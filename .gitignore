@@ -1,0 +1,8 @@
+build/
+doc/_build/
+*~
+*.pyc
+*.swp
+*.db
+*.png
+*.eps
