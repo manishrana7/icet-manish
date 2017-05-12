@@ -8,6 +8,14 @@ Structure::Structure()
     //empty constructure..
 }
 
+void Structure::printHello(int n)
+    {
+        for(int i=0; i<n; i++)
+        {
+            std::cout<<"Hello"<<std::endl;
+        }
+    }
+
 int add(int i, int j) {
     return i + j;
 }

@@ -14,5 +14,5 @@ SET(SourceFiles
 )
 
 PYBIND11_ADD_MODULE(example ${SourceFiles})
-SET_TARGET_PROPERTIES(example PROPERTIES OUTPUT_NAME "_example")
+SET_TARGET_PROPERTIES(example PROPERTIES OUTPUT_NAME "example")
 
