@@ -9,4 +9,4 @@ a = Atoms('HOC', positions=[(1, 1, 1), (3, 1, 1), (6, 1, 1)])
 a.set_cell((9, 2, 2))
 a.set_pbc((True, False, False))
 
-ex_structure = Structure(a)
+ex_structure = Structure(a.positions, a.get_chemical_symbols())
