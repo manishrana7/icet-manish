@@ -10,9 +10,7 @@ a = Atoms('HOC', positions=[(1, 1, 1), (3, 1, 1), (6, 1, 1)])
 a.set_cell((9, 2, 2))
 a.set_pbc((True, False, False))
 
-print(a.get_chemical_symbols())
-print(a.positions)
-ex_structure = Structure(a.positions)
+ex_structure = Structure(a.positions, a.get_chemical_symbols())
 
 
 # Calculate indiviually with mic=False

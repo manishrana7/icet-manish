@@ -2,6 +2,7 @@
 #include <pybind11/pybind11.h>
 #include <iostream>
 #include <pybind11/eigen.h>
+#include <pybind11/stl.h>
 #include <Eigen/Dense>
 #include <vector>
 #include <string>
@@ -9,11 +10,11 @@ using namespace Eigen;
 
 namespace py = pybind11;
 
-Structure::Structure(const Eigen::Matrix<float, Dynamic, 3>  &pos)//,
-//const std::vector<std::string> elements)
+Structure::Structure(const Eigen::Matrix<float, Dynamic, 3>  &pos,
+const std::vector<std::string> elements)
 {
     setPositions(pos);
-//    setElements(elements);
+    setElements(elements);
 }
 
 void Structure::setPositions(const Eigen::Matrix<float, Dynamic, 3>  &m)
@@ -32,6 +33,11 @@ double Structure::getDistance(const int index1, const int index2, const bool mic
     const auto pos2 = positions.row(index2);
 
     auto diff = pos1 - pos2;
+    if(mic)
+    {
+
+    }
+
    const  auto distance = diff.norm();
     return distance;
     
@@ -55,8 +61,8 @@ PYBIND11_PLUGIN(example)
     py::module m("example", "pybind11 example plugin");
 
     py::class_<Structure> (m, "Structure")    
-        .def(py::init<const Eigen::Matrix<float, Dynamic, 3>  &>())//,
-//const std::vector<std::string> >()) 
+        .def(py::init<const Eigen::Matrix<float, Dynamic, 3>  &,
+    const std::vector<std::string> >()) 
         .def("set_positions",&Structure::setPositions)
         .def("set_elements", &Structure::setElements)
         .def("get_positions",&Structure::getPositions)

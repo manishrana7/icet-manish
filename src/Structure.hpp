@@ -12,8 +12,8 @@ namespace py = pybind11;
 class Structure
 {
   public:
-    Structure(const Eigen::Matrix<float, Dynamic, 3> &pos);//,
- //             const std::vector<std::string> elements);
+    Structure(const Eigen::Matrix<float, Dynamic, 3> &pos,
+             const std::vector<std::string> elements);
 
     void setPositions(const Eigen::Matrix<float, Dynamic, 3> &);
     void setElements(const std::vector<std::string> &);
