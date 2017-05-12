@@ -1,0 +1,15 @@
+# Require a modern version of CMake.
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0 FATAL_ERROR)
+project(example)
+
+
+# Enable C++11 standard.
+IF(NOT CMAKE_VERSION VERSION_LESS "3.1")
+	SET(CMAKE_CXX_STANDARD 11)
+	SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+ELSE()
+   	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+ENDIF()
+
+add_subdirectory(src)
+
