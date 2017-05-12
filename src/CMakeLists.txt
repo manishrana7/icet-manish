@@ -12,7 +12,15 @@ ADD_SUBDIRECTORY("../3rdparty/pybind11" pybind11)
 SET(SourceFiles
 	Structure.cpp
 )
+# Find Eigen3
+FIND_PACKAGE(Eigen3 REQUIRED)
+IF(NOT Eigen3_FOUND)
+  MESSAGE(FATAL_ERROR "Eigen3 not found.")
+ENDIF()
+include_directories(${EIGEN3_INCLUDE_DIR})
 
+#target_include_directories(example PRIVATE ${EIGEN3_INCLUDE_DIR})
 PYBIND11_ADD_MODULE(example ${SourceFiles})
 SET_TARGET_PROPERTIES(example PROPERTIES OUTPUT_NAME "example")
+
 
