@@ -7,7 +7,9 @@ from icetdev import *
 from icetdev.structure import *
 from ase.neighborlist import NeighborList
 
+#Distance tolerance for comparing distances 
 DISTTOL = 1e-8
+
 # Setup a chain of H,O,C
 # H-O Dist = 2
 # O-C Dist = 3
@@ -26,10 +28,9 @@ assert a.get_distance(1, 2, mic=False) == 3
 assert a.get_distance(0, 2, mic=False) == 5
 
 
-
+# Test distance calculator with offsets
 a = bulk("Al").repeat(2)
 ex_structure = structure_from_atoms(a)
-
 nl = NeighborList(len(a)*[10])
 nl.update(a)
 for ind in range(len(a)):
