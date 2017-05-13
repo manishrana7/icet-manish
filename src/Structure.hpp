@@ -12,16 +12,16 @@ namespace py = pybind11;
 class Structure
 {
   public:
-    Structure(const Eigen::Matrix<float, Dynamic, 3> &pos,
+    Structure(const Eigen::Matrix<double, Dynamic, 3> &pos,
              const std::vector<std::string> elements);
 
-    void setPositions(const Eigen::Matrix<float, Dynamic, 3> &);
+    void setPositions(const Eigen::Matrix<double, Dynamic, 3> &);
     void setElements(const std::vector<std::string> &);
-    Eigen::Matrix<float, Dynamic, 3> &getPositions();
+    Eigen::Matrix<double, Dynamic, 3> &getPositions();
     double getDistance(const int, const int, const bool) const;
     void printPositions();
 
   private:
-    Eigen::Matrix<float, Dynamic, 3> positions;
+    Eigen::Matrix<double, Dynamic, 3> positions;
     std::vector<std::string> _elements;
 };
