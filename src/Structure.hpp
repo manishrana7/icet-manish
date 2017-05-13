@@ -14,10 +14,20 @@ class Structure
   public:
     Structure(const Eigen::Matrix<double, Dynamic, 3> &,
               const std::vector<std::string> &,
-              const Eigen::Matrix<double, 3, 3> &,
+              const Eigen::Matrix3d &,
               const std::vector<bool> &);
 
     double getDistance(const int, const int, const bool) const;
+
+    double getDistance2(const int ind1 , const Vector3d offset1,
+    const int ind2 , const Vector3d offset2)
+    {
+        Vector3d pos1 = _positions.row(ind1) + offset1.transpose() * _cell;
+        Vector3d pos2 = _positions.row(ind2) + offset2.transpose() * _cell;
+        Vector3d d = pos1 - pos2;
+        return d.norm();
+    }
+
     void printPositions();
 
     // Getters - Setters
@@ -25,14 +35,13 @@ class Structure
     {
         _positions = positions;
     }
- 
 
     Eigen::Matrix<double, Dynamic, 3> &getPositions()
     {
         return _positions;
     }
 
-   void setElements(const std::vector<std::string> &elements)
+    void setElements(const std::vector<std::string> &elements)
     {
         _elements = elements;
     }
@@ -54,20 +63,19 @@ class Structure
         _pbc = pbc;
     }
 
-    void set_cell( const Eigen::Matrix<double, 3, 3> &cell)
+    void set_cell(const Eigen::Matrix<double, 3, 3> &cell)
     {
         _cell = cell;
     }
 
-   Eigen::Matrix<double, 3, 3> get_cell() const
+    Eigen::Matrix<double, 3, 3> get_cell() const
     {
         return _cell;
     }
 
-
   private:
     Eigen::Matrix<double, Dynamic, 3> _positions;
-    Eigen::Matrix<double, 3, 3> _cell;
+    Eigen::Matrix3d _cell;
     std::vector<std::string> _elements;
     std::vector<bool> _pbc;
 };
