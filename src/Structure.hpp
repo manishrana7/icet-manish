@@ -12,21 +12,62 @@ namespace py = pybind11;
 class Structure
 {
   public:
-    Structure(const Eigen::Matrix<double, Dynamic, 3> &pos,
-             const std::vector<std::string> elements);
+    Structure(const Eigen::Matrix<double, Dynamic, 3> &,
+              const std::vector<std::string> &,
+              const Eigen::Matrix<double, 3, 3> &,
+              const std::vector<bool> &);
 
-    void setPositions(const Eigen::Matrix<double, Dynamic, 3> &);
-    void setElements(const std::vector<std::string> &);
+    double getDistance(const int, const int, const bool) const;
+    void printPositions();
+
+    // Getters - Setters
+    void setPositions(const Eigen::Matrix<double, Dynamic, 3> &positions)
+    {
+        _positions = positions;
+    }
+ 
+
+    Eigen::Matrix<double, Dynamic, 3> &getPositions()
+    {
+        return _positions;
+    }
+
+   void setElements(const std::vector<std::string> &elements)
+    {
+        _elements = elements;
+    }
+
     std::vector<std::string> getElements() const
     {
         return _elements;
     }
-    Eigen::Matrix<double, Dynamic, 3> &getPositions();
-    double getDistance(const int, const int, const bool) const;
-    void printPositions();
+    bool has_pbc(const int k) const
+    {
+        return _pbc[k];
+    }
+    std::vector<bool> get_pbc() const
+    {
+        return _pbc;
+    }
+    void set_pbc(const std::vector<bool> pbc)
+    {
+        _pbc = pbc;
+    }
 
-  private:  
-    Eigen::Matrix<double, Dynamic, 3> positions;   
+    void set_cell( const Eigen::Matrix<double, 3, 3> &cell)
+    {
+        _cell = cell;
+    }
+
+   Eigen::Matrix<double, 3, 3> get_cell() const
+    {
+        return _cell;
+    }
+
+
+  private:
+    Eigen::Matrix<double, Dynamic, 3> _positions;
+    Eigen::Matrix<double, 3, 3> _cell;
     std::vector<std::string> _elements;
-
+    std::vector<bool> _pbc;
 };

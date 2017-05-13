@@ -7,48 +7,37 @@
 #include <vector>
 #include <string>
 
-
 namespace py = pybind11;
 
 Structure::Structure(const Eigen::Matrix<double, Dynamic, 3> &pos,
-                     const std::vector<std::string> elements)
+                     const std::vector<std::string> &elements,
+                     const Eigen::Matrix<double, 3, 3> &cell,
+                     const std::vector<bool> &pbc)
 {
     setPositions(pos);
     setElements(elements);
-}
-
-void Structure::setPositions(const Eigen::Matrix<double, Dynamic, 3> &m)
-{
-    positions = m;
-}
-
-void Structure::setElements(const std::vector<std::string> &elements)
-{
-    _elements = elements;
+    _cell = cell;
+    _pbc = pbc;
 }
 
 double Structure::getDistance(const int index1, const int index2, const bool mic) const
 {
-    const Eigen::Vector3d pos1 = positions.row(index1);
-    const Eigen::Vector3d pos2 = positions.row(index2);
+    const Eigen::Vector3d pos1 = _positions.row(index1);
+    const Eigen::Vector3d pos2 = _positions.row(index2);
 
     Eigen::Vector3d diff = pos1 - pos2;
     if (mic)
     {
+        // insert mic finder function
     }
 
     const auto distance = diff.norm();
     return distance;
 }
 
-Eigen::Matrix<double, Dynamic, 3> &Structure::getPositions()
-{
-    return positions;
-}
-
 void Structure::printPositions()
 {
-    std::cout << positions << std::endl;
+    std::cout << _positions << std::endl;
 }
 
 PYBIND11_PLUGIN(example)
@@ -57,12 +46,19 @@ PYBIND11_PLUGIN(example)
 
     py::class_<Structure>(m, "Structure")
         .def(py::init<const Eigen::Matrix<double, Dynamic, 3> &,
-                      const std::vector<std::string>>())
+                      const std::vector<std::string> &,
+                      const Eigen::Matrix<double, 3, 3> &,
+                      const std::vector<bool> &>())
         .def("set_positions", &Structure::setPositions)
         .def("set_elements", &Structure::setElements)
         .def("get_elements", &Structure::getElements)
         .def("get_positions", &Structure::getPositions)
         .def("get_distance", &Structure::getDistance)
+        .def("has_pbc", &Structure::has_pbc)
+        .def("get_pbc", &Structure::get_pbc)
+        .def("set_pbc", &Structure::set_pbc)
+        .def("get_cell", &Structure::get_cell)
+        .def("set_cell", &Structure::set_cell)
         .def("print_positions", &Structure::printPositions);
     return m.ptr();
 }
