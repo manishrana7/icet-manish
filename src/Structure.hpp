@@ -17,11 +17,16 @@ class Structure
 
     void setPositions(const Eigen::Matrix<double, Dynamic, 3> &);
     void setElements(const std::vector<std::string> &);
+    std::vector<std::string> getElements() const
+    {
+        return _elements;
+    }
     Eigen::Matrix<double, Dynamic, 3> &getPositions();
     double getDistance(const int, const int, const bool) const;
     void printPositions();
 
-  private:
-    Eigen::Matrix<double, Dynamic, 3> positions;
+  private:  
+    Eigen::Matrix<double, Dynamic, 3> positions;   
     std::vector<std::string> _elements;
+
 };
