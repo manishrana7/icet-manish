@@ -33,6 +33,7 @@ PYBIND11_PLUGIN(example)
    py::class_<Neighborlist>(m, "Neighborlist")
         .def(py::init<const double>())
         .def("build", &Neighborlist::build)
+        .def("get_neighbors",&Neighborlist::getNeighbors)
         ;
 
     return m.ptr();

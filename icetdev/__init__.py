@@ -6,3 +6,4 @@ from __future__ import print_function, division
 # different interpreter than the one used to build.
 
 from .structure import *
+from .neighborlist import *

@@ -4,6 +4,7 @@
 #include <pybind11/eigen.h>
 #include <Eigen/Dense>
 #include <vector>
+#include <utility>
 #include <string>
 #include "Structure.hpp"
 
@@ -22,6 +23,10 @@ class Neighborlist
     Neighborlist(const double);
     void build(const Structure &);
     void update(const Structure &);
+    std::pair<std::vector<int>, std::vector<Vector3d>> getNeighbors(int index)
+    {
+        return std::make_pair( latticeIndices[index], offsets[index]);
+    }
     private:
     std::vector<std::vector<int>> latticeIndices;
     std::vector<std::vector<Vector3d>> offsets;        

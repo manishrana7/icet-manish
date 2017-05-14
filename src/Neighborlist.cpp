@@ -65,8 +65,13 @@ void Neighborlist::build(const Structure &conf)
 
                                 //i have a neighbour j, where atom j sits in cell (n1,n2,3)
                                 //add j and offset to i'th neighborlist
-                                latticeIndices[i].push_back(j);
-                                offsets[i].push_back(extVector);
+                                auto find_indice = std::find(latticeIndices[i].begin(),latticeIndices[i].end(),j);
+                                auto find_offsets = std::find(offsets[i].begin(), offsets[i].end(), extVector);
+                                if(find_indice == latticeIndices[i].end() || find_offsets == offsets[i].end())
+                                {
+                                    latticeIndices[i].push_back(j);
+                                    offsets[i].push_back(extVector);
+                                }
                             }
                         }
                     }
