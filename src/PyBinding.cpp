@@ -34,11 +34,12 @@ PYBIND11_PLUGIN(example)
    py::class_<Neighborlist>(m, "Neighborlist")
         .def(py::init<const double>())
         .def("build", &Neighborlist::build)
+        .def("is_neighbor",&Neighborlist::isNeighbor)
         .def("get_neighbors",&Neighborlist::getNeighbors)
         ;
            
    py::class_<ManybodyNeighborlist>(m, "ManybodyNeighborlist")
-     .def(py::init<const std::vector<double>>())
+     .def(py::init<>())
      .def("calc_intersection", &ManybodyNeighborlist::getIntersection)
      ;
     return m.ptr();

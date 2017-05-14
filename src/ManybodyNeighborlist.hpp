@@ -5,6 +5,7 @@
 #include <pybind11/stl.h>
 #include <Eigen/Dense>
 #include "Vector3dCompare.hpp"
+#include "Neighborlist.hpp"
 #include <vector>
 
 /**
@@ -15,26 +16,27 @@ Design approach:
 
 class ManybodyNeighborlist
 {
-    public:
-    ManybodyNeighborlist(const std::vector<double> cutoffs)
+  public:
+    ManybodyNeighborlist()
     {
-        _cutoffs = cutoffs;
+        //empty...
     }
-    void build();
 
-std::vector<std::pair<int,Vector3d>> getIntersection(const std::vector<std::pair<int,Vector3d>> &Ni,const std::vector<std::pair<int,Vector3d>> &Nj)
-{
-  std::vector<std::pair<int,Vector3d>> N_intersection;
-  std::set_intersection(Ni.begin(), Ni.end(),
-                            Nj.begin(), Nj.end(),
-                            std::back_inserter(N_intersection),
-                            NeighborPairCompare());
-  return N_intersection;
-}
+    std::vector<std::pair<int, Vector3d>> build(const Neighborlist &nl, int index, int order);
 
+    void goDeeper(const Neighborlist &nl, std::vector<int> neighborIndices,
+                  std::vector<std::pair<int, Vector3d>> manybodyNeighborIndex, std::vector<std::pair<int, Vector3d>> Ni, const int);
 
+    std::vector<std::pair<int, Vector3d>> getIntersection(const std::vector<std::pair<int, Vector3d>> &Ni, const std::vector<std::pair<int, Vector3d>> &Nj)
+    {
+        std::vector<std::pair<int, Vector3d>> N_intersection;
+        std::set_intersection(Ni.begin(), Ni.end(),
+                              Nj.begin(), Nj.end(),
+                              std::back_inserter(N_intersection),
+                              NeighborPairCompare());
+        return N_intersection;
+    }
 
-    private:
+  private:
     std::vector<double> _cutoffs;
-
 };

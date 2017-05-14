@@ -27,9 +27,25 @@ class Neighborlist
     // {
     //     return std::make_pair( latticeIndices[index], offsets[index]);
     // }
-    std::vector<std::pair<int,Vector3d>> getNeighbors(int index)
+    std::vector<std::pair<int,Vector3d>> getNeighbors(int index) const
     {
         return _neighbors[index];
+    }
+    ///Check if index1 and index2 are neighbors
+    bool isNeighbor(const int index1, const int index2) const
+    {
+        for(const auto &nbr1 : _neighbors[index1])
+        {
+            if( nbr1.first == index2 )
+            {
+                return true;
+            }
+        }
+    }
+
+     size_t size() const
+    {
+        return _neighbors.size();
     }
     private:
     std::vector<std::vector<int>> latticeIndices;

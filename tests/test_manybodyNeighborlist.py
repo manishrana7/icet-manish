@@ -20,7 +20,7 @@ nl.build(structure)
 neighbors = nl.get_neighbors(0)
 
 #set up manybody neighborlist
-mbnl = ManybodyNeighborlist([3,2,1])
+mbnl = ManybodyNeighborlist()
 #this is intersect between neighbors of atom 0 and atom 1
 intersect = mbnl.calc_intersection(nl.get_neighbors(0), nl.get_neighbors(1))
 
