@@ -11,6 +11,8 @@ ADD_SUBDIRECTORY("../3rdparty/pybind11" pybind11)
 # List of source files that need to be compiled:
 SET(SourceFiles
 	Structure.cpp
+  PyBinding.cpp
+  Neighborlist.cpp
 )
 # Find Eigen3
 FIND_PACKAGE(Eigen3 REQUIRED)

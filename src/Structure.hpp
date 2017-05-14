@@ -20,7 +20,7 @@ class Structure
     double getDistance(const int, const int, const bool) const;
 
     double getDistance2(const int ind1 , const Vector3d offset1,
-    const int ind2 , const Vector3d offset2)
+    const int ind2 , const Vector3d offset2) const
     {
         Vector3d pos1 = _positions.row(ind1) + offset1.transpose() * _cell;
         Vector3d pos2 = _positions.row(ind2) + offset2.transpose() * _cell;
