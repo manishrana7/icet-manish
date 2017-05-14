@@ -1,4 +1,5 @@
 #include "Structure.hpp"
+#include "Neighborlist.hpp"
 #include <pybind11/pybind11.h>
 #include <iostream>
 #include <pybind11/eigen.h>
@@ -26,6 +27,13 @@ PYBIND11_PLUGIN(example)
         .def("set_pbc", &Structure::set_pbc)
         .def("get_cell", &Structure::get_cell)
         .def("set_cell", &Structure::set_cell)
-        .def("print_positions", &Structure::printPositions);
+        .def("print_positions", &Structure::printPositions)
+        ;
+
+   py::class_<Neighborlist>(m, "Neighborlist")
+        .def(py::init<const double>())
+        .def("build", &Neighborlist::build)
+        ;
+
     return m.ptr();
 }
