@@ -23,13 +23,18 @@ class Neighborlist
     Neighborlist(const double);
     void build(const Structure &);
     void update(const Structure &);
-    std::pair<std::vector<int>, std::vector<Vector3d>> getNeighbors(int index)
+    // std::pair<std::vector<int>, std::vector<Vector3d>> getNeighbors(int index)
+    // {
+    //     return std::make_pair( latticeIndices[index], offsets[index]);
+    // }
+    std::vector<std::pair<int,Vector3d>> getNeighbors(int index)
     {
-        return std::make_pair( latticeIndices[index], offsets[index]);
+        return _neighbors[index];
     }
     private:
     std::vector<std::vector<int>> latticeIndices;
-    std::vector<std::vector<Vector3d>> offsets;        
+    std::vector<std::vector<Vector3d>> offsets;
+    std::vector<std::vector<std::pair<int,Vector3d>>> _neighbors;        
     double _cutoff;
     double DISTTOL = 1e-7;
 };

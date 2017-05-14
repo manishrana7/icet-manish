@@ -12,7 +12,7 @@ void Neighborlist::build(const Structure &conf)
     int nbrOfSites = conf.getElements().size();
     latticeIndices.resize(nbrOfSites);
     offsets.resize(nbrOfSites);
-
+    _neighbors.resize(nbrOfSites);
     Matrix3d cellInverse = conf.get_cell().inverse();
     std::vector<int> unitCellExpanse(3);
     for (int i = 0; i < 3; i++)
@@ -63,37 +63,43 @@ void Neighborlist::build(const Structure &conf)
 
                                 //i have a neighbour j, where atom j sits in cell (n1,n2,3)
                                 //add j and offset to i'th neighborlist
-                                auto find_indice = std::find(latticeIndices[i].begin(), latticeIndices[i].end(), j);
-                                auto find_offsets = std::find(offsets[i].begin(), offsets[i].end(), extVector);
-                                if (find_offsets != offsets[i].end())
+                                // auto find_indice = std::find(latticeIndices[i].begin(), latticeIndices[i].end(), j);
+                                // auto find_offsets = std::find(offsets[i].begin(), offsets[i].end(), extVector);
+                                // if (find_offsets != offsets[i].end())
+                                // {
+                                //     // Vector3d find_vector = *find_offsets;
+                                //     // std::cout<<find_vector[0]<<" "<<find_vector[1]<<" "<<find_vector[2]<<" | ";
+                                //     // std::cout<<extVector[0]<<" "<<extVector[1]<<" "<<extVector[2]<<" "<<std::endl;
+                                // }
+                                auto neighbor = std::make_pair(j, extVector);
+                                auto find_neighbor = std::find(_neighbors[i].begin(),_neighbors[i].end(), neighbor);
+                                if(find_neighbor == _neighbors[i].end())
                                 {
-                                    // Vector3d find_vector = *find_offsets;
-                                    // std::cout<<find_vector[0]<<" "<<find_vector[1]<<" "<<find_vector[2]<<" | ";
-                                    // std::cout<<extVector[0]<<" "<<extVector[1]<<" "<<extVector[2]<<" "<<std::endl;
+                                    _neighbors[i].push_back(neighbor);
                                 }
 
-                                bool newNeighbor = true;
-                                for (int ind = 0; ind < latticeIndices[i].size(); ind++)
-                                {
-                                    if (!newNeighbor)
-                                    {
-                                        break;
-                                    }
-                                    if (latticeIndices[i][ind] == j)
-                                    {
-                                        if (offsets[i][ind] == extVector)
-                                        {
-                                            newNeighbor = false;
-                                            break;
-                                        }
-                                    }
-                                }
+                                // bool newNeighbor = true;
+                                // for (int ind = 0; ind < latticeIndices[i].size(); ind++)
+                                // {
+                                //     if (!newNeighbor)
+                                //     {
+                                //         break;
+                                //     }
+                                //     if (latticeIndices[i][ind] == j)
+                                //     {
+                                //         if (offsets[i][ind] == extVector)
+                                //         {
+                                //             newNeighbor = false;
+                                //             break;
+                                //         }
+                                //     }
+                                // }
 
-                                if (newNeighbor)
-                                {
-                                    latticeIndices[i].push_back(j);
-                                    offsets[i].push_back(extVector);
-                                }
+                                // if (newNeighbor)
+                                // {
+                                //     latticeIndices[i].push_back(j);
+                                //     offsets[i].push_back(extVector);
+                                // }
                             }
                         }
                     }

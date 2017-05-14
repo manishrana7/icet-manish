@@ -21,8 +21,12 @@ ase_indices, ase_offsets = ase_nl.get_neighbors(0)
 # icet neighborlist
 nl = Neighborlist(neighbor_cutoff)
 nl.build(structure)
-indices, offsets = nl.get_neighbors(0)
-
+neighbors = nl.get_neighbors(0)
+indices = []
+offsets = []
+for nbr in neighbors:
+    indices.append(nbr[0])
+    offsets.append(nbr[1])
 
 """
 For debugging
