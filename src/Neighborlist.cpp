@@ -10,7 +10,7 @@ void Neighborlist::build(const Structure &conf)
 {
 
     //resize the offsets and indices to number of atoms
-    int nbrOfSites = conf.getElements().size();
+    int nbrOfSites = conf.getElements().size();    
     latticeIndices.resize(nbrOfSites);
     offsets.resize(nbrOfSites);
 
@@ -43,18 +43,17 @@ void Neighborlist::build(const Structure &conf)
 
                 if (n1 == 0 and (n2 < 0 or (n2 == 0 and n3 < 0)))
                 {
-                    continue;
+                    //continue;
                 }
 
                 for (int m = -1; m < 2; m += 2)
                 {
                     Vector3d extVector(n1 * m, n2 * m, n3 * m);
-                    Vector3d displacement = extVector.transpose() * conf.get_cell();
-
+                    
                     for (int i = 0; i < nbrOfSites; i++)
                     {
 
-                        for (int j = i; j < nbrOfSites; j++)
+                        for (int j = 0; j < nbrOfSites; j++)
                         {
                             Vector3d noOffset(0, 0, 0);
 
@@ -67,11 +66,32 @@ void Neighborlist::build(const Structure &conf)
                                 //add j and offset to i'th neighborlist
                                 auto find_indice = std::find(latticeIndices[i].begin(),latticeIndices[i].end(),j);
                                 auto find_offsets = std::find(offsets[i].begin(), offsets[i].end(), extVector);
-                                if(find_indice == latticeIndices[i].end() || find_offsets == offsets[i].end())
+                                if( find_offsets != offsets[i].end())
+                                {
+                                    // Vector3d find_vector = *find_offsets;
+                                    // std::cout<<find_vector[0]<<" "<<find_vector[1]<<" "<<find_vector[2]<<" | ";
+                                    // std::cout<<extVector[0]<<" "<<extVector[1]<<" "<<extVector[2]<<" "<<std::endl;
+                                }
+
+                                bool newNeighbor = true;
+                                for(int ind = 0; ind<latticeIndices[i].size(); ind++)
+                                {
+                                    if( !newNeighbor){break;}
+                                    if(latticeIndices[i][ind] == j)
+                                    {
+                                        if(offsets[i][ind] == extVector)
+                                        {
+                                            newNeighbor = false;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if(newNeighbor)
                                 {
                                     latticeIndices[i].push_back(j);
                                     offsets[i].push_back(extVector);
-                                }
+                                }                                
                             }
                         }
                     }
