@@ -1,5 +1,6 @@
 #include "Structure.hpp"
 #include "Neighborlist.hpp"
+#include "ManybodyNeighborlist.hpp"
 #include <pybind11/pybind11.h>
 #include <iostream>
 #include <pybind11/eigen.h>
@@ -35,6 +36,10 @@ PYBIND11_PLUGIN(example)
         .def("build", &Neighborlist::build)
         .def("get_neighbors",&Neighborlist::getNeighbors)
         ;
-
+           
+   py::class_<ManybodyNeighborlist>(m, "ManybodyNeighborlist")
+     .def(py::init<const std::vector<double>>())
+     .def("calc_intersection", &ManybodyNeighborlist::getIntersection)
+     ;
     return m.ptr();
 }

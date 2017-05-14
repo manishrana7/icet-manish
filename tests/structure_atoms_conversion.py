@@ -4,10 +4,13 @@ import numpy as np
 from icetdev import *
 from icetdev.structure import *
 #Setup bcc WTi
-a = bulk('TiW',"bcc",a=3.321).repeat(2)
+a = bulk('Na').repeat(2)
+for at in a:
+    if at.index % 2 == 0:
+        at.symbol ="Cl"
 a.set_pbc((True, True, True))
-structure = structure_from_atoms(a)
 
+structure = structure_from_atoms(a)
 # Test that each position is equal
 assert len(a.positions) == len(structure.get_positions())
 for ase_pos, struct_pos in zip(a.positions, structure.get_positions()):
@@ -19,7 +22,13 @@ for ase_symbol, struct_symbol in zip(a.get_chemical_symbols(),
                                      structure.get_elements()):
     assert ase_symbol == struct_symbol
 
+#Test pbc equality
+assert (structure.pbc == a.pbc).all()
 
+#Test unit cell equality
+assert (structure.cell == a.cell).all()
 
-#True to return structure as ASE atoms object
+#assert that structure return as an equal ASE atoms object
 conf = structure.to_atoms()
+assert conf == a
+

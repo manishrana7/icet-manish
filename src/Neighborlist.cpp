@@ -1,5 +1,6 @@
 #include "Neighborlist.hpp"
 #include "Structure.hpp"
+#include "Vector3dCompare.hpp"
 
 Neighborlist::Neighborlist(const double cutoff)
 {
@@ -107,4 +108,9 @@ void Neighborlist::build(const Structure &conf)
             }
         }
     } // end n loop
+    for(auto &nbr : _neighbors )
+    {
+        std::sort(nbr.begin(), nbr.end(),NeighborPairCompare());
+    }
+
 }

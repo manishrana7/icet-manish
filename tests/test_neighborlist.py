@@ -16,18 +16,18 @@ structure = structure_from_atoms(atoms)
 ase_nl = NeighborList(len(atoms)*[neighbor_cutoff/2],skin=1e-8,
                     bothways=True,self_interaction=False)
 ase_nl.update(atoms)
-ase_indices, ase_offsets = ase_nl.get_neighbors(0)
+ase_indices, ase_offsets = ase_nl.get_neighbors(1)
 
 # icet neighborlist
 nl = Neighborlist(neighbor_cutoff)
 nl.build(structure)
-neighbors = nl.get_neighbors(0)
+neighbors = nl.get_neighbors(1)
 indices = []
 offsets = []
 for nbr in neighbors:
     indices.append(nbr[0])
     offsets.append(nbr[1])
-
+    
 """
 For debugging
 print(len(indices), len(ase_indices))
