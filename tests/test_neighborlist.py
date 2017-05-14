@@ -12,6 +12,7 @@ neighbor_cutoff = 5
 atoms = bulk("Al","fcc",a=2).repeat(3)
 atoms.pbc = [True,False,True]
 structure = structure_from_atoms(atoms)
+#skin here should be thought of as DISTTOL in icet
 ase_nl = NeighborList(len(atoms)*[neighbor_cutoff/2],skin=1e-8,
                     bothways=True,self_interaction=False)
 ase_nl.update(atoms)
