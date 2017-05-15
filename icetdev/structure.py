@@ -15,12 +15,12 @@ def structure_from_atoms(conf):
     -------
     icet structure object
     """
-    
+
     return Structure(conf.positions,
                     conf.get_chemical_symbols(),
                     conf.cell,
                     conf.pbc.tolist())
-
+                    
 
 def __Structure_to_atoms(self):
     """
@@ -63,11 +63,11 @@ def __structure_positions(self):
     N x 3 numpy matrix : positions
     """
     return self.get_positions()
-Structure.positions = property(__structure_positions)    
+Structure.positions = property(__structure_positions)
 
 def __structure_elements(self):
     """
     Numpy array  of type str(check this) : elements
     """
     return self.get_elements()
-Structure.elements = property(__structure_elements)    
+Structure.elements = property(__structure_elements)

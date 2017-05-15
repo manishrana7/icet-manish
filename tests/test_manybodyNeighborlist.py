@@ -41,3 +41,28 @@ for n1 in naive_intersect:
 #assert that all the intersects are equal
 for n1, n2 in zip(intersect, naive_intersect):
     assert n1[0] == n2[0] and (n1[1] == n2[1]).all()
+
+
+mbnl_i = mbnl.build(nl,0,5)
+
+"""
+for debug:
+def printNeighbor(nbr,onlyIndice=False):
+    if onlyIndice:
+        print(nbr[0], end=" ")    
+    else:        
+        print(nbr[0], nbr[1], end=" ")
+
+for nbr in mbnl_i:
+    orig, manyInd = nbr
+    for s in orig:
+        printNeighbor(s)
+    print(" | ",end=" ")
+    for s in manyInd:
+        printNeighbor(s,True)
+    print("")    
+
+for nbr in mbnl_i:
+    orig, manyInd = nbr
+    print("ec",len(orig),len(manyInd))
+"""    

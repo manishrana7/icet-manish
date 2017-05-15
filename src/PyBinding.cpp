@@ -41,6 +41,7 @@ PYBIND11_PLUGIN(example)
    py::class_<ManybodyNeighborlist>(m, "ManybodyNeighborlist")
      .def(py::init<>())
      .def("calc_intersection", &ManybodyNeighborlist::getIntersection)
+     .def("build", &ManybodyNeighborlist::build)
      ;
     return m.ptr();
 }

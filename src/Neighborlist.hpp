@@ -27,7 +27,7 @@ class Neighborlist
     // {
     //     return std::make_pair( latticeIndices[index], offsets[index]);
     // }
-    std::vector<std::pair<int,Vector3d>> getNeighbors(int index) const
+    std::vector<std::pair<int, Vector3d>> getNeighbors(int index) const
     {
         return _neighbors[index];
     }
@@ -41,6 +41,7 @@ class Neighborlist
                 return true;
             }
         }
+        return false;
     }
 
      size_t size() const
