@@ -42,8 +42,8 @@ for n1 in naive_intersect:
 for n1, n2 in zip(intersect, naive_intersect):
     assert n1[0] == n2[0] and (n1[1] == n2[1]).all()
 
-
-mbnl_i = mbnl.build(nl,0,3)
+bothways = True
+mbnl_i = mbnl.build(nl,0,3,bothways)
 #get manybodyNeighbors to third order
 def naiveManybodyThirdOrder(nl, index, bothways=True):
     nbr_0 = nl.get_neighbors(index)
@@ -70,7 +70,7 @@ def printNeighbor(nbr,onlyIndice=False):
     else:        
         print(nbr[0], nbr[1], end=" ")
 
-mbnl_3 = naiveManybodyThirdOrder(nl,0,bothways = False)
+mbnl_3 = naiveManybodyThirdOrder(nl,0,bothways)
 for ss in mbnl_3:
     print(ss[0],ss[1], end= " ")
     printNeighbor(ss[2])

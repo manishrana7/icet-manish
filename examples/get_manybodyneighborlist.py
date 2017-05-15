@@ -25,7 +25,8 @@ mbnl = ManybodyNeighborlist()
 #build mbnl for index "index" and order "order"
 index = 3
 order = 3
-mbnl_i = mbnl.build(nl, index, order)
+bothways = True
+mbnl_i = mbnl.build(nl, index, order, bothways)
 # get manybodyNeighbors to third order
 
 def arrayCompare(arr1, arr2):
@@ -48,7 +49,7 @@ def naiveManybodyThirdOrder(nl, index, bothways=True):
     nbr_index = (index, [0,0,0])
     nbrs = []
     for j in nbr_0:
-        if nbrCompare(j, nbr_index):
+        if not bothways and nbrCompare(j, nbr_index):
             continue
         nbr_j = nl.get_neighbors(j[0])
         for k in nbr_j:            
@@ -71,7 +72,7 @@ def printNeighbor(nbr, onlyIndice=False):
         print(nbr[0], nbr[1], end=" ")
 
 
-mbnl_3 = naiveManybodyThirdOrder(nl, index, bothways=False)
+mbnl_3 = naiveManybodyThirdOrder(nl, index, bothways)
 for ss in mbnl_3:
     print(ss[0], ss[1], end=" ")
     printNeighbor(ss[2])

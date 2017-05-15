@@ -22,7 +22,7 @@ class ManybodyNeighborlist
         //empty...
     }
 
-    std::vector<std::pair<std::vector<std::pair<int, Vector3d>>,  std::vector<std::pair<int, Vector3d>>>> build(const Neighborlist &nl, int index, int order);
+    std::vector<std::pair<std::vector<std::pair<int, Vector3d>>,  std::vector<std::pair<int, Vector3d>>>> build(const Neighborlist &nl, int index, int order,bool);
 
     void combineToHigherOrder(const Neighborlist &nl, 
                                  std::vector<std::pair<std::vector<std::pair<int, Vector3d>>,  std::vector<std::pair<int, Vector3d>>>> &manybodyNeighborIndex,

@@ -24,9 +24,9 @@
 
 */
 
-std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pair<int, Vector3d>>>> ManybodyNeighborlist::build(const Neighborlist &nl, int index, int maxOrder)
+std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pair<int, Vector3d>>>> ManybodyNeighborlist::build(const Neighborlist &nl, int index, int maxOrder, bool saveBothWays)
 {
-    bool saveBothWays = false; // if true this means both i,j,k and j,i,k will be saved
+    
     std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pair<int, Vector3d>>>> manybodyNeighborIndices;
     auto Ni = nl.getNeighbors(index);
     int numberOfSites = nl.size();
