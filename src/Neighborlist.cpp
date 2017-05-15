@@ -110,7 +110,7 @@ void Neighborlist::build(const Structure &conf)
     } // end n loop
     for(auto &nbr : _neighbors )
     {
-        std::sort(nbr.begin(), nbr.end(),NeighborPairCompare());
+        std::sort(nbr.begin(), nbr.end(), NeighborPairCompare());
     }
 
 }

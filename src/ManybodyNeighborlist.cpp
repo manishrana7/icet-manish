@@ -26,19 +26,19 @@
 
 std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pair<int, Vector3d>>>> ManybodyNeighborlist::build(const Neighborlist &nl, int index, int maxOrder)
 {
-    bool saveBothWays = false; // this means both i,j,k and j,i,k will be saved
+    bool saveBothWays = false; // if true this means both i,j,k and j,i,k will be saved
     std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pair<int, Vector3d>>>> manybodyNeighborIndices;
     auto Ni = nl.getNeighbors(index);
     int numberOfSites = nl.size();
 
     // for (int c = 2; c < maxOrder; c++)
     // {
-        int c = 2;
-        Vector3d zeroVector = {0.0, 0.0, 0.0};
-        std::vector<std::pair<int, Vector3d>> currentOriginalNeighbors;
-        currentOriginalNeighbors.push_back(std::make_pair(index, zeroVector)); // index is always first index
+    int c = 2;
+    Vector3d zeroVector = {0.0, 0.0, 0.0};
+    std::vector<std::pair<int, Vector3d>> currentOriginalNeighbors;
+    currentOriginalNeighbors.push_back(std::make_pair(index, zeroVector)); // index is always first index
 
-        combineToHigherOrder(nl, manybodyNeighborIndices, Ni, currentOriginalNeighbors, c, saveBothWays, maxOrder);
+    combineToHigherOrder(nl, manybodyNeighborIndices, Ni, currentOriginalNeighbors, c, saveBothWays, maxOrder);
     // }
 
     return manybodyNeighborIndices;
@@ -49,7 +49,7 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
                                                 const std::vector<std::pair<int, Vector3d>> &Ni, std::vector<std::pair<int, Vector3d>> currentOriginalNeighbors, int order, bool saveBothWays, const int maxOrder)
 {
 
-    int maxSiteIndex = 0;
+    auto maxSiteIndex = 0;
 
     //if we dont want bothways then only consider indices above this maxSiteIndex
     if (!saveBothWays)
@@ -66,20 +66,36 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
     for (const auto j : Ni)
     {
         auto originalNeighborCopy = currentOriginalNeighbors;
-        if (j.first < maxSiteIndex)
+        NeighborPairCompare comp;
+        
+        if( !saveBothWays && comp(j,originalNeighborCopy.back()) )
         {
             continue;
         }
+     
         originalNeighborCopy.push_back(j); // put j in originalNeigbhors
 
-        const auto N_j_offset = translateAllNi(nl.getNeighbors(j.first), j.second);
+        auto N_j_offset = translateAllNi(nl.getNeighbors(j.first), j.second);
+        //exclude smaller neighbors if not saving bothways
+        if(!saveBothWays)
+        {
+            std::vector<std::pair<int, Vector3d>> N_j_filtered;
+            for(const auto &nbrPair : N_j_offset)
+            {
+                if(comp(j,nbrPair)) // push back the neighbors greater than j
+                {
+                    N_j_filtered.push_back(nbrPair);
+                }
+            }
+             N_j_offset = N_j_filtered;
+        }
         auto intersection_N_ij = getIntersection(Ni, N_j_offset);
 
         if (originalNeighborCopy.size() + 1 < maxOrder)
         {
             combineToHigherOrder(nl, manybodyNeighborIndices, intersection_N_ij, originalNeighborCopy, order++, saveBothWays, maxOrder);
         }
-        if(intersection_N_ij.size() > 0)
+        if (intersection_N_ij.size() > 0)
         {
             manybodyNeighborIndices.push_back(std::make_pair(originalNeighborCopy, intersection_N_ij));
         }
