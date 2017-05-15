@@ -79,8 +79,10 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
         {
             combineToHigherOrder(nl, manybodyNeighborIndices, intersection_N_ij, originalNeighborCopy, order++, saveBothWays, maxOrder);
         }
-        
-        manybodyNeighborIndices.push_back(std::make_pair(originalNeighborCopy, intersection_N_ij));
+        if(intersection_N_ij.size() > 0)
+        {
+            manybodyNeighborIndices.push_back(std::make_pair(originalNeighborCopy, intersection_N_ij));
+        }
     }
 }
 

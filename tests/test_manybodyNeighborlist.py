@@ -8,7 +8,7 @@ from ase.neighborlist import NeighborList
 from ase.build import bulk
 
 
-neighbor_cutoff = 5
+neighbor_cutoff = 5.1
 
 #set ut atoms and icet structure
 a = bulk('Ti',"bcc",a=3.321).repeat(2)
@@ -43,26 +43,60 @@ for n1, n2 in zip(intersect, naive_intersect):
     assert n1[0] == n2[0] and (n1[1] == n2[1]).all()
 
 
-mbnl_i = mbnl.build(nl,0,5)
+mbnl_i = mbnl.build(nl,0,3)
+#get manybodyNeighbors to third order
+def naiveManybodyThirdOrder(nl, index, bothways=True):
+    nbr_0 = nl.get_neighbors(index)
+    nbrs = []
+    for j in nbr_0:
+        nbr_j = nl.get_neighbors(j[0])
+        for k in nbr_j:
 
-"""
-for debug:
+            if(not bothways and k[0] < j[0] and (k[1] == [0,0,0]).all() and (k[1] == j[1]).all()):
+                continue
+            
+
+            if (nl.is_neighbor(index,k[0],k[1] + j[1])):
+                neighbor_k = (k[0],k[1] + j[1])                
+                manybodyNbr = [index,[0.,0.,0.],j,neighbor_k]
+                nbrs.append(manybodyNbr)
+    return nbrs                        
+
+
+#debug
 def printNeighbor(nbr,onlyIndice=False):
     if onlyIndice:
         print(nbr[0], end=" ")    
     else:        
         print(nbr[0], nbr[1], end=" ")
 
-for nbr in mbnl_i:
-    orig, manyInd = nbr
-    for s in orig:
-        printNeighbor(s)
-    print(" | ",end=" ")
-    for s in manyInd:
-        printNeighbor(s,True)
-    print("")    
+mbnl_3 = naiveManybodyThirdOrder(nl,0,bothways = False)
+for ss in mbnl_3:
+    print(ss[0],ss[1], end= " ")
+    printNeighbor(ss[2])
+    printNeighbor(ss[3])
+    print("")
 
+
+
+for nbr in nl.get_neighbors(0):
+    print(0,[0,0,0], end= " ")
+    printNeighbor(nbr)
+    print("")
 for nbr in mbnl_i:
     orig, manyInd = nbr
+    for mind in manyInd:
+        for s in orig:
+            printNeighbor(s)                
+        printNeighbor(mind)
+        print("")    
+
+count = 0
+for nbr in mbnl_i:
+    orig, manyInd = nbr    
     print("ec",len(orig),len(manyInd))
-"""    
+    count += len(manyInd)
+print("counts",len(mbnl_3), count)
+
+#Test if there are duplicates in mbnl
+

@@ -32,13 +32,16 @@ class Neighborlist
         return _neighbors[index];
     }
     ///Check if index1 and index2 are neighbors
-    bool isNeighbor(const int index1, const int index2) const
+    bool isNeighbor(const int index1, const int index2,const Vector3d offset) const
     {
-        for(const auto &nbr1 : _neighbors[index1])
+        for(const auto &nbr : _neighbors[index1])
         {
-            if( nbr1.first == index2 )
+            if( nbr.first == index2 ) // index are the same
             {
-                return true;
+                if( nbr.second == offset) // are the offsets equal?
+                {
+                    return true;
+                }
             }
         }
         return false;
