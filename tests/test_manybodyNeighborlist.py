@@ -44,6 +44,9 @@ for n1, n2 in zip(intersect, naive_intersect):
 
 bothways = True
 mbnl_i = mbnl.build(nl,0,3,bothways)
+
+assert len(mbnl.build(nl,0,3,True)) == len(mbnl.build(nl,len(a)-1,3,True))
+
 #get manybodyNeighbors to third order
 def naiveManybodyThirdOrder(nl, index, bothways=True):
     nbr_0 = nl.get_neighbors(index)
