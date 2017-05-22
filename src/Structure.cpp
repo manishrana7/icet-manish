@@ -20,23 +20,18 @@ Structure::Structure(const Eigen::Matrix<double, Dynamic, 3> &pos,
     _pbc = pbc;
 }
 
-double Structure::getDistance(const int index1, const int index2, const bool mic) const
+double Structure::getDistance(const int index1, const int index2) const
 {
+    //bool mic = false; ///@todo:  add  mic functionality
+
+    if (index1 >= _positions.rows() or index2 >= _positions.rows())
+    {
+        throw std::out_of_range("Error: Tried accessing position at out of bound index. Structure::getDistance");
+    }
+
     const Eigen::Vector3d pos1 = _positions.row(index1);
     const Eigen::Vector3d pos2 = _positions.row(index2);
 
-    Eigen::Vector3d diff = pos1 - pos2;
-    if (mic)
-    {
-        // insert mic finder function
-    }
-
-    const auto distance = diff.norm();
-    return distance;
-}
-
-void Structure::printPositions()
-{
-    std::cout << _positions << std::endl;
+    return (pos1 - pos2).norm();
 }
 

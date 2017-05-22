@@ -27,8 +27,7 @@ PYBIND11_PLUGIN(example)
         .def("get_pbc", &Structure::get_pbc)
         .def("set_pbc", &Structure::set_pbc)
         .def("get_cell", &Structure::get_cell)
-        .def("set_cell", &Structure::set_cell)
-        .def("print_positions", &Structure::printPositions)
+        .def("set_cell", &Structure::set_cell)        
         ;
 
    py::class_<Neighborlist>(m, "Neighborlist")
