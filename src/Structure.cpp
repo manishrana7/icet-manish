@@ -6,10 +6,10 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <string>
-
+using namespace Eigen;
 namespace py = pybind11;
 
-Structure::Structure(const Eigen::Matrix<double, Dynamic, 3> &pos,
+Structure::Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &pos,
                      const std::vector<std::string> &elements,
                      const Eigen::Matrix3d &cell,
                      const std::vector<bool> &pbc)
@@ -39,4 +39,3 @@ void Structure::printPositions()
 {
     std::cout << _positions << std::endl;
 }
-

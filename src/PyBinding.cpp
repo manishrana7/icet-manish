@@ -7,13 +7,12 @@
 #include <pybind11/stl.h>
 #include <Eigen/Dense>
 
-
 PYBIND11_PLUGIN(example)
 {
     py::module m("example", "pybind11 example plugin");
 
     py::class_<Structure>(m, "Structure")
-        .def(py::init<const Eigen::Matrix<double, Dynamic, 3> &,
+        .def(py::init<const Eigen::Matrix<double, Dynamic, 3, Eigen::RowMajor> &,
                       const std::vector<std::string> &,
                       const Eigen::Matrix3d &,
                       const std::vector<bool> &>())
@@ -28,20 +27,17 @@ PYBIND11_PLUGIN(example)
         .def("set_pbc", &Structure::set_pbc)
         .def("get_cell", &Structure::get_cell)
         .def("set_cell", &Structure::set_cell)
-        .def("print_positions", &Structure::printPositions)
-        ;
+        .def("print_positions", &Structure::printPositions);
 
-   py::class_<Neighborlist>(m, "Neighborlist")
+    py::class_<Neighborlist>(m, "Neighborlist")
         .def(py::init<const double>())
         .def("build", &Neighborlist::build)
-        .def("is_neighbor",&Neighborlist::isNeighbor)
-        .def("get_neighbors",&Neighborlist::getNeighbors)
-        ;
-           
-   py::class_<ManybodyNeighborlist>(m, "ManybodyNeighborlist")
-     .def(py::init<>())
-     .def("calc_intersection", &ManybodyNeighborlist::getIntersection)
-     .def("build", &ManybodyNeighborlist::build)
-     ;
+        .def("is_neighbor", &Neighborlist::isNeighbor)
+        .def("get_neighbors", &Neighborlist::getNeighbors);
+
+    py::class_<ManybodyNeighborlist>(m, "ManybodyNeighborlist")
+        .def(py::init<>())
+        .def("calc_intersection", &ManybodyNeighborlist::getIntersection)
+        .def("build", &ManybodyNeighborlist::build);
     return m.ptr();
 }
