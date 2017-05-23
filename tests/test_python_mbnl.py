@@ -16,10 +16,15 @@ ase_nl.update(atoms)
 
 index = 0
 order = 3
-bothways = True
+bothways = False
 
 
 nbrs = mbnl_T.build(ase_nl, index, order, bothways) 
 
+count = 0
 for j in nbrs:    
-      print(j[0], len(j[1]))
+      count += len(j[1])
+      for intersect in j[1]:
+            print(j[0], intersect)
+print("count = {}".format(count))
+

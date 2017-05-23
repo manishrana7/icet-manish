@@ -8,11 +8,12 @@ from ase.neighborlist import NeighborList
 from ase.build import bulk
 
 
-neighbor_cutoff = 5.1
+neighbor_cutoff = 5.0
 
 # set ut atoms and icet structure
-a = bulk('Ti', "bcc", a=3.321).repeat(2)
-a.set_pbc((True, True, True))
+#a = bulk('Ti', "bcc", a=3.321).repeat(2)
+a = bulk("Al").repeat(2)
+#a.set_pbc((True, True, True))
 structure = structure_from_atoms(a)
 # set up neighborlist for input to manybody neighborlist
 nl = Neighborlist(neighbor_cutoff)
@@ -23,9 +24,9 @@ neighbors = nl.get_neighbors(0)
 mbnl = ManybodyNeighborlist()
 
 #build mbnl for index "index" and order "order"
-index = 3
+index = 0
 order = 3
-bothways = True
+bothways = False
 mbnl_i = mbnl.build(nl, index, order, bothways)
 # get manybodyNeighbors to third order
 
