@@ -100,7 +100,8 @@ class manybodyNeighborlistTester():
         """
         N_j_filtered = []
         for k in N_i:
-            if not self.nbrCompare(k, k):
+            #if k > j
+            if not self.nbrCompare(k, j):
                 N_j_filtered.append(k)
         return N_j_filtered
 
@@ -120,7 +121,7 @@ class manybodyNeighborlistTester():
         Returns true if arr1 < arr2
         """
         assert len(arr1) == len(arr2)
-        for i in range(3):
+        for i in range(len(arr)):
             if arr1[i] < arr2[i]:
                 return True
             if arr1[i] > arr2[i]:
@@ -148,18 +149,7 @@ class manybodyNeighborlistTester():
         for ind, offs in zip(indices, offsets):
             Ni.append([ind, offs])
         return Ni
-
-        def nbrCompare(self, nbr1, nbr2):
-            """
-            Compares two neighbors.
-            return nbr1 < nbr2 by first looking at index
-            and if they are equal look at the offsets.
-            """
-            if nbr1[0] < nbr2[0]:
-                return True
-            if nbr1[0] > nbr2[0]:
-                return False
-            return arrayCompare(nbr1[1], nbr2[1])
+ 
 
 
 """

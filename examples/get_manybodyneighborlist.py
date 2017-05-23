@@ -11,10 +11,9 @@ from ase.build import bulk
 neighbor_cutoff = 5.0
 
 # set ut atoms and icet structure
-#a = bulk('Ti', "bcc", a=3.321).repeat(2)
 a = bulk("Al").repeat(2)
-#a.set_pbc((True, True, True))
 structure = structure_from_atoms(a)
+
 # set up neighborlist for input to manybody neighborlist
 nl = Neighborlist(neighbor_cutoff)
 nl.build(structure)
@@ -65,6 +64,14 @@ def naiveManybodyThirdOrder(nl, index, bothways=True):
     return nbrs
 
 
+def getDistances(nbrs, structure):
+    d = []
+    for i in nbrs:
+        for j in nbrs:
+            if nbrCompare(i,j) or i[0] == j[0] and (i[1] == j[1]).all():
+                continue
+            d.append( structure.get_distance2(i[0], i[1] ,j[0],j[1]))
+    return d
 # debug
 def printNeighbor(nbr, onlyIndice=False):
     if onlyIndice:
@@ -88,9 +95,13 @@ for nbr in nl.get_neighbors(0):
 for nbr in mbnl_i:
     orig, manyInd = nbr
     for mind in manyInd:
+        nbr = []
         for s in orig:
+            nbr.append(s)
             printNeighbor(s)
         printNeighbor(mind)
+        nbr.append(mind)
+        print(getDistances(nbr,structure))
         print("")
 
 count = 0
