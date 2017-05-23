@@ -23,9 +23,9 @@ ex_structure = structure_from_atoms(a)
 
 
 # Calculate indiviually with mic=False
-assert a.get_distance(0, 1, mic=False) == 2
-assert a.get_distance(1, 2, mic=False) == 3
-assert a.get_distance(0, 2, mic=False) == 5
+assert a.get_distance(0, 1, mic=False) == ex_structure.get_distance(0, 1)
+assert a.get_distance(1, 2, mic=False) == ex_structure.get_distance(1, 2)
+assert a.get_distance(0, 2, mic=False) == ex_structure.get_distance(0, 2)
 
 
 # Test distance calculator with offsets

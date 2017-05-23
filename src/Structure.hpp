@@ -17,21 +17,27 @@ class Structure
               const Eigen::Matrix3d &,
               const std::vector<bool> &);
 
-    double getDistance(const int, const int, const bool) const;
+    double getDistance(const int, const int) const;
 
-    double getDistance2(const int ind1, const Vector3d offset1,
-                        const int ind2, const Vector3d offset2) const
+    /**
+        Returns the distance for index1 with unitcell offset offset 1 to index2 with unit-cell offset offset2
+    */
+    double getDistance2(const int index1, const Vector3d offset1,
+                        const int index2, const Vector3d offset2) const
     {
-        Vector3d pos1 = _positions.row(ind1) + offset1.transpose() * _cell;
-        Vector3d pos2 = _positions.row(ind2) + offset2.transpose() * _cell;
-        Vector3d d = pos1 - pos2;
-        return d.norm();
+        if (index1 >= _positions.rows() or index2 >= _positions.rows())
+        {
+            throw std::out_of_range("Error: Tried accessing position at out of bound index. Structure::getDistance2");
+        }
+
+        Vector3d pos1 = _positions.row(index1) + offset1.transpose() * _cell;
+        Vector3d pos2 = _positions.row(index2) + offset2.transpose() * _cell;
+
+        return (pos1 - pos2).norm();
     }
-
-    void printPositions();
-
+   
     // Getters - Setters
-    void setPositions(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &positions)
+    void setPositions(const Eigen::Matrix<double, Dynamic, 3> &positions)
     {
         _positions = positions;
     }
