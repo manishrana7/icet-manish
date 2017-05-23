@@ -49,6 +49,7 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
     for (const auto j : Ni)
     {
         auto originalNeighborCopy = currentOriginalNeighbors;
+        NeighborPairCompare comp;
 
         //if j is smaller than last added site then continue
         // if bothways = True then don't compare to first
