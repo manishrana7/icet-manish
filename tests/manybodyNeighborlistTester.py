@@ -57,8 +57,13 @@ class manybodyNeighborlistTester():
         for j in Ni:
             originalNeighborCopy = current_original_neighbors.copy()
 
-            if self.nbrCompare(j, originalNeighborCopy[-1]) and not (bothways and len(originalNeighborCopy) == 1):
+            #if self.nbrCompare(j, originalNeighborCopy[-1]) and (len(originalNeighborCopy) == 1 and not bothways):
+            #    continue
+            print(len(originalNeighborCopy) == 1 , self.nbrCompare(j, originalNeighborCopy[-1]),bothways, (len(originalNeighborCopy) == 1 and not bothways and self.nbrCompare(j, originalNeighborCopy[-1])))
+            if len(originalNeighborCopy) == 1 and not bothways and self.nbrCompare(j, originalNeighborCopy[-1]):
+                print(originalNeighborCopy, j)
                 continue
+                
 
             originalNeighborCopy.append(j)
 
@@ -99,9 +104,8 @@ class manybodyNeighborlistTester():
         Returns all k in N_i that are bigger than j
         """
         N_j_filtered = []
-        for k in N_i:
-            #if k > j
-            if not self.nbrCompare(k, j):
+        for k in N_i:            
+            if self.nbrCompare(j, k):
                 N_j_filtered.append(k)
         return N_j_filtered
 
@@ -146,7 +150,7 @@ class manybodyNeighborlistTester():
         """
         indices, offsets = ase_nl.get_neighbors(index)
         Ni = []
-        for ind, offs in zip(indices, offsets):
+        for ind, offs in zip(indices.copy(), offsets.copy()):
             Ni.append([ind, offs])
         return Ni
  

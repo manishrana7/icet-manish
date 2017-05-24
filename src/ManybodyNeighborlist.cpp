@@ -53,7 +53,7 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
 
         //if j is smaller than last added site then continue
         // if bothways = True then don't compare to first
-        if (comp(j, originalNeighborCopy.back()) and !(saveBothWays && originalNeighborCopy.size() == 1))
+        if ((!saveBothWays && originalNeighborCopy.size() == 1) && comp(j, originalNeighborCopy.back()))
         {
             continue;
         }

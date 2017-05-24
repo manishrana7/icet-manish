@@ -23,7 +23,7 @@ neighbors = nl.get_neighbors(0)
 mbnl = ManybodyNeighborlist()
 
 #build mbnl for index "index" and order "order"
-index = 0
+index = 1
 order = 3
 bothways = False
 mbnl_i = mbnl.build(nl, index, order, bothways)
@@ -101,13 +101,13 @@ for nbr in mbnl_i:
             printNeighbor(s)
         printNeighbor(mind)
         nbr.append(mind)
-        print(getDistances(nbr,structure))
+        print(getDistances(nbr,structure), end=" ")
         print("")
 
 count = 0
 for nbr in mbnl_i:
     orig, manyInd = nbr
-    print("ec", len(orig), len(manyInd))
+    #print("ec", len(orig), len(manyInd))
     count += len(manyInd)
 print("counts", len(mbnl_3), count)
 
