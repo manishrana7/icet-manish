@@ -41,8 +41,6 @@ std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pa
     return manybodyNeighborIndices;
 }
 
-
-
 /*
     for each j in Ni construct the intersect of N_j and N_i = N_ij.
     all k in N_ij are then neighbors with i,j
@@ -52,7 +50,7 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
                                                 std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pair<int, Vector3d>>>> &manybodyNeighborIndices,
                                                 const std::vector<std::pair<int, Vector3d>> &Ni, std::vector<std::pair<int, Vector3d>> &currentOriginalNeighbors, int order, bool saveBothWays, const int maxOrder)
 {
-        NeighborPairCompare comp;
+    NeighborPairCompare comp;
     for (const auto &j : Ni)
     {
         //if j is smaller than last added site then continue
@@ -66,13 +64,15 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
         originalNeighborCopy.push_back(j); // put j in originalNeigbhors
 
         auto Nj = nl.getNeighbors(j.first);
+
+        //translate the neighbors
         translateAllNi(Nj, j.second);
 
         //exclude smaller neighbors
-        const auto N_j_filtered = getFilteredNj(Nj, j);        
+        const auto N_j_filtered = getFilteredNj(Nj, j);
 
+        //construct the intersection
         const auto intersection_N_ij = getIntersection(Ni, N_j_filtered);
-
 
         if (originalNeighborCopy.size() + 1 < maxOrder)
         {
@@ -94,7 +94,7 @@ and then filtered are from indexof(k) to end()
 std::vector<std::pair<int, Vector3d>> ManybodyNeighborlist::getFilteredNj(const std::vector<std::pair<int, Vector3d>> &N_j, const std::pair<int, Vector3d> &j) const
 {
     NeighborPairCompare comp;
-    auto first = std::upper_bound(N_j.begin(), N_j.end(), j,comp);
+    auto first = std::upper_bound(N_j.begin(), N_j.end(), j, comp);
 
     std::vector<std::pair<int, Vector3d>> ret(first, N_j.end());
     return ret;
@@ -112,5 +112,4 @@ void ManybodyNeighborlist::translateAllNi(std::vector<std::pair<int, Vector3d>> 
     {
         latNbr.second += unitCellOffset;
     }
-    
 }
