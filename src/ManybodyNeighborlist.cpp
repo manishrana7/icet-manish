@@ -43,13 +43,13 @@ std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pa
 
 void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
                                                 std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pair<int, Vector3d>>>> &manybodyNeighborIndices,
-                                                const std::vector<std::pair<int, Vector3d>> &Ni, std::vector<std::pair<int, Vector3d>> currentOriginalNeighbors, int order, bool saveBothWays, const int maxOrder)
+                                                const std::vector<std::pair<int, Vector3d>> &Ni, std::vector<std::pair<int, Vector3d>> &currentOriginalNeighbors, int order, bool saveBothWays, const int maxOrder)
 {
-
-    for (const auto j : Ni)
+        NeighborPairCompare comp;
+    for (const auto &j : Ni)
     {
         auto originalNeighborCopy = currentOriginalNeighbors;
-        NeighborPairCompare comp;
+
 
         //if j is smaller than last added site then continue
         // if bothways = True then don't compare to first
@@ -60,9 +60,12 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
 
         originalNeighborCopy.push_back(j); // put j in originalNeigbhors
 
-        auto N_j_offset = translateAllNi(nl.getNeighbors(j.first), j.second);
+        auto Nj = nl.getNeighbors(j.first);
+        const auto N_j_offset = translateAllNi(Nj, j.second);
+
         //exclude smaller neighbors
         std::vector<std::pair<int, Vector3d>> N_j_filtered;
+        N_j_filtered.reserve(N_j_offset.size());
         for (const auto &nbrPair : N_j_offset)
         {
             if (comp(j, nbrPair)) // push back the neighbors greater than j
@@ -70,22 +73,27 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
                 N_j_filtered.push_back(nbrPair);
             }
         }
-        N_j_offset = N_j_filtered;
+        
 
-        auto intersection_N_ij = getIntersection(Ni, N_j_offset);
+        const auto intersection_N_ij = getIntersection(Ni, N_j_filtered);
+
+        if (intersection_N_ij.size() == 0)
+        {
+            continue;
+        }
 
         if (originalNeighborCopy.size() + 1 < maxOrder)
         {
             combineToHigherOrder(nl, manybodyNeighborIndices, intersection_N_ij, originalNeighborCopy, order++, saveBothWays, maxOrder);
         }
-        if (intersection_N_ij.size() > 0)
-        {
+        // if (intersection_N_ij.size() > 0)
+        // {
             manybodyNeighborIndices.push_back(std::make_pair(originalNeighborCopy, intersection_N_ij));
-        }
+        // }
     }
 }
 
-std::vector<std::pair<int, Vector3d>> ManybodyNeighborlist::translateAllNi(std::vector<std::pair<int, Vector3d>> Ni, const Vector3d &unitCellOffset) const
+std::vector<std::pair<int, Vector3d>> ManybodyNeighborlist::translateAllNi(std::vector<std::pair<int, Vector3d>> &Ni, const Vector3d &unitCellOffset) const
 {
     for (auto &latNbr : Ni)
     {

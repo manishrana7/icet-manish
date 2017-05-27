@@ -26,11 +26,12 @@ class ManybodyNeighborlist
 
     void combineToHigherOrder(const Neighborlist &nl, 
                                  std::vector<std::pair<std::vector<std::pair<int, Vector3d>>,  std::vector<std::pair<int, Vector3d>>>> &manybodyNeighborIndex,
-                                  const std::vector<std::pair<int, Vector3d>> &Ni,std::vector<std::pair<int, Vector3d>> currentOriginalNeighbrs,  int order, bool saveBothWays,const int maxOrder);
+                                  const std::vector<std::pair<int, Vector3d>> &Ni,std::vector<std::pair<int, Vector3d>> &currentOriginalNeighbrs,  int order, bool saveBothWays,const int maxOrder);
 
     std::vector<std::pair<int, Vector3d>> getIntersection(const std::vector<std::pair<int, Vector3d>> &Ni, const std::vector<std::pair<int, Vector3d>> &Nj)
     {
         std::vector<std::pair<int, Vector3d>> N_intersection;
+        N_intersection.reserve(Ni.size()/2);
         std::set_intersection(Ni.begin(), Ni.end(),
                               Nj.begin(), Nj.end(),
                               std::back_inserter(N_intersection),
@@ -38,7 +39,7 @@ class ManybodyNeighborlist
         return N_intersection;
     }
 
-    std::vector<std::pair<int, Vector3d>> translateAllNi(std::vector<std::pair<int, Vector3d>> Ni, const Vector3d &unitCellOffset) const ;
+    std::vector<std::pair<int, Vector3d>> translateAllNi(std::vector<std::pair<int, Vector3d>> &Ni, const Vector3d &unitCellOffset) const ;
 
 
 

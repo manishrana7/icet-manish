@@ -71,3 +71,10 @@ def __structure_elements(self):
     """
     return self.get_elements()
 Structure.elements = property(__structure_elements)
+
+def __get_size(self):
+    """
+    Get size of structure (number of elements)
+    """
+    return len(self.elements)
+Structure.size = __get_size    
