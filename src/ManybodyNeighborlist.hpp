@@ -31,7 +31,7 @@ class ManybodyNeighborlist
     std::vector<std::pair<int, Vector3d>> getIntersection(const std::vector<std::pair<int, Vector3d>> &Ni, const std::vector<std::pair<int, Vector3d>> &Nj)
     {
         std::vector<std::pair<int, Vector3d>> N_intersection;
-        N_intersection.reserve(Ni.size()/2);
+        N_intersection.reserve(Ni.size());
         std::set_intersection(Ni.begin(), Ni.end(),
                               Nj.begin(), Nj.end(),
                               std::back_inserter(N_intersection),
@@ -39,23 +39,11 @@ class ManybodyNeighborlist
         return N_intersection;
     }
 
-    std::vector<std::pair<int, Vector3d>> translateAllNi(std::vector<std::pair<int, Vector3d>> &Ni, const Vector3d &unitCellOffset) const ;
-
-
-
-    // Lets put this on ice since it might be a bit dangerous to have this custom comparison
-    // std::vector<std::pair<int, Vector3d>> getIntersectionOffset(const std::vector<std::pair<int, Vector3d>> &Ni, const std::vector<std::pair<int, Vector3d>> &Nj, const Vector3d &offset_j)
-    // {
-    //     std::vector<std::pair<int, Vector3d>> N_intersection;
-    //     std::set_intersection(Ni.begin(), Ni.end(),
-    //                           Nj.begin(), Nj.end(),
-    //                           std::back_inserter(N_intersection),
-    //                           NeighborPairCompareOffset(offset_j));
-    //     return N_intersection;
-    // }
-
-
+    void translateAllNi(std::vector<std::pair<int, Vector3d>> &Ni, const Vector3d &unitCellOffset) const ;
 
   private:
     std::vector<double> _cutoffs;
+    std::vector<std::pair<int, Vector3d>> getFilteredNj(const std::vector<std::pair<int, Vector3d>> &, const std::pair<int, Vector3d> &) const;
+
+ 
 };

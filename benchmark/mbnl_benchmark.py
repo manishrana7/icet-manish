@@ -18,7 +18,7 @@ def benchmark_cpp_mbnl(structure, order, cutoff):
 
 
 if __name__ == "__main__":
-    atoms = bulk("Al").repeat(1)
+    atoms = bulk("Al").repeat(2)
     structure = structure_from_atoms(atoms)
     order = 5
     cutoff = 10
