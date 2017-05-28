@@ -57,13 +57,14 @@ class manybodyNeighborlistTester():
         for j in Ni:
             originalNeighborCopy = current_original_neighbors.copy()
 
-            #if self.nbrCompare(j, originalNeighborCopy[-1]) and (len(originalNeighborCopy) == 1 and not bothways):
+            # if self.nbrCompare(j, originalNeighborCopy[-1]) and (len(originalNeighborCopy) == 1 and not bothways):
             #    continue
-            print(len(originalNeighborCopy) == 1 , self.nbrCompare(j, originalNeighborCopy[-1]),bothways, (len(originalNeighborCopy) == 1 and (not bothways and self.nbrCompare(j, originalNeighborCopy[-1])))
-            if len(originalNeighborCopy) == 1 and not bothways and self.nbrCompare(j, originalNeighborCopy[-1]):
-                print(originalNeighborCopy, j)
+            # print(len(originalNeighborCopy) == 1 , self.nbrCompare(j,
+            # originalNeighborCopy[-1]),bothways, (len(originalNeighborCopy) ==
+            # 1 and (not bothways and self.nbrCompare(j,
+            # originalNeighborCopy[-1])))
+            if len(originalNeighborCopy) == 1 and (not bothways and self.nbrCompare(j, originalNeighborCopy[-1])):
                 continue
-                
 
             originalNeighborCopy.append(j)
 
@@ -75,7 +76,7 @@ class manybodyNeighborlistTester():
             if len(originalNeighborCopy) + 1 < order:
                 self.combine_to_higher_order(
                     nl, manybody_neighbor_indices, intersection_ij, originalNeighborCopy, c + 1, bothways, order)
-            if len(intersection_ij) > 0:        
+            if len(intersection_ij) > 0:
                 manybody_neighbor_indices.append(
                     [originalNeighborCopy, intersection_ij])
 
@@ -104,7 +105,7 @@ class manybodyNeighborlistTester():
         Returns all k in N_i that are bigger than j
         """
         N_j_filtered = []
-        for k in N_i:            
+        for k in N_i:
             if self.nbrCompare(j, k):
                 N_j_filtered.append(k)
         return N_j_filtered
@@ -125,7 +126,7 @@ class manybodyNeighborlistTester():
         Returns true if arr1 < arr2
         """
         assert len(arr1) == len(arr2)
-        for i in range(len(arr)):
+        for i in range(len(arr1)):
             if arr1[i] < arr2[i]:
                 return True
             if arr1[i] > arr2[i]:
@@ -153,27 +154,3 @@ class manybodyNeighborlistTester():
         for ind, offs in zip(indices.copy(), offsets.copy()):
             Ni.append([ind, offs])
         return Ni
- 
-
-
-"""
-def naiveManybodyThirdOrder(nl, index, bothways=True):
-
-    nbr_0 = nl.get_neighbors(index)
-    nbr_index = (index, [0, 0, 0])
-    nbrs = []
-    for j in nbr_0:
-        if not bothways and nbrCompare(j, nbr_index):
-            continue
-        nbr_j = nl.get_neighbors(j[0])
-        for k in nbr_j:
-            if (nl.is_neighbor(index, k[0], k[1] + j[1])):
-                neighbor_k = (k[0], k[1] + j[1])
-                manybodyNbr = [index, [0., 0., 0.], j, neighbor_k]
-                if not bothways:
-                    if nbrCompare(j, neighbor_k):
-                        nbrs.append(manybodyNbr)
-                else:
-                    nbrs.append(manybodyNbr)
-    return nbrs
-"""
