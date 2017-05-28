@@ -8,3 +8,4 @@ from __future__ import print_function, division
 from .structure import *
 from .neighborlist import *
 from .manybodyNeighborlist import *
+from .cluster import *

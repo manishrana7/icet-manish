@@ -1,12 +1,13 @@
 #include "Structure.hpp"
 #include "Neighborlist.hpp"
 #include "ManybodyNeighborlist.hpp"
+#include "Cluster.hpp"
 #include <pybind11/pybind11.h>
 #include <iostream>
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
 #include <Eigen/Dense>
-
+#include <pybind11/operators.h>
 
 PYBIND11_PLUGIN(example)
 {
@@ -30,6 +31,7 @@ PYBIND11_PLUGIN(example)
         .def("set_cell", &Structure::set_cell)        
         ;
 
+    
    py::class_<Neighborlist>(m, "Neighborlist")
         .def(py::init<const double>())
         .def("build", &Neighborlist::build)
@@ -42,5 +44,17 @@ PYBIND11_PLUGIN(example)
      .def("calc_intersection", &ManybodyNeighborlist::getIntersection)
      .def("build", &ManybodyNeighborlist::build)
      ;
+
+                
+   py::class_<Cluster>(m, "Cluster")
+     .def(py::init<std::vector<int>&, std::vector<double>&>  ())
+     .def("count", &Cluster::count)
+     .def("get_count", &Cluster::getCount)
+     .def("get_sites", &Cluster::getSites)
+     .def("get_distances", &Cluster::getDistances)
+     .def(py::self < py::self)
+     ;
+
+
     return m.ptr();
 }

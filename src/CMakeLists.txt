@@ -14,6 +14,7 @@ SET(SourceFiles
   PyBinding.cpp
   Neighborlist.cpp
   ManybodyNeighborlist.cpp
+  Cluster.cpp
 )
 # Find Eigen3
 FIND_PACKAGE(Eigen3 REQUIRED)
