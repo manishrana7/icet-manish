@@ -57,3 +57,15 @@ sites_few = np.array([100,1000])
 distances_few = np.array([1000000.0])
 cluster_pair = it.Cluster(sites_few, distances_few)
 assert cluster_pair < cluster_big
+
+
+#try sorting
+
+my_clusters = [cluster_big, cluster_slightly_bigger, cluster_pair, cluster_equal]
+
+my_clusters.sort()
+
+#check that cluster_pair is at the front
+#note this is using pythons own equal method
+assert my_clusters[0] == cluster_pair
+assert my_clusters[0] != cluster_big
