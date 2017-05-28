@@ -72,7 +72,7 @@ for i in range(len(a)):
         nbrs_cpp = mbnl.build(nl, index, order, bothways)
         assert len(nbrs_cpp) == len(nbrs_cpp)
 
-
+#test that bothways = false also works
 bothways = False
 for i in range(len(a)):
     for j in range(maxorder):
