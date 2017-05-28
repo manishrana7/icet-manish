@@ -44,10 +44,10 @@ for n1, n2 in zip(intersect, naive_intersect):
 order = 3
 bothways = True
 index1 = 0
-index2 = len(a) - 2
+index2 = len(a) - 3
 nbrs1 = mbnl.build(nl, index1, order, True)
 nbrs2 = mbnl.build(nl, index2, order, True)
-# print(len(nbrs1), len(nbrs2)) #debug
+#print(len(nbrs1), len(nbrs2)) #debug
 assert len(nbrs1) == len(
     nbrs2), "bothways = True should give same number of neigbhors independent on what index you look at"
 
