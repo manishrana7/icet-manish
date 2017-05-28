@@ -21,10 +21,10 @@ bothways = False
 
 nbrs = mbnl_T.build(ase_nl, index, order, bothways=bothways) 
 
-count = 0
-for j in nbrs:    
-      count += len(j[1])
-      for intersect in j[1]:
-            print(j[0], intersect)
-print("count = {}".format(count))
+# count = 0
+# for j in nbrs:    
+#       count += len(j[1])
+#       for intersect in j[1]:
+#             print(j[0], intersect)
+# print("count = {}".format(count))
 
