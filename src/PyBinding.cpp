@@ -2,6 +2,7 @@
 #include "Neighborlist.hpp"
 #include "ManybodyNeighborlist.hpp"
 #include "Cluster.hpp"
+#include "PermutationMap.hpp"
 #include <pybind11/pybind11.h>
 #include <iostream>
 #include <pybind11/eigen.h>
@@ -54,6 +55,14 @@ PYBIND11_PLUGIN(example)
      .def("get_distances", &Cluster::getDistances)
      .def(py::self < py::self)
      ;
+
+   py::class_<PermutationMap>(m, "PermutationMap")
+     .def(py::init<const std::vector<Vector3d> &,
+                   const std::vector<Matrix3d> &>  ())
+     .def("build", &PermutationMap::build)     
+     ;
+
+
 
 
     return m.ptr();

@@ -42,7 +42,7 @@ class Structure
         _positions = positions;
     }
 
-    Eigen::Matrix<double, Dynamic, 3, RowMajor> &getPositions()
+    Eigen::Matrix<double, Dynamic, 3, RowMajor> getPositions() const
     {
         return _positions;
     }

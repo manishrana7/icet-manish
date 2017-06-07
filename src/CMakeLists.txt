@@ -15,6 +15,7 @@ SET(SourceFiles
   Neighborlist.cpp
   ManybodyNeighborlist.cpp
   Cluster.cpp
+  PermutationMap.cpp
 )
 # Find Eigen3
 FIND_PACKAGE(Eigen3 REQUIRED)

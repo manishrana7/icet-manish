@@ -9,3 +9,4 @@ from .structure import *
 from .neighborlist import *
 from .manybodyNeighborlist import *
 from .cluster import *
+from .permutationMap import *
