@@ -24,11 +24,15 @@ class PermutationMap
         _rotations = rotations;
     }
 
-    void build(const Eigen::Matrix<double,Dynamic,3,RowMajor> &positions);
+    void build(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &positions);
+
+    std::vector<std::vector<Vector3d>> getPermutatedPositions()
+    {
+        return _permutatedPositions;
+    }
 
   private:
     std::vector<Vector3d> _translations;
     std::vector<Matrix3d> _rotations;
-    std::vector<std::vector<Vector3d>> _permutatedPositons;
-    
-    };
+    std::vector<std::vector<Vector3d>> _permutatedPositions;
+};

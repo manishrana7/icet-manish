@@ -10,6 +10,12 @@ import spglib as spglib
 atoms = bulk("Al","fcc",a=2).repeat(3)
 
 symmetry = spglib.get_symmetry(atoms)
-print(symmetry['translations'])
-print(symmetry['rotations'])
-#permutation_map = PermutationMap(symmetry['translations'], symmetry['rotations'])
+translations = symmetry['translations']
+rotations = symmetry['rotations']
+permutation_map = PermutationMap(translations, rotations)
+
+pos = atoms.get_scaled_positions()
+#print(pos)
+
+assert len(rotations) == len(translations)
+permutation_map.build(pos)

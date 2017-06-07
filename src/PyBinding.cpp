@@ -60,6 +60,8 @@ PYBIND11_PLUGIN(example)
      .def(py::init<const std::vector<Vector3d> &,
                    const std::vector<Matrix3d> &>  ())
      .def("build", &PermutationMap::build)     
+     .def("get_permutated_positions", &PermutationMap::getPermutatedPositions)
+     
      ;
 
 
