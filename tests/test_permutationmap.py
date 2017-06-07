@@ -7,7 +7,7 @@ import spglib as spglib
 
 
 #ASE atoms
-atoms = bulk("Al","fcc",a=2).repeat(3)
+atoms = bulk("Al","fcc",a=2.0).repeat(1)
 
 symmetry = spglib.get_symmetry(atoms)
 translations = symmetry['translations']
@@ -18,4 +18,8 @@ pos = atoms.get_scaled_positions()
 #print(pos)
 
 assert len(rotations) == len(translations)
+print(rotations)
+print("pyrot size ", len(rotations))
 permutation_map.build(pos)
+
+print( permutation_map.get_permutated_positions() )
