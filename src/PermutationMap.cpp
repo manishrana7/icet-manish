@@ -12,16 +12,16 @@ these positions and the current rotational/translational symmetries.
 void PermutationMap::build(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &fractionalPositions)
 {
     //std::vector<std::vector<Vector3d>> _permutatedPositons;
-    std::cout<<"trans size "<< _translations.size() << " rot size "<< _rotations.size()<<std::endl;
-    
+    std::cout << "trans size " << _translations.size() << " rot size " << _rotations.size() << std::endl;
+
     for (size_t i = 0; i < _translations.size(); i++)
     {
-        std::vector<Vector3d> permutationPositionI(fractionalPositions.rows()); //do reserve instead
-
+        std::vector<Vector3d> permutationPositionI; //do reserve instead
+        permutationPositionI.reserve(fractionalPositions.rows());
         for (size_t j = 0; j < fractionalPositions.rows(); j++)
         {
-            Vector3d permutatedPos = _translations[i].transpose() + fractionalPositions.row(j) * _rotations[i]; // transpose frac pos?
-            permutationPositionI[j] = permutatedPos;
+            Vector3d permutatedPos = _translations[i].transpose() + fractionalPositions.row(j).transpose() * _rotations[i]; // transpose frac pos?
+            permutationPositionI.push_back(permutatedPos);
         }
         _permutatedPositions.push_back(permutationPositionI);
     }
