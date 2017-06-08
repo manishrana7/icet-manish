@@ -22,6 +22,7 @@ class PermutationMap
     {
         _translations = translations;
         _rotations = rotations;
+        symprec = 1e-5;
     }
 
     void build(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &positions);
@@ -31,28 +32,27 @@ class PermutationMap
         return _permutatedPositions;
     }
 
-
     /**
 
      Returns indices for unique positions,
      same indices share the same indice
 
     */
-    std::vector<std::vector<int>> getIndicedPermutatedPositions()
-    {   
+    std::pair<std::vector<std::vector<int>>, std::vector<Vector3d>> getIndicedPermutatedPositions()
+    {
         std::vector<Vector3d> uniquePositions;
         std::vector<std::vector<int>> indicePositions;
-        for(const auto &posRow : _permutatedPositions)
+        for (const auto &posRow : _permutatedPositions)
         {
             std::vector<int> indiceRow(posRow.size());
             int indiceCount = 0;
-            for(const Vector3d &pos : posRow)
+            for (const Vector3d &pos : posRow)
             {
                 const auto find = std::find(uniquePositions.begin(), uniquePositions.end(), pos);
-                if(find == uniquePositions.end())
+                if (find == uniquePositions.end())
                 {
                     uniquePositions.push_back(pos);
-                    indiceRow[indiceCount++] = uniquePositions.size()-1;
+                    indiceRow[indiceCount++] = uniquePositions.size() - 1;
                 }
                 else
                 {
@@ -62,11 +62,20 @@ class PermutationMap
             indicePositions.push_back(indiceRow);
         }
 
-        return indicePositions;
+        return std::make_pair(indicePositions, uniquePositions);
     }
 
   private:
     std::vector<Vector3d> _translations;
     std::vector<Matrix3d> _rotations;
     std::vector<std::vector<Vector3d>> _permutatedPositions;
+
+    void roundVector3d(Vector3d &vec3d)
+    {
+        vec3d[0] = round(vec3d[0] * 1.0 / symprec) / (1.0 / symprec);
+        vec3d[1] = round(vec3d[1] * 1.0 / symprec) / (1.0 / symprec);
+        vec3d[2] = round(vec3d[2] * 1.0 / symprec) / (1.0 / symprec);
+    }
+
+    double symprec;
 };
