@@ -20,9 +20,10 @@ void PermutationMap::build(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &fr
         permutationPositionI.reserve(fractionalPositions.rows());
         for (size_t j = 0; j < fractionalPositions.rows(); j++)
         {
-            Vector3d permutatedPos = _translations[i].transpose() + fractionalPositions.row(j).transpose() * _rotations[i]; // transpose frac pos?
+            Vector3d permutatedPos = _translations[i].transpose() + fractionalPositions.row(j) * _rotations[i]; // transpose frac pos?
             permutationPositionI.push_back(permutatedPos);
         }
         _permutatedPositions.push_back(permutationPositionI);
     }
 }
+

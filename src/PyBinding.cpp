@@ -61,6 +61,7 @@ PYBIND11_PLUGIN(example)
                    const std::vector<Matrix3d> &>  ())
      .def("build", &PermutationMap::build)     
      .def("get_permutated_positions", &PermutationMap::getPermutatedPositions)
+     .def("get_indiced_positions",&PermutationMap::getIndicedPermutatedPositions)
      
      ;
 
