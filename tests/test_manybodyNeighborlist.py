@@ -1,13 +1,13 @@
-from icetdev import *
-from icetdev.structure import *
-from icetdev.manybodyNeighborlist import *
-import numpy.random as random
 import numpy as np
-from ase import Atoms
-from ase.neighborlist import NeighborList
-from ase.build import bulk
-from tests import manybodyNeighborlistTester
+import numpy.random as random
 
+from ase import Atoms
+from ase.build import bulk
+from ase.neighborlist import NeighborList
+from icetdev import *
+from icetdev.manybodyNeighborlist import *
+from icetdev.structure import *
+from tests import manybodyNeighborlistTester
 
 #note that currently test at row 44 fails if cutoff is 6.1
 neighbor_cutoff = 7.1
@@ -32,13 +32,13 @@ nbrs2 = nl.get_neighbors(1)
 naive_intersect = []
 for n1 in nbrs1:
     for n2 in nbrs2:
-        if n1[0] == n2[0] and (n1[1] == n2[1]).all():
+        if n1.index == n2.index and (n1.unitcellOffset == n2.unitcellOffset).all():
             naive_intersect.append(n1)
 
-
+ 
 # assert that all the intersects are equal
 for n1, n2 in zip(intersect, naive_intersect):
-    assert n1[0] == n2[0] and (n1[1] == n2[1]).all()
+    assert n1.index == n2.index and (n1.unitcellOffset == n2.unitcellOffset).all()
 
 
 # test actual mbnl
@@ -86,6 +86,6 @@ for i in range(len(a)):
 # debug
 def printNeighbor(nbr, onlyIndice=False):
     if onlyIndice:
-        print(nbr[0], end=" ")
+        print(nbr.index, end=" ")
     else:
-        print(nbr[0], nbr[1], end=" ")
+        print(nbr.index, nbr.unitcellOffset, end=" ")

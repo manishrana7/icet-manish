@@ -23,17 +23,17 @@
     otherwise only i,j,k will be saved if i < j < k
 */
 
-std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pair<int, Vector3d>>>> ManybodyNeighborlist::build(const Neighborlist &nl, int index, int maxOrder, bool saveBothWays)
+std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> ManybodyNeighborlist::build(const Neighborlist &nl, int index, int maxOrder, bool saveBothWays)
 {
 
-    std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pair<int, Vector3d>>>> manybodyNeighborIndices;
+    std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> manybodyNeighborIndices;
     auto Ni = nl.getNeighbors(index);
     int numberOfSites = nl.size();
 
     int c = 2;
     Vector3d zeroVector = {0.0, 0.0, 0.0};
-    std::vector<std::pair<int, Vector3d>> currentOriginalNeighbors;
-    currentOriginalNeighbors.push_back(std::make_pair(index, zeroVector)); // index is always first index
+    std::vector<LatticeNeighbor> currentOriginalNeighbors;
+    currentOriginalNeighbors.push_back(LatticeNeighbor(index, zeroVector)); // index is always first index
 
     combineToHigherOrder(nl, manybodyNeighborIndices, Ni, currentOriginalNeighbors, c, saveBothWays, maxOrder);
     // }
@@ -47,15 +47,15 @@ std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pa
     what is saved is then i,j and N_ij up to the desired order "maxorder"
 */
 void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
-                                                std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pair<int, Vector3d>>>> &manybodyNeighborIndices,
-                                                const std::vector<std::pair<int, Vector3d>> &Ni, std::vector<std::pair<int, Vector3d>> &currentOriginalNeighbors, int order, bool saveBothWays, const int maxOrder)
+                                                std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &manybodyNeighborIndices,
+                                                const std::vector<LatticeNeighbor> &Ni, std::vector<LatticeNeighbor> &currentOriginalNeighbors, int order, bool saveBothWays, const int maxOrder)
 {
     NeighborPairCompare comp;
     for (const auto &j : Ni)
     {
         //if j is smaller than last added site then continue
         // if bothways = True then don't compare to first
-        if ((!saveBothWays && currentOriginalNeighbors.size() == 1) && comp(j, currentOriginalNeighbors.back()))
+        if ((!saveBothWays && currentOriginalNeighbors.size() == 1) && j < currentOriginalNeighbors.back())
         {
             continue;
         }
@@ -63,10 +63,10 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
         auto originalNeighborCopy = currentOriginalNeighbors;
         originalNeighborCopy.push_back(j); // put j in originalNeigbhors
 
-        auto Nj = nl.getNeighbors(j.first);
+        auto Nj = nl.getNeighbors(j.index);
 
         //translate the neighbors
-        translateAllNi(Nj, j.second);
+        translateAllNi(Nj, j.unitcellOffset);
 
         //exclude smaller neighbors
         const auto N_j_filtered = getFilteredNj(Nj, j);
@@ -91,12 +91,11 @@ Since N_j is always sorted then simply search for first k in N_j that have k>= j
 and then filtered are from indexof(k) to end()
 
 */
-std::vector<std::pair<int, Vector3d>> ManybodyNeighborlist::getFilteredNj(const std::vector<std::pair<int, Vector3d>> &N_j, const std::pair<int, Vector3d> &j) const
+std::vector<LatticeNeighbor> ManybodyNeighborlist::getFilteredNj(const std::vector<LatticeNeighbor> &N_j, const LatticeNeighbor &j) const
 {
-    NeighborPairCompare comp;
-    auto first = std::upper_bound(N_j.begin(), N_j.end(), j, comp);
+    auto first = std::upper_bound(N_j.begin(), N_j.end(), j);
 
-    std::vector<std::pair<int, Vector3d>> ret(first, N_j.end());
+    std::vector<LatticeNeighbor> ret(first, N_j.end());
     return ret;
 }
 
@@ -106,10 +105,10 @@ std::vector<std::pair<int, Vector3d>> ManybodyNeighborlist::getFilteredNj(const 
      offset j.offset with "unitCellOffset"
 
 */
-void ManybodyNeighborlist::translateAllNi(std::vector<std::pair<int, Vector3d>> &Ni, const Vector3d &unitCellOffset) const
+void ManybodyNeighborlist::translateAllNi(std::vector<LatticeNeighbor> &Ni, const Vector3d &unitCellOffset) const
 {
     for (auto &latNbr : Ni)
     {
-        latNbr.second += unitCellOffset;
+        latNbr.unitcellOffset += unitCellOffset;
     }
 }

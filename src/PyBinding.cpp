@@ -3,6 +3,7 @@
 #include "ManybodyNeighborlist.hpp"
 #include "Cluster.hpp"
 #include "PermutationMap.hpp"
+#include "LatticeNeighbor.hpp"
 #include <pybind11/pybind11.h>
 #include <iostream>
 #include <pybind11/eigen.h>
@@ -65,7 +66,14 @@ PYBIND11_PLUGIN(example)
      
      ;
 
+   py::class_<LatticeNeighbor>(m, "LatticeNeighbor")
+     .def(py::init<const int,const Vector3d &> ())
+     .def_readwrite("index", &LatticeNeighbor::index)
+     .def_readwrite("unitcellOffset", &LatticeNeighbor::unitcellOffset)
+     .def(py::self < py::self)     
+     ;
 
+     
 
 
     return m.ptr();
