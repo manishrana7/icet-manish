@@ -72,7 +72,7 @@ void Neighborlist::build(const Structure &conf)
                                 //     // std::cout<<find_vector[0]<<" "<<find_vector[1]<<" "<<find_vector[2]<<" | ";
                                 //     // std::cout<<extVector[0]<<" "<<extVector[1]<<" "<<extVector[2]<<" "<<std::endl;
                                 // }
-                                auto neighbor = std::make_pair(j, extVector);
+                                LatticeNeighbor neighbor = LatticeNeighbor(j, extVector);
                                 auto find_neighbor = std::find(_neighbors[i].begin(),_neighbors[i].end(), neighbor);
                                 if(find_neighbor == _neighbors[i].end())
                                 {
@@ -110,7 +110,7 @@ void Neighborlist::build(const Structure &conf)
     } // end n loop
     for(auto &nbr : _neighbors )
     {
-        std::sort(nbr.begin(), nbr.end(), NeighborPairCompare());
+        std::sort(nbr.begin(), nbr.end());
     }
 
 }

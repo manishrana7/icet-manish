@@ -8,6 +8,18 @@ using boost::hash_value;
 
 struct LatticeNeighbor
 {
+
+    LatticeNeighbor()
+    {
+        //empty constructor
+    }
+
+    LatticeNeighbor(const int newIndex, const Eigen::Vector3d newUnitcellOffset)
+    {
+        index = newIndex;
+        unitcellOffset = newUnitcellOffset;
+    }   
+
     int index;
     Eigen::Vector3d unitcellOffset;
     bool operator<(const LatticeNeighbor &other) const

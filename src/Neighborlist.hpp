@@ -7,6 +7,7 @@
 #include <utility>
 #include <string>
 #include "Structure.hpp"
+#include "LatticeNeighbor.hpp"
 
 using namespace Eigen;
 
@@ -19,7 +20,7 @@ Builds a (pair) neighborlist for each lattice site
 
 class Neighborlist
 {
-    public:
+  public:
     Neighborlist(const double);
     void build(const Structure &);
     void update(const Structure &);
@@ -27,18 +28,18 @@ class Neighborlist
     // {
     //     return std::make_pair( latticeIndices[index], offsets[index]);
     // }
-    std::vector<std::pair<int, Vector3d>> getNeighbors(int index) const
+    std::vector<LatticeNeighbor> getNeighbors(int index) const
     {
         return _neighbors[index];
     }
     ///Check if index1 and index2 are neighbors
-    bool isNeighbor(const int index1, const int index2,const Vector3d offset) const
+    bool isNeighbor(const int index1, const int index2, const Vector3d offset) const
     {
-        for(const auto &nbr : _neighbors[index1])
+        for (const auto &nbr : _neighbors[index1])
         {
-            if( nbr.first == index2 ) // index are the same
+            if (nbr.index == index2) // index are the same
             {
-                if( nbr.second == offset) // are the offsets equal?
+                if (nbr.unitcellOffset == offset) // are the offsets equal?
                 {
                     return true;
                 }
@@ -47,14 +48,15 @@ class Neighborlist
         return false;
     }
 
-     size_t size() const
+    size_t size() const
     {
         return _neighbors.size();
     }
-    private:
+
+  private:
     std::vector<std::vector<int>> latticeIndices;
     std::vector<std::vector<Vector3d>> offsets;
-    std::vector<std::vector<std::pair<int,Vector3d>>> _neighbors;        
+    std::vector<std::vector<LatticeNeighbor>> _neighbors;
     double _cutoff;
     double DISTTOL = 1e-7;
 };
