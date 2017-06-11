@@ -25,10 +25,10 @@ for index in range(len(atoms)):
     neighbors = nl.get_neighbors(index)
     print("Neighbors of atom with index {}".format(index))
     for neighbor in neighbors:
-        neighbor_index = neighbor[0]
-        neighbor_offset = neighbor[1]
+        neighbor_index = neighbor.index
+        neighbor_offset = neighbor.unitcellOffset
         distance_to_neighbor = structure.get_distance2(
-            index, [0, 0, 0], neighbor[0], neighbor[1])
+            index, [0, 0, 0], neighbor.index, neighbor.unitcellOffset)
         print("{0} {1} {2:1.5f}".format(neighbor_index,
                                         neighbor_offset, distance_to_neighbor))
     print("")
