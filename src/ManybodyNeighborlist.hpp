@@ -22,11 +22,11 @@ class ManybodyNeighborlist
         //empty...
     }
 
-    std::vector<std::pair<std::vector<std::pair<int, Vector3d>>,  std::vector<std::pair<int, Vector3d>>>> build(const Neighborlist &nl, int index, int order,bool);
+    std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pair<int, Vector3d>>>> build(const Neighborlist &nl, int index, int order, bool);
 
-    void combineToHigherOrder(const Neighborlist &nl, 
-                                 std::vector<std::pair<std::vector<std::pair<int, Vector3d>>,  std::vector<std::pair<int, Vector3d>>>> &manybodyNeighborIndex,
-                                  const std::vector<std::pair<int, Vector3d>> &Ni,std::vector<std::pair<int, Vector3d>> &currentOriginalNeighbrs,  int order, bool saveBothWays,const int maxOrder);
+    void combineToHigherOrder(const Neighborlist &nl,
+                              std::vector<std::pair<std::vector<std::pair<int, Vector3d>>, std::vector<std::pair<int, Vector3d>>>> &manybodyNeighborIndex,
+                              const std::vector<std::pair<int, Vector3d>> &Ni, std::vector<std::pair<int, Vector3d>> &currentOriginalNeighbrs, int order, bool saveBothWays, const int maxOrder);
 
     std::vector<std::pair<int, Vector3d>> getIntersection(const std::vector<std::pair<int, Vector3d>> &Ni, const std::vector<std::pair<int, Vector3d>> &Nj)
     {
@@ -39,11 +39,9 @@ class ManybodyNeighborlist
         return N_intersection;
     }
 
-    void translateAllNi(std::vector<std::pair<int, Vector3d>> &Ni, const Vector3d &unitCellOffset) const ;
+    void translateAllNi(std::vector<std::pair<int, Vector3d>> &Ni, const Vector3d &unitCellOffset) const;
 
   private:
     std::vector<double> _cutoffs;
     std::vector<std::pair<int, Vector3d>> getFilteredNj(const std::vector<std::pair<int, Vector3d>> &, const std::pair<int, Vector3d> &) const;
-
- 
 };

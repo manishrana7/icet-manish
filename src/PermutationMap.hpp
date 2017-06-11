@@ -25,6 +25,7 @@ class PermutationMap
         symprec = 1e-5;
     }
 
+    ///Build the permutationmap usng the input positions
     void build(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &positions);
 
     std::vector<std::vector<Vector3d>> getPermutatedPositions()
@@ -33,8 +34,7 @@ class PermutationMap
     }
 
     /**
-
-     Returns indices for unique positions,
+     Returns indices for unique positions as well as the representative positions,
      same indices share the same indice
 
     */
@@ -70,6 +70,11 @@ class PermutationMap
     std::vector<Matrix3d> _rotations;
     std::vector<std::vector<Vector3d>> _permutatedPositions;
 
+    /** 
+    Help function to round a Vector3d for easier comparing the transmutated positions
+
+    @TODO: move this outside the class into some type of support/tools collection
+    */
     void roundVector3d(Vector3d &vec3d)
     {
         vec3d[0] = round(vec3d[0] * 1.0 / symprec) / (1.0 / symprec);

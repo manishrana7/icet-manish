@@ -20,9 +20,16 @@ Structure::Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &pos,
     _pbc = pbc;
 }
 
+/**
+
+Returns the distance between two indices with MIC = false
+@todo:  add  mic functionality
+
+*/
+
 double Structure::getDistance(const int index1, const int index2) const
 {
-    //bool mic = false; ///@todo:  add  mic functionality
+    
 
     if (index1 >= _positions.rows() or index2 >= _positions.rows())
     {

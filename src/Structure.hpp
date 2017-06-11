@@ -79,6 +79,15 @@ class Structure
         return _cell;
     }
 
+    size_t size() const
+    {
+        if (_elements.size() != _positions.rows())
+        {
+            throw std::out_of_range("Error: Positions and elements do not match in size");
+        }        
+        return( _elements.size());
+    }    
+
   private:
     Eigen::Matrix<double, Dynamic, 3, RowMajor> _positions;
     Eigen::Matrix3d _cell;

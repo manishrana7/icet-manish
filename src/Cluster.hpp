@@ -16,6 +16,12 @@ namespace py = pybind11;
 class Cluster
 {
   public:
+    Cluster()
+    {
+        //empty constructor
+    }
+
+    
     Cluster(std::vector<int> &sites, std::vector<double> &distances)
     {
         _sites = sites;
