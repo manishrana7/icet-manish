@@ -25,8 +25,8 @@ neighbors = nl.get_neighbors(1)
 indices = []
 offsets = []
 for nbr in neighbors:
-    indices.append(nbr[0])
-    offsets.append(nbr[1])
+    indices.append(nbr.index)
+    offsets.append(nbr.unitcellOffset)
     
 """
 For debugging
