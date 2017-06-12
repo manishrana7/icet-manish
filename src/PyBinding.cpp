@@ -4,6 +4,7 @@
 #include "Cluster.hpp"
 #include "PermutationMap.hpp"
 #include "LatticeNeighbor.hpp"
+#include "ClusterCounts.hpp"
 #include <pybind11/pybind11.h>
 #include <iostream>
 #include <pybind11/eigen.h>
@@ -23,6 +24,9 @@ PYBIND11_PLUGIN(example)
         .def("set_positions", &Structure::setPositions)
         .def("set_elements", &Structure::setElements)
         .def("get_elements", &Structure::getElements)
+        .def("set_unique_sites", &Structure::setUniqueSites)
+        .def("get_unique_sites", &Structure::getUniqueSites)        
+        .def("get_unique_site", &Structure::getSite)        
         .def("get_positions", &Structure::getPositions)
         .def("get_distance", &Structure::getDistance)
         .def("get_distance2", &Structure::getDistance2)
@@ -31,6 +35,7 @@ PYBIND11_PLUGIN(example)
         .def("set_pbc", &Structure::set_pbc)
         .def("get_cell", &Structure::get_cell)
         .def("set_cell", &Structure::set_cell)        
+        .def("size", &Structure::size)        
         ;
 
     
@@ -54,6 +59,8 @@ PYBIND11_PLUGIN(example)
      .def("get_count", &Cluster::getCount)
      .def("get_sites", &Cluster::getSites)
      .def("get_distances", &Cluster::getDistances)
+     .def("print", &Cluster::print)
+
      .def(py::self < py::self)
      ;
 
@@ -73,6 +80,13 @@ PYBIND11_PLUGIN(example)
      .def(py::self < py::self)     
      ;
 
+   py::class_<ClusterCounts>(m, "ClusterCounts")
+     .def(py::init<> ())
+     .def("count_lattice_neighbors", &ClusterCounts::countLatticeNeighbors)
+     .def("reset", &ClusterCounts::reset)
+     .def("get_cluster_counts",&ClusterCounts::getClusterCounts)
+     .def("print", &ClusterCounts::print)
+     ;
      
 
 

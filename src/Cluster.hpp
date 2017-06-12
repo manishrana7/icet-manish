@@ -152,7 +152,19 @@ class Cluster
     friend bool operator==(const Cluster &c1, const Cluster &c2)
     {
         ///@TODO: Think if this is enough
-        return( c1 < c2 && c2 < c1);
+        if (c1._sites != c2._sites)
+        {
+            return false;
+        }
+        if(c1._distances != c2._distances)
+        {
+            return false;
+        }
+        return true;
+    
+        
+
+        //return( c1 < c2 && c2 < c1);
     }
 
 
@@ -197,6 +209,20 @@ class Cluster
 
         //4) if we are here then everything is equal so return false
         return false;
+    }
+
+    void print() const
+    {
+        for(const auto d : _distances)
+        {
+            std::cout<<d<<" ";
+        }
+        std::cout<< " : ";
+        for(const auto s : _sites)
+        {
+            std::cout<<s<<" ";
+        }
+        std::cout<<std::endl;
     }
 
   private:

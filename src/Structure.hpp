@@ -73,7 +73,10 @@ class Structure
     {
         if ( i >= _elements.size())
         {
-            throw std::out_of_range("Error: out of range in function getSite");
+            std::string errorMessage = "Error: out of range in function get element:index : elements.size()  _elements.size() ";
+            errorMessage += std::to_string(i) + " : ";
+            errorMessage += std::to_string(_elements.size());
+            throw std::out_of_range(errorMessage);
         }        
 
         return _elements[i];
@@ -85,7 +88,7 @@ class Structure
         _uniqueSites = sites;
     }
 
-    std::vector<int> geUniqueSites() const
+    std::vector<int> getUniqueSites() const
     {
         return _uniqueSites;
     }
@@ -94,7 +97,11 @@ class Structure
     {
        if ( i >= _uniqueSites.size())
         {
-            throw std::out_of_range("Error: out of range in function getSite");
+            std::string errorMessage = "Error: out of range in function getSite : index :  _uniqueSites.size() ";
+            errorMessage += std::to_string(i) + " : ";
+            errorMessage += std::to_string(_uniqueSites.size());
+
+            throw std::out_of_range(errorMessage);
         }        
         return _uniqueSites[i];
 

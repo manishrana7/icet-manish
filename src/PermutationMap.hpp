@@ -81,6 +81,5 @@ class PermutationMap
         vec3d[1] = round(vec3d[1] * 1.0 / symprec) / (1.0 / symprec);
         vec3d[2] = round(vec3d[2] * 1.0 / symprec) / (1.0 / symprec);
     }
-
     double symprec;
 };

@@ -26,7 +26,7 @@ void ClusterCounts::countLatticeNeighbors(const Structure &structure,
         //pair.first == the base indices and pair.second is all indices that form clusters with the base indices
         for (const auto &combinationIndice : neighborPair.second)
         {
-            auto latticePointsForCluster = neighborPair.second;
+            auto latticePointsForCluster = neighborPair.first;
             latticePointsForCluster.push_back(combinationIndice);
             count(structure, latticePointsForCluster);
         }
@@ -47,16 +47,17 @@ void ClusterCounts::count(const Structure &structure,
     distances.reserve((clusterSize * (clusterSize - 1) / 2));
     for (size_t i = 0; i < latticeNeighbors.size(); i++)
     {
-        sites[i] = structure.getSite(i);
-        elements[i] = structure.getElement(i);
-        for (size_t j = i; j < latticeNeighbors.size(); j++)
+        sites[i] = structure.getSite(latticeNeighbors[i].index);
+        elements[i] = structure.getElement(latticeNeighbors[i].index);
+        for (size_t j = i+1; j < latticeNeighbors.size(); j++)
         {
-            distances.push_back(structure.getDistance2(latticeNeighbors[i].index,
-                                                    latticeNeighbors[i].unitcellOffset,
-                                                    latticeNeighbors[j].index,
-                                                    latticeNeighbors[j].unitcellOffset));
+            distances.push_back(roundDouble(structure.getDistance2(latticeNeighbors[i].index,
+                                                                   latticeNeighbors[i].unitcellOffset,
+                                                                   latticeNeighbors[j].index,
+                                                                   latticeNeighbors[j].unitcellOffset)));
         }
     }
     Cluster cluster = Cluster(sites, distances);
+    //cluster.print();
     _clusterCounts[cluster][elements] += 1;
 }

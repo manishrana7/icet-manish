@@ -10,3 +10,4 @@ from .neighborlist import *
 from .manybodyNeighborlist import *
 from .cluster import *
 from .permutationMap import *
+from .clusterCounts import *
