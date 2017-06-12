@@ -7,10 +7,10 @@ atoms.set_chemical_symbols([['Al','Cu'][n] for n in np.round(np.random.random((l
 
 clusterCounts = ClusterCounts()
 
-clusterCounts.count_clusters(atoms=atoms,cutoffs=[10.0, 5.0, 5.0])
+clusterCounts.count_clusters(atoms=atoms,cutoffs=[8, 8.0,8,8])
 
 
-clusterCounts.print()
+#clusterCounts.print()
 #cluster_count_map = clusterCounts.get_cluster_counts()
 
 #for cluster in cluster_count_map:
