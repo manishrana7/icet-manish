@@ -9,9 +9,26 @@
 #include <map>
 #include <unordered_map>
 #include <algorithm>
+
+
+#include <boost/functional/hash.hpp>
+using boost::hash;
+using boost::hash_combine;
+using boost::hash_value;
+
+
 using namespace Eigen;
 
 namespace py = pybind11;
+
+
+
+
+
+
+
+
+
 
 class Cluster
 {
@@ -132,6 +149,13 @@ class Cluster
         }
     }
 
+    friend bool operator==(const Cluster &c1, const Cluster &c2)
+    {
+        ///@TODO: Think if this is enough
+        return( c1 < c2 && c2 < c1);
+    }
+
+
     // comparison operator for sortable clusters
     friend bool operator<(const Cluster &c1, const Cluster &c2)
     {
@@ -180,3 +204,36 @@ class Cluster
     std::vector<double> _distances;
     std::map<std::vector<int>, int> _element_counts;
 };
+
+
+
+
+
+
+namespace std
+{
+template <>
+struct hash<Cluster>
+{
+    size_t
+    operator()(const Cluster &k) const
+    {
+
+        // Compute individual hash values for first,
+        // second and third and combine them using XOR
+        // and bit shifting:
+        size_t seed = 0;        
+
+        for(const auto &distance : k.getDistances())
+        {
+            hash_combine(seed, hash_value(distance));
+        }
+        for(const auto &site : k.getSites())
+        {
+            hash_combine(seed, hash_value(site));
+        }        
+        return seed;
+    }
+};
+
+}

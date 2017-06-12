@@ -15,9 +15,10 @@ Structure::Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &pos,
                      const std::vector<bool> &pbc)
 {
     setPositions(pos);
-    setElements(elements);
+    setStrElements(elements);    
     _cell = cell;
     _pbc = pbc;
+    _uniqueSites.resize(elements.size());
 }
 
 /**

@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <string>
+#include "PeriodicTable.hpp"
 using namespace Eigen;
 
 namespace py = pybind11;
@@ -47,15 +48,58 @@ class Structure
         return _positions;
     }
 
-    void setElements(const std::vector<std::string> &elements)
+    void setStrElements(const std::vector<std::string> &elements)
+    {
+        _strelements = elements;
+        setElements(convertStrElements(_strelements));
+    }
+
+    std::vector<std::string> getStrElements() const
+    {
+        return _strelements;
+    }
+
+    void setElements(const std::vector<int> &elements)
     {
         _elements = elements;
     }
 
-    std::vector<std::string> getElements() const
+    std::vector<int> getElements() const
     {
         return _elements;
     }
+
+    int getElement(const size_t i) const
+    {
+        if ( i >= _elements.size())
+        {
+            throw std::out_of_range("Error: out of range in function getSite");
+        }        
+
+        return _elements[i];
+    }
+
+
+    void setUniqueSites(const std::vector<int> &sites)
+    {
+        _uniqueSites = sites;
+    }
+
+    std::vector<int> geUniqueSites() const
+    {
+        return _uniqueSites;
+    }
+    
+    int getSite(const size_t i) const
+    {
+       if ( i >= _uniqueSites.size())
+        {
+            throw std::out_of_range("Error: out of range in function getSite");
+        }        
+        return _uniqueSites[i];
+
+    }
+
     bool has_pbc(const int k) const
     {
         return _pbc[k];
@@ -91,6 +135,32 @@ class Structure
   private:
     Eigen::Matrix<double, Dynamic, 3, RowMajor> _positions;
     Eigen::Matrix3d _cell;
-    std::vector<std::string> _elements;
+    std::vector<int> _elements;
+    std::vector<std::string> _strelements;
     std::vector<bool> _pbc;
+    std::vector<int> _uniqueSites;
+
+std::vector<int> convertStrElements( const std::vector<std::string> &elements) 
+{
+    std::vector<int> intElements(elements.size());
+    for (int i = 0; i < elements.size(); i++)
+    {
+        intElements[i] = PeriodicTable::strInt[elements[i]];
+    }
+    return intElements;
+}
+
+std::vector<std::string> convertIntElements( const std::vector<int> &elements) 
+{
+    std::vector<std::string> strElements(elements.size());
+    for (int i = 0; i < elements.size(); i++)
+    {
+        strElements[i] = PeriodicTable::intStr[elements[i]];
+    }
+    return strElements;
+}
+
+
+
+
 };

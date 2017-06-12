@@ -15,7 +15,7 @@
 /**
 
 Counts clusters given this compact form of latticeneighbors (see ManybodyNeighborlist for more details)
-*/ 
+*/
 // build(const Neighborlist &nl, int index, int order, bool);
 void ClusterCounts::countLatticeNeighbors(const Structure &structure,
                                           const std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &latticeNeighbors)
@@ -40,7 +40,23 @@ Get the indice of one set of indices and counts this
 void ClusterCounts::count(const Structure &structure,
                           const std::vector<LatticeNeighbor> &latticeNeighbors)
 {
-
-Cluster cluster;
-
+    size_t clusterSize = latticeNeighbors.size();
+    std::vector<int> sites(clusterSize);
+    std::vector<double> distances;
+    std::vector<int> elements(clusterSize);
+    distances.reserve((clusterSize * (clusterSize - 1) / 2));
+    for (size_t i = 0; i < latticeNeighbors.size(); i++)
+    {
+        sites[i] = structure.getSite(i);
+        elements[i] = structure.getElement(i);
+        for (size_t j = i; j < latticeNeighbors.size(); j++)
+        {
+            distances.push_back(structure.getDistance2(latticeNeighbors[i].index,
+                                                    latticeNeighbors[i].unitcellOffset,
+                                                    latticeNeighbors[j].index,
+                                                    latticeNeighbors[j].unitcellOffset));
+        }
+    }
+    Cluster cluster = Cluster(sites, distances);
+    _clusterCounts[cluster][elements] += 1;
 }

@@ -64,7 +64,7 @@ struct LatticeNeighbor
     }
 };
 
-#include <boost/functional/hash.hpp>
+
 
 namespace std
 {

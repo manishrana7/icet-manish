@@ -1,7 +1,7 @@
 #pragma once
 #include <pybind11/pybind11.h>
 #include <iostream>
-#include <unordered_map>
+#include <unordered_set>
 #include <pybind11/eigen.h>
 #include <Eigen/Dense>
 #include <vector>
@@ -27,5 +27,6 @@ class ClusterCounts
     void count(const Structure &,
                const std::vector<LatticeNeighbor> &);
   private:
+  std::unordered_map<Cluster, std::map<std::vector<int>, int>> _clusterCounts;
     
 };
