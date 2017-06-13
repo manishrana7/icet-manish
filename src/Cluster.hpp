@@ -34,11 +34,15 @@ class Cluster
         sortCluster();
     }
 
+
+    //counts the elements
     void count(const std::vector<int> &elements)
     {
         _element_counts[elements]++;
     }
 
+
+    //get count of a specific element vector
     int getCount(const std::vector<int> &elements) const
     {
         const auto find = _element_counts.find(elements);
@@ -51,17 +55,27 @@ class Cluster
             return _element_counts.at(elements);
         }
     }
-
+    //return the unique sites
     std::vector<int> getSites() const
     {
         return _sites;
     }
 
+    //return the cluster distances
     std::vector<double> getDistances() const
     {
         return _distances;
     }
 
+
+    /**
+    Sorts the clusters internal sites and corresponding distances 
+    so it is in the lowest form possible.
+
+    This enables sorting and uniqueness of clusters since you can easily compare it using
+    the defined compare and equal function.
+    
+    */
     void sortCluster()
     {
         std::vector<std::pair<std::vector<std::pair<double,int>>, std::pair<int, int>>> first_dists;
@@ -75,39 +89,63 @@ class Cluster
         std::vector<int> minimumOrder(_sites.size());
         int min_index_count = 0;
 
-        //minimumOrder[min_index_count++] = first_dists[0].first[0].second; //first min index
-        // first_dists[0] = std::pair<std::vector<std::pair<double,int>>, std::pair<int, int>>
-        // first_dists[0].first = std::vector<std::pair<double,int>
 
         minimumOrder[min_index_count++] = first_dists[0].second.second;
-        // std::cout<<" distance,int ("<<first_dists[0].second.second<< ")";
+        
         for(const auto &dist_pair : first_dists[0].first)
         {
-            minimumOrder[min_index_count++] = dist_pair.second;
-            // std::cout<< "( "<< dist_pair.first<< " : "<< dist_pair.second<< " )";
+            minimumOrder[min_index_count++] = dist_pair.second;        
         }
-        // std::cout<< std::endl;
+        
 
         if(minimumOrder.size() != _sites.size())
         {
             throw("Error minimumorder.size != _sites.size()");
         }
-        // for (const auto &dist_pair_pair : first_dists)
-        // {
-        //     minimumOrder[min_index_count++] = dist_pair_pair.second.second;
-        // }
-
-
 
         setThisOrder(minimumOrder);
         if( _distances[0] != first_dists[0].first[0].first)
         {
-            // std::cout<<"error distances not as expected, expected: "
-            //          <<first_dists[0].first[0].first<< ". Gotten: "
-            //          << _distances[0]<<std::endl;
+             std::cout<<"error distances not as expected, expected: "
+                      <<first_dists[0].first[0].first<< ". Gotten: "
+                      << _distances[0]<<std::endl;
+            throw("Error first dist is not the expected first dist");
         }
     }
 
+    /**
+    Rearranges distances and sites to the order given in minimumOrder
+
+    example:
+    -------
+    minimumOrder[0] = current index which should be first place
+    minimumOrder[1] = current index which should be second place
+    and so on ... 
+
+    This is a slightly non trivial operation since swapping two sites changes 
+    the order of the distances in a complex way.
+
+    The distances are ordered by:
+     d_12, d_13, d_14, ... , d_23, d_24, ...
+
+
+     solution:
+     ---------
+     The algorithm creates a vector of tuples with i, j, distance
+
+     the current state is: 1, 2, d_12
+                           1, 3, d_13
+
+    
+    which is then mapped to:
+                           minOrder.index_of(1), minOrder.index_of(2), d_12
+                           minOrder.index_of(1), minOrder.index_of(3), d_13
+
+
+    where minOrder.index_of(1) = index of 1 in minOrder.
+    this vector is then sorted and the positions will align to the new order.
+
+    */
     void setThisOrder(const std::vector<int> &minimumOrder)
     {
         //swap sites        
@@ -141,15 +179,18 @@ class Cluster
                 dist_indices.push_back(std::make_tuple(first, second, _distances[counter++]));
             }
         }
-
+        //debugging cout
         // std::cout<<"set this order before: "<<std::endl;
         // for(const auto tup : dist_indices)
         // {
         //     std::cout<<std::get<0>(tup)<< " "<<std::get<1>(tup)<< " "<<std::get<2>(tup)<<std::endl;
         // }
 
+
+        //sort to get the new order of dists
         std::sort(dist_indices.begin(), dist_indices.end());
 
+        //debugging cout
         // std::cout<<"set this order after sort: "<<std::endl;
         // for(const auto tup : dist_indices)
         // {
@@ -166,7 +207,7 @@ class Cluster
     /*
     Get all dists that origin from site i
 
-    Sorted double vector
+    Returns a sorted double (distances) vector
     */
     std::vector<std::pair<double,int>> getDistsToSite(int i)
     {
@@ -311,6 +352,10 @@ class Cluster
         return false;
     }
 
+
+    /**
+    
+    */
     void print() const
     {
         for (const auto d : _distances)
