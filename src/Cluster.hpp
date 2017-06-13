@@ -23,7 +23,7 @@ class Cluster
 {
   public:
     Cluster()
-    {        
+    {
         //empty constructor
     }
 
@@ -128,34 +128,292 @@ class Cluster
         }
         //ordering
         std::sort(first_dists.begin(), first_dists.end());
-        std::vector<int> minimumOrder(_sites.size());
-        int min_index_count = 0;
 
-        minimumOrder[min_index_count++] = first_dists[0].second.second;
+        std::vector<int> minimumOrder = getOrderFromFirstDists(first_dists[0]);
+        // int min_index_count = 0;
 
-        for (const auto &dist_pair : first_dists[0].first)
-        {
-            minimumOrder[min_index_count++] = dist_pair.second;
-        }
+        // minimumOrder[min_index_count++] = first_dists[0].second.second;
+
+        // for (const auto &dist_pair : first_dists[0].first)
+        // {
+        //     minimumOrder[min_index_count++] = dist_pair.second;
+        // }
 
         if (minimumOrder.size() != _sites.size())
         {
             throw("Error minimumorder.size != _sites.size()");
         }
 
-        auto min_data = case2_min_indices(minimumOrder[0],first_dists[0].first);
-        _distances = std::get<1>(min_data);
-        _sites = std::get<2>(min_data);
-        //setThisOrder(minimumOrder);
-        if (_distances[0] != first_dists[0].first[0].first)
+        std::vector<double> min_distance;
+        std::vector<int> min_sites;
+
+        //check if we have case 1
+        //if not we do case 2 (both a check and a doer)
+
+        auto equal_minimum_first_sites = getEqual_minimum_first_sites(first_dists);
+        if (equal_minimum_first_sites.size() > 1)
         {
-            std::cout << "error distances not as expected, expected: "
-                      << first_dists[0].first[0].first << ". Gotten: "
-                      << _distances[0] << std::endl;
-            throw("Error first dist is not the expected first dist");
+            std::cout<<"case 1"<<std::endl;
+            auto case1_data = case1_min_indices(equal_minimum_first_sites);
+            min_distance = std::get<1>(case1_data);
+            min_sites = std::get<2>(case1_data);
         }
+        else
+        {
+            std::cout<<"case 2"<<std::endl;
+            ///Do case 2
+            auto min_data = case2_min_indices(minimumOrder[0], first_dists[0].first);
+            min_distance = std::get<1>(min_data);
+            min_sites = std::get<2>(min_data);
+        }
+
+   
+        /// some validation of algorithm and debugging
+        // auto original_distance_copy = _distances;
+        // std::sort(min_distance.begin(), min_distance.end());
+        // std::sort(original_distance_copy.begin(), original_distance_copy.end());
+        // for (int i = 0; i < original_distance_copy.size(); i++)
+        // {
+        //     if (original_distance_copy[i] != min_distance[i])
+        //     {
+        //         std::cout << "error: the distances havee been changed (Not only order)" << std::endl;
+        //         throw std::runtime_error("error: the distances havee been changed (Not only order)");
+        //     }
+        // }
+        _distances = min_distance;
+        _sites = min_sites;
+
+        validateSorting();
+        //setThisOrder(minimumOrder);
+        // for (int i = 0; i < first_dists[0].first.size(); i++)
+        // {
+        //     if (_distances[i] != first_dists[0].first[i].first)
+        //     {
+        //         std::cout << "error distances not as expected, expected: "
+        //                   << first_dists[0].first[i].first << ". Gotten: "
+        //                   << _distances[i] << std::endl;
+        //         throw std::runtime_error("Error first dist is not the expected first dist");
+        //     }
+        // }
+    }
+  
+
+
+    /**
+    Bruteforce attempt to find minumum cluster
+    */
+    std::tuple<std::vector<int>, std::vector<double>, std::vector<int>> getMinimumStateBruteForce()
+    {
+
+        std::vector<int> atomic_order(_sites.size());
+        for (int i = 0; i < atomic_order.size(); i++)
+        {
+            atomic_order[i] = i;
+        }
+        auto min_order = atomic_order;
+        auto min_dists = getReorderedDistances(atomic_order);
+        auto min_sites = getReorderedSites(atomic_order);
+
+        do
+        {
+            auto dists = getReorderedDistances(atomic_order);
+            auto sites = getReorderedSites(atomic_order);
+            if (compare_sites_dists(dists, sites, min_dists, min_sites))
+            {
+                min_dists = dists;
+                min_sites = sites;
+                min_order = atomic_order;
+            }
+
+        } while (std::next_permutation(atomic_order.begin(), atomic_order.end()));
+
+        return std::make_tuple(min_order, min_dists, min_sites);
     }
 
+  /**
+    This validates the sorting by testing all possible 
+    combinations of sites and sees if there is a lower state of the cluster.
+
+    */
+    void validateSorting()
+    {
+
+        auto minBruteForce = getMinimumStateBruteForce();
+        auto bruteForceDists = std::get<1>(minBruteForce);
+        auto bruteForceSites = std::get<2>(minBruteForce);
+
+        if(compare_sites_dists(bruteForceDists,bruteForceSites, _distances, _sites) )
+        {
+            for(auto d : bruteForceDists){std::cout<<d<< " ";}
+            std::cout<<std::endl;
+            for(auto d : bruteForceSites){std::cout<<d<< " ";}
+            std::cout<<std::endl;
+            for(auto d : _distances){std::cout<<d<< " ";}
+            std::cout<<std::endl;
+            for(auto d : _sites){std::cout<<d<< " ";}
+            std::cout<<std::endl;
+            throw std::runtime_error("ERror: brute force found a smaller");
+        }
+
+    }
+
+    /**
+    Get all equal first_dists that are identical to the minimum one
+    By equality one mean that all distances and sites are equalr
+    
+    */
+    std::vector<std::pair<std::vector<std::pair<double, int>>, std::pair<int, int>>> getEqual_minimum_first_sites(
+        const std::vector<std::pair<std::vector<std::pair<double, int>>, std::pair<int, int>>> &first_dists) const
+    {
+        std::vector<std::pair<std::vector<std::pair<double, int>>, std::pair<int, int>>> equalFirstDists;
+        equalFirstDists.push_back(first_dists[0]);
+        int first_index_site = _sites[equalFirstDists[0].second.second];
+        for (int i = 1; i < first_dists.size(); i++)
+        {
+            int this_site = _sites[first_dists[i].second.second];
+            if (first_index_site == this_site && isEqualFirstDists(equalFirstDists[0].first, first_dists[i].first))
+            {
+                equalFirstDists.push_back(first_dists[i]);
+            }
+            else
+            {
+                break;
+            }
+        }
+        return equalFirstDists;
+    }
+
+    /**
+   Returns true if dist_index1 is equal to dist_index2
+
+   THe hitch is that dist_index1[i].second is a index in the cluster and has to be checked what site is on that
+   index when comparing
+
+   */
+    bool isEqualFirstDists(const std::vector<std::pair<double, int>> &dist_index1, const std::vector<std::pair<double, int>> &dist_index2) const
+    {
+        for (int i = 0; i < dist_index1.size(); i++)
+        {
+            if (!(dist_index1[i].first == dist_index2[i].first && _sites[dist_index1[i].second] == _sites[dist_index2[i].second]))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+
+
+    Arguments:
+        equal_minimum_first_dists
+        a vector of all the minimum first dists
+    Do case 1: 
+        solutions case 1:
+        1) assume case2 and case3 is not active.
+            a) get "getDistIndices" and getReorderedSites for each case
+            b) compare to each other. The lowest should be the one to use
+        2) if case2 is active also:
+           a )for each smallest i_dist:
+                get solution from case 2
+            b) compare case2 solutions of i_dist to find minimum.
+
+    */
+
+    std::tuple<std::vector<int>, std::vector<double>, std::vector<int>> case1_min_indices(const std::vector<std::pair<std::vector<std::pair<double, int>>, std::pair<int, int>>> &equal_minimum_first_dists) const
+    {
+        //Only one minimum dists..
+        std::vector<std::pair<double, int>> minimum_dists;
+        for (const auto &pair_index : equal_minimum_first_dists[0].first)
+        {
+            minimum_dists.push_back(std::make_pair(pair_index.first, _sites[pair_index.second]));
+        }
+
+        std::vector<double> min_distances;
+        std::vector<int> min_sites;
+        std::vector<int> min_order;
+        if (isCase2(minimum_dists))
+        {
+            auto case_2_solution_first = case2_min_indices(equal_minimum_first_dists[0].second.second, equal_minimum_first_dists[0].first);
+
+            min_order = std::get<0>(case_2_solution_first);
+            min_distances = std::get<1>(case_2_solution_first);
+            min_sites = std::get<2>(case_2_solution_first);
+            //get first solution for comparing:
+            //note that we begin on 1 since we did first manually
+            for (int i = 1; i < equal_minimum_first_dists.size(); i++)
+            {
+                //case2_min_indices(const int i_index, const std::vector<std::pair<double, int>> &i_dist)
+                auto case_2_solution = case2_min_indices(equal_minimum_first_dists[i].second.second, equal_minimum_first_dists[i].first);
+
+                auto min_order_trial = std::get<0>(case_2_solution);
+                auto min_distances_trial = std::get<1>(case_2_solution);
+                auto min_sites_trial = std::get<2>(case_2_solution);
+                if (compare_sites_dists(min_distances_trial, min_sites_trial, min_distances, min_sites))
+                {
+                    min_order = min_order_trial;
+                    min_distances = min_distances_trial;
+                    min_sites = min_sites_trial;
+                }
+            }
+        }
+        else
+        {
+
+            min_order = getOrderFromFirstDists(equal_minimum_first_dists[0]);
+            min_distances = getReorderedDistances(min_order);
+            min_sites = getReorderedSites(min_order);
+            for (int i = 1; i < equal_minimum_first_dists.size(); i++)
+            {
+                auto min_order_trial = getOrderFromFirstDists(equal_minimum_first_dists[i]);
+                {
+                    auto min_order_trial = getOrderFromFirstDists(equal_minimum_first_dists[i]);
+                    auto min_distances_trial = getReorderedDistances(min_order_trial);
+                    auto min_sites_trial = getReorderedSites(min_order_trial);
+
+                    if (compare_sites_dists(min_distances_trial, min_sites_trial, min_distances, min_sites))
+                    {
+                        min_order = min_order_trial;
+                        min_distances = min_distances_trial;
+                        min_sites = min_sites_trial;
+                    }
+                }
+            }
+        }
+        return std::make_tuple(min_order, min_distances, min_sites);
+    }
+
+    /**
+    Gets the min order of indices as given by this "first dists"
+
+    this format is used throughout this code to simpler extract the indices from a given first dist (i_dists)
+
+    The format is 
+    first_dists.first = a vector of distances and indices to the corresponding site the distance is to
+    first_dists.second.first = the site of this index
+    first_dists.second.second the index of this first_dists, i.e. the i in i_dists
+    */
+
+    std::vector<int> getOrderFromFirstDists(const std::pair<std::vector<std::pair<double, int>>, std::pair<int, int>> &first_dists) const
+    {
+        std::vector<int> minOrder(_sites.size());
+
+        int counter = 0;
+        minOrder[counter++] = first_dists.second.second;
+        for (const auto &dist_index_pair : first_dists.first)
+        {
+            minOrder[counter++] = dist_index_pair.second;
+        }
+        return minOrder;
+    }
+    /** 
+        Checks if these distance, sites vector has some equal elements 
+         and is thus subject to case2
+    */
+    bool isCase2(const std::vector<std::pair<double, int>> &first_dists) const
+    {
+        return std::adjacent_find(first_dists.begin(), first_dists.end()) == first_dists.end();
+    }
     /**
     Rearranges distances and sites to the order given in minimumOrder
 
@@ -190,8 +448,8 @@ class Cluster
 
     */
     void setThisOrder(const std::vector<int> &minimumOrder)
-    {        
-        _sites = getReorderedSites(minimumOrder); 
+    {
+        _sites = getReorderedSites(minimumOrder);
         _distances = getReorderedDistances(minimumOrder);
     }
 
@@ -264,12 +522,10 @@ class Cluster
             }
         }
 
-        std::sort(dist_indices.begin(), dist_indices.end());        
+        std::sort(dist_indices.begin(), dist_indices.end());
 
         return dist_indices;
     }
-
-
 
     /**
     Get the distances if the sites would have been rearranged according to indiceOrder
@@ -313,7 +569,7 @@ class Cluster
 
     returns min_indices, correspong distances and corresponding sites
     */
-    std::tuple<std::vector<int>,std::vector<double>, std::vector<int>> case2_min_indices(const int i_index,const std::vector<std::pair<double, int>> &i_dist) const
+    std::tuple<std::vector<int>, std::vector<double>, std::vector<int>> case2_min_indices(const int i_index, const std::vector<std::pair<double, int>> &i_dist) const
     {
 
         int counter;
@@ -321,110 +577,114 @@ class Cluster
         std::map<std::pair<double, int>, std::vector<std::pair<int, int>>> uniqueDistsWithIndices;
         std::vector<int> minimumOrder;
         minimumOrder.reserve(_sites.size());
-        minimumOrder[0] = i_index; //this is always first for case2
-        
-
+        minimumOrder.push_back(i_index); //this is always first for case2
 
         // create the current  mimumum order i_index , i_dist[0].second, ...
-        for (const auto &dist_int : i_dist)
+        for (const auto &dist_ind : i_dist)
         {
-            minimumOrder.push_back(dist_int.second);
-        } 
+            minimumOrder.push_back(dist_ind.second);
+        }
         std::vector<double> min_distances = getReorderedDistances(minimumOrder);
         std::vector<int> min_sites = getReorderedSites(minimumOrder);
+        for (int i = 0; i < i_dist.size(); i++)
+        {
+            if (min_distances[i] != i_dist[i].first)
+            {
+                std::cout << "Error: min distances and i_dist do not equal" << std::endl;
+                std::cout << min_distances[i] << " " << i_dist[i].first << std::endl;
+                throw("Error: min distances and i_dist do not equal");
+            }
+        }
 
         //set up the uniqueDists
         // distance, site  = [(i_dist_index, i_nbr),... , ]
         counter = 0;
         for (const auto &dist_indice : i_dist)
         {
-            uniqueDistsWithIndices[std::make_pair(dist_indice.first, _sites[dist_indice.second])].push_back(std::make_pair(counter++, dist_indice.second));        
+            uniqueDistsWithIndices[std::make_pair(dist_indice.first, _sites[dist_indice.second])].push_back(std::make_pair(counter++, dist_indice.second));
         }
 
-        std::cout<<"distances: "<<std::endl;
-        for(auto d : min_distances){std::cout<<d<< " ";}
-        std::cout<<std::endl;
-        std::cout<<"i_nbrs: "<<std::endl;
-        for(auto d : i_dist){std::cout<<d.second<< " ";}
-        std::cout<<std::endl;
-        std::cout<<"i_dist: "<<std::endl;
-        for(auto d : i_dist){std::cout<<d.first<< " ";}
-        std::cout<<std::endl;
+        // std::cout<<"distances: "<<std::endl;
+        // for(auto d : min_distances){std::cout<<d<< " ";}
+        // std::cout<<std::endl;
+        // std::cout<<"i_nbrs: "<<std::endl;
+        // for(auto d : i_dist){std::cout<<d.second<< " ";}
+        // std::cout<<std::endl;
+        // std::cout<<"i_dist: "<<std::endl;
+        // for(auto d : i_dist){std::cout<<d.first<< " ";}
+        // std::cout<<std::endl;
 
-        //identical indices is a vector of vectors, first int is order it has in i_nbrs and second int is the index to the site in the cluster        
+        //identical indices is a vector of vectors, first int is order it has in i_nbrs and second int is the index to the site in the cluster
         std::vector<std::vector<std::pair<int, int>>> identicalIndices;
         for (const auto &dist_indice_pair : uniqueDistsWithIndices)
         {
-            std::cout<<"( "<<dist_indice_pair.first.first<< " "<<dist_indice_pair.first.second<<" ) = [ ";
-            for(auto id : dist_indice_pair.second )
-            {
-                std::cout<<"("<<id.first<< " "<<id.second<< " )";
-            }
-            std::cout<<"] "<<std::endl;
+            // std::cout<<"( "<<dist_indice_pair.first.first<< " "<<dist_indice_pair.first.second<<" ) = [ ";
+            // for(auto id : dist_indice_pair.second )
+            // {
+            //     std::cout<<"("<<id.first<< " "<<id.second<< " )";
+            // }
+            // std::cout<<"] "<<std::endl;
             if (dist_indice_pair.second.size() > 1)
             {
                 identicalIndices.push_back(dist_indice_pair.second);
             }
-            
         }
         //return if no dists, sites are equal
         if (identicalIndices.size() == 0)
         {
-            std::cout<< "no dists equal:" <<std::endl;
-            return std::make_tuple(minimumOrder,min_distances, min_sites)  ;
+            // std::cout<< "no dists equal:" <<std::endl;
+            return std::make_tuple(minimumOrder, min_distances, min_sites);
         }
 
         //sort identical indices so they appear in order in terms of indice in minimumOrder:
         //this is needed when taking the permutations of the identical sites
-        for(auto &vec : identicalIndices)
+        for (auto &vec : identicalIndices)
         {
             std::sort(vec.begin(), vec.end());
         }
         //current minimum dists and sites
-        
+
         //do all permutations of the identical dists, sites
         // identIndices = std::vector<std::pair<int, int>>
-        for(auto &identIndices : identicalIndices)
+        for (auto &identIndices : identicalIndices)
         {
-            
+
             //i_dist_indices are the sites that we can freely swap between
             std::vector<int> i_dist_indices;
-            for(const auto &i_dist_index_i_nbr : identIndices)
+            for (const auto &i_dist_index_i_nbr : identIndices)
             {
-                std::cout<<"( "<< i_dist_index_i_nbr.first<< " "<< i_dist_index_i_nbr.second<< ") ";
+                // std::cout<<"( "<< i_dist_index_i_nbr.first<< " "<< i_dist_index_i_nbr.second<< ") ";
                 i_dist_indices.push_back(i_dist_index_i_nbr.first);
             }
-            std::cout<<std::endl;
-            do {
+            // std::cout<<std::endl;
+            do
+            {
                 std::vector<int> trial_indices = minimumOrder;
-                for(int i=0 ; i< i_dist_indices.size(); i++)
+                for (int i = 0; i < i_dist_indices.size(); i++)
                 {
-                    trial_indices[i_dist_indices[i]+1] = identIndices[i].second;
+                    trial_indices[i_dist_indices[i] + 1] = identIndices[i].second;
                 }
-                for(auto i : trial_indices){std::cout<<i<< "";}
-                std::cout<<":";
-                for(auto i : i_dist_indices){std::cout<<i<< "";}
-                std::cout<<std::endl;
+                // for(auto i : trial_indices){std::cout<<i<< "";}
+                // std::cout<<":";
+                // for(auto i : i_dist_indices){std::cout<<i<< "";}
+                // std::cout<<std::endl;
 
                 // for(const auto &i_dist_index_i_nbr : identIndices )
                 // {
                 //     trial_indices.push_back(i_dist_index_i_nbr.first);
                 // }
-                std::vector<double> trial_min_distances = getReorderedDistances(trial_indices);     
+                std::vector<double> trial_min_distances = getReorderedDistances(trial_indices);
                 std::vector<int> trial_min_sites = getReorderedSites(trial_indices);
-                if( !compare_sites_dists(min_distances,min_sites, trial_min_distances, trial_min_sites ))
+                if (!compare_sites_dists(min_distances, min_sites, trial_min_distances, trial_min_sites))
                 {
                     min_distances = trial_min_distances;
-                    min_sites = trial_min_sites;                    
+                    min_sites = trial_min_sites;
                 }
-        } while ( std::next_permutation(i_dist_indices.begin(), i_dist_indices.end()) );
-
+            } while (std::next_permutation(i_dist_indices.begin(), i_dist_indices.end()));
         }
 
-        return std::make_tuple(minimumOrder,min_distances, min_sites);
-
+        return std::make_tuple(minimumOrder, min_distances, min_sites);
     }
-
 
     /**
 
@@ -432,13 +692,13 @@ class Cluster
     (first compare distances, if they are equal compare sites)
     */
 
-    bool compare_sites_dists(const std::vector<double> &dist1,const std::vector<int> &sites1,const std::vector<double> &dist2, const std::vector<int> &sites2 ) const
+    bool compare_sites_dists(const std::vector<double> &dist1, const std::vector<int> &sites1, const std::vector<double> &dist2, const std::vector<int> &sites2) const
     {
-        if( dist1 < dist2)
+        if (dist1 < dist2)
         {
             return true;
         }
-        if( dist1 > dist2)
+        if (dist1 > dist2)
         {
             return false;
         }
@@ -449,7 +709,7 @@ class Cluster
     /*
     Get all dists that origin from site i
 
-    Returns a sorted double (distances) vector
+    Returns a sorted double (distances) vector along with the index in _sites it points to
     */
     std::vector<std::pair<double, int>> getDistsToSite(int i)
     {
@@ -614,11 +874,10 @@ class Cluster
     std::vector<double> _distances;
     std::map<std::vector<int>, int> _element_counts;
     double symprec;
-      double roundDouble(const double &double_value)
-  {
-    return round(double_value * 1.0 / symprec) / (1.0 / symprec);
-  }
-
+    double roundDouble(const double &double_value)
+    {
+        return round(double_value * 1.0 / symprec) / (1.0 / symprec);
+    }
 };
 
 namespace std
