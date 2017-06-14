@@ -239,20 +239,27 @@ class Cluster
     {
 
         auto minBruteForce = getMinimumStateBruteForce();
+        auto bruteforce_order = std::get<0>(minBruteForce);
         auto bruteForceDists = std::get<1>(minBruteForce);
         auto bruteForceSites = std::get<2>(minBruteForce);
 
-        if(compare_sites_dists(bruteForceDists,bruteForceSites, _distances, _sites) )
+        if(compare_sites_dists(bruteForceDists, bruteForceSites, _distances, _sites) )
         {
+            std::cout<< " bruteforce dists, sites and order:"<<std::endl;
             for(auto d : bruteForceDists){std::cout<<d<< " ";}
             std::cout<<std::endl;
             for(auto d : bruteForceSites){std::cout<<d<< " ";}
             std::cout<<std::endl;
+            for(auto d : bruteforce_order){std::cout<<d<< " ";}
+            std::cout<<std::endl;
+            std::cout<< " algorithm result for dists and sites:"<<std::endl;
             for(auto d : _distances){std::cout<<d<< " ";}
             std::cout<<std::endl;
             for(auto d : _sites){std::cout<<d<< " ";}
             std::cout<<std::endl;
-            throw std::runtime_error("ERror: brute force found a smaller");
+            
+
+            throw std::runtime_error("Error: brute force found a smaller");
         }
 
     }
@@ -604,26 +611,26 @@ class Cluster
             uniqueDistsWithIndices[std::make_pair(dist_indice.first, _sites[dist_indice.second])].push_back(std::make_pair(counter++, dist_indice.second));
         }
 
-        // std::cout<<"distances: "<<std::endl;
-        // for(auto d : min_distances){std::cout<<d<< " ";}
-        // std::cout<<std::endl;
-        // std::cout<<"i_nbrs: "<<std::endl;
-        // for(auto d : i_dist){std::cout<<d.second<< " ";}
-        // std::cout<<std::endl;
-        // std::cout<<"i_dist: "<<std::endl;
-        // for(auto d : i_dist){std::cout<<d.first<< " ";}
-        // std::cout<<std::endl;
+        std::cout<<"distances: "<<std::endl;
+        for(auto d : min_distances){std::cout<<d<< " ";}
+        std::cout<<std::endl;
+        std::cout<<"i_nbrs: "<<std::endl;
+        for(auto d : i_dist){std::cout<<d.second<< " ";}
+        std::cout<<std::endl;
+        std::cout<<"i_dist: "<<std::endl;
+        for(auto d : i_dist){std::cout<<d.first<< " ";}
+        std::cout<<std::endl;
 
         //identical indices is a vector of vectors, first int is order it has in i_nbrs and second int is the index to the site in the cluster
         std::vector<std::vector<std::pair<int, int>>> identicalIndices;
         for (const auto &dist_indice_pair : uniqueDistsWithIndices)
         {
-            // std::cout<<"( "<<dist_indice_pair.first.first<< " "<<dist_indice_pair.first.second<<" ) = [ ";
-            // for(auto id : dist_indice_pair.second )
-            // {
-            //     std::cout<<"("<<id.first<< " "<<id.second<< " )";
-            // }
-            // std::cout<<"] "<<std::endl;
+            std::cout<<"( "<<dist_indice_pair.first.first<< " "<<dist_indice_pair.first.second<<" ) = [ ";
+            for(auto id : dist_indice_pair.second )
+            {
+                std::cout<<"("<<id.first<< " "<<id.second<< " )";
+            }
+            std::cout<<"] "<<std::endl;
             if (dist_indice_pair.second.size() > 1)
             {
                 identicalIndices.push_back(dist_indice_pair.second);
@@ -664,16 +671,20 @@ class Cluster
                 {
                     trial_indices[i_dist_indices[i] + 1] = identIndices[i].second;
                 }
-                // for(auto i : trial_indices){std::cout<<i<< "";}
+                std::cout<<"trial indices"<<std::endl;
+                for(auto i : trial_indices){std::cout<<i<< " ";}
                 // std::cout<<":";
                 // for(auto i : i_dist_indices){std::cout<<i<< "";}
-                // std::cout<<std::endl;
+                std::cout<<std::endl;
 
                 // for(const auto &i_dist_index_i_nbr : identIndices )
                 // {
                 //     trial_indices.push_back(i_dist_index_i_nbr.first);
                 // }
+                std::cout<<"trial min dists "<<std::endl;
                 std::vector<double> trial_min_distances = getReorderedDistances(trial_indices);
+                for(auto i : trial_min_distances){std::cout<<i<< " ";}
+                std::cout<<std::endl;
                 std::vector<int> trial_min_sites = getReorderedSites(trial_indices);
                 if (!compare_sites_dists(min_distances, min_sites, trial_min_distances, trial_min_sites))
                 {
@@ -694,15 +705,34 @@ class Cluster
 
     bool compare_sites_dists(const std::vector<double> &dist1, const std::vector<int> &sites1, const std::vector<double> &dist2, const std::vector<int> &sites2) const
     {
+
+        for(int i=0; i < dist1.size(); i++)
+        {
+            if(dist1[i] < dist2[i])
+            {
+                std::cout<<"true "<< dist1[i]<< " "<< dist2[i]<<std::endl;
+                return true;
+            }
+            else if(dist1[i] > dist2[i])
+            {
+                std::cout<<"false "<< dist1[i]<< " "<< dist2[i]<<std::endl;
+                return false;
+            }
+
+        }
         if (dist1 < dist2)
         {
+            std::cout<<"true: dist1< dist2"<<std::endl;          
             return true;
         }
         if (dist1 > dist2)
         {
+            std::cout<<"false: dist1 > dist2"<<std::endl;
             return false;
         }
 
+        std::cout<<"return sites sites1 < sites2 "<< std::boolalpha<< (sites1 < sites2)<<std::endl;
+        
         return sites1 < sites2;
     }
 
