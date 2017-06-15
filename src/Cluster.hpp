@@ -184,7 +184,6 @@ class Cluster
         _distances = min_distance;
         _sites = min_sites;
 
-        
         //setThisOrder(minimumOrder);
         // for (int i = 0; i < first_dists[0].first.size(); i++)
         // {
@@ -300,17 +299,16 @@ class Cluster
             }
         }
 
-        std::cout<<" Found "<< equalFirstDists.size()<< " equal first dists"<<std::endl;
-        std::cout<<"Minimum and second minimum: "<<std::endl;
-        for(int i = 0; i < first_dists.size() ; i++)
-        {   
+        std::cout << " Found " << equalFirstDists.size() << " equal first dists" << std::endl;
+        std::cout << "Minimum and second minimum: " << std::endl;
+        for (int i = 0; i < first_dists.size(); i++)
+        {
 
-            for(int j = 0; j <first_dists[i].first.size(); j++)
+            for (int j = 0; j < first_dists[i].first.size(); j++)
             {
-                std::cout<<first_dists[i].first[j].first<< " "<<first_dists[i].first[j].second<< "  ";
+                std::cout << first_dists[i].first[j].first << " " << first_dists[i].first[j].second << "  ";
             }
-            std::cout<< first_dists[i].second.second<<std::endl;
-            
+            std::cout << first_dists[i].second.second << std::endl;
         }
         return equalFirstDists;
     }
@@ -609,15 +607,15 @@ class Cluster
         std::map<std::pair<double, int>, std::vector<std::pair<int, int>>> uniqueDistsWithIndices;
         std::vector<int> minimumOrder;
 
-        minimumOrder = getOrderFromFirstDists(i_dist);
-        // minimumOrder.reserve(_sites.size());
-        // minimumOrder.push_back(i_index); //this is always first for case2
+        // minimumOrder = getOrderFromFirstDists(i_dist);
+        minimumOrder.reserve(_sites.size());
+        minimumOrder.push_back(i_index); //this is always first for case2
 
-        // // create the current  mimumum order i_index , i_dist[0].second, ...
-        // for (const auto &dist_ind : i_dist)
-        // {
-        //     minimumOrder.push_back(dist_ind.second);              
-        // }
+        // create the current  mimumum order i_index , i_dist[0].second, ...
+        for (const auto &dist_ind : i_dist)
+        {
+            minimumOrder.push_back(dist_ind.second);
+        }
         std::vector<double> min_distances = getReorderedDistances(minimumOrder);
         std::vector<int> min_sites = getReorderedSites(minimumOrder);
         for (int i = 0; i < i_dist.size(); i++)
@@ -794,7 +792,7 @@ class Cluster
                 {
                     if (k != i)
                     {
-                        dists.push_back(std::make_pair(_distances[counter], k));      //Change to sites here or else it will mess up the sorting
+                        dists.push_back(std::make_pair(_distances[counter], k)); //Change to sites here or else it will mess up the sorting
                     }
                     else
                     {
@@ -977,3 +975,142 @@ struct hash<Cluster>
     }
 };
 }
+
+/**
+Help struct which handle the I_Neighbors concept used in sorting a cluster.
+
+
+
+*/
+struct I_Neighbors
+{
+    I_Neighbors(const uint &this_index, const std::vector<double> &distances, const std::vector<int> &sites, const std::vector<uint> &indices)
+    {
+        i_index = this_index;
+        _distances = distances;
+        _sites = sites;
+        _indices = indices;
+    }
+
+    std::vector<double> getIdists() const
+    {
+        return _distances;
+    }
+    std::vector<int> getSites() const
+    {
+        return _sites;
+    }
+    std::vector<uint> getINeighbors() const
+    {
+        return _indices;
+    }
+
+    std::vector<uint> getFullIndices() const
+    {
+        std::vector<uint> fullIndices = {i_index};
+
+        fullIndices.insert(fullIndices.begin(), _indices.begin(), _indices.end());
+        return fullIndices;
+    }
+
+
+    /**
+    Looks for identical dists and sites
+
+    returns a vector of vectors like:
+    [i,j,k], [l, p] where i,j,k then have the same sites and distances
+    and l,p have same sites and distances (but different from [i,j,k])
+
+    The strategy is to use that the distances are sorted
+    */
+    std::vector<std::vector<uint>> getIdenticalIndices() const
+    {
+        //maps dists, sites to vector of indices
+        std::map<std::pair<double, int>, std::vector<uint>> equalIndicesMap;
+        for(int i =0; i< _distances.size(); i++)
+        {
+            equalIndicesMap[std::make_pair(_distances[i], _sites[i])].push_back(_indices[i]);
+        }
+
+        std::vector<std::vector<uint>> equalIndices;
+        if(equalIndicesMap.size() == _distances.size())
+        {
+            //all dists, sites pairs were unique
+            return equalIndices;
+        }        
+        
+        for(const auto &mapPair : equalIndicesMap)
+        {
+            if (mapPair.second.size() > 1)
+            {
+                equalIndices.push_back(mapPair.second);
+            }
+        }
+        return equalIndices;
+    }
+
+
+
+
+
+
+
+
+    friend bool operator<(const I_Neighbors &i_n1, const I_Neighbors &i_n2)
+    {
+        if (i_n1._distances.size() < i_n2._distances.size())
+        {
+            return true;
+        }
+        else if (i_n1._distances.size() > i_n2._distances.size())
+        {
+            return false;
+        }
+
+        for (int i = 0; i < i_n1._distances.size(); i++)
+        {
+            if (i_n1._distances[i] < i_n2._distances[i])
+            {
+                return true;
+            }
+            else if (i_n1._distances[i] > i_n2._distances[i])
+            {
+                return true;
+            }
+        }
+
+        for (int i = 0; i < i_n1._sites.size(); i++)
+        {
+            if (i_n1._sites[i] < i_n2._sites[i])
+            {
+                return true;
+            }
+            else if (i_n1._sites[i] > i_n2._sites[i])
+            {
+                return true;
+            }
+        }
+        //everything is equal => return false;
+        return false;
+    }
+
+
+    friend bool operator==(const I_Neighbors &i_n1, const I_Neighbors &i_n2)
+    {
+        if(i_n1._distances != i_n2._distances )
+        {
+            return false;
+        }
+        else if(i_n1._sites != i_n2._sites )
+        {
+            return false;
+        }
+        return true;
+    }
+
+
+    std::vector<double> _distances;
+    std::vector<int> _sites;
+    std::vector<uint> _indices;
+    uint i_index;
+};
