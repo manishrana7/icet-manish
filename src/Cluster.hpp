@@ -32,6 +32,8 @@ class Cluster
         _sites = sites;
         _distances = distances;
         sortCluster();
+        sortCluster();
+        validateSorting();
     }
 
     //counts the elements
@@ -182,7 +184,7 @@ class Cluster
         _distances = min_distance;
         _sites = min_sites;
 
-        validateSorting();
+        
         //setThisOrder(minimumOrder);
         // for (int i = 0; i < first_dists[0].first.size(); i++)
         // {
@@ -300,13 +302,15 @@ class Cluster
 
         std::cout<<" Found "<< equalFirstDists.size()<< " equal first dists"<<std::endl;
         std::cout<<"Minimum and second minimum: "<<std::endl;
-        for(int i = 0; i < 2 ; i++)
+        for(int i = 0; i < first_dists.size() ; i++)
         {   
+
             for(int j = 0; j <first_dists[i].first.size(); j++)
             {
                 std::cout<<first_dists[i].first[j].first<< " "<<first_dists[i].first[j].second<< "  ";
             }
-            std::cout<< _sites[first_dists[i].second.second]<<std::endl;
+            std::cout<< first_dists[i].second.second<<std::endl;
+            
         }
         return equalFirstDists;
     }
@@ -604,14 +608,16 @@ class Cluster
         //this maps map distance, site to each indice in i_dist that have equal distances and sites
         std::map<std::pair<double, int>, std::vector<std::pair<int, int>>> uniqueDistsWithIndices;
         std::vector<int> minimumOrder;
-        minimumOrder.reserve(_sites.size());
-        minimumOrder.push_back(i_index); //this is always first for case2
 
-        // create the current  mimumum order i_index , i_dist[0].second, ...
-        for (const auto &dist_ind : i_dist)
-        {
-            minimumOrder.push_back(dist_ind.second);
-        }
+        minimumOrder = getOrderFromFirstDists(i_dist);
+        // minimumOrder.reserve(_sites.size());
+        // minimumOrder.push_back(i_index); //this is always first for case2
+
+        // // create the current  mimumum order i_index , i_dist[0].second, ...
+        // for (const auto &dist_ind : i_dist)
+        // {
+        //     minimumOrder.push_back(dist_ind.second);              
+        // }
         std::vector<double> min_distances = getReorderedDistances(minimumOrder);
         std::vector<int> min_sites = getReorderedSites(minimumOrder);
         for (int i = 0; i < i_dist.size(); i++)
@@ -788,7 +794,7 @@ class Cluster
                 {
                     if (k != i)
                     {
-                        dists.push_back(std::make_pair(_distances[counter], k));
+                        dists.push_back(std::make_pair(_distances[counter], k));      //Change to sites here or else it will mess up the sorting
                     }
                     else
                     {
