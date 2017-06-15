@@ -54,7 +54,10 @@ struct I_Neighbors
     std::vector<int> getFullSites() const
     {
         std::vector<int> fullSites = {i_site};
-        fullSites.insert(fullSites.begin(), _sites.begin(), _sites.end());
+        for(const auto &site : _sites)
+        {
+            fullSites.push_back(site);
+        }        
         return fullSites;
     }
 
@@ -85,16 +88,6 @@ struct I_Neighbors
         {
             fullIndices.push_back(index);
         }
-
-        //fullIndices.insert(fullIndices.begin(), _indices.begin(), _indices.end());
-        std::cout<<"inside get full indices: "<<std::endl;
-        std::cout<<"my indices:"<<std::endl;
-        for(auto d : _indices){std::cout<<d<< " ";}
-        std::cout<<std::endl;
-        std::cout<<"my full:"<<std::endl;
-        for(auto d : fullIndices){std::cout<<d<< " ";}
-        std::cout<<std::endl;
-        std::cout<<"this index "<<i_index<<std::endl;
         return fullIndices;
     }
 
@@ -261,6 +254,7 @@ class Cluster
     {
         _sites = sites;
         _distances = distances;
+        sortCluster();
         sortCluster();
         validateSorting();
     }
@@ -843,11 +837,11 @@ class Cluster
     std::tuple<std::vector<double>, std::vector<int>, std::vector<int>> case2_min_indices(const I_Neighbors &i_neighbor) const
     {
 
-        auto minimumOrder = i_neighbor.getFullIndices();
+        std::vector<int> minimumOrder = i_neighbor.getFullIndices();
 
-        auto min_distances = getReorderedDistances(minimumOrder);
-        auto min_sites = getReorderedSites(minimumOrder);
-        auto min_indices = minimumOrder;
+        std::vector<double> min_distances = getReorderedDistances(minimumOrder);
+        std::vector<int> min_sites = getReorderedSites(minimumOrder);
+        std::vector<int> min_indices = minimumOrder;
         std::cout<<"original distances "<<std::endl;
         for(auto d : min_distances){std::cout<< d<< " ";}
         std::cout<<std::endl;
@@ -894,7 +888,10 @@ class Cluster
 
         //this i_neighbor has the right first indice and site
 
-        for (auto &identIndices : identicalIndices)
+
+        
+
+        for (const auto &identIndices : identicalIndices)
         {
 
             //i_dist_indices are the sites that we can freely swap between
@@ -919,7 +916,7 @@ class Cluster
                 std::vector<int> trial_indices = minimumOrder;
                 for (int i = 0; i < identIndices.size(); i++)
                 {
-                    trial_indices[i_dist_indices[i] + 1] = identIndices[i];
+                    trial_indices[i_dist_indices[i] ] = identIndices[i];
                 }
                 std::cout << "trial indices" << std::endl;
                 for (auto i : trial_indices)
@@ -943,6 +940,13 @@ class Cluster
                 // }
             } while (std::next_permutation(i_dist_indices.begin(), i_dist_indices.end()));
         }
+
+        std::cout << "found min indices" << std::endl;
+        for (auto i : min_indices)
+        {
+            std::cout << i << " ";
+        }
+        std::cout << std::endl;
 
         return std::make_tuple(min_distances, min_sites, min_indices);
     }
