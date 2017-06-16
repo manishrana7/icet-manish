@@ -1,13 +1,13 @@
 from icetdev.clusterCounts import ClusterCounts
 from ase.build import bulk
 import numpy as np
-atoms = bulk("Al").repeat(2)
+atoms = bulk("Al").repeat(1)
 
 atoms.set_chemical_symbols([['Al','Cu'][n] for n in np.round(np.random.random((len(atoms),))).astype(int)])
 
 clusterCounts = ClusterCounts()
 
-clusterCounts.count_clusters(atoms=atoms,cutoffs=5*[8])
+clusterCounts.count_clusters(atoms=atoms,cutoffs=6*[8])
 
 
 clusterCounts.print()

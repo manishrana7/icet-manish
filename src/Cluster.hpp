@@ -54,10 +54,10 @@ struct I_Neighbors
     std::vector<int> getFullSites() const
     {
         std::vector<int> fullSites = {i_site};
-        for(const auto &site : _sites)
+        for (const auto &site : _sites)
         {
             fullSites.push_back(site);
-        }        
+        }
         return fullSites;
     }
 
@@ -84,7 +84,7 @@ struct I_Neighbors
     {
         std::vector<int> fullIndices = {i_index};
         fullIndices.reserve(_indices.size());
-        for(const auto &index : _indices)
+        for (const auto &index : _indices)
         {
             fullIndices.push_back(index);
         }
@@ -103,11 +103,11 @@ struct I_Neighbors
     std::vector<std::vector<int>> getIdenticalIndices() const
     {
 
-        if(_distances.size() != _sites.size() )
+        if (_distances.size() != _sites.size())
         {
             throw std::runtime_error("_distances and _sites not equal in size in getIdenticalIndices");
         }
-        if(_indices.size() != _sites.size() )
+        if (_indices.size() != _sites.size())
         {
             throw std::runtime_error("_distances and _sites not equal in size in getIdenticalIndices");
         }
@@ -116,7 +116,7 @@ struct I_Neighbors
         std::map<std::pair<double, int>, std::vector<int>> equalIndicesMap;
         for (int i = 0; i < _distances.size(); i++)
         {
-            equalIndicesMap[std::make_pair(_distances[i], _sites[i])].push_back(_indices[i]);
+            equalIndicesMap[std::make_pair(_distances[i], _sites[i])].push_back(i+1); 
         }
 
         std::vector<std::vector<int>> equalIndices;
@@ -128,9 +128,12 @@ struct I_Neighbors
 
         for (const auto &mapPair : equalIndicesMap)
         {
-            std::cout<<mapPair.first.first<< " "<<mapPair.first.second<< " ";
-            for(auto d : mapPair.second){std::cout<<d<< " ";}
-            std::cout<<std::endl;
+            // std::cout << mapPair.first.first << " " << mapPair.first.second << " ";
+            // for (auto d : mapPair.second)
+            // {
+            //     std::cout << d << " ";
+            // }
+            // std::cout << std::endl;
             if (mapPair.second.size() > 1)
             {
                 equalIndices.push_back(mapPair.second);
@@ -143,44 +146,42 @@ struct I_Neighbors
     {
         if (i_n1._distances.size() < i_n2._distances.size())
         {
-            std::cout<<"return1"<<std::endl;
             return true;
         }
         else if (i_n1._distances.size() > i_n2._distances.size())
         {
-            std::cout<<"return2"<<std::endl;
             return false;
         }
 
         for (int i = 0; i < i_n1._distances.size(); i++)
         {
 
-            if(fabs(i_n1._distances[i] - i_n2._distances[i]) < 0.4)
-            {
-                std::cout<< i_n1._distances[i] << " < " << i_n2._distances[i]<< " = "<<std::boolalpha<< (i_n1._distances[i] < i_n2._distances[i]) << std::endl;
-                std::cout<< i_n1._distances[i] << " > " << i_n2._distances[i]<< " = "<<std::boolalpha<< (i_n1._distances[i] > i_n2._distances[i]) << std::endl;
-            }
+            // if (fabs(i_n1._distances[i] - i_n2._distances[i]) < 0.4)
+            // {
+            //     std::cout << i_n1._distances[i] << " < " << i_n2._distances[i] << " = " << std::boolalpha << (i_n1._distances[i] < i_n2._distances[i]) << std::endl;
+            //     std::cout << i_n1._distances[i] << " > " << i_n2._distances[i] << " = " << std::boolalpha << (i_n1._distances[i] > i_n2._distances[i]) << std::endl;
+            // }
 
             if (i_n1._distances[i] < i_n2._distances[i])
             {
-                std::cout<<"return3"<<std::endl;
+                // std::cout << "return3" << std::endl;
                 return true;
             }
             if (i_n1._distances[i] > i_n2._distances[i])
             {
-                std::cout<<"return4"<<std::endl;
+                // std::cout << "return4" << std::endl;
                 return false;
             }
         }
 
         if (i_n1.i_site < i_n2.i_site)
         {
-            std::cout<<"return5"<<std::endl;
+            // std::cout << "return5" << std::endl;
             return true;
         }
         if (i_n1.i_site > i_n2.i_site)
         {
-            std::cout<<"return6"<<std::endl;
+            // std::cout << "return6" << std::endl;
             return false;
         }
 
@@ -188,17 +189,17 @@ struct I_Neighbors
         {
             if (i_n1._sites[i] < i_n2._sites[i])
             {
-                std::cout<<"return7"<<std::endl;
+                // std::cout << "return7" << std::endl;
                 return true;
             }
             else if (i_n1._sites[i] > i_n2._sites[i])
             {
-                std::cout<<"return8"<<std::endl;
+                // std::cout << "return8" << std::endl;
                 return false;
             }
         }
         //everything is equal => return false;
-        std::cout<<"return9"<<std::endl;
+        // std::cout << "return9" << std::endl;
         return false;
     }
     void print() const
@@ -255,8 +256,7 @@ class Cluster
         _sites = sites;
         _distances = distances;
         sortCluster();
-        sortCluster();
-        validateSorting();
+        //validateSorting();
     }
 
     //counts the elements
@@ -352,23 +352,24 @@ class Cluster
             first_dists[i] = getDistsToSite(i);
         }
         //ordering
-        std::cout<<"before sort"<<std::endl;
-        for(auto d : first_dists){d.print();}
+        // std::cout << "before sort" << std::endl;
+        // for (auto d : first_dists)
+        // {
+        //     d.print();
+        // }
 
         std::sort(first_dists.begin(), first_dists.end());
 
+        // std::cout << "after sort" << std::endl;
+        // for (auto d : first_dists)
+        // {
+        //     d.print();
+        // }
 
-        std::cout<<"after sort"<<std::endl;
-        for(auto d : first_dists){d.print();}
-        if(!( first_dists[0] < first_dists[1]))
-        {
-            throw std::runtime_error("Sorting does not work for i_neighbors");
-        }
-
-        first_dists[0].print();
-        first_dists[1].print();
-        std::cout<<"ok test these two above "<<std::endl;
-        std::cout<< " less than? "<< std::boolalpha<< (first_dists[0] < first_dists[1]) <<std::endl;
+        // first_dists[0].print();
+        // first_dists[1].print();
+        // std::cout << "ok test these two above " << std::endl;
+        // std::cout << " less than? " << std::boolalpha << (first_dists[0] < first_dists[1]) << std::endl;
         std::vector<int> minimumOrder = first_dists[0].getFullIndices(); // getOrderFromFirstDists(first_dists[0]);
         // int min_index_count = 0;
 
@@ -386,6 +387,7 @@ class Cluster
 
         std::vector<double> min_distance;
         std::vector<int> min_sites;
+        std::vector<int> min_indices;
 
         //check if we have case 1
         //if not we do case 2 (both a check and a doer)
@@ -393,18 +395,20 @@ class Cluster
         auto equal_minimum_first_sites = getEqual_minimum_first_sites(first_dists);
         if (equal_minimum_first_sites.size() > 1)
         {
-            std::cout << "case 1" << std::endl;
+            // std::cout << "case 1" << std::endl;
             auto min_data = case1_min_indices(equal_minimum_first_sites);
             min_distance = std::get<0>(min_data);
             min_sites = std::get<1>(min_data);
+            min_indices = std::get<2>(min_data);
         }
         else
         {
-            std::cout << "case 2" << std::endl;
+            // std::cout << "case 2" << std::endl;
             ///Do case 2
             auto min_data = case2_min_indices(first_dists[0]);
             min_distance = std::get<0>(min_data);
             min_sites = std::get<1>(min_data);
+            min_indices = std::get<2>(min_data);
         }
 
         /// some validation of algorithm and debugging
@@ -431,7 +435,12 @@ class Cluster
         }
         _distances = min_distance;
         _sites = min_sites;
-
+        // std::cout << " sort cluster found order: " << std::endl;
+        // for (auto d : min_indices)
+        // {
+        //     std::cout << d << " ";
+        // }
+        // std::cout << std::endl;
         //setThisOrder(minimumOrder);
         // for (int i = 0; i < first_dists[0].first.size(); i++)
         // {
@@ -547,12 +556,12 @@ class Cluster
             }
         }
 
-        std::cout << " Found " << equalFirstDists.size() << " equal first dists" << std::endl;
-        std::cout << "Minimum and second minimum: " << std::endl;
-        for (int i = 0; i < i_neighbors.size(); i++)
-        {
-            i_neighbors[i].print();
-        }
+        // std::cout << " Found " << equalFirstDists.size() << " equal first dists" << std::endl;
+        // std::cout << "Minimum and second minimum: " << std::endl;
+        // for (int i = 0; i < i_neighbors.size(); i++)
+        // {
+        //     i_neighbors[i].print();
+        // }
 
         return equalFirstDists;
     }
@@ -603,6 +612,7 @@ class Cluster
 
         if (isCase2(equal_minimum_i_neighbors[0]))
         {
+            // std::cout << "case 2 inside case1" << std::endl;
             for (int i = 0; i < equal_minimum_i_neighbors.size(); i++)
             {
                 //case2_min_indices(const int i_index, const std::vector<std::pair<double, int>> &i_dist)
@@ -622,6 +632,7 @@ class Cluster
         }
         else
         {
+            // std::cout << "NOT case 2 inside case1" << std::endl;
             for (int i = 0; i < equal_minimum_i_neighbors.size(); i++)
             {
 
@@ -842,14 +853,20 @@ class Cluster
         std::vector<double> min_distances = getReorderedDistances(minimumOrder);
         std::vector<int> min_sites = getReorderedSites(minimumOrder);
         std::vector<int> min_indices = minimumOrder;
-        std::cout<<"original distances "<<std::endl;
-        for(auto d : min_distances){std::cout<< d<< " ";}
-        std::cout<<std::endl;
-        std::cout<<"printing i_neighbor "<<std::endl;
-        i_neighbor.print();
-        std::cout<<" Min order"<<std::endl;
-        for(auto d : minimumOrder){std::cout<< d<< " ";}
-        std::cout<<std::endl;
+        // std::cout << "original distances " << std::endl;
+        // for (auto d : min_distances)
+        // {
+        //     std::cout << d << " ";
+        // }
+        // std::cout << std::endl;
+        // std::cout << "printing i_neighbor " << std::endl;
+        // i_neighbor.print();
+        // std::cout << " Min order" << std::endl;
+        // for (auto d : minimumOrder)
+        // {
+        //     std::cout << d << " ";
+        // }
+        // std::cout << std::endl;
 
         //identical indices is a vector of vectors
         // the identical indices are given in the global indices in the cluster
@@ -858,19 +875,19 @@ class Cluster
         //return if no dists, sites are equal
         if (identicalIndices.size() == 0)
         {
-             std::cout<< "no dists equal:" <<std::endl;
-             i_neighbor.print();
+            // std::cout << "no dists equal:" << std::endl;
+            // i_neighbor.print();
             return std::make_tuple(min_distances, min_sites, min_indices);
         }
 
-        for (auto identVec : identicalIndices)
-        {
-            for (auto d : identVec)
-            {
-                std::cout << d << " ";
-            }
-            std::cout << std::endl;
-        }
+        // for (auto identVec : identicalIndices)
+        // {
+        //     for (auto d : identVec)
+        //     {
+        //         std::cout << d << " ";
+        //     }
+        //     std::cout << std::endl;
+        // }
 
         if (minimumOrder.size() != _sites.size())
         {
@@ -888,69 +905,140 @@ class Cluster
 
         //this i_neighbor has the right first indice and site
 
+        //   std::vector<int> &trial_order,
+        //   std::vector<double> &min_distances,
+        //   std::vector<int> &min_sites,
+        //   std::vector<int> &min_indices) const
+        auto trial_order = minimumOrder;
+        findMinimumIndicePermutation(0, identicalIndices, minimumOrder, trial_order, min_distances, min_sites, min_indices);
 
-        
-
-        for (const auto &identIndices : identicalIndices)
-        {
-
-            //i_dist_indices are the sites that we can freely swap between
-            std::vector<int> i_dist_indices;
-            for (const auto &i_dist_index_i_nbr : identIndices)
-            {
-                // std::cout<<"( "<< i_dist_index_i_nbr.first<< " "<< i_dist_index_i_nbr.second<< ") ";
-                i_dist_indices.push_back(i_dist_index_i_nbr);
-            }
-            std::cout << std::endl;
-
-            int firstTime = 0;
-            do
-            {
-                //skip the first "permutation" since it is the original
-                // if (firstTime == 0)
-                // {
-                //     firstTime++;
-                //     continue;
-                // }
-
-                std::vector<int> trial_indices = minimumOrder;
-                for (int i = 0; i < identIndices.size(); i++)
-                {
-                    trial_indices[i_dist_indices[i] ] = identIndices[i];
-                }
-                std::cout << "trial indices" << std::endl;
-                for (auto i : trial_indices)
-                {
-                    std::cout << i << " ";
-                }
-                std::cout << std::endl;
-
-                auto distances_trial = getReorderedDistances(trial_indices);
-                auto trial_sites = getReorderedSites(trial_indices);
-
-                if(compare_sites_dists(distances_trial, trial_sites, min_distances, min_sites))
-                {
-                    min_distances = distances_trial;
-                    min_sites = trial_sites;
-                    min_indices = trial_indices;
-                }
-                // if (i_neighbor_trial < i_neighbor_minimum)
-                // {
-                //     i_neighbor_minimum = i_neighbor_trial;
-                // }
-            } while (std::next_permutation(i_dist_indices.begin(), i_dist_indices.end()));
-        }
-
-        std::cout << "found min indices" << std::endl;
-        for (auto i : min_indices)
-        {
-            std::cout << i << " ";
-        }
-        std::cout << std::endl;
+        // std::cout << "found min indices" << std::endl;
+        // for (auto i : min_indices)
+        // {
+        //     std::cout << i << " ";
+        // }
+        // std::cout << std::endl;
 
         return std::make_tuple(min_distances, min_sites, min_indices);
+
+        // for (const auto &identIndices : identicalIndices)
+        // {
+
+        //     //i_dist_indices are the sites that we can freely swap between
+        //     std::vector<int> i_dist_indices;
+        //     for (const auto &i_dist_index_i_nbr : identIndices)
+        //     {
+        //         // std::cout<<"( "<< i_dist_index_i_nbr.first<< " "<< i_dist_index_i_nbr.second<< ") ";
+        //         i_dist_indices.push_back(i_dist_index_i_nbr);
+        //     }
+        //     std::cout << std::endl;
+
+        //     int firstTime = 0;
+        //     do
+        //     {
+        //         //skip the first "permutation" since it is the original
+        //         // if (firstTime == 0)
+        //         // {
+        //         //     firstTime++;
+        //         //     continue;
+        //         // }
+
+        //         std::vector<int> trial_indices = minimumOrder;
+        //         for (int i = 0; i < identIndices.size(); i++)
+        //         {
+        //             trial_indices[i_dist_indices[i]] = identIndices[i];
+        //         }
+        //         std::cout << "trial indices" << std::endl;
+        //         for (auto i : trial_indices)
+        //         {
+        //             std::cout << i << " ";
+        //         }
+        //         std::cout << std::endl;
+
+        //         auto distances_trial = getReorderedDistances(trial_indices);
+        //         auto trial_sites = getReorderedSites(trial_indices);
+
+        //         if (compare_sites_dists(distances_trial, trial_sites, min_distances, min_sites))
+        //         {
+        //             min_distances = distances_trial;
+        //             min_sites = trial_sites;
+        //             min_indices = trial_indices;
+        //         }
+        //         // if (i_neighbor_trial < i_neighbor_minimum)
+        //         // {
+        //         //     i_neighbor_minimum = i_neighbor_trial;
+        //         // }
+        //     } while (std::next_permutation(i_dist_indices.begin(), i_dist_indices.end()));
+        // }
+
+        // std::cout << "found min indices" << std::endl;
+        // for (auto i : min_indices)
+        // {
+        //     std::cout << i << " ";
+        // }
+        // std::cout << std::endl;
+
+        // return std::make_tuple(min_distances, min_sites, min_indices);
     }
 
+    void findMinimumIndicePermutation(int currentIndiceSet,
+                                      const std::vector<std::vector<int>> &identicalIndices,
+                                      const std::vector<int> &minimumOrder,
+                                      std::vector<int> trial_order,
+                                      std::vector<double> &min_distances,
+                                      std::vector<int> &min_sites,
+                                      std::vector<int> &min_indices) const
+    {
+        std::vector<int> identicalIndiceSet = identicalIndices[currentIndiceSet];
+        //trial_order = minimumOrder;
+        do
+        {
+           // trial_order = minimumOrder;
+            for (int i = 0; i < identicalIndiceSet.size(); i++)
+            {
+                trial_order[identicalIndiceSet[i]] = minimumOrder[identicalIndices[currentIndiceSet][i]];
+            }
+
+            auto distances_trial = getReorderedDistances(trial_order);
+            auto trial_sites = getReorderedSites(trial_order);
+
+            if (compare_sites_dists(distances_trial, trial_sites, min_distances, min_sites))
+            {
+                min_distances = distances_trial;
+                min_sites = trial_sites;
+                min_indices = trial_order;
+            }
+
+            // std::cout << " identical indices order " << std::endl;
+            // for (auto d : identicalIndiceSet)
+            // {
+            //     std::cout << d<< " ";
+            // }
+            // std::cout << std::endl;
+            // std::cout << std::endl;
+            // std::cout << " minimum order " << std::endl;
+            // for (auto d : minimumOrder)
+            // {
+            //     std::cout << d<< " ";
+            // }
+            // std::cout << std::endl;
+            // std::cout << std::endl;
+
+            // std::cout << "trial order: " << currentIndiceSet << std::endl;
+            // for (auto i : trial_order)
+            // {
+            //     std::cout << i << "  ";
+            // }
+            // std::cout << std::endl;
+            // std::cout << std::endl;
+
+            if (currentIndiceSet + 1 < identicalIndices.size())
+            {
+                findMinimumIndicePermutation(currentIndiceSet + 1, identicalIndices, minimumOrder, trial_order, min_distances, min_sites, min_indices);
+            }
+
+        } while (std::next_permutation(identicalIndiceSet.begin(), identicalIndiceSet.end()));
+    }
     /**
 
     compare distances and sites if dist1 and sites1 < dists2 and sites2
@@ -1020,7 +1108,7 @@ class Cluster
         {
             std::cout << "Error: count not equal to distance size " << _distances.size() << " counter " << counter << std::endl;
             std::cout << "Sites size: " << _sites.size() << std::endl;
-            throw std::out_of_range("");
+            throw std::out_of_range(" count not equal to distance size");
         }
         std::sort(dists_site_index.begin(), dists_site_index.end());
         std::vector<double> distances(dists_site_index.size());
