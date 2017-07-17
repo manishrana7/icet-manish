@@ -905,80 +905,11 @@ class Cluster
 
         //this i_neighbor has the right first indice and site
 
-        //   std::vector<int> &trial_order,
-        //   std::vector<double> &min_distances,
-        //   std::vector<int> &min_sites,
-        //   std::vector<int> &min_indices) const
         auto trial_order = minimumOrder;
         findMinimumIndicePermutation(0, identicalIndices, minimumOrder, trial_order, min_distances, min_sites, min_indices);
 
-        // std::cout << "found min indices" << std::endl;
-        // for (auto i : min_indices)
-        // {
-        //     std::cout << i << " ";
-        // }
-        // std::cout << std::endl;
-
         return std::make_tuple(min_distances, min_sites, min_indices);
 
-        // for (const auto &identIndices : identicalIndices)
-        // {
-
-        //     //i_dist_indices are the sites that we can freely swap between
-        //     std::vector<int> i_dist_indices;
-        //     for (const auto &i_dist_index_i_nbr : identIndices)
-        //     {
-        //         // std::cout<<"( "<< i_dist_index_i_nbr.first<< " "<< i_dist_index_i_nbr.second<< ") ";
-        //         i_dist_indices.push_back(i_dist_index_i_nbr);
-        //     }
-        //     std::cout << std::endl;
-
-        //     int firstTime = 0;
-        //     do
-        //     {
-        //         //skip the first "permutation" since it is the original
-        //         // if (firstTime == 0)
-        //         // {
-        //         //     firstTime++;
-        //         //     continue;
-        //         // }
-
-        //         std::vector<int> trial_indices = minimumOrder;
-        //         for (int i = 0; i < identIndices.size(); i++)
-        //         {
-        //             trial_indices[i_dist_indices[i]] = identIndices[i];
-        //         }
-        //         std::cout << "trial indices" << std::endl;
-        //         for (auto i : trial_indices)
-        //         {
-        //             std::cout << i << " ";
-        //         }
-        //         std::cout << std::endl;
-
-        //         auto distances_trial = getReorderedDistances(trial_indices);
-        //         auto trial_sites = getReorderedSites(trial_indices);
-
-        //         if (compare_sites_dists(distances_trial, trial_sites, min_distances, min_sites))
-        //         {
-        //             min_distances = distances_trial;
-        //             min_sites = trial_sites;
-        //             min_indices = trial_indices;
-        //         }
-        //         // if (i_neighbor_trial < i_neighbor_minimum)
-        //         // {
-        //         //     i_neighbor_minimum = i_neighbor_trial;
-        //         // }
-        //     } while (std::next_permutation(i_dist_indices.begin(), i_dist_indices.end()));
-        // }
-
-        // std::cout << "found min indices" << std::endl;
-        // for (auto i : min_indices)
-        // {
-        //     std::cout << i << " ";
-        // }
-        // std::cout << std::endl;
-
-        // return std::make_tuple(min_distances, min_sites, min_indices);
     }
 
     void findMinimumIndicePermutation(int currentIndiceSet,
@@ -1008,30 +939,6 @@ class Cluster
                 min_sites = trial_sites;
                 min_indices = trial_order;
             }
-
-            // std::cout << " identical indices order " << std::endl;
-            // for (auto d : identicalIndiceSet)
-            // {
-            //     std::cout << d<< " ";
-            // }
-            // std::cout << std::endl;
-            // std::cout << std::endl;
-            // std::cout << " minimum order " << std::endl;
-            // for (auto d : minimumOrder)
-            // {
-            //     std::cout << d<< " ";
-            // }
-            // std::cout << std::endl;
-            // std::cout << std::endl;
-
-            // std::cout << "trial order: " << currentIndiceSet << std::endl;
-            // for (auto i : trial_order)
-            // {
-            //     std::cout << i << "  ";
-            // }
-            // std::cout << std::endl;
-            // std::cout << std::endl;
-
             if (currentIndiceSet + 1 < identicalIndices.size())
             {
                 findMinimumIndicePermutation(currentIndiceSet + 1, identicalIndices, minimumOrder, trial_order, min_distances, min_sites, min_indices);
@@ -1237,7 +1144,9 @@ class Cluster
     }
 
     /**
-    
+    Print the cluster to standard out.
+
+    Format is first distances then sites
     */
     void print() const
     {
