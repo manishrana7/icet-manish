@@ -24,7 +24,7 @@ public:
     //empty constructor
   }
 
-  //void count(const Structure & , XXX indices );
+  void count_pairs(const Structure &, const Neighborlist &);
   void count_using_mbnl(const Structure &, ManybodyNeighborlist &, const int);
   void countLatticeNeighbors(const Structure &,
                              const std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &);
@@ -34,6 +34,8 @@ public:
   {
     return _clusterCounts;
   }
+
+  
   void reset()
   {
     _clusterCounts.clear();
@@ -41,7 +43,7 @@ public:
 
   /**
  Helpful function that prints the cluster counts
-*/
+  */
   void print()
   {
     for (const auto &map_pair : _clusterCounts)

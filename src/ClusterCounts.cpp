@@ -13,7 +13,32 @@
 // }
 
 /**
+Counts all the pairs using the neigbhorlist
 
+*/
+
+void ClusterCounts::count_pairs(const Structure &structure, const Neighborlist &neighborlist)
+{   
+    Vector3d zeroVector = {0.0, 0.0, 0.0};
+
+    std::vector<LatticeNeighbor> pairNeighbor(2);
+    pairNeighbor[0] = LatticeNeighbor(0,zeroVector);
+    for(size_t i=0; i < structure.size(); i++)
+    {
+        auto i_neighbors = neighborlist.getNeighbors(i);
+        pairNeighbor[0].index = i;
+        for(const auto &neighbor : i_neighbors)
+        {
+          pairNeighbor[1] = neighbor;
+          count(structure, pairNeighbor);
+        }
+
+    }
+
+}
+
+
+/**
 Counts clusters given this compact form of latticeneighbors (see ManybodyNeighborlist for more details)
 */
 // build(const Neighborlist &nl, int index, int order, bool);
