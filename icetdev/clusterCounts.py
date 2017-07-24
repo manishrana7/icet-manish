@@ -1,4 +1,5 @@
 from example import ClusterCounts
+from example import LatticeNeighbor
 from icetdev.structure import structure_from_atoms
 from icetdev.neighborlist import Neighborlist
 from icetdev.manybodyNeighborlist import ManybodyNeighborlist
@@ -63,14 +64,13 @@ def __count_clusters(self, atoms=None, structure=None, nl=None, mbnl=None, cutof
 
     # loop over the indices in the structure, create the mbnl for each index
     # and count each index
-    for lattice_index in range(structure.size()):
-        lattice_neigbhors = mbnl.build(nl, lattice_index, order, bothways)
-        # for latNbrs in lattice_neigbhors:
-        #     for latnbrComb in latNbrs[1]:
-        #         for latnbr in latNbrs[0]:
-        #             print(latnbr.index, latnbr.unitcellOffset, end=' ')
-        #         print(latnbrComb.index, latnbrComb.unitcellOffset)
-        self.count_lattice_neighbors(structure, lattice_neigbhors)
+    if order > 2:    
+        for lattice_index in range(structure.size()):
+            lattice_neigbhors = mbnl.build(nl, lattice_index, order, bothways)
+            self.count_lattice_neighbors(structure, lattice_neigbhors)
+
+    #Count the pairs    
+    self.count_pairs(structure, nl)
     # return all objects that might have been created here for possible reuse
     return structure, nl, mbnl, order
 
