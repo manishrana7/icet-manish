@@ -36,7 +36,7 @@ std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>
     currentOriginalNeighbors.push_back(LatticeNeighbor(index, zeroVector)); // index is always first index
 
     combineToHigherOrder(nl, manybodyNeighborIndices, Ni, currentOriginalNeighbors, c, saveBothWays, maxOrder);
-    // }
+    
 
     return manybodyNeighborIndices;
 }

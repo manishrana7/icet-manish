@@ -6,7 +6,7 @@ import numpy as np
 
 """
 This is a python implementation of icet's  manybody neighborlist.
-This is used both as a tester of the c++ version and also a venue
+This is used both as a tester of the c++ version and also as a venue
 to try out new functionalities.
 
 
