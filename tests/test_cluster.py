@@ -3,7 +3,7 @@ import numpy as np
 
 # set up a test cluster
 sites = np.array([0, 0, 0])
-distances = np.array([3.0, 1.0, 0.0])
+distances = np.array([.0, 1.0, 3.0])
 cluster = it.Cluster(sites, distances)
 
 
@@ -17,7 +17,7 @@ assert cluster.get_count([0, 0, 0]) == 1, "first count is one"
 
 # test getters
 assert (cluster.get_distances() == distances).all(
-), "The distances should be equal"
+), "The distances should be equal, {} {}".format(cluster.get_distances(), distances)
 
 assert (cluster.get_sites() == sites).all(), "The sites should be equal"
 
@@ -28,7 +28,7 @@ sites_big = np.array([10, 10, 10])
 distances_big = np.array([10, 10, 10])
 cluster_big = it.Cluster(sites_big, distances_big)
 
-assert cluster < cluster_big
+assert cluster < cluster_big, "cluster_big is not bigger"
 
 # try distances equal but sites different
 
@@ -38,7 +38,7 @@ cluster_slightly_bigger = it.Cluster(
     sites_slightly_bigger, distances_slightly_bigger)
 
 
-assert cluster_big < cluster_slightly_bigger
+assert cluster_big < cluster_slightly_bigger, "cluster slightly bigger is not bigger"
 
 # try distances different but sites same
 
