@@ -6,10 +6,12 @@ from ase import Atoms
 from ase.neighborlist import NeighborList
 from ase.build import bulk
 
-neighbor_cutoff = 5
+neighbor_cutoff = 6
 
 #ASE neighborlist
 atoms = bulk("Al","fcc",a=2).repeat(3)
+atoms = bulk('Ti', "bcc", a=3.321).repeat(2)
+
 atoms.pbc = [True,False,True]
 structure = structure_from_atoms(atoms)
 #skin here should be thought of as DISTTOL in icet
@@ -54,3 +56,7 @@ for i,offset in zip(indices, offsets):
     assert len(eq_indices) == 1
     assert i == ase_indices[ eq_indices[0] ]
 
+#test that the number of neighbors of  first and last is equal.
+first_neighbors = nl.get_neighbors(0)
+last_neighbors = nl.get_neighbors(len(atoms)-1)
+assert len(first_neighbors) == len(last_neighbors)

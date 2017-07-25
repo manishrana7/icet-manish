@@ -10,7 +10,7 @@ from icetdev.structure import *
 from tests import manybodyNeighborlistTester
 
 #note that currently test at row 44 fails if cutoff is 6.1
-neighbor_cutoff = 7.1
+neighbor_cutoff = 6
 
 # set ut atoms and icet structure
 a = bulk('Ti', "bcc", a=3.321).repeat(2)
@@ -46,11 +46,12 @@ order = 3
 bothways = True
 index1 = 0
 index2 = len(a) - 1
-nbrs1 = mbnl.build(nl, index1, order, True)
-nbrs2 = mbnl.build(nl, index2, order, True)
-#print(len(nbrs1), len(nbrs2)) #debug
+nbrs1 = mbnl.build(order*[nl], index1, True)
+nbrs2 = mbnl.build(order*[nl], index2, True)
+#print(nbrs1, nbrs2) #debug
+
 assert len(nbrs1) == len(
-    nbrs2), "bothways = True should give same number of neigbhors independent on what index you look at"
+    nbrs2), "bothways = True should give same number of neigbhors independent on what index you look at. {} != {}".format(len(nbrs1), len(nbrs2))
 
 
 # get manybodyNeighbors to third order
@@ -69,7 +70,7 @@ for i in range(len(a)):
         index = i
         order = j
         nbrs_tester = mbnl_T.build(ase_nl, index, order, bothways)
-        nbrs_cpp = mbnl.build(nl, index, order, bothways)
+        nbrs_cpp = mbnl.build(order*[nl], index, bothways)
         assert len(nbrs_cpp) == len(nbrs_cpp)
 
 #test that bothways = false also works
@@ -79,7 +80,7 @@ for i in range(len(a)):
         index = j
         order = i
         nbrs_tester = mbnl_T.build(ase_nl, index, order, bothways)
-        nbrs_cpp = mbnl.build(nl, index, order, bothways)
+        nbrs_cpp = mbnl.build(order*[nl], index, bothways)
         assert len(nbrs_cpp) == len(nbrs_cpp)
 
 

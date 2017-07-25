@@ -57,10 +57,33 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
     {
         //if j is smaller than last added site then continue
         // if bothways = True then don't compare to first
-        if ((!saveBothWays && currentOriginalNeighbors.size() == 1) && j < currentOriginalNeighbors.back())
+        bool cont = false;
+
+        if( saveBothWays )
+        {
+            if(currentOriginalNeighbors.size() > 1)
+            {
+                if(j < currentOriginalNeighbors.back())
+                {
+                    cont = true;
+                }
+            }
+        }
+        else
+        {
+            if(j < currentOriginalNeighbors.back()) 
+            {
+                cont = true;
+            }
+        }
+        if(cont)
         {
             continue;
         }
+        // if ((!saveBothWays && currentOriginalNeighbors.size() == 1) && j < currentOriginalNeighbors.back())
+        // {
+        //     continue;
+        // }
 
         auto originalNeighborCopy = currentOriginalNeighbors;
         originalNeighborCopy.push_back(j); // put j in originalNeigbhors
@@ -71,10 +94,15 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
         translateAllNi(Nj, j.unitcellOffset);
 
         //exclude smaller neighbors
-        const auto N_j_filtered = getFilteredNj(Nj, j);
+        if(!saveBothWays)
+        {
+            Nj = getFilteredNj(Nj, j);
+        }
+   
+        
 
         //construct the intersection
-        const auto intersection_N_ij = getIntersection(Ni, N_j_filtered);
+        const auto intersection_N_ij = getIntersection(Ni, Nj);
 
         if (originalNeighborCopy.size() + 1 < maxOrder)
         {

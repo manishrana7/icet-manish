@@ -73,12 +73,14 @@ class manybodyNeighborlistTester():
             N_j_filtered = self.filter_Ni_from_smaller(N_j_offset, j)
             intersection_ij = self.get_intersection(Ni, N_j_filtered)
 
+            if len(intersection_ij) > 0:
+                manybody_neighbor_indices.append(
+                [originalNeighborCopy, intersection_ij])
+
+
             if len(originalNeighborCopy) + 1 < order:
                 self.combine_to_higher_order(
                     nl, manybody_neighbor_indices, intersection_ij, originalNeighborCopy, c + 1, bothways, order)
-            if len(intersection_ij) > 0:
-                manybody_neighbor_indices.append(
-                    [originalNeighborCopy, intersection_ij])
 
     def get_intersection(self, Ni, Nj):
         """
