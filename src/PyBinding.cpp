@@ -44,6 +44,8 @@ PYBIND11_PLUGIN(example)
         .def("build", &Neighborlist::build)
         .def("is_neighbor",&Neighborlist::isNeighbor)
         .def("get_neighbors",&Neighborlist::getNeighbors)
+        .def("size",&Neighborlist::size)
+
         ;
            
    py::class_<ManybodyNeighborlist>(m, "ManybodyNeighborlist")
@@ -59,8 +61,7 @@ PYBIND11_PLUGIN(example)
      .def("get_count", &Cluster::getCount)
      .def("get_sites", &Cluster::getSites)
      .def("get_distances", &Cluster::getDistances)
-     .def("print", &Cluster::print)
-
+     .def("print", &Cluster::print)     
      .def(py::self < py::self)
      ;
 
@@ -86,6 +87,7 @@ PYBIND11_PLUGIN(example)
      .def("count_singlets", &ClusterCounts::countSinglets)
      .def("count_pairs", &ClusterCounts::countPairs)
      .def("count", &ClusterCounts::count)
+     .def("size", &ClusterCounts::size)
      .def("reset", &ClusterCounts::reset)
      .def("get_cluster_counts",&ClusterCounts::getClusterCounts)
      .def("print", &ClusterCounts::print)

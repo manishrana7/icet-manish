@@ -5,7 +5,7 @@ from icetdev.neighborlist import Neighborlist
 from icetdev.manybodyNeighborlist import ManybodyNeighborlist
 
 
-def __count_clusters(self, atoms=None, structure=None, nl=None, mbnl=None, cutoffs=None,
+def __count_clusters(self, atoms=None, structure=None, neighborlists=None, mbnl=None, cutoffs=None,
                      reset=True, order=None):
     """
     Counts clusters in either atoms or structure
@@ -16,8 +16,8 @@ def __count_clusters(self, atoms=None, structure=None, nl=None, mbnl=None, cutof
         ASE atoms object (bi-optional) need atleast this or structure
     structure:
         icet structure object (bi-optional) need atleast this or atoms
-    nl:
-        icet neighborlist object
+    neighborlists:
+        array/list of icet neighborlist object
         if None: then it will be created
     mbnl:
         icet manybody neighborlist
@@ -46,13 +46,21 @@ def __count_clusters(self, atoms=None, structure=None, nl=None, mbnl=None, cutof
         else:
             structure = structure_from_atoms(atoms)
 
-    if nl is None:
+    if neighborlists is None:
+        neighborlists = []
         if cutoffs is None:
             raise Exception(
                 "Error: both nl and cutoffs is None in count clusters")
         else:
-            nl = Neighborlist(max(cutoffs))
-    nl.build(structure)
+            for co in cutoffs:
+                nl = Neighborlist(co)
+                neighborlists.append(nl)
+
+    # build the neighborlists
+    for nl in neighborlists:
+        nl.build(structure)
+    
+        
     if cutoffs is None:
         if order is None:
             raise Exception(
@@ -64,19 +72,20 @@ def __count_clusters(self, atoms=None, structure=None, nl=None, mbnl=None, cutof
 
     # loop over the indices in the structure, create the mbnl for each index
     # and count each index
-    if order > 2:    
-        for lattice_index in range(structure.size()):
-            lattice_neigbhors = mbnl.build(nl, lattice_index, order, bothways)
+    if order > 2:
+        for lattice_index in range(structure.size()):            
+            lattice_neigbhors = mbnl.build(neighborlists, lattice_index, bothways)
             self.count_lattice_neighbors(structure, lattice_neigbhors)
 
-    #Count the pairs    
-    self.count_pairs(structure, nl)
 
-    #count the singlets
+    # Count the pairs
+    self.count_pairs(structure, neighborlists[0])
+
+    # count the singlets
     self.count_singlets(structure)
-    
+
     # return all objects that might have been created here for possible reuse
-    return structure, nl, mbnl, order
+    return structure, neighborlists, mbnl, order
 
 
 ClusterCounts.count_clusters = __count_clusters

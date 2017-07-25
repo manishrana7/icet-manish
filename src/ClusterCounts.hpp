@@ -36,6 +36,10 @@ public:
     return _clusterCounts;
   }
 
+  size_t size() const
+  {
+    return _clusterCounts.size();
+  }
   
   void reset()
   {

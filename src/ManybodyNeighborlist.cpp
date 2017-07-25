@@ -23,20 +23,20 @@
     otherwise only i,j,k will be saved if i < j < k
 */
 
-std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> ManybodyNeighborlist::build(const Neighborlist &nl, int index, int maxOrder, bool saveBothWays)
+std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> ManybodyNeighborlist::build(const std::vector<Neighborlist> &neighborlists, int index, bool saveBothWays)
 {
 
     std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> manybodyNeighborIndices;
-    auto Ni = nl.getNeighbors(index);
-    int numberOfSites = nl.size();
+    for(size_t c = 2; c < neighborlists.size()+2; c++)
+    {
+        auto Ni = neighborlists[c-2].getNeighbors(index);
+        int numberOfSites = neighborlists[c-2].size();
+        Vector3d zeroVector = {0.0, 0.0, 0.0};
+        std::vector<LatticeNeighbor> currentOriginalNeighbors;
+        currentOriginalNeighbors.push_back(LatticeNeighbor(index, zeroVector)); // index is always first index
 
-    int c = 2;
-    Vector3d zeroVector = {0.0, 0.0, 0.0};
-    std::vector<LatticeNeighbor> currentOriginalNeighbors;
-    currentOriginalNeighbors.push_back(LatticeNeighbor(index, zeroVector)); // index is always first index
-
-    combineToHigherOrder(nl, manybodyNeighborIndices, Ni, currentOriginalNeighbors, c, saveBothWays, maxOrder);   
-
+        combineToHigherOrder(neighborlists[c-2], manybodyNeighborIndices, Ni, currentOriginalNeighbors, saveBothWays, c);   
+    }
     return manybodyNeighborIndices;
 }
 
@@ -50,7 +50,7 @@ std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>
 */
 void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
                                                 std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &manybodyNeighborIndices,
-                                                const std::vector<LatticeNeighbor> &Ni, std::vector<LatticeNeighbor> &currentOriginalNeighbors, int order, bool saveBothWays, const int maxOrder)
+                                                const std::vector<LatticeNeighbor> &Ni, std::vector<LatticeNeighbor> &currentOriginalNeighbors, bool saveBothWays, const int maxOrder)
 {
 
     for (const auto &j : Ni)
@@ -78,10 +78,10 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
 
         if (originalNeighborCopy.size() + 1 < maxOrder)
         {
-            combineToHigherOrder(nl, manybodyNeighborIndices, intersection_N_ij, originalNeighborCopy, order++, saveBothWays, maxOrder);
+            combineToHigherOrder(nl, manybodyNeighborIndices, intersection_N_ij, originalNeighborCopy, saveBothWays, maxOrder);
         }
 
-        if (intersection_N_ij.size() > 0)
+        if (intersection_N_ij.size() > 0 && originalNeighborCopy.size() == (maxOrder - 1) )
         {
             manybodyNeighborIndices.push_back(std::make_pair(originalNeighborCopy, intersection_N_ij));
         }
