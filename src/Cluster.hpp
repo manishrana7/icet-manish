@@ -345,6 +345,10 @@ class Cluster
     */
     void sortCluster()
     {
+        if(_distances.size()==0)
+        {
+            return;
+        }
         std::vector<I_Neighbors> first_dists(_sites.size());
 
         for (int i = 0; i < _sites.size(); i++)

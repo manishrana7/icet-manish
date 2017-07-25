@@ -71,6 +71,10 @@ def __count_clusters(self, atoms=None, structure=None, nl=None, mbnl=None, cutof
 
     #Count the pairs    
     self.count_pairs(structure, nl)
+
+    #count the singlets
+    self.count_singlets(structure)
+    
     # return all objects that might have been created here for possible reuse
     return structure, nl, mbnl, order
 

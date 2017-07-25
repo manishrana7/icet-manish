@@ -11,3 +11,4 @@ from .manybodyNeighborlist import *
 from .cluster import *
 from .permutationMap import *
 from .clusterCounts import *
+from .clusterspace import *

@@ -13,11 +13,31 @@
 // }
 
 /**
-Counts all the pairs using the neigbhorlist
-
+    Count all the singlets using only the structure
 */
 
-void ClusterCounts::count_pairs(const Structure &structure, const Neighborlist &neighborlist)
+void ClusterCounts::countSinglets(const Structure &structure)
+{    
+    std::vector<int> sites(1);
+    std::vector<int> elements(1);
+    std::vector<double> distances(0); //empty for singlet
+
+    for(size_t i=0; i < structure.size(); i++)
+    {
+        sites[0] = structure.getSite(i);
+        elements[0] = structure.getElement(i);
+
+        Cluster cluster = Cluster(sites, distances);
+        _clusterCounts[cluster][elements] += 1;
+    }
+}
+
+
+
+/**
+Counts all the pairs using the neigbhorlist
+*/
+void ClusterCounts::countPairs(const Structure &structure, const Neighborlist &neighborlist)
 {   
     Vector3d zeroVector = {0.0, 0.0, 0.0};
 
@@ -83,6 +103,5 @@ void ClusterCounts::count(const Structure &structure,
         }
     }
     Cluster cluster = Cluster(sites, distances);
-    //cluster.print();
     _clusterCounts[cluster][elements] += 1;
 }

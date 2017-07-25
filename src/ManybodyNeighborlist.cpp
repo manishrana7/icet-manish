@@ -35,11 +35,13 @@ std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>
     std::vector<LatticeNeighbor> currentOriginalNeighbors;
     currentOriginalNeighbors.push_back(LatticeNeighbor(index, zeroVector)); // index is always first index
 
-    combineToHigherOrder(nl, manybodyNeighborIndices, Ni, currentOriginalNeighbors, c, saveBothWays, maxOrder);
-    
+    combineToHigherOrder(nl, manybodyNeighborIndices, Ni, currentOriginalNeighbors, c, saveBothWays, maxOrder);   
 
     return manybodyNeighborIndices;
 }
+
+
+
 
 /*
     for each j in Ni construct the intersect of N_j and N_i = N_ij.
@@ -50,7 +52,7 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
                                                 std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &manybodyNeighborIndices,
                                                 const std::vector<LatticeNeighbor> &Ni, std::vector<LatticeNeighbor> &currentOriginalNeighbors, int order, bool saveBothWays, const int maxOrder)
 {
-    NeighborPairCompare comp;
+
     for (const auto &j : Ni)
     {
         //if j is smaller than last added site then continue

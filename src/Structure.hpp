@@ -102,7 +102,7 @@ class Structure
             errorMessage += std::to_string(_uniqueSites.size());
 
             throw std::out_of_range(errorMessage);
-        }        
+        }
         return _uniqueSites[i];
 
     }
