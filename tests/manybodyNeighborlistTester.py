@@ -70,8 +70,9 @@ class manybodyNeighborlistTester():
 
             N_j_offset = self.translate_all_Ni(
                 self.get_Ni_from_nl(nl, j[0]), j[1])
-            N_j_filtered = self.filter_Ni_from_smaller(N_j_offset, j)
-            intersection_ij = self.get_intersection(Ni, N_j_filtered)
+            if not bothways:
+                N_j_offset = self.filter_Ni_from_smaller(N_j_offset, j)
+            intersection_ij = self.get_intersection(Ni, N_j_offset)
 
             if len(intersection_ij) > 0:
                 manybody_neighbor_indices.append(
