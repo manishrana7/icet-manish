@@ -15,9 +15,6 @@ these positions and the current rotational/translational symmetries.
 
 void PermutationMap::build(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &fractionalPositions)
 {
-
-    //std::vector<std::vector<Vector3d>> _permutatedPositons;
-    //std::cout << "trans size " << _translations.size() << " rot size " << _rotations.size() << std::endl;
     _permutatedPositions.clear();
     _permutatedPositions.resize(fractionalPositions.rows());
     for (size_t i = 0; i < _translations.size(); i++) //column
@@ -28,5 +25,5 @@ void PermutationMap::build(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &fr
             roundVector3d(permutatedPos);
             _permutatedPositions[j].push_back(permutatedPos);
         }
-    }    
+    }
 }

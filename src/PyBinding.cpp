@@ -31,6 +31,8 @@ PYBIND11_PLUGIN(example)
       .def("get_position", &Structure::getPosition)
       .def("get_distance", &Structure::getDistance)
       .def("get_distance2", &Structure::getDistance2)
+      .def("find_index_of_position_pybind", &Structure::findIndexOfPosition,
+        py::arg("position"), py::arg("position_tolerance")= 1e-6 )
       .def("has_pbc", &Structure::has_pbc)
       .def("get_pbc", &Structure::get_pbc)
       .def("set_pbc", &Structure::set_pbc)

@@ -39,7 +39,7 @@ class Structure
 
         return (pos1 - pos2).norm();
     }
-   
+
     // Getters - Setters
     void setPositions(const Eigen::Matrix<double, Dynamic, 3> &positions)
     {
@@ -85,17 +85,16 @@ class Structure
 
     int getElement(const size_t i) const
     {
-        if ( i >= _elements.size())
+        if (i >= _elements.size())
         {
             std::string errorMessage = "Error: out of range in function get element:index : elements.size()  _elements.size() ";
             errorMessage += std::to_string(i) + " : ";
             errorMessage += std::to_string(_elements.size());
             throw std::out_of_range(errorMessage);
-        }        
+        }
 
         return _elements[i];
     }
-
 
     void setUniqueSites(const std::vector<int> &sites)
     {
@@ -106,10 +105,10 @@ class Structure
     {
         return _uniqueSites;
     }
-    
+
     int getSite(const size_t i) const
     {
-       if ( i >= _uniqueSites.size())
+        if (i >= _uniqueSites.size())
         {
             std::string errorMessage = "Error: out of range in function getSite : index :  _uniqueSites.size() ";
             errorMessage += std::to_string(i) + " : ";
@@ -118,7 +117,6 @@ class Structure
             throw std::out_of_range(errorMessage);
         }
         return _uniqueSites[i];
-
     }
 
     bool has_pbc(const int k) const
@@ -149,9 +147,30 @@ class Structure
         if (_elements.size() != _positions.rows())
         {
             throw std::out_of_range("Error: Positions and elements do not match in size");
-        }        
-        return( _elements.size());
-    }    
+        }
+        return (_elements.size());
+    }
+
+    /**
+    Search for the position and returns the index of the found position.
+
+    If it does not find the position it will return -1
+
+    argument: const double position_tolerance if the norm of difference of positions is less than this
+    then equality is assumed.
+    */
+    int findIndexOfPosition(const Vector3d &position, const double position_tolerance = 1e-6)
+    {
+        for (size_t i = 0; i < _positions.rows(); i++)
+        {
+            if ((_positions.row(i).transpose() - position).norm() < position_tolerance)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
 
   private:
     Eigen::Matrix<double, Dynamic, 3, RowMajor> _positions;
@@ -161,27 +180,23 @@ class Structure
     std::vector<bool> _pbc;
     std::vector<int> _uniqueSites;
 
-std::vector<int> convertStrElements( const std::vector<std::string> &elements) 
-{
-    std::vector<int> intElements(elements.size());
-    for (int i = 0; i < elements.size(); i++)
+    std::vector<int> convertStrElements(const std::vector<std::string> &elements)
     {
-        intElements[i] = PeriodicTable::strInt[elements[i]];
+        std::vector<int> intElements(elements.size());
+        for (int i = 0; i < elements.size(); i++)
+        {
+            intElements[i] = PeriodicTable::strInt[elements[i]];
+        }
+        return intElements;
     }
-    return intElements;
-}
 
-std::vector<std::string> convertIntElements( const std::vector<int> &elements) 
-{
-    std::vector<std::string> strElements(elements.size());
-    for (int i = 0; i < elements.size(); i++)
+    std::vector<std::string> convertIntElements(const std::vector<int> &elements)
     {
-        strElements[i] = PeriodicTable::intStr[elements[i]];
+        std::vector<std::string> strElements(elements.size());
+        for (int i = 0; i < elements.size(); i++)
+        {
+            strElements[i] = PeriodicTable::intStr[elements[i]];
+        }
+        return strElements;
     }
-    return strElements;
-}
-
-
-
-
 };

@@ -1,4 +1,5 @@
 import numpy as np
+from icetdev.latticeNeighbor import LatticeNeighbor
 
 
 def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
@@ -19,3 +20,32 @@ def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
                 fractional[:, i] %= 1.0
 
     return fractional
+
+
+def find_latticeNeighbor_from_position(structure, position):
+    """
+    Get lattice neighbor from position
+    """
+    print(position)
+    fractional = np.linalg.solve(structure.cell.T, np.array(position).T).T
+
+    print(fractional)
+    for i, periodic in enumerate(structure.pbc):
+        if periodic:
+            fractional[i] %= 1.0
+            fractional[i] %= 1.0
+
+    unit_cell_offset = [int(x) for x in fractional]
+    print(position, unit_cell_offset, position - unit_cell_offset)
+    remainder = position - unit_cell_offset
+
+    try:
+        index = structure.find_index_of_position(remainder)
+    except:
+        print("error did not find index with pos: {}".format(remainder))
+        print("position in structure are:")
+        print(structure.positions)
+        exit(1)
+
+    latNbr = LatticeNeighbor(index, unit_cell_offset)
+    return latNbr
