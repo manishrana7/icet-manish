@@ -4,7 +4,7 @@ import numpy as np
 # set up a test cluster
 sites = np.array([0, 0, 0])
 distances = np.array([.0, 1.0, 3.0])
-cluster = it.Cluster(sites, distances)
+cluster = it.Cluster( distances=distances, sites=sites, sortedCluster=True)
 
 
 assert cluster.get_count(
@@ -15,7 +15,7 @@ cluster.count([0, 0, 0])
 
 assert cluster.get_count([0, 0, 0]) == 1, "first count is one"
 
-# test getters
+# test getters (note that the distances are allready sorted otherwise they will reorder to lowest form)
 assert (cluster.get_distances() == distances).all(
 ), "The distances should be equal, {} {}".format(cluster.get_distances(), distances)
 

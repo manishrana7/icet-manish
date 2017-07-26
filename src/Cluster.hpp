@@ -116,7 +116,7 @@ struct I_Neighbors
         std::map<std::pair<double, int>, std::vector<int>> equalIndicesMap;
         for (int i = 0; i < _distances.size(); i++)
         {
-            equalIndicesMap[std::make_pair(_distances[i], _sites[i])].push_back(i+1); 
+            equalIndicesMap[std::make_pair(_distances[i], _sites[i])].push_back(i + 1);
         }
 
         std::vector<std::vector<int>> equalIndices;
@@ -246,16 +246,25 @@ struct I_Neighbors
 class Cluster
 {
   public:
-    Cluster()
-    {
-        //empty constructor
-    }
+    // Cluster()
+    // {
+    //     //empty constructor
+    // }
 
-    Cluster(std::vector<int> &sites, std::vector<double> &distances)
+    Cluster(std::vector<int> &sites, std::vector<double> &distances, const bool sortedCluster = true, const int clusterTag = 0)
     {
+
         _sites = sites;
         _distances = distances;
-        sortCluster();
+        _sortedCluster = sortedCluster;
+        _clusterTag = clusterTag;
+        if (_sortedCluster)
+        {
+            sortCluster();
+        }
+
+        //Run this if you doubt the sorting. It will bruteforce all
+        //possible ways to see if there is another way to rearrange the cluster into a more "lower form"
         //validateSorting();
     }
 
@@ -345,7 +354,7 @@ class Cluster
     */
     void sortCluster()
     {
-        if(_distances.size()==0)
+        if (_distances.size() == 0)
         {
             return;
         }
@@ -913,7 +922,6 @@ class Cluster
         findMinimumIndicePermutation(0, identicalIndices, minimumOrder, trial_order, min_distances, min_sites, min_indices);
 
         return std::make_tuple(min_distances, min_sites, min_indices);
-
     }
 
     void findMinimumIndicePermutation(int currentIndiceSet,
@@ -928,7 +936,7 @@ class Cluster
         //trial_order = minimumOrder;
         do
         {
-           // trial_order = minimumOrder;
+            // trial_order = minimumOrder;
             for (int i = 0; i < identicalIndiceSet.size(); i++)
             {
                 trial_order[identicalIndiceSet[i]] = minimumOrder[identicalIndices[currentIndiceSet][i]];
@@ -1090,6 +1098,17 @@ class Cluster
 
     friend bool operator==(const Cluster &c1, const Cluster &c2)
     {
+        if (c1.isSorted() != c2.isSorted())
+        {
+            throw std::runtime_error("Undefined behavior: comparing sorted and non-sorted cluster");
+        }
+
+        //Non-sorted clusters uses clustertag for comparison
+        if (!c1.isSorted())
+        {
+            return c1.getClusterTag() == c2.getClusterTag();
+        }
+
         ///@TODO: Think if this is enough
         if (c1._sites != c2._sites)
         {
@@ -1107,6 +1126,17 @@ class Cluster
     // comparison operator for sortable clusters
     friend bool operator<(const Cluster &c1, const Cluster &c2)
     {
+
+        if (c1.isSorted() != c2.isSorted())
+        {
+            throw std::runtime_error("Undefined behavior: comparing sorted and non-sorted cluster");
+        }
+
+        if (!c1.isSorted())
+        {
+            return c1.getClusterTag() < c2.getClusterTag();
+        }
+
         //1) compare number of bodies in cluster
         if (c1._sites.size() < c2._sites.size())
         {
@@ -1166,10 +1196,21 @@ class Cluster
         std::cout << std::endl;
     }
 
+    bool isSorted() const
+    {
+        return _sortedCluster;
+    }
+    int getClusterTag() const
+    {
+        return _clusterTag;
+    }
+
   private:
     std::vector<int> _sites;
     std::vector<double> _distances;
     std::map<std::vector<int>, int> _element_counts;
+    bool _sortedCluster;
+    int _clusterTag;
     double symprec;
     double roundDouble(const double &double_value)
     {
