@@ -29,6 +29,8 @@ frac_coordinates = get_scaled_positions(np.array(pos_neighbors), cell=atoms.cell
 #print to see what happens
 print("#1: frac pos #2: position #3: fpos*cell")
 for fpos, pos in zip(frac_coordinates,pos_neighbors):
-    print(fpos, pos, np.dot(fpos, atoms.cell), find_latticeNeighbor_from_position(structure, pos) )
+    lat_nbr = find_latticeNeighbor_from_position(structure, pos)
+    lat_pos = structure.positions[lat_nbr.index] + np.dot(lat_nbr.unitcellOffset, structure.cell)
+    print(fpos, pos, np.dot(fpos, atoms.cell), lat_nbr, lat_pos-pos )
 
 
