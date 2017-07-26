@@ -36,30 +36,56 @@ class PermutationMap
     /**
      Returns indices for unique positions as well as the representative positions,
      same indices share the same indice
-
     */
-    std::pair<std::vector<std::vector<int>>, std::vector<Vector3d>> getIndicedPermutatedPositions()
+    // std::pair<std::vector<std::vector<int>>, std::vector<Vector3d>> getIndicedPermutatedPositions()
+    // {
+    //     std::vector<Vector3d> uniquePositions;
+    //     std::vector<std::vector<int>> indicePositions;
+    //     for (const auto &posRow : _permutatedPositions)
+    //     {
+    //         std::vector<int> indiceRow(posRow.size());
+    //         int indiceCount = 0;
+    //         for (const Vector3d &pos : posRow)
+    //         {
+    //             const auto find = std::find(uniquePositions.begin(), uniquePositions.end(), pos);
+    //             if (find == uniquePositions.end())
+    //             {
+    //                 uniquePositions.push_back(pos);
+    //                 indiceRow[indiceCount++] = uniquePositions.size() - 1;
+    //             }
+    //             else
+    //             {
+    //                 indiceRow[indiceCount++] = std::distance(uniquePositions.begin(), find);
+    //             }
+    //         }
+    //         indicePositions.push_back(indiceRow);
+    //     }
+
+    //     return std::make_pair(indicePositions, uniquePositions);
+    // }
+
+
+   std::pair<std::vector<std::vector<int>>, std::vector<Vector3d>> getIndicedPermutatedPositions()
     {
         std::vector<Vector3d> uniquePositions;
-        std::vector<std::vector<int>> indicePositions;
-        for (const auto &posRow : _permutatedPositions)
+        std::vector<std::vector<int>> indicePositions(_permutatedPositions.size(), std::vector<int>(_permutatedPositions[0].size()));
+        for (size_t row = 0; row <_permutatedPositions.size(); row++)
         {
-            std::vector<int> indiceRow(posRow.size());
-            int indiceCount = 0;
-            for (const Vector3d &pos : posRow)
+            for (size_t col=0; col < _permutatedPositions[0].size(); col++)
             {
+        
+                Vector3d pos = _permutatedPositions[row][col];
                 const auto find = std::find(uniquePositions.begin(), uniquePositions.end(), pos);
                 if (find == uniquePositions.end())
                 {
                     uniquePositions.push_back(pos);
-                    indiceRow[indiceCount++] = uniquePositions.size() - 1;
-                }
+                    indicePositions[row][col] = uniquePositions.size() - 1;
+                }                
                 else
                 {
-                    indiceRow[indiceCount++] = std::distance(uniquePositions.begin(), find);
+                    indicePositions[row][col] = std::distance(uniquePositions.begin(), find);
                 }
             }
-            indicePositions.push_back(indiceRow);
         }
 
         return std::make_pair(indicePositions, uniquePositions);

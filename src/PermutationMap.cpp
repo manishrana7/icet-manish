@@ -17,19 +17,16 @@ void PermutationMap::build(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &fr
 {
 
     //std::vector<std::vector<Vector3d>> _permutatedPositons;
-    std::cout << "trans size " << _translations.size() << " rot size " << _rotations.size() << std::endl;
-
-    for (size_t i = 0; i < _translations.size(); i++)
+    //std::cout << "trans size " << _translations.size() << " rot size " << _rotations.size() << std::endl;
+    _permutatedPositions.clear();
+    _permutatedPositions.resize(fractionalPositions.rows());
+    for (size_t i = 0; i < _translations.size(); i++) //column
     {
-        std::vector<Vector3d> permutationPositionI; //do reserve instead
-        permutationPositionI.reserve(fractionalPositions.rows());
-        for (size_t j = 0; j < fractionalPositions.rows(); j++)
+        for (size_t j = 0; j < fractionalPositions.rows(); j++) //row
         {
             Vector3d permutatedPos = _translations[i].transpose() + fractionalPositions.row(j) * _rotations[i]; // transpose frac pos?
             roundVector3d(permutatedPos);
-
-            permutationPositionI.push_back(permutatedPos);
+            _permutatedPositions[j].push_back(permutatedPos);
         }
-        _permutatedPositions.push_back(permutationPositionI);
-    }
+    }    
 }

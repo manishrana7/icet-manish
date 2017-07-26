@@ -10,7 +10,7 @@ Neighborlist::Neighborlist(const double cutoff)
 void Neighborlist::build(const Structure &conf)
 {
     //resize the offsets and indices to number of atoms
-    int nbrOfSites = conf.getElements().size();
+    int nbrOfSites = conf.size();
     latticeIndices.resize(nbrOfSites);
     offsets.resize(nbrOfSites);
     _neighbors.resize(nbrOfSites);

@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include "PeriodicTable.hpp"
+#include "LatticeNeighbor.hpp"
 using namespace Eigen;
 
 namespace py = pybind11;
@@ -22,6 +23,8 @@ class Structure
 
     /**
         Returns the distance for index1 with unitcell offset offset 1 to index2 with unit-cell offset offset2
+
+        @TODO: use overloading here instead
     */
     double getDistance2(const int index1, const Vector3d offset1,
                         const int index2, const Vector3d offset2) const
@@ -41,6 +44,17 @@ class Structure
     void setPositions(const Eigen::Matrix<double, Dynamic, 3> &positions)
     {
         _positions = positions;
+    }
+
+    ///Get position from a lattice neighbor
+    Vector3d getPosition(const LatticeNeighbor &latticeNeighbor)
+    {
+        if (latticeNeighbor.index >= _positions.rows() || latticeNeighbor.index < 0)
+        {
+            throw std::out_of_range("Error: Tried accessing position at out of bound index. Structure::getPosition");
+        }
+        Vector3d position = _positions.row(latticeNeighbor.index) + latticeNeighbor.unitcellOffset.transpose() * _cell;
+        return position;
     }
 
     Eigen::Matrix<double, Dynamic, 3, RowMajor> getPositions() const
