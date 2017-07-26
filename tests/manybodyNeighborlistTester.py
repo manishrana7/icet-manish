@@ -57,12 +57,6 @@ class manybodyNeighborlistTester():
         for j in Ni:
             originalNeighborCopy = current_original_neighbors.copy()
 
-            # if self.nbrCompare(j, originalNeighborCopy[-1]) and (len(originalNeighborCopy) == 1 and not bothways):
-            #    continue
-            # print(len(originalNeighborCopy) == 1 , self.nbrCompare(j,
-            # originalNeighborCopy[-1]),bothways, (len(originalNeighborCopy) ==
-            # 1 and (not bothways and self.nbrCompare(j,
-            # originalNeighborCopy[-1])))
             if len(originalNeighborCopy) == 1 and (not bothways and self.nbrCompare(j, originalNeighborCopy[-1])):
                 continue
 
