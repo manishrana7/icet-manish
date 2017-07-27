@@ -16,7 +16,6 @@ namespace py = pybind11;
 
 ///@TODO: Think about renaming this to permutation matrix since it doesnt really map anything
 
-
 class PermutationMap
 {
   public:
@@ -40,22 +39,22 @@ class PermutationMap
      Returns indices for unique positions as well as the representative positions,
      same indices share the same position
     */
-   std::pair<std::vector<std::vector<int>>, std::vector<Vector3d>> getIndicedPermutatedPositions()
+    std::pair<std::vector<std::vector<int>>, std::vector<Vector3d>> getIndicedPermutatedPositions()
     {
         std::vector<Vector3d> uniquePositions;
         std::vector<std::vector<int>> indicePositions(_permutatedPositions.size(), std::vector<int>(_permutatedPositions[0].size()));
-        for (size_t row = 0; row <_permutatedPositions.size(); row++)
+        for (size_t row = 0; row < _permutatedPositions.size(); row++)
         {
-            for (size_t col=0; col < _permutatedPositions[0].size(); col++)
+            for (size_t col = 0; col < _permutatedPositions[0].size(); col++)
             {
-        
+
                 Vector3d pos = _permutatedPositions[row][col];
                 const auto find = std::find(uniquePositions.begin(), uniquePositions.end(), pos);
                 if (find == uniquePositions.end())
                 {
                     uniquePositions.push_back(pos);
                     indicePositions[row][col] = uniquePositions.size() - 1;
-                }                
+                }
                 else
                 {
                     indicePositions[row][col] = std::distance(uniquePositions.begin(), find);

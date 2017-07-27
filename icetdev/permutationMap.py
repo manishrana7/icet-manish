@@ -5,6 +5,7 @@ from ase import Atoms
 from ase.visualize import view
 from example import PermutationMap
 from icetdev.neighborlist import *
+from icetdev.latticeNeighbor import LatticeNeighbor
 from icetdev.structure import structure_from_atoms
 from icetdev.tools.geometry import get_scaled_positions
 
@@ -43,7 +44,11 @@ def __get_fractional_positions_from_nl(structure, neighborlist):
     """
     position_of_neighbors = []
     fractional_positions = []
+    latnbr_i = LatticeNeighbor(0, [0, 0, 0])
     for i in range(neighborlist.size()):
+        latnbr_i.index = i
+        position = structure.get_position(latnbr_i)
+        position_of_neighbors.append(position)
         for latNbr in neighborlist.get_neighbors(i):
             position = structure.get_position(latNbr)
             position_of_neighbors.append(position)
@@ -97,4 +102,4 @@ def permutation_maps_from_atoms(atoms, cutoffs=None, find_prim=True, verbosity=0
         if len(frac_positions) > 0:
             permutation_maps[i].build(frac_positions)
 
-    return permutation_maps
+    return permutation_maps, prim_structure
