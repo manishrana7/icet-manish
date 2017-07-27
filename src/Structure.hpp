@@ -159,7 +159,7 @@ class Structure
     argument: const double position_tolerance if the norm of difference of positions is less than this
     then equality is assumed.
     */
-    int findIndexOfPosition(const Vector3d &position, const double position_tolerance = 1e-6)
+    int findIndexOfPosition(const Vector3d &position, const double position_tolerance = 1e-6) const
     {
         for (size_t i = 0; i < _positions.rows(); i++)
         {
@@ -172,6 +172,58 @@ class Structure
         return -1;
     }
 
+    /**
+    Finds the LatticeNeigbhor object from the position.
+
+    The algorithm works by first extracting the fractional position.
+    From the fractional position the unitcelloffset is taken by rounding the fractional coordinates to the nearest integer.
+    When subtracting the fractional position with the unitcelloffset and taking the dot product with the cell 
+    the remainder position is found.
+
+    The index is found by searching for the remainder position in structure.
+
+    if no index is found a runtime_error gets thrown.
+    */
+    LatticeNeighbor findLatticeNeighborFromPosition(const Vector3d &position, const double position_tolerance = 1e-6) const
+    {
+
+        ///ldlt require positive or negative semidefinite cell
+        // std::cout<<"position "<< position<<std::endl;
+        // std::cout<<"cell "<< _cell<<std::endl;
+        Vector3d fractional = _cell.transpose().partialPivLu().solve(position);
+        // std::cout<<"fractional "<< fractional<<std::endl;
+        Vector3d unitcellOffset = {int(round(fractional[0])), int(round(fractional[1])), int(round(fractional[2]))};
+
+        Vector3d remainder = (fractional - unitcellOffset).transpose() * _cell;
+        // std::cout<<"remainder "<< remainder<<std::endl;
+
+        auto index = findIndexOfPosition(remainder, position_tolerance);
+        if (index == -1)
+        {
+            throw std::runtime_error("Did not find position in function findLatticeNeighborFromPosition in Structure");
+        }
+
+        LatticeNeighbor ret = LatticeNeighbor(index, unitcellOffset);
+        return ret;
+    }
+
+    /**
+    Finds a vector of lattice neigbhors from a vector of positions
+
+    */
+    std::vector<LatticeNeighbor> findLatticeNeighborsFromPositions(const std::vector<Vector3d> &positions, const double position_tolerance = 1e-6) const
+    {
+        std::vector<LatticeNeighbor> latNbrVector;
+        latNbrVector.reserve(positions.size());
+
+        for (const Vector3d position : positions)
+        {
+            latNbrVector.push_back(findLatticeNeighborFromPosition(position, position_tolerance));
+        }
+
+        return latNbrVector;
+    }
+
   private:
     Eigen::Matrix<double, Dynamic, 3, RowMajor> _positions;
     Eigen::Matrix3d _cell;
@@ -179,7 +231,6 @@ class Structure
     std::vector<std::string> _strelements;
     std::vector<bool> _pbc;
     std::vector<int> _uniqueSites;
-
     std::vector<int> convertStrElements(const std::vector<std::string> &elements)
     {
         std::vector<int> intElements(elements.size());
