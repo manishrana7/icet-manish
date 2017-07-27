@@ -31,7 +31,7 @@ class PermutationMap
     ///Build the permutationmap usng the input positions
     void build(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &positions);
 
-    std::vector<std::vector<Vector3d>> getPermutatedPositions()
+    std::vector<std::vector<Vector3d>> getPermutatedPositions() const
     {
         return _permutatedPositions;
     }

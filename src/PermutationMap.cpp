@@ -17,9 +17,9 @@ void PermutationMap::build(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &fr
 {
     _permutatedPositions.clear();
     _permutatedPositions.resize(fractionalPositions.rows());
-    for (size_t i = 0; i < _translations.size(); i++) //column
+    for (size_t j = 0; j < fractionalPositions.rows(); j++) //row
     {
-        for (size_t j = 0; j < fractionalPositions.rows(); j++) //row
+        for (size_t i = 0; i < _translations.size(); i++) //column
         {
             Vector3d permutatedPos = _translations[i].transpose() + fractionalPositions.row(j) * _rotations[i]; // transpose frac pos?
             roundVector3d(permutatedPos);
