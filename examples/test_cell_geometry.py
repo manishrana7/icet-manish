@@ -11,6 +11,7 @@ import numpy as np
 # ASE atoms
 atoms = bulk("Al", "fcc", a=2.0).repeat(1)
 atoms.append(Atom("Al",position=[0.5,0.5,0.5]))
+atoms.append(Atom("Al",position=[0.25,0.5,0.5]))
 
 #get neighborlist
 neighbor_cutoff = 4.0 #Ångström
