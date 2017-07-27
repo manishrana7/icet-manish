@@ -48,5 +48,5 @@ lat_nbrs = structure.findLatticeNeighborsFromPositions(pos_neighbors)
 
 
 t1 = time.time()
-print("time for finding latnbrs: ", round((t0-t1)*1e3,4))
+print("time for finding latnbrs: {} ms ".format( round((t0-t1)*1e3,4)))
 print("Found {} LatticeNeighbors".format(len(lat_nbrs)))

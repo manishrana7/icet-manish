@@ -13,3 +13,6 @@ cutoffs = [10]
 pm_maps, prim_structure = permutation_maps_from_atoms(atoms, cutoffs, verbosity=0)
 
 pm_matrix = pm_maps[0]
+
+#get mbnl....
+
