@@ -56,7 +56,11 @@ PYBIND11_PLUGIN(example)
     py::class_<ManybodyNeighborlist>(m, "ManybodyNeighborlist")
         .def(py::init<>())
         .def("calc_intersection", &ManybodyNeighborlist::getIntersection)
-        .def("build", &ManybodyNeighborlist::build);
+        .def("build", &ManybodyNeighborlist::build)
+        .def("buildFromPermutationMatrix", &ManybodyNeighborlist::buildFromPermutationMatrix)        
+        ;
+
+        
 
     py::class_<Cluster>(m, "Cluster")
         .def(py::init<std::vector<int> &, std::vector<double> &, const bool, const int>(), pybind11::arg("sites"),

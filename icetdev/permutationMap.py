@@ -102,4 +102,4 @@ def permutation_maps_from_atoms(atoms, cutoffs=None, find_prim=True, verbosity=0
         if len(frac_positions) > 0:
             permutation_maps[i].build(frac_positions)
 
-    return permutation_maps, prim_structure
+    return permutation_maps, prim_structure, neighborlists
