@@ -59,7 +59,7 @@ print("len of clusters ",len(clusters))
 
 
 clusterCounts = ClusterCounts()
-cutoffs[0] = 0
+
 clusterCounts.count_clusters(atoms=atoms, cutoffs=cutoffs)
 
 
