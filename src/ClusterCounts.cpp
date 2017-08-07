@@ -105,3 +105,32 @@ void ClusterCounts::count(const Structure &structure,
     Cluster cluster = Cluster(sites, distances);
     _clusterCounts[cluster][elements] += 1;
 }
+
+/**
+This counts clusters that are unsorted and is assigned an indice
+
+Get the indice of one set of indices and counts this
+*/
+// void ClusterCounts::countUnSorted(const Structure &structure,
+//                           const std::vector<LatticeNeighbor> &latticeNeighbors,)
+// {
+//     size_t clusterSize = latticeNeighbors.size();
+//     std::vector<int> sites(clusterSize);
+//     std::vector<double> distances;
+//     std::vector<int> elements(clusterSize);
+//     distances.reserve((clusterSize * (clusterSize - 1) / 2));
+//     for (size_t i = 0; i < latticeNeighbors.size(); i++)
+//     {
+//         sites[i] = structure.getSite(latticeNeighbors[i].index);
+//         elements[i] = structure.getElement(latticeNeighbors[i].index);
+//         for (size_t j = i+1; j < latticeNeighbors.size(); j++)
+//         {
+//             distances.push_back(roundDouble(structure.getDistance2(latticeNeighbors[i].index,
+//                                                                    latticeNeighbors[i].unitcellOffset,
+//                                                                    latticeNeighbors[j].index,
+//                                                                    latticeNeighbors[j].unitcellOffset)));
+//         }
+//     }
+//     Cluster cluster = Cluster(sites, distances);
+//     _clusterCounts[cluster][elements] += 1;
+// }

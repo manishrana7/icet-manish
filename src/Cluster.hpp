@@ -1226,7 +1226,7 @@ struct hash<Cluster>
     size_t
     operator()(const Cluster &k) const
     {
-
+            
         // Compute individual hash values for first,
         // second and third and combine them using XOR
         // and bit shifting:

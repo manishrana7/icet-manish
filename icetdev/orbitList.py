@@ -13,7 +13,7 @@ def __fractional_to_position(structure, row):
     return positions
 
 
-def __get_latNbr_permutation_matrix(structure, permutation_matrix, prune=True, verbosity=3):
+def __get_latNbr_permutation_matrix(structure, permutation_matrix, prune=True, verbosity=1):
     """
     Return a transformed permutation matrix with lattice neighbors instead of frac positions
 

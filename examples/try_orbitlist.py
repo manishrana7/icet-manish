@@ -12,7 +12,7 @@ from time import time
 atoms = bulk("Al", "fcc", a=2.0).repeat(1)
 
 
-cutoffs = [10,7]
+cutoffs = [5.1, 5.1]
 pm_maps, prim_structure, neighborlists = permutation_maps_from_atoms(atoms, cutoffs, verbosity=0)
 
 
@@ -27,7 +27,7 @@ row2 = pm[row2]
 
 # for l1,l2 in zip(row1, row2):
 #     print("dists : ",   np.linalg.norm(np.dot(l1-l2,prim_structure.cell)))
-# # exit(1)
+# exit(1)
 
 pm_lat_nbr = __get_latNbr_permutation_matrix(prim_structure, pm_matrix)
 
@@ -42,7 +42,7 @@ row2 = pm_lat_nbr[row2]
 #     # print(l1,l2)
 #     print("dists : ",   prim_structure.get_distance2(l1.index, l1.unitcellOffset, l2.index, l2.unitcellOffset) )
 
-# exit(1)    
+# exit(1)
 # print("col1")
 # for row in pm_lat_nbr:
 #     print(row[0])
@@ -55,16 +55,21 @@ row2 = pm_lat_nbr[row2]
 
 clusters = create_orbit_list(structure=prim_structure, permutation_matrix=pm_matrix, neighborlists=neighborlists)
 print("len of clusters ",len(clusters))
-# #get lattice neighbors
+#get lattice neighbors
 
 
 clusterCounts = ClusterCounts()
-cutoffs = [6, 6]
+cutoffs[0] = 0
 clusterCounts.count_clusters(atoms=atoms, cutoffs=cutoffs)
 
 
 print("Found {} clusters".format(clusterCounts.size()))
+# for cl in clusters:
+#     print(cl[0][2].unitcellOffset, np.dot(cl[0][2].unitcellOffset,prim_structure.cell.T))
+#print(clusters[0][0:4])
 
+# for clust_list in clusters:
+#     print(clust_list[0:3])
 
 
 #lattice_neighbors = get_all_lattice_neighbors(structure=prim_structure, cutoffs=cutoffs)

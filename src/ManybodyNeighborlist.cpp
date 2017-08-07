@@ -77,11 +77,21 @@ std::vector<std::vector<std::vector<LatticeNeighbor>>> ManybodyNeighborlist::bui
 
     //if [0,1,2] exists in taken_rows then these three rows (with columns) have been accounted for and should not be looked at
     std::vector<std::vector<int>> taken_rows;
-    auto col1 = getColumn1FromPM(permutation_matrix, false);
+    std::vector<LatticeNeighbor> col1 = getColumn1FromPM(permutation_matrix, false);
 
+    std::set<LatticeNeighbor> col1_uniques(col1.begin(), col1.end());
+    if (col1.size() != col1_uniques.size())
+    {
+        throw std::runtime_error("Found duplicates in column1 of permutation matrix");
+    }
+    // for (auto latnbr : col1_uniques)
+    // {
+    //     latnbr.print();
+    // }
+    std::cout<<"Size of col1 "<<col1.size()<<std::endl;
     for (size_t index = 0; index < neighborlists[0].size(); index++)
     {
-    
+        
         std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> mbnl_latnbrs = build(neighborlists, index, saveBothWays);
         for (const auto &mbnl_pair : mbnl_latnbrs)
         {
@@ -102,21 +112,33 @@ std::vector<std::vector<std::vector<LatticeNeighbor>>> ManybodyNeighborlist::bui
         }
     }
 
-for(int i =0; i < lattice_neighbors.size(); i++)
-{
-    std::sort(lattice_neighbors[i].begin(), lattice_neighbors[i].end());
-}
+    for (int i = 0; i < lattice_neighbors.size(); i++)
+    {
+        std::sort(lattice_neighbors[i].begin(), lattice_neighbors[i].end());
+    }
 
-    for(int i =0; i < lattice_neighbors.size(); i++)
+    for (int i = 0; i < lattice_neighbors.size(); i++)
+    {
+        for (int j = i + 1; j < lattice_neighbors.size(); j++)
         {
-            for(int j = i+1; j < lattice_neighbors.size(); j++)
+            if (lattice_neighbors[i] == lattice_neighbors[j])
             {
-                if ( lattice_neighbors[i] == lattice_neighbors[j])
-                {
-                    std::cout<<"Found duplicate"<<std::endl;
-                }
+                std::cout << "Found duplicate" << std::endl;
             }
         }
+    }
+    std::sort(taken_rows.begin(),taken_rows.end());
+    std::cout << "Taken rows: " << std::endl;
+    for (auto taken_row : taken_rows)
+    {
+        for (auto el : taken_row)
+        {
+            std::cout << el << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "=========" << std::endl;
+
     return lattice_neighbors;
 }
 
@@ -129,9 +151,11 @@ void ManybodyNeighborlist::addPermutationMatrixColumns(
     std::vector<std::vector<std::vector<LatticeNeighbor>>> &lattice_neighbors, std::vector<std::vector<int>> &taken_rows, const std::vector<LatticeNeighbor> &lat_nbrs, const std::vector<int> &pm_rows,
     const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<LatticeNeighbor> &col1) const
 {
+
     std::vector<std::vector<LatticeNeighbor>> columnLatticeNeighbors;
     columnLatticeNeighbors.reserve(permutation_matrix[0].size());
     columnLatticeNeighbors.push_back(lat_nbrs);
+
     taken_rows.push_back(pm_rows);
     for (size_t column = 1; column < permutation_matrix[0].size(); column++) //start at one since we got the zeroth one allready
     {
@@ -141,24 +165,29 @@ void ManybodyNeighborlist::addPermutationMatrixColumns(
         {
             indistinctLatNbrs.push_back(permutation_matrix[row][column]);
         }
-         if(validatedCluster(indistinctLatNbrs))
-         {
-
             auto perm_matrix_rows = findRowsFromCol1(col1, indistinctLatNbrs);
             // std::cout<<"find in permutation matrix function:"<<std::endl;
             auto find = std::find(taken_rows.begin(), taken_rows.end(), perm_matrix_rows);
             if (find == taken_rows.end())
             {
+                // std::cout<<"Found new taken rows: "<<std::endl;
+                // for(auto el : perm_matrix_rows){std::cout<<el<<" ";}
+                // std::cout<<std::endl;
+                // std::cout<<"Taken rows: "<<std::endl;
+                // for(auto taken_row : taken_rows)
+                // {
+                //     for(auto el : taken_row){std::cout<<el<<" ";}
+                //     std::cout<<std::endl;
+                // }
+                // std::cout<<"========="<<std::endl;
                 taken_rows.push_back(perm_matrix_rows);
             }
-            columnLatticeNeighbors.push_back(indistinctLatNbrs);
-         }
+            columnLatticeNeighbors.push_back(indistinctLatNbrs);        
     }
-    if(columnLatticeNeighbors.size() > 0 )
+    if (columnLatticeNeighbors.size() > 0)
     {
         lattice_neighbors.push_back(columnLatticeNeighbors);
     }
-    
 }
 
 /**
@@ -180,7 +209,7 @@ bool ManybodyNeighborlist::validatedCluster(const std::vector<LatticeNeighbor> &
 }
 
 /**
- Searches for latticeneighbors in col1 of permutation matrix and find the corresponding rows 
+ Searches for latticeNeighbors in col1 of permutation matrix and find the corresponding rows 
 */
 std::vector<int> ManybodyNeighborlist::findRowsFromCol1(const std::vector<LatticeNeighbor> &col1, const std::vector<LatticeNeighbor> &latNbrs, bool sortIt) const
 {
@@ -199,14 +228,14 @@ std::vector<int> ManybodyNeighborlist::findRowsFromCol1(const std::vector<Lattic
         }
         else
         {
-            int row = std::distance(col1.begin(), find);
-            rows.push_back(row);
+            int row_in_col1 = std::distance(col1.begin(), find);
+            rows.push_back(row_in_col1);
         }
     }
-    if (sortIt)
-    {
-        std::sort(rows.begin(), rows.end());
-    }
+    // if (sortIt)
+    // {
+    std::sort(rows.begin(), rows.end());
+    // }
     return rows;
 }
 
