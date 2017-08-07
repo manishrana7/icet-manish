@@ -12,7 +12,7 @@ from time import time
 atoms = bulk("Al", "fcc", a=2.0).repeat(1)
 
 
-cutoffs = [10.5, 10]
+cutoffs = [10,7]
 pm_maps, prim_structure, neighborlists = permutation_maps_from_atoms(atoms, cutoffs, verbosity=0)
 
 
@@ -59,7 +59,7 @@ print("len of clusters ",len(clusters))
 
 
 clusterCounts = ClusterCounts()
-
+cutoffs = [6, 6]
 clusterCounts.count_clusters(atoms=atoms, cutoffs=cutoffs)
 
 

@@ -45,7 +45,7 @@ class ManybodyNeighborlist
     std::vector<LatticeNeighbor> getColumn1FromPM(const std::vector<std::vector<LatticeNeighbor>> &, bool sortIt=true) const;
     std::vector<int> findRowsFromCol1(const std::vector<LatticeNeighbor> &col1, const std::vector<LatticeNeighbor> &latNbrs, bool sortit=true) const;
 
-
+  bool validatedCluster(const std::vector<LatticeNeighbor> &) const;
   private:
     std::vector<double> _cutoffs;
     std::vector<LatticeNeighbor> getFilteredNj(const std::vector<LatticeNeighbor> &, const LatticeNeighbor &) const;

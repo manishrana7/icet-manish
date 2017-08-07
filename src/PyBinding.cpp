@@ -87,7 +87,9 @@ PYBIND11_PLUGIN(example)
         .def(py::init<const int, const Vector3d &>())
         .def_readwrite("index", &LatticeNeighbor::index)
         .def_readwrite("unitcellOffset", &LatticeNeighbor::unitcellOffset)
-        .def(py::self < py::self);
+        .def(py::self < py::self)
+        .def(py::self == py::self)
+        ;
 
     py::class_<ClusterCounts>(m, "ClusterCounts")
         .def(py::init<>())

@@ -81,6 +81,7 @@ std::vector<std::vector<std::vector<LatticeNeighbor>>> ManybodyNeighborlist::bui
 
     for (size_t index = 0; index < neighborlists[0].size(); index++)
     {
+    
         std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> mbnl_latnbrs = build(neighborlists, index, saveBothWays);
         for (const auto &mbnl_pair : mbnl_latnbrs)
         {
@@ -95,11 +96,27 @@ std::vector<std::vector<std::vector<LatticeNeighbor>>> ManybodyNeighborlist::bui
                 if (find == taken_rows.end())
                 {
                     //new stuff found
-                    addPermutationMatrixColumns( lattice_neighbors, taken_rows, lat_nbrs, pm_rows, permutation_matrix, col1);
+                    addPermutationMatrixColumns(lattice_neighbors, taken_rows, lat_nbrs, pm_rows, permutation_matrix, col1);
                 }
             }
         }
     }
+
+for(int i =0; i < lattice_neighbors.size(); i++)
+{
+    std::sort(lattice_neighbors[i].begin(), lattice_neighbors[i].end());
+}
+
+    for(int i =0; i < lattice_neighbors.size(); i++)
+        {
+            for(int j = i+1; j < lattice_neighbors.size(); j++)
+            {
+                if ( lattice_neighbors[i] == lattice_neighbors[j])
+                {
+                    std::cout<<"Found duplicate"<<std::endl;
+                }
+            }
+        }
     return lattice_neighbors;
 }
 
@@ -110,7 +127,7 @@ std::vector<std::vector<std::vector<LatticeNeighbor>>> ManybodyNeighborlist::bui
  */
 void ManybodyNeighborlist::addPermutationMatrixColumns(
     std::vector<std::vector<std::vector<LatticeNeighbor>>> &lattice_neighbors, std::vector<std::vector<int>> &taken_rows, const std::vector<LatticeNeighbor> &lat_nbrs, const std::vector<int> &pm_rows,
-                                                       const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<LatticeNeighbor> &col1) const
+    const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<LatticeNeighbor> &col1) const
 {
     std::vector<std::vector<LatticeNeighbor>> columnLatticeNeighbors;
     columnLatticeNeighbors.reserve(permutation_matrix[0].size());
@@ -124,8 +141,8 @@ void ManybodyNeighborlist::addPermutationMatrixColumns(
         {
             indistinctLatNbrs.push_back(permutation_matrix[row][column]);
         }
-        // if (isRealNeighbor(index, lat_nbrs, neighborlist))
-        // {
+         if(validatedCluster(indistinctLatNbrs))
+         {
 
             auto perm_matrix_rows = findRowsFromCol1(col1, indistinctLatNbrs);
             // std::cout<<"find in permutation matrix function:"<<std::endl;
@@ -134,19 +151,33 @@ void ManybodyNeighborlist::addPermutationMatrixColumns(
             {
                 taken_rows.push_back(perm_matrix_rows);
             }
-        // }
-        columnLatticeNeighbors.push_back(indistinctLatNbrs);
+            columnLatticeNeighbors.push_back(indistinctLatNbrs);
+         }
     }
-    lattice_neighbors.push_back(columnLatticeNeighbors);
+    if(columnLatticeNeighbors.size() > 0 )
+    {
+        lattice_neighbors.push_back(columnLatticeNeighbors);
+    }
+    
 }
 
+/**
 
-// /**
+Checks that atleast one lattice neigbhor originate in the original cell (has one cell offset = [0,0,0])
+*/
 
-// Checks that 
-// */
-
-// bool isRealNeighbor()
+bool ManybodyNeighborlist::validatedCluster(const std::vector<LatticeNeighbor> &latticeNeighbors) const
+{
+    Vector3d zeroVector = {0., 0., 0.};
+    for (const auto &latNbr : latticeNeighbors)
+    {
+        if (latNbr.unitcellOffset == zeroVector)
+        {
+            return true;
+        }
+    }
+    return false;
+}
 
 /**
  Searches for latticeneighbors in col1 of permutation matrix and find the corresponding rows 
@@ -159,12 +190,12 @@ std::vector<int> ManybodyNeighborlist::findRowsFromCol1(const std::vector<Lattic
         const auto find = std::find(col1.begin(), col1.end(), latNbr);
         if (find == col1.end())
         {
-            for(const auto &latNbrp : latNbrs )
+            for (const auto &latNbrp : latNbrs)
             {
                 latNbrp.print();
             }
             latNbr.print();
-            throw std::runtime_error("Did not find lattice neigbhor in col1 of permutation matrix in function findRowsFromCol1 in mbnl");            
+            throw std::runtime_error("Did not find lattice neigbhor in col1 of permutation matrix in function findRowsFromCol1 in mbnl");
         }
         else
         {
