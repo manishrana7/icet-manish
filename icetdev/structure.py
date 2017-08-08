@@ -94,13 +94,14 @@ def __get_size(self):
 Structure.size = __get_size
 
 
-def __find_index_from_position(self, position, tolerance = 1e-6):
-    
-    index = self.find_index_of_position_pybind(position, 1e-3)
+def __find_index_from_position(self, position, tolerance=1e-6):
+
+    index = self.find_index_of_position_pybind(position, tolerance)
     if index == -1:
-        raise ValueError("Did not find index of position in function find_latticeNeighbor_from_position")
+        raise ValueError(
+            "Did not find index of position in function find_latticeNeighbor_from_position")
     else:
         return index
+
+
 Structure.find_index_of_position = __find_index_from_position
-
-
