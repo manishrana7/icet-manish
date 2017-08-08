@@ -1,5 +1,4 @@
 from example import ClusterCounts
-from example import LatticeNeighbor
 from icetdev.structure import structure_from_atoms
 from icetdev.neighborlist import Neighborlist
 from icetdev.manybodyNeighborlist import ManybodyNeighborlist
@@ -59,8 +58,7 @@ def __count_clusters(self, atoms=None, structure=None, neighborlists=None, mbnl=
     # build the neighborlists
     for nl in neighborlists:
         nl.build(structure)
-    
-        
+
     if cutoffs is None:
         if order is None:
             raise Exception(
@@ -73,10 +71,10 @@ def __count_clusters(self, atoms=None, structure=None, neighborlists=None, mbnl=
     # loop over the indices in the structure, create the mbnl for each index
     # and count each index
     if order > 2:
-        for lattice_index in range(structure.size()):            
-            lattice_neigbhors = mbnl.build(neighborlists, lattice_index, bothways)
+        for lattice_index in range(structure.size()):
+            lattice_neigbhors = mbnl.build(
+                neighborlists, lattice_index, bothways)
             self.count_lattice_neighbors(structure, lattice_neigbhors)
-
 
     # Count the pairs
     self.count_pairs(structure, neighborlists[0])
@@ -94,7 +92,8 @@ ClusterCounts.count_clusters = __count_clusters
 # def __count_pm_clusters(self, atoms=None, structure=None, mbnl_indices,
 #                      reset=True, order=None):
 #     """
-#     Counts clusters in either atoms or structure for indices retrieved from permutation map format
+# Counts clusters in either atoms or structure for indices retrieved from
+# permutation map format
 
 #     Parameters
 #     ----------
@@ -132,10 +131,9 @@ ClusterCounts.count_clusters = __count_clusters
 #             structure = structure_from_atoms(atoms)
 
 
-
 #     # loop over the indices in the structure, create the mbnl for each index
 #     # and count each index
-    
+
 #     for lattice_indices in mbnl_indices:
 #         self.count(structure, lattice_indices)
 
