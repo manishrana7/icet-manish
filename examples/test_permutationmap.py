@@ -1,5 +1,5 @@
 from icetdev.permutationMap import PermutationMap
-from icetdev.tools.geometry import get_scaled_positions, 
+from icetdev.tools.geometry import get_scaled_positions
 
 from icetdev.structure import *
 from icetdev.neighborlist import *
