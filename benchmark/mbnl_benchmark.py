@@ -15,11 +15,17 @@ def benchmark_cpp_mbnl(structure, order, cutoff):
     """
     Finds all the indices up to "order" within the cutoffs using the c++ implemented mbnl
     """
-    nl = Neighborlist(cutoff)
-    nl.build(structure)
+    cutoffs = (order-1)*[cutoff]
+    neighborlists = []
+
+    for co in cutoffs:
+        nl = Neighborlist(co)           
+        nl.build(structure)
+        neighborlists.append(nl)     
+
     mbnl = ManybodyNeighborlist()
     for i in range(structure.size()):
-        mbnl.build(nl, i, order, False)
+        mbnl.build(neighborlists, i, False)
 
 
 def benchmark_python_mbnl(atoms, order, cutoff):
