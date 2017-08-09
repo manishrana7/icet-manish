@@ -12,9 +12,9 @@
 #include <Eigen/Dense>
 #include <pybind11/operators.h>
 
-PYBIND11_PLUGIN(example)
+PYBIND11_PLUGIN(_icetdev)
 {
-    py::module m("example", "pybind11 example plugin");
+    py::module m("_icetdev", "pybind11 _icetdev plugin");
 
     py::class_<Structure>(m, "Structure")
         .def(py::init<const Eigen::Matrix<double, Dynamic, 3, Eigen::RowMajor> &,

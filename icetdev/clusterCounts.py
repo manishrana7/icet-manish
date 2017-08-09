@@ -1,4 +1,4 @@
-from example import ClusterCounts
+from _icetdev import ClusterCounts
 from icetdev.structure import structure_from_atoms
 from icetdev.neighborlist import Neighborlist
 from icetdev.manybodyNeighborlist import ManybodyNeighborlist

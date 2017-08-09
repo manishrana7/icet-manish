@@ -3,7 +3,7 @@ import spglib as spglib
 
 from ase import Atoms
 from ase.visualize import view
-from example import PermutationMap
+from _icetdev import PermutationMap
 from icetdev.neighborlist import *
 from icetdev.latticeNeighbor import LatticeNeighbor
 from icetdev.structure import structure_from_atoms

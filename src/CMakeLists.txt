@@ -25,8 +25,8 @@ IF(NOT Eigen3_FOUND)
 ENDIF()
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-#target_include_directories(example PRIVATE ${EIGEN3_INCLUDE_DIR})
-PYBIND11_ADD_MODULE(example ${SourceFiles})
-SET_TARGET_PROPERTIES(example PROPERTIES OUTPUT_NAME "example")
+#target_include_directories(_icetdev PRIVATE ${EIGEN3_INCLUDE_DIR})
+PYBIND11_ADD_MODULE(_icetdev ${SourceFiles})
+SET_TARGET_PROPERTIES(_icetdev PROPERTIES OUTPUT_NAME "_icetdev")
 
 

@@ -1,4 +1,4 @@
-from example import ManybodyNeighborlist
+from _icetdev import ManybodyNeighborlist
 
 from icetdev.latticeNeighbor import LatticeNeighbor
 from icetdev.neighborlist import get_neighborlists

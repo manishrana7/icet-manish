@@ -1,4 +1,4 @@
-from example import Structure
+from icetdev import structure
 from ase import Atoms
 import numpy as np
 from ase.build import bulk
