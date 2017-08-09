@@ -1,4 +1,4 @@
-from example import Structure
+from _icetdev import Structure
 
 
 def structure_from_atoms(conf):

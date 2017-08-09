@@ -1,4 +1,4 @@
-from example import LatticeNeighbor
+from _icetdev import LatticeNeighbor
 
 
 

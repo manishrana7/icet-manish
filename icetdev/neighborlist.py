@@ -1,4 +1,4 @@
-from example import Neighborlist
+from _icetdev import Neighborlist
 from icetdev.structure import structure_from_atoms
 
 

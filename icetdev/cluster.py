@@ -1,1 +1,1 @@
-from example import Cluster
+from _icetdev import Cluster
