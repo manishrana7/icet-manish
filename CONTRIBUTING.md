@@ -27,17 +27,18 @@ therefore include comment blocks that document your code and are formatted to
 comply with the doxygen markup style.
 
 For most functions, class members, etc. that can be comprehensively described
-using a single line one can use the triple-slash form, e.g.,:
-
+using a single line one can use the triple-slash form, e.g.,
+```
    /// Space group number according to ITCA.
    int spacegroup;
    
    /// Returns the space group number.
    int getSpacegroup() { return spacegroup; }
+```
 
 For more substantial functions, classes, or other elements (such as ``enum``-s)
-adopt the extended documentation form:
-
+adopt the extended documentation form
+```
    /**
    @brief Write a structure to file.
    @details This function writes an atomic structure to file using different formats.
@@ -48,12 +49,12 @@ adopt the extended documentation form:
    void writeStructureToFile(AtomicStructure *struct, string::string filename, string::string format) {
      ...
 }
-
+```
 More examples can of course be found in the code.
 
 Please use [CamelCase](https://en.wikipedia.org/wiki/Camel_case) and expressive
 names for functions, classes, and members (avoiding unnecessary and non-standard
-abbreviations), e.g. ``writeStructureToFile``, ``AtomicStructure``. Private and
+abbreviations), e.g., ``writeStructureToFile``, ``AtomicStructure``. Private and
 protected class members should be preceded by an underscore as in
 ``_myPrivateVariable``.
 
