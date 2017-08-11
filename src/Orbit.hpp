@@ -24,6 +24,7 @@ class Orbit
     public:
     Orbit(const Cluster &);
 
+    ///Add a group sites that are equivalent to the ones in this orbit
     void addEquivalentSites(const std::vector<LatticeNeighbor> &latNbrs)
     {
         _equivalentSites.push_back(latNbrs);
@@ -56,21 +57,28 @@ class Orbit
 
         throw std::runtime_error("Both representative cluster and size of equivalent sites are equal in orbit < comparison");
     }
-
+    ///Returns amount of equivalent sites in this orbit
     size_t size() const
     {
         return _equivalentSites.size();
     }
 
+    ///Return the sorted, reprasentative cluster for this orbit
     Cluster getRepresentativeCluster() const
     {
         return _sortedCluster;
     }
+
+    ///Returns equivalent sites
     std::vector<<std::vector<LatticeNeighbor>> getEquivalentSites() const
     {
         return _equivalentSites;
     }
     private:
+
+    ///Reprasentative sorted cluster for this orbit
     Cluster _sortedCluster;
+
+    ///Container of equivalent sites for this orbit
     std::vector<std::vector<LatticeNeighbor>> _equivalentSites;
 };
