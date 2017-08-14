@@ -58,6 +58,9 @@ abbreviations), e.g., ``writeStructureToFile``, ``AtomicStructure``. Private and
 protected class members should be preceded by an underscore as in
 ``_myPrivateVariable``.
 
+
+* Use [const correctness](https://isocpp.org/wiki/faq/const-correctness)
+
 Python
 ------
 
