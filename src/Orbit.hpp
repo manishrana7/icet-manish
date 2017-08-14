@@ -8,7 +8,6 @@
 #include "Cluster.hpp"
 using namespace Eigen;
 
-
 /**
 Class Orbit
 
@@ -21,7 +20,7 @@ Can be compared to other orbits
 
 class Orbit
 {
-    public:
+  public:
     Orbit(const Cluster &);
 
     ///Add a group sites that are equivalent to the ones in this orbit
@@ -30,28 +29,26 @@ class Orbit
         _equivalentSites.push_back(latNbrs);
     }
 
-
-
     friend bool operator<(const Orbit &orbit1, const Orbit &orbit2)
     {
-        if( orbit1.getRepresentativeCluster() < orbit2.getRepresentativeCluster())
+        if (orbit1.getRepresentativeCluster() < orbit2.getRepresentativeCluster())
         {
             return true;
         }
-        if( orbit1.getRepresentativeCluster() > orbit2.getRepresentativeCluster())
+        if (orbit1.getRepresentativeCluster() > orbit2.getRepresentativeCluster())
         {
             return false;
         }
         //representative cluster is equal
         //Try comparing length of equivalent sites
-        if( orbit1.size() < orbit2.size() )
+        if (orbit1.size() < orbit2.size())
         {
             return true;
         }
-        if( orbit1.size() > orbit2.size() )
+        if (orbit1.size() > orbit2.size())
         {
             return false;
-        }   
+        }
         //Both representative cluster and size of equivalent sites are equal.
         //throw error to see if this ever happens
 
@@ -70,12 +67,12 @@ class Orbit
     }
 
     ///Returns equivalent sites
-    std::vector<<std::vector<LatticeNeighbor>> getEquivalentSites() const
+    std::vector << std::vector<LatticeNeighbor>> getEquivalentSites() const
     {
         return _equivalentSites;
     }
-    private:
 
+  private:
     ///Reprasentative sorted cluster for this orbit
     Cluster _sortedCluster;
 
