@@ -44,7 +44,7 @@ class Orbit
     }
 
     ///Returns equivalent sites
-    std::vector << std::vector<LatticeNeighbor>> getEquivalentSites() const
+    std::vector<std::vector<LatticeNeighbor>>  getEquivalentSites() const
     {
         return _equivalentSites;
     }
