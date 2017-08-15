@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 #include "Orbit.hpp"
+#include "ManybodyNeighborlist.hpp"
+#include "Structure.hpp"
 
 /**
 Class OrbitList

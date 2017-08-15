@@ -17,7 +17,8 @@ OrbitList::OrbitList(const ManybodyNeighborlist &mbnl, const Structure &structur
         for(size_t j=0; j<mbnl.getNumberOfSites(i); j++)
         {
             std::vector<LatticeNeighbor> sites = mbnl.getSites(i,j);
-            
+            Cluster cluster = Cluster(structure, sites);
+
         }
     }
 

@@ -17,6 +17,8 @@ SET(SourceFiles
   Cluster.cpp
   PermutationMap.cpp
   ClusterCounts.cpp
+  Orbit.cpp
+  OrbitList.cpp
 )
 # Find Eigen3
 FIND_PACKAGE(Eigen3 REQUIRED)

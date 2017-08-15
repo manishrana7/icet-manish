@@ -46,8 +46,11 @@ class ManybodyNeighborlist
     std::vector<int> findRowsFromCol1(const std::vector<LatticeNeighbor> &col1, const std::vector<LatticeNeighbor> &latNbrs, bool sortit = true) const;
 
     bool validatedCluster(const std::vector<LatticeNeighbor> &) const;
+    
     size_t getNumberOfSites() const;
-    size_t getNumberOfSites(int index) const;
+
+    size_t getNumberOfSites(const unsigned int index) const;
+
     std::vector<LatticeNeighbor> getSites(const unsigned int &,
                                           const unsigned int &) const;
 

@@ -376,7 +376,7 @@ size_t ManybodyNeighborlist::getNumberOfSites() const
 }
 
 ///Get number of manybodies one can make from _latticeNeighbors[index]
-size_t ManybodyNeighborlist::getNumberOfSites(int index) const
+size_t ManybodyNeighborlist::getNumberOfSites(const unsigned int index) const
 {
     //std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> _latticeNeighbors;
     return _latticeNeighbors[index].second.size();
