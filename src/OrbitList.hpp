@@ -5,6 +5,7 @@
 #include "Orbit.hpp"
 #include "ManybodyNeighborlist.hpp"
 #include "Structure.hpp"
+#include "Cluster.hpp"
 
 /**
 Class OrbitList
@@ -58,6 +59,7 @@ class OrbitList
         return _orbitList[i];
     }
 
+    
     /// Clears the _orbitList
     void clear()
     {
@@ -75,6 +77,8 @@ class OrbitList
     {
         return _orbitList;
     }
+
+    int findOrbit(const Cluster &) const;
 
   private:
     std::vector<Orbit> _orbitList;

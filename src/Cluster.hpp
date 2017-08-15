@@ -248,10 +248,10 @@ struct I_Neighbors
 class Cluster
 {
   public:
-    // Cluster()
-    // {
-    //     //empty constructor
-    // }
+    Cluster()
+    {
+        //empty constructor
+    }
 
     Cluster(std::vector<int> &sites, std::vector<double> &distances, const bool sortedCluster = true, const int clusterTag = 0)
     {

@@ -89,6 +89,11 @@ def __count_clusters(self, atoms=None, structure=None, neighborlists=None, mbnl=
 ClusterCounts.count_clusters = __count_clusters
 
 
+
+
+
+
+
 # def __count_pm_clusters(self, atoms=None, structure=None, mbnl_indices,
 #                      reset=True, order=None):
 #     """

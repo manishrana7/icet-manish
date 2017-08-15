@@ -29,7 +29,6 @@ class Orbit
         _equivalentSites.push_back(latNbrs);
     }
 
-    friend bool operator<(const Orbit &orbit1, const Orbit &orbit2);
 
     ///Returns amount of equivalent sites in this orbit
     size_t size() const
@@ -40,7 +39,7 @@ class Orbit
     ///Return the sorted, reprasentative cluster for this orbit
     Cluster getRepresentativeCluster() const
     {
-        return _sortedCluster;
+        return _representativeCluster;
     }
 
     ///Returns equivalent sites
@@ -80,7 +79,7 @@ class Orbit
 
   private:
     ///Reprasentative sorted cluster for this orbit
-    Cluster _sortedCluster;
+    Cluster _representativeCluster;
 
     ///Container of equivalent sites for this orbit
     std::vector<std::vector<LatticeNeighbor>> _equivalentSites;

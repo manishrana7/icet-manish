@@ -68,3 +68,4 @@ def create_orbit_list(structure, permutation_matrix, neighborlists, verbosity=3)
     if verbosity >2:
         print("time taken for building from permutation matrix {} s".format(t2-t1))
     return distinct_latnbrs
+
