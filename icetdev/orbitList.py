@@ -59,7 +59,7 @@ def create_orbit_list(structure, permutation_matrix, neighborlists, verbosity=3)
     """
 
     # step1: transform permutation_matrix to be in lattice neigbhor format
-    pm_lattice_neighbors =__get_latNbr_permutation_matrix(structure, permutation_matrix) 
+    pm_lattice_neighbors = __get_latNbr_permutation_matrix(structure, permutation_matrix) 
     
     mbnl = ManybodyNeighborlist()
     t1 = time.time()
