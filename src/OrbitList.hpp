@@ -7,7 +7,7 @@
 /**
 Class OrbitList
 
-contains a sotted vector or orbits
+contains a sorted vector or orbits
 
 
 */
@@ -16,6 +16,7 @@ class OrbitList
 {
   public:
     OrbitList();
+    OrbitList(const ManybodyNeighborlist &, const Structure &);
 
     ///Add a group sites that are equivalent to the ones in this orbit
     void addOrbit(const Orbit &orbit)

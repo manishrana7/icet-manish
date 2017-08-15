@@ -9,6 +9,8 @@
 #include <map>
 #include <unordered_map>
 #include <algorithm>
+#include "Structure.hpp"
+#include "LatticeNeighbor.hpp"
 
 #include <boost/functional/hash.hpp>
 using boost::hash;
@@ -267,6 +269,11 @@ class Cluster
         //possible ways to see if there is another way to rearrange the cluster into a more "lower form"
         //validateSorting();
     }
+
+    ///Create cluster from a structure and latticeNeigbhors
+    Cluster(const Structure &structure,
+            const std::vector<LatticeNeighbor> &latticeNeighbors,
+            const bool sortedCluster = true, const int clusterTag = 0);
 
     //counts the elements
     void count(const std::vector<int> &elements)
@@ -1226,7 +1233,7 @@ struct hash<Cluster>
     size_t
     operator()(const Cluster &k) const
     {
-            
+
         // Compute individual hash values for first,
         // second and third and combine them using XOR
         // and bit shifting:
