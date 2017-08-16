@@ -388,4 +388,7 @@ size_t ManybodyNeighborlist::getNumberOfSites(const unsigned int index) const
 std::vector<LatticeNeighbor> ManybodyNeighborlist::getSites(const unsigned int &firstIndex,
                                                             const unsigned int &secondIndex) const
 {
+    std::vector<LatticeNeighbor> sites = _latticeNeighbors[firstIndex].first;
+    sites.push_back(_latticeNeighbors[firstIndex].second[secondIndex]);
+    return sites;
 }

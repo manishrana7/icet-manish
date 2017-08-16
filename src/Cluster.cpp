@@ -1,5 +1,6 @@
 #include "Cluster.hpp"
 
+
 Cluster::Cluster(const Structure &structure, const std::vector<LatticeNeighbor> &latticeNeighbors,
         const bool sortedCluster, const int clusterTag )
 {
@@ -12,13 +13,21 @@ Cluster::Cluster(const Structure &structure, const std::vector<LatticeNeighbor> 
         sites[i] = structure.getSite(latticeNeighbors[i].index);
         for (size_t j = i + 1; j < latticeNeighbors.size(); j++)
         {
-            distances.push_back(roundDouble(structure.getDistance2(latticeNeighbors[i].index,
+            double distance = roundDouble(structure.getDistance2(latticeNeighbors[i].index,
                                                                    latticeNeighbors[i].unitcellOffset,
                                                                    latticeNeighbors[j].index,
-                                                                   latticeNeighbors[j].unitcellOffset)));
+                                                                   latticeNeighbors[j].unitcellOffset));
+            std::cout<<"distance calculated "<<distance<<std::endl;
+            distances.push_back(distance);
         }
     }
 
+    std::cout<<latticeNeighbors.size() << " "<<sites.size()<<" "<< distances.size()<<std::endl;
+    for(auto latnbr : latticeNeighbors)
+    {
+        latnbr.print();
+    }
+    std::cout<<"===="<<std::endl;
     _sites = sites;
     _distances = distances;
     _sortedCluster = sortedCluster;

@@ -77,6 +77,7 @@ class Orbit
         throw std::runtime_error("Both representative cluster and size of equivalent sites are equal in orbit < comparison");
     }
 
+    int getNumberOfDuplicates(int verbosity=0) const;
   private:
     ///Reprasentative sorted cluster for this orbit
     Cluster _representativeCluster;

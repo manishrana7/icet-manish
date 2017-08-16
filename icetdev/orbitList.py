@@ -2,6 +2,8 @@
 import numpy as np
 import time
 from icetdev.manybodyNeighborlist import ManybodyNeighborlist
+from _icetdev import OrbitList
+
 def __fractional_to_position(structure, row):
     """
     Return real xyz positions from fractional positions

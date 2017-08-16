@@ -59,14 +59,13 @@ PYBIND11_PLUGIN(_icetdev)
         .def(py::init<>())
         .def("calc_intersection", &ManybodyNeighborlist::getIntersection)
         .def("build", &ManybodyNeighborlist::build)
-        .def("buildFromPermutationMatrix", &ManybodyNeighborlist::buildFromPermutationMatrix)        
-        ;
-
-        
+        .def("buildFromPermutationMatrix", &ManybodyNeighborlist::buildFromPermutationMatrix);
 
     py::class_<Cluster>(m, "Cluster")
         .def(py::init<std::vector<int> &, std::vector<double> &, const bool, const int>(), pybind11::arg("sites"),
              pybind11::arg("distances"), pybind11::arg("sortedCluster") = true, pybind11::arg("clusterTag") = 0)
+        .def(py::init<const Structure &, const std::vector<LatticeNeighbor> &, const bool, const int>(), pybind11::arg("structure"),
+             pybind11::arg("latticeNeighbors"), pybind11::arg("sortedCluster") = true, pybind11::arg("clusterTag") = 0)     
         .def("count", &Cluster::count)
         .def("get_count", &Cluster::getCount)
         .def("get_sites", &Cluster::getSites)
@@ -90,8 +89,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def_readwrite("index", &LatticeNeighbor::index)
         .def_readwrite("unitcellOffset", &LatticeNeighbor::unitcellOffset)
         .def(py::self < py::self)
-        .def(py::self == py::self)
-        ;
+        .def(py::self == py::self);
 
     py::class_<ClusterCounts>(m, "ClusterCounts")
         .def(py::init<>())
@@ -105,27 +103,24 @@ PYBIND11_PLUGIN(_icetdev)
         .def("print", &ClusterCounts::print);
 
     py::class_<Orbit>(m, "Orbit")
-        .def(py::init<const Cluster>())
+        .def(py::init<const Cluster &>())
         .def("add_equivalent_sites", &Orbit::addEquivalentSites)
         .def("get_representative_cluster", &Orbit::getRepresentativeCluster)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
         .def("size", &Orbit::size)
-        .def(py::self < py::self)
-        ;
-        
+        .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
+        .def(py::self < py::self);
 
     py::class_<OrbitList>(m, "OrbitList")
         .def(py::init<>())
+        .def(py::init<const ManybodyNeighborlist &, const Structure &>())
         .def("add_orbit", &OrbitList::addOrbit)
         .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters)
         .def("get_orbit", &OrbitList::getOrbit)
         .def("clear", &OrbitList::clear)
         .def("sort", &OrbitList::sort)
-        .def("get_orbitList", &OrbitList::getOrbitList)        
-        .def("size", &OrbitList::size)
-        ;
-        
-
+        .def("get_orbitList", &OrbitList::getOrbitList)
+        .def("size", &OrbitList::size);
 
     return m.ptr();
 }

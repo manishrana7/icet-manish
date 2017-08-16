@@ -79,7 +79,6 @@ class OrbitList
     }
 
     int findOrbit(const Cluster &) const;
-
   private:
     std::vector<Orbit> _orbitList;
 };
