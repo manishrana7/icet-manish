@@ -17,7 +17,6 @@ int Orbit::getNumberOfDuplicates(int verbosity) const
     {
         for (size_t j = i + 1; j < _equivalentSites.size(); j++)
         {
-
             auto i_sites = _equivalentSites[i];
             auto j_sites = _equivalentSites[j];
             //compare the sorted sites

@@ -48,8 +48,12 @@ class Orbit
         return _equivalentSites;
     }
 
-
-      ///Compare operator for automatic sorting in containers
+    ///Return the number of bodies of the cluster that represent this orbit
+    unsigned int getClusterSize() const
+    {
+        return _representativeCluster.getNumberOfBodies();
+    }
+    ///Compare operator for automatic sorting in containers
     friend bool operator<(const Orbit &orbit1, const Orbit &orbit2)
     {
         if (orbit1.getRepresentativeCluster() < orbit2.getRepresentativeCluster())

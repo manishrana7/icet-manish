@@ -33,10 +33,8 @@ class Structure
         {
             throw std::out_of_range("Error: Tried accessing position at out of bound index. Structure::getDistance2");
         }
-
         Vector3d pos1 = _positions.row(index1) + offset1.transpose() * _cell;
         Vector3d pos2 = _positions.row(index2) + offset2.transpose() * _cell;
-
         return (pos1 - pos2).norm();
     }
 

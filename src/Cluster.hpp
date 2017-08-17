@@ -255,7 +255,7 @@ class Cluster
 
     Cluster(std::vector<int> &sites, std::vector<double> &distances, const bool sortedCluster = true, const int clusterTag = 0)
     {
-
+        _symprec = 1e-5;
         _sites = sites;
         _distances = distances;
         _sortedCluster = sortedCluster;
@@ -1202,14 +1202,22 @@ class Cluster
         }
         std::cout << std::endl;
     }
-
+    
+    ///Return true if this is a sorted cluster
     bool isSorted() const
     {
         return _sortedCluster;
     }
+
+    ///Return the cluster tag used for identification if not dists/sites is used to distinguish
     int getClusterTag() const
     {
         return _clusterTag;
+    }
+    ///Return the number of bodies (size of sites) of the cluster
+    unsigned int getNumberOfBodies() const
+    {
+        return _sites.size();
     }
 
   private:
@@ -1218,12 +1226,13 @@ class Cluster
     std::map<std::vector<int>, int> _element_counts;
     bool _sortedCluster;
     int _clusterTag;
-    double symprec;
+    double _symprec;
     double roundDouble(const double &double_value)
-    {
-        return round(double_value * 1.0 / symprec) / (1.0 / symprec);
+    {    
+        return round(double_value * 1.0 / _symprec) / (1.0 / _symprec);
     }
 };
+
 
 namespace std
 {

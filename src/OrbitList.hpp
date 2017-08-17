@@ -6,7 +6,7 @@
 #include "ManybodyNeighborlist.hpp"
 #include "Structure.hpp"
 #include "Cluster.hpp"
-
+#include <unordered_map>
 /**
 Class OrbitList
 
@@ -41,7 +41,7 @@ class OrbitList
         unsigned int count = 0;
         for (const auto &orbit : _orbitList)
         {
-            if (orbit.size() == N)
+            if (orbit.getRepresentativeCluster().getNumberOfBodies() == N)
             {
                 count++;
             }
@@ -79,6 +79,32 @@ class OrbitList
     }
 
     int findOrbit(const Cluster &) const;
+
+    /** 
+    Prints information about the orbitlist
+
+
+    */
+    void print(int verbosity=0) const
+    {
+        int orbitCount =0;
+        for(const auto &orbit : _orbitList)
+        {
+            std::cout<<"Orbit number: "<<orbitCount++<<std::endl;
+            std::cout<<"Representative cluster "<<std::endl;
+            orbit.getRepresentativeCluster().print();
+
+            std::cout<<"Multiplicities: "<< orbit.size()<<std::endl;
+            if(verbosity>1)
+            {
+                std::cout<<"Duplicates: "<< orbit.getNumberOfDuplicates()<<std::endl;
+            }
+            std::cout<<std::endl;
+        }
+
+    }
   private:
+  int findOrbit(const Cluster &, const std::unordered_map<Cluster,int> &) const;
+
     std::vector<Orbit> _orbitList;
 };

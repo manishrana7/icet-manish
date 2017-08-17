@@ -15,16 +15,15 @@ def setup_test_orbitlist(atoms, cutoffs):
 
 
 atoms = bulk("Al", "fcc", a=2)
-cutoffs = [5, 5]
+cutoffs = [15, 10]
 
 structure, mbnl = setup_test_orbitlist(atoms, cutoffs)
 
-print(structure.cell)
-print(structure.positions)
-exit(1)
-
 ol = orbitList.OrbitList(mbnl, structure)
 
+ol.sort()
+
+#ol.print(verbosity = 3)
 for i in range(5):    
     print("number of {0}body clusters = {1}".format(i,ol.get_number_of_NClusters(i)))
 

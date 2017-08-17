@@ -11,6 +11,7 @@ OrbitList::OrbitList()
 ///Construct orbitlist from mbnl and structure
 OrbitList::OrbitList(const ManybodyNeighborlist &mbnl, const Structure &structure)
 {
+    std::unordered_map<Cluster,int> clusterIndexMap;
     for (size_t i = 0; i < mbnl.getNumberOfSites(); i++)
     {
         for (size_t j = 0; j < mbnl.getNumberOfSites(i); j++)
@@ -19,16 +20,14 @@ OrbitList::OrbitList(const ManybodyNeighborlist &mbnl, const Structure &structur
             std::vector<LatticeNeighbor> sites = mbnl.getSites(i, j);
             Cluster cluster = Cluster(structure, sites);
           //  cluster.print();
-          std::cout<<"size of sites "<<sites.size()<<std::endl;
-          std::cout<<"size of cluster "<<cluster.getSites().size()<<std::endl;
-          cluster.print();
-            int orbitNumber = findOrbit(cluster);
+            int orbitNumber = findOrbit(cluster, clusterIndexMap);
             if (orbitNumber == -1)
             {
                 Orbit newOrbit = Orbit(cluster);
                 addOrbit(newOrbit);
                 //add to back ( assuming addOrbit does not sort orbitlist )
                 _orbitList.back().addEquivalentSites(sites);
+                clusterIndexMap[cluster] = _orbitList.size()-1;
             }
             else
             {
@@ -53,5 +52,23 @@ int OrbitList::findOrbit(const Cluster &cluster) const
         }
     }
     return -1;
+}
+
+/**
+Returns the orbit for which "cluster" is the representative cluster
+
+returns -1 if it nothing is found
+*/
+int OrbitList::findOrbit(const Cluster &cluster, const std::unordered_map<Cluster,int> &clusterIndexMap  ) const
+{
+    auto search = clusterIndexMap.find(cluster);
+    if(search != clusterIndexMap.end())
+    {
+     return search->second;   
+    }
+    else
+    {
+        return -1;
+    }
 }
 

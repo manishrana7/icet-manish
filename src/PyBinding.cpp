@@ -65,7 +65,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def(py::init<std::vector<int> &, std::vector<double> &, const bool, const int>(), pybind11::arg("sites"),
              pybind11::arg("distances"), pybind11::arg("sortedCluster") = true, pybind11::arg("clusterTag") = 0)
         .def(py::init<const Structure &, const std::vector<LatticeNeighbor> &, const bool, const int>(), pybind11::arg("structure"),
-             pybind11::arg("latticeNeighbors"), pybind11::arg("sortedCluster") = true, pybind11::arg("clusterTag") = 0)     
+             pybind11::arg("latticeNeighbors"), pybind11::arg("sortedCluster") = true, pybind11::arg("clusterTag") = 0)
         .def("count", &Cluster::count)
         .def("get_count", &Cluster::getCount)
         .def("get_sites", &Cluster::getSites)
@@ -120,7 +120,8 @@ PYBIND11_PLUGIN(_icetdev)
         .def("clear", &OrbitList::clear)
         .def("sort", &OrbitList::sort)
         .def("get_orbitList", &OrbitList::getOrbitList)
-        .def("size", &OrbitList::size);
+        .def("size", &OrbitList::size)
+        .def("print", &OrbitList::print, py::arg("verbosity") = 0);
 
     return m.ptr();
 }
