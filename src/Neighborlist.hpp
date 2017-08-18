@@ -24,12 +24,14 @@ class Neighborlist
     Neighborlist(const double);
     void build(const Structure &);
     void update(const Structure &);
-    // std::pair<std::vector<int>, std::vector<Vector3d>> getNeighbors(int index)
-    // {
-    //     return std::make_pair( latticeIndices[index], offsets[index]);
-    // }
+
     std::vector<LatticeNeighbor> getNeighbors(int index) const
     {
+
+        if (index >= _neighbors.size() || index < 0)
+        {
+            throw std::out_of_range("Error: Tried accessing position at out of bound index. Neighborlist::getNeighbors");
+        }
         return _neighbors[index];
     }
     ///Check if index1 and index2 are neighbors
