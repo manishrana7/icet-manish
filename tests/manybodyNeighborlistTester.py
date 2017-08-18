@@ -31,29 +31,41 @@ class manybodyNeighborlistTester():
     def __init__(self):
         self.initiated = True
 
-    def build(self, nl, index, order, bothways=False):
+    def build(self, neighborlists, index, order, bothways=False):
         """
         Will take the neighborlist object (nl) and combine the neighbors
         of index "index" up to order "order".
 
         Params:
-        nl : ASE neighborlist
+        neighborlists : list of ASE neighborlists
         index: index to return neighbors from
         order: order or how many sites a neighbir is
         bothways: see above...
         """
+        if not isinstance(neighborlists, list):
+            neighborlists = [neighborlists]
 
-        Ni = self.get_Ni_from_nl(nl, index)
-        numberOfSites = len(nl.positions)
-        c = 2
-        zero_vector = np.array([0., 0., 0., ])
-        current_original_neighbors = [[index, zero_vector]]
+        if not neighborlists:
+            raise RuntimeError(
+                "Neighborlists is empty in manybodyNeighborlistTester::build ")
+
         manybody_neighbor_indices = []
-        self.combine_to_higher_order(
-            nl, manybody_neighbor_indices, Ni, current_original_neighbors, c, bothways, order)
+
+        self.add_singlet(index, manybody_neighbor_indices)
+        self.add_pairs(index, neighborlists[0],
+                       manybody_neighbor_indices, bothways)
+
+        for c in range(2, len(neighborlists) + 2):
+            Ni = self.get_Ni_from_nl(neighborlists[c - 2], index)
+            numberOfSites = len(neighborlists[c - 2].positions)
+            c = 2
+            zero_vector = np.array([0., 0., 0., ])
+            current_original_neighbors = [[index, zero_vector]]
+            self.combine_to_higher_order(
+                neighborlists[c - 2], manybody_neighbor_indices, Ni, current_original_neighbors, bothways, c)
         return manybody_neighbor_indices
 
-    def combine_to_higher_order(self, nl, manybody_neighbor_indices, Ni, current_original_neighbors, c, bothways, order):
+    def combine_to_higher_order(self, nl, manybody_neighbor_indices, Ni, current_original_neighbors, bothways, order):
         for j in Ni:
             originalNeighborCopy = current_original_neighbors.copy()
 
@@ -64,18 +76,36 @@ class manybodyNeighborlistTester():
 
             N_j_offset = self.translate_all_Ni(
                 self.get_Ni_from_nl(nl, j[0]), j[1])
+
             if not bothways:
                 N_j_offset = self.filter_Ni_from_smaller(N_j_offset, j)
             intersection_ij = self.get_intersection(Ni, N_j_offset)
 
-            if len(intersection_ij) > 0:
-                manybody_neighbor_indices.append(
-                [originalNeighborCopy, intersection_ij])
-
-
             if len(originalNeighborCopy) + 1 < order:
                 self.combine_to_higher_order(
                     nl, manybody_neighbor_indices, intersection_ij, originalNeighborCopy, c + 1, bothways, order)
+
+            if len(intersection_ij) > 0 and len(originalNeighborCopy) == (order - 1):
+                manybody_neighbor_indices.append(
+                    [originalNeighborCopy, intersection_ij])
+
+    def add_singlet(self, index, mb_indices):
+        """
+        Add singlet to mb_indices
+        """
+        offset = [0.0, 0., 0.]
+        mb_indices.append([index, offset])
+
+    def add_pairs(self, index, neigbhorlist, mb_indices, bothways):
+        """
+        Add pairs of 'index' from neigbhorlist to mb_indices
+        """
+        offset = [0., 0., 0.]
+        first_site = [index, offset]
+        Ni = self.get_Ni_from_nl(neigbhorlist, index)
+        if not bothways:
+            Ni = self.filter_Ni_from_smaller(Ni, first_site)
+        mb_indices.append([first_site, Ni])
 
     def get_intersection(self, Ni, Nj):
         """
