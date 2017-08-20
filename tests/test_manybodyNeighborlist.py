@@ -67,14 +67,15 @@ maxorder = 4
 bothways = True
 index = 0
 for i in range(len(a)):
-    for j in range(1, maxorder):
+    for j in range(2, maxorder):
         index = i
         order = j
-        nbrs_tester = mbnl_T.build(ase_nl, index, order, bothways)
-        nbrs_cpp = mbnl.build(order * [nl], index, bothways)
-        print(j, len(nbrs_cpp))        
-        assert len(nbrs_tester) == len(nbrs_cpp),"Number of manybody-neighbors at "\
-                                                 "index {0} with order {1} was not equal".format(i,j)
+        nbrs_tester = mbnl_T.build(
+            (order - 1) * [ase_nl], index, bothways)
+        nbrs_cpp = mbnl.build((order - 1) * [nl], index, bothways)        
+        assert len(nbrs_tester) == len(nbrs_cpp), "Number of manybody-neighbors at "\
+            "index {0} with order {1} was not equal. {2} != {3}".format(
+                i, j, len(nbrs_tester), len(nbrs_cpp))
 
 
 # test that bothways = false also works
@@ -83,7 +84,7 @@ for i in range(len(a)):
     for j in range(1, maxorder):
         index = i
         order = j
-        nbrs_tester = mbnl_T.build(ase_nl, index, order, bothways)
+        nbrs_tester = mbnl_T.build(order*[ase_nl], index, bothways)
         nbrs_cpp = mbnl.build(order * [nl], index, bothways)
         assert len(nbrs_tester) == len(nbrs_cpp)
 

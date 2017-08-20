@@ -31,7 +31,7 @@ class manybodyNeighborlistTester():
     def __init__(self):
         self.initiated = True
 
-    def build(self, neighborlists, index, order, bothways=False):
+    def build(self, neighborlists, index, bothways=False):
         """
         Will take the neighborlist object (nl) and combine the neighbors
         of index "index" up to order "order".
@@ -39,8 +39,9 @@ class manybodyNeighborlistTester():
         Params:
         neighborlists : list of ASE neighborlists
         index: index to return neighbors from
-        order: order or how many sites a neighbir is
-        bothways: see above...
+        bothways: False will return all indices that are bigger than site "index"
+                  True will return also return indices that are smaller. No option returns
+                  duplicates such as ijk and ikj though.  
         """
         if not isinstance(neighborlists, list):
             neighborlists = [neighborlists]
@@ -58,7 +59,7 @@ class manybodyNeighborlistTester():
         for c in range(2, len(neighborlists) + 2):
             Ni = self.get_Ni_from_nl(neighborlists[c - 2], index)
             numberOfSites = len(neighborlists[c - 2].positions)
-            c = 2
+            
             zero_vector = np.array([0., 0., 0., ])
             current_original_neighbors = [[index, zero_vector]]
             self.combine_to_higher_order(
@@ -83,7 +84,7 @@ class manybodyNeighborlistTester():
 
             if len(originalNeighborCopy) + 1 < order:
                 self.combine_to_higher_order(
-                    nl, manybody_neighbor_indices, intersection_ij, originalNeighborCopy, c + 1, bothways, order)
+                    nl, manybody_neighbor_indices, intersection_ij, originalNeighborCopy, bothways, order)
 
             if len(intersection_ij) > 0 and len(originalNeighborCopy) == (order - 1):
                 manybody_neighbor_indices.append(

@@ -25,7 +25,7 @@ order = 3
 bothways = False
 
 
-nbrs = mbnl_T.build(ase_nl, index, order, bothways=bothways)
+nbrs = mbnl_T.build(order*[ase_nl], index, bothways=bothways)
 
 
 # test that mbnl_T give same amount of neighobrs for first and last site
@@ -37,8 +37,8 @@ bothways = True
 index1 = 0
 index2 = len(atoms) - 1
 
-nbrs1 = mbnl_T.build(ase_nl, index1, order, bothways)
-nbrs2 = mbnl_T.build(ase_nl, index2, order, bothways)
+nbrs1 = mbnl_T.build(order*[ase_nl], index1, bothways)
+nbrs2 = mbnl_T.build(order*[ase_nl], index2,  bothways)
 # print(len(nbrs1), len(nbrs2)) #debug
 assert len(nbrs1) == len(nbrs2), "bothways = True should give same number of"\
     " neigbhors independent on what index you look at. {} != {}".format(
@@ -54,8 +54,8 @@ bothways = False
 index1 = 0
 index2 = len(atoms) - 1
 
-nbrs1 = mbnl_T.build(order*[ase_nl], index1, order, bothways)
-nbrs2 = mbnl_T.build(order*[ase_nl], index2, order, bothways)
+nbrs1 = mbnl_T.build(order*[ase_nl], index1, bothways)
+nbrs2 = mbnl_T.build(order*[ase_nl], index2,  bothways)
 # print(len(nbrs1), len(nbrs2)) #debug
 assert len(nbrs1) > len(nbrs2), "bothways = False should not give same number of neighbors independent on what index you look at. {} != {}".format(
     len(nbrs1), len(nbrs2))
