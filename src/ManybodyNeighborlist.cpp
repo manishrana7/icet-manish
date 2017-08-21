@@ -128,10 +128,7 @@ std::vector<std::vector<std::vector<LatticeNeighbor>>> ManybodyNeighborlist::bui
     {
         throw std::runtime_error("Found duplicates in column1 of permutation matrix");
     }
-    // for (auto latnbr : col1_uniques)
-    // {
-    //     latnbr.print();
-    // }
+
     std::cout << "Size of col1 " << col1.size() << std::endl;
     for (size_t index = 0; index < neighborlists[0].size(); index++)
     {
@@ -432,6 +429,10 @@ std::vector<LatticeNeighbor> ManybodyNeighborlist::getSites(const unsigned int &
                                                             const unsigned int &secondIndex) const
 {
     std::vector<LatticeNeighbor> sites = _latticeNeighbors[firstIndex].first;
-    sites.push_back(_latticeNeighbors[firstIndex].second[secondIndex]);
+    //If zero then this is a singlet
+    if (getNumberOfSites(firstIndex) > 0)
+    {
+        sites.push_back(_latticeNeighbors[firstIndex].second[secondIndex]);
+    }
     return sites;
 }

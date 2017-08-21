@@ -14,8 +14,9 @@ def setup_test_orbitlist(atoms, cutoffs):
     return structure, mbnl
 
 
-atoms = bulk("Al", "fcc", a=2)
-cutoffs = [15, 10]
+atoms = bulk("Al", "bcc", a=2)
+cutoffs = [15, 10, 5.0]
+
 
 structure, mbnl = setup_test_orbitlist(atoms, cutoffs)
 
@@ -24,7 +25,8 @@ ol = orbitList.OrbitList(mbnl, structure)
 ol.sort()
 
 #ol.print(verbosity = 3)
-for i in range(5):    
-    print("number of {0}body clusters = {1}".format(i,ol.get_number_of_NClusters(i)))
+for i in range(len(cutoffs) + 2):
+    print("number of {0}body clusters = {1}".format(
+        i, ol.get_number_of_NClusters(i)))
 
-print("size of orbitlist {0}".format(ol.size()))    
+print("size of orbitlist {0}".format(ol.size()))

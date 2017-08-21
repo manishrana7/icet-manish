@@ -103,6 +103,9 @@ class OrbitList
         }
 
     }
+
+   void addClusterToOrbitlist(const Cluster &cluster,  const std::vector<LatticeNeighbor> &, std::unordered_map<Cluster, int> &);
+
   private:
   int findOrbit(const Cluster &, const std::unordered_map<Cluster,int> &) const;
 
