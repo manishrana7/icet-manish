@@ -8,7 +8,7 @@ mbnl_T = manybodyNeighborlistTester.manybodyNeighborlistTester()
 
 atoms = bulk("Al").repeat(2)
 
-neighbor_cutoff = 6.3
+neighbor_cutoff = 8.3
 
 # set ut atoms and icet structure
 atoms = bulk('Ti', "bcc", a=3.321).repeat(2)
@@ -25,7 +25,7 @@ order = 3
 bothways = False
 
 
-nbrs = mbnl_T.build(ase_nl, index, order, bothways=bothways)
+nbrs = mbnl_T.build(order*[ase_nl], index, bothways=bothways)
 
 
 # test that mbnl_T give same amount of neighobrs for first and last site
@@ -37,11 +37,12 @@ bothways = True
 index1 = 0
 index2 = len(atoms) - 1
 
-nbrs1 = mbnl_T.build(ase_nl, index1, order, bothways)
-nbrs2 = mbnl_T.build(ase_nl, index2, order, bothways)
+nbrs1 = mbnl_T.build(order*[ase_nl], index1, bothways)
+nbrs2 = mbnl_T.build(order*[ase_nl], index2,  bothways)
 # print(len(nbrs1), len(nbrs2)) #debug
-assert len(nbrs1) == len(
-    nbrs2), "bothways = True should give same number of neigbhors independent on what index you look at. {} != {}".format(len(nbrs1), len(nbrs2))
+assert len(nbrs1) == len(nbrs2), "bothways = True should give same number of"\
+    " neigbhors independent on what index you look at. {} != {}".format(
+        len(nbrs1), len(nbrs2))
 
 
 # test that mbnl_T do not give same amount of neighobrs for first and last site
@@ -53,8 +54,8 @@ bothways = False
 index1 = 0
 index2 = len(atoms) - 1
 
-nbrs1 = mbnl_T.build(ase_nl, index1, order, bothways)
-nbrs2 = mbnl_T.build(ase_nl, index2, order, bothways)
+nbrs1 = mbnl_T.build(order*[ase_nl], index1, bothways)
+nbrs2 = mbnl_T.build(order*[ase_nl], index2,  bothways)
 # print(len(nbrs1), len(nbrs2)) #debug
-assert len(nbrs1) > len(nbrs2), "bothways = True should give same number of neigbhors independent on what index you look at. {} != {}".format(
+assert len(nbrs1) > len(nbrs2), "bothways = False should not give same number of neighbors independent on what index you look at. {} != {}".format(
     len(nbrs1), len(nbrs2))

@@ -17,12 +17,12 @@
 */
 
 void ClusterCounts::countSinglets(const Structure &structure)
-{    
+{
     std::vector<int> sites(1);
     std::vector<int> elements(1);
     std::vector<double> distances(0); //empty for singlet
 
-    for(size_t i=0; i < structure.size(); i++)
+    for (size_t i = 0; i < structure.size(); i++)
     {
         sites[0] = structure.getSite(i);
         elements[0] = structure.getElement(i);
@@ -38,12 +38,12 @@ void ClusterCounts::countSinglets(const Structure &structure)
 Counts all the pairs using the neigbhorlist
 */
 void ClusterCounts::countPairs(const Structure &structure, const Neighborlist &neighborlist)
-{   
+{
     Vector3d zeroVector = {0.0, 0.0, 0.0};
 
     std::vector<LatticeNeighbor> pairNeighbor(2);
-    pairNeighbor[0] = LatticeNeighbor(0,zeroVector);
-    for(size_t i=0; i < structure.size(); i++)
+    pairNeighbor[0] = LatticeNeighbor(0, zeroVector);
+    for (size_t i = 0; i < structure.size(); i++)
     {
         auto i_neighbors = neighborlist.getNeighbors(i);
         pairNeighbor[0].index = i;
@@ -69,11 +69,19 @@ void ClusterCounts::countLatticeNeighbors(const Structure &structure,
     {
         //Now we have std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>
         //pair.first == the base indices and pair.second is all indices that form clusters with the base indices
-        for (const auto &combinationIndice : neighborPair.second)
+        if (neighborPair.second.size() > 0)
         {
-            auto latticePointsForCluster = neighborPair.first;
-            latticePointsForCluster.push_back(combinationIndice);
-            count(structure, latticePointsForCluster);
+            for (const auto &combinationIndice : neighborPair.second)
+            {
+                auto latticePointsForCluster = neighborPair.first;
+                latticePointsForCluster.push_back(combinationIndice);
+                count(structure, latticePointsForCluster);
+            }
+        }
+        else
+        {
+            //count singlets here            
+            count(structure, neighborPair.first);
         }
     }
 }
@@ -84,7 +92,7 @@ Get the indice of one set of indices and counts this
 */
 void ClusterCounts::count(const Structure &structure,
                           const std::vector<LatticeNeighbor> &latticeNeighbors)
-{ 
+{
     size_t clusterSize = latticeNeighbors.size();
     std::vector<int> elements(clusterSize);    
     for (size_t i = 0; i < latticeNeighbors.size(); i++)

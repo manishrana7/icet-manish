@@ -59,7 +59,10 @@ PYBIND11_PLUGIN(_icetdev)
         .def(py::init<>())
         .def("calc_intersection", &ManybodyNeighborlist::getIntersection)
         .def("build", &ManybodyNeighborlist::build)
-        .def("buildFromPermutationMatrix", &ManybodyNeighborlist::buildFromPermutationMatrix);
+        .def("buildFromPermutationMatrix", &ManybodyNeighborlist::buildFromPermutationMatrix)        
+        ;
+
+        
 
     py::class_<Cluster>(m, "Cluster")
         .def(py::init<std::vector<int> &, std::vector<double> &, const bool, const int>(), pybind11::arg("sites"),
@@ -89,7 +92,8 @@ PYBIND11_PLUGIN(_icetdev)
         .def_readwrite("index", &LatticeNeighbor::index)
         .def_readwrite("unitcellOffset", &LatticeNeighbor::unitcellOffset)
         .def(py::self < py::self)
-        .def(py::self == py::self);
+        .def(py::self == py::self)
+        ;
 
     py::class_<ClusterCounts>(m, "ClusterCounts")
         .def(py::init<>())
