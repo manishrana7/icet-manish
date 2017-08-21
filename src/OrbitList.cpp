@@ -19,18 +19,17 @@ OrbitList::OrbitList(const ManybodyNeighborlist &mbnl, const Structure &structur
         {
             std::vector<LatticeNeighbor> sites = mbnl.getSites(i, 0);
             Cluster cluster = Cluster(structure, sites);
-            addClusterToOrbitlist(cluster, sites,clusterIndexMap);
+            addClusterToOrbitlist(cluster, sites, clusterIndexMap);
         }
 
         for (size_t j = 0; j < mbnl.getNumberOfSites(i); j++)
         {
             std::vector<LatticeNeighbor> sites = mbnl.getSites(i, j);
             Cluster cluster = Cluster(structure, sites);
-            addClusterToOrbitlist(cluster, sites,clusterIndexMap);
+            addClusterToOrbitlist(cluster, sites, clusterIndexMap);
         }
     }
 }
-
 
 ///add cluster to orbitlist, if cluster exists add sites if not create a new orbit
 void OrbitList::addClusterToOrbitlist(const Cluster &cluster, const std::vector<LatticeNeighbor> &sites, std::unordered_map<Cluster, int> &clusterIndexMap)
@@ -84,12 +83,6 @@ int OrbitList::findOrbit(const Cluster &cluster, const std::unordered_map<Cluste
         return -1;
     }
 }
-
-
-
-
-
-
 
 OrbitList::OrbitList(const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<Neighborlist> &neighborlists)
 {
@@ -159,8 +152,6 @@ OrbitList::OrbitList(const std::vector<std::vector<LatticeNeighbor>> &permutatio
         std::cout << std::endl;
     }
     std::cout << "=========" << std::endl;
-
- 
 }
 
 /**
