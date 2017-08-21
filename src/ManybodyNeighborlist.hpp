@@ -37,15 +37,9 @@ class ManybodyNeighborlist
                               std::back_inserter(N_intersection));
         return N_intersection;
     }
-    void addPermutationMatrixColumns(std::vector<std::vector<std::vector<LatticeNeighbor>>> &lattice_neighbors, std::vector<std::vector<int>> &taken_rows, const std::vector<LatticeNeighbor> &lat_nbrs, const std::vector<int> &pm_rows,
-                                     const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<LatticeNeighbor> &col1) const;
+    
 
     void translateAllNi(std::vector<LatticeNeighbor> &Ni, const Vector3d &unitCellOffset) const;
-    std::vector<std::vector<std::vector<LatticeNeighbor>>> buildFromPermutationMatrix(const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<Neighborlist> &);
-    std::vector<LatticeNeighbor> getColumn1FromPM(const std::vector<std::vector<LatticeNeighbor>> &, bool sortIt = true) const;
-    std::vector<int> findRowsFromCol1(const std::vector<LatticeNeighbor> &col1, const std::vector<LatticeNeighbor> &latNbrs, bool sortit = true) const;
-
-    bool validatedCluster(const std::vector<LatticeNeighbor> &) const;
 
     size_t getNumberOfSites() const;
 

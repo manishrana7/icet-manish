@@ -7,6 +7,7 @@
 #include "Structure.hpp"
 #include "Cluster.hpp"
 #include <unordered_map>
+#include "LatticeNeighbor.hpp"
 /**
 Class OrbitList
 
@@ -20,6 +21,9 @@ class OrbitList
   public:
     OrbitList();
     OrbitList(const ManybodyNeighborlist &, const Structure &);
+    OrbitList(const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<Neighborlist> &);
+    
+
 
     ///Add a group sites that are equivalent to the ones in this orbit
     void addOrbit(const Orbit &orbit)
@@ -59,7 +63,6 @@ class OrbitList
         return _orbitList[i];
     }
 
-    
     /// Clears the _orbitList
     void clear()
     {
@@ -85,29 +88,36 @@ class OrbitList
 
 
     */
-    void print(int verbosity=0) const
+    void print(int verbosity = 0) const
     {
-        int orbitCount =0;
-        for(const auto &orbit : _orbitList)
+        int orbitCount = 0;
+        for (const auto &orbit : _orbitList)
         {
-            std::cout<<"Orbit number: "<<orbitCount++<<std::endl;
-            std::cout<<"Representative cluster "<<std::endl;
+            std::cout << "Orbit number: " << orbitCount++ << std::endl;
+            std::cout << "Representative cluster " << std::endl;
             orbit.getRepresentativeCluster().print();
 
-            std::cout<<"Multiplicities: "<< orbit.size()<<std::endl;
-            if(verbosity>1)
+            std::cout << "Multiplicities: " << orbit.size() << std::endl;
+            if (verbosity > 1)
             {
-                std::cout<<"Duplicates: "<< orbit.getNumberOfDuplicates()<<std::endl;
+                std::cout << "Duplicates: " << orbit.getNumberOfDuplicates() << std::endl;
             }
-            std::cout<<std::endl;
+            std::cout << std::endl;
         }
-
     }
 
-   void addClusterToOrbitlist(const Cluster &cluster,  const std::vector<LatticeNeighbor> &, std::unordered_map<Cluster, int> &);
+    void addClusterToOrbitlist(const Cluster &cluster, const std::vector<LatticeNeighbor> &, std::unordered_map<Cluster, int> &);
+
+    void addPermutationMatrixColumns(std::vector<std::vector<std::vector<LatticeNeighbor>>> &lattice_neighbors, std::vector<std::vector<int>> &taken_rows, const std::vector<LatticeNeighbor> &lat_nbrs, const std::vector<int> &pm_rows,
+                                     const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<LatticeNeighbor> &col1) const;
+
+    std::vector<LatticeNeighbor> getColumn1FromPM(const std::vector<std::vector<LatticeNeighbor>> &, bool sortIt = true) const;
+    std::vector<int> findRowsFromCol1(const std::vector<LatticeNeighbor> &col1, const std::vector<LatticeNeighbor> &latNbrs, bool sortit = true) const;
+
+    bool validatedCluster(const std::vector<LatticeNeighbor> &) const;
 
   private:
-  int findOrbit(const Cluster &, const std::unordered_map<Cluster,int> &) const;
+    int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;
 
     std::vector<Orbit> _orbitList;
 };

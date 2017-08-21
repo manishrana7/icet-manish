@@ -59,7 +59,6 @@ PYBIND11_PLUGIN(_icetdev)
         .def(py::init<>())
         .def("calc_intersection", &ManybodyNeighborlist::getIntersection)
         .def("build", &ManybodyNeighborlist::build)
-        .def("buildFromPermutationMatrix", &ManybodyNeighborlist::buildFromPermutationMatrix)        
         ;
 
         
