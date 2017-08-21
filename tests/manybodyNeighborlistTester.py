@@ -59,7 +59,7 @@ class manybodyNeighborlistTester():
         for c in range(2, len(neighborlists) + 2):
             Ni = self.get_Ni_from_nl(neighborlists[c - 2], index)
             numberOfSites = len(neighborlists[c - 2].positions)
-            
+
             zero_vector = np.array([0., 0., 0., ])
             current_original_neighbors = [[index, zero_vector]]
             self.combine_to_higher_order(
@@ -67,6 +67,16 @@ class manybodyNeighborlistTester():
         return manybody_neighbor_indices
 
     def combine_to_higher_order(self, nl, manybody_neighbor_indices, Ni, current_original_neighbors, bothways, order):
+        """
+        For each j in Ni construct the intersect of N_j and N_i, call the intersect N_ij.
+        All k in N_ij are then neighbors with i,j
+        what is saved is then i,j and N_ij up to the desired order "order"
+
+        Parameters
+        ----------
+        nl : ase neighborlist object
+        manybody_neighbor_indices: list of lists, each inner list is made up 
+        """
         for j in Ni:
             originalNeighborCopy = current_original_neighbors.copy()
 

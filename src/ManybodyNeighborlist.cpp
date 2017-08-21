@@ -25,8 +25,8 @@
 
 std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> ManybodyNeighborlist::build(const std::vector<Neighborlist> &neighborlists, int index, bool saveBothWays)
 {
-    
-    if(neighborlists.empty())
+
+    if (neighborlists.empty())
     {
         throw std::runtime_error("Error: neigbhorlist vector is empty in ManybodyNeighborlist::build");
     }
@@ -67,7 +67,7 @@ void ManybodyNeighborlist::addPairs(const int index, const Neighborlist &neighbo
 {
     Vector3d zeroVector = {0.0, 0.0, 0.0};
     LatticeNeighbor latticeNeighborIndex = LatticeNeighbor(index, zeroVector);
-    
+
     std::vector<LatticeNeighbor> firstSite = {latticeNeighborIndex};
     std::vector<LatticeNeighbor> Ni = neighborList.getNeighbors(index);
     //exclude smaller neighbors
@@ -76,7 +76,7 @@ void ManybodyNeighborlist::addPairs(const int index, const Neighborlist &neighbo
         Ni = getFilteredNj(Ni, latticeNeighborIndex);
     }
 
-    if(Ni.size()==0)
+    if (Ni.size() == 0)
     {
         return;
     }
