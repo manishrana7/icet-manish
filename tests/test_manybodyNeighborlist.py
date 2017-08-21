@@ -10,10 +10,10 @@ from icetdev.structure import *
 from tests import manybodyNeighborlistTester
 
 # note that currently test at row 44 fails if cutoff is 6.1
-neighbor_cutoff = 6
+neighbor_cutoff = 6.1
 
 # set ut atoms and icet structure
-a = bulk('Ti', "bcc", a=3.321).repeat(2)
+a = bulk('Ti', "bcc", a=3.321).repeat(3)
 a.set_pbc((True, True, True))
 structure = structure_from_atoms(a)
 # set up neighborlist for input to manybody neighborlist
@@ -43,7 +43,7 @@ for n1, n2 in zip(intersect, naive_intersect):
 
 
 # test actual mbnl
-order = 3
+order = 5
 bothways = True
 index1 = 0
 index2 = len(a) - 1
@@ -72,7 +72,7 @@ for i in range(len(a)):
         order = j
         nbrs_tester = mbnl_T.build(
             (order - 1) * [ase_nl], index, bothways)
-        nbrs_cpp = mbnl.build((order - 1) * [nl], index, bothways)        
+        nbrs_cpp = mbnl.build((order - 1) * [nl], index, bothways)
         assert len(nbrs_tester) == len(nbrs_cpp), "Number of manybody-neighbors at "\
             "index {0} with order {1} was not equal. {2} != {3}".format(
                 i, j, len(nbrs_tester), len(nbrs_cpp))
@@ -84,9 +84,11 @@ for i in range(len(a)):
     for j in range(1, maxorder):
         index = i
         order = j
-        nbrs_tester = mbnl_T.build(order*[ase_nl], index, bothways)
+        nbrs_tester = mbnl_T.build(order * [ase_nl], index, bothways)
         nbrs_cpp = mbnl.build(order * [nl], index, bothways)
-        assert len(nbrs_tester) == len(nbrs_cpp)
+        assert len(nbrs_tester) == len(nbrs_cpp), "python mbnl and cpp mbnl do not give same amount of "\
+            "neighbors at index {0} with order {1} was not equal. {2} != {3}".format(
+            i, j, len(nbrs_tester), len(nbrs_cpp))
 
 
 # debug
