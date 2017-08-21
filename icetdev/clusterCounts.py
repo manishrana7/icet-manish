@@ -70,17 +70,17 @@ def __count_clusters(self, atoms=None, structure=None, neighborlists=None, mbnl=
 
     # loop over the indices in the structure, create the mbnl for each index
     # and count each index
-    if order > 2:
-        for lattice_index in range(structure.size()):
-            lattice_neigbhors = mbnl.build(
-                neighborlists, lattice_index, bothways)
-            self.count_lattice_neighbors(structure, lattice_neigbhors)
+    
+    for lattice_index in range(structure.size()):
+        lattice_neigbhors = mbnl.build(
+            neighborlists, lattice_index, bothways)
+        self.count_lattice_neighbors(structure, lattice_neigbhors)
 
     # Count the pairs
-    self.count_pairs(structure, neighborlists[0])
+    #self.count_pairs(structure, neighborlists[0])
 
     # count the singlets
-    self.count_singlets(structure)
+    #self.count_singlets(structure)
 
     # return all objects that might have been created here for possible reuse
     return structure, neighborlists, mbnl, order

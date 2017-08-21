@@ -104,26 +104,26 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_cluster_counts", &ClusterCounts::getClusterCounts)
         .def("print", &ClusterCounts::print);
 
-    py::class_<Orbit>(m, "Orbit")
-        .def(py::init<const Cluster>())
-        .def("add_equivalent_sites", &Orbit::addEquivalentSites)
-        .def("get_representative_cluster", &Orbit::getRepresentativeCluster)
-        .def("get_equivalent_sites", &Orbit::getEquivalentSites)
-        .def("size", &Orbit::size)
-        .def(py::self < py::self)
-        ;
+    // py::class_<Orbit>(m, "Orbit")
+    //     .def(py::init<const Cluster>())
+    //     .def("add_equivalent_sites", &Orbit::addEquivalentSites)
+    //     .def("get_representative_cluster", &Orbit::getRepresentativeCluster)
+    //     .def("get_equivalent_sites", &Orbit::getEquivalentSites)
+    //     .def("size", &Orbit::size)
+    //     .def(py::self < py::self)
+    //     ;
         
 
-    py::class_<OrbitList>(m, "OrbitList")
-        .def(py::init<>())
-        .def("add_orbit", &OrbitList::addOrbit)
-        .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters)
-        .def("get_orbit", &OrbitList::getOrbit)
-        .def("clear", &OrbitList::clear)
-        .def("sort", &OrbitList::sort)
-        .def("get_orbitList", &OrbitList::getOrbitList)        
-        .def("size", &OrbitList::size)
-        ;
+    // py::class_<OrbitList>(m, "OrbitList")
+    //     .def(py::init<>())
+    //     .def("add_orbit", &OrbitList::addOrbit)
+    //     .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters)
+    //     .def("get_orbit", &OrbitList::getOrbit)
+    //     .def("clear", &OrbitList::clear)
+    //     .def("sort", &OrbitList::sort)
+    //     .def("get_orbitList", &OrbitList::getOrbitList)        
+    //     .def("size", &OrbitList::size)
+    //     ;
         
 
 

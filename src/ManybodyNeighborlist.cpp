@@ -26,7 +26,15 @@
 std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> ManybodyNeighborlist::build(const std::vector<Neighborlist> &neighborlists, int index, bool saveBothWays)
 {
 
+    if (neighborlists.empty())
+    {
+        throw std::runtime_error("Error: neigbhorlist vector is empty in ManybodyNeighborlist::build");
+    }
     std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> manybodyNeighborIndices;
+
+    addSinglet(index, manybodyNeighborIndices);
+    addPairs(index, neighborlists[0], manybodyNeighborIndices, saveBothWays);
+
     for (size_t c = 2; c < neighborlists.size() + 2; c++)
     {
         auto Ni = neighborlists[c - 2].getNeighbors(index);
@@ -38,6 +46,41 @@ std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>
         combineToHigherOrder(neighborlists[c - 2], manybodyNeighborIndices, Ni, currentOriginalNeighbors, saveBothWays, c);
     }
     return manybodyNeighborIndices;
+}
+
+///Adds singlet from the index to manybodyNeighborIndices
+void ManybodyNeighborlist::addSinglet(const int index, std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &manybodyNeighborIndices) const
+{
+    Vector3d zeroVector = {0.0, 0.0, 0.0};
+    LatticeNeighbor latticeNeighborSinglet = LatticeNeighbor(index, zeroVector);
+    std::vector<LatticeNeighbor> singletLatticeNeighbors;
+    singletLatticeNeighbors.push_back(latticeNeighborSinglet);
+
+    std::vector<LatticeNeighbor> latNbrsEmpty;
+    manybodyNeighborIndices.push_back(std::make_pair(singletLatticeNeighbors, latNbrsEmpty));
+}
+
+///Add all pairs originating from index using neighborlist
+void ManybodyNeighborlist::addPairs(const int index, const Neighborlist &neighborList,
+                                    std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &manybodyNeighborIndices, bool saveBothWays) const
+
+{
+    Vector3d zeroVector = {0.0, 0.0, 0.0};
+    LatticeNeighbor latticeNeighborIndex = LatticeNeighbor(index, zeroVector);
+
+    std::vector<LatticeNeighbor> firstSite = {latticeNeighborIndex};
+    std::vector<LatticeNeighbor> Ni = neighborList.getNeighbors(index);
+    //exclude smaller neighbors
+    if (!saveBothWays)
+    {
+        Ni = getFilteredNj(Ni, latticeNeighborIndex);
+    }
+
+    if (Ni.size() == 0)
+    {
+        return;
+    }
+    manybodyNeighborIndices.push_back(std::make_pair(firstSite, Ni));
 }
 
 /**
@@ -88,10 +131,10 @@ std::vector<std::vector<std::vector<LatticeNeighbor>>> ManybodyNeighborlist::bui
     // {
     //     latnbr.print();
     // }
-    std::cout<<"Size of col1 "<<col1.size()<<std::endl;
+    std::cout << "Size of col1 " << col1.size() << std::endl;
     for (size_t index = 0; index < neighborlists[0].size(); index++)
     {
-        
+
         std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> mbnl_latnbrs = build(neighborlists, index, saveBothWays);
         for (const auto &mbnl_pair : mbnl_latnbrs)
         {
@@ -127,7 +170,7 @@ std::vector<std::vector<std::vector<LatticeNeighbor>>> ManybodyNeighborlist::bui
             }
         }
     }
-    std::sort(taken_rows.begin(),taken_rows.end());
+    std::sort(taken_rows.begin(), taken_rows.end());
     std::cout << "Taken rows: " << std::endl;
     for (auto taken_row : taken_rows)
     {
@@ -165,24 +208,24 @@ void ManybodyNeighborlist::addPermutationMatrixColumns(
         {
             indistinctLatNbrs.push_back(permutation_matrix[row][column]);
         }
-            auto perm_matrix_rows = findRowsFromCol1(col1, indistinctLatNbrs);
-            // std::cout<<"find in permutation matrix function:"<<std::endl;
-            auto find = std::find(taken_rows.begin(), taken_rows.end(), perm_matrix_rows);
-            if (find == taken_rows.end())
-            {
-                // std::cout<<"Found new taken rows: "<<std::endl;
-                // for(auto el : perm_matrix_rows){std::cout<<el<<" ";}
-                // std::cout<<std::endl;
-                // std::cout<<"Taken rows: "<<std::endl;
-                // for(auto taken_row : taken_rows)
-                // {
-                //     for(auto el : taken_row){std::cout<<el<<" ";}
-                //     std::cout<<std::endl;
-                // }
-                // std::cout<<"========="<<std::endl;
-                taken_rows.push_back(perm_matrix_rows);
-            }
-            columnLatticeNeighbors.push_back(indistinctLatNbrs);        
+        auto perm_matrix_rows = findRowsFromCol1(col1, indistinctLatNbrs);
+        // std::cout<<"find in permutation matrix function:"<<std::endl;
+        auto find = std::find(taken_rows.begin(), taken_rows.end(), perm_matrix_rows);
+        if (find == taken_rows.end())
+        {
+            // std::cout<<"Found new taken rows: "<<std::endl;
+            // for(auto el : perm_matrix_rows){std::cout<<el<<" ";}
+            // std::cout<<std::endl;
+            // std::cout<<"Taken rows: "<<std::endl;
+            // for(auto taken_row : taken_rows)
+            // {
+            //     for(auto el : taken_row){std::cout<<el<<" ";}
+            //     std::cout<<std::endl;
+            // }
+            // std::cout<<"========="<<std::endl;
+            taken_rows.push_back(perm_matrix_rows);
+        }
+        columnLatticeNeighbors.push_back(indistinctLatNbrs);
     }
     if (columnLatticeNeighbors.size() > 0)
     {

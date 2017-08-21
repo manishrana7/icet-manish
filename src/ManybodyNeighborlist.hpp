@@ -26,7 +26,7 @@ class ManybodyNeighborlist
 
     void combineToHigherOrder(const Neighborlist &nl,
                               std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &manybodyNeighborIndex,
-                              const std::vector<LatticeNeighbor> &Ni, std::vector<LatticeNeighbor> &currentOriginalNeighbrs,  bool saveBothWays, const int);
+                              const std::vector<LatticeNeighbor> &Ni, std::vector<LatticeNeighbor> &currentOriginalNeighbrs, bool saveBothWays, const int);
 
     std::vector<LatticeNeighbor> getIntersection(const std::vector<LatticeNeighbor> &Ni, const std::vector<LatticeNeighbor> &Nj)
     {
@@ -38,15 +38,18 @@ class ManybodyNeighborlist
         return N_intersection;
     }
     void addPermutationMatrixColumns(std::vector<std::vector<std::vector<LatticeNeighbor>>> &lattice_neighbors, std::vector<std::vector<int>> &taken_rows, const std::vector<LatticeNeighbor> &lat_nbrs, const std::vector<int> &pm_rows,
-                                                       const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<LatticeNeighbor> &col1) const;
+                                     const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<LatticeNeighbor> &col1) const;
 
     void translateAllNi(std::vector<LatticeNeighbor> &Ni, const Vector3d &unitCellOffset) const;
     std::vector<std::vector<std::vector<LatticeNeighbor>>> buildFromPermutationMatrix(const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<Neighborlist> &);
-    std::vector<LatticeNeighbor> getColumn1FromPM(const std::vector<std::vector<LatticeNeighbor>> &, bool sortIt=true) const;
-    std::vector<int> findRowsFromCol1(const std::vector<LatticeNeighbor> &col1, const std::vector<LatticeNeighbor> &latNbrs, bool sortit=true) const;
+    std::vector<LatticeNeighbor> getColumn1FromPM(const std::vector<std::vector<LatticeNeighbor>> &, bool sortIt = true) const;
+    std::vector<int> findRowsFromCol1(const std::vector<LatticeNeighbor> &col1, const std::vector<LatticeNeighbor> &latNbrs, bool sortit = true) const;
 
-  bool validatedCluster(const std::vector<LatticeNeighbor> &) const;
-  private:
+    bool validatedCluster(const std::vector<LatticeNeighbor> &) const;
+    void addSinglet(const int, std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &) const;
+    void addPairs(const int, const Neighborlist &,std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &, bool) const;
+
+    private:
     std::vector<double> _cutoffs;
     std::vector<LatticeNeighbor> getFilteredNj(const std::vector<LatticeNeighbor> &, const LatticeNeighbor &) const;
 };
