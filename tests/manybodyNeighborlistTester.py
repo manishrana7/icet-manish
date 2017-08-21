@@ -106,6 +106,8 @@ class manybodyNeighborlistTester():
         Ni = self.get_Ni_from_nl(neigbhorlist, index)
         if not bothways:
             Ni = self.filter_Ni_from_smaller(Ni, first_site)
+        if len(Ni) == 0:
+            return
         mb_indices.append([first_site, Ni])
 
     def get_intersection(self, Ni, Nj):
