@@ -21,7 +21,7 @@ class OrbitList
   public:
     OrbitList();
     OrbitList(const ManybodyNeighborlist &, const Structure &);
-    OrbitList(const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<Neighborlist> &);
+    OrbitList(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<Neighborlist> &);
     
 
 
@@ -115,7 +115,10 @@ class OrbitList
     std::vector<int> findRowsFromCol1(const std::vector<LatticeNeighbor> &col1, const std::vector<LatticeNeighbor> &latNbrs, bool sortit = true) const;
 
     bool validatedCluster(const std::vector<LatticeNeighbor> &) const;
-
+    void addOrbitsFromPM(const Structure &, const std::vector<std::vector<std::vector<LatticeNeighbor>>> &) ;
+    void addOrbitFromPM(const Structure &,const std::vector<std::vector<LatticeNeighbor>> &);
+    void checkEquivalentClusters(const Structure &) const;
+    
   private:
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;
 

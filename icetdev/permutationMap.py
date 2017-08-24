@@ -23,18 +23,6 @@ def __get_primitive_structure(atoms):
     return atoms_prim
 
 
-def __get_neigbhorlists(atoms, cutoffs):
-    """
-    Get a list of neigbhorlist objects (one for each cutoff)
-    Also returns the created structure object
-    """
-    structure = structure_from_atoms(atoms)
-    neighborlists = []
-    for co in cutoffs:
-        nl = Neighborlist(co)
-        nl.build(structure)
-        neighborlists.append(nl)
-    return structure, neighborlists
 
 
 def __get_fractional_positions_from_nl(structure, neighborlist):
@@ -60,7 +48,7 @@ def __get_fractional_positions_from_nl(structure, neighborlist):
     return fractional_positions
 
 
-def permutation_maps_from_atoms(atoms, cutoffs=None, find_prim=True, verbosity=0):
+def permutation_matrices_from_atoms(atoms, cutoffs=None, find_prim=True, verbosity=0):
     """
     Setup a list of permutation maps from an atoms object.
 
@@ -85,11 +73,11 @@ def permutation_maps_from_atoms(atoms, cutoffs=None, find_prim=True, verbosity=0
     symmetry = spglib.get_symmetry(atoms_prim)
     translations = symmetry['translations']
     rotations = symmetry['rotations']
-    permutation_maps = [PermutationMap(
-        translations, rotations) for i in range(len(cutoffs))]
+    permutation_matrices = PermutationMap(translations, rotations)
 
     # Create neighborlists from the different cutoffs
-    prim_structure, neighborlists = __get_neigbhorlists(atoms_prim, cutoffs)
+    prim_structure = structure_from_atoms(atoms_prim)
+    neighborlists = get_neighborlists(structure=prim_structure, cutoffs=cutoffs)
 
     # get fractional positions for each neighborlist
     for i, neighborlist in enumerate(neighborlists):
@@ -100,6 +88,50 @@ def permutation_maps_from_atoms(atoms, cutoffs=None, find_prim=True, verbosity=0
         if verbosity >= 3:
             print("number of fractional positions: {} ".format(len(frac_positions)))
         if len(frac_positions) > 0:
-            permutation_maps[i].build(frac_positions)
+            permutation_matrices[i].build(frac_positions)
 
-    return permutation_maps, prim_structure, neighborlists
+    return permutation_matrices, prim_structure, neighborlists
+
+def permutation_matrix_from_atoms(atoms, cutoff=None, find_prim=True, verbosity=0):
+    """
+    Setup a list of permutation maps from an atoms object.
+
+    Keyword arguments:
+        cutoffs -- list of cutoffs for the clusters wanted.
+        find_primitive -- if true it will take symmetries from the primitive
+        atoms object (default True)
+        verbosity -- 0 or lower is no verbosity, 1 is some output 3 is debug mode (default 0)
+    """
+    atoms = atoms.copy()
+    # set each element to the same since we only care about geometry when
+    # taking primitive
+    atoms.set_chemical_symbols(len(atoms) * [atoms[0].symbol])
+
+    atoms_prim = atoms
+    if find_prim:
+        atoms_prim = __get_primitive_structure(atoms)
+
+    if verbosity >= 3:
+        print("size of atoms_prim {}".format(len(atoms_prim)))
+    # Get symmetry information and load into a permutation map object
+    symmetry = spglib.get_symmetry(atoms_prim)
+    translations = symmetry['translations']
+    rotations = symmetry['rotations']
+    permutation_matrix = PermutationMap(translations, rotations)
+
+    # Create neighborlists from the different cutoffs
+    prim_structure = structure_from_atoms(atoms_prim)
+    neighborlist = Neighborlist(cutoff)
+    neighborlist.build(prim_structure)
+
+    # get fractional positions for each neighborlist
+    if verbosity >= 3:
+        print("building permutation map {}/{}".format(i, len(neighborlists)))
+    frac_positions = __get_fractional_positions_from_nl(
+        prim_structure, neighborlist)
+    if verbosity >= 3:
+        print("number of fractional positions: {} ".format(len(frac_positions)))
+    if len(frac_positions) > 0:
+        permutation_matrix.build(frac_positions)
+
+    return permutation_matrix, prim_structure, neighborlist

@@ -29,7 +29,6 @@ class Orbit
         _equivalentSites.push_back(latNbrs);
     }
 
-
     ///Returns amount of equivalent sites in this orbit
     size_t size() const
     {
@@ -43,7 +42,7 @@ class Orbit
     }
 
     ///Returns equivalent sites
-    std::vector<std::vector<LatticeNeighbor>>  getEquivalentSites() const
+    std::vector<std::vector<LatticeNeighbor>> getEquivalentSites() const
     {
         return _equivalentSites;
     }
@@ -78,10 +77,54 @@ class Orbit
         //Both representative cluster and size of equivalent sites are equal.
         //throw error to see if this ever happens
 
+        bool debug = true;
+
+        if (debug)
+        {
+            std::cout << "Clusters:" << std::endl;
+            orbit1.getRepresentativeCluster().print();
+            orbit2.getRepresentativeCluster().print();
+            std::cout << "Length of eq sites: (orbit1.size(), orbit2.size()) " << orbit1.size() << " , " << orbit2.size() << std::endl;
+
+            int maxCols = 7;
+            std::cout << "First " << maxCols << " equivalent sites in bort orbits" << std::endl;
+
+            int count = 0;
+            for (auto sites : orbit1.getEquivalentSites())
+            {
+                std::cout << "site " << count << std::endl;
+                for(auto site : sites)
+                {
+                    site.print();
+                }
+                
+                if (count++ == maxCols)
+                {
+                    break;
+                }
+            }
+            count = 0;
+            std::cout << std::endl;
+            for (auto sites : orbit2.getEquivalentSites())
+            {
+                std::cout << "site " << count << std::endl;
+                for(auto site : sites)
+                {
+                    site.print();
+                }
+                
+                if (count++ == maxCols)
+                {
+                    break;
+                }
+            }
+        }
+
         throw std::runtime_error("Both representative cluster and size of equivalent sites are equal in orbit < comparison");
     }
 
-    int getNumberOfDuplicates(int verbosity=0) const;
+    int getNumberOfDuplicates(int verbosity = 0) const;
+
   private:
     ///Reprasentative sorted cluster for this orbit
     Cluster _representativeCluster;

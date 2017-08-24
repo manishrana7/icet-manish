@@ -3,7 +3,8 @@ import numpy as np
 import time
 from icetdev.manybodyNeighborlist import ManybodyNeighborlist
 from _icetdev import OrbitList
-
+from icetdev.neighborlist import get_neighborlists
+from icetdev.permutationMap import permutation_matrix_from_atoms
 def __fractional_to_position(structure, row):
     """
     Return real xyz positions from fractional positions
@@ -50,8 +51,9 @@ def __prune_permutation_matrix(permutation_matrix, verbosity=0):
                 permutation_matrix[j].pop()
 
 
-    return permutation_matrix        
-def create_orbit_list(structure, permutation_matrix, neighborlists, verbosity=3):
+    return permutation_matrix
+
+def create_orbit_list(structure, cutoffs, verbosity=3):
     """
     Create and build an orbit list from a primitive structure, a mbnl object and a permutation matrix
 
@@ -59,15 +61,16 @@ def create_orbit_list(structure, permutation_matrix, neighborlists, verbosity=3)
     lattice_neighbors : lattice neighbors in format given by mbnl
     permutation_matrix : icet permutation matrix object
     """
+    max_cutoff = np.max(cutoffs)
 
-    # step1: transform permutation_matrix to be in lattice neigbhor format
-    pm_lattice_neighbors = __get_latNbr_permutation_matrix(structure, permutation_matrix) 
-    
-    mbnl = ManybodyNeighborlist()
-    t1 = time.time()
-    distinct_latnbrs = mbnl.buildFromPermutationMatrix(pm_lattice_neighbors,neighborlists)
-    t2 = time.time()
-    if verbosity >2:
-        print("time taken for building from permutation matrix {} s".format(t2-t1))
-    return distinct_latnbrs
+    neighborlists = get_neighborlists(structure=structure, cutoffs=cutoffs) 
+
+    permutation_matrix, prim_structure, neighborlist = permutation_matrix_from_atoms(structure.to_atoms(), max_cutoff)
+
+    #transform permutation_matrix to be in lattice neigbhor format
+    pm_lattice_neighbors = __get_latNbr_permutation_matrix(prim_structure, permutation_matrix) 
+   
+   
+    return OrbitList(structure, pm_lattice_neighbors, neighborlists)
+   
 

@@ -238,6 +238,7 @@ struct I_Neighbors
         return true;
     }
 
+  
     std::vector<double> _distances;
     std::vector<int> _sites;
     std::vector<int> _indices;
@@ -1129,6 +1130,12 @@ class Cluster
 
         //return( c1 < c2 && c2 < c1);
     }
+
+    friend bool operator!=(const Cluster &c1, const Cluster &c2)
+    {
+       return !(c1==c2);
+    }
+
 
     // comparison operator for sortable clusters
     friend bool operator<(const Cluster &c1, const Cluster &c2)

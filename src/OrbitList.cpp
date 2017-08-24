@@ -84,7 +84,7 @@ int OrbitList::findOrbit(const Cluster &cluster, const std::unordered_map<Cluste
     }
 }
 
-OrbitList::OrbitList(const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<Neighborlist> &neighborlists)
+OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<Neighborlist> &neighborlists)
 {
 
     std::vector<std::vector<std::vector<LatticeNeighbor>>> lattice_neighbors;
@@ -109,7 +109,7 @@ OrbitList::OrbitList(const std::vector<std::vector<LatticeNeighbor>> &permutatio
         std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> mbnl_latnbrs = mbnl.build(neighborlists, index, saveBothWays);
         for (const auto &mbnl_pair : mbnl_latnbrs)
         {
-
+            
             for (const auto &latnbr : mbnl_pair.second)
             {
                 std::vector<LatticeNeighbor> lat_nbrs = mbnl_pair.first;
@@ -123,6 +123,20 @@ OrbitList::OrbitList(const std::vector<std::vector<LatticeNeighbor>> &permutatio
                     addPermutationMatrixColumns(lattice_neighbors, taken_rows, lat_nbrs, pm_rows, permutation_matrix, col1);
                 }
             }
+            //special singlet case
+            //copy-paste from above section but with line with lat_nbrs.push_back(latnbr); is removed
+            if(mbnl_pair.second.size() == 0 )
+            {
+                std::vector<LatticeNeighbor> lat_nbrs = mbnl_pair.first;
+                auto pm_rows = findRowsFromCol1(col1, lat_nbrs);
+                auto find = std::find(taken_rows.begin(), taken_rows.end(), pm_rows);
+                if (find == taken_rows.end())
+                {
+                    //new stuff found
+                    addPermutationMatrixColumns(lattice_neighbors, taken_rows, lat_nbrs, pm_rows, permutation_matrix, col1);
+                }
+
+            }
         }
     }
 
@@ -131,29 +145,83 @@ OrbitList::OrbitList(const std::vector<std::vector<LatticeNeighbor>> &permutatio
         std::sort(lattice_neighbors[i].begin(), lattice_neighbors[i].end());
     }
 
-    for (int i = 0; i < lattice_neighbors.size(); i++)
+    addOrbitsFromPM(structure, lattice_neighbors);
+
+    bool debug = true;
+
+    if (debug)
     {
-        for (int j = i + 1; j < lattice_neighbors.size(); j++)
+        checkEquivalentClusters(structure);
+        std::cout<<"Done checking equivalent structures"<<std::endl;
+    }
+
+    // for (int i = 0; i < lattice_neighbors.size(); i++)
+    // {
+    //     for (int j = i + 1; j < lattice_neighbors.size(); j++)
+    //     {
+    //         if (lattice_neighbors[i] == lattice_neighbors[j])
+    //         {
+    //             std::cout << "Found duplicate" << std::endl;
+    //         }
+    //     }
+    // }
+    // std::sort(taken_rows.begin(), taken_rows.end());
+}
+
+///Debug function to check that all equivalent sites in every orbit give same sorted cluster
+void OrbitList::checkEquivalentClusters(const Structure &structure) const
+{
+
+    for (const auto &orbit : _orbitList)
+    {
+        Cluster representative_cluster = orbit.getRepresentativeCluster();
+        for (const auto &sites : orbit.getEquivalentSites())
         {
-            if (lattice_neighbors[i] == lattice_neighbors[j])
+            Cluster equivalentCluster = Cluster(structure, sites);
+            if(representative_cluster != equivalentCluster)
             {
-                std::cout << "Found duplicate" << std::endl;
+                std::cout<<" found a \"equivalent\" cluster that were not equal representative cluster"<<std::endl;
+                std::cout<<"representative_cluster:"<<std::endl;
+                representative_cluster.print();
+
+                std::cout<<"equivalentCluster:"<<std::endl;
+                equivalentCluster.print();
+
+                exit(1);
             }
         }
     }
-    std::sort(taken_rows.begin(), taken_rows.end());
-    std::cout << "Taken rows: " << std::endl;
-    for (auto taken_row : taken_rows)
-    {
-        for (auto el : taken_row)
-        {
-            std::cout << el << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "=========" << std::endl;
 }
 
+/**
+This adds the lattice_neighbors container found in the constructor to the orbits
+
+each outer vector is an orbit and the inner vectors are identical sites
+
+*/
+
+void OrbitList::addOrbitsFromPM(const Structure &structure, const std::vector<std::vector<std::vector<LatticeNeighbor>>> &lattice_neighbors)
+{
+
+    for (const auto &equivalent_sites : lattice_neighbors)
+    {
+        addOrbitFromPM(structure, equivalent_sites);
+    }
+}
+
+///add these equivalent sites as an orbit to orbitlist
+void OrbitList::addOrbitFromPM(const Structure &structure, const std::vector<std::vector<LatticeNeighbor>> &equivalent_sites)
+{
+
+    Cluster representativeCluster = Cluster(structure, equivalent_sites[0]);
+    Orbit newOrbit = Orbit(representativeCluster);
+    _orbitList.push_back(newOrbit);
+
+    for (const auto &sites : equivalent_sites)
+    {
+        _orbitList.back().addEquivalentSites(sites);
+    }
+}
 /**
     From all columns in permutation matrix add all the vector<LatticeNeighbors> from pm_rows
 

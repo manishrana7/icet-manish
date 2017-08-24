@@ -4,7 +4,7 @@ from icetdev.structure import structure_from_atoms
 
 def get_neighborlists(atoms=None, structure=None, cutoffs=None):
     """
-    Return list of icet'sneigbhorlist from a configuration and cutoffs
+    Return list of icet's neigbhorlist from a configuration and cutoffs
 
     return:
          list of neighborlists
