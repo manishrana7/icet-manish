@@ -115,8 +115,19 @@ def permutation_matrix_from_atoms(atoms, cutoff=None, find_prim=True, verbosity=
         print("size of atoms_prim {}".format(len(atoms_prim)))
     # Get symmetry information and load into a permutation map object
     symmetry = spglib.get_symmetry(atoms_prim)
-    translations = symmetry['translations']
+    translations = symmetry['translations']    
     rotations = symmetry['rotations']
+
+    # print(translations.shape)
+    # print(rotations.shape)
+
+    # from itertools import permutations
+    # for trans in  (list(set(permutations([0,0,1])))):
+    #     translations = np.vstack((translations, trans))
+    #     rotations = np.vstack((rotations, np.eye(3)[np.newaxis,:]))
+    # print(translations.shape)   
+    # print(rotations.shape)
+
     permutation_matrix = PermutationMap(translations, rotations)
 
     # Create neighborlists from the different cutoffs

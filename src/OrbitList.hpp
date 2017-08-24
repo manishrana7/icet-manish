@@ -119,6 +119,10 @@ class OrbitList
     void addOrbitFromPM(const Structure &,const std::vector<std::vector<LatticeNeighbor>> &);
     void checkEquivalentClusters(const Structure &) const;
     
+
+    std::vector<LatticeNeighbor> translateSites(const std::vector<LatticeNeighbor> &, const unsigned int ) const;
+    std::vector<std::vector<LatticeNeighbor>> getSitesTranslatedToUnitcell(const std::vector<LatticeNeighbor> &) const;
+    
   private:
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;
 

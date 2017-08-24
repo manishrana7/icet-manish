@@ -62,15 +62,46 @@ def create_orbit_list(structure, cutoffs, verbosity=3):
     permutation_matrix : icet permutation matrix object
     """
     max_cutoff = np.max(cutoffs)
-
+    total_time_taken = 0
+    t0 = time.time()
     neighborlists = get_neighborlists(structure=structure, cutoffs=cutoffs) 
+    t1 = time.time()
+    time_taken = t1 - t0
+    total_time_taken += time_taken
+    if verbosity > 3:
+        print("Done getting neighborlists. Time {0} s".format(time_taken))
 
+    t0 = time.time()
     permutation_matrix, prim_structure, neighborlist = permutation_matrix_from_atoms(structure.to_atoms(), max_cutoff)
+    t1 = time.time()
+    time_taken = t1 - t0
 
+    if verbosity > 3:
+        print("Done getting permutation_matrix. Time {0} s".format(time_taken))
+    total_time_taken += time_taken
+
+    t0 = time.time()
     #transform permutation_matrix to be in lattice neigbhor format
-    pm_lattice_neighbors = __get_latNbr_permutation_matrix(prim_structure, permutation_matrix) 
-   
-   
-    return OrbitList(structure, pm_lattice_neighbors, neighborlists)
+    pm_lattice_neighbors = __get_latNbr_permutation_matrix(prim_structure, permutation_matrix)
+    t1 = time.time()
+    time_taken = t1 - t0
+    total_time_taken += time_taken
+
+    if verbosity > 3:
+        print("Done transforming permutation matrix into lattice neighbbor format. Time {0} s".format(time_taken))
+
+    t0 = time.time()
+    orbitlist = OrbitList(structure, pm_lattice_neighbors, neighborlists)
+    t1 = time.time()
+    time_taken = t1 - t0
+    total_time_taken += time_taken
+
+    if verbosity > 3:
+        print("Done construction orbitlist. Time {0} s".format(time_taken))
+
+    if verbosity > 3:
+        print("Total time {0} s".format(total_time_taken))
+
+    return orbitlist
    
 
