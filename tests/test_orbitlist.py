@@ -5,6 +5,7 @@ from ase import Atoms
 from ase.build import bulk
 from icetdev.neighborlist import get_neighborlists
 from icetdev.orbitList import create_orbit_list
+# from clib.cluster_space import ClusterSpace
 
 
 def setup_test_orbitlist(atoms, cutoffs):
@@ -12,14 +13,16 @@ def setup_test_orbitlist(atoms, cutoffs):
     mbnl = ManybodyNeighborlist()
     neighborlists = get_neighborlists(atoms=atoms, cutoffs=cutoffs)
     mbnl.build(neighborlists, 0, True)
-    return structure, mbnl
+    return structure, mbnl, neighborlists
 
 
-atoms = bulk("Al", "diamond", a=1)
-cutoffs = [3.01, 2.01]
+atoms = bulk("Al", "bcc", a=1)
+cutoffs = [2.01, 2.01]
 
-
-structure, mbnl = setup_test_orbitlist(atoms, cutoffs)
+# cs = ClusterSpace(atoms=atoms, cutoffs=cutoffs)
+# print(cs)
+# len(cs)
+structure, mbnl, neighborlists = setup_test_orbitlist(atoms, cutoffs)
 
 ol = orbitList.OrbitList(mbnl, structure)
 
@@ -39,9 +42,14 @@ print("size of orbitlist {0}".format(ol.size()))
 #                                          #
 ############################################
 
+# for nbr in neighborlists[0].get_neighbors(0):
+#     print(nbr)
+# print("-------")    
+# for nbr in neighborlists[0].get_neighbors(1):
+#     print(nbr)    
 orbitlist = create_orbit_list(structure, cutoffs, verbosity=4)
 
-# orbitlist.sort()
+#orbitlist.sort()
 
 #ol.print(verbosity = 3)
 for i in range(len(cutoffs) + 2):
@@ -50,10 +58,15 @@ for i in range(len(cutoffs) + 2):
 
 print("size of orbitlist {0}".format(orbitlist.size()))
 
-import numpy as np
-for i in range(orbitlist.size()):
-    if len(orbitlist.get_orbit(i).get_representative_cluster().get_distances())==3:        
-        print(orbitlist.get_orbit(i).get_representative_cluster().get_distances())
+# for i in range(orbitlist.size()):
+#      (orbitlist.get_orbit(i).get_representative_cluster().print())
+#      print("number of equivalent sites: ",len(orbitlist.get_orbit(i).get_equivalent_sites()))
+
+
+# import numpy as np
+# for i in range(orbitlist.size()):
+#     if len(orbitlist.get_orbit(i).get_representative_cluster().get_distances())==3:        
+#         print(orbitlist.get_orbit(i).get_representative_cluster().get_distances())
 
 
 #         eq_sites = orbitlist.get_orbit(i).get_equivalent_sites()
@@ -64,7 +77,8 @@ for i in range(orbitlist.size()):
 #         print(" ")
 # for i in range(orbitlist.size()):
 #     if len(orbitlist.get_orbit(i).get_representative_cluster().get_distances())==3:        
-#         dists = orbitlist.get_orbit(i).get_representative_cluster().get_distances()
+#         dists = orbitlist.get_orbit(i).get_rep
+# resentative_cluster().get_distances()
 #         if np.linalg.norm((np.array(dists) -[0.86, 1.4,1.65])) < 0.1:
 #             eq_sites = orbitlist.get_orbit(i).get_equivalent_sites()
 #             print("len of eq sites: {}".format(len(eq_sites)) )

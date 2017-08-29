@@ -88,6 +88,7 @@ PYBIND11_PLUGIN(_icetdev)
 
     py::class_<LatticeNeighbor>(m, "LatticeNeighbor")
         .def(py::init<const int, const Vector3d &>())
+        .def("print", &LatticeNeighbor::print )
         .def_readwrite("index", &LatticeNeighbor::index)
         .def_readwrite("unitcellOffset", &LatticeNeighbor::unitcellOffset)
         .def(py::self < py::self)

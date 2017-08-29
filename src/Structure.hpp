@@ -186,14 +186,18 @@ class Structure
     {
 
         ///ldlt require positive or negative semidefinite cell
-        // std::cout<<"position "<< position<<std::endl;
-        // std::cout<<"cell "<< _cell<<std::endl;
+        // std::cout << "position " << position << std::endl;
+        //  std::cout<<"cell "<< _cell<<std::endl;
         Vector3d fractional = _cell.transpose().partialPivLu().solve(position);
-        // std::cout<<"fractional "<< fractional<<std::endl;
-        Vector3d unitcellOffset = {int(round(fractional[0])), int(round(fractional[1])), int(round(fractional[2]))};
+        // std::cout << "fractional " << fractional << std::endl;
+        // Vector3d unitcellOffset = {int(round(fractional[0])), int(round(fractional[1])), int(round(fractional[2]))};
+        Vector3d unitcellOffset = {int(floor(coordinateRound((double)fractional[0]))),
+                                   int(floor(coordinateRound((double)fractional[1]))),
+                                   int(floor(coordinateRound((double)fractional[2])))};
+        // std::cout << "unitcellOffset " << unitcellOffset << std::endl;
 
         Vector3d remainder = (fractional - unitcellOffset).transpose() * _cell;
-        // std::cout<<"remainder "<< remainder<<std::endl;
+        // std::cout << "remainder " << remainder << std::endl;
 
         auto index = findIndexOfPosition(remainder, position_tolerance);
         if (index == -1)
@@ -205,6 +209,18 @@ class Structure
         return ret;
     }
 
+    ///Round to nearest integer toward zero
+    int nearestIntegerTowardZero(const double value) const
+    {
+        if (value > 0)
+        {
+            return int(floor(value));
+        }
+        else
+        {
+            return int(floor(value));
+        }
+    }
     /**
     Finds a vector of lattice neigbhors from a vector of positions
 
@@ -247,5 +263,11 @@ class Structure
             strElements[i] = PeriodicTable::intStr[elements[i]];
         }
         return strElements;
+    }
+    ///rounds val to precision
+    double coordinateRound(const double &val) const
+    {
+        double precision = 1e-6;
+        return round(val * 1.0 / precision) / (1.0 / precision);
     }
 };

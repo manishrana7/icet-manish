@@ -93,7 +93,7 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
     ManybodyNeighborlist mbnl = ManybodyNeighborlist();
 
     //if [0,1,2] exists in taken_rows then these three rows (with columns) have been accounted for and should not be looked at
-    std::vector<std::vector<int>> taken_rows;
+    std::unordered_set<std::vector<int>,VectorHash> taken_rows;
     std::vector<LatticeNeighbor> col1 = getColumn1FromPM(permutation_matrix, false);
 
     std::set<LatticeNeighbor> col1_uniques(col1.begin(), col1.end());
@@ -117,29 +117,46 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
 
                 std::vector<std::vector<LatticeNeighbor>> translatedSites = getSitesTranslatedToUnitcell(lat_nbrs);
                 int missedSites = 0;
-                for (const auto &translatedSite : translatedSites)
-                {
-                    try
-                    {
-                        auto pm_rows = findRowsFromCol1(col1, translatedSite);
 
-                        auto find = std::find(taken_rows.begin(), taken_rows.end(), pm_rows);
-                        if (find == taken_rows.end())
-                        {
-                            //new stuff found
-                            addPermutationMatrixColumns(lattice_neighbors, taken_rows, translatedSite, pm_rows, permutation_matrix, col1);
-                        }
-                    }
-                    catch (const std::runtime_error)
-                    {
-                        std::cout<<"missed sites here "<<missedSites<<std::endl;
-                        missedSites++;
-                    }
-                }
-                if (missedSites == translatedSites.size() - 1)
+                auto sites_index_pair = getMatchesInPM(translatedSites, col1);
+                auto find = taken_rows.find(sites_index_pair[0].second);
+                if (find == taken_rows.end())
                 {
-                    throw std::runtime_error("Did not find any of the translated sites in findRowsFromCol1. From orbitlist constructor ");
+                    //new stuff found
+                    addPermutationMatrixColumns(lattice_neighbors, taken_rows, sites_index_pair[0].first, sites_index_pair[0].second, permutation_matrix, col1, true);
                 }
+                //add the equivalent translated clusters as taken but do not add them to a new orbit 
+                // for (int i = 1; i < translatedSites.size(); i++)
+                // {
+                //     auto find = taken_rows.find(sites_index_pair[i].second);
+                //     if (find == taken_rows.end())
+                //     {
+                //         //new stuff found
+                //         addPermutationMatrixColumns(lattice_neighbors, taken_rows, sites_index_pair[i].first, sites_index_pair[i].second, permutation_matrix, col1, false);
+                //     }
+                // }
+                // if (missedSites == translatedSites.size())
+                // {
+                //     if(missedSites==2)
+                //     {
+                //         std::cout<<"dist "<<structure.getDistance2(translatedSites[0][0].index, translatedSites[0][0].unitcellOffset,translatedSites[0][1].index, translatedSites[0][1].unitcellOffset)<<std::endl;
+                //     }
+                //     for(auto sites : translatedSites)
+                //     {
+                //         for(auto site : sites)
+                //         {
+                //             site.print();
+                //         }
+                //         std::cout<<"==="<<std::endl;
+                //     }
+                //     for(auto row : col1)
+                //     {
+                //         row.print();
+                //     }
+                //     std::cout<<"Missed sites: "<< missedSites<<std::endl;
+                //     std::cout<<"translatedSites size : "<< translatedSites.size() << std::endl;
+                //     throw std::runtime_error("Did not find any of the translated sites in findRowsFromCol1. From orbitlist constructor ");
+                // }
             }
 
             //special singlet case
@@ -148,11 +165,11 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
             {
                 std::vector<LatticeNeighbor> lat_nbrs = mbnl_pair.first;
                 auto pm_rows = findRowsFromCol1(col1, lat_nbrs);
-                auto find = std::find(taken_rows.begin(), taken_rows.end(), pm_rows);
+                auto find = taken_rows.find(pm_rows);
                 if (find == taken_rows.end())
                 {
                     //new stuff found
-                    addPermutationMatrixColumns(lattice_neighbors, taken_rows, lat_nbrs, pm_rows, permutation_matrix, col1);
+                    addPermutationMatrixColumns(lattice_neighbors, taken_rows, lat_nbrs, pm_rows, permutation_matrix, col1, true);
                 }
             }
         }
@@ -189,15 +206,15 @@ std::vector<std::vector<LatticeNeighbor>> OrbitList::getSitesTranslatedToUnitcel
     Vector3d zeroVector = {0.0, 0.0, 0.0};
     for (int i = 0; i < latticeNeighbors.size(); i++)
     {
-        if ((latticeNeighbors[i].unitcellOffset- zeroVector).norm()> 0.1)
+        if ((latticeNeighbors[i].unitcellOffset - zeroVector).norm() > 0.1)
         {
             auto translatedSites = translateSites(latticeNeighbors, i);
             std::sort(translatedSites.begin(), translatedSites.end());
 
             translatedLatticeNeighbors.push_back(translatedSites);
-        } 
+        }
     }
-    
+
     return translatedLatticeNeighbors;
 }
 
@@ -232,7 +249,7 @@ void OrbitList::checkEquivalentClusters(const Structure &structure) const
                 std::cout << "equivalentCluster:" << std::endl;
                 equivalentCluster.print();
 
-                exit(1);
+                throw std::runtime_error("found a \"equivalent\" cluster that were not equal representative cluster");
             }
         }
     }
@@ -273,15 +290,12 @@ void OrbitList::addOrbitFromPM(const Structure &structure, const std::vector<std
     When taking new columns update taken_rows accordingly
  */
 void OrbitList::addPermutationMatrixColumns(
-    std::vector<std::vector<std::vector<LatticeNeighbor>>> &lattice_neighbors, std::vector<std::vector<int>> &taken_rows, const std::vector<LatticeNeighbor> &lat_nbrs, const std::vector<int> &pm_rows,
-    const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<LatticeNeighbor> &col1) const
+    std::vector<std::vector<std::vector<LatticeNeighbor>>> &lattice_neighbors, std::unordered_set<std::vector<int>,VectorHash> &taken_rows, const std::vector<LatticeNeighbor> &lat_nbrs, const std::vector<int> &pm_rows,
+    const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<LatticeNeighbor> &col1, bool add) const
 {
 
     std::vector<std::vector<LatticeNeighbor>> columnLatticeNeighbors;
     columnLatticeNeighbors.reserve(permutation_matrix[0].size());
-    // columnLatticeNeighbors.push_back(lat_nbrs);
-
-    // taken_rows.push_back(pm_rows);
     for (size_t column = 0; column < permutation_matrix[0].size(); column++) //start at one since we got the zeroth one allready
     {
         std::vector<LatticeNeighbor> indistinctLatNbrs;
@@ -291,16 +305,39 @@ void OrbitList::addPermutationMatrixColumns(
             indistinctLatNbrs.push_back(permutation_matrix[row][column]);
         }
         auto translatedEquivalentSites = getSitesTranslatedToUnitcell(indistinctLatNbrs);
-        for (const auto &eq_sites : translatedEquivalentSites)
+
+        auto sites_index_pair = getMatchesInPM(translatedEquivalentSites, col1);
+
+
+        // for (int i = 1; i < sites_index_pair.size(); i++)
+        // {
+        //     auto find = taken_rows.find(sites_index_pair[i].second);
+        //     if( find == taken_rows.end())
+        //     {
+
+        //     }
+
+        // }
+        
+        auto find = taken_rows.find(sites_index_pair[0].second);
+
+
+
+
+        if (find == taken_rows.end())
         {
-
-            auto perm_matrix_rows = findRowsFromCol1(col1, eq_sites);
-
-            auto find = std::find(taken_rows.begin(), taken_rows.end(), perm_matrix_rows);
-            if (find == taken_rows.end())
+            taken_rows.insert(sites_index_pair[0].second);
+            if (add)
             {
-                taken_rows.push_back(perm_matrix_rows);
-                columnLatticeNeighbors.push_back(eq_sites);
+                columnLatticeNeighbors.push_back(sites_index_pair[0].first);
+            }
+            for (int i = 1; i < sites_index_pair.size(); i++)
+            {
+                find = taken_rows.find(sites_index_pair[i].second);
+                if (find == taken_rows.end())
+                {
+                    taken_rows.insert(sites_index_pair[i].second);
+                }
             }
         }
     }
@@ -310,8 +347,53 @@ void OrbitList::addPermutationMatrixColumns(
     }
 }
 
-/**
 
+///returns the first set of translated sites that exists in col1 of permutationmatrix
+std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<int>>> OrbitList::getMatchesInPM(const std::vector<std::vector<LatticeNeighbor>> &translatedSites, const std::vector<LatticeNeighbor> &col1) const
+{
+    std::vector<int> perm_matrix_rows;
+    std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<int>>> matchedSites;
+    for (const auto &sites : translatedSites)
+    {
+        try
+        {
+            perm_matrix_rows = findRowsFromCol1(col1, sites);
+        }
+        catch (const std::runtime_error)
+        {
+            continue;
+        }
+        //no error here indicating we found matching rows in col1
+        matchedSites.push_back(std::make_pair(sites, perm_matrix_rows));
+    }
+    if (matchedSites.size() > 0)
+    {
+        return matchedSites;
+    }
+    else
+    {
+        //we found no matching rows in permutation matrix, this should not happen so we throw an error
+
+        //first print some debug info
+        std::cout << "number of translated sites: " << translatedSites.size() << std::endl;
+        std::cout << "sites: " << std::endl;
+        for (auto latnbrs : translatedSites)
+        {
+            for (auto latnbr : latnbrs)
+            {
+                latnbr.print();
+            }
+            std::cout << " ========= " << std::endl;
+        }
+        std::cout << "col1:" << std::endl;
+        for (auto row : col1)
+        {
+            row.print();
+        }
+        throw std::runtime_error("Did not find any of the translated sites in col1 of permutation matrix in function getFirstMatchInPM in orbitlist");
+    }
+}
+/**
 Checks that atleast one lattice neigbhor originate in the original cell (has one cell offset = [0,0,0])
 */
 
@@ -341,9 +423,9 @@ std::vector<int> OrbitList::findRowsFromCol1(const std::vector<LatticeNeighbor> 
         {
             for (const auto &latNbrp : latNbrs)
             {
-                latNbrp.print();
+                //latNbrp.print();
             }
-            latNbr.print();
+            //  latNbr.print();
             throw std::runtime_error("Did not find lattice neigbhor in col1 of permutation matrix in function findRowsFromCol1 in mbnl");
         }
         else

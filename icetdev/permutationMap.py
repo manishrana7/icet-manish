@@ -33,11 +33,11 @@ def __get_fractional_positions_from_nl(structure, neighborlist):
     position_of_neighbors = []
     fractional_positions = []
     latnbr_i = LatticeNeighbor(0, [0, 0, 0])
-    for i in range(neighborlist.size()):
+    for i in range(neighborlist.size()):        
         latnbr_i.index = i
         position = structure.get_position(latnbr_i)
         position_of_neighbors.append(position)
-        for latNbr in neighborlist.get_neighbors(i):
+        for latNbr in neighborlist.get_neighbors(i):            
             position = structure.get_position(latNbr)
             position_of_neighbors.append(position)
     if len(position_of_neighbors) > 0:
@@ -78,7 +78,6 @@ def permutation_matrices_from_atoms(atoms, cutoffs=None, find_prim=True, verbosi
     # Create neighborlists from the different cutoffs
     prim_structure = structure_from_atoms(atoms_prim)
     neighborlists = get_neighborlists(structure=prim_structure, cutoffs=cutoffs)
-
     # get fractional positions for each neighborlist
     for i, neighborlist in enumerate(neighborlists):
         if verbosity >= 3:
@@ -118,16 +117,6 @@ def permutation_matrix_from_atoms(atoms, cutoff=None, find_prim=True, verbosity=
     translations = symmetry['translations']    
     rotations = symmetry['rotations']
 
-    # print(translations.shape)
-    # print(rotations.shape)
-
-    # from itertools import permutations
-    # for trans in  (list(set(permutations([0,0,1])))):
-    #     translations = np.vstack((translations, trans))
-    #     rotations = np.vstack((rotations, np.eye(3)[np.newaxis,:]))
-    # print(translations.shape)   
-    # print(rotations.shape)
-
     permutation_matrix = PermutationMap(translations, rotations)
 
     # Create neighborlists from the different cutoffs
@@ -135,9 +124,7 @@ def permutation_matrix_from_atoms(atoms, cutoff=None, find_prim=True, verbosity=
     neighborlist = Neighborlist(cutoff)
     neighborlist.build(prim_structure)
 
-    # get fractional positions for each neighborlist
-    if verbosity >= 3:
-        print("building permutation map {}/{}".format(i, len(neighborlists)))
+    # get fractional positions for neighborlist    
     frac_positions = __get_fractional_positions_from_nl(
         prim_structure, neighborlist)
     if verbosity >= 3:

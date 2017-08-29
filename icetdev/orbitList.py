@@ -16,13 +16,16 @@ def __fractional_to_position(structure, row):
     return positions
 
 
-def __get_latNbr_permutation_matrix(structure, permutation_matrix, prune=True, verbosity=1):
+def __get_latNbr_permutation_matrix(structure, permutation_matrix, prune=True, verbosity=3):
     """
     Return a transformed permutation matrix with lattice neighbors instead of frac positions
 
     Permutation matrix is in row major format which we will keep
     """
     pm_frac = permutation_matrix.get_permutated_positions()
+    
+    
+    
     pm_latNbrs = []
     for row in pm_frac:
         positions = __fractional_to_position(structure, row)
@@ -32,7 +35,7 @@ def __get_latNbr_permutation_matrix(structure, permutation_matrix, prune=True, v
     if prune:
         if verbosity >2:
             print("size before pruning {} ".format(len(pm_latNbrs)))
-        pm_latNbrs = __prune_permutation_matrix(pm_latNbrs)
+        pm_latNbrs = __prune_permutation_matrix(pm_latNbrs, verbosity=0)
         if verbosity >2:
             print("size after pruning {} ".format(len(pm_latNbrs)))
     return pm_latNbrs
@@ -42,15 +45,31 @@ def __prune_permutation_matrix(permutation_matrix, verbosity=0):
     """
     Prunes the matrix so that the first column only contains unique elements
     """ 
-    for i, rowi in enumerate(permutation_matrix):
-        for j, rowj in enumerate(permutation_matrix):
+    rows = len(permutation_matrix)
+    del_list = []
+    for i  in range(len(permutation_matrix)):
+        for j  in reversed(range(len(permutation_matrix))):
             if j <= i:
                 continue
-            if permutation_matrix[i][0] == permutation_matrix[j][0]:
-                # print("equal {} {}".format(i,j))
-                permutation_matrix[j].pop()
+            if permutation_matrix[i][0] == permutation_matrix[j][0]:                
+                permutation_matrix.pop(j)
+                if verbosity > 2:
+                    print("Removing duplicate in permutation matrix with index {1}, same as {0}".format(i,j))
+                # permutation_matrix[j].pop()
+                #print("found duplicate")
+    #             if j not in del_list:
+    #                 del_list.append(j)
 
-
+    # popped_rows_to_add = []
+    # for j in reversed(sorted(del_list)):
+    #     popped_row = permutation_matrix.pop(j)
+    #     popped_col1 = popped_row[0]
+    #     if popped_col1 not in permutation_matrix[:][0]:
+    #         print("Error: removed too much in prune permutation matrix")
+    #         popped_col1.print()
+    # #         popped_rows_to_add.append(popped_row)
+    # for row in popped_rows_to_add:
+    #     permutation_matrix.append(row)
     return permutation_matrix
 
 def create_orbit_list(structure, cutoffs, verbosity=3):
@@ -62,36 +81,44 @@ def create_orbit_list(structure, cutoffs, verbosity=3):
     permutation_matrix : icet permutation matrix object
     """
     max_cutoff = np.max(cutoffs)
+    print("Max cutoff: {}".format(max_cutoff))
     total_time_taken = 0
+    
+
     t0 = time.time()
-    neighborlists = get_neighborlists(structure=structure, cutoffs=cutoffs) 
+    permutation_matrix, prim_structure, neighborlist = permutation_matrix_from_atoms(structure.to_atoms(), max_cutoff)    
     t1 = time.time()
     time_taken = t1 - t0
     total_time_taken += time_taken
-    if verbosity > 3:
-        print("Done getting neighborlists. Time {0} s".format(time_taken))
-
-    t0 = time.time()
-    permutation_matrix, prim_structure, neighborlist = permutation_matrix_from_atoms(structure.to_atoms(), max_cutoff)
-    t1 = time.time()
-    time_taken = t1 - t0
 
     if verbosity > 3:
         print("Done getting permutation_matrix. Time {0} s".format(time_taken))
     total_time_taken += time_taken
 
     t0 = time.time()
+    neighborlists = get_neighborlists(structure=prim_structure, cutoffs=cutoffs) 
+    t1 = time.time()
+    time_taken = t1 - t0
+    total_time_taken += time_taken
+
+    if verbosity > 3:
+        print("Done getting neighborlists. Time {0} s".format(time_taken))
+
+
+
+
+    t0 = time.time()
     #transform permutation_matrix to be in lattice neigbhor format
-    pm_lattice_neighbors = __get_latNbr_permutation_matrix(prim_structure, permutation_matrix)
+    pm_lattice_neighbors = __get_latNbr_permutation_matrix(prim_structure, permutation_matrix, verbosity=3)
     t1 = time.time()
     time_taken = t1 - t0
     total_time_taken += time_taken
 
     if verbosity > 3:
         print("Done transforming permutation matrix into lattice neighbbor format. Time {0} s".format(time_taken))
-
+    
     t0 = time.time()
-    orbitlist = OrbitList(structure, pm_lattice_neighbors, neighborlists)
+    orbitlist = OrbitList(prim_structure, pm_lattice_neighbors, neighborlists)
     t1 = time.time()
     time_taken = t1 - t0
     total_time_taken += time_taken
