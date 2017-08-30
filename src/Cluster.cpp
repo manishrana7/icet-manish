@@ -4,7 +4,7 @@
 Cluster::Cluster(const Structure &structure, const std::vector<LatticeNeighbor> &latticeNeighbors,
         const bool sortedCluster, const int clusterTag )
 {
-    _symprec = 1e-5;
+    _symprec = 1e-6;
     size_t clusterSize = latticeNeighbors.size();
     std::vector<int> sites(clusterSize);
     std::vector<double> distances;

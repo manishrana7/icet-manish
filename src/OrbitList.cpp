@@ -9,25 +9,38 @@ OrbitList::OrbitList()
 }
 
 ///Construct orbitlist from mbnl and structure
-OrbitList::OrbitList(const ManybodyNeighborlist &mbnl, const Structure &structure)
+OrbitList::OrbitList(const std::vector<Neighborlist> &neighborlists, const Structure &structure)
 {
     std::unordered_map<Cluster, int> clusterIndexMap;
-    for (size_t i = 0; i < mbnl.getNumberOfSites(); i++)
-    {
-        //special case for singlet
-        if (mbnl.getNumberOfSites(i) == 0)
-        {
-            std::vector<LatticeNeighbor> sites = mbnl.getSites(i, 0);
-            Cluster cluster = Cluster(structure, sites);
-            addClusterToOrbitlist(cluster, sites, clusterIndexMap);
-        }
+    ManybodyNeighborlist mbnl = ManybodyNeighborlist();
 
-        for (size_t j = 0; j < mbnl.getNumberOfSites(i); j++)
+    for (int index = 0; index < structure.size(); index++)
+    {
+        mbnl.build(neighborlists, index, false); //bothways=false
+        for (size_t i = 0; i < mbnl.getNumberOfSites(); i++)
         {
-            std::vector<LatticeNeighbor> sites = mbnl.getSites(i, j);
-            Cluster cluster = Cluster(structure, sites);
-            addClusterToOrbitlist(cluster, sites, clusterIndexMap);
+            //special case for singlet
+            if (mbnl.getNumberOfSites(i) == 0)
+            {
+                std::vector<LatticeNeighbor> sites = mbnl.getSites(i, 0);
+                Cluster cluster = Cluster(structure, sites);
+                addClusterToOrbitlist(cluster, sites, clusterIndexMap);
+            }
+
+            for (size_t j = 0; j < mbnl.getNumberOfSites(i); j++)
+            {
+                std::vector<LatticeNeighbor> sites = mbnl.getSites(i, j);                
+                Cluster cluster = Cluster(structure, sites);
+                addClusterToOrbitlist(cluster, sites, clusterIndexMap);
+            }
         }
+    }
+    bool debug = true;
+
+    if (debug)
+    {
+        checkEquivalentClusters(structure);
+        // std::cout << "Done checking equivalent structures" << std::endl;
     }
 }
 
@@ -93,7 +106,7 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
     ManybodyNeighborlist mbnl = ManybodyNeighborlist();
 
     //if [0,1,2] exists in taken_rows then these three rows (with columns) have been accounted for and should not be looked at
-    std::unordered_set<std::vector<int>,VectorHash> taken_rows;
+    std::unordered_set<std::vector<int>, VectorHash> taken_rows;
     std::vector<LatticeNeighbor> col1 = getColumn1FromPM(permutation_matrix, false);
 
     std::set<LatticeNeighbor> col1_uniques(col1.begin(), col1.end());
@@ -125,7 +138,7 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
                     //new stuff found
                     addPermutationMatrixColumns(lattice_neighbors, taken_rows, sites_index_pair[0].first, sites_index_pair[0].second, permutation_matrix, col1, true);
                 }
-                //add the equivalent translated clusters as taken but do not add them to a new orbit 
+                //add the equivalent translated clusters as taken but do not add them to a new orbit
                 // for (int i = 1; i < translatedSites.size(); i++)
                 // {
                 //     auto find = taken_rows.find(sites_index_pair[i].second);
@@ -290,7 +303,7 @@ void OrbitList::addOrbitFromPM(const Structure &structure, const std::vector<std
     When taking new columns update taken_rows accordingly
  */
 void OrbitList::addPermutationMatrixColumns(
-    std::vector<std::vector<std::vector<LatticeNeighbor>>> &lattice_neighbors, std::unordered_set<std::vector<int>,VectorHash> &taken_rows, const std::vector<LatticeNeighbor> &lat_nbrs, const std::vector<int> &pm_rows,
+    std::vector<std::vector<std::vector<LatticeNeighbor>>> &lattice_neighbors, std::unordered_set<std::vector<int>, VectorHash> &taken_rows, const std::vector<LatticeNeighbor> &lat_nbrs, const std::vector<int> &pm_rows,
     const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<LatticeNeighbor> &col1, bool add) const
 {
 
@@ -308,7 +321,6 @@ void OrbitList::addPermutationMatrixColumns(
 
         auto sites_index_pair = getMatchesInPM(translatedEquivalentSites, col1);
 
-
         // for (int i = 1; i < sites_index_pair.size(); i++)
         // {
         //     auto find = taken_rows.find(sites_index_pair[i].second);
@@ -318,11 +330,8 @@ void OrbitList::addPermutationMatrixColumns(
         //     }
 
         // }
-        
+
         auto find = taken_rows.find(sites_index_pair[0].second);
-
-
-
 
         if (find == taken_rows.end())
         {
@@ -346,7 +355,6 @@ void OrbitList::addPermutationMatrixColumns(
         lattice_neighbors.push_back(columnLatticeNeighbors);
     }
 }
-
 
 ///returns the first set of translated sites that exists in col1 of permutationmatrix
 std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<int>>> OrbitList::getMatchesInPM(const std::vector<std::vector<LatticeNeighbor>> &translatedSites, const std::vector<LatticeNeighbor> &col1) const

@@ -117,7 +117,7 @@ PYBIND11_PLUGIN(_icetdev)
 
     py::class_<OrbitList>(m, "OrbitList")
         .def(py::init<>())
-        .def(py::init<const ManybodyNeighborlist &, const Structure &>())
+        .def(py::init<const std::vector<Neighborlist> & , const Structure &>())
         .def(py::init<const Structure &, const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<Neighborlist> &>())
         .def("add_orbit", &OrbitList::addOrbit)
         .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters)

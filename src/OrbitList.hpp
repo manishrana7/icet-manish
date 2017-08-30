@@ -6,6 +6,7 @@
 #include "ManybodyNeighborlist.hpp"
 #include "Structure.hpp"
 #include "Cluster.hpp"
+#include "Neighborlist.hpp"
 #include <unordered_map>
 #include <unordered_set>
 #include "LatticeNeighbor.hpp"
@@ -22,7 +23,7 @@ class OrbitList
 {
   public:
     OrbitList();
-    OrbitList(const ManybodyNeighborlist &, const Structure &);
+    OrbitList(const std::vector<Neighborlist> &neighborlists, const Structure &);
     OrbitList(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<Neighborlist> &);
     
 

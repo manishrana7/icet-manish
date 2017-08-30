@@ -5,6 +5,7 @@ from ase import Atoms
 from ase.build import bulk
 from icetdev.neighborlist import get_neighborlists
 from icetdev.orbitList import create_orbit_list
+from ase.spacegroup import crystal
 # from clib.cluster_space import ClusterSpace
 
 
@@ -17,14 +18,21 @@ def setup_test_orbitlist(atoms, cutoffs):
 
 
 atoms = bulk("Al", "bcc", a=1)
-cutoffs = [2.01, 2.01]
+# atoms = crystal("Al", spacegroup=223)
+from ase.io import read
+atoms = read("../clathrate-cluster-expansions/cluster-expansions/reference-clathrate-structure.json")
+from ase.visualize import view
+# view(atoms)
+# exit(1)
+cutoffs = [10.51, 5.51]
 
 # cs = ClusterSpace(atoms=atoms, cutoffs=cutoffs)
 # print(cs)
 # len(cs)
 structure, mbnl, neighborlists = setup_test_orbitlist(atoms, cutoffs)
 
-ol = orbitList.OrbitList(mbnl, structure)
+#ol = orbitList.OrbitList(mbnl, structure)
+ol = orbitList.OrbitList(neighborlists, structure)
 
 ol.sort()
 
@@ -35,6 +43,9 @@ for i in range(len(cutoffs) + 2):
 
 print("size of orbitlist {0}".format(ol.size()))
 
+# for orbit in range(ol.size()):
+#     (ol.get_orbit(i).get_representative_cluster().print())
+#     print("number of equivalent sites: ",len(ol.get_orbit(i).get_equivalent_sites()))
 
 ############################################
 #                                          #
