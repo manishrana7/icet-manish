@@ -125,6 +125,20 @@ class Orbit
 
     int getNumberOfDuplicates(int verbosity = 0) const;
 
+
+    friend Orbit operator+(const Orbit &orbit, const Eigen::Vector3d &offset)
+    {
+        Orbit orbitOffset = orbit;
+        for(auto &latNbrs : orbitOffset._equivalentSites)
+        {
+            for(auto &latNbr : latNbrs)
+            {
+                latNbr = latNbr + offset;
+            }
+        }
+        return orbitOffset;
+    }
+
   private:
     ///Reprasentative sorted cluster for this orbit
     Cluster _representativeCluster;

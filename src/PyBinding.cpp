@@ -91,8 +91,9 @@ PYBIND11_PLUGIN(_icetdev)
         .def("print", &LatticeNeighbor::print )
         .def_readwrite("index", &LatticeNeighbor::index)
         .def_readwrite("unitcellOffset", &LatticeNeighbor::unitcellOffset)
-        .def(py::self < py::self)
+        .def(py::self < py::self)        
         .def(py::self == py::self)
+        .def(py::self + Eigen::Vector3d())
         ;
 
     py::class_<ClusterCounts>(m, "ClusterCounts")
@@ -113,7 +114,9 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
         .def("size", &Orbit::size)
         .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
-        .def(py::self < py::self);
+        .def(py::self < py::self)
+        .def(py::self + Eigen::Vector3d())
+        ;
 
     py::class_<OrbitList>(m, "OrbitList")
         .def(py::init<>())
@@ -126,7 +129,8 @@ PYBIND11_PLUGIN(_icetdev)
         .def("sort", &OrbitList::sort)
         .def("get_orbitList", &OrbitList::getOrbitList)
         .def("size", &OrbitList::size)
-        .def("print", &OrbitList::print, py::arg("verbosity") = 0);
+        .def("print", &OrbitList::print, py::arg("verbosity") = 0)
+        ;
 
     return m.ptr();
 }
