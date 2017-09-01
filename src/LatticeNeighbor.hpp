@@ -52,6 +52,17 @@ struct LatticeNeighbor
         }
         return true;
     }
+    friend LatticeNeighbor operator+(const LatticeNeighbor &latticeNeighbor, const Eigen::Vector3d &offset)
+    {
+        LatticeNeighbor latnbr = LatticeNeighbor(latticeNeighbor.index, latticeNeighbor.unitcellOffset + offset);        
+        return latnbr;
+    }
+
+    friend LatticeNeighbor operator-(const LatticeNeighbor &latticeNeighbor, const Eigen::Vector3d &offset)
+    {
+        LatticeNeighbor latnbr = LatticeNeighbor(latticeNeighbor.index, latticeNeighbor.unitcellOffset - offset);        
+        return latnbr;
+    }
 
     void print() const
     {
