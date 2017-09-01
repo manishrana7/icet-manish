@@ -11,6 +11,7 @@ OrbitList::OrbitList()
 ///Construct orbitlist from mbnl and structure
 OrbitList::OrbitList(const std::vector<Neighborlist> &neighborlists, const Structure &structure)
 {
+    _primitiveStructure = structure;
     std::unordered_map<Cluster, int> clusterIndexMap;
     ManybodyNeighborlist mbnl = ManybodyNeighborlist();
 
@@ -99,7 +100,7 @@ int OrbitList::findOrbit(const Cluster &cluster, const std::unordered_map<Cluste
 
 OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<Neighborlist> &neighborlists)
 {
-
+    _primitiveStructure = structure;
     std::vector<std::vector<std::vector<LatticeNeighbor>>> lattice_neighbors;
     std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> manybodyNeighborIndices;
     bool saveBothWays = false;
@@ -138,38 +139,6 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
                     //new stuff found
                     addPermutationMatrixColumns(lattice_neighbors, taken_rows, sites_index_pair[0].first, sites_index_pair[0].second, permutation_matrix, col1, true);
                 }
-                //add the equivalent translated clusters as taken but do not add them to a new orbit
-                // for (int i = 1; i < translatedSites.size(); i++)
-                // {
-                //     auto find = taken_rows.find(sites_index_pair[i].second);
-                //     if (find == taken_rows.end())
-                //     {
-                //         //new stuff found
-                //         addPermutationMatrixColumns(lattice_neighbors, taken_rows, sites_index_pair[i].first, sites_index_pair[i].second, permutation_matrix, col1, false);
-                //     }
-                // }
-                // if (missedSites == translatedSites.size())
-                // {
-                //     if(missedSites==2)
-                //     {
-                //         std::cout<<"dist "<<structure.getDistance2(translatedSites[0][0].index, translatedSites[0][0].unitcellOffset,translatedSites[0][1].index, translatedSites[0][1].unitcellOffset)<<std::endl;
-                //     }
-                //     for(auto sites : translatedSites)
-                //     {
-                //         for(auto site : sites)
-                //         {
-                //             site.print();
-                //         }
-                //         std::cout<<"==="<<std::endl;
-                //     }
-                //     for(auto row : col1)
-                //     {
-                //         row.print();
-                //     }
-                //     std::cout<<"Missed sites: "<< missedSites<<std::endl;
-                //     std::cout<<"translatedSites size : "<< translatedSites.size() << std::endl;
-                //     throw std::runtime_error("Did not find any of the translated sites in findRowsFromCol1. From orbitlist constructor ");
-                // }
             }
 
             //special singlet case

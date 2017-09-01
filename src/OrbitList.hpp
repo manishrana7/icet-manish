@@ -126,8 +126,9 @@ class OrbitList
     std::vector<LatticeNeighbor> translateSites(const std::vector<LatticeNeighbor> &, const unsigned int ) const;
     std::vector<std::vector<LatticeNeighbor>> getSitesTranslatedToUnitcell(const std::vector<LatticeNeighbor> &) const;
     std::vector<std::pair<std::vector<LatticeNeighbor>,std::vector<int>>> getMatchesInPM(const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<LatticeNeighbor> &) const;
+    
   private:
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;
-
+    Structure _primitiveStructure;
     std::vector<Orbit> _orbitList;
 };
