@@ -27,6 +27,15 @@ class OrbitList
     OrbitList(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<Neighborlist> &);
     
 
+    /**
+    The strucute is a super cell
+    The unsigned int is the index of the lattice site () (should probable be mapped to index 0 in  prim latnbr )
+    the map maps primitive lattice neighbors to lattice neighbors in the supercell
+
+    strategy is to get the translated orbit and then map it using the map and that should be the partial supercell orbit of this site
+    add together all sites and you get the full supercell porbot
+    */
+    Orbit getSuperCellOrbit(const Structure &, const unsigned int, const std::unordered_map<LatticeNeighbor, LatticeNeighbor>&) const;
 
     ///Add a group sites that are equivalent to the ones in this orbit
     void addOrbit(const Orbit &orbit)
@@ -126,7 +135,7 @@ class OrbitList
     std::vector<LatticeNeighbor> translateSites(const std::vector<LatticeNeighbor> &, const unsigned int ) const;
     std::vector<std::vector<LatticeNeighbor>> getSitesTranslatedToUnitcell(const std::vector<LatticeNeighbor> &) const;
     std::vector<std::pair<std::vector<LatticeNeighbor>,std::vector<int>>> getMatchesInPM(const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<LatticeNeighbor> &) const;
-    
+
   private:
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;
     Structure _primitiveStructure;
