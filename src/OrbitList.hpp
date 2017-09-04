@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include "LatticeNeighbor.hpp"
 #include "hash_functions.hpp"
+#include "Vector3dCompare.hpp"
 /**
 Class OrbitList
 
@@ -25,7 +26,6 @@ class OrbitList
     OrbitList();
     OrbitList(const std::vector<Neighborlist> &neighborlists, const Structure &);
     OrbitList(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<Neighborlist> &);
-    
 
     /**
     The structure is a super cell
@@ -38,7 +38,7 @@ class OrbitList
     */
     Orbit getSuperCellOrbit(const Structure &, const Vector3d &, const unsigned int, std::unordered_map<LatticeNeighbor, LatticeNeighbor> &) const;
 
-    OrbitList getLocalOrbitList(const Structure &, const Vector3d &, std::unordered_map<LatticeNeighbor, LatticeNeighbor> &  ) const;
+    OrbitList getLocalOrbitList(const Structure &, const Vector3d &, std::unordered_map<LatticeNeighbor, LatticeNeighbor> &) const;
     ///Add a group sites that are equivalent to the ones in this orbit
     void addOrbit(const Orbit &orbit)
     {
@@ -99,9 +99,9 @@ class OrbitList
 
     /** 
     Prints information about the orbitlist
-
-
     */
+
+
     void print(int verbosity = 0) const
     {
         int orbitCount = 0;
@@ -122,28 +122,44 @@ class OrbitList
 
     void addClusterToOrbitlist(const Cluster &cluster, const std::vector<LatticeNeighbor> &, std::unordered_map<Cluster, int> &);
 
-    void addPermutationMatrixColumns(std::vector<std::vector<std::vector<LatticeNeighbor>>> &lattice_neighbors, std::unordered_set<std::vector<int>,VectorHash> &taken_rows, const std::vector<LatticeNeighbor> &lat_nbrs, const std::vector<int> &pm_rows,
+    void addPermutationMatrixColumns(std::vector<std::vector<std::vector<LatticeNeighbor>>> &lattice_neighbors, std::unordered_set<std::vector<int>, VectorHash> &taken_rows, const std::vector<LatticeNeighbor> &lat_nbrs, const std::vector<int> &pm_rows,
                                      const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<LatticeNeighbor> &col1, bool) const;
 
     std::vector<LatticeNeighbor> getColumn1FromPM(const std::vector<std::vector<LatticeNeighbor>> &, bool sortIt = true) const;
     std::vector<int> findRowsFromCol1(const std::vector<LatticeNeighbor> &col1, const std::vector<LatticeNeighbor> &latNbrs, bool sortit = true) const;
 
     bool validatedCluster(const std::vector<LatticeNeighbor> &) const;
-    void addOrbitsFromPM(const Structure &, const std::vector<std::vector<std::vector<LatticeNeighbor>>> &) ;
-    void addOrbitFromPM(const Structure &,const std::vector<std::vector<LatticeNeighbor>> &);
+    void addOrbitsFromPM(const Structure &, const std::vector<std::vector<std::vector<LatticeNeighbor>>> &);
+    void addOrbitFromPM(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &);
     void checkEquivalentClusters(const Structure &) const;
-    
 
-    std::vector<LatticeNeighbor> translateSites(const std::vector<LatticeNeighbor> &, const unsigned int ) const;
+    std::vector<LatticeNeighbor> translateSites(const std::vector<LatticeNeighbor> &, const unsigned int) const;
     std::vector<std::vector<LatticeNeighbor>> getSitesTranslatedToUnitcell(const std::vector<LatticeNeighbor> &) const;
-    std::vector<std::pair<std::vector<LatticeNeighbor>,std::vector<int>>> getMatchesInPM(const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<LatticeNeighbor> &) const;
+    std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<int>>> getMatchesInPM(const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<LatticeNeighbor> &) const;
 
-
-    void transformSiteToSupercell(LatticeNeighbor &site, const Structure &superCell,std::unordered_map<LatticeNeighbor, LatticeNeighbor> &primToSuperMap ) const;
+    void transformSiteToSupercell(LatticeNeighbor &site, const Structure &superCell, std::unordered_map<LatticeNeighbor, LatticeNeighbor> &primToSuperMap) const;
     void setPrimitiveStructure(const Structure &primitive)
     {
         _primitiveStructure = primitive;
     }
+
+    /// += a orbitlist to another, first assert that they have the same number of orbits and then add equivalent sites of orbit i of rhs to orbit i to ->this
+    OrbitList &operator+=(const OrbitList &rhs_ol)
+    {
+        if (this->size() != rhs_ol.size())
+        {
+            throw std::runtime_error("Error: lhs.size() and rhs.size() are not equal in  OrbitList& operator+=");
+        }
+
+        for (size_t i = 0; i < rhs_ol.size(); i++)
+        {
+            this->_orbitList[i].addEquivalentSites(rhs_ol.getOrbit(i).getEquivalentSites());
+        }
+        return *this;
+    }
+
+    OrbitList getSupercellOrbitlist(const Structure &superCell) const;
+
   private:
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;
     Structure _primitiveStructure;

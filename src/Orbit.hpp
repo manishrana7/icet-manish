@@ -28,6 +28,11 @@ class Orbit
     {
         _equivalentSites.push_back(latNbrs);
     }
+    ///add many lattice neigbhors
+    void addEquivalentSites(const std::vector<std::vector<LatticeNeighbor>> &LatticeNeighbors)
+    {
+        _equivalentSites.insert(_equivalentSites.end(), LatticeNeighbors.begin(), LatticeNeighbors.end());
+    }
 
     ///Returns amount of equivalent sites in this orbit
     size_t size() const

@@ -514,3 +514,33 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &superCell, const Vector3
     }
     return localOrbitList;
 }
+
+/**
+    Create and return the orbitlist of the full supercell using 'this' primitive orbitlist
+    Warning: Could become large
+
+*/
+OrbitList OrbitList::getSupercellOrbitlist(const Structure &superCell) const
+{
+    OrbitList supercellOrbitlist = OrbitList();
+
+    std::unordered_map<LatticeNeighbor, LatticeNeighbor> primToSuperMap;
+    std::set<Vector3d,Vector3dCompare> uniqueCellOffsets;
+
+    //first map all sites
+    for(size_t i=0; i < superCell.size(); i++)
+    {
+        Vector3d position_i = superCell.getPositions().row(i);
+        LatticeNeighbor primitive_site = _primitiveStructure.findLatticeNeighborFromPosition(position_i);
+        LatticeNeighbor super_site = superCell.findLatticeNeighborFromPosition(position_i);
+        primToSuperMap[primitive_site] = super_site;
+        uniqueCellOffsets.insert(super_site.unitcellOffset);
+    }
+
+    for(const auto &offset: uniqueCellOffsets)
+    {
+        OrbitList localOrbitlist = getLocalOrbitList(superCell, offset,primToSuperMap);
+        supercellOrbitlist += localOrbitlist;
+    }
+    return supercellOrbitlist;
+}
