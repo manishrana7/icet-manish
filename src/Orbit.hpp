@@ -47,6 +47,18 @@ class Orbit
         return _equivalentSites;
     }
 
+    std::vector<LatticeNeighbor> GetSitesOfIndex(unsigned int index) const
+    {
+        if (index >= _equivalentSites.size())
+        {
+            throw std::out_of_range("Index out of range in function Orbit::GetSitesOfIndex");
+        }
+        return _equivalentSites[index];
+    }
+    void setEquivalentSites(const std::vector<std::vector<LatticeNeighbor>> &equivalentSites)
+    {
+        _equivalentSites = equivalentSites;
+    }
     ///Return the number of bodies of the cluster that represent this orbit
     unsigned int getClusterSize() const
     {
@@ -93,11 +105,11 @@ class Orbit
             for (auto sites : orbit1.getEquivalentSites())
             {
                 std::cout << "site " << count << std::endl;
-                for(auto site : sites)
+                for (auto site : sites)
                 {
                     site.print();
                 }
-                
+
                 if (count++ == maxCols)
                 {
                     break;
@@ -108,11 +120,11 @@ class Orbit
             for (auto sites : orbit2.getEquivalentSites())
             {
                 std::cout << "site " << count << std::endl;
-                for(auto site : sites)
+                for (auto site : sites)
                 {
                     site.print();
                 }
-                
+
                 if (count++ == maxCols)
                 {
                     break;
@@ -125,13 +137,12 @@ class Orbit
 
     int getNumberOfDuplicates(int verbosity = 0) const;
 
-
     friend Orbit operator+(const Orbit &orbit, const Eigen::Vector3d &offset)
     {
         Orbit orbitOffset = orbit;
-        for(auto &latNbrs : orbitOffset._equivalentSites)
+        for (auto &latNbrs : orbitOffset._equivalentSites)
         {
-            for(auto &latNbr : latNbrs)
+            for (auto &latNbr : latNbrs)
             {
                 latNbr = latNbr + offset;
             }

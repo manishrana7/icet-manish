@@ -14,6 +14,7 @@ namespace py = pybind11;
 class Structure
 {
   public:
+    Structure();
     Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &,
               const std::vector<std::string> &,
               const Eigen::Matrix3d &,
@@ -45,7 +46,7 @@ class Structure
     }
 
     ///Get position from a lattice neighbor
-    Vector3d getPosition(const LatticeNeighbor &latticeNeighbor)
+    Vector3d getPosition(const LatticeNeighbor &latticeNeighbor) const
     {
         if (latticeNeighbor.index >= _positions.rows() || latticeNeighbor.index < 0)
         {

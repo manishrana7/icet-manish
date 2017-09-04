@@ -30,7 +30,7 @@ OrbitList::OrbitList(const std::vector<Neighborlist> &neighborlists, const Struc
 
             for (size_t j = 0; j < mbnl.getNumberOfSites(i); j++)
             {
-                std::vector<LatticeNeighbor> sites = mbnl.getSites(i, j);                
+                std::vector<LatticeNeighbor> sites = mbnl.getSites(i, j);
                 Cluster cluster = Cluster(structure, sites);
                 addClusterToOrbitlist(cluster, sites, clusterIndexMap);
             }
@@ -438,4 +438,79 @@ std::vector<LatticeNeighbor> OrbitList::getColumn1FromPM(const std::vector<std::
         std::sort(col1.begin(), col1.end());
     }
     return col1;
+}
+
+/**
+    The structure is a super cell
+    the Vector3d is the offset you translate the orbit with
+    the map maps primitive lattice neighbors to lattice neighbors in the supercell
+    the const unsigned int is the index of the orbit
+    
+    strategy is to get the translated orbit and then map it using the map and that should be the partial supercell orbit of this site
+    add together all sites and you get the full supercell porbot
+    */
+Orbit OrbitList::getSuperCellOrbit(const Structure &superCell, const Vector3d &cellOffset, const unsigned int orbitIndex, std::unordered_map<LatticeNeighbor, LatticeNeighbor> &primToSuperMap) const
+{
+    if (orbitIndex >= _orbitList.size())
+    {
+        std::string errorMsg = "Error: orbitIndex out of range in OrbitList::getSuperCellOrbit " + std::to_string(orbitIndex) + " >= " + std::to_string(_orbitList.size());
+        throw std::out_of_range(errorMsg);
+    }
+
+    Orbit superCellOrbit = _orbitList[orbitIndex] + cellOffset;
+
+    auto equivalentSites = superCellOrbit.getEquivalentSites();
+
+    for (auto &sites : equivalentSites)
+    {
+        for (auto &site : sites)
+        {
+            transformSiteToSupercell(site, superCell, primToSuperMap);
+        }
+    }
+
+    superCellOrbit.setEquivalentSites(equivalentSites);
+    return superCellOrbit;
+}
+
+/**
+
+Takes the site and tries to find it in the map to supercell 
+
+if it does not find it it gets the xyz position and then find the lattice neighbor in the supercell corresponding to that position and adds it to the map
+
+in the end site is modified to correspond to the index, offset of the supercell
+*/
+void OrbitList::transformSiteToSupercell(LatticeNeighbor &site, const Structure &superCell, std::unordered_map<LatticeNeighbor, LatticeNeighbor> &primToSuperMap) const
+{
+    auto find = primToSuperMap.find(site);
+    LatticeNeighbor supercellSite;
+    if (find == primToSuperMap.end())
+    {
+        Vector3d sitePosition = _primitiveStructure.getPosition(site);
+        supercellSite = superCell.findLatticeNeighborFromPosition(sitePosition);
+        primToSuperMap[site] = supercellSite;
+    }
+    else
+    {
+        supercellSite = primToSuperMap[site];
+    }
+
+    //write over site to match supercell index offset
+    site.index = supercellSite.index;
+    site.unitcellOffset = supercellSite.unitcellOffset;
+}
+
+
+///Create and return a "local" orbitList by offsetting each site in the primitve by cellOffset
+OrbitList OrbitList::getLocalOrbitList(const Structure &superCell, const Vector3d &cellOffset, std::unordered_map<LatticeNeighbor, LatticeNeighbor> &primToSuperMap) const
+{
+    OrbitList localOrbitList = OrbitList();
+    localOrbitList.setPrimitiveStructure(_primitiveStructure);
+
+    for(size_t orbitIndex=0; orbitIndex < _orbitList.size(); orbitIndex++)
+    {
+        localOrbitList.addOrbit(getSuperCellOrbit(superCell, cellOffset, orbitIndex, primToSuperMap));
+    }
+    return localOrbitList;
 }
