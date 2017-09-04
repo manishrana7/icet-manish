@@ -146,14 +146,15 @@ class OrbitList
     /// += a orbitlist to another, first assert that they have the same number of orbits and then add equivalent sites of orbit i of rhs to orbit i to ->this
     OrbitList &operator+=(const OrbitList &rhs_ol)
     {
-        if (this->size() != rhs_ol.size())
+        if (size() != rhs_ol.size())
         {
-            throw std::runtime_error("Error: lhs.size() and rhs.size() are not equal in  OrbitList& operator+=");
+            std::string errorMsg = "Error: lhs.size() and rhs.size() are not equal in  OrbitList& operator+= " + std::to_string(size()) + " != " +std::to_string(rhs_ol.size());
+            throw std::runtime_error(errorMsg);
         }
 
         for (size_t i = 0; i < rhs_ol.size(); i++)
         {
-            this->_orbitList[i].addEquivalentSites(rhs_ol.getOrbit(i).getEquivalentSites());
+            _orbitList[i].addEquivalentSites(rhs_ol.getOrbit(i).getEquivalentSites());
         }
         return *this;
     }

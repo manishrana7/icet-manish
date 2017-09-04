@@ -6,6 +6,7 @@ from ase.build import bulk
 from icetdev.neighborlist import get_neighborlists
 from icetdev.orbitList import create_orbit_list
 from ase.spacegroup import crystal
+import time
 # from clib.cluster_space import ClusterSpace
 
 
@@ -24,7 +25,7 @@ atoms = read("../clathrate-cluster-expansions/cluster-expansions/reference-clath
 from ase.visualize import view
 # view(atoms)
 # exit(1)
-cutoffs = [10.51, 5.51]
+cutoffs = [5, 5.51]
 
 # cs = ClusterSpace(atoms=atoms, cutoffs=cutoffs)
 # print(cs)
@@ -69,9 +70,39 @@ for i in range(len(cutoffs) + 2):
 
 print("size of orbitlist {0}".format(orbitlist.size()))
 
-# for i in range(orbitlist.size()):
-#      (orbitlist.get_orbit(i).get_representative_cluster().print())
-#      print("number of equivalent sites: ",len(orbitlist.get_orbit(i).get_equivalent_sites()))
+for i in range(orbitlist.size()):
+     (orbitlist.get_orbit(i).get_representative_cluster().print())
+     print("number of equivalent sites: ",len(orbitlist.get_orbit(i).get_equivalent_sites()))
+
+
+
+#################################################
+#                                               #
+#        Get orbitlist for a supercell          #
+#                                               #
+#################################################
+
+
+N = 3
+atoms = atoms.repeat(N)
+
+structure_repeat = structure_from_atoms(atoms)
+t1 = time.time()
+supercell_orbitlist = orbitlist.get_supercell_orbitlist(structure_repeat)
+t2 = time.time()
+
+print("Time to get supercell with x atoms {0}: {1} s".format(structure_repeat.size(), t2-t1))
+
+print("size of repeated orbitlist {0}".format(supercell_orbitlist.size()))
+
+for i in range(len(cutoffs) + 2):
+    print("number of {0}body clusters = {1}".format(
+        i, supercell_orbitlist.get_number_of_NClusters(i)))
+
+
+for i in range(supercell_orbitlist.size()):
+     (supercell_orbitlist.get_orbit(i).get_representative_cluster().print())
+     print("number of equivalent sites: ",len(supercell_orbitlist.get_orbit(i).get_equivalent_sites()))
 
 
 # import numpy as np

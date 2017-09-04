@@ -536,7 +536,14 @@ OrbitList OrbitList::getSupercellOrbitlist(const Structure &superCell) const
         primToSuperMap[primitive_site] = super_site;
         uniqueCellOffsets.insert(super_site.unitcellOffset);
     }
-
+    Vector3d zeroOffset = {0.0, 0.0, 0.0};
+    auto findZero = uniqueCellOffsets.find(zeroOffset);
+    if(findZero != uniqueCellOffsets.end())
+    {
+        uniqueCellOffsets.erase(findZero);
+    }
+    
+    supercellOrbitlist = getLocalOrbitList(superCell, zeroOffset,primToSuperMap);
     for(const auto &offset: uniqueCellOffsets)
     {
         OrbitList localOrbitlist = getLocalOrbitList(superCell, offset,primToSuperMap);

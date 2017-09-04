@@ -14,7 +14,7 @@ namespace py = pybind11;
 class Structure
 {
   public:
-    Structure();
+    Structure(){};
     Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &,
               const std::vector<std::string> &,
               const Eigen::Matrix3d &,

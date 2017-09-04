@@ -19,6 +19,7 @@ PYBIND11_PLUGIN(_icetdev)
     py::module m("_icetdev", "pybind11 _icetdev plugin");
 
     py::class_<Structure>(m, "Structure")
+        .def(py::init<>())
         .def(py::init<const Eigen::Matrix<double, Dynamic, 3, Eigen::RowMajor> &,
                       const std::vector<std::string> &,
                       const Eigen::Matrix3d &,
@@ -131,6 +132,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_orbitList", &OrbitList::getOrbitList)
         .def("size", &OrbitList::size)
         .def("print", &OrbitList::print, py::arg("verbosity") = 0)
+        .def("get_supercell_orbitlist",&OrbitList::getSupercellOrbitlist)
         ;
 
     return m.ptr();
