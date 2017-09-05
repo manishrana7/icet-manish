@@ -25,7 +25,7 @@ atoms = read("../clathrate-cluster-expansions/cluster-expansions/reference-clath
 from ase.visualize import view
 # view(atoms)
 # exit(1)
-cutoffs = [5, 5.51]
+cutoffs = [7.5]*4
 
 # cs = ClusterSpace(atoms=atoms, cutoffs=cutoffs)
 # print(cs)
@@ -70,9 +70,9 @@ for i in range(len(cutoffs) + 2):
 
 print("size of orbitlist {0}".format(orbitlist.size()))
 
-for i in range(orbitlist.size()):
-     (orbitlist.get_orbit(i).get_representative_cluster().print())
-     print("number of equivalent sites: ",len(orbitlist.get_orbit(i).get_equivalent_sites()))
+# for i in range(orbitlist.size()):
+#      (orbitlist.get_orbit(i).get_representative_cluster().print())
+#      print("number of equivalent sites: ",len(orbitlist.get_orbit(i).get_equivalent_sites()))
 
 
 
@@ -83,7 +83,7 @@ for i in range(orbitlist.size()):
 #################################################
 
 
-N = 3
+N = 4
 atoms = atoms.repeat(N)
 
 structure_repeat = structure_from_atoms(atoms)
@@ -100,9 +100,9 @@ for i in range(len(cutoffs) + 2):
         i, supercell_orbitlist.get_number_of_NClusters(i)))
 
 
-for i in range(supercell_orbitlist.size()):
-     (supercell_orbitlist.get_orbit(i).get_representative_cluster().print())
-     print("number of equivalent sites: ",len(supercell_orbitlist.get_orbit(i).get_equivalent_sites()))
+# for i in range(supercell_orbitlist.size()):
+#      (supercell_orbitlist.get_orbit(i).get_representative_cluster().print())
+#      print("number of equivalent sites: ",len(supercell_orbitlist.get_orbit(i).get_equivalent_sites()))
 
 
 # import numpy as np
