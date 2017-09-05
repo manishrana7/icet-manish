@@ -31,6 +31,8 @@ public:
                              const std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &);
   void count(const Structure &,
              const std::vector<LatticeNeighbor> &);
+  void count(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &,
+             const Cluster &);
   std::unordered_map<Cluster, std::map<std::vector<int>, int>> getClusterCounts() const
   {
     return _clusterCounts;
@@ -40,7 +42,7 @@ public:
   {
     return _clusterCounts.size();
   }
-  
+
   void reset()
   {
     _clusterCounts.clear();
@@ -63,7 +65,7 @@ public:
         }
         std::cout << map_pair.second.at(element_count_pair.first) << std::endl;
       }
-      std::cout<<std::endl;
+      std::cout << std::endl;
     }
   }
 

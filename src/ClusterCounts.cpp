@@ -32,8 +32,6 @@ void ClusterCounts::countSinglets(const Structure &structure)
     }
 }
 
-
-
 /**
 Counts all the pairs using the neigbhorlist
 */
@@ -47,16 +45,13 @@ void ClusterCounts::countPairs(const Structure &structure, const Neighborlist &n
     {
         auto i_neighbors = neighborlist.getNeighbors(i);
         pairNeighbor[0].index = i;
-        for(const auto &neighbor : i_neighbors)
+        for (const auto &neighbor : i_neighbors)
         {
-          pairNeighbor[1] = neighbor;
-          count(structure, pairNeighbor);
+            pairNeighbor[1] = neighbor;
+            count(structure, pairNeighbor);
         }
-
     }
-
 }
-
 
 /**
 Counts clusters given this compact form of latticeneighbors (see ManybodyNeighborlist for more details)
@@ -80,7 +75,7 @@ void ClusterCounts::countLatticeNeighbors(const Structure &structure,
         }
         else
         {
-            //count singlets here            
+            //count singlets here
             count(structure, neighborPair.first);
         }
     }
@@ -94,15 +89,30 @@ void ClusterCounts::count(const Structure &structure,
                           const std::vector<LatticeNeighbor> &latticeNeighbors)
 {
     size_t clusterSize = latticeNeighbors.size();
-    std::vector<int> elements(clusterSize);    
+    std::vector<int> elements(clusterSize);
     for (size_t i = 0; i < latticeNeighbors.size(); i++)
     {
         elements[i] = structure.getElement(latticeNeighbors[i].index);
     }
 
-
     Cluster cluster = Cluster(structure, latticeNeighbors);
     _clusterCounts[cluster][elements] += 1;
+}
+
+void ClusterCounts::count(const Structure &structure, const std::vector<std::vector<LatticeNeighbor>> &latticeNeighbors,
+           const Cluster &cluster)
+{
+
+    for(const auto &latnbrs : latticeNeighbors )
+    {
+        std::vector<int> elements(latnbrs.size());        
+        for (size_t i = 0; i < latnbrs.size(); i++)
+        {
+            elements[i] = structure.getElement(latnbrs[i].index);
+        }
+        _clusterCounts[cluster][elements] +=1;    
+    }
+
 }
 
 /**

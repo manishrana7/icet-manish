@@ -102,7 +102,10 @@ PYBIND11_PLUGIN(_icetdev)
         .def("count_lattice_neighbors", &ClusterCounts::countLatticeNeighbors)
         .def("count_singlets", &ClusterCounts::countSinglets)
         .def("count_pairs", &ClusterCounts::countPairs)
-        .def("count", &ClusterCounts::count)
+        .def("count",(void (ClusterCounts::*)( const Structure &,
+            const std::vector<LatticeNeighbor> &)) &ClusterCounts::count)
+        .def("count",(void (ClusterCounts::*)( const Structure &, const std::vector<std::vector<LatticeNeighbor>> &,
+            const Cluster &)) &ClusterCounts::count)
         .def("size", &ClusterCounts::size)
         .def("reset", &ClusterCounts::reset)
         .def("get_cluster_counts", &ClusterCounts::getClusterCounts)
