@@ -238,7 +238,6 @@ struct I_Neighbors
         return true;
     }
 
-  
     std::vector<double> _distances;
     std::vector<int> _sites;
     std::vector<int> _indices;
@@ -1133,9 +1132,8 @@ class Cluster
 
     friend bool operator!=(const Cluster &c1, const Cluster &c2)
     {
-       return !(c1==c2);
+        return !(c1 == c2);
     }
-
 
     // comparison operator for sortable clusters
     friend bool operator<(const Cluster &c1, const Cluster &c2)
@@ -1209,7 +1207,7 @@ class Cluster
         }
         std::cout << std::endl;
     }
-    
+
     ///Return true if this is a sorted cluster
     bool isSorted() const
     {
@@ -1235,11 +1233,10 @@ class Cluster
     int _clusterTag;
     double _symprec;
     double roundDouble(const double &double_value)
-    {    
+    {
         return round(double_value * 1.0 / _symprec) / (1.0 / _symprec);
     }
 };
-
 
 namespace std
 {
@@ -1254,6 +1251,13 @@ struct hash<Cluster>
         // second and third and combine them using XOR
         // and bit shifting:
         size_t seed = 0;
+
+        //if unsorted just use the clusterTag as seed
+        if(!k.isSorted())
+        {
+            hash_combine(seed, k.getClusterTag());
+            return seed;
+        }
 
         for (const auto &distance : k.getDistances())
         {
