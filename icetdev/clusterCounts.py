@@ -2,7 +2,7 @@ from _icetdev import ClusterCounts
 from icetdev.structure import structure_from_atoms
 from icetdev.neighborlist import Neighborlist
 from icetdev.manybodyNeighborlist import ManybodyNeighborlist
-
+from icetdev.cluster import Cluster
 
 def __count_clusters(self, atoms=None, structure=None, neighborlists=None, mbnl=None, cutoffs=None,
                      reset=True, order=None):
@@ -90,7 +90,28 @@ ClusterCounts.count_clusters = __count_clusters
 
 
 
+def __count_orbitlist(self, structure, orbitlist):
+    """
+    Counts the clusters of the sites in each orbit of orbitlist
 
+    Parameters
+    ----------
+    structure:
+        icet structure object to be counted on
+
+    orbitlist:
+        icet orbitlist class
+    """
+
+    for i, orbit in enumerate(orbitlist.get_orbitList()):
+        repr_cluster = orbit.get_representative_cluster()
+        cluster = Cluster(distances = repr_cluster.get_distances(),
+                         sites = repr_cluster.get_sites(),
+                         sortedCluster=False,
+                         clusterTag = i)
+        self.count(structure, orbit.get_equivalent_sites(), cluster)                         
+                        
+ClusterCounts.count_orbitlist = __count_orbitlist
 
 
 
