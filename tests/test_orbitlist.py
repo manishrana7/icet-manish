@@ -84,12 +84,12 @@ print("size of orbitlist {0}".format(orbitlist.size()))
 #################################################
 
 
-N = 6
+N = 1
 atoms = atoms.repeat(N)
 
 structure_repeat = structure_from_atoms(atoms)
 t1 = time.time()
-supercell_orbitlist = orbitlist.get_supercell_orbitlist(structure_repeat)
+supercell_orbitlist = ol.get_supercell_orbitlist(structure_repeat)
 t2 = time.time()
 
 print("Time to get supercell with x atoms {0}: {1} s".format(
@@ -111,17 +111,20 @@ for i in range(len(cutoffs) + 2):
 
 clustercounts = ClusterCounts()
 t1 = time.time()
-clustercounts.count_orbitlist(structure_repeat, supercell_orbitlist)
+clustercounts.count_orbitlist(structure, orbitlist)
 t2 = time.time()
 
 clustercounts.print()
 
-
-print("Time to count orbitlist {0} s".format(t2-t1))
-# for i in range(supercell_orbitlist.size()):
-#      (supercell_orbitlist.get_orbit(i).get_representative_cluster().print())
-#      print("number of equivalent sites: ",len(supercell_orbitlist.get_orbit(i).get_equivalent_sites()))
-
+#print(orbitlist.get_orbit(1).get_equivalent_sites())
+# print("Time to count orbitlist {0} s".format(t2-t1))
+for i in range(orbitlist.size()):
+      #(supercell_orbitlist.get_orbit(i).get_representative_cluster().print())
+      if 0 == len(orbitlist.get_orbit(i).get_representative_cluster().get_distances()):
+        #print("number of equivalent sites: ",len(supercell_orbitlist.get_orbit(i).get_equivalent_sites()))
+        print(i)
+        print(orbitlist.get_orbit(i).get_equivalent_sites())
+        print(len(orbitlist.get_orbit(i).get_equivalent_sites()))
 
 # import numpy as np
 # for i in range(orbitlist.size()):

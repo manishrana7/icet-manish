@@ -299,24 +299,39 @@ void OrbitList::addPermutationMatrixColumns(
         //     }
 
         // }
-
+        // auto find_first_validCluster = std::find_if(sites_index_pair.begin(), sites_index_pair.end(),[](const std::pair<std::vector<LatticeNeighbor>,std::vector<int>> &site_index_pair){return validatedCluster(site_index_pair.second);});
         auto find = taken_rows.find(sites_index_pair[0].second);
-
+        bool findOnlyOne=true;
         if (find == taken_rows.end())
-        {
-            taken_rows.insert(sites_index_pair[0].second);
-            if (add)
-            {
-                columnLatticeNeighbors.push_back(sites_index_pair[0].first);
-            }
-            for (int i = 1; i < sites_index_pair.size(); i++)
+        {        
+            for (int i = 0; i < sites_index_pair.size(); i++)
             {
                 find = taken_rows.find(sites_index_pair[i].second);
                 if (find == taken_rows.end())
                 {
+                    if(add && findOnlyOne && validatedCluster(sites_index_pair[i].first))
+                    {
+                        columnLatticeNeighbors.push_back(sites_index_pair[0].first);                        
+                        findOnlyOne=false;
+                    }
                     taken_rows.insert(sites_index_pair[i].second);
                 }
             }
+
+
+            // taken_rows.insert(sites_index_pair[0].second);
+            // if (add && validatedCluster(sites_index_pair[0].first))
+            // {
+            //     columnLatticeNeighbors.push_back(sites_index_pair[0].first);
+            // }
+            // for (int i = 1; i < sites_index_pair.size(); i++)
+            // {
+            //     find = taken_rows.find(sites_index_pair[i].second);
+            //     if (find == taken_rows.end())
+            //     {
+            //         taken_rows.insert(sites_index_pair[i].second);
+            //     }
+            // }
         }
     }
     if (columnLatticeNeighbors.size() > 0)
