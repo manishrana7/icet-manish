@@ -22,12 +22,12 @@ def setup_test_orbitlist(atoms, cutoffs):
 atoms = bulk("Al", "bcc", a=1)
 # atoms = crystal("Al", spacegroup=223)
 from ase.io import read
-atoms = read(
-    "../clathrate-cluster-expansions/cluster-expansions/reference-clathrate-structure.json")
+#atoms = read(
+#    "../clathrate-cluster-expansions/cluster-expansions/reference-clathrate-structure.json")
 from ase.visualize import view
 # view(atoms)
 # exit(1)
-cutoffs = [3] * 1
+cutoffs = [2.5] * 4
 
 # cs = ClusterSpace(atoms=atoms, cutoffs=cutoffs)
 # print(cs)
@@ -84,7 +84,7 @@ print("size of orbitlist {0}".format(orbitlist.size()))
 #################################################
 
 
-N = 1
+N = 6
 atoms = atoms.repeat(N)
 
 structure_repeat = structure_from_atoms(atoms)
@@ -92,7 +92,7 @@ t1 = time.time()
 supercell_orbitlist = ol.get_supercell_orbitlist(structure_repeat)
 t2 = time.time()
 
-print("Time to get supercell with x atoms {0}: {1} s".format(
+print("Time to get supercell orbitlist with {0} atoms : {1:.6f} s".format(
     structure_repeat.size(), t2 - t1))
 
 print("size of repeated orbitlist {0}".format(supercell_orbitlist.size()))
@@ -111,20 +111,20 @@ for i in range(len(cutoffs) + 2):
 
 clustercounts = ClusterCounts()
 t1 = time.time()
-clustercounts.count_orbitlist(structure, orbitlist)
+clustercounts.count_orbitlist(structure_repeat, supercell_orbitlist)
 t2 = time.time()
 
-clustercounts.print()
+#clustercounts.print()
 
 #print(orbitlist.get_orbit(1).get_equivalent_sites())
-# print("Time to count orbitlist {0} s".format(t2-t1))
-for i in range(orbitlist.size()):
-      #(supercell_orbitlist.get_orbit(i).get_representative_cluster().print())
-      if 0 == len(orbitlist.get_orbit(i).get_representative_cluster().get_distances()):
-        #print("number of equivalent sites: ",len(supercell_orbitlist.get_orbit(i).get_equivalent_sites()))
-        print(i)
-        print(orbitlist.get_orbit(i).get_equivalent_sites())
-        print(len(orbitlist.get_orbit(i).get_equivalent_sites()))
+print("Time to count orbitlist {0:.6f} s".format(t2-t1))
+# for i in range(orbitlist.size()):
+#       #(supercell_orbitlist.get_orbit(i).get_representative_cluster().print())
+#       if 0 == len(orbitlist.get_orbit(i).get_representative_cluster().get_distances()):
+#         #print("number of equivalent sites: ",len(supercell_orbitlist.get_orbit(i).get_equivalent_sites()))
+#         print(i)
+#         print(orbitlist.get_orbit(i).get_equivalent_sites())
+#         print(len(orbitlist.get_orbit(i).get_equivalent_sites()))
 
 # import numpy as np
 # for i in range(orbitlist.size()):
