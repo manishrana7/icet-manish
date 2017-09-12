@@ -59,10 +59,7 @@ PYBIND11_PLUGIN(_icetdev)
     py::class_<ManybodyNeighborlist>(m, "ManybodyNeighborlist")
         .def(py::init<>())
         .def("calc_intersection", &ManybodyNeighborlist::getIntersection)
-        .def("build", &ManybodyNeighborlist::build)
-        ;
-
-        
+        .def("build", &ManybodyNeighborlist::build);
 
     py::class_<Cluster>(m, "Cluster")
         .def(py::init<std::vector<int> &, std::vector<double> &, const bool, const int>(), pybind11::arg("sites"),
@@ -76,6 +73,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("print", &Cluster::print)
         .def("is_sorted", &Cluster::isSorted)
         .def("get_clusterTag", &Cluster::getClusterTag)
+        .def("__hash__", [](const Cluster &cluster) {return std::hash<Cluster>{}(cluster); })
         .def(py::self < py::self);
 
     py::class_<PermutationMap>(m, "PermutationMap")
@@ -89,12 +87,14 @@ PYBIND11_PLUGIN(_icetdev)
 
     py::class_<LatticeNeighbor>(m, "LatticeNeighbor")
         .def(py::init<const int, const Vector3d &>())
-        .def("print", &LatticeNeighbor::print )
+        .def("print", &LatticeNeighbor::print)
         .def_readwrite("index", &LatticeNeighbor::index)
         .def_readwrite("unitcellOffset", &LatticeNeighbor::unitcellOffset)
-        .def(py::self < py::self)        
+        .def(py::self < py::self)
         .def(py::self == py::self)
         .def(py::self + Eigen::Vector3d())
+        .def("__hash__", [](const LatticeNeighbor &latticeNeighbor) {return std::hash<LatticeNeighbor>{}(latticeNeighbor); })
+        
         ;
 
     py::class_<ClusterCounts>(m, "ClusterCounts")
@@ -102,30 +102,40 @@ PYBIND11_PLUGIN(_icetdev)
         .def("count_lattice_neighbors", &ClusterCounts::countLatticeNeighbors)
         .def("count_singlets", &ClusterCounts::countSinglets)
         .def("count_pairs", &ClusterCounts::countPairs)
-        .def("count",(void (ClusterCounts::*)( const Structure &,
-            const std::vector<LatticeNeighbor> &)) &ClusterCounts::count)
-        .def("count",(void (ClusterCounts::*)( const Structure &, const std::vector<std::vector<LatticeNeighbor>> &,
-            const Cluster &)) &ClusterCounts::count)
+        .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<LatticeNeighbor> &)) & ClusterCounts::count)
+        .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &, const Cluster &)) & ClusterCounts::count)
         .def("size", &ClusterCounts::size)
         .def("reset", &ClusterCounts::reset)
-        .def("get_cluster_counts", &ClusterCounts::getClusterCounts)
+        .def("get_cluster_counts", [](const ClusterCounts &clusterCounts) {
+            //&ClusterCounts::getClusterCounts
+            py::dict clusterCountDict;
+            for (const auto &mapPair : clusterCounts.getClusterCounts())
+            {
+                py::dict d;
+                for (const auto &vecInt_intPair : mapPair.second)
+                {
+                    d[py::tuple(py::cast(vecInt_intPair.first))] = vecInt_intPair.second;
+                }
+                clusterCountDict[py::cast(mapPair.first)] = d;
+            }
+            return clusterCountDict;
+        })
         .def("print", &ClusterCounts::print);
 
     py::class_<Orbit>(m, "Orbit")
         .def(py::init<const Cluster &>())
-        .def("add_equivalent_sites",(void (Orbit::*)(const std::vector<LatticeNeighbor> &)) &Orbit::addEquivalentSites )
-        .def("add_equivalent_sites",(void (Orbit::*)(const std::vector<std::vector<LatticeNeighbor>> &)) &Orbit::addEquivalentSites )
+        .def("add_equivalent_sites", (void (Orbit::*)(const std::vector<LatticeNeighbor> &)) & Orbit::addEquivalentSites)
+        .def("add_equivalent_sites", (void (Orbit::*)(const std::vector<std::vector<LatticeNeighbor>> &)) & Orbit::addEquivalentSites)
         .def("get_representative_cluster", &Orbit::getRepresentativeCluster)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
         .def("size", &Orbit::size)
         .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
         .def(py::self < py::self)
-        .def(py::self + Eigen::Vector3d())
-        ;
+        .def(py::self + Eigen::Vector3d());
 
     py::class_<OrbitList>(m, "OrbitList")
         .def(py::init<>())
-        .def(py::init<const std::vector<Neighborlist> & , const Structure &>())
+        .def(py::init<const std::vector<Neighborlist> &, const Structure &>())
         .def(py::init<const Structure &, const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<Neighborlist> &>())
         .def("add_orbit", &OrbitList::addOrbit)
         .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters)
@@ -135,8 +145,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_orbitList", &OrbitList::getOrbitList)
         .def("size", &OrbitList::size)
         .def("print", &OrbitList::print, py::arg("verbosity") = 0)
-        .def("get_supercell_orbitlist",&OrbitList::getSupercellOrbitlist)
-        ;
+        .def("get_supercell_orbitlist", &OrbitList::getSupercellOrbitlist);
 
     return m.ptr();
 }
