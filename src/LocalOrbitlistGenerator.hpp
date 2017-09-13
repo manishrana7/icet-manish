@@ -3,7 +3,8 @@
 #include <unordered_map>
 #include "LatticeNeighbor.hpp"
 #include "Structure.hpp"
-#include "Orbitlist.hpp"
+#include "OrbitList.hpp"
+#include "Vector3dCompare.hpp"
 
 /**
 
@@ -46,12 +47,12 @@ class LocalOrbitlistGenerator
     void mapSitesAndFindCellOffsets();
 
     ///generate and returns the local orbitlist with the input index
-    Orbitlist generateLocalOrbitlist(const unsigned int ) const;
+    OrbitList generateLocalOrbitlist(const unsigned int ) ;
 
     ///generate and returns the local orbitlist with the input offset (require that the offset is in uniquecell offset?)
-    Orbitlist generateLocalOrbitlist(const Vector3d & ) const;
+    OrbitList generateLocalOrbitlist(const Vector3d & ) ;
 
-    //clears the unordered_map and the unordered_set    
+    //clears the unordered_map and the vector    
     void clear();
 
     ///Return the primitive lattice neighbor to supercell latticeneigbhor map

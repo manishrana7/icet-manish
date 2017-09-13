@@ -19,6 +19,8 @@ SET(SourceFiles
   ClusterCounts.cpp
   Orbit.cpp
   OrbitList.cpp
+  LocalOrbitlistGenerator.cpp
+
 )
 # Find Eigen3
 FIND_PACKAGE(Eigen3 REQUIRED)
