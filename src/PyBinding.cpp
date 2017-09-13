@@ -74,8 +74,11 @@ PYBIND11_PLUGIN(_icetdev)
         .def("is_sorted", &Cluster::isSorted)
         .def("get_clusterTag", &Cluster::getClusterTag)
         .def("__hash__", [](const Cluster &cluster) {return std::hash<Cluster>{}(cluster); })
-        .def(py::self < py::self);
-
+        .def(py::self < py::self)
+        .def(py::self == py::self)
+        // .def(hash(py::self))
+            ;
+        
     py::class_<PermutationMap>(m, "PermutationMap")
         .def(py::init<const std::vector<Vector3d> &,
                       const std::vector<Matrix3d> &>())
@@ -132,6 +135,9 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
         .def(py::self < py::self)
         .def(py::self + Eigen::Vector3d());
+    
+        
+        
 
     py::class_<OrbitList>(m, "OrbitList")
         .def(py::init<>())
@@ -146,6 +152,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("size", &OrbitList::size)
         .def("print", &OrbitList::print, py::arg("verbosity") = 0)
         .def("get_supercell_orbitlist", &OrbitList::getSupercellOrbitlist);
-
     return m.ptr();
+
+
 }

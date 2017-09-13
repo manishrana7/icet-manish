@@ -143,6 +143,11 @@ class OrbitList
         _primitiveStructure = primitive;
     }
 
+    ///Returns the primitive structure
+    Structure getPrimitiveStructure() const
+    {
+        return _primitiveStructure;
+    }
     /// += a orbitlist to another, first assert that they have the same number of orbits or that this is empty and then add equivalent sites of orbit i of rhs to orbit i to ->this
     OrbitList &operator+=(const OrbitList &rhs_ol)
     {   
