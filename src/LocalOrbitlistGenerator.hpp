@@ -39,12 +39,7 @@ class LocalOrbitlistGenerator
   public:
     LocalOrbitlistGenerator(const OrbitList &, const Structure &);
 
-    /**
-    Maps supercell positions to reference to the primitive cell and find unique primitive cell offsets
-    Will loop through all sites in supercell and map them to the primitive structures cell
-    and find the unique primitive cell offsets
-    */
-    void mapSitesAndFindCellOffsets();
+ 
 
     ///generate and returns the local orbitlist with the input index
     OrbitList generateLocalOrbitlist(const unsigned int ) ;
@@ -54,6 +49,12 @@ class LocalOrbitlistGenerator
 
     //clears the unordered_map and the vector    
     void clear();
+
+    ///Returns the number of unique offsets
+    size_t getUniqueOffsetsCount() const
+    {
+        return _uniquePrimcellOffsets.size();
+    }
 
     ///Return the primitive lattice neighbor to supercell latticeneigbhor map
     std::unordered_map<LatticeNeighbor, LatticeNeighbor> getPrimToSupercellMap() const
@@ -70,6 +71,15 @@ class LocalOrbitlistGenerator
 
 
   private:
+
+   /**
+    Maps supercell positions to reference to the primitive cell and find unique primitive cell offsets
+    Will loop through all sites in supercell and map them to the primitive structures cell
+    and find the unique primitive cell offsets
+    */    
+    void mapSitesAndFindCellOffsets();
+
+
     ///Primitive orbitlist
     OrbitList _orbitlist;
 

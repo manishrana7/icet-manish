@@ -5,6 +5,7 @@
 #include "PermutationMap.hpp"
 #include "LatticeNeighbor.hpp"
 #include "ClusterCounts.hpp"
+#include "LocalOrbitlistGenerator.hpp"
 #include <pybind11/pybind11.h>
 #include "Orbit.hpp"
 #include "OrbitList.hpp"
@@ -73,12 +74,12 @@ PYBIND11_PLUGIN(_icetdev)
         .def("print", &Cluster::print)
         .def("is_sorted", &Cluster::isSorted)
         .def("get_clusterTag", &Cluster::getClusterTag)
-        .def("__hash__", [](const Cluster &cluster) {return std::hash<Cluster>{}(cluster); })
+        .def("__hash__", [](const Cluster &cluster) { return std::hash<Cluster>{}(cluster); })
         .def(py::self < py::self)
         .def(py::self == py::self)
         // .def(hash(py::self))
-            ;
-        
+        ;
+
     py::class_<PermutationMap>(m, "PermutationMap")
         .def(py::init<const std::vector<Vector3d> &,
                       const std::vector<Matrix3d> &>())
@@ -96,8 +97,8 @@ PYBIND11_PLUGIN(_icetdev)
         .def(py::self < py::self)
         .def(py::self == py::self)
         .def(py::self + Eigen::Vector3d())
-        .def("__hash__", [](const LatticeNeighbor &latticeNeighbor) {return std::hash<LatticeNeighbor>{}(latticeNeighbor); })
-        
+        .def("__hash__", [](const LatticeNeighbor &latticeNeighbor) { return std::hash<LatticeNeighbor>{}(latticeNeighbor); })
+
         ;
 
     py::class_<ClusterCounts>(m, "ClusterCounts")
@@ -135,9 +136,6 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
         .def(py::self < py::self)
         .def(py::self + Eigen::Vector3d());
-    
-        
-        
 
     py::class_<OrbitList>(m, "OrbitList")
         .def(py::init<>())
@@ -152,7 +150,14 @@ PYBIND11_PLUGIN(_icetdev)
         .def("size", &OrbitList::size)
         .def("print", &OrbitList::print, py::arg("verbosity") = 0)
         .def("get_supercell_orbitlist", &OrbitList::getSupercellOrbitlist);
+
+    py::class_<LocalOrbitlistGenerator>(m, "LocalOrbitlistGenerator")
+        .def(py::init<const OrbitList &, const Structure &>())
+        .def("generate_local_orbitlist", (OrbitList(LocalOrbitlistGenerator::*)(const unsigned int)) & LocalOrbitlistGenerator::generateLocalOrbitlist)
+        .def("generate_local_orbitlist", (OrbitList(LocalOrbitlistGenerator::*)(const Vector3d &)) & LocalOrbitlistGenerator::generateLocalOrbitlist)
+        .def("clear", &LocalOrbitlistGenerator::clear)
+        .def("get_unique_offsets_count", &LocalOrbitlistGenerator::getUniqueOffsetsCount)
+        .def("get_prim_to_supercell_map", &LocalOrbitlistGenerator::getPrimToSupercellMap)
+        .def("get_unique_primcell_offsets", &LocalOrbitlistGenerator::getUniquePrimcellOffsets);
     return m.ptr();
-
-
 }
