@@ -45,7 +45,7 @@ run_tests:
     - linux
   dependencies:
     - build_linux
-   script:
+  script:
     - echo $PWD 
     - echo $PYTHONPATH
     - python3 tests/__init__.py
