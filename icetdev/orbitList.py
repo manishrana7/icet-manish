@@ -55,21 +55,6 @@ def __prune_permutation_matrix(permutation_matrix, verbosity=0):
                 permutation_matrix.pop(j)
                 if verbosity > 2:
                     print("Removing duplicate in permutation matrix with index {1}, same as {0}".format(i,j))
-                # permutation_matrix[j].pop()
-                #print("found duplicate")
-    #             if j not in del_list:
-    #                 del_list.append(j)
-
-    # popped_rows_to_add = []
-    # for j in reversed(sorted(del_list)):
-    #     popped_row = permutation_matrix.pop(j)
-    #     popped_col1 = popped_row[0]
-    #     if popped_col1 not in permutation_matrix[:][0]:
-    #         print("Error: removed too much in prune permutation matrix")
-    #         popped_col1.print()
-    # #         popped_rows_to_add.append(popped_row)
-    # for row in popped_rows_to_add:
-    #     permutation_matrix.append(row)
     return permutation_matrix
 
 def create_orbit_list(structure, cutoffs, verbosity=0):
