@@ -1,0 +1,51 @@
+image: ubuntu:latest
+
+before_script:
+  - apt-get -yqq update
+  - apt-get -yqq install cmake
+                         git
+                         build-essential
+                         libboost-all-dev
+                         libeigen3-dev
+                         libboost-system-dev
+                         libboost-thread-dev
+                         libboost-filesystem-dev
+                         python3-dev
+                         python-dev
+                         python3-numpy
+                         python-numpy
+                         python-pip
+                         python3-sphinx
+                         python-sphinx
+                         python3-joblib
+                         python-joblib
+                         python
+                         libgsl-dev
+                         python-tk
+  - pip3 install --upgrade --user ase
+  - pip3 install --upgrade --user spglib
+  
+
+build_linux:
+  stage: build
+  tags:
+    - linux
+  script:
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make
+  artifacts:
+      paths:
+        - build
+
+run_tests:
+  stage: test
+  tags:
+    - linux
+  dependencies:
+    - build_linux
+  script:
+    - PYTHONPATH=$PWD/../build python3 tests/__init__.py
+
+
