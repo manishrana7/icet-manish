@@ -46,6 +46,8 @@ run_tests:
   dependencies:
     - build_linux
   script:
+    - export PYTHONPATH=/builds/icet/icet-dev:$PYTHONPATH
+    - export PYTHONPATH=/builds/icet/icet-dev/buid/src/:$PYTHONPATH
     - echo $PWD 
     - echo $PYTHONPATH
     - python3 tests/__init__.py
