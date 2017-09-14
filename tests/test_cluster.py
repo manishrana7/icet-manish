@@ -6,6 +6,8 @@ sites = np.array([0, 0, 0])
 distances = np.array([.0, 1.0, 3.0])
 cluster = it.Cluster( distances=distances, sites=sites, sortedCluster=True)
 
+# TODO :set up a cluster using structure and lattice neigbhors
+
 
 assert cluster.get_count(
     [0, 0, 0]) == 0, "if no count has happened, then its zero"

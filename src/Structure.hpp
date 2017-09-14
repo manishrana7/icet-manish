@@ -14,6 +14,7 @@ namespace py = pybind11;
 class Structure
 {
   public:
+    Structure(){};
     Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &,
               const std::vector<std::string> &,
               const Eigen::Matrix3d &,
@@ -33,10 +34,8 @@ class Structure
         {
             throw std::out_of_range("Error: Tried accessing position at out of bound index. Structure::getDistance2");
         }
-
         Vector3d pos1 = _positions.row(index1) + offset1.transpose() * _cell;
         Vector3d pos2 = _positions.row(index2) + offset2.transpose() * _cell;
-
         return (pos1 - pos2).norm();
     }
 
@@ -47,7 +46,7 @@ class Structure
     }
 
     ///Get position from a lattice neighbor
-    Vector3d getPosition(const LatticeNeighbor &latticeNeighbor)
+    Vector3d getPosition(const LatticeNeighbor &latticeNeighbor) const
     {
         if (latticeNeighbor.index >= _positions.rows() || latticeNeighbor.index < 0)
         {
@@ -57,33 +56,39 @@ class Structure
         return position;
     }
 
+    ///Return positions
     Eigen::Matrix<double, Dynamic, 3, RowMajor> getPositions() const
     {
         return _positions;
     }
 
+    /**set elements using a string vector 
+    @TODO: think about overloading to setElements
+    */
     void setStrElements(const std::vector<std::string> &elements)
     {
         _strelements = elements;
         setElements(convertStrElements(_strelements));
     }
-
+    ///return the elements as strings
     std::vector<std::string> getStrElements() const
     {
         return _strelements;
     }
 
+    ///set elements using integer vector
     void setElements(const std::vector<int> &elements)
     {
         _elements = elements;
     }
-
+    ///get elements as vector<int>
     std::vector<int> getElements() const
     {
         return _elements;
     }
 
-    int getElement(const size_t i) const
+    /// Get integer element of index i
+    int getElement(const unsigned int i) const
     {
         if (i >= _elements.size())
         {
@@ -96,16 +101,21 @@ class Structure
         return _elements[i];
     }
 
+    ///Set the symmetrically distinct sites using vector<int> where length of vector should match number of positions
     void setUniqueSites(const std::vector<int> &sites)
     {
+        if( sites.size() != _positions.rows() )
+        {
+            throw std::out_of_range("Sites are not the same size as positions");            
+        }
         _uniqueSites = sites;
     }
-
+    ///Returns the symettrically distinct sites if index i and index j has the same unique site they are considered equal
     std::vector<int> getUniqueSites() const
     {
         return _uniqueSites;
     }
-
+    ///Return the symmetrically distinct site 
     int getSite(const size_t i) const
     {
         if (i >= _uniqueSites.size())
@@ -119,29 +129,33 @@ class Structure
         return _uniqueSites[i];
     }
 
+    ///rTrue if this structure has pbc along cell axis k
     bool has_pbc(const int k) const
     {
         return _pbc[k];
     }
+    ///return the pbc vector
     std::vector<bool> get_pbc() const
     {
         return _pbc;
     }
+    ///set the pbc vector
     void set_pbc(const std::vector<bool> pbc)
     {
         _pbc = pbc;
     }
-
+    ///set the lattice cell matrix
     void set_cell(const Eigen::Matrix<double, 3, 3> &cell)
     {
         _cell = cell;
     }
-
+    ///returns the lattice cell matrix
     Eigen::Matrix<double, 3, 3> get_cell() const
     {
         return _cell;
     }
 
+    ///Returns size of the structure i.e. number of atoms, sites, or positions in the structure
     size_t size() const
     {
         if (_elements.size() != _positions.rows())
@@ -188,14 +202,18 @@ class Structure
     {
 
         ///ldlt require positive or negative semidefinite cell
-        // std::cout<<"position "<< position<<std::endl;
-        // std::cout<<"cell "<< _cell<<std::endl;
+        // std::cout << "position " << position << std::endl;
+        //  std::cout<<"cell "<< _cell<<std::endl;
         Vector3d fractional = _cell.transpose().partialPivLu().solve(position);
-        // std::cout<<"fractional "<< fractional<<std::endl;
-        Vector3d unitcellOffset = {int(round(fractional[0])), int(round(fractional[1])), int(round(fractional[2]))};
+        // std::cout << "fractional " << fractional << std::endl;
+        // Vector3d unitcellOffset = {int(round(fractional[0])), int(round(fractional[1])), int(round(fractional[2]))};
+        Vector3d unitcellOffset = {int(floor(coordinateRound((double)fractional[0]))),
+                                   int(floor(coordinateRound((double)fractional[1]))),
+                                   int(floor(coordinateRound((double)fractional[2])))};
+        // std::cout << "unitcellOffset " << unitcellOffset << std::endl;
 
         Vector3d remainder = (fractional - unitcellOffset).transpose() * _cell;
-        // std::cout<<"remainder "<< remainder<<std::endl;
+        // std::cout << "remainder " << remainder << std::endl;
 
         auto index = findIndexOfPosition(remainder, position_tolerance);
         if (index == -1)
@@ -207,6 +225,18 @@ class Structure
         return ret;
     }
 
+    ///Round to nearest integer toward zero
+    int nearestIntegerTowardZero(const double value) const
+    {
+        if (value > 0)
+        {
+            return int(floor(value));
+        }
+        else
+        {
+            return int(floor(value));
+        }
+    }
     /**
     Finds a vector of lattice neigbhors from a vector of positions
 
@@ -231,6 +261,7 @@ class Structure
     std::vector<std::string> _strelements;
     std::vector<bool> _pbc;
     std::vector<int> _uniqueSites;
+    
     std::vector<int> convertStrElements(const std::vector<std::string> &elements)
     {
         std::vector<int> intElements(elements.size());
@@ -249,5 +280,11 @@ class Structure
             strElements[i] = PeriodicTable::intStr[elements[i]];
         }
         return strElements;
+    }
+    ///rounds val to precision
+    double coordinateRound(const double &val) const
+    {
+        double precision = 1e-6;
+        return round(val * 1.0 / precision) / (1.0 / precision);
     }
 };

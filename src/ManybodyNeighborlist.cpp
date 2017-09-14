@@ -45,6 +45,7 @@ std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>
 
         combineToHigherOrder(neighborlists[c - 2], manybodyNeighborIndices, Ni, currentOriginalNeighbors, saveBothWays, c);
     }
+    _latticeNeighbors = manybodyNeighborIndices;
     return manybodyNeighborIndices;
 }
 
@@ -111,198 +112,6 @@ be removed/overlooked when moving to the next vector<LatticeNeighbor>.
 
 */
 
-std::vector<std::vector<std::vector<LatticeNeighbor>>> ManybodyNeighborlist::buildFromPermutationMatrix(const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<Neighborlist> &neighborlists)
-{
-
-    std::vector<std::vector<std::vector<LatticeNeighbor>>> lattice_neighbors;
-    std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> manybodyNeighborIndices;
-    bool saveBothWays = false;
-
-    //if [0,1,2] exists in taken_rows then these three rows (with columns) have been accounted for and should not be looked at
-    std::vector<std::vector<int>> taken_rows;
-    std::vector<LatticeNeighbor> col1 = getColumn1FromPM(permutation_matrix, false);
-
-    std::set<LatticeNeighbor> col1_uniques(col1.begin(), col1.end());
-    if (col1.size() != col1_uniques.size())
-    {
-        throw std::runtime_error("Found duplicates in column1 of permutation matrix");
-    }
-    // for (auto latnbr : col1_uniques)
-    // {
-    //     latnbr.print();
-    // }
-    std::cout << "Size of col1 " << col1.size() << std::endl;
-    for (size_t index = 0; index < neighborlists[0].size(); index++)
-    {
-
-        std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> mbnl_latnbrs = build(neighborlists, index, saveBothWays);
-        for (const auto &mbnl_pair : mbnl_latnbrs)
-        {
-
-            for (const auto &latnbr : mbnl_pair.second)
-            {
-                std::vector<LatticeNeighbor> lat_nbrs = mbnl_pair.first;
-                lat_nbrs.push_back(latnbr);
-                // std::cout<<"find in build function:"<<std::endl;
-                auto pm_rows = findRowsFromCol1(col1, lat_nbrs);
-                auto find = std::find(taken_rows.begin(), taken_rows.end(), pm_rows);
-                if (find == taken_rows.end())
-                {
-                    //new stuff found
-                    addPermutationMatrixColumns(lattice_neighbors, taken_rows, lat_nbrs, pm_rows, permutation_matrix, col1);
-                }
-            }
-        }
-    }
-
-    for (int i = 0; i < lattice_neighbors.size(); i++)
-    {
-        std::sort(lattice_neighbors[i].begin(), lattice_neighbors[i].end());
-    }
-
-    for (int i = 0; i < lattice_neighbors.size(); i++)
-    {
-        for (int j = i + 1; j < lattice_neighbors.size(); j++)
-        {
-            if (lattice_neighbors[i] == lattice_neighbors[j])
-            {
-                std::cout << "Found duplicate" << std::endl;
-            }
-        }
-    }
-    std::sort(taken_rows.begin(), taken_rows.end());
-    std::cout << "Taken rows: " << std::endl;
-    for (auto taken_row : taken_rows)
-    {
-        for (auto el : taken_row)
-        {
-            std::cout << el << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "=========" << std::endl;
-
-    return lattice_neighbors;
-}
-
-/**
-    From all columns in permutation matrix add all the vector<LatticeNeighbors> from pm_rows
-
-    When taking new columns update taken_rows accordingly
- */
-void ManybodyNeighborlist::addPermutationMatrixColumns(
-    std::vector<std::vector<std::vector<LatticeNeighbor>>> &lattice_neighbors, std::vector<std::vector<int>> &taken_rows, const std::vector<LatticeNeighbor> &lat_nbrs, const std::vector<int> &pm_rows,
-    const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<LatticeNeighbor> &col1) const
-{
-
-    std::vector<std::vector<LatticeNeighbor>> columnLatticeNeighbors;
-    columnLatticeNeighbors.reserve(permutation_matrix[0].size());
-    columnLatticeNeighbors.push_back(lat_nbrs);
-
-    taken_rows.push_back(pm_rows);
-    for (size_t column = 1; column < permutation_matrix[0].size(); column++) //start at one since we got the zeroth one allready
-    {
-        std::vector<LatticeNeighbor> indistinctLatNbrs;
-
-        for (const int &row : pm_rows)
-        {
-            indistinctLatNbrs.push_back(permutation_matrix[row][column]);
-        }
-        auto perm_matrix_rows = findRowsFromCol1(col1, indistinctLatNbrs);
-        // std::cout<<"find in permutation matrix function:"<<std::endl;
-        auto find = std::find(taken_rows.begin(), taken_rows.end(), perm_matrix_rows);
-        if (find == taken_rows.end())
-        {
-            // std::cout<<"Found new taken rows: "<<std::endl;
-            // for(auto el : perm_matrix_rows){std::cout<<el<<" ";}
-            // std::cout<<std::endl;
-            // std::cout<<"Taken rows: "<<std::endl;
-            // for(auto taken_row : taken_rows)
-            // {
-            //     for(auto el : taken_row){std::cout<<el<<" ";}
-            //     std::cout<<std::endl;
-            // }
-            // std::cout<<"========="<<std::endl;
-            taken_rows.push_back(perm_matrix_rows);
-        }
-        columnLatticeNeighbors.push_back(indistinctLatNbrs);
-    }
-    if (columnLatticeNeighbors.size() > 0)
-    {
-        lattice_neighbors.push_back(columnLatticeNeighbors);
-    }
-}
-
-/**
-
-Checks that atleast one lattice neigbhor originate in the original cell (has one cell offset = [0,0,0])
-*/
-
-bool ManybodyNeighborlist::validatedCluster(const std::vector<LatticeNeighbor> &latticeNeighbors) const
-{
-    Vector3d zeroVector = {0., 0., 0.};
-    for (const auto &latNbr : latticeNeighbors)
-    {
-        if (latNbr.unitcellOffset == zeroVector)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-/**
- Searches for latticeNeighbors in col1 of permutation matrix and find the corresponding rows 
-*/
-std::vector<int> ManybodyNeighborlist::findRowsFromCol1(const std::vector<LatticeNeighbor> &col1, const std::vector<LatticeNeighbor> &latNbrs, bool sortIt) const
-{
-    std::vector<int> rows;
-    for (const auto &latNbr : latNbrs)
-    {
-        const auto find = std::find(col1.begin(), col1.end(), latNbr);
-        if (find == col1.end())
-        {
-            for (const auto &latNbrp : latNbrs)
-            {
-                latNbrp.print();
-            }
-            latNbr.print();
-            throw std::runtime_error("Did not find lattice neigbhor in col1 of permutation matrix in function findRowsFromCol1 in mbnl");
-        }
-        else
-        {
-            int row_in_col1 = std::distance(col1.begin(), find);
-            rows.push_back(row_in_col1);
-        }
-    }
-    // if (sortIt)
-    // {
-    std::sort(rows.begin(), rows.end());
-    // }
-    return rows;
-}
-
-/**
-    Returns the first column of the permutation matrix
-
-    named arguments:
-        sortIt : if true it will sort col1 (default true)
-
-*/
-std::vector<LatticeNeighbor> ManybodyNeighborlist::getColumn1FromPM(const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, bool sortIt) const
-{
-    std::vector<LatticeNeighbor> col1;
-    col1.reserve(permutation_matrix[0].size());
-    for (const auto &row : permutation_matrix)
-    {
-        col1.push_back(row[0]);
-    }
-    if (sortIt)
-    {
-        std::sort(col1.begin(), col1.end());
-    }
-    return col1;
-}
 
 /*
     for each j in Ni construct the intersect of N_j and N_i = N_ij.
@@ -400,4 +209,41 @@ void ManybodyNeighborlist::translateAllNi(std::vector<LatticeNeighbor> &Ni, cons
     {
         latNbr.unitcellOffset += unitCellOffset;
     }
+}
+
+/** Get size of _latticeNeighbors 
+
+    This can be used in conjunction with 
+    getNumberOfSites(int index)
+    and 
+    ManybodyNeighborlist::getSites
+    To loop over possible manybody neighbors
+
+*/
+size_t ManybodyNeighborlist::getNumberOfSites() const
+{
+    //std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> _latticeNeighbors;
+    return _latticeNeighbors.size();
+}
+
+///Get number of manybodies one can make from _latticeNeighbors[index]
+size_t ManybodyNeighborlist::getNumberOfSites(const unsigned int index) const
+{
+    //std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> _latticeNeighbors;
+    return _latticeNeighbors[index].second.size();
+}
+
+/** Return the manybody neighbor at "firstIndex"  and "secondIndex " 
+    in _latticeNeighbors and _latticeNeighbors[firstIndex] respectively
+*/
+std::vector<LatticeNeighbor> ManybodyNeighborlist::getSites(const unsigned int &firstIndex,
+                                                            const unsigned int &secondIndex) const
+{
+    std::vector<LatticeNeighbor> sites = _latticeNeighbors[firstIndex].first;
+    //If zero then this is a singlet
+    if (getNumberOfSites(firstIndex) > 0)
+    {
+        sites.push_back(_latticeNeighbors[firstIndex].second[secondIndex]);
+    }
+    return sites;
 }

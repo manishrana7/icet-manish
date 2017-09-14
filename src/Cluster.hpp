@@ -9,6 +9,8 @@
 #include <map>
 #include <unordered_map>
 #include <algorithm>
+#include "Structure.hpp"
+#include "LatticeNeighbor.hpp"
 
 #include <boost/functional/hash.hpp>
 using boost::hash;
@@ -246,14 +248,14 @@ struct I_Neighbors
 class Cluster
 {
   public:
-    // Cluster()
-    // {
-    //     //empty constructor
-    // }
+    Cluster()
+    {
+        //empty constructor
+    }
 
     Cluster(std::vector<int> &sites, std::vector<double> &distances, const bool sortedCluster = true, const int clusterTag = 0)
     {
-
+        _symprec = 1e-5;
         _sites = sites;
         _distances = distances;
         _sortedCluster = sortedCluster;
@@ -267,6 +269,11 @@ class Cluster
         //possible ways to see if there is another way to rearrange the cluster into a more "lower form"
         //validateSorting();
     }
+
+    ///Create cluster from a structure and latticeNeigbhors
+    Cluster(const Structure &structure,
+            const std::vector<LatticeNeighbor> &latticeNeighbors,
+            const bool sortedCluster = true, const int clusterTag = 0);
 
     //counts the elements
     void count(const std::vector<int> &elements)
@@ -1123,6 +1130,11 @@ class Cluster
         //return( c1 < c2 && c2 < c1);
     }
 
+    friend bool operator!=(const Cluster &c1, const Cluster &c2)
+    {
+        return !(c1 == c2);
+    }
+
     // comparison operator for sortable clusters
     friend bool operator<(const Cluster &c1, const Cluster &c2)
     {
@@ -1196,13 +1208,21 @@ class Cluster
         std::cout << std::endl;
     }
 
+    ///Return true if this is a sorted cluster
     bool isSorted() const
     {
         return _sortedCluster;
     }
+
+    ///Return the cluster tag used for identification if not dists/sites is used to distinguish
     int getClusterTag() const
     {
         return _clusterTag;
+    }
+    ///Return the number of bodies (size of sites) of the cluster
+    unsigned int getNumberOfBodies() const
+    {
+        return _sites.size();
     }
 
   private:
@@ -1211,10 +1231,10 @@ class Cluster
     std::map<std::vector<int>, int> _element_counts;
     bool _sortedCluster;
     int _clusterTag;
-    double symprec;
+    double _symprec;
     double roundDouble(const double &double_value)
     {
-        return round(double_value * 1.0 / symprec) / (1.0 / symprec);
+        return round(double_value * 1.0 / _symprec) / (1.0 / _symprec);
     }
 };
 
@@ -1226,11 +1246,18 @@ struct hash<Cluster>
     size_t
     operator()(const Cluster &k) const
     {
-            
+
         // Compute individual hash values for first,
         // second and third and combine them using XOR
         // and bit shifting:
         size_t seed = 0;
+
+        //if unsorted just use the clusterTag as seed
+        if(!k.isSorted())
+        {
+            hash_combine(seed, k.getClusterTag());
+            return seed;
+        }
 
         for (const auto &distance : k.getDistances())
         {

@@ -18,7 +18,7 @@ struct LatticeNeighbor
     {
         index = newIndex;
         unitcellOffset = newUnitcellOffset;
-    }   
+    }
 
     int index;
     Eigen::Vector3d unitcellOffset;
@@ -52,6 +52,24 @@ struct LatticeNeighbor
         }
         return true;
     }
+    /// latnbr + offset
+    friend LatticeNeighbor operator+(const LatticeNeighbor &latticeNeighbor, const Eigen::Vector3d &offset)
+    {
+        LatticeNeighbor latnbr = LatticeNeighbor(latticeNeighbor.index, latticeNeighbor.unitcellOffset + offset);
+        return latnbr;
+    }
+    /// latnbr - offset
+    friend LatticeNeighbor operator-(const LatticeNeighbor &latticeNeighbor, const Eigen::Vector3d &offset)
+    {
+        LatticeNeighbor latnbr = LatticeNeighbor(latticeNeighbor.index, latticeNeighbor.unitcellOffset - offset);
+        return latnbr;
+    }
+
+    friend LatticeNeighbor operator+=(const LatticeNeighbor &latticeNeighbor, const Eigen::Vector3d &offset)
+    {
+        LatticeNeighbor latnbr = LatticeNeighbor(latticeNeighbor.index, latticeNeighbor.unitcellOffset + offset);
+        return latnbr;
+    }
 
     void print() const
     {
@@ -63,8 +81,6 @@ struct LatticeNeighbor
         std::cout << std::endl;
     }
 };
-
-
 
 namespace std
 {

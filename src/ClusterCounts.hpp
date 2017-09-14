@@ -24,13 +24,13 @@ public:
     symprec = 1e-5;
     //empty constructor
   }
-  void countSinglets(const Structure &);
-  void countPairs(const Structure &, const Neighborlist &);
-  void count_using_mbnl(const Structure &, ManybodyNeighborlist &, const int);
   void countLatticeNeighbors(const Structure &,
                              const std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &);
   void count(const Structure &,
              const std::vector<LatticeNeighbor> &);
+  void count(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &,
+             const Cluster &);
+  void countCluster(const Cluster &, const std::vector<int> &);
   std::unordered_map<Cluster, std::map<std::vector<int>, int>> getClusterCounts() const
   {
     return _clusterCounts;
@@ -40,7 +40,7 @@ public:
   {
     return _clusterCounts.size();
   }
-  
+
   void reset()
   {
     _clusterCounts.clear();
@@ -53,6 +53,7 @@ public:
   {
     for (const auto &map_pair : _clusterCounts)
     {
+      int total = 0;
       map_pair.first.print();
       std::cout << "==============" << std::endl;
       for (const auto &element_count_pair : map_pair.second)
@@ -62,8 +63,10 @@ public:
           std::cout << PeriodicTable::intStr[el] << " ";
         }
         std::cout << map_pair.second.at(element_count_pair.first) << std::endl;
+        total +=map_pair.second.at(element_count_pair.first);
       }
-      std::cout<<std::endl;
+      std::cout<<"Total: "<<total<<std::endl;
+      std::cout << std::endl;
     }
   }
 
