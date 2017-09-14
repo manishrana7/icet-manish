@@ -24,9 +24,6 @@ public:
     symprec = 1e-5;
     //empty constructor
   }
-  void countSinglets(const Structure &);
-  void countPairs(const Structure &, const Neighborlist &);
-  void count_using_mbnl(const Structure &, ManybodyNeighborlist &, const int);
   void countLatticeNeighbors(const Structure &,
                              const std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &);
   void count(const Structure &,
