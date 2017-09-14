@@ -45,9 +45,7 @@ run_tests:
     - linux
   dependencies:
     - build_linux
- environment:
-    - PYTHONPATH=$PWD/build/src/:$PYTHONPATH
-  script:
-    - python3 tests/__init__.py
+   script:
+     - PYTHONPATH=$PWD/build/src/:$PWD/ python3 tests/__init__.py
 
 
