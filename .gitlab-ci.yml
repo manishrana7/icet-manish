@@ -48,6 +48,6 @@ run_tests:
  environment:
     - PYTHONPATH=$PWD/build/src/:$PYTHONPATH
   script:
-    -python3 tests/__init__.py
+    - python3 tests/__init__.py
 
 
