@@ -82,7 +82,7 @@ class Structure
         return _elements;
     }
 
-    int getElement(const size_t i) const
+    int getElement(const unsigned int i) const
     {
         if (i >= _elements.size())
         {

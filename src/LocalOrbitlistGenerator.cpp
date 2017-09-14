@@ -22,9 +22,9 @@ void LocalOrbitlistGenerator::mapSitesAndFindCellOffsets()
         Vector3d position_i = _supercell.getPositions().row(i);
 
         LatticeNeighbor primitive_site = _orbitlist.getPrimitiveStructure().findLatticeNeighborFromPosition(position_i);
-        LatticeNeighbor super_site = _supercell.findLatticeNeighborFromPosition(position_i);
+        // LatticeNeighbor super_site = _supercell.findLatticeNeighborFromPosition(position_i);
 
-        _primToSupercellMap[primitive_site] = super_site;
+        // _primToSupercellMap[primitive_site] = super_site;
         uniqueCellOffsets.insert(primitive_site.unitcellOffset);
     }
 

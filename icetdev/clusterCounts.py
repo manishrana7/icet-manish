@@ -3,6 +3,8 @@ from icetdev.structure import structure_from_atoms
 from icetdev.neighborlist import Neighborlist
 from icetdev.manybodyNeighborlist import ManybodyNeighborlist
 from icetdev.cluster import Cluster
+from icetdev.localOrbitlistGenerator import LocalOrbitlistGenerator
+
 
 def __count_clusters(self, atoms=None, structure=None, neighborlists=None, mbnl=None, cutoffs=None,
                      reset=True, order=None):
@@ -70,7 +72,7 @@ def __count_clusters(self, atoms=None, structure=None, neighborlists=None, mbnl=
 
     # loop over the indices in the structure, create the mbnl for each index
     # and count each index
-    
+
     for lattice_index in range(structure.size()):
         lattice_neigbhors = mbnl.build(
             neighborlists, lattice_index, bothways)
@@ -80,14 +82,13 @@ def __count_clusters(self, atoms=None, structure=None, neighborlists=None, mbnl=
     #self.count_pairs(structure, neighborlists[0])
 
     # count the singlets
-    #self.count_singlets(structure)
+    # self.count_singlets(structure)
 
     # return all objects that might have been created here for possible reuse
     return structure, neighborlists, mbnl, order
 
 
 ClusterCounts.count_clusters = __count_clusters
-
 
 
 def __count_orbitlist(self, structure, orbitlist):
@@ -105,15 +106,42 @@ def __count_orbitlist(self, structure, orbitlist):
 
     for i, orbit in enumerate(orbitlist.get_orbitList()):
         repr_cluster = orbit.get_representative_cluster()
-        cluster = Cluster(distances = repr_cluster.get_distances(),
-                         sites = repr_cluster.get_sites(),
-                         sortedCluster=False,
-                         clusterTag = i)
-        self.count(structure, orbit.get_equivalent_sites(), cluster)                         
-                        
+        cluster = Cluster(distances=repr_cluster.get_distances(),
+                          sites=repr_cluster.get_sites(),
+                          sortedCluster=False,
+                          clusterTag=i)
+        self.count(structure, orbit.get_equivalent_sites(), cluster)
+
+
 ClusterCounts.count_orbitlist = __count_orbitlist
 
 
+def __count_each_local_orbitlist(self, structure, prim_orbitlist):
+    """
+    Span the structure and count all clusters by finding each local orbitlist.
+
+    This will need to create the localOrbitListGenerator object which can generate
+    the local orbitlists
+
+    Parameters
+    ----------
+    structure:
+        icet structure object (supercell of the structure prim_orbitlist was based on)
+    prim_orbitlist:        
+        icet orbitlist object (based on a primitive of the input structure)
+    """
+
+    localOrbitListGenerator = LocalOrbitlistGenerator(
+        prim_orbitlist, structure)
+
+    for i in range(localOrbitListGenerator.get_unique_offsets_count()):
+        # sending local ol directly into function was about 10% faster
+        # local_orbitlist = localOrbitListGenerator.generate_local_orbitlist(i)
+        self.count_orbitlist(
+            structure, localOrbitListGenerator.generate_local_orbitlist(i))
+
+
+ClusterCounts.count_each_local_orbitlist = __count_each_local_orbitlist
 
 # def __count_pm_clusters(self, atoms=None, structure=None, mbnl_indices,
 #                      reset=True, order=None):

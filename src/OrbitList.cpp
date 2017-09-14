@@ -116,7 +116,6 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
         throw std::runtime_error("Found duplicates in column1 of permutation matrix");
     }
 
-    std::cout << "Size of col1 " << col1.size() << std::endl;
     for (size_t index = 0; index < neighborlists[0].size(); index++)
     {
 

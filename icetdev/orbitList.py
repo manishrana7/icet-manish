@@ -16,7 +16,7 @@ def __fractional_to_position(structure, row):
     return positions
 
 
-def __get_latNbr_permutation_matrix(structure, permutation_matrix, prune=True, verbosity=3):
+def __get_latNbr_permutation_matrix(structure, permutation_matrix, prune=True, verbosity=0):
     """
     Return a transformed permutation matrix with lattice neighbors instead of frac positions
 
@@ -72,7 +72,7 @@ def __prune_permutation_matrix(permutation_matrix, verbosity=0):
     #     permutation_matrix.append(row)
     return permutation_matrix
 
-def create_orbit_list(structure, cutoffs, verbosity=3):
+def create_orbit_list(structure, cutoffs, verbosity=0):
     """
     Create and build an orbit list from a primitive structure, a mbnl object and a permutation matrix
 
@@ -81,7 +81,6 @@ def create_orbit_list(structure, cutoffs, verbosity=3):
     permutation_matrix : icet permutation matrix object
     """
     max_cutoff = np.max(cutoffs)
-    print("Max cutoff: {}".format(max_cutoff))
     total_time_taken = 0
     
 
@@ -109,7 +108,7 @@ def create_orbit_list(structure, cutoffs, verbosity=3):
 
     t0 = time.time()
     #transform permutation_matrix to be in lattice neigbhor format
-    pm_lattice_neighbors = __get_latNbr_permutation_matrix(prim_structure, permutation_matrix, verbosity=3)
+    pm_lattice_neighbors = __get_latNbr_permutation_matrix(prim_structure, permutation_matrix, verbosity)
     t1 = time.time()
     time_taken = t1 - t0
     total_time_taken += time_taken

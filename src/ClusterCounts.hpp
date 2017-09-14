@@ -33,6 +33,7 @@ public:
              const std::vector<LatticeNeighbor> &);
   void count(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &,
              const Cluster &);
+  void countCluster(const Cluster &, const std::vector<int> &);
   std::unordered_map<Cluster, std::map<std::vector<int>, int>> getClusterCounts() const
   {
     return _clusterCounts;
@@ -55,6 +56,7 @@ public:
   {
     for (const auto &map_pair : _clusterCounts)
     {
+      int total = 0;
       map_pair.first.print();
       std::cout << "==============" << std::endl;
       for (const auto &element_count_pair : map_pair.second)
@@ -64,7 +66,9 @@ public:
           std::cout << PeriodicTable::intStr[el] << " ";
         }
         std::cout << map_pair.second.at(element_count_pair.first) << std::endl;
+        total +=map_pair.second.at(element_count_pair.first);
       }
+      std::cout<<"Total: "<<total<<std::endl;
       std::cout << std::endl;
     }
   }

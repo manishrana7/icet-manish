@@ -28,7 +28,7 @@ void ClusterCounts::countSinglets(const Structure &structure)
         elements[0] = structure.getElement(i);
 
         Cluster cluster = Cluster(sites, distances);
-        _clusterCounts[cluster][elements] += 1;
+        countCluster(cluster, elements);
     }
 }
 
@@ -96,7 +96,7 @@ void ClusterCounts::count(const Structure &structure,
     }
 
     Cluster cluster = Cluster(structure, latticeNeighbors);
-    _clusterCounts[cluster][elements] += 1;
+    countCluster(cluster, elements);
 }
 
 void ClusterCounts::count(const Structure &structure, const std::vector<std::vector<LatticeNeighbor>> &latticeNeighbors,
@@ -110,9 +110,16 @@ void ClusterCounts::count(const Structure &structure, const std::vector<std::vec
         {
             elements[i] = structure.getElement(latnbrs[i].index);
         }
-        _clusterCounts[cluster][elements] +=1;    
+        countCluster(cluster, elements);
     }
+}
 
+///Count cluster only through this function
+void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> &elements)
+{
+    std::vector<int> sortedElements = elements;
+    std::sort(sortedElements.begin(), sortedElements.end());
+    _clusterCounts[cluster][sortedElements] +=1;
 }
 
 /**

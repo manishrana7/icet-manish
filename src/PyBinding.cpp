@@ -117,7 +117,7 @@ PYBIND11_PLUGIN(_icetdev)
             {
                 py::dict d;
                 for (const auto &vecInt_intPair : mapPair.second)
-                {
+                {   
                     d[py::tuple(py::cast(vecInt_intPair.first))] = vecInt_intPair.second;
                 }
                 clusterCountDict[py::cast(mapPair.first)] = d;
