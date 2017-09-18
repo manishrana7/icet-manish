@@ -2,7 +2,7 @@ from _icetdev import ManybodyNeighborlist
 
 from icetdev.latticeNeighbor import LatticeNeighbor
 from icetdev.neighborlist import get_neighborlists
-
+from icetdev.structure import structure_from_atoms
 
 def get_all_lattice_neighbors(atoms=None, structure=None, neighborlists=None, cutoffs=None):
     """
