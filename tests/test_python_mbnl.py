@@ -8,7 +8,7 @@ mbnl_T = manybodyNeighborlistTester.manybodyNeighborlistTester()
 
 atoms = bulk("Al").repeat(2)
 
-neighbor_cutoff = 8.3
+neighbor_cutoff = 6.3
 
 # set ut atoms and icet structure
 atoms = bulk('Ti', "bcc", a=3.321).repeat(2)
