@@ -24,6 +24,7 @@ before_script:
                          python-tk
   - pip3 install --upgrade --user ase
   - pip3 install --upgrade --user spglib
+  - pip3 install --upgrade --user coverage
   
 
 build_linux:
@@ -50,6 +51,11 @@ run_tests:
     - export PYTHONPATH=/builds/icet/icet-dev/build/src/:$PYTHONPATH
     - echo $PWD 
     - echo $PYTHONPATH
-    - python3 tests/__init__.py
+    - coverage run tests/__init__.py
+    - mv .coverage public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days 
 
 
