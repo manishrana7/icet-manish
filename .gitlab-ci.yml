@@ -54,7 +54,8 @@ run_tests:
     - echo $PWD 
     - echo $PYTHONPATH
     - python3-coverage run tests/__init__.py
-    - pylint3 -f html icetdev/ > .pylint_report.html
+    - pylint3 icetdev/
+    - pylint3 icetdev/ > .pylint_report.html
     - echo "Done with pylint3"
     - mkdir public
     - cp .pylint_report.html public/
