@@ -51,7 +51,7 @@ run_tests:
     - export PYTHONPATH=/builds/icet/icet-dev/build/src/:$PYTHONPATH
     - echo $PWD 
     - echo $PYTHONPATH
-    - coverage run tests/__init__.py
+    - coverage3 run tests/__init__.py
     - mv .coverage public/
   artifacts:
     paths:
