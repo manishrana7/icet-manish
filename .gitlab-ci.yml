@@ -55,9 +55,11 @@ run_tests:
     - echo $PWD 
     - echo $PYTHONPATH
     - python3-coverage run tests/__init__.py
-    - pylint3 icetdev/ | grep -s rated | awk '{print $7}' > public/.pylint_score
+    - pylint3 icetdev/ | grep -s rated | awk '{print $7}' 
+    - pylint3 icetdev/ | grep -s rated | awk '{print $7}' > .pylint_score
     - echo "Done with pylint3"
     - cp .coverage public/
+    - cp .pylint_score public/
   artifacts:
     paths:
       - public
