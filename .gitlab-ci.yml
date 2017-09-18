@@ -49,18 +49,15 @@ run_tests:
   dependencies:
     - build_linux
   script:
+    - mkdir public
     - export PYTHONPATH=/builds/icet/icet-dev:$PYTHONPATH
     - export PYTHONPATH=/builds/icet/icet-dev/build/src/:$PYTHONPATH
     - echo $PWD 
     - echo $PYTHONPATH
     - python3-coverage run tests/__init__.py
-    - pylint3 icetdev/
-    - pylint3 icetdev/ > .pylint_report.html
+    - pylint3 icetdev/ | grep -s rated | awk '{print $7}' > public/.pylint_score
     - echo "Done with pylint3"
-    - mkdir public
-    - cp .pylint_report.html public/
     - cp .coverage public/
-    - grep rated .pylint_report.html | awk '{print $7}' > public/.pylint_score    
   artifacts:
     paths:
       - public
