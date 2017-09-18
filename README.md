@@ -1,3 +1,6 @@
+[![pipeline status](https://gitlab.com/icet/icet-dev/badges/master/pipeline.svg)](https://gitlab.com/icet/icet-dev/commits/master) [![coverage report](https://gitlab.com/icet/icet-dev/badges/master/coverage.svg)](https://gitlab.com/icet/icet-dev/commits/master)
+
+
 icet2 &mdash; The tea party for runaways
 ========================================
 
