@@ -23,6 +23,7 @@ before_script:
                          libgsl-dev
                          python-tk
                          python3-coverage
+                         pylint3
   - pip3 install --upgrade --user ase
   - pip3 install --upgrade --user spglib
   
@@ -53,6 +54,12 @@ run_tests:
     - echo $PWD 
     - echo $PYTHONPATH
     - python3-coverage run tests/__init__.py
+    - pylint3 -f html icetdev/ > .pylint_report.html
+    - rm -r public/
+    - mkdir public
+    - cp .pylint_report.html public/
+    - cp .coverage public/
+    - grep rated .pylint_report.html | awk '{print $7}' > public/.pylint_score    
   artifacts:
     paths:
       - public
