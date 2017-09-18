@@ -9,6 +9,9 @@ omit =
     *spglib/*
     tests/*
 
+include = 
+    icetdev/*
+
 [report]
 # Regexes for lines to exclude from consideration
 exclude_lines =

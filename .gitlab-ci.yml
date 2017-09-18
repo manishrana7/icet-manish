@@ -22,9 +22,10 @@ before_script:
                          python
                          libgsl-dev
                          python-tk
+                         python3-coverage
   - pip3 install --upgrade --user ase
   - pip3 install --upgrade --user spglib
-  - pip3 install --upgrade --user coverage
+  
   
 
 build_linux:
@@ -51,7 +52,7 @@ run_tests:
     - export PYTHONPATH=/builds/icet/icet-dev/build/src/:$PYTHONPATH
     - echo $PWD 
     - echo $PYTHONPATH
-    - coverage3 run tests/__init__.py
+    - python3-coverage run tests/__init__.py
     - mv .coverage public/
   artifacts:
     paths:
