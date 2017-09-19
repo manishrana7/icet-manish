@@ -60,7 +60,7 @@ run_tests:
     - python3-coverage html -d py_coverage
     - cp -r py_coverage $PWD/code_analysis/
     - cp .pylint_score $PWD/code_analysis/
-  coverage: '/^TOTAL.*\s+(\d+\%)$/'
+  coverage: '/\d+\%\s*$/'
   artifacts:
     name: py_coverage
     expire_in: 30 days 

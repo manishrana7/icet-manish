@@ -1,5 +1,5 @@
 [![pipeline status](https://gitlab.com/icet/icet-dev/badges/master/pipeline.svg)](https://gitlab.com/icet/icet-dev/commits/master)
-[![coverage report](https://gitlab.com/icet/icet-dev/badges/master/coverage.svg)](https://icet.gitlab.io/icet-dev/py_coverage)
+[![coverage report](https://gitlab.com/icet/icet-dev/badges/master/coverage.svg?job=run_tests)](https://icet.gitlab.io/icet-dev/py_coverage)
 
 
 icet2 &mdash; The tea party for runaways
