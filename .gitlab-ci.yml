@@ -49,17 +49,7 @@ run_tests:
   dependencies:
     - build_linux
   script:
-    - mkdir $PWD/code_analysis
-    - export PYTHONPATH=/builds/icet/icet-dev:$PYTHONPATH
-    - export PYTHONPATH=/builds/icet/icet-dev/build/src/:$PYTHONPATH
-    - echo $PWD 
-    - echo $PYTHONPATH
-    - ls -l
-    - bash .run_code_analysis.sh
-    - python3-coverage run tests/__init__.py
-    - python3-coverage html -d py_coverage
-    - cp -r py_coverage $PWD/code_analysis/
-    - cp .pylint_score $PWD/code_analysis/
+    - python3 tests/__init__.py
   coverage: '/\d+\%\s*$/'
   artifacts:
     name: py_coverage
@@ -67,16 +57,34 @@ run_tests:
     paths:      
       - code_analysis/
 
+
+coverage:
+  stage:test
+  tags:
+    - linux
+  dependencies:
+    - build_linux
+  script:   
+    - export PYTHONPATH=/builds/icet/icet-dev:$PYTHONPATH
+    - export PYTHONPATH=/builds/icet/icet-dev/build/src/:$PYTHONPATH
+    - python3-coverage run tests/__init__.py
+    - python3-coverage html -d coverage    
+  coverage: '/\d+\%\s*$/'
+  artifacts:
+    name: coverage
+    expire_in: 30 days 
+    paths:      
+      - coverage/
+
+
 pages:
   stage: deploy
-  dependencies:
-    - run_tests
+  dependencies:    
+    - coverage
   script:
     - mv public/ .public/ || true
-    - mkdir public/ || true    
-    - mkdir public/pylint
-    - mv code_analysis/py_coverage/ public/ || true
-    - mv code_analysis/.pylint_score public/pylint/ || true
+    - mkdir public/ || true        
+    - mv coverage/ public/ || true    
   artifacts:
     paths:
       - public
