@@ -1,5 +1,7 @@
 [![pipeline status](https://gitlab.com/icet/icet-dev/badges/master/pipeline.svg)](https://gitlab.com/icet/icet-dev/commits/master)
 [![coverage report](https://gitlab.com/icet/icet-dev/badges/master/coverage.svg)](https://icet.gitlab.io/icet-dev/coverage)
+[![coverage report](https://gitlab.com/icet/icet-dev/badges/master/coverage.svg?job=coverage)](https://icet.gitlab.io/icet-dev/coverage)
+[![Overall test coverage](https://gitlab.com//icet/icet-dev/badges/master/coverage.svg)](https://gitlab.com/icet/icet-dev/pipelines)
 [![coverage report](https://gitlab.com/icet/icet-dev/badges/master/coverage.svg)](https://gitlab.com/icet/icet-dev/commits/master)
 
 
