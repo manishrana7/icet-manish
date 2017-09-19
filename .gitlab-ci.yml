@@ -59,7 +59,7 @@ run_tests:
 
 
 coverage:
-  stage:test
+  stage: test
   tags:
     - linux
   dependencies:
