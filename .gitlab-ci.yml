@@ -67,7 +67,7 @@ run_tests:
 pages:
   stage: deploy
   dependencies:
-    - build_linux
+    - run_tests
   script:
     - mv code_analysis/ public/
   artifacts:
