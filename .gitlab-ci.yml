@@ -56,20 +56,30 @@ run_tests:
     - echo $PYTHONPATH
     - ls -l
     - bash .run_code_analysis.sh
-    - python3-coverage run tests/__init__.py    
-    - cp .coverage $PWD/code_analysis/
+    - python3-coverage run tests/__init__.py
+    - python3-coverage report > py_cov_report
+    - cp py_cov_report $PWD/code_analysis/
     - cp .pylint_score $PWD/code_analysis/
+  coverage: '/^TOTAL.*\s+(\d+\%)$/'
   artifacts:
-    paths:
-      - code_analysis/
+    name: py_coverage
     expire_in: 30 days 
+    paths:      
+      - code_analysis/
+    
+
 
 pages:
   stage: deploy
   dependencies:
     - run_tests
   script:
-    - mv code_analysis/ public/
+    - mv public/ .public/ || true
+    - mkdir public/ || true
+    - mkdir public/coverage_python
+    - mkdir public/pylint
+    - mv code_analysis/py_cov_report public/coverage_python/ || true
+    - mv code_analysis/.pylint_score public/pylint/ || true
   artifacts:
     paths:
       - public
