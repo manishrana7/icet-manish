@@ -49,7 +49,7 @@ run_tests:
   dependencies:
     - build_linux
   script:
-    - mkdir $PWD/public
+    - mkdir $PWD/code_analysis
     - export PYTHONPATH=/builds/icet/icet-dev:$PYTHONPATH
     - export PYTHONPATH=/builds/icet/icet-dev/build/src/:$PYTHONPATH
     - echo $PWD 
@@ -57,11 +57,23 @@ run_tests:
     - ls -l
     - bash .run_code_analysis.sh
     - python3-coverage run tests/__init__.py    
-    - cp .coverage $PWD/public/
-    - cp .pylint_score $PWD/public/
+    - cp .coverage $PWD/code_analysis/
+    - cp .pylint_score $PWD/code_analysis/
+  artifacts:
+    paths:
+      - code_analysis/
+    expire_in: 30 days 
+
+pages:
+  stage: deploy
+  dependencies:
+    - build_linux
+  script:
+    - mv code_analysis/ public/
   artifacts:
     paths:
       - public
-    expire_in: 30 days 
-
+    expire_in: 30 days
+  only:
+    - master
 
