@@ -84,7 +84,8 @@ pages:
   script:
     - mv public/ .public/ || true
     - mkdir public/ || true        
-    - mv coverage/ public/ || true    
+    - mkdir public/coverage || true
+    - mv coverage/index.html public/coverage/ || true    
   artifacts:
     paths:
       - public
