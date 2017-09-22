@@ -50,12 +50,12 @@ void ClusterCounts::count(const Structure &structure,
 Will count the vectors in latticeNeighbors and assuming these sets of sites are represented by the cluster 'cluster'
 */
 void ClusterCounts::count(const Structure &structure, const std::vector<std::vector<LatticeNeighbor>> &latticeNeighbors,
-           const Cluster &cluster)
+                          const Cluster &cluster)
 {
 
-    for(const auto &latnbrs : latticeNeighbors )
+    for (const auto &latnbrs : latticeNeighbors)
     {
-        std::vector<int> elements(latnbrs.size());        
+        std::vector<int> elements(latnbrs.size());
         for (size_t i = 0; i < latnbrs.size(); i++)
         {
             elements[i] = structure.getElement(latnbrs[i].index);
@@ -69,5 +69,27 @@ void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> 
 {
     std::vector<int> sortedElements = elements;
     std::sort(sortedElements.begin(), sortedElements.end());
-    _clusterCounts[cluster][sortedElements] +=1;
+    _clusterCounts[cluster][sortedElements] += 1;
+}
+
+/**
+    Counts the clusters of the sites in each orbit of orbitlist
+
+    Parameters
+    ----------
+    structure:
+        icet structure object to be counted on
+
+    orbitlist:
+        icet orbitlist class
+*/
+void ClusterCounts::countOrbitlist(const Structure &structure, const OrbitList &orbitlist)
+{
+    for (int i = 0; i < orbitlist.size(); i++)
+    {
+        Cluster repr_cluster = orbitlist.getOrbit(i).getRepresentativeCluster();
+        repr_cluster.setClusterTag(i);
+
+        count(structure, orbitlist.getOrbit(i).getEquivalentSites(), repr_cluster);
+    }
 }
