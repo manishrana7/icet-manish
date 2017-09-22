@@ -1219,6 +1219,12 @@ class Cluster
     {
         return _clusterTag;
     }
+    ///Sets the clustertag and marks this cluster as non-sorted
+    void setClusterTag(const int clusterTag) 
+    {
+        _sortedCluster = false;
+        _clusterTag = clusterTag;
+    }
     ///Return the number of bodies (size of sites) of the cluster
     unsigned int getNumberOfBodies() const
     {
@@ -1253,7 +1259,7 @@ struct hash<Cluster>
         size_t seed = 0;
 
         //if unsorted just use the clusterTag as seed
-        if(!k.isSorted())
+        if (!k.isSorted())
         {
             hash_combine(seed, k.getClusterTag());
             return seed;
