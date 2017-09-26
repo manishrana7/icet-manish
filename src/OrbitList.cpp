@@ -56,10 +56,11 @@ void OrbitList::addClusterToOrbitlist(const Cluster &cluster, const std::vector<
         //add to back ( assuming addOrbit does not sort orbitlist )
         _orbitList.back().addEquivalentSites(sites);
         clusterIndexMap[cluster] = _orbitList.size() - 1;
+        _orbitList.back().sortOrbit();
     }
     else
     {
-        _orbitList[orbitNumber].addEquivalentSites(sites);
+        _orbitList[orbitNumber].addEquivalentSites(sites, true);
     }
 }
 
@@ -252,7 +253,8 @@ void OrbitList::addOrbitsFromPM(const Structure &structure, const std::vector<st
     for (const auto &equivalent_sites : lattice_neighbors)
     {
         addOrbitFromPM(structure, equivalent_sites);
-    }
+    }    
+    
 }
 
 ///add these equivalent sites as an orbit to orbitlist
@@ -267,6 +269,7 @@ void OrbitList::addOrbitFromPM(const Structure &structure, const std::vector<std
     {
         _orbitList.back().addEquivalentSites(sites);
     }
+    _orbitList.back().sortOrbit();
 }
 /**
     From all columns in permutation matrix add all the vector<LatticeNeighbors> from pm_rows

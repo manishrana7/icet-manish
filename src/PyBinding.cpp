@@ -64,8 +64,8 @@ PYBIND11_PLUGIN(_icetdev)
         .def("build", &ManybodyNeighborlist::build);
 
     py::class_<Cluster>(m, "Cluster")
-        .def(py::init<std::vector<int> &, std::vector<double> &, const bool, const int>(), pybind11::arg("sites"),
-             pybind11::arg("distances"), pybind11::arg("sortedCluster") = true, pybind11::arg("clusterTag") = 0)
+        // .def(py::init<std::vector<int> &, std::vector<double> &, const bool, const int>(), pybind11::arg("sites"),
+        //      pybind11::arg("distances"), pybind11::arg("sortedCluster") = true, pybind11::arg("clusterTag") = 0)
         .def(py::init<const Structure &, const std::vector<LatticeNeighbor> &, const bool, const int>(), pybind11::arg("structure"),
              pybind11::arg("latticeNeighbors"), pybind11::arg("sortedCluster") = true, pybind11::arg("clusterTag") = 0)
         .def("count", &Cluster::count)
@@ -128,8 +128,8 @@ PYBIND11_PLUGIN(_icetdev)
 
     py::class_<Orbit>(m, "Orbit")
         .def(py::init<const Cluster &>())
-        .def("add_equivalent_sites", (void (Orbit::*)(const std::vector<LatticeNeighbor> &)) & Orbit::addEquivalentSites)
-        .def("add_equivalent_sites", (void (Orbit::*)(const std::vector<std::vector<LatticeNeighbor>> &)) & Orbit::addEquivalentSites)
+        .def("add_equivalent_sites", (void (Orbit::*)(const std::vector<LatticeNeighbor> &, bool)) & Orbit::addEquivalentSites, py::arg("lattice_neighbors"), py::arg("sort")=false)
+        .def("add_equivalent_sites", (void (Orbit::*)(const std::vector<std::vector<LatticeNeighbor>> &, bool)) & Orbit::addEquivalentSites, py::arg("lattice_neighbors"), py::arg("sort")=false)
         .def("get_representative_cluster", &Orbit::getRepresentativeCluster)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
         .def("size", &Orbit::size)

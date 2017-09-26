@@ -9,8 +9,10 @@ Cluster::Cluster(const Structure &structure, const std::vector<LatticeNeighbor> 
     std::vector<int> sites(clusterSize);
     std::vector<double> distances;
     distances.reserve((clusterSize * (clusterSize - 1) / 2));
+    Vector3d avg_position = {0.0, 0.0, 0.0};
     for (size_t i = 0; i < latticeNeighbors.size(); i++)
     {
+        avg_position += structure.getPosition(latticeNeighbors[i]);
         sites[i] = structure.getSite(latticeNeighbors[i].index);
         for (size_t j = i + 1; j < latticeNeighbors.size(); j++)
         {
@@ -22,17 +24,20 @@ Cluster::Cluster(const Structure &structure, const std::vector<LatticeNeighbor> 
             distances.push_back(distance);
         }
     }
+    //from avg_position (center position ) get average distance to center
+    double meanDistanceToCenter = 0.0;
+    for(const auto &latNbr :latticeNeighbors)
+    {
+        meanDistanceToCenter += (structure.getPosition(latNbr) - avg_position).norm();
+    }
 
-    // std::cout<<latticeNeighbors.size() << " "<<sites.size()<<" "<< distances.size()<<std::endl;
-    // for(auto latnbr : latticeNeighbors)
-    // {
-    //     latnbr.print();
-    // }
-    // std::cout<<"===="<<std::endl;
+    meanDistanceToCenter /= (double) latticeNeighbors.size();
+
     _sites = sites;
     _distances = distances;
     _sortedCluster = sortedCluster;
     _clusterTag = clusterTag;
+    _geometricalSize = meanDistanceToCenter;
     if (_sortedCluster)
     {
         sortCluster();

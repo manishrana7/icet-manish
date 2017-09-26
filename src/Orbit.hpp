@@ -21,17 +21,25 @@ Can be compared to other orbits
 class Orbit
 {
   public:
-    Orbit(const Cluster &, const double geometricSize);
+    Orbit(const Cluster &);
 
     ///Add a group sites that are equivalent to the ones in this orbit
-    void addEquivalentSites(const std::vector<LatticeNeighbor> &latNbrs)
+    void addEquivalentSites(const std::vector<LatticeNeighbor> &latNbrs, bool sort = false)
     {
         _equivalentSites.push_back(latNbrs);
+        if (sort)
+        {
+            sortOrbit();
+        }
     }
     ///add many lattice neigbhors
-    void addEquivalentSites(const std::vector<std::vector<LatticeNeighbor>> &LatticeNeighbors)
+    void addEquivalentSites(const std::vector<std::vector<LatticeNeighbor>> &LatticeNeighbors, bool sort = false)
     {
         _equivalentSites.insert(_equivalentSites.end(), LatticeNeighbors.begin(), LatticeNeighbors.end());
+        if (sort)
+        {
+            sortOrbit();
+        }
     }
 
     ///Returns amount of equivalent sites in this orbit
@@ -39,10 +47,10 @@ class Orbit
     {
         return _equivalentSites.size();
     }
-    ///Returns the geometric size of the orbit defines as the mean distance to the center of the 
-    double geometricSize() const
+    ///Returns the geometric size of the orbit defines as the mean distance to the center of the
+    double getGeometricalSize() const
     {
-        
+        _representativeCluster.getGeometricalSize();
     }
     ///Return the sorted, reprasentative cluster for this orbit
     Cluster getRepresentativeCluster() const
@@ -68,6 +76,11 @@ class Orbit
     {
         _equivalentSites = equivalentSites;
     }
+
+    void sortOrbit()
+    {
+        std::sort(_equivalentSites.begin(), _equivalentSites.end());
+    }
     ///Return the number of bodies of the cluster that represent this orbit
     unsigned int getClusterSize() const
     {
@@ -76,17 +89,15 @@ class Orbit
     ///Compare operator for automatic sorting in containers
     friend bool operator<(const Orbit &orbit1, const Orbit &orbit2)
     {
-        if (orbit1.getRepresentativeCluster() < orbit2.getRepresentativeCluster())
+
+        // return ( orbit1.getRepresentativeCluster() < orbit2.getRepresentativeCluster());
+        ///not equal size: compare by geometrical size
+        if (fabs(orbit1.getGeometricalSize() - orbit2.getGeometricalSize()) > 1e-3) // @TODO: remove 1e-4 and add tunable parameter
         {
-            return true;
+            return orbit1.getGeometricalSize() < orbit2.getGeometricalSize();
         }
-        //note the order is changed here "o2 < o1"
-        if (orbit2.getRepresentativeCluster() < orbit1.getRepresentativeCluster())
-        {
-            return false;
-        }
-        //representative cluster is equal
-        //Try comparing length of equivalent sites
+
+        // check size of vector of equivalent sites
         if (orbit1.size() < orbit2.size())
         {
             return true;
@@ -95,55 +106,13 @@ class Orbit
         {
             return false;
         }
-        //Both representative cluster and size of equivalent sites are equal.
-        //throw error to see if this ever happens
-
-        bool debug = true;
-
-        if (debug)
-        {
-            std::cout << "Clusters:" << std::endl;
-            orbit1.getRepresentativeCluster().print();
-            orbit2.getRepresentativeCluster().print();
-            std::cout << "Length of eq sites: (orbit1.size(), orbit2.size()) " << orbit1.size() << " , " << orbit2.size() << std::endl;
-
-            int maxCols = 7;
-            std::cout << "First " << maxCols << " equivalent sites in bort orbits" << std::endl;
-
-            int count = 0;
-            for (auto sites : orbit1.getEquivalentSites())
-            {
-                std::cout << "site " << count << std::endl;
-                for (auto site : sites)
-                {
-                    site.print();
-                }
-
-                if (count++ == maxCols)
-                {
-                    break;
-                }
-            }
-            count = 0;
-            std::cout << std::endl;
-            for (auto sites : orbit2.getEquivalentSites())
-            {
-                std::cout << "site " << count << std::endl;
-                for (auto site : sites)
-                {
-                    site.print();
-                }
-
-                if (count++ == maxCols)
-                {
-                    break;
-                }
-            }
-        }
-
-        throw std::runtime_error("Both representative cluster and size of equivalent sites are equal in orbit < comparison");
+        //Now size of  equivalent sites vector are the same, then check the individual equivalent sites
+        return orbit1.getEquivalentSites() < orbit2.getEquivalentSites();
     }
-
+    /** 
+    Returns the number of exactly equal sites in equivalent sites vector
+    This is used among other things to debug orbits when duplicates is not expected
+    */
     int getNumberOfDuplicates(int verbosity = 0) const;
 
     friend Orbit operator+(const Orbit &orbit, const Eigen::Vector3d &offset)
@@ -160,7 +129,7 @@ class Orbit
     }
 
   private:
-    ///Reprasentative sorted cluster for this orbit
+    ///Representative sorted cluster for this orbit
     Cluster _representativeCluster;
 
     ///Container of equivalent sites for this orbit

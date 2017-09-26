@@ -253,22 +253,22 @@ class Cluster
         //empty constructor
     }
 
-    Cluster(std::vector<int> &sites, std::vector<double> &distances, const bool sortedCluster = true, const int clusterTag = 0)
-    {
-        _symprec = 1e-5;
-        _sites = sites;
-        _distances = distances;
-        _sortedCluster = sortedCluster;
-        _clusterTag = clusterTag;
-        if (_sortedCluster)
-        {
-            sortCluster();
-        }
+    // Cluster(std::vector<int> &sites, std::vector<double> &distances, const bool sortedCluster = true, const int clusterTag = 0)
+    // {
+    //     _symprec = 1e-5;
+    //     _sites = sites;
+    //     _distances = distances;
+    //     _sortedCluster = sortedCluster;
+    //     _clusterTag = clusterTag;
+    //     if (_sortedCluster)
+    //     {
+    //         sortCluster();
+    //     }
 
-        //Run this if you doubt the sorting. It will bruteforce all
-        //possible ways to see if there is another way to rearrange the cluster into a more "lower form"
-        //validateSorting();
-    }
+    //     //Run this if you doubt the sorting. It will bruteforce all
+    //     //possible ways to see if there is another way to rearrange the cluster into a more "lower form"
+    //     //validateSorting();
+    // }
 
     ///Create cluster from a structure and latticeNeigbhors
     Cluster(const Structure &structure,
@@ -1205,7 +1205,9 @@ class Cluster
         {
             std::cout << s << " ";
         }
+        std::cout<< _geometricalSize<< " ";
         std::cout << std::endl;
+
     }
 
     ///Return true if this is a sorted cluster
@@ -1231,10 +1233,16 @@ class Cluster
         return _sites.size();
     }
 
+    double getGeometricalSize() const
+    {
+        return _geometricalSize;
+    }
+
   private:
     std::vector<int> _sites;
     std::vector<double> _distances;
     std::map<std::vector<int>, int> _element_counts;
+    double _geometricalSize;
     bool _sortedCluster;
     int _clusterTag;
     double _symprec;
