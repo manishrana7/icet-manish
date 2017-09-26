@@ -56,7 +56,7 @@ def test_no_symmetry_local_orbitlist_counting(prim_atoms, cutoffs, repeatInteger
 
     local_cluster_map = clusterCount_local.get_cluster_counts()
 
-    supercell_cluster_map = clusterCount_local.get_cluster_counts()
+    supercell_cluster_map = clusterCount_supercell.get_cluster_counts()
 
     assert len(local_cluster_map) == len(
         supercell_cluster_map), "lengths of cluster counts in test_no_symmetry_local_orbitlist_counting is not same"
