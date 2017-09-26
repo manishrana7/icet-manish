@@ -6,6 +6,7 @@
 #include "LatticeNeighbor.hpp"
 #include "ClusterCounts.hpp"
 #include "LocalOrbitlistGenerator.hpp"
+#include "ClusterSpace.hpp"
 #include <pybind11/pybind11.h>
 #include "Orbit.hpp"
 #include "OrbitList.hpp"
@@ -158,5 +159,12 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_unique_offsets_count", &LocalOrbitlistGenerator::getUniqueOffsetsCount)
         .def("get_prim_to_supercell_map", &LocalOrbitlistGenerator::getPrimToSupercellMap)
         .def("get_unique_primcell_offsets", &LocalOrbitlistGenerator::getUniquePrimcellOffsets);
+
+        py::class_<ClusterSpace>(m, "ClusterSpace")
+        .def(py::init<int, const OrbitList &>())
+        .def("get_clustervector",&ClusterSpace::generateClustervector)
+        ;
+
+
     return m.ptr();
 }

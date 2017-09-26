@@ -20,7 +20,7 @@ std::vector<double> ClusterSpace::generateClustervector(const Structure &structu
     ClusterCounts clusterCounts = ClusterCounts();
     for (int i = 0; i < uniqueOffsets; i++)
     {
-        auto local_orbitlist = localOrbitListGenerator.generateLocalOrbitlist(i);
+        const auto local_orbitlist = localOrbitListGenerator.generateLocalOrbitlist(i);
         clusterCounts.countOrbitlist(structure, local_orbitlist);
     }
 
@@ -40,7 +40,7 @@ std::vector<double> ClusterSpace::generateClustervector(const Structure &structu
             clusterVectorElement += getClusterProduct(_Mi, elementsCountPair.first) * elementsCountPair.second;
             multiplicity += elementsCountPair.second;
         }
-        clusterVectorElement /= (multiplicity * uniqueOffsets);
+        clusterVectorElement /= ((double)multiplicity);
         clusterVector.push_back(clusterVectorElement);
     }
     return clusterVector;
@@ -51,18 +51,18 @@ This is the default clusterfunction
 */
 double ClusterSpace::defaultClusterFunction(const int Mi, const int element) const
 {
-    if (Mi == 2)
-    {
-        return (element % 2) * 2 - 1;
-    }
+    // std::cout<<Mi<< " "<< element<< " = "<<(element % 2) * 2 - 1<<std::endl;
+
+    return (element % 2) * 2 - 1;
 }
 
 ///Return the full cluster product of entire cluster (elements vector). Assuming all sites have same Mi
 double ClusterSpace::getClusterProduct(const int Mi, const std::vector<int> &elements) const
 {
-    double clusterProduct = 0;
+    double clusterProduct = 1;
     for (const auto &element : elements)
     {
+        // std::cout<<clusterProduct<< " "<< defaultClusterFunction(Mi, element)<< std::endl;
         clusterProduct *= defaultClusterFunction(Mi, element);
     }
     return clusterProduct;
