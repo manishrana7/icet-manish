@@ -21,7 +21,7 @@ Can be compared to other orbits
 class Orbit
 {
   public:
-    Orbit(const Cluster &);
+    Orbit(const Cluster &, const double geometricSize);
 
     ///Add a group sites that are equivalent to the ones in this orbit
     void addEquivalentSites(const std::vector<LatticeNeighbor> &latNbrs)
@@ -39,7 +39,11 @@ class Orbit
     {
         return _equivalentSites.size();
     }
-
+    ///Returns the geometric size of the orbit defines as the mean distance to the center of the 
+    double geometricSize() const
+    {
+        
+    }
     ///Return the sorted, reprasentative cluster for this orbit
     Cluster getRepresentativeCluster() const
     {

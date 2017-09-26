@@ -187,7 +187,7 @@ std::vector<std::vector<LatticeNeighbor>> OrbitList::getSitesTranslatedToUnitcel
     Vector3d zeroVector = {0.0, 0.0, 0.0};
     for (int i = 0; i < latticeNeighbors.size(); i++)
     {
-        if ((latticeNeighbors[i].unitcellOffset - zeroVector).norm() > 0.1)
+        if ((latticeNeighbors[i].unitcellOffset - zeroVector).norm() > 0.1) //only translate those outside unitcell
         {
             auto translatedSites = translateSites(latticeNeighbors, i);
             std::sort(translatedSites.begin(), translatedSites.end());
@@ -195,6 +195,9 @@ std::vector<std::vector<LatticeNeighbor>> OrbitList::getSitesTranslatedToUnitcel
             translatedLatticeNeighbors.push_back(translatedSites);
         }
     }
+    
+    //sort this so that the lowest vec<latNbr> will be chosen and therefore the sorting of orbits should be consistent.
+    std::sort(translatedLatticeNeighbors.begin(), translatedLatticeNeighbors.end());
 
     return translatedLatticeNeighbors;
 }
