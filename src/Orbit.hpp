@@ -90,7 +90,13 @@ class Orbit
     friend bool operator<(const Orbit &orbit1, const Orbit &orbit2)
     {
 
-        // return ( orbit1.getRepresentativeCluster() < orbit2.getRepresentativeCluster());
+
+
+        /// First test against number of bodies in cluster
+        if( orbit1.getRepresentativeCluster().getNumberOfBodies() != orbit2.getRepresentativeCluster().getNumberOfBodies() )
+        {
+            return orbit1.getRepresentativeCluster().getNumberOfBodies() < orbit2.getRepresentativeCluster().getNumberOfBodies();
+        }
         ///not equal size: compare by geometrical size
         if (fabs(orbit1.getGeometricalSize() - orbit2.getGeometricalSize()) > 1e-3) // @TODO: remove 1e-4 and add tunable parameter
         {
