@@ -1,11 +1,8 @@
-from icetdev import orbitList
 from icetdev.structure import structure_from_atoms, Structure
 from icetdev.manybodyNeighborlist import *
-from ase import Atoms
 from ase.build import bulk
 from icetdev.neighborlist import get_neighborlists
 from icetdev.orbitList import create_orbit_list
-from ase.spacegroup import crystal
 import time
 from icetdev.clusterCounts import *
 from icetdev import ClusterSpace
@@ -25,19 +22,15 @@ latnbr = LatticeNeighbor(0, [0., 0., 0.])
 
 
 atoms = bulk("Al", "bcc", a=1)
-# atoms = crystal("Al", spacegroup=223)
+
 from ase.io import read
 # atoms = read(
 #    "../clathrate-cluster-expansions/cluster-expansions/reference-clathrate-structure.json")
 from ase.visualize import view
-# view(atoms)
-# exit(1)
+
 cutoffs = [5,4,2.5,2.3] 
 
-# cs = ClusterSpace(atoms=atoms, cutoffs=cutoffs)
-# print(cs)
-# len(cs)
-structure, mbnl, neighborlists = setup_test_orbitlist(atoms, cutoffs)
+structure = structure_from_atoms(atoms)
 
 
 
@@ -49,7 +42,7 @@ structure, mbnl, neighborlists = setup_test_orbitlist(atoms, cutoffs)
 
 orbitlist = create_orbit_list(structure, cutoffs, verbosity=4)
 
-# orbitlist.sort()
+orbitlist.sort()
 
 for i in range(len(cutoffs) + 2):
     print("number of {0}body clusters = {1}".format(

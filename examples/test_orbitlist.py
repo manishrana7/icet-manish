@@ -176,3 +176,11 @@ for key in localClusterMap_no_symmetry.keys():
     print(localClusterMap_no_symmetry[key])
     print("-----------")
 
+clusters = []
+for i,key in enumerate(allClusterMap.keys()):
+    print(key.get_clustertag(), key.get_distances())
+    
+for i in range(orbitlist.size()):
+    repr_cluster = orbitlist.get_orbit(i).get_representative_cluster()
+    print(repr_cluster.get_clustertag(), repr_cluster.get_distances())
+
