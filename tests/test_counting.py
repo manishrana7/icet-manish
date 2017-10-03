@@ -11,17 +11,6 @@ from icetdev.clusterCounts import *
 import random
 
 
-def setup_test_orbitlist(atoms, cutoffs):
-    """
-    A helper for getting structure, mbnl and neighborlists used for setting up a orbitlist without symmetry
-    """
-    structure = structure_from_atoms(atoms)
-    mbnl = ManybodyNeighborlist()
-    neighborlists = get_neighborlists(atoms=atoms, cutoffs=cutoffs)
-    mbnl.build(neighborlists, 0, True)
-    return structure, mbnl, neighborlists
-
-
 def test_no_symmetry_local_orbitlist_counting(prim_atoms, cutoffs, repeatInteger):
     """
     Creates a primitive orbitlist and create an orbitlist on supercell and
@@ -33,29 +22,46 @@ def test_no_symmetry_local_orbitlist_counting(prim_atoms, cutoffs, repeatInteger
         if random.random() < 0.5:
             atom.symbol = "H"
 
-    # atoms_repeat = atoms.repeat(repeatInteger)
-
+    """ Set up neighborlists """
+    neighborlists_prim = get_neighborlists(atoms=atoms, cutoffs=cutoffs)
+    structure = structure_from_atoms(atoms)
     structure_repeat = structure_from_atoms(atoms_repeat)
-    structure, mbnl, neighborlists = setup_test_orbitlist(atoms, cutoffs)
+    neighborlists_supercell = get_neighborlists(
+        atoms=atoms_repeat, cutoffs=cutoffs)
 
-    prim_orbitlist = orbitList.OrbitList(neighborlists, structure)
+    ##########################################################################
+    #                                                                        #
+    #   set up orbitlists. Important to sort so clusters get same hash       #
+    #                                                                        #
+    ##########################################################################
+
+    """ Orbitlist primitive """
+    prim_orbitlist = orbitList.OrbitList(neighborlists_prim, structure)
+    prim_orbitlist.sort()
+
+    """ orbitlist supercell"""
+    supercell_orbitlist = orbitList.OrbitList(
+        neighborlists_supercell, structure_repeat)
+    supercell_orbitlist.sort()
+
+    ################################################################
+    #                                                              #
+    #             set up clustercounts and count clusters          #
+    #                                                              #
+    ################################################################
+
     clusterCount_local = ClusterCounts()
 
     clusterCount_local.count_each_local_orbitlist(
         structure_repeat, prim_orbitlist)
 
-    """ Repeat for supercell"""
-    structure_repeat, mbnl, neighborlists = setup_test_orbitlist(
-        atoms_repeat, cutoffs)
-
-    supercell_orbitlist = orbitList.OrbitList(neighborlists, structure_repeat)
     clusterCount_supercell = ClusterCounts()
 
     clusterCount_supercell.count_orbitlist(
         structure_repeat, supercell_orbitlist)
 
+    # Get the clustercount map
     local_cluster_map = clusterCount_local.get_cluster_counts()
-
     supercell_cluster_map = clusterCount_supercell.get_cluster_counts()
 
     assert len(local_cluster_map) == len(
@@ -65,9 +71,6 @@ def test_no_symmetry_local_orbitlist_counting(prim_atoms, cutoffs, repeatInteger
 
     for key in local_cluster_map.keys():
         assert local_cluster_map[key] == supercell_cluster_map[key]
-        # print(local_cluster_map[key])
-        # print(supercell_cluster_map[key])
-        # print(" ")
 
 
 def get_total_count(cluster_count_dict, cluster):
@@ -92,20 +95,42 @@ def test_no_symmetry_vs_symmetry_count(prim_atoms, cutoffs, repeatInteger):
             atom.symbol = "H"
 
     structure_repeat = structure_from_atoms(atoms_repeat)
+    structure = structure_from_atoms(atoms)
 
-    # no symmetry counting
-    structure, mbnl, neighborlists = setup_test_orbitlist(atoms, cutoffs)
+    ####################################
+    #                                  #
+    #      no symmetry counting        #
+    #                                  #
+    ####################################
+
+    # get neighborlist
+    neighborlists = get_neighborlists(atoms=atoms, cutoffs=cutoffs)
+
+    # get orbitlist
     orbitlist_no_symmetry = orbitList.OrbitList(neighborlists, structure)
+    # setup cluster count and count:
     clusterCount_no_symmetry = ClusterCounts()
     clusterCount_no_symmetry.count_each_local_orbitlist(
         structure_repeat, orbitlist_no_symmetry)
+
+    # get the clustercount map
     clusterCountMap_no_symmetry = clusterCount_no_symmetry.get_cluster_counts()
 
-    # counting with symmetry
+    ##################################
+    #                                #
+    #     counting with symmetry     #
+    #                                #
+    ##################################
+
+    # get orbitlist
     orbitlist_symmetry = create_orbit_list(structure, cutoffs, verbosity=0)
+
+    # setup clustercount and count
     clustercounts_symmetry = ClusterCounts()
     clustercounts_symmetry.count_each_local_orbitlist(
         structure_repeat, orbitlist_symmetry)
+
+    # get the clustercount map
     clusterCountMap_symmetry = clustercounts_symmetry.get_cluster_counts()
 
     assert orbitlist_symmetry.size() == orbitlist_no_symmetry.size(
