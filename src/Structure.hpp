@@ -253,8 +253,8 @@ class Structure
 
         return latNbrVector;
     }
-
-
+    
+    /// Return number of allowed components on site i
     int getMi(const unsigned int i) const
     {
         if (i >= _allowedComponents.size())
@@ -272,7 +272,7 @@ class Structure
     void setAllowedComponents(const std::vector<int> &allowedComponents)
     {
         _allowedComponents = allowedComponents;
-    }
+    }   
 
   private:
     Eigen::Matrix<double, Dynamic, 3, RowMajor> _positions;

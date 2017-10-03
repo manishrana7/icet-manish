@@ -140,4 +140,7 @@ class Orbit
 
     ///Container of equivalent sites for this orbit
     std::vector<std::vector<LatticeNeighbor>> _equivalentSites;
+
+    ///Contains allowed permutations i.e.
+    std::vector<std::vector<int>> _allowPermutations;
 };
