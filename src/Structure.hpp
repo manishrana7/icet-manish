@@ -254,6 +254,26 @@ class Structure
         return latNbrVector;
     }
 
+
+    int getMi(const unsigned int i) const
+    {
+        if (i >= _allowedComponents.size())
+        {
+            std::string errorMessage = "Error: out of range in function getMi : index :  _allowedComponents.size() ";
+            errorMessage += std::to_string(i) + " : ";
+            errorMessage += std::to_string(_allowedComponents.size());
+
+            throw std::out_of_range(errorMessage);
+        }
+        return _allowedComponents[i];
+    }
+    
+    ///Set allowed components on each site
+    void setAllowedComponents(const std::vector<int> &allowedComponents)
+    {
+        _allowedComponents = allowedComponents;
+    }
+
   private:
     Eigen::Matrix<double, Dynamic, 3, RowMajor> _positions;
     Eigen::Matrix3d _cell;
@@ -261,6 +281,7 @@ class Structure
     std::vector<std::string> _strelements;
     std::vector<bool> _pbc;
     std::vector<int> _uniqueSites;
+    std::vector<int> _allowedComponents;
     
     std::vector<int> convertStrElements(const std::vector<std::string> &elements)
     {

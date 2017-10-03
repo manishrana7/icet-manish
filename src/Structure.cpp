@@ -19,6 +19,7 @@ Structure::Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &pos,
     _cell = cell;
     _pbc = pbc;
     _uniqueSites.resize(elements.size());
+    _allowedComponents.resize(pos.rows());
 }
 
 /**
