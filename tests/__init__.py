@@ -65,8 +65,11 @@ def run_test(verbosity=2, files=None):
     ttr = unittest.TextTestRunner(verbosity=verbosity)
     results = ttr.run(testSuite)
 
+
     return results
 
 
 if __name__ == '__main__':
-    run_test()
+    results = run_test()
+    assert len(results.failures) == 0, "ERROR: all tests did not succeed: "
+    assert len(results.errors) == 0, "ERROR: all tests did not succeed "

@@ -49,6 +49,8 @@ run_tests:
   dependencies:
     - build_linux
   script:
+    - export PYTHONPATH=/builds/icet/icet-dev:$PYTHONPATH
+    - export PYTHONPATH=/builds/icet/icet-dev/build/src/:$PYTHONPATH
     - python3 tests/__init__.py
   coverage: '/\d+\%\s*$/'
   artifacts:
