@@ -12,6 +12,7 @@
 #include "LatticeNeighbor.hpp"
 #include "hash_functions.hpp"
 #include "Vector3dCompare.hpp"
+#include "Symmetry.hpp"
 /**
 Class OrbitList
 
@@ -101,7 +102,6 @@ class OrbitList
     Prints information about the orbitlist
     */
 
-
     void print(int verbosity = 0) const
     {
         int orbitCount = 0;
@@ -150,8 +150,8 @@ class OrbitList
     }
     /// += a orbitlist to another, first assert that they have the same number of orbits or that this is empty and then add equivalent sites of orbit i of rhs to orbit i to ->this
     OrbitList &operator+=(const OrbitList &rhs_ol)
-    {   
-        if(size() == 0)
+    {
+        if (size() == 0)
         {
             _orbitList = rhs_ol.getOrbitList();
             return *this;
@@ -159,13 +159,14 @@ class OrbitList
 
         if (size() != rhs_ol.size())
         {
-            std::string errorMsg = "Error: lhs.size() and rhs.size() are not equal in  OrbitList& operator+= " + std::to_string(size()) + " != " +std::to_string(rhs_ol.size());
+            std::string errorMsg = "Error: lhs.size() and rhs.size() are not equal in  OrbitList& operator+= " + std::to_string(size()) + " != " + std::to_string(rhs_ol.size());
             throw std::runtime_error(errorMsg);
         }
-        
+
         for (size_t i = 0; i < rhs_ol.size(); i++)
         {
-            _orbitList[i].addEquivalentSites(rhs_ol.getOrbit(i).getEquivalentSites());
+            //_orbitList[i] += .addEquivalentSites(rhs_ol.getOrbit(i).getEquivalentSites());
+            _orbitList[i] += rhs_ol.getOrbit(i); // .addEquivalentSites(.getEquivalentSites());
         }
         return *this;
     }

@@ -21,6 +21,7 @@ SET(SourceFiles
   OrbitList.cpp
   LocalOrbitlistGenerator.cpp
   ClusterSpace.cpp
+  Symmetry.cpp
 
 )
 # Find Eigen3
