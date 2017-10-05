@@ -8,6 +8,7 @@
 #include "LocalOrbitlistGenerator.hpp"
 #include "ClusterSpace.hpp"
 #include <pybind11/pybind11.h>
+#include "Symmetry.hpp"
 #include "Orbit.hpp"
 #include "OrbitList.hpp"
 #include <iostream>
