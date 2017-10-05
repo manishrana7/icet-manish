@@ -173,6 +173,13 @@ class OrbitList
 
     OrbitList getSupercellOrbitlist(const Structure &superCell) const;
 
+    ///Adds the permutation information to the orbits
+    void addPermutationInformationToOrbits(const std::vector<LatticeNeighbor> &, const std::vector<std::vector<LatticeNeighbor>> &);
+    
+    ///Returns all columns from the given rows in permutation matrix    
+    std::vector<std::vector<LatticeNeighbor>> getAllColumnsFromRow(const std::vector<int> &, const std::vector<std::vector<LatticeNeighbor>> &, bool ) const;
+    
+
   private:
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;
     Structure _primitiveStructure;

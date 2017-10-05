@@ -57,6 +57,30 @@ getPermutatedVector(
     return v2;
 }
 
+///Return the permutation of v using the permutation in indices
+template <typename T>
+std::vector<std::vector<T>>
+getAllPermutations(
+    std::vector<T> v)
+{   
+    std::vector<std::vector<T>> allPermutations;
+    std::sort(v.begin(), v.end());
+
+    do
+    {
+        allPermutations.push_back(v);
+    
+    }while(std::next_permutation(v.begin(), v.end() ));
+
+    return allPermutations;
+}
+
+
+
 /// Return the transformed position `position` using the input translation and rotation
 Eigen::Vector3d transformPosition2(const Eigen::Vector3d &position, const Eigen::Vector3d &translation, const Eigen::Matrix3d &rotation);
+
+
+
+
 }
