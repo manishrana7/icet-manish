@@ -165,7 +165,6 @@ class OrbitList
 
         for (size_t i = 0; i < rhs_ol.size(); i++)
         {
-            //_orbitList[i] += .addEquivalentSites(rhs_ol.getOrbit(i).getEquivalentSites());
             _orbitList[i] += rhs_ol.getOrbit(i); // .addEquivalentSites(.getEquivalentSites());
         }
         return *this;

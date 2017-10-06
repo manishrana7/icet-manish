@@ -187,39 +187,53 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
     2. Find the rows these sites belong to (also find the unit cell offsets equivalent sites??)
     3. Get all columns for these rows, i.e the sites that are equivalent call these p_equal
     4. Construct all possible permutations for the representative sites, call these p_all
-    5. Construct the intersect of p_equal and p_all, call this p_allowed_permutations, 
-       get the indice version of p_allowed_permutations and these are then the allowed permutations for this orbit.
-    6. ...       
+    5. Construct the intersect of p_equal and p_all, call this p_allowed_permutations.
+    6. Get the indice version of p_allowed_permutations and these are then the allowed permutations for this orbit.
+    7. ...       
 */
 void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeighbor> &col1, const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix)
 {
     for (size_t i = 0; i < size(); i++)
     {
-        // step one 
+        // step one
         std::vector<LatticeNeighbor> representativeSites = getOrbit(i).getRepresentativeSites();
 
         // step two
         bool sortRows = false;
-        std::vector<int> rowsFromCol1 = findRowsFromCol1(col1,representativeSites, sortRows);
+        std::vector<int> rowsFromCol1 = findRowsFromCol1(col1, representativeSites, sortRows);
 
         // step three
-        std::vector<std::vector<LatticeNeighbor>> p_equal = getAllColumnsFromRow( rowsFromCol1, permutation_matrix, true);
-        std::sort(p_equal.begin(),p_equal.end());
+        std::vector<std::vector<LatticeNeighbor>> p_equal = getAllColumnsFromRow(rowsFromCol1, permutation_matrix, true);
+        std::sort(p_equal.begin(), p_equal.end());
 
         // Step four
         std::vector<std::vector<LatticeNeighbor>> p_all = icet::getAllPermutations<LatticeNeighbor>(representativeSites);
-        std::sort(p_all.begin(),p_all.end());
+        std::sort(p_all.begin(), p_all.end());
 
         // Step five
         std::vector<std::vector<LatticeNeighbor>> p_allowed_permutations;
         std::set_intersection(p_equal.begin(), p_equal.end(),
-        p_all.begin(), p_all.end(),
+                              p_all.begin(), p_all.end(),
                               std::back_inserter(p_allowed_permutations));
 
-        //Profit?                              
-        //std::cout<<representativeSites.size()<< " "<<p_all.size()<< " "<< p_equal.size()<< " " << p_allowed_permutations.size()<<std::endl;
+        // Step six. Use set to only get the  unique permutations
+        std::unordered_set<std::vector<int>, VectorHash> allowedPermutations;
+        for (const auto &p_lattNbr : p_allowed_permutations)
+        {
+            std::vector<int> allowedPermutation = icet::getPermutation<LatticeNeighbor>(representativeSites, p_lattNbr);
+            allowedPermutations.insert(allowedPermutation);
+        }
 
-
+        for (auto perm : allowedPermutations)
+        {
+            for (auto i : perm)
+            {
+                std::cout << i << " ";
+            }
+            std::cout << " | ";
+        }
+        std::cout << std::endl;
+    //    std::cout<<representativeSites.size()<< " "<<p_all.size()<< " "<< p_equal.size()<< " " << p_allowed_permutations.size()<<std::endl;
     }
 }
 
@@ -246,15 +260,14 @@ std::vector<std::vector<LatticeNeighbor>> OrbitList::getAllColumnsFromRow(const 
             indistinctLatNbrs.push_back(permutation_matrix[row][column]);
         }
 
-
-        if( includeTranslatedSites)
+        if (includeTranslatedSites)
         {
             auto translatedEquivalentSites = getSitesTranslatedToUnitcell(indistinctLatNbrs);
             allColumns.insert(allColumns.end(), translatedEquivalentSites.begin(), translatedEquivalentSites.end());
         }
         else
         {
-            allColumns.push_back( indistinctLatNbrs);
+            allColumns.push_back(indistinctLatNbrs);
         }
     }
     return allColumns;
@@ -516,10 +529,10 @@ std::vector<int> OrbitList::findRowsFromCol1(const std::vector<LatticeNeighbor> 
             rows.push_back(row_in_col1);
         }
     }
-    // if (sortIt)
-    // {
-    std::sort(rows.begin(), rows.end());
-    // }
+    if (sortIt)
+    {
+        std::sort(rows.begin(), rows.end());
+    }
     return rows;
 }
 
