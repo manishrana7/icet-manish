@@ -128,13 +128,19 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
             {
                 std::vector<LatticeNeighbor> lat_nbrs = mbnl_pair.first;
                 lat_nbrs.push_back(latnbr);
-
+                auto lat_nbrs_copy = lat_nbrs;
+                std::sort(lat_nbrs_copy.begin(), lat_nbrs_copy.end());
+                if (lat_nbrs_copy != lat_nbrs)
+                {
+                    throw std::runtime_error("Original sites is not sorted");
+                }
                 std::vector<std::vector<LatticeNeighbor>> translatedSites = getSitesTranslatedToUnitcell(lat_nbrs);
                 int missedSites = 0;
 
                 auto sites_index_pair = getMatchesInPM(translatedSites, col1);
-                auto find = taken_rows.find(sites_index_pair[0].second);
-                if (find == taken_rows.end())
+                // auto find = taken_rows.find(sites_index_pair[0].second);
+                // if (find == taken_rows.end())
+                if (isRowsTaken(taken_rows, sites_index_pair[0].second))
                 {
                     //new stuff found
                     addPermutationMatrixColumns(lattice_neighbors, taken_rows, sites_index_pair[0].first, sites_index_pair[0].second, permutation_matrix, col1, true);
@@ -189,40 +195,88 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
     4. Construct all possible permutations for the representative sites, call these p_all
     5. Construct the intersect of p_equal and p_all, call this p_allowed_permutations.
     6. Get the indice version of p_allowed_permutations and these are then the allowed permutations for this orbit.
-    7. ...       
+    7. take the sites in the orbit:
+        site exist in p_all?:
+            those sites are then related to representative_sites through the permutation
+        else:
+           loop over permutations of the sites:
+              does the permutation exist in p_all?:
+                 that permutation is then related to rep_sites through that permutation
+              else:
+                 continue
+                  
+        
+            
 */
 void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeighbor> &col1, const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix)
 {
     for (size_t i = 0; i < size(); i++)
     {
-        // step one
+        // step one: Take representative sites
         std::vector<LatticeNeighbor> representativeSites = getOrbit(i).getRepresentativeSites();
 
-        // step two
+        // step two: Find the rows these sites belong to
         bool sortRows = false;
         std::vector<int> rowsFromCol1 = findRowsFromCol1(col1, representativeSites, sortRows);
 
-        // step three
+        // step three: Get all columns for these rows
         std::vector<std::vector<LatticeNeighbor>> p_equal = getAllColumnsFromRow(rowsFromCol1, permutation_matrix, true);
         std::sort(p_equal.begin(), p_equal.end());
 
-        // Step four
+        // Step four: Construct all possible permutations for the representative sites
         std::vector<std::vector<LatticeNeighbor>> p_all = icet::getAllPermutations<LatticeNeighbor>(representativeSites);
         std::sort(p_all.begin(), p_all.end());
 
-        // Step five
+        // Step five:  Construct the intersect of p_equal and p_all
         std::vector<std::vector<LatticeNeighbor>> p_allowed_permutations;
         std::set_intersection(p_equal.begin(), p_equal.end(),
                               p_all.begin(), p_all.end(),
                               std::back_inserter(p_allowed_permutations));
 
-        // Step six. Use set to only get the  unique permutations
+        // Step six: Get the indice version of p_allowed_permutations
         std::unordered_set<std::vector<int>, VectorHash> allowedPermutations;
         for (const auto &p_lattNbr : p_allowed_permutations)
         {
             std::vector<int> allowedPermutation = icet::getPermutation<LatticeNeighbor>(representativeSites, p_lattNbr);
             allowedPermutations.insert(allowedPermutation);
         }
+
+
+        // Step 7
+        const auto orbitSites = getOrbit(i).getEquivalentSites();
+        std::unordered_set<std::vector<LatticeNeighbor>> p_equal_set;
+        p_equal_set.insert(p_equal.begin(), p_equal.end());
+
+        std::vector<std::vector<int>> sitePermutations;
+        sitePermutations.reserve(orbitSites.size());
+
+        for(const auto &eqOrbitSites : orbitSites)
+        {
+            if(p_equal_set.find(eqOrbitSites) == p_equal_set.end())
+            {
+                const auto allPermutationsOfSites = icet::getAllPermutations<LatticeNeighbor>(eqOrbitSites);
+                for(const auto &onePerm : allPermutationsOfSites )
+                {   
+                    const auto findOnePerm =  p_equal_set.find(onePerm);
+                    if( findOnePerm !=p_equal_set.end()) // one perm is one of the equivalent sites. This means that eqOrbitSites is associated to p_equal 
+                    {
+                        std::vector<int> permutationToEquivalentSites = icet::getPermutation<LatticeNeighbor>(onePerm,eqOrbitSites);
+                        sitePermutations.push_back(permutationToEquivalentSites);
+                        break;
+                    }
+
+                }
+            }
+            else
+            {
+                std::vector<int> permutationToEquivalentSites = icet::getPermutation<LatticeNeighbor>(eqOrbitSites, eqOrbitSites); //the identical permutation
+                sitePermutations.push_back(permutationToEquivalentSites);
+            }
+        }
+
+        getOrbit(i).setEquivalentSitesPermutations(sitePermutations);
+        getOrbit(i).setAllowedSitesPermutations(allowedPermutations);
+        ///debug prints
 
         for (auto perm : allowedPermutations)
         {
@@ -233,7 +287,25 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeigh
             std::cout << " | ";
         }
         std::cout << std::endl;
-    //    std::cout<<representativeSites.size()<< " "<<p_all.size()<< " "<< p_equal.size()<< " " << p_allowed_permutations.size()<<std::endl;
+        //    std::cout<<representativeSites.size()<< " "<<p_all.size()<< " "<< p_equal.size()<< " " << p_allowed_permutations.size()<<std::endl;
+    }
+}
+
+///First construct rows_sort = sorted(rows)  then returns true/false if rows_sort exists in taken_rows
+bool OrbitList::isRowsTaken(const std::unordered_set<std::vector<int>, VectorHash> &taken_rows, std::vector<int> rows) const
+{
+    //sort
+    std::sort(rows.begin(), rows.end());
+
+    //find
+    const auto find = taken_rows.find(rows);
+    if (find == taken_rows.end())
+    {
+        return false;
+    }
+    else
+    {
+        return false;
     }
 }
 

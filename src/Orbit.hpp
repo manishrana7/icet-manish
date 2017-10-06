@@ -6,6 +6,7 @@
 #include <string>
 #include "LatticeNeighbor.hpp"
 #include "Cluster.hpp"
+#include "hash_functions.hpp"
 using namespace Eigen;
 
 /**
@@ -122,6 +123,19 @@ class Orbit
         return _equivalentSitesPermutations;
     }
 
+   /// Assigns the equivalent sites permutations
+   void setEquivalentSitesPermutations(std::vector<std::vector<int>> &permutations) 
+   {
+        _equivalentSitesPermutations = permutations;
+   }
+   
+   /// Assigns the allowed sites permutations
+   void setAllowedSitesPermutations(std::unordered_set<std::vector<int>, VectorHash> &permutations )
+   {
+        _allowedSitesPermutations = permutations;    
+   }
+
+
     ///Return the representative sites of this orbit (if any equivalentSites permutations exists it is to these sites they refer to)
     std::vector<LatticeNeighbor> getRepresentativeSites() const
     {
@@ -228,4 +242,9 @@ class Orbit
 
     ///Contains the permutations of the equivalent sites which takes it to the order of the reference cluster
     std::vector<std::vector<int>> _equivalentSitesPermutations;
+
+    /// Contains the allowed sites permutations. i.e. if 0,2,1 is in this set then 0,1,0 is the same MC vector as 0,0,1
+    std::unordered_set<std::vector<int>, VectorHash> _allowedSitesPermutations;
+    
+
 };

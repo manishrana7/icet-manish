@@ -178,6 +178,9 @@ class OrbitList
     ///Returns all columns from the given rows in permutation matrix    
     std::vector<std::vector<LatticeNeighbor>> getAllColumnsFromRow(const std::vector<int> &, const std::vector<std::vector<LatticeNeighbor>> &, bool ) const;
     
+    ///First construct rows_sort = sorted(rows)  then returns true/false if rows_sort exists in taken_rows
+    bool isRowsTaken(const std::unordered_set<std::vector<int>, VectorHash> &taken_rows, std::vector<int> rows) const;
+    
 
   private:
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;
