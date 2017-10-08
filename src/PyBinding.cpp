@@ -135,6 +135,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
         .def("size", &Orbit::size)
         .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
+        .def("get_MC_vectors",&Orbit::getMCVectors)
         .def(py::self < py::self)
         .def(py::self + Eigen::Vector3d());
 

@@ -7,6 +7,7 @@
 #include "LatticeNeighbor.hpp"
 #include "Cluster.hpp"
 #include "hash_functions.hpp"
+#include "Symmetry.hpp"
 using namespace Eigen;
 
 /**
@@ -232,6 +233,11 @@ class Orbit
         
         return *this;
     }
+    ///Mi_local are the same size as representative sites and details the allowed occupations on the representative sites
+    std::vector<std::vector<int>> getMCVectors(std::vector<int> &Mi_local) const;
+
+    std::vector<std::vector<int>> getAllPossibleMCVectorPermutations(const std::vector<int> &Mi_local) const;
+    
 
   private:
     ///Representative sorted cluster for this orbit

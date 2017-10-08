@@ -47,3 +47,38 @@ int Orbit::getNumberOfDuplicates(int verbosity) const
     }
     return numberOfEquals;
 }
+
+/**
+  Returns the inequivalent MC vectors for this orbit
+  
+ */
+std::vector<std::vector<int>> Orbit::getMCVectors(std::vector<int> &Mi_local) const
+{
+    auto allMCVectors = getAllPossibleMCVectorPermutations(Mi_local);
+
+    return allMCVectors;
+
+}
+
+///Similar to get all permutations but needs to be filtered through the number of allowed elements
+std::vector<std::vector<int>> Orbit::getAllPossibleMCVectorPermutations(const std::vector<int> &Mi_local) const
+{
+
+    std::vector<std::vector<int>> cartesianFactors(Mi_local.size());
+    for (int i = 0; i < Mi_local.size(); i++)
+    {
+        for (int j = 0; j < Mi_local[i]; j++)
+        {
+            cartesianFactors[i].push_back(j);
+        }
+    }
+
+    std::vector<std::vector<int>> allPossibleMCPermutations;
+    std::vector<int> firstVector(Mi_local.size(), 0);
+
+    do
+    {
+        allPossibleMCPermutations.push_back(firstVector);
+    }while( icet::next_cartesian_product(cartesianFactors,firstVector) );
+return allPossibleMCPermutations;
+}
