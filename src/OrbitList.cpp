@@ -138,8 +138,6 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
                 int missedSites = 0;
 
                 auto sites_index_pair = getMatchesInPM(translatedSites, col1);
-                // auto find = taken_rows.find(sites_index_pair[0].second);
-                // if (find == taken_rows.end())
                 if (!isRowsTaken(taken_rows, sites_index_pair[0].second))
                 {
                     //new stuff found

@@ -44,7 +44,7 @@ getPermutatedVector(
     const std::vector<int> &indices)
 {
 
-    if (v() != indices.size())
+    if (v.size() != indices.size())
     {
         throw std::runtime_error("Error: vectors are not of the same size in function getPermutatedVector in Symmetry.hpp");
     }
