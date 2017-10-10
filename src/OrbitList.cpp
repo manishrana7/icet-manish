@@ -140,7 +140,7 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
                 auto sites_index_pair = getMatchesInPM(translatedSites, col1);
                 // auto find = taken_rows.find(sites_index_pair[0].second);
                 // if (find == taken_rows.end())
-                if (isRowsTaken(taken_rows, sites_index_pair[0].second))
+                if (!isRowsTaken(taken_rows, sites_index_pair[0].second))
                 {
                     //new stuff found
                     addPermutationMatrixColumns(lattice_neighbors, taken_rows, sites_index_pair[0].first, sites_index_pair[0].second, permutation_matrix, col1, true);
@@ -291,7 +291,7 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeigh
     }
 }
 
-///First construct rows_sort = sorted(rows)  then returns true/false if rows_sort exists in taken_rows
+///First construct  then returns true if rows_sort exists in taken_rows
 bool OrbitList::isRowsTaken(const std::unordered_set<std::vector<int>, VectorHash> &taken_rows, std::vector<int> rows) const
 {
     //sort
@@ -305,7 +305,7 @@ bool OrbitList::isRowsTaken(const std::unordered_set<std::vector<int>, VectorHas
     }
     else
     {
-        return false;
+        return true;
     }
 }
 
