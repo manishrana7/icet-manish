@@ -295,7 +295,7 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeigh
 bool OrbitList::isRowsTaken(const std::unordered_set<std::vector<int>, VectorHash> &taken_rows, std::vector<int> rows) const
 {
     //sort
-    std::sort(rows.begin(), rows.end());
+    //std::sort(rows.begin(), rows.end());
 
     //find
     const auto find = taken_rows.find(rows);
