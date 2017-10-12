@@ -66,6 +66,19 @@ class Orbit
         return _equivalentSites;
     }
 
+    ///Returns equivalent sites
+    std::vector<std::vector<LatticeNeighbor>> getPermutatedEquivalentSites() const
+    {   
+        std::vector<std::vector<LatticeNeighbor>> permutatedSites(_equivalentSites.size());
+        for(size_t i =0; i < _equivalentSites.size(); i++)
+        {
+            permutatedSites[i] = getSitesWithPermutation(i);
+        }
+        return permutatedSites;
+    }
+
+                                      
+
     ///Return the equivalent sites at position `index`
     std::vector<LatticeNeighbor> GetSitesOfIndex(unsigned int index) const
     {
@@ -81,11 +94,12 @@ class Orbit
     {
         if (index >= _equivalentSites.size())
         {
-            throw std::out_of_range("Index out of range in function Orbit::GetSitesOfIndex");
+            throw std::out_of_range("Index out of range for _equivalentSites in function Orbit::getSitesWithPermutation");
         }
         if (index >= _equivalentSitesPermutations.size())
         {
-            throw std::out_of_range("Index out of range in function Orbit::GetSitesOfIndex");
+            std::string errMSG = "Index out of range for _equivalentSitesPermutations in function Orbit::getSitesWithPermutation index: " + std::to_string(index) + " >= "  + std::to_string( _equivalentSitesPermutations.size());
+            throw std::out_of_range(errMSG);
         }
         
         return icet::getPermutatedVector<LatticeNeighbor>( _equivalentSites[index],_equivalentSitesPermutations[index]);

@@ -6,7 +6,7 @@ from icetdev.cluster import Cluster
 from icetdev.localOrbitlistGenerator import LocalOrbitlistGenerator
 
 
-def __count_each_local_orbitlist(self, structure, prim_orbitlist):
+def __count_each_local_orbitlist(self, structure, prim_orbitlist, keepOrderIntact=False):
     """
     Span the structure and count all clusters by finding each local orbitlist.
 
@@ -19,6 +19,8 @@ def __count_each_local_orbitlist(self, structure, prim_orbitlist):
         icet structure object (supercell of the structure prim_orbitlist was based on)
     prim_orbitlist:        
         icet orbitlist object (based on a primitive of the input structure)
+    keepOrderIntact: bool
+        count the clusters in the orbit with the same orientation as the prototype cluster    
     """
 
     localOrbitListGenerator = LocalOrbitlistGenerator(
@@ -28,7 +30,7 @@ def __count_each_local_orbitlist(self, structure, prim_orbitlist):
         # sending local ol directly into function was about 10% faster
         # local_orbitlist = localOrbitListGenerator.generate_local_orbitlist(i)
         self.count_orbitlist(
-            structure, localOrbitListGenerator.generate_local_orbitlist(i))
+            structure, localOrbitListGenerator.generate_local_orbitlist(i), keepOrderIntact)
 
 
 ClusterCounts.count_each_local_orbitlist = __count_each_local_orbitlist

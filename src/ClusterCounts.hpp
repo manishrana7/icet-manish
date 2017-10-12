@@ -32,7 +32,7 @@ public:
   void count(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &,
              const Cluster &);
   void countCluster(const Cluster &, const std::vector<int> &);
-  void countOrbitlist(const Structure &, const OrbitList &);
+  void countOrbitlist(const Structure &, const OrbitList &, bool orderIntact);
   std::unordered_map<Cluster, std::map<std::vector<int>, int>> getClusterCounts() const
   {
     return _clusterCounts;

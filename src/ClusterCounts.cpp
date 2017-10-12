@@ -83,13 +83,21 @@ void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> 
     orbitlist:
         icet orbitlist class
 */
-void ClusterCounts::countOrbitlist(const Structure &structure, const OrbitList &orbitlist)
-{
+void ClusterCounts::countOrbitlist(const Structure &structure, const OrbitList &orbitlist, bool orderIntact)
+{   
+
     for (int i = 0; i < orbitlist.size(); i++)
     {
         Cluster repr_cluster = orbitlist.getOrbit(i).getRepresentativeCluster();
         repr_cluster.setClusterTag(i);
-
-        count(structure, orbitlist.getOrbit(i).getEquivalentSites(), repr_cluster);
+        if(orderIntact)
+        {
+            count(structure, orbitlist.getOrbit(i).getPermutatedEquivalentSites(), repr_cluster);
+        }
+        else
+        {
+            count(structure, orbitlist.getOrbit(i).getEquivalentSites(), repr_cluster);
+        }
     }
+
 }
