@@ -144,9 +144,8 @@ def test_no_symmetry_vs_symmetry_count(atoms_primitive, atoms_tag, cutoffs, repe
     """ Set up cluster count and count """
     clusterCount_no_symmetry = ClusterCounts()
     clusterCount_no_symmetry.count_each_local_orbitlist(
-        structure_repeat, orbitlist_no_symmetry) Here we use a cutoff so that no extra clusters are found in the symmetry case
-    and compare the counts found in both methods
-
+        structure_repeat, orbitlist_no_symmetry), "Here we use a cutoff so that no extra clusters are found in the symmetry case" \
+                                        "and compare the counts found in both methods"
 
     """ Get the clustercount map """
     cluster_map_no_symmetry = clusterCount_no_symmetry.get_cluster_counts()
