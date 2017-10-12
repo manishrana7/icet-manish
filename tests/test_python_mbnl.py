@@ -1,61 +1,62 @@
 from tests import manybodyNeighborlistTester
 from ase import Atoms
 from ase.neighborlist import NeighborList
-from ase.build import bulk
+from ase.db import connect
+import spglib as spg
 
+"""
+Testing manybodyneighborlist implemented in python (mblnl.tester) againts ASE neighborlist
 
-mbnl_T = manybodyNeighborlistTester.manybodyNeighborlistTester()
+Parameters:
+    neighbor_cutoff : cutoff radii for neighbor search
+    order(int) : highest order for manybody neighbor indices 
 
-atoms = bulk("Al").repeat(2)
+Raises: 
+    AssertionError: if lists of neighbors obatined from mbnl.tester and ASE are not the same
+"""
 
-neighbor_cutoff = 6.3
+mbnl_tester = manybodyNeighborlistTester.manybodyNeighborlistTester()
 
-# set ut atoms and icet structure
-atoms = bulk('Ti', "bcc", a=3.321).repeat(2)
-atoms.set_pbc((True, True, True))
+neighbor_cutoff = 1.4
 
+db = connect("structures_for_testing.db")
 
-ase_nl = NeighborList(len(atoms) * [neighbor_cutoff / 2.0], skin=1e-8,
-                      bothways=True, self_interaction=False)
-ase_nl.update(atoms)
+for row in db.select('natoms>1'):
 
+    atoms_row = row.toatoms()
 
-index = 1
-order = 3
-bothways = False
+    ase_nl = NeighborList(len(atoms_row) * [neighbor_cutoff / 2.0], skin=1e-8,
+                          bothways=True, self_interaction=False)
+    ase_nl.update(atoms_row)
 
+    order = 3
 
-nbrs = mbnl_T.build(order*[ase_nl], index, bothways=bothways)
+    mbnl_tester = manybodyNeighborlistTester.manybodyNeighborlistTester()
+    count_neighbors = {}
 
+    dataset = spg.get_symmetry_dataset(atoms_row, symprec=1e-5, angle_tolerance=-1.0, hall_number=0)
 
-# test that mbnl_T give same amount of neighobrs for first and last site
-# when bothways = True
-mbnl_T = manybodyNeighborlistTester.manybodyNeighborlistTester()
+    for index, equiv_index in enumerate(dataset['equivalent_atoms']):
+        neighbors = mbnl_tester.build(order * [ase_nl], index, bothways=True)
+        if equiv_index in count_neighbors:
+            #print(index, equiv_index, count_neighbors[equiv_index], len(neighbors))
+            assert count_neighbors[equiv_index] == len(neighbors), "Testing number "\
+                "of neighbors from mbnl_tester with bothways=True failed for {} "\
+                "when counts {}!={}".format(row.tag, len(neighbors), count_neighbors[equiv_index])
+        else:
+            count_neighbors[equiv_index] = len(neighbors)
+            #print(index, equiv_index, count_neighbors[equiv_index])
 
-order = 3
-bothways = True
-index1 = 0
-index2 = len(atoms) - 1
+    mbnl_tester = manybodyNeighborlistTester.manybodyNeighborlistTester()
+    count_neighbors = {}
 
-nbrs1 = mbnl_T.build(order*[ase_nl], index1, bothways)
-nbrs2 = mbnl_T.build(order*[ase_nl], index2,  bothways)
-# print(len(nbrs1), len(nbrs2)) #debug
-assert len(nbrs1) == len(nbrs2), "bothways = True should give same number of"\
-    " neigbhors independent on what index you look at. {} != {}".format(
-        len(nbrs1), len(nbrs2))
-
-
-# test that mbnl_T do not give same amount of neighobrs for first and last site
-# when bothways = False
-mbnl_T = manybodyNeighborlistTester.manybodyNeighborlistTester()
-
-order = 3
-bothways = False
-index1 = 0
-index2 = len(atoms) - 1
-
-nbrs1 = mbnl_T.build(order*[ase_nl], index1, bothways)
-nbrs2 = mbnl_T.build(order*[ase_nl], index2,  bothways)
-# print(len(nbrs1), len(nbrs2)) #debug
-assert len(nbrs1) > len(nbrs2), "bothways = False should not give same number of neighbors independent on what index you look at. {} != {}".format(
-    len(nbrs1), len(nbrs2))
+    for index, equiv_index in enumerate(dataset['equivalent_atoms']):
+        neighbors = mbnl_tester.build(order * [ase_nl], index, bothways=False)
+        if equiv_index in count_neighbors:
+            #print(index, equiv_index, count_neighbors[equiv_index], len(neighbors))
+            assert count_neighbors[equiv_index] >= len(neighbors), "Testing number "\
+                "of neighbors from mbnl_tester with bothways=False failed for {} "\
+                "when counts {}<{}".format(row.tag, len(neighbors), count_neighbors[equiv_index])
+        else:
+            count_neighbors[equiv_index] = len(neighbors)
+            #print(index, equiv_index, count_neighbors[equiv_index])
