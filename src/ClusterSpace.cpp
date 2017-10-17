@@ -26,7 +26,7 @@ std::vector<double> ClusterSpace::generateClustervector(const Structure &structu
         clusterCounts.countOrbitlist(structure, local_orbitlist, orderIntact);
     }
 
-    const std::unordered_map<Cluster, std::map<std::vector<int>, int>> clusterMap = clusterCounts.getClusterCounts();
+    const auto clusterMap = clusterCounts.getClusterCounts();
     std::vector<double> clusterVector;
     clusterVector.push_back(1);
     //Finally begin occupying the clustervector

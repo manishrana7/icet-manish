@@ -173,7 +173,7 @@ class Structure
     argument: const double position_tolerance if the norm of difference of positions is less than this
     then equality is assumed.
     */
-    int findIndexOfPosition(const Vector3d &position, const double position_tolerance = 1e-6) const
+    int findIndexOfPosition(const Vector3d &position, const double position_tolerance = 1e-5) const
     {
         for (size_t i = 0; i < _positions.rows(); i++)
         {
@@ -198,12 +198,13 @@ class Structure
 
     if no index is found a runtime_error gets thrown.
     */
-    LatticeNeighbor findLatticeNeighborFromPosition(const Vector3d &position, const double position_tolerance = 1e-6) const
+    LatticeNeighbor findLatticeNeighborFromPosition(const Vector3d &position, const double position_tolerance = 1e-5) const
     {
 
         ///ldlt require positive or negative semidefinite cell
         // std::cout << "position " << position << std::endl;
         //  std::cout<<"cell "<< _cell<<std::endl;
+        // Vector3d position = {coordinateRound(position1[0]), coordinateRound(position1[1]), coordinateRound(position1[2]) };
         Vector3d fractional = _cell.transpose().partialPivLu().solve(position);
         // std::cout << "fractional " << fractional << std::endl;
         // Vector3d unitcellOffset = {int(round(fractional[0])), int(round(fractional[1])), int(round(fractional[2]))};
@@ -218,6 +219,21 @@ class Structure
         auto index = findIndexOfPosition(remainder, position_tolerance);
         if (index == -1)
         {
+            std::cout<<"Positions"<<std::endl;
+           for(int i =0; i < size(); i++)                
+           {
+               Vector3d pos = _positions.row(i);
+               std::cout<<pos[0]<<" "<<pos[1]<< " "<<pos[2]<<std::endl;
+           }
+           std::cout<<"Positions done"<<std::endl;
+        ///ldlt require positive or negative semidefinite cell
+        std::cout << "position " << position << std::endl;
+        std::cout<<"cell "<< _cell<<std::endl;
+        std::cout << "fractional " << fractional << std::endl;
+        Vector3d unitcellOffset = {int(round(fractional[0])), int(round(fractional[1])), int(round(fractional[2]))};
+        std::cout << "unitcellOffset " << unitcellOffset << std::endl;
+        std::cout << "remainder " << remainder << std::endl;
+
             throw std::runtime_error("Did not find position in function findLatticeNeighborFromPosition in Structure");
         }
 
@@ -241,7 +257,7 @@ class Structure
     Finds a vector of lattice neigbhors from a vector of positions
 
     */
-    std::vector<LatticeNeighbor> findLatticeNeighborsFromPositions(const std::vector<Vector3d> &positions, const double position_tolerance = 1e-6) const
+    std::vector<LatticeNeighbor> findLatticeNeighborsFromPositions(const std::vector<Vector3d> &positions, const double position_tolerance = 1e-5) const
     {
         std::vector<LatticeNeighbor> latNbrVector;
         latNbrVector.reserve(positions.size());
@@ -305,7 +321,7 @@ class Structure
     ///rounds val to precision
     double coordinateRound(const double &val) const
     {
-        double precision = 1e-6;
+        double precision = 1e-7;
         return round(val * 1.0 / precision) / (1.0 / precision);
     }
 };

@@ -13,6 +13,7 @@
 #include "hash_functions.hpp"
 #include "Vector3dCompare.hpp"
 #include "Symmetry.hpp"
+#include "Geometry.hpp"
 /**
 Class OrbitList
 
@@ -131,7 +132,7 @@ class OrbitList
     bool validatedCluster(const std::vector<LatticeNeighbor> &) const;
     void addOrbitsFromPM(const Structure &, const std::vector<std::vector<std::vector<LatticeNeighbor>>> &);
     void addOrbitFromPM(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &);
-    void checkEquivalentClusters(const Structure &) const;
+    void checkEquivalentClusters() const;
 
     std::vector<LatticeNeighbor> translateSites(const std::vector<LatticeNeighbor> &, const unsigned int) const;
     std::vector<std::vector<LatticeNeighbor>> getSitesTranslatedToUnitcell(const std::vector<LatticeNeighbor> &) const;

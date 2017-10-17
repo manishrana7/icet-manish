@@ -15,11 +15,15 @@ def __get_primitive_structure(atoms):
     Returns primitive atoms object.
     """
     lattice, scaled_positions, numbers = spglib.standardize_cell(
-        atoms, to_primitive=True)
+        atoms, to_primitive=True, no_idealize=True)
 
+
+    scaled_positions = [np.round(pos,12) for pos in scaled_positions]
+    
     # create the primitive atoms object
     atoms_prim = Atoms(scaled_positions=scaled_positions,
                        numbers=numbers, cell=lattice, pbc=atoms.pbc)
+    atoms_prim.wrap()                       
     return atoms_prim
 
 
@@ -109,6 +113,8 @@ def permutation_matrix_from_atoms(atoms, cutoff=None, find_prim=True, verbosity=
     atoms_prim = atoms
     if find_prim:
         atoms_prim = __get_primitive_structure(atoms)
+
+
 
     if verbosity >= 3:
         print("size of atoms_prim {}".format(len(atoms_prim)))

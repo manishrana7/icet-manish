@@ -52,7 +52,7 @@ class Orbit
     ///Returns the geometric size of the orbit defines as the mean distance to the center of the
     double getGeometricalSize() const
     {
-        _representativeCluster.getGeometricalSize();
+        return _representativeCluster.getGeometricalSize();
     }
     ///Return the sorted, reprasentative cluster for this orbit
     Cluster getRepresentativeCluster() const
@@ -121,6 +121,31 @@ class Orbit
             return _representativeCluster.getNumberOfBodies();
         }
         ///Compare operator for automatic sorting in containers
+        friend bool operator==(const Orbit &orbit1, const Orbit &orbit2)
+        {
+
+            /// First test against number of bodies in cluster
+            if (orbit1.getRepresentativeCluster().getNumberOfBodies() != orbit2.getRepresentativeCluster().getNumberOfBodies())
+            {
+                return false;
+            }            
+            ///not equal size: compare by geometrical size
+            if (fabs(orbit1.getGeometricalSize() - orbit2.getGeometricalSize()) > 1e-5) // @TODO: remove 1e-4 and add tunable parameter
+            {
+                return false;
+            }
+            
+            // check size of vector of equivalent sites
+            if (orbit1.size() != orbit2.size())
+            {
+                return false;
+            }
+            
+            //Now size of  equivalent sites vector are the same, then check the individual equivalent sites
+            return orbit1.getEquivalentSites() == orbit2.getEquivalentSites();
+        }
+
+        ///Compare operator for automatic sorting in containers
         friend bool operator<(const Orbit &orbit1, const Orbit &orbit2)
         {
 
@@ -130,7 +155,7 @@ class Orbit
                 return orbit1.getRepresentativeCluster().getNumberOfBodies() < orbit2.getRepresentativeCluster().getNumberOfBodies();
             }
             ///not equal size: compare by geometrical size
-            if (fabs(orbit1.getGeometricalSize() - orbit2.getGeometricalSize()) > 1e-3) // @TODO: remove 1e-4 and add tunable parameter
+            if (fabs(orbit1.getGeometricalSize() - orbit2.getGeometricalSize()) > 1e-5) // @TODO: remove 1e-4 and add tunable parameter
             {
                 return orbit1.getGeometricalSize() < orbit2.getGeometricalSize();
             }

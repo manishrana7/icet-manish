@@ -11,6 +11,7 @@
 #include <algorithm>
 #include "Structure.hpp"
 #include "LatticeNeighbor.hpp"
+#include "Geometry.hpp"
 
 #include <boost/functional/hash.hpp>
 using boost::hash;
