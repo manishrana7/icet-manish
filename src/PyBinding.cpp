@@ -134,6 +134,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("add_equivalent_sites", (void (Orbit::*)(const std::vector<std::vector<LatticeNeighbor>> &, bool)) & Orbit::addEquivalentSites, py::arg("lattice_neighbors"), py::arg("sort")=false)
         .def("get_representative_cluster", &Orbit::getRepresentativeCluster)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
+        .def("get_equivalent_sites_permutations", &Orbit::getEquivalentSitesPermutations)        
         .def("get_sites_with_permutation", &Orbit::getSitesWithPermutation)
         .def("size", &Orbit::size)
         .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
@@ -165,8 +166,8 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_prim_to_supercell_map", &LocalOrbitlistGenerator::getPrimToSupercellMap)
         .def("get_unique_primcell_offsets", &LocalOrbitlistGenerator::getUniquePrimcellOffsets);
 
-        py::class_<ClusterSpace>(m, "ClusterSpace")
-        .def(py::init<int, const OrbitList &>())
+        py::class_<ClusterSpace>(m, "ClusterSpace")        
+        .def(py::init<int,std::vector<std::string>, const OrbitList &>())
         .def("get_clustervector",&ClusterSpace::generateClustervector)
         ;
 

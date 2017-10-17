@@ -11,6 +11,7 @@
 #include "OrbitList.hpp"
 #include "LocalOrbitlistGenerator.hpp"
 #include "ClusterCounts.hpp"
+#include "PeriodicTable.hpp"
 using namespace Eigen;
 
 
@@ -24,12 +25,22 @@ It will have the definition of the cluster space a cluster expansion is based on
 class ClusterSpace
 {
 public:
-ClusterSpace(int Mi, const OrbitList primOrbitList)
+ClusterSpace(int Mi, std::vector<std::string> elements, const OrbitList primOrbitList)
 {
     _Mi = Mi;
     _primitive_orbitlist = primOrbitList;
+    initElementMap(elements);
 };
 
+
+void initElementMap(std::vector<std::string> elements)
+{
+    std::sort(elements.begin(), elements.end());
+    for(size_t i=0; i < elements.size(); i++)
+    {
+        _elementRepresentation[ PeriodicTable::strInt[elements[i]] ] = i;
+    }
+}
 
 ///Generate the clustervector on the input structure
 std::vector<double> generateClustervector(const Structure &) const;
@@ -60,8 +71,15 @@ std::map<int,std::vector<int>> _equalOrbitsList;
 //std::map<std::pair<int,int>, double> _defaultClusterFunction; 
 
 ///return the default clusterfunction of the input element when this site can have Mi elements
-double defaultClusterFunction(const int Mi, const int element) const;
+double defaultClusterFunction(const int Mi, const int clusterFunction, const int element) const;
 
 ///Return the full cluster product of entire cluster (elements vector). Assuming all sites have same Mi
-double getClusterProduct(const int Mi, const std::vector<int> &elements) const;
+double getClusterProduct(const std::vector<int> &mcVector, const std::vector<int> &Mi, const std::vector<int> &elements) const;
+
+//////Returns the allowed occupations on the sites
+std::vector<int> getAllowedOccupations(const Structure &structure, const std::vector<LatticeNeighbor> &latticeNeighbors) const;
+
+//Maps real elements  to a 0,1,2, ... representation
+std::map<int,int> _elementRepresentation;
+
 };

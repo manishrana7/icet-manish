@@ -98,6 +98,7 @@ class Orbit
         }
         if (index >= _equivalentSitesPermutations.size())
         {
+            std::cout<<" size of orbit that failed "<<_equivalentSites[0].size()<<std::endl;
             std::string errMSG = "Index out of range for _equivalentSitesPermutations in function Orbit::getSitesWithPermutation index: " + std::to_string(index) + " >= "  + std::to_string( _equivalentSitesPermutations.size());
             throw std::out_of_range(errMSG);
         }
@@ -277,13 +278,14 @@ class Orbit
             //All tests passed, can now add equivalent sites and equivalent sites permutations
 
             //_equivalentSites.insert(_equivalentSites.end(), LatticeNeighbors.begin(), LatticeNeighbors.end());
+
             const auto rhsEquivalentSites = orbit_rhs.getEquivalentSites();
             const auto rhsEquivalentSitesPermutations = orbit_rhs.getEquivalentSitesPermutations();
-
+            std::cout<<"size before "<< _equivalentSites.size()<<std::endl;
             //Insert rhs eq sites and corresponding permutations
             _equivalentSites.insert(_equivalentSites.end(), rhsEquivalentSites.begin(), rhsEquivalentSites.end());
             _equivalentSitesPermutations.insert(_equivalentSitesPermutations.end(), rhsEquivalentSitesPermutations.begin(), rhsEquivalentSitesPermutations.end());
-
+            std::cout<<"size after "<< _equivalentSites.size()<<std::endl;
             return *this;
         }
         ///Mi_local are the same size as representative sites and details the allowed occupations on the representative sites

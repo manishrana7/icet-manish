@@ -290,6 +290,12 @@ class Structure
         _allowedComponents = allowedComponents;
     }   
 
+    void setAllowedComponents(const int allowedComponents)
+    {
+        std::vector<int> allowedComps(_elements.size(),allowedComponents);
+        _allowedComponents = allowedComps;
+    }
+
   private:
     Eigen::Matrix<double, Dynamic, 3, RowMajor> _positions;
     Eigen::Matrix3d _cell;

@@ -29,6 +29,7 @@ from ase.io import read
 from ase.visualize import view
 
 cutoffs = [5,4,2.5,2.3] 
+#cutoffs = [1] 
 
 structure = structure_from_atoms(atoms)
 
@@ -50,7 +51,12 @@ for i in range(len(cutoffs) + 2):
 
 print("size of orbitlist {0}".format(orbitlist.size()))
 
-
+# for i in range(orbitlist.size()):
+#     perm = orbitlist.get_orbit(i).get_sites_with_permutation(0)
+#     print("i: {}, permsize {}".format(i, len(perm)))
+#     for p in perm:
+#         print(perm)
+# exit(1)
 #################################################
 #                                               #
 #             get clustervector                 #
@@ -65,7 +71,7 @@ for atom in atoms_super:
 
 structure_atoms = structure_from_atoms(atoms_super)        
 
-clusterspace = ClusterSpace(2,orbitlist)
+clusterspace = ClusterSpace(2 ,["Al", "He"], orbitlist)
 
 t1=time.time()
 cv1 = clusterspace.get_clustervector(structure_atoms)

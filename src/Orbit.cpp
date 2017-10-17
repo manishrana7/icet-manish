@@ -80,5 +80,6 @@ std::vector<std::vector<int>> Orbit::getAllPossibleMCVectorPermutations(const st
     {
         allPossibleMCPermutations.push_back(firstVector);
     }while( icet::next_cartesian_product(cartesianFactors,firstVector) );
+    
 return allPossibleMCPermutations;
 }
