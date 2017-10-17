@@ -64,7 +64,8 @@ coverage:
     - export PYTHONPATH=/builds/icet/icet-dev:$PYTHONPATH
     - export PYTHONPATH=/builds/icet/icet-dev/build/src/:$PYTHONPATH
     - python3-coverage run tests/__init__.py
-    - python3-coverage html -d coverage    
+    - python3-coverage report -m
+    - python3-coverage html -d coverage     
   coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
   artifacts:
     name: coverage
