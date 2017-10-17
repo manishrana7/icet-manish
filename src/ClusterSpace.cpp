@@ -61,18 +61,20 @@ This is the default clusterfunction
 */
 double ClusterSpace::defaultClusterFunction(const int Mi, const int clusterFunction, const int element) const
 {
-    if (clusterFunction == 0)
-    {
-        return 1.0;
-    }
+    // if (clusterFunction == 0)
+    // {
+    //     return 1.0;
+    // }
 
-    if ((clusterFunction % 2) == 0)
+    if (((clusterFunction+2) % 2) == 0)
     {
-        return -cos(2.0 * M_PI * ceil( (double)clusterFunction / 2.0) * (double) element / Mi);
+        return -cos(2.0 * M_PI * (double) ((int) (clusterFunction + 2) / 2)
+        * (double) element / ((double) Mi));
     }
     else
     {
-        return -sin(2.0 * M_PI * ceil((double)clusterFunction / 2.0) * (double) element / Mi);
+        return -sin(2.0 * M_PI * (double) ((int) (clusterFunction + 2) / 2)
+        * (double) element / ((double) Mi));
     }
 }
 

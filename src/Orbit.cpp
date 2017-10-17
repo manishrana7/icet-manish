@@ -67,7 +67,7 @@ std::vector<std::vector<int>> Orbit::getAllPossibleMCVectorPermutations(const st
     std::vector<std::vector<int>> cartesianFactors(Mi_local.size());
     for (int i = 0; i < Mi_local.size(); i++)
     {
-        for (int j = 0; j < Mi_local[i]; j++)
+        for (int j = 0; j < Mi_local[i]-1; j++) // N.B minus one so a binary only get one cluster function
         {
             cartesianFactors[i].push_back(j);
         }

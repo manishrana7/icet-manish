@@ -28,7 +28,7 @@ from ase.io import read
 #    "../clathrate-cluster-expansions/cluster-expansions/reference-clathrate-structure.json")
 from ase.visualize import view
 
-cutoffs = [5,4,2.5,2.3] 
+cutoffs = [2,1,1] 
 #cutoffs = [1] 
 
 structure = structure_from_atoms(atoms)
