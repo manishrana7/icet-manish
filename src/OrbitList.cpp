@@ -244,7 +244,7 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeigh
             allowedPermutations.insert(allowedPermutation);
         }
 
-        std::cout<<i << "/"<< size()<< " | "<< representativeSites.size()<<std::endl;
+        std::cout<<i << "/"<< size()<< " | "<< representativeSites.size()<<" " << std::endl;
         // Step 7
         const auto orbitSites =  _orbitList[i].getEquivalentSites();
         std::unordered_set<std::vector<LatticeNeighbor>> p_equal_set;
@@ -267,8 +267,13 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeigh
                         sitePermutations.push_back(permutationToEquivalentSites);
                         break;
                     }
-
+                    if(onePerm == allPermutationsOfSites.back())
+                    {
+                    std::string errMSG = "Error: did not find a permutation of the orbit sites to the permutations of the representative sites";
+                    throw std::runtime_error(errMSG);
+                    }
                 }
+                
             }
             else
             {
@@ -279,7 +284,7 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeigh
 
         if(sitePermutations.size() !=   _orbitList[i].getEquivalentSites().size() || sitePermutations.size()==0)
         {
-            std::string errMSG = "Error: each set of site did not get a permutations";
+            std::string errMSG = "Error: each set of site did not get a permutations " + std::to_string(sitePermutations.size()) +" != "+ std::to_string(_orbitList[i].getEquivalentSites().size());
             throw std::runtime_error(errMSG);
         }
 

@@ -105,3 +105,28 @@ def __find_index_from_position(self, position, tolerance=1e-6):
 
 
 Structure.find_index_of_position = __find_index_from_position
+
+
+def __get_len(self):
+    """
+    returns size of structure
+    """
+    return self.size()
+
+
+Structure.__len__ = __get_len
+
+
+def __str_function(self):
+    """
+    Define the str function for structure
+    """
+
+    str = "Cell: \n"
+    str += """ {} \n \n""".format(self.cell)
+    str += """Element and positions: \n"""
+    for pos, element in zip(self.positions, self.elements):
+        str += " {}  {} \n".format(element, pos)
+
+    return str
+Structure.__str__ = __str_function
