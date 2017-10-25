@@ -15,8 +15,7 @@ atoms_1 = bulk('Al','fcc', a=1.0)
 atoms_2 = bulk('Al', 'fcc', a=1.0).repeat(2)
 
 """ FCC (single element, distorted structure, pbc=True) """
-atoms_3 = bulk('Al', 'fcc', a=1.0).repeat(2)
-atoms_3.rattle(stdev=0.001, seed=42)
+atoms_3 = bulk('Al', 'fcc', a=1.0).repeat(2).rattle(stdev=0.01, seed=42)
 
 """ BCC (two elements, cubic structure, pbc=True) """
 atoms_4 = bulk('Ti','bcc', a=1.0).repeat(2)
@@ -25,16 +24,16 @@ for atom in atoms_4:
         atom.symbol='W'
 
 """ rocksalt (two elements, cubic structure) """
-atoms_5 = bulk('NaCl', 'rocksalt', a=1.0)
+atoms_5 = bulk('NaCl', 'rocksalt', a=1.0).repeat(1)
 
 """ HCP (single element, hexagonal structure) """
-atoms_6 = bulk('Ni', 'hcp', a=0.625, c=1.0)
+atoms_6 = bulk('Ni', 'hcp', a=0.625, c=1.0).repeat(1)
 
 """ perovskite (three elements, cubic structure) """
 a=1.0
 b=a/2
 atoms_7 = Atoms('BaZrO3', positions=[(0, 0, 0), (b,b,b), 
-                (b,b,0), (b,0,b), (0,b,b)], cell=[a, a, a], pbc=True)
+                (b,b,0), (b,0,b), (0,b,b)], cell=[a, a, a], pbc=True).repeat(1)
 
 """ surface slab (two elements, pbc=[True, True, False]) """
 atoms_8 = fcc111('Pd', a=1.0, size=(2,2,3))
