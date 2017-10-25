@@ -169,6 +169,7 @@ PYBIND11_PLUGIN(_icetdev)
         py::class_<ClusterSpace>(m, "ClusterSpace")        
         .def(py::init<int,std::vector<std::string>, const OrbitList &>())
         .def("get_clustervector",&ClusterSpace::generateClustervector)
+        .def("get_cluster_product", &ClusterSpace::getClusterProduct)
         ;
 
 

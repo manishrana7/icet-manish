@@ -206,14 +206,23 @@ class Structure
         //  std::cout<<"cell "<< _cell<<std::endl;
         // Vector3d position = {coordinateRound(position1[0]), coordinateRound(position1[1]), coordinateRound(position1[2]) };
         Vector3d fractional = _cell.transpose().partialPivLu().solve(position);
+        
         // std::cout << "fractional " << fractional << std::endl;
         // Vector3d unitcellOffset = {int(round(fractional[0])), int(round(fractional[1])), int(round(fractional[2]))};
         Vector3d unitcellOffset = {int(floor(coordinateRound((double)fractional[0]))),
                                    int(floor(coordinateRound((double)fractional[1]))),
                                    int(floor(coordinateRound((double)fractional[2])))};
         // std::cout << "unitcellOffset " << unitcellOffset << std::endl;
-
+        for(int i=0; i<3; i++)
+        {
+            if (!has_pbc(i))
+            {
+                // fractional[i]=0;
+                unitcellOffset[i]=0;
+            }
+        }
         Vector3d remainder = (fractional - unitcellOffset).transpose() * _cell;
+
         // std::cout << "remainder " << remainder << std::endl;
 
         auto index = findIndexOfPosition(remainder, position_tolerance);

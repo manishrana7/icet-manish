@@ -279,7 +279,7 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeigh
         // std::cout << i << "/" << size() << " | " << representativeSites_i.size() << " " << std::endl;
         // Step 7
         const auto orbitSites = _orbitList[i].getEquivalentSites();
-        std::set<std::vector<LatticeNeighbor>> p_equal_set;
+        std::unordered_set<std::vector<LatticeNeighbor>> p_equal_set;
         p_equal_set.insert(all_translated_p_equal.begin(), all_translated_p_equal.end());
 
         std::vector<std::vector<int>> sitePermutations;

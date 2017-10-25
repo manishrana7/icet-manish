@@ -50,6 +50,9 @@ class ClusterSpace
     ///Generate the clustervector on the input structure
     std::vector<double> generateClustervector(const Structure &) const;
 
+    ///Return the full cluster product of entire cluster (elements vector). Assuming all sites have same Mi
+    double getClusterProduct(const std::vector<int> &mcVector, const std::vector<int> &Mi, const std::vector<int> &elements) const;
+        
   private:
     ///Currently we have constant Mi for development but will later change to dynamic Mi
     int _Mi;
@@ -72,13 +75,10 @@ This will mean that when retrieving the cluster vector the zeroth element will b
 */
     std::map<int, std::vector<int>> _equalOrbitsList;
 
-    //std::map<std::pair<int,int>, double> _defaultClusterFunction;
+    
 
     ///return the default clusterfunction of the input element when this site can have Mi elements
     double defaultClusterFunction(const int Mi, const int clusterFunction, const int element) const;
-
-    ///Return the full cluster product of entire cluster (elements vector). Assuming all sites have same Mi
-    double getClusterProduct(const std::vector<int> &mcVector, const std::vector<int> &Mi, const std::vector<int> &elements) const;
 
     //////Returns the allowed occupations on the sites
     std::vector<int> getAllowedOccupations(const Structure &structure, const std::vector<LatticeNeighbor> &latticeNeighbors) const;

@@ -70,11 +70,18 @@ double ClusterSpace::defaultClusterFunction(const int Mi, const int clusterFunct
     {
         return -cos(2.0 * M_PI * (double) ((int) (clusterFunction + 2) / 2)
         * (double) element / ((double) Mi));
+
+        // return -cos(2.0 * M_PI * (double) ((int) (clusterFunction + 2) / 2)
+        // * (double) element / ((double) Mi));
     }
     else
     {
         return -sin(2.0 * M_PI * (double) ((int) (clusterFunction + 2) / 2)
         * (double) element / ((double) Mi));
+
+
+        // return -sin(2.0 * M_PI * (double) ((int) (clusterFunction + 2) / 2)
+        // * (double) element / ((double) Mi));
     }
 }
 
