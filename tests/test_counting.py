@@ -214,7 +214,7 @@ for row in db.select():
     atoms_row=row.toatoms()
     atoms_tag=row.tag
     N=3
-    cutoffs=[1.4] * 4
+    cutoffs=[1.4] * 3
     if "NaCl" in atoms_tag:
         cutoffs=[1.1] * 4            
     if "Ni-hcp-hexagonal" in atoms_tag:

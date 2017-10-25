@@ -135,7 +135,7 @@ class OrbitList
     void checkEquivalentClusters() const;
 
     std::vector<LatticeNeighbor> translateSites(const std::vector<LatticeNeighbor> &, const unsigned int) const;
-    std::vector<std::vector<LatticeNeighbor>> getSitesTranslatedToUnitcell(const std::vector<LatticeNeighbor> &) const;
+    std::vector<std::vector<LatticeNeighbor>> getSitesTranslatedToUnitcell(const std::vector<LatticeNeighbor> &, bool sortit = true) const;
     std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<int>>> getMatchesInPM(const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<LatticeNeighbor> &) const;
 
     void transformSiteToSupercell(LatticeNeighbor &site, const Structure &superCell, std::unordered_map<LatticeNeighbor, LatticeNeighbor> &primToSuperMap) const;
@@ -177,11 +177,15 @@ class OrbitList
     void addPermutationInformationToOrbits(const std::vector<LatticeNeighbor> &, const std::vector<std::vector<LatticeNeighbor>> &);
     
     ///Returns all columns from the given rows in permutation matrix    
-    std::vector<std::vector<LatticeNeighbor>> getAllColumnsFromRow(const std::vector<int> &, const std::vector<std::vector<LatticeNeighbor>> &, bool ) const;
+    std::vector<std::vector<LatticeNeighbor>> getAllColumnsFromRow(const std::vector<int> &, const std::vector<std::vector<LatticeNeighbor>> &, bool, bool sortIt=true ) const;
     
     ///First construct rows_sort = sorted(rows)  then returns true/false if rows_sort exists in taken_rows
     bool isRowsTaken(const std::unordered_set<std::vector<int>, VectorHash> &taken_rows, std::vector<int> rows) const;
-    
+
+    ///Will find the sites in col1, extract and return all columns along with their unit cell translated indistinguishable sites
+    std::vector<std::vector<LatticeNeighbor>> getAllColumnsFromSites(const std::vector<LatticeNeighbor> &, 
+        const std::vector<LatticeNeighbor> &,
+        const std::vector<std::vector<LatticeNeighbor>> & ) const;
 
   private:
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;

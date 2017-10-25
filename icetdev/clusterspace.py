@@ -29,7 +29,7 @@ def create_clusterspace(subelements, cutoffs, atoms=None, structure=None, verbos
                 "Error: both atoms and structure is None in get_mbnls")
         else:
             structure = structure_from_atoms(atoms)
-
+    
     Mi = len(subelements)
 
     orbitList = create_orbit_list(structure, cutoffs, verbosity=verbosity)

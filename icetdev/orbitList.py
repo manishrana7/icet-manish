@@ -104,7 +104,6 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
         print("Done transforming permutation matrix into lattice neighbbor format. Time {0} s".format(time_taken))
     
     t0 = time.time()
-    print(prim_structure)
     orbitlist = OrbitList(prim_structure, pm_lattice_neighbors, neighborlists)
     t1 = time.time()
     time_taken = t1 - t0

@@ -38,7 +38,7 @@ OrbitList::OrbitList(const std::vector<Neighborlist> &neighborlists, const Struc
     }
     bool debug = true;
 
-    for(auto &orbit : _orbitList)
+    for (auto &orbit : _orbitList)
     {
         orbit.sortOrbit();
     }
@@ -118,7 +118,7 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
     std::set<LatticeNeighbor> col1_uniques(col1.begin(), col1.end());
     if (col1.size() != col1_uniques.size())
     {
-        std::string errMSG = "Found duplicates in column1 of permutation matrix " + std::to_string(col1.size()) + " != "+ std::to_string(col1_uniques.size());
+        std::string errMSG = "Found duplicates in column1 of permutation matrix " + std::to_string(col1.size()) + " != " + std::to_string(col1_uniques.size());
         throw std::runtime_error(errMSG);
     }
 
@@ -179,7 +179,7 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
     bool debug = true;
 
     if (debug)
-    {   
+    {
         checkEquivalentClusters();
         // std::cout << "Done checking equivalent structures" << std::endl;
     }
@@ -194,7 +194,7 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
 
     1. Take representative sites
     2. Find the rows these sites belong to (also find the unit cell offsets equivalent sites??)
-    3. Get all columns for these rows, i.e the sites that are equivalent call these p_equal
+    3. Get all columns for these rows, i.e the sites that are directly equivalent, call these p_equal.
     4. Construct all possible permutations for the representative sites, call these p_all
     5. Construct the intersect of p_equal and p_all, call this p_allowed_permutations.
     6. Get the indice version of p_allowed_permutations and these are then the allowed permutations for this orbit.
@@ -215,65 +215,129 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeigh
 {
     for (size_t i = 0; i < size(); i++)
     {
-        // step one: Take representative sites
-        std::vector<LatticeNeighbor> representativeSites = _orbitList[i].getRepresentativeSites();
 
-        // step two: Find the rows these sites belong to
         bool sortRows = false;
-        std::vector<int> rowsFromCol1 = findRowsFromCol1(col1, representativeSites, sortRows);
+
+        // step one: Take representative sites
+        std::vector<LatticeNeighbor> representativeSites_i = _orbitList[i].getRepresentativeSites();
+        auto translatedRepresentativeSites = getSitesTranslatedToUnitcell(representativeSites_i, sortRows);
+
+        // step two: Find the rows these sites belong to and,
 
         // step three: Get all columns for these rows
-        std::vector<std::vector<LatticeNeighbor>> p_equal = getAllColumnsFromRow(rowsFromCol1, permutation_matrix, true);
-        std::sort(p_equal.begin(), p_equal.end());
+        std::vector<std::vector<LatticeNeighbor>> all_translated_p_equal;
+
+        for (auto translated_rep_sites : translatedRepresentativeSites)
+        {
+            auto p_equal_i = getAllColumnsFromSites(translated_rep_sites, col1, permutation_matrix);
+            all_translated_p_equal.insert(all_translated_p_equal.end(), p_equal_i.begin(), p_equal_i.end());
+        }
+
+        std::sort(all_translated_p_equal.begin(), all_translated_p_equal.end());
 
         // Step four: Construct all possible permutations for the representative sites
-        std::vector<std::vector<LatticeNeighbor>> p_all = icet::getAllPermutations<LatticeNeighbor>(representativeSites);
-        std::sort(p_all.begin(), p_all.end());
+        std::vector<std::vector<LatticeNeighbor>> p_all_with_translated_equivalent;
+        for (auto translated_rep_sites : translatedRepresentativeSites)
+        {
+            std::vector<std::vector<LatticeNeighbor>> p_all_i = icet::getAllPermutations<LatticeNeighbor>(translated_rep_sites);
+            p_all_with_translated_equivalent.insert(p_all_with_translated_equivalent.end(), p_all_i.begin(), p_all_i.end());
+        }
+        std::sort(p_all_with_translated_equivalent.begin(), p_all_with_translated_equivalent.end());
 
         // Step five:  Construct the intersect of p_equal and p_all
         std::vector<std::vector<LatticeNeighbor>> p_allowed_permutations;
-        std::set_intersection(p_equal.begin(), p_equal.end(),
-                              p_all.begin(), p_all.end(),
+        std::set_intersection(all_translated_p_equal.begin(), all_translated_p_equal.end(),
+                              p_all_with_translated_equivalent.begin(), p_all_with_translated_equivalent.end(),
                               std::back_inserter(p_allowed_permutations));
 
         // Step six: Get the indice version of p_allowed_permutations
         std::unordered_set<std::vector<int>, VectorHash> allowedPermutations;
         for (const auto &p_lattNbr : p_allowed_permutations)
         {
-            std::vector<int> allowedPermutation = icet::getPermutation<LatticeNeighbor>(representativeSites, p_lattNbr);
-            allowedPermutations.insert(allowedPermutation);
+            int failedLoops = 0;
+            for (auto translated_rep_sites : translatedRepresentativeSites)
+            {
+                try
+                {
+                    std::vector<int> allowedPermutation = icet::getPermutation<LatticeNeighbor>(translated_rep_sites, p_lattNbr);
+                    allowedPermutations.insert(allowedPermutation);
+                }
+                catch (const std::runtime_error& e)
+                {
+                    {
+                        failedLoops++;
+                        if (failedLoops == translatedRepresentativeSites.size())
+                        {
+                            throw std::runtime_error("Error: did not find any integer permutation from allowed permutation to any translated representative site ");
+                        }
+                        continue;
+                    }
+                }
+            }
         }
 
-        std::cout<<i << "/"<< size()<< " | "<< representativeSites.size()<<" " << std::endl;
+        // std::cout << i << "/" << size() << " | " << representativeSites_i.size() << " " << std::endl;
         // Step 7
-        const auto orbitSites =  _orbitList[i].getEquivalentSites();
-        std::unordered_set<std::vector<LatticeNeighbor>> p_equal_set;
-        p_equal_set.insert(p_equal.begin(), p_equal.end());
+        const auto orbitSites = _orbitList[i].getEquivalentSites();
+        std::set<std::vector<LatticeNeighbor>> p_equal_set;
+        p_equal_set.insert(all_translated_p_equal.begin(), all_translated_p_equal.end());
 
         std::vector<std::vector<int>> sitePermutations;
         sitePermutations.reserve(orbitSites.size());
 
-        for(const auto &eqOrbitSites : orbitSites)
+        for (const auto &eqOrbitSites : orbitSites)
         {
-            if(p_equal_set.find(eqOrbitSites) == p_equal_set.end())
+            if (p_equal_set.find(eqOrbitSites) == p_equal_set.end())
             {
-                const auto allPermutationsOfSites = icet::getAllPermutations<LatticeNeighbor>(eqOrbitSites);
-                for(const auto &onePerm : allPermutationsOfSites )
-                {   
-                    const auto findOnePerm =  p_equal_set.find(onePerm);
-                    if( findOnePerm !=p_equal_set.end()) // one perm is one of the equivalent sites. This means that eqOrbitSites is associated to p_equal 
+                // for (auto latNbr : eqOrbitSites)
+                // {
+                //     latNbr.print();
+                // }
+                // std::cout << "====" << std::endl;
+                //Did not find the orbit.eq_sites in p_equal meaning that this eq site does not have an allowed permutation
+                auto equivalently_translated_eqOrbitsites = getSitesTranslatedToUnitcell(eqOrbitSites, sortRows);
+                std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> translatedPermutationsOfSites;
+                for(const auto eq_trans_eqOrbitsites : equivalently_translated_eqOrbitsites)
+                {
+                    const auto allPermutationsOfSites_i = icet::getAllPermutations<LatticeNeighbor>(eq_trans_eqOrbitsites);
+                    for(const auto perm :allPermutationsOfSites_i)
                     {
-                        std::vector<int> permutationToEquivalentSites = icet::getPermutation<LatticeNeighbor>(onePerm,eqOrbitSites);
+                        translatedPermutationsOfSites.push_back( std::make_pair(perm,eq_trans_eqOrbitsites));
+                    }
+                    // translatedPermutationsOfSites.insert(translatedPermutationsOfSites.end(),allPermutationsOfSites_i.begin(), allPermutationsOfSites_i.end());
+                }
+                for (const auto &onePermPair : translatedPermutationsOfSites)
+                {
+                    // for (auto latNbr : onePermPair.first)
+                    // {
+                    //     std::cout << "\t";
+                    //     latNbr.print();
+                    // }
+                    // std::cout << "----" << std::endl;
+
+                    const auto findOnePerm = p_equal_set.find(onePermPair.first);
+                    if (findOnePerm != p_equal_set.end()) // one perm is one of the equivalent sites. This means that eqOrbitSites is associated to p_equal
+                    {
+                        std::vector<int> permutationToEquivalentSites = icet::getPermutation<LatticeNeighbor>(onePermPair.first, onePermPair.second);
                         sitePermutations.push_back(permutationToEquivalentSites);
                         break;
                     }
-                    if(onePerm == allPermutationsOfSites.back())
+                    if (onePermPair == translatedPermutationsOfSites.back())
                     {
-                    std::string errMSG = "Error: did not find a permutation of the orbit sites to the permutations of the representative sites";
-                    throw std::runtime_error(errMSG);
+
+                        // std::cout << "Target sites " << std::endl;
+                        // for (auto latNbrs : p_equal_set)
+                        // {
+                        //     for (auto latNbr : latNbrs)
+                        //     {
+                        //         latNbr.print();
+                        //     }
+                        //     std::cout << "-=-=-=-=-=-=-=" << std::endl;
+                        // }
+                        std::string errMSG = "Error: did not find a permutation of the orbit sites to the permutations of the representative sites";
+                        throw std::runtime_error(errMSG);
                     }
                 }
-                
             }
             else
             {
@@ -282,9 +346,9 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeigh
             }
         }
 
-        if(sitePermutations.size() !=   _orbitList[i].getEquivalentSites().size() || sitePermutations.size()==0)
+        if (sitePermutations.size() != _orbitList[i].getEquivalentSites().size() || sitePermutations.size() == 0)
         {
-            std::string errMSG = "Error: each set of site did not get a permutations " + std::to_string(sitePermutations.size()) +" != "+ std::to_string(_orbitList[i].getEquivalentSites().size());
+            std::string errMSG = "Error: each set of site did not get a permutations " + std::to_string(sitePermutations.size()) + " != " + std::to_string(_orbitList[i].getEquivalentSites().size());
             throw std::runtime_error(errMSG);
         }
 
@@ -292,17 +356,29 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeigh
         _orbitList[i].setAllowedSitesPermutations(allowedPermutations);
         ///debug prints
 
-        for (auto perm : allowedPermutations)
-        {
-            for (auto i : perm)
-            {
-                std::cout << i << " ";
-            }
-            std::cout << " | ";
-        }
-        std::cout << std::endl;
+        // for (auto perm : allowedPermutations)
+        // {
+        //     for (auto i : perm)
+        //     {
+        //         std::cout << i << " ";
+        //     }
+        //     std::cout << " | ";
+        // }
+        // std::cout << std::endl;
         //    std::cout<<representativeSites.size()<< " "<<p_all.size()<< " "<< p_equal.size()<< " " << p_allowed_permutations.size()<<std::endl;
     }
+}
+
+///Will find the sites in col1, extract all columns along with their unit cell translated indistinguishable sites
+std::vector<std::vector<LatticeNeighbor>> OrbitList::getAllColumnsFromSites(const std::vector<LatticeNeighbor> &sites,
+                                                                            const std::vector<LatticeNeighbor> &col1,
+                                                                            const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix) const
+{
+    bool sortRows = false;
+    std::vector<int> rowsFromCol1 = findRowsFromCol1(col1, sites, sortRows);
+    std::vector<std::vector<LatticeNeighbor>> p_equal = getAllColumnsFromRow(rowsFromCol1, permutation_matrix, true, sortRows);
+
+    return p_equal;
 }
 
 ///First construct  then returns true if rows_sort exists in taken_rows
@@ -331,7 +407,7 @@ includeTranslatedSites: bool
 
 */
 
-std::vector<std::vector<LatticeNeighbor>> OrbitList::getAllColumnsFromRow(const std::vector<int> &rows, const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, bool includeTranslatedSites) const
+std::vector<std::vector<LatticeNeighbor>> OrbitList::getAllColumnsFromRow(const std::vector<int> &rows, const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, bool includeTranslatedSites, bool sortIt) const
 {
 
     std::vector<std::vector<LatticeNeighbor>> allColumns;
@@ -348,7 +424,7 @@ std::vector<std::vector<LatticeNeighbor>> OrbitList::getAllColumnsFromRow(const 
 
         if (includeTranslatedSites)
         {
-            auto translatedEquivalentSites = getSitesTranslatedToUnitcell(indistinctLatNbrs);
+            auto translatedEquivalentSites = getSitesTranslatedToUnitcell(indistinctLatNbrs, sortIt);
             allColumns.insert(allColumns.end(), translatedEquivalentSites.begin(), translatedEquivalentSites.end());
         }
         else
@@ -367,7 +443,7 @@ This translation will give rise to equivalent sites that sometimes are not found
 by spglib
 
 */
-std::vector<std::vector<LatticeNeighbor>> OrbitList::getSitesTranslatedToUnitcell(const std::vector<LatticeNeighbor> &latticeNeighbors) const
+std::vector<std::vector<LatticeNeighbor>> OrbitList::getSitesTranslatedToUnitcell(const std::vector<LatticeNeighbor> &latticeNeighbors, bool sortIt) const
 {
     std::vector<std::vector<LatticeNeighbor>> translatedLatticeNeighbors;
     translatedLatticeNeighbors.push_back(latticeNeighbors);
@@ -377,7 +453,10 @@ std::vector<std::vector<LatticeNeighbor>> OrbitList::getSitesTranslatedToUnitcel
         if ((latticeNeighbors[i].unitcellOffset - zeroVector).norm() > 0.1) //only translate those outside unitcell
         {
             auto translatedSites = translateSites(latticeNeighbors, i);
-            std::sort(translatedSites.begin(), translatedSites.end());
+            if (sortIt)
+            {
+                std::sort(translatedSites.begin(), translatedSites.end());
+            }
 
             translatedLatticeNeighbors.push_back(translatedSites);
         }
@@ -422,17 +501,16 @@ void OrbitList::checkEquivalentClusters() const
 
                 throw std::runtime_error("found a \"equivalent\" cluster that were not equal representative cluster");
             }
-            if(fabs(equivalentCluster.getGeometricalSize() - representative_cluster.getGeometricalSize()) > 1e-3 )
+            if (fabs(equivalentCluster.getGeometricalSize() - representative_cluster.getGeometricalSize()) > 1e-3)
             {
                 std::cout << " found a \"equivalent\" cluster that were not equal representative cluster" << std::endl;
                 std::cout << "representative_cluster:" << std::endl;
                 representative_cluster.print();
-                    
+
                 std::cout << "equivalentCluster:" << std::endl;
                 equivalentCluster.print();
-                std::cout<<" test geometric size: "<< icet::getGeometricalRadius(sites, _primitiveStructure)<< " "<<std::endl;
+                std::cout << " test geometric size: " << icet::getGeometricalRadius(sites, _primitiveStructure) << " " << std::endl;
                 throw std::runtime_error("found a \"equivalent\" cluster that were not equal representative cluster");
-
             }
         }
     }
