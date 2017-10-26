@@ -107,3 +107,53 @@ std::vector<int> ClusterSpace::getAllowedOccupations(const Structure &structure,
     }
     return Mi;
 }
+
+
+///Setup the clusterspace info
+void ClusterSpace::setupClusterspaceInfo()
+{
+    _clusterSpaceInfo.clear();
+
+    for(int i=0; i < _primitive_orbitlist.size(); i++)
+    {
+        auto allowedOccupations = getAllowedOccupations(_primitive_structure, _primitive_orbitlist.getOrbit(i).getRepresentativeSites());
+        auto mcVectors = _primitive_orbitlist.getOrbit(i).getMCVectors(allowedOccupations);
+        for(const auto &mcVector : mcVectors)
+        {
+            _clusterSpaceInfo.push_back(std::make_pair(i, mcVector));
+        }
+    }
+    _isClusterspaceInitialized = true;
+
+}
+
+///Get a clusterspace info
+std::pair<int, std::vector<int>> ClusterSpace::getClusterSpaceInfo(const unsigned int index) 
+{
+    if(!_isClusterspaceInitialized)
+    {
+        setupClusterspaceInfo();
+    }
+
+    if(index >=_clusterSpaceInfo.size() )
+    {
+        std::string errMSG = "Error: out of range in ClusterSpace::getClusterSpaceInfo " + std::to_string(index) +" >= "+ std::to_string(_clusterSpaceInfo.size());
+        throw std::out_of_range(errMSG);
+    }
+
+    return _clusterSpaceInfo[index];
+    
+}
+
+
+///Returns the clusterspace size i.e. the length of a clustervector
+size_t ClusterSpace::getClusterSpaceSize()
+{
+    if(!_isClusterspaceInitialized)
+    {
+        setupClusterspaceInfo();
+    }
+
+    return _clusterSpaceInfo.size();
+
+}

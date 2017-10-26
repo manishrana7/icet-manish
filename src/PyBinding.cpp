@@ -77,6 +77,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("is_sorted", &Cluster::isSorted)
         .def("get_clustertag", &Cluster::getClusterTag)
         .def("get_geometrical_size", &Cluster::getGeometricalSize)
+        .def("get_number_of_bodies",&Cluster::getNumberOfBodies)
         .def("__hash__", [](const Cluster &cluster) { return std::hash<Cluster>{}(cluster); })
         .def(py::self < py::self)
         .def(py::self == py::self)
@@ -166,10 +167,15 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_prim_to_supercell_map", &LocalOrbitlistGenerator::getPrimToSupercellMap)
         .def("get_unique_primcell_offsets", &LocalOrbitlistGenerator::getUniquePrimcellOffsets);
 
-        py::class_<ClusterSpace>(m, "ClusterSpace")        
+        py::class_<ClusterSpace>(m, "ClusterSpace",py::dynamic_attr())        
         .def(py::init<int,std::vector<std::string>, const OrbitList &>())
         .def("get_clustervector",&ClusterSpace::generateClustervector)
+        .def("get_orbit", &ClusterSpace::getOrbit)
         .def("get_cluster_product", &ClusterSpace::getClusterProduct)
+        .def("get_clusterspace_info", &ClusterSpace::getClusterSpaceInfo)
+        .def("get_clusterspace_size", &ClusterSpace::getClusterSpaceSize)
+        .def("get_elements", &ClusterSpace::getElements)
+        .def("get_cutoffs",&ClusterSpace::getCutoffs)        
         ;
 
 
