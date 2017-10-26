@@ -62,10 +62,10 @@ def __represent_clusterspace(self):
 
     rep += "Cutoffs: "
     for co in self.cutoffs:
-        rep += str(co) +" "
+        rep += str(co) + " "
     rep += " \n"
     rep += " Total number of dimensions {} \n".format(len(self))
-    rep += "clusterspace index : Cluster order : cluster radius : multiplicity  : mc vector\n" 
+    rep += "clusterspace index : orbit index : Cluster order : cluster radius : multiplicity  : mc vector\n"
     rep += "-------------------------------------\n"
     for i in range(len(self)):
         rep += "{}: ".format(i)
@@ -76,9 +76,12 @@ def __represent_clusterspace(self):
         cluster = self.get_orbit(orbit_index).get_representative_cluster()
         multiplicity = len(self.get_orbit(orbit_index).get_equivalent_sites())
 
-        rep += " {0} : {1:.4f} : {2} : {3} ".format(len(cluster),
-        cluster.get_geometrical_size(), multiplicity, mc_vector)
-                                
+        rep += " {0} : {1} {2:.4f} : {3} : {4} ".format(len(cluster),
+                                                       orbit_index,
+                                                       cluster.get_geometrical_size(), multiplicity, mc_vector)
+
         rep += "\n"
     return rep
+
+
 ClusterSpace.__repr__ = __represent_clusterspace
