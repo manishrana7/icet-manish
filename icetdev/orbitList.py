@@ -39,7 +39,7 @@ def __get_latNbr_permutation_matrix(structure, permutation_matrix, prune=True, v
                     lat_nbr = structure.findLatticeNeighborFromPosition(pos)
                     lat_nbrs.append(lat_nbr)
                 except:
-                    continue                    
+                    continue                            
         if len(lat_nbrs) >0:
             pm_latNbrs.append(lat_nbrs)
         else:

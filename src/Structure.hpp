@@ -104,9 +104,9 @@ class Structure
     ///Set the symmetrically distinct sites using vector<int> where length of vector should match number of positions
     void setUniqueSites(const std::vector<int> &sites)
     {
-        if( sites.size() != _positions.rows() )
+        if (sites.size() != _positions.rows())
         {
-            throw std::out_of_range("Sites are not the same size as positions");            
+            throw std::out_of_range("Sites are not the same size as positions");
         }
         _uniqueSites = sites;
     }
@@ -115,7 +115,7 @@ class Structure
     {
         return _uniqueSites;
     }
-    ///Return the symmetrically distinct site 
+    ///Return the symmetrically distinct site
     int getSite(const size_t i) const
     {
         if (i >= _uniqueSites.size())
@@ -204,21 +204,24 @@ class Structure
         ///ldlt require positive or negative semidefinite cell
         // std::cout << "position " << position << std::endl;
         //  std::cout<<"cell "<< _cell<<std::endl;
-        // Vector3d position = {coordinateRound(position1[0]), coordinateRound(position1[1]), coordinateRound(position1[2]) };
+        //  Vector3d position = {coordinateRound(position1[0]), coordinateRound(position1[1]), coordinateRound(position1[2]) };
+
+         
         Vector3d fractional = _cell.transpose().partialPivLu().solve(position);
         
+        // Vector3d fractional = cell2.transpose().partialPivLu().solve(position);
         // std::cout << "fractional " << fractional << std::endl;
         // Vector3d unitcellOffset = {int(round(fractional[0])), int(round(fractional[1])), int(round(fractional[2]))};
         Vector3d unitcellOffset = {int(floor(coordinateRound((double)fractional[0]))),
                                    int(floor(coordinateRound((double)fractional[1]))),
                                    int(floor(coordinateRound((double)fractional[2])))};
         // std::cout << "unitcellOffset " << unitcellOffset << std::endl;
-        for(int i=0; i<3; i++)
+        for (int i = 0; i < 3; i++)
         {
             if (!has_pbc(i))
             {
                 // fractional[i]=0;
-                unitcellOffset[i]=0;
+                // unitcellOffset[i]=0;
             }
         }
         Vector3d remainder = (fractional - unitcellOffset).transpose() * _cell;
@@ -228,24 +231,32 @@ class Structure
         auto index = findIndexOfPosition(remainder, position_tolerance);
         if (index == -1)
         {
-            std::cout<<"Positions"<<std::endl;
-           for(int i =0; i < size(); i++)                
-           {
-               Vector3d pos = _positions.row(i);
-               std::cout<<pos[0]<<" "<<pos[1]<< " "<<pos[2]<<std::endl;
-           }
-           std::cout<<"Positions done"<<std::endl;
-        ///ldlt require positive or negative semidefinite cell
-        std::cout << "position " << position << std::endl;
-        std::cout<<"cell "<< _cell<<std::endl;
-        std::cout << "fractional " << fractional << std::endl;
-        Vector3d unitcellOffset = {int(round(fractional[0])), int(round(fractional[1])), int(round(fractional[2]))};
-        std::cout << "unitcellOffset " << unitcellOffset << std::endl;
-        std::cout << "remainder " << remainder << std::endl;
+            std::cout << "Positions" << std::endl;
+            for (int i = 0; i < size(); i++)
+            {
+                Vector3d pos = _positions.row(i);
+                std::cout << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
+            }
+            std::cout << "Positions done" << std::endl;
+            ///ldlt require positive or negative semidefinite cell
+            std::cout << "position " << position << std::endl;
+            std::cout << "cell " << _cell << std::endl;
+            // std::cout<<"cell2 "<< cell2<<std::endl;
+            std::cout << "pbc " << std::boolalpha << _pbc[0] << " " << _pbc[1] << " " << _pbc[2] << std::endl;
+            std::cout << "fractional " << fractional << std::endl;
+            // Vector3d unitcellOffset = {int(round(fractional[0])), int(round(fractional[1])), int(round(fractional[2]))};
+            std::cout << "unitcellOffset " << unitcellOffset << std::endl;
+            std::cout << "remainder " << remainder << std::endl;
 
             throw std::runtime_error("Did not find position in function findLatticeNeighborFromPosition in Structure");
         }
-
+        for (int i = 0; i < 3; i++)
+        {
+            if (!has_pbc(i) && unitcellOffset[i] != 0)
+            {
+                throw std::runtime_error("Error, created a lattice neigbor with a unitcell offset in a pbc=false direction");
+            }
+        }
         LatticeNeighbor ret = LatticeNeighbor(index, unitcellOffset);
         return ret;
     }
@@ -278,7 +289,7 @@ class Structure
 
         return latNbrVector;
     }
-    
+
     /// Return number of allowed components on site i
     int getMi(const unsigned int i) const
     {
@@ -292,16 +303,16 @@ class Structure
         }
         return _allowedComponents[i];
     }
-    
+
     ///Set allowed components on each site
     void setAllowedComponents(const std::vector<int> &allowedComponents)
     {
         _allowedComponents = allowedComponents;
-    }   
+    }
 
     void setAllowedComponents(const int allowedComponents)
     {
-        std::vector<int> allowedComps(_elements.size(),allowedComponents);
+        std::vector<int> allowedComps(_elements.size(), allowedComponents);
         _allowedComponents = allowedComps;
     }
 
@@ -313,7 +324,7 @@ class Structure
     std::vector<bool> _pbc;
     std::vector<int> _uniqueSites;
     std::vector<int> _allowedComponents;
-    
+
     std::vector<int> convertStrElements(const std::vector<std::string> &elements)
     {
         std::vector<int> intElements(elements.size());

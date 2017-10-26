@@ -121,7 +121,6 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
         std::string errMSG = "Found duplicates in column1 of permutation matrix " + std::to_string(col1.size()) + " != " + std::to_string(col1_uniques.size());
         throw std::runtime_error(errMSG);
     }
-
     for (size_t index = 0; index < neighborlists[0].size(); index++)
     {
 
@@ -175,7 +174,6 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
 
     //rename this
     addPermutationInformationToOrbits(col1, permutation_matrix);
-
     bool debug = true;
 
     if (debug)
@@ -262,7 +260,7 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeigh
                     std::vector<int> allowedPermutation = icet::getPermutation<LatticeNeighbor>(translated_rep_sites, p_lattNbr);
                     allowedPermutations.insert(allowedPermutation);
                 }
-                catch (const std::runtime_error& e)
+                catch (const std::runtime_error &e)
                 {
                     {
                         failedLoops++;
@@ -297,12 +295,12 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeigh
                 //Did not find the orbit.eq_sites in p_equal meaning that this eq site does not have an allowed permutation
                 auto equivalently_translated_eqOrbitsites = getSitesTranslatedToUnitcell(eqOrbitSites, sortRows);
                 std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> translatedPermutationsOfSites;
-                for(const auto eq_trans_eqOrbitsites : equivalently_translated_eqOrbitsites)
+                for (const auto eq_trans_eqOrbitsites : equivalently_translated_eqOrbitsites)
                 {
                     const auto allPermutationsOfSites_i = icet::getAllPermutations<LatticeNeighbor>(eq_trans_eqOrbitsites);
-                    for(const auto perm :allPermutationsOfSites_i)
+                    for (const auto perm : allPermutationsOfSites_i)
                     {
-                        translatedPermutationsOfSites.push_back( std::make_pair(perm,eq_trans_eqOrbitsites));
+                        translatedPermutationsOfSites.push_back(std::make_pair(perm, eq_trans_eqOrbitsites));
                     }
                     // translatedPermutationsOfSites.insert(translatedPermutationsOfSites.end(),allPermutationsOfSites_i.begin(), allPermutationsOfSites_i.end());
                 }
@@ -442,9 +440,19 @@ and translate the other sites with the same translation.
 This translation will give rise to equivalent sites that sometimes are not found by using the set of crystal symmetries given
 by spglib
 
+An added requirement to this is that if _primitiveStructure.has_pbc(i) == false then this function should not give rise to any sites
+ in the ith direction
+
 */
 std::vector<std::vector<LatticeNeighbor>> OrbitList::getSitesTranslatedToUnitcell(const std::vector<LatticeNeighbor> &latticeNeighbors, bool sortIt) const
 {
+
+    ///sanity check that pbc is currently respected:
+    if (!isSitesPBCCorrect(latticeNeighbors))
+    {
+        throw std::runtime_error("Error: function: OrbitList::getSitesTranslatedToUnitcell received a latnbr that had a repeated site in the unitcell direction where pbc was false");
+    }
+
     std::vector<std::vector<LatticeNeighbor>> translatedLatticeNeighbors;
     translatedLatticeNeighbors.push_back(latticeNeighbors);
     Vector3d zeroVector = {0.0, 0.0, 0.0};
@@ -458,6 +466,11 @@ std::vector<std::vector<LatticeNeighbor>> OrbitList::getSitesTranslatedToUnitcel
                 std::sort(translatedSites.begin(), translatedSites.end());
             }
 
+            if (!isSitesPBCCorrect(translatedSites))
+            {
+                throw std::runtime_error("Error: function: OrbitList::getSitesTranslatedToUnitcell translated a latnbr and got a repeated site in the unitcell direction where pbc was false");
+            }
+
             translatedLatticeNeighbors.push_back(translatedSites);
         }
     }
@@ -466,6 +479,22 @@ std::vector<std::vector<LatticeNeighbor>> OrbitList::getSitesTranslatedToUnitcel
     std::sort(translatedLatticeNeighbors.begin(), translatedLatticeNeighbors.end());
 
     return translatedLatticeNeighbors;
+}
+
+///Check that the lattice neighbors do not have any unitcell offsets in a pbc=false direction
+bool OrbitList::isSitesPBCCorrect(const std::vector<LatticeNeighbor> &sites) const
+{
+    for (const auto &latNbr : sites)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if (!(_primitiveStructure.has_pbc(i)) && latNbr.unitcellOffset[i] != 0)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 ///Take all lattice neighbors in vector latticeNeighbors and subtract the unitcelloffset of site latticeNeighbors[index]

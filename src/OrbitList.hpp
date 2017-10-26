@@ -187,6 +187,9 @@ class OrbitList
         const std::vector<LatticeNeighbor> &,
         const std::vector<std::vector<LatticeNeighbor>> & ) const;
 
+    ///Check that the lattice neighbors do not have any unitcell offsets in a pbc=false direction        
+    bool isSitesPBCCorrect(const std::vector<LatticeNeighbor> &sites) const;
+        
   private:
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;
     Structure _primitiveStructure;

@@ -26,7 +26,6 @@ std::vector<double> ClusterSpace::generateClustervector(const Structure &structu
         clusterCounts.countOrbitlist(structure, local_orbitlist, orderIntact);
     }
 
-    
     const auto clusterMap = clusterCounts.getClusterCounts();
     std::vector<double> clusterVector;
     clusterVector.push_back(1);

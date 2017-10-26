@@ -7,6 +7,7 @@ from icetdev import clusterspace
 from icetdev.clusterspace import create_clusterspace
 from icetdev.structure import structure_from_atoms
 from ase.build import bulk, make_supercell
+from icetdev import permutationMap
 import numpy as np
 import random
 from ase.db import connect
@@ -18,11 +19,14 @@ def generateRandomStructure(atoms_prim, subelements):
     and fill it randomly with elements in subelements
     """
 
-    if atoms_prim.pbc.all() == True:
-        atoms = atoms_prim.copy().repeat(8)
-    else:
-        atoms = atoms_prim.copy()        
+    repeat = [1]*3
+    for i, pbc in enumerate(atoms_prim.pbc):
+        if pbc:
+            repeat[i] = 5
 
+    
+    atoms = atoms_prim.copy().repeat(repeat)
+    
     for at in atoms:
         element = random.choice(subelements)
         at.symbol = element
@@ -85,16 +89,18 @@ subelements = ["H", "He", "Pb"]
 for row in db.select():
     atoms_row = row.toatoms()
     atoms_tag = row.tag
-    cutoffs = [1.1] * 1
+    cutoffs = [1.4] * 3
     if len(atoms_row) == 0:
         continue
     if atoms_row.get_pbc().all() == True:
         atoms_row.wrap()
     if True: # atoms_row.get_pbc().all() == True:
-        print("Testing structure: {} with cutoffs {}".format(atoms_tag, cutoffs))
+        print("Testing finding cv for structure: {} with cutoffs {}".format(atoms_tag, cutoffs))
         
         clusterspace = create_clusterspace(
             subelements, cutoffs, atoms=atoms_row)
+        if not atoms_row.get_pbc().all() == True:
+            permutationMap.__vacuum_on_non_pbc(atoms_row)
 
-        cvs = generateCVSet(10, atoms_row, subelements, clusterspace)
+        cvs = generateCVSet(5, atoms_row, subelements, clusterspace)
 

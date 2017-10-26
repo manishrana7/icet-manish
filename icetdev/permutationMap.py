@@ -13,13 +13,14 @@ from icetdev.tools.geometry import get_scaled_positions
 def __vacuum_on_non_pbc(atoms):
     """ add vacuum to directions where pbc is false"""
     vacuum_axis = []
-    print(atoms.pbc)
     for i,pbc in enumerate(atoms.pbc):
         if not pbc:
             vacuum_axis.append(i)
 
     if len(vacuum_axis) > 0:
-        atoms.center(50, axis=vacuum_axis)
+        atoms.center(30, axis=vacuum_axis)
+        atoms.wrap()
+            
     return atoms
 
 def __get_primitive_structure(atoms):
