@@ -50,12 +50,30 @@ int Orbit::getNumberOfDuplicates(int verbosity) const
 
 /**
   Returns the inequivalent MC vectors for this orbit
+
+  step1: get all possible mc vectors
+  step2: remove 
   
  */
 std::vector<std::vector<int>> Orbit::getMCVectors(std::vector<int> &Mi_local) const
 {
     auto allMCVectors = getAllPossibleMCVectorPermutations(Mi_local);
-    return allMCVectors;
+    std::sort(allMCVectors.begin(), allMCVectors.end());
+    std::vector<std::vector<int>> distinctMCVectors;
+    for(const auto &mcVector : allMCVectors)
+    {
+        std::vector<std::vector<int>> permutatedMCVectors;
+        for(const auto &allowedPermutation : _allowedSitesPermutations )
+        {
+            permutatedMCVectors.push_back(icet::getPermutatedVector<int>(mcVector, allowedPermutation));
+        }
+        if(! std::any_of(permutatedMCVectors.begin(), permutatedMCVectors.end(),[&](const std::vector<int> &permMcVector){
+                 return !(std::find(distinctMCVectors.begin(),distinctMCVectors.end(),permMcVector) == distinctMCVectors.end()); }  ))
+        {
+            distinctMCVectors.push_back(mcVector);
+        }
+    }
+    return distinctMCVectors;
 }
 
 ///Similar to get all permutations but needs to be filtered through the number of allowed elements
