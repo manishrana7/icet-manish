@@ -8,7 +8,7 @@ from icetdev.structure import structure_from_atoms
 from ase.build import bulk, make_supercell
 import numpy as np
 
-cutoffs = [10.0, 7.0, 7]
+cutoffs = [10.0, 7.0]
 subelements = ['Re', 'Ti',"H"]
 prototype = bulk('Re')
 clusterspace = create_clusterspace(subelements, cutoffs, atoms=prototype)
@@ -17,5 +17,5 @@ conf = structure_from_atoms(prototype.repeat(10))
 print(len(conf))
 cv = clusterspace.get_clustervector(conf)
 
-print(cv)
+#print(cv)
 print(clusterspace)

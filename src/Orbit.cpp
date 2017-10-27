@@ -55,9 +55,7 @@ int Orbit::getNumberOfDuplicates(int verbosity) const
 std::vector<std::vector<int>> Orbit::getMCVectors(std::vector<int> &Mi_local) const
 {
     auto allMCVectors = getAllPossibleMCVectorPermutations(Mi_local);
-
     return allMCVectors;
-
 }
 
 ///Similar to get all permutations but needs to be filtered through the number of allowed elements
@@ -67,7 +65,7 @@ std::vector<std::vector<int>> Orbit::getAllPossibleMCVectorPermutations(const st
     std::vector<std::vector<int>> cartesianFactors(Mi_local.size());
     for (int i = 0; i < Mi_local.size(); i++)
     {
-        for (int j = 0; j < Mi_local[i]-1; j++) // N.B minus one so a binary only get one cluster function
+        for (int j = 0; j < Mi_local[i] - 1; j++) // N.B minus one so a binary only get one cluster function
         {
             cartesianFactors[i].push_back(j);
         }
@@ -79,7 +77,7 @@ std::vector<std::vector<int>> Orbit::getAllPossibleMCVectorPermutations(const st
     do
     {
         allPossibleMCPermutations.push_back(firstVector);
-    }while( icet::next_cartesian_product(cartesianFactors,firstVector) );
-    
-return allPossibleMCPermutations;
+    } while (icet::next_cartesian_product(cartesianFactors, firstVector));
+
+    return allPossibleMCPermutations;
 }

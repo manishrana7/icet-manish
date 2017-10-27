@@ -67,7 +67,12 @@ def __represent_clusterspace(self):
     rep += " Total number of dimensions {} \n".format(len(self))
     rep += "clusterspace index : orbit index : Cluster order : cluster radius : multiplicity  : mc vector\n"
     rep += "-------------------------------------\n"
-    for i in range(len(self)):
+    i = 0
+    print_threshold = 50 
+    while i < len(self):
+        if len(self) > print_threshold and i>10 and i< len(self)-10:
+            i = len(self)-10
+            rep += "\n...... \n\n"            
         rep += "{}: ".format(i)
         clusterspace_info = self.get_clusterspace_info(i)
         orbit_index = clusterspace_info[0]
@@ -81,6 +86,7 @@ def __represent_clusterspace(self):
                                                        cluster.get_geometrical_size(), multiplicity, mc_vector)
 
         rep += "\n"
+        i += 1
     return rep
 
 

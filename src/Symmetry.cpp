@@ -13,7 +13,7 @@ Eigen::Vector3d transformPosition2(const Eigen::Vector3d &position, const Eigen:
 bool next_cartesian_product(const std::vector<std::vector<int>> &items, std::vector<int> &currentProduct)
 {
     auto n = items.size();
-    if( n != currentProduct.size())
+    if (n != currentProduct.size())
     {
         throw std::runtime_error("ERROR: items and currentProduct are different sizes in function next_cartesian_product");
     }
@@ -28,8 +28,8 @@ bool next_cartesian_product(const std::vector<std::vector<int>> &items, std::vec
         {
             return true;
         }
-        return false;
+        
     }
+    return false;
 }
-
 }
