@@ -44,6 +44,7 @@ def __Structure_to_atoms(self):
 Structure.to_atoms = __Structure_to_atoms
 
 
+
 def __structure_pbc(self):
     """
     list of three booleans: Periodic boundary conditions.

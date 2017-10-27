@@ -89,6 +89,11 @@ class ClusterSpace
         return _primitive_orbitlist.getOrbit(index);
     }
 
+    Structure getPrimitiveStructure() const
+    {
+        return _primitive_structure;
+    }
+
   private:
     ///Currently we have constant Mi for development but will later change to dynamic Mi
     int _Mi;

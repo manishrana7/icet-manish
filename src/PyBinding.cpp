@@ -135,6 +135,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("add_equivalent_sites", (void (Orbit::*)(const std::vector<std::vector<LatticeNeighbor>> &, bool)) & Orbit::addEquivalentSites, py::arg("lattice_neighbors"), py::arg("sort")=false)
         .def("get_representative_cluster", &Orbit::getRepresentativeCluster)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
+        .def("get_representative_sites", &Orbit::getRepresentativeSites)
         .def("get_equivalent_sites_permutations", &Orbit::getEquivalentSitesPermutations)        
         .def("get_sites_with_permutation", &Orbit::getSitesWithPermutation)
         .def("size", &Orbit::size)
@@ -175,7 +176,8 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_clusterspace_info", &ClusterSpace::getClusterSpaceInfo)
         .def("get_clusterspace_size", &ClusterSpace::getClusterSpaceSize)
         .def("get_elements", &ClusterSpace::getElements)
-        .def("get_cutoffs",&ClusterSpace::getCutoffs)        
+        .def("get_cutoffs",&ClusterSpace::getCutoffs)
+        .def("get_primitive_structure",&ClusterSpace::getPrimitiveStructure)
         ;
 
 
