@@ -179,6 +179,12 @@ def view_singlets(structure=None, atoms=None):
 
 
 def get_Mi_drom_dict(Mi, structure):
+    """
+    Mi maps orbit index to allowed components
+    this function will return a list, where
+    Mi_ret[i] will be the allowed components on site index i    
+    
+    """
     cluster_data = get_singlet_info(atoms=structure)
     Mi_ret = [-1] * len(structure)
     for singlet in cluster_data:
