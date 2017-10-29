@@ -24,7 +24,7 @@ It will have the definition of the cluster space a cluster expansion is based on
 class ClusterSpace
 {
   public:
-    ClusterSpace(int Mi, std::vector<std::string> elements, const OrbitList primOrbitList)
+    ClusterSpace(std::vector<int> Mi, std::vector<std::string> elements, const OrbitList primOrbitList)
     {
         _Mi = Mi;        
         _primitive_orbitlist = primOrbitList;        
@@ -96,7 +96,7 @@ class ClusterSpace
 
   private:
     ///Currently we have constant Mi for development but will later change to dynamic Mi
-    int _Mi;
+    std::vector<int> _Mi;
 
     ///Primitive cell/structure
     Structure _primitive_structure;

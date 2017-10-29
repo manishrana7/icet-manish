@@ -155,6 +155,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("clear", &OrbitList::clear)
         .def("sort", &OrbitList::sort)
         .def("get_orbitList", &OrbitList::getOrbitList)
+        .def("get_primitive_structure",&OrbitList::getPrimitiveStructure)
         .def("size", &OrbitList::size)
         .def("print", &OrbitList::print, py::arg("verbosity") = 0)
         .def("get_supercell_orbitlist", &OrbitList::getSupercellOrbitlist);
@@ -169,7 +170,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_unique_primcell_offsets", &LocalOrbitlistGenerator::getUniquePrimcellOffsets);
 
         py::class_<ClusterSpace>(m, "ClusterSpace",py::dynamic_attr())        
-        .def(py::init<int,std::vector<std::string>, const OrbitList &>())
+        .def(py::init<std::vector<int>, std::vector<std::string>, const OrbitList &>())
         .def("get_clustervector",&ClusterSpace::generateClustervector)
         .def("get_orbit", &ClusterSpace::getOrbit)
         .def("get_cluster_product", &ClusterSpace::getClusterProduct)

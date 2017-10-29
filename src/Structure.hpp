@@ -307,6 +307,10 @@ class Structure
     ///Set allowed components on each site
     void setAllowedComponents(const std::vector<int> &allowedComponents)
     {
+        if(allowedComponents.size() != size())
+        {
+            throw std::out_of_range("Error: allowed components is a different size than structure");
+        }
         _allowedComponents = allowedComponents;
     }
 

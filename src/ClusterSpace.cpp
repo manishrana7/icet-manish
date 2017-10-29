@@ -15,7 +15,7 @@ The length of the clustervector will be 1 + sum_i( orbit_i * orbit_i.multicimpon
 std::vector<double> ClusterSpace::generateClustervector(const Structure &structure2) const
 {
     Structure structure = structure2;
-    structure.setAllowedComponents(_Mi);
+    //structure.setAllowedComponents(_Mi);
     bool orderIntact = true; // count the clusters in the orbit with the same orientation as the prototype cluster
     LocalOrbitlistGenerator localOrbitListGenerator = LocalOrbitlistGenerator(_primitive_orbitlist, structure);
     size_t uniqueOffsets = localOrbitListGenerator.getUniqueOffsetsCount();
@@ -33,7 +33,7 @@ std::vector<double> ClusterSpace::generateClustervector(const Structure &structu
     for (size_t i = 0; i < _primitive_orbitlist.size(); i++)
     {
         auto repCluster = _primitive_orbitlist.getOrbit(i).getRepresentativeCluster();
-        auto allowedOccupations = getAllowedOccupations(structure, _primitive_orbitlist.getOrbit(i).getRepresentativeSites());
+        auto allowedOccupations = getAllowedOccupations(_primitive_structure, _primitive_orbitlist.getOrbit(i).getRepresentativeSites());
         auto mcVectors = _primitive_orbitlist.getOrbit(i).getMCVectors(allowedOccupations);
         repCluster.setClusterTag(i);
 

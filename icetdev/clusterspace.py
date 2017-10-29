@@ -3,7 +3,7 @@ from icetdev.structure import structure_from_atoms
 from icetdev.orbitList import create_orbit_list
 
 
-def create_clusterspace(subelements, cutoffs, atoms=None, structure=None, verbosity=0):
+def create_clusterspace(subelements, cutoffs, atoms=None, structure=None,Mi=None, verbosity=0):
     """
     Creates a clusterspace.
 
@@ -30,10 +30,15 @@ def create_clusterspace(subelements, cutoffs, atoms=None, structure=None, verbos
         else:
             structure = structure_from_atoms(atoms)
 
-    Mi = len(subelements)
-
     orbitList = create_orbit_list(structure, cutoffs, verbosity=verbosity)
     orbitList.sort()
+    if Mi == None:
+        Mi = len(subelements)
+    if not isinstance(Mi,list):
+        if not isinstance(Mi, int):
+            raise Exception("Error: Mi has wrong type in create_clusterspace")
+        else:
+            Mi = [Mi] * len(orbitList.get_primitive_structure())
     clusterspace = ClusterSpace(Mi, subelements, orbitList)
     clusterspace.cutoffs = cutoffs
     return clusterspace
