@@ -34,7 +34,9 @@ def create_clusterspace(subelements, cutoffs, atoms=None, structure=None,Mi=None
     orbitList.sort()
     if Mi == None:
         Mi = len(subelements)
-    if not isinstance(Mi,list):
+    if isinstance(Mi,dict):
+        Mi = get_Mi_from_dict(Mi, orbitList.get_primitive_structure())
+    if not isinstance(Mi,list):        
         if not isinstance(Mi, int):
             raise Exception("Error: Mi has wrong type in create_clusterspace")
         else:
@@ -172,3 +174,15 @@ def view_singlets(structure=None, atoms=None):
             primitive_atoms[atom_index].symbol = element
 
     view(primitive_atoms)
+
+
+
+
+def get_Mi_drom_dict(Mi, structure):
+    cluster_data = get_singlet_info(atoms=structure)
+    Mi_ret = [-1] * len(structure)
+    for singlet in cluster_data:
+        for site in singlet["sites"]:
+            Mi_ret[ site[0].index ] = Mi[singlet["orbit_index"]]
+
+    return Mi_ret
