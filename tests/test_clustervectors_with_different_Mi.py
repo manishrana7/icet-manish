@@ -14,19 +14,19 @@ from icetdev.structure import structure_from_atoms
 print(__doc__)
 
 
-def test_mi_int_list_and_dict(atoms, subelements, cutoffs):
+def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
     """Test that int Mi, list Mi and dict Mi produces the same clustervectors"""
 
     prim_size = len(
         icetdev.permutationMap.__get_primitive_structure(atoms.copy()))
 
-    Mi_int = 2
-    Mi_list = [2] * prim_size
+    Mi_int = allowed_sites
+    Mi_list = [allowed_sites] * prim_size
     Mi_dict = {}
 
     singlet_data = get_singlet_info(atoms=atoms.copy())
     for singlet in singlet_data:
-        Mi_dict[singlet["orbit_index"]] = 2
+        Mi_dict[singlet["orbit_index"]] = allowed_sites
 
     clusterspace_int = create_clusterspace(
         subelements, cutoffs, atoms=atoms, Mi=Mi_int)
@@ -76,4 +76,5 @@ for row in db.select():
             atoms_tag, cutoffs))
         atoms_row.set_chemical_symbols(len(atoms_row) * [atoms_row[0].symbol])
 
-        test_mi_int_list_and_dict(atoms_row, subelements, cutoffs)
+        for allowed_sites in range(2,4):
+            test_mi_int_list_and_dict(atoms_row, subelements, cutoffs,allowed_sites)
