@@ -19,7 +19,7 @@ prototype = bulk('Re')
 
 print(prototype)
 
-clusterspace = create_clusterspace(subelements, cutoffs, atoms=prototype)
+clusterspace = create_clusterspace(prototype, cutoffs, subelements)
 
 conf = structure_from_atoms(prototype.copy())
 print('Structure no. 1 (nat= {}):'.format(len(conf)))

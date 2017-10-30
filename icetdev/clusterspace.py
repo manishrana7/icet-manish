@@ -1,9 +1,11 @@
 from _icetdev import ClusterSpace
+from icetdev import Structure
 from icetdev.structure import structure_from_atoms
 from icetdev.orbitList import create_orbit_list
+from ase import Atoms
 
 
-def create_clusterspace(subelements, cutoffs, atoms=None, structure=None, Mi=None, verbosity=0):
+def create_clusterspace(crystal_structure, cutoffs, subelements, Mi=None, verbosity=0):
     """
     Creates a clusterspace.
 
@@ -23,26 +25,29 @@ def create_clusterspace(subelements, cutoffs, atoms=None, structure=None, Mi=Non
     """
 
     # get structure
-    if structure is None:
-        if atoms is None:
-            raise Exception(
-                "Error: both atoms and structure is None in get_mbnls")
-        else:
-            structure = structure_from_atoms(atoms)
+    if isinstance(crystal_structure, Atoms):
+        structure = structure_from_atoms(crystal_structure)
+    elif not isinstance(crystal_structure, Structure):
+        print(type(crystal_structure))
+        raise Exception(
+            "Error: no known crystal structure format added to function create_clusterspace")
+    else:
+        structure = crystal_structure
 
     orbitList = create_orbit_list(structure, cutoffs, verbosity=verbosity)
     orbitList.sort()
     if Mi == None:
         Mi = len(subelements)
-    if isinstance(Mi,dict):
+    if isinstance(Mi, dict):
         Mi = get_Mi_from_dict(Mi, orbitList.get_primitive_structure())
-    if not isinstance(Mi,list):
+    if not isinstance(Mi, list):
         if not isinstance(Mi, int):
             raise Exception("Error: Mi has wrong type in create_clusterspace")
         else:
             Mi = [Mi] * len(orbitList.get_primitive_structure())
 
-    assert len(Mi) == len( orbitList.get_primitive_structure()), "Error: len(Mi) is not len(primitive_structure). {} != {}".format(len(Mi),len( orbitList.get_primitive_structure()) )
+    assert len(Mi) == len(orbitList.get_primitive_structure()), "Error: len(Mi) is not len(primitive_structure). {} != {}".format(
+        len(Mi), len(orbitList.get_primitive_structure()))
     clusterspace = ClusterSpace(Mi, subelements, orbitList)
     clusterspace.cutoffs = cutoffs
     return clusterspace
@@ -102,14 +107,12 @@ def __represent_clusterspace(self):
 ClusterSpace.__repr__ = __represent_clusterspace
 
 
-def get_singlet_info(structure=None, atoms=None, return_clusterspace=False):
+def get_singlet_info(crystal_structure, return_clusterspace=False):
     """
     Get information about the singlets in this structure.
 
-    structure: icet structure object
-        either this or atoms needs to be defined
-    atoms: ASE atoms object
-        either this or structure needs to be defined
+    crystal_structure: icet structure object or ASE atoms object       
+    
     return_clusterspace: bool
         If true it will return the created clusterspace        
     """
@@ -124,8 +127,7 @@ def get_singlet_info(structure=None, atoms=None, return_clusterspace=False):
     subelements = ["H", "He"]
     cutoffs = [0.0]
 
-    clusterspace = create_clusterspace(
-        subelements, cutoffs, atoms=atoms, structure=structure)
+    clusterspace = create_clusterspace(crystal_structure, cutoffs, subelements)
 
     singlet_data = []
 
@@ -154,15 +156,14 @@ def get_singlet_info(structure=None, atoms=None, return_clusterspace=False):
         return singlet_data
 
 
-def view_singlets(structure=None, atoms=None):
+def view_singlets(crystal_structure):
     """
     Visualize the singlets in the structure,
     singlet 0 is represented by a H,
     singlet 1 is represented by a He etc...
     """
 
-    cluster_data, clusterspace = get_singlet_info(
-        structure=structure, atoms=atoms, return_clusterspace=True)
+    cluster_data, clusterspace = get_singlet_info(crystal_structure, return_clusterspace=True)
 
     primitive_atoms = clusterspace.get_primitive_structure().to_atoms()
 
@@ -178,23 +179,22 @@ def view_singlets(structure=None, atoms=None):
     view(primitive_atoms)
 
 
-
-
 def get_Mi_from_dict(Mi, structure):
     """
     Mi maps orbit index to allowed components
     this function will return a list, where
     Mi_ret[i] will be the allowed components on site index i    
-    
+
     """
-    cluster_data = get_singlet_info(structure=structure)
+    cluster_data = get_singlet_info(structure)
     Mi_ret = [-1] * len(structure)
     for singlet in cluster_data:
         for site in singlet["sites"]:
-            Mi_ret[ site[0].index ] = Mi[singlet["orbit_index"]]
+            Mi_ret[site[0].index] = Mi[singlet["orbit_index"]]
 
     for all_comp in Mi_ret:
         if all_comp == -1:
-            raise Exception("Error: the calculated Mi from dict did not cover all sites on input structure. \n Were all sites in primitive mapped?")
-            
+            raise Exception(
+                "Error: the calculated Mi from dict did not cover all sites on input structure. \n Were all sites in primitive mapped?")
+
     return Mi_ret

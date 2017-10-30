@@ -219,7 +219,7 @@ for row in db.select():
         cutoffs=[1.1] * 4            
     if "Ni-hcp-hexagonal" in atoms_tag:
         cutoffs = [1.4, 0.5, 0.8]
-    if "BaZrO3-perovskite" in atoms_tag: #this system has wyckoff sites so even with cutoffs at zero the singlets give different size of the orbitlists
+    if "BaZrO3-perovskite" in atoms_tag or "distorted" in atoms_tag: #these system has wyckoff sites so even with cutoffs at zero the singlets give different size of the orbitlists
         continue
     if atoms_row.get_pbc().all() == True:
         print("Testing structure: {} with cutoffs {}".format(atoms_tag, cutoffs))

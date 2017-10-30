@@ -24,18 +24,15 @@ def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
     Mi_list = [allowed_sites] * prim_size
     Mi_dict = {}
 
-    singlet_data = get_singlet_info(atoms=atoms.copy())
+    singlet_data = get_singlet_info(atoms.copy())
     for singlet in singlet_data:
         Mi_dict[singlet["orbit_index"]] = allowed_sites
 
-    clusterspace_int = create_clusterspace(
-        subelements, cutoffs, atoms=atoms, Mi=Mi_int)
+    clusterspace_int = create_clusterspace(atoms, cutoffs, subelements, Mi=Mi_int)
 
-    clusterspace_list = create_clusterspace(
-        subelements, cutoffs, atoms=atoms, Mi=Mi_list)
+    clusterspace_list = create_clusterspace(atoms, cutoffs, subelements, Mi=Mi_list)
 
-    clusterspace_dict = create_clusterspace(
-        subelements, cutoffs, atoms=atoms, Mi=Mi_dict)
+    clusterspace_dict = create_clusterspace(atoms, cutoffs, subelements, Mi=Mi_dict)
 
     atoms_prim = clusterspace_int.get_primitive_structure().to_atoms()
 

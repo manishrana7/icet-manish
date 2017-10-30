@@ -97,8 +97,7 @@ for row in db.select():
     if True: # atoms_row.get_pbc().all() == True:
         print("Testing finding cv for structure: {} with cutoffs {}".format(atoms_tag, cutoffs))
         
-        clusterspace = create_clusterspace(
-            subelements, cutoffs, atoms=atoms_row)
+        clusterspace = create_clusterspace(atoms_row,cutoffs,subelements)
         if not atoms_row.get_pbc().all() == True:
             permutationMap.__vacuum_on_non_pbc(atoms_row)
 

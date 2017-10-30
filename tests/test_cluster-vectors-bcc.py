@@ -17,7 +17,7 @@ subelements = ['W', 'Ti']
 prototype = bulk('W')
 
 
-clusterspace = create_clusterspace(subelements, cutoffs, atoms=prototype)
+clusterspace = create_clusterspace(prototype, cutoffs, subelements)
 
 conf = structure_from_atoms(prototype.copy())
 
