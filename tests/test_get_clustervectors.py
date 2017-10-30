@@ -1,6 +1,6 @@
 """
-This script checks the column correlation for a set of clustervectors,
-it will be asserted that no columns are not highly correlated
+This script checks that all atom objects in the database can have
+its  clustervector computed
 """
 
 from icetdev import clusterspace
@@ -103,4 +103,4 @@ for row in db.select():
             permutationMap.__vacuum_on_non_pbc(atoms_row)
 
         cvs = generateCVSet(5, atoms_row, subelements, clusterspace)
-
+            

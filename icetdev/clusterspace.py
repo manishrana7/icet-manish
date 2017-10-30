@@ -3,7 +3,7 @@ from icetdev.structure import structure_from_atoms
 from icetdev.orbitList import create_orbit_list
 
 
-def create_clusterspace(subelements, cutoffs, atoms=None, structure=None,Mi=None, verbosity=0):
+def create_clusterspace(subelements, cutoffs, atoms=None, structure=None, Mi=None, verbosity=0):
     """
     Creates a clusterspace.
 
@@ -36,11 +36,13 @@ def create_clusterspace(subelements, cutoffs, atoms=None, structure=None,Mi=None
         Mi = len(subelements)
     if isinstance(Mi,dict):
         Mi = get_Mi_from_dict(Mi, orbitList.get_primitive_structure())
-    if not isinstance(Mi,list):        
+    if not isinstance(Mi,list):
         if not isinstance(Mi, int):
             raise Exception("Error: Mi has wrong type in create_clusterspace")
         else:
             Mi = [Mi] * len(orbitList.get_primitive_structure())
+
+    assert len(Mi) == len( orbitList.get_primitive_structure()), "Error: len(Mi) is not len(primitive_structure). {} != {}".format(len(Mi),len( orbitList.get_primitive_structure()) )
     clusterspace = ClusterSpace(Mi, subelements, orbitList)
     clusterspace.cutoffs = cutoffs
     return clusterspace
@@ -191,4 +193,8 @@ def get_Mi_drom_dict(Mi, structure):
         for site in singlet["sites"]:
             Mi_ret[ site[0].index ] = Mi[singlet["orbit_index"]]
 
+    for all_comp in Mi_ret:
+        if all_comp == -1:
+            raise Exception("Error: the calculated Mi from dict did not cover all sites on input structure. \n Were all sites in primitive mapped?")
+            
     return Mi_ret

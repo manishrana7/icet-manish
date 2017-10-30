@@ -309,7 +309,8 @@ class Structure
     {
         if(allowedComponents.size() != size())
         {
-            throw std::out_of_range("Error: allowed components is a different size than structure");
+            std::string errMSG = "Error: Input allowed components is a different size than structure: allowed comps != structure.size():= " +std::to_string(allowedComponents.size()) + " != "+ std::to_string(size());
+            throw std::out_of_range(errMSG);
         }
         _allowedComponents = allowedComponents;
     }
