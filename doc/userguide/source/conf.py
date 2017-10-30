@@ -184,7 +184,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'icet', u'icet Documentation',
-     author, 'icet', 'One line description of project.',
+     author, 'icet', 'cluster expansions for the masses',
      'Miscellaneous'),
 ]
 
