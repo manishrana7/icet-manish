@@ -78,8 +78,8 @@ def __represent_clusterspace(self):
     for co in self.cutoffs:
         rep += str(co) + " "
     rep += " \n"
-    rep += " Total number of dimensions {} \n".format(len(self))
-    rep += "clusterspace index : orbit index : Cluster order : cluster radius : multiplicity  : mc vector\n"
+    rep += "Total number of dimensions {} \n".format(len(self))
+    rep += "Cluster bodies : cluster radius : multiplicity : (clusterspace index : orbit index)  : mc vector\n"
     rep += "-------------------------------------\n"
     i = 0
     print_threshold = 50
@@ -87,7 +87,7 @@ def __represent_clusterspace(self):
         if len(self) > print_threshold and i > 10 and i < len(self) - 10:
             i = len(self) - 10
             rep += "\n...... \n\n"
-        rep += "{}: ".format(i)
+        
         clusterspace_info = self.get_clusterspace_info(i)
         orbit_index = clusterspace_info[0]
         mc_vector = clusterspace_info[1]
@@ -95,9 +95,7 @@ def __represent_clusterspace(self):
         cluster = self.get_orbit(orbit_index).get_representative_cluster()
         multiplicity = len(self.get_orbit(orbit_index).get_equivalent_sites())
 
-        rep += " {0} : {1} {2:.4f} : {3} : {4} ".format(len(cluster),
-                                                        orbit_index,
-                                                        cluster.get_geometrical_size(), multiplicity, mc_vector)
+        rep += " {0} : {1:.4f} : {2} : ({3} : {4}) : {5}".format( len(cluster), cluster.get_geometrical_size(), multiplicity, i, orbit_index, mc_vector)
 
         rep += "\n"
         i += 1
@@ -112,7 +110,7 @@ def get_singlet_info(crystal_structure, return_clusterspace=False):
     Get information about the singlets in this structure.
 
     crystal_structure: icet structure object or ASE atoms object       
-    
+
     return_clusterspace: bool
         If true it will return the created clusterspace        
     """
@@ -163,7 +161,8 @@ def view_singlets(crystal_structure):
     singlet 1 is represented by a He etc...
     """
 
-    cluster_data, clusterspace = get_singlet_info(crystal_structure, return_clusterspace=True)
+    cluster_data, clusterspace = get_singlet_info(
+        crystal_structure, return_clusterspace=True)
 
     primitive_atoms = clusterspace.get_primitive_structure().to_atoms()
 
@@ -198,3 +197,17 @@ def get_Mi_from_dict(Mi, structure):
                 "Error: the calculated Mi from dict did not cover all sites on input structure. \n Were all sites in primitive mapped?")
 
     return Mi_ret
+
+
+def __get_clustervector(self, crystal_structure):
+    """ Get clustervector"""
+
+    if isinstance(crystal_structure, Atoms):
+            structure = structure_from_atoms(crystal_structure)
+    elif not isinstance(crystal_structure, Structure):
+        print(type(crystal_structure))
+        raise Exception(
+            "Error: no known crystal structure format added to function create_clusterspace")
+    else:
+        structure = crystal_structure
+    return self._c

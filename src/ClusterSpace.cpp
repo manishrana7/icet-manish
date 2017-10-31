@@ -55,6 +55,65 @@ std::vector<double> ClusterSpace::generateClustervector(const Structure &structu
     return clusterVector;
 }
 
+///Returns the native clusters count in this structure, i.e. only clusters inside the unitcell
+ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
+{
+    bool orderIntact = true; // count the clusters in the orbit with the same orientation as the prototype cluster
+    LocalOrbitlistGenerator localOrbitListGenerator = LocalOrbitlistGenerator(_primitive_orbitlist, structure);
+    size_t uniqueOffsets = localOrbitListGenerator.getUniqueOffsetsCount();
+    ClusterCounts clusterCounts = ClusterCounts();
+
+    int clusterTags=0;
+    for (int i = 0; i < uniqueOffsets; i++)
+    {
+        const auto local_orbitlist = localOrbitListGenerator.generateLocalOrbitlist(i);
+        for (int j = 0; j < local_orbitlist.size(); j++)
+        {
+            Cluster repr_cluster = local_orbitlist.getOrbit(j).getRepresentativeCluster();
+            
+            for (const auto sites : local_orbitlist.getOrbit(j).getPermutatedEquivalentSites())
+            {
+                bool cont = true;
+                for (auto site : sites)
+                {
+                    if (site.unitcellOffset.norm() > 0.1)
+                    {
+                        cont = false;
+                    }
+                }
+                if (!cont)
+                {
+                    continue;
+                }
+                repr_cluster.setClusterTag(j);
+                if (repr_cluster.getNumberOfBodies() != 1)
+                {
+                    std::vector<int> elements(sites.size());
+                    for (size_t i = 0; i < sites.size(); i++)
+                    {
+                        elements[i] = structure.getElement(sites[i].index);
+                    }
+                    clusterCounts.countCluster(repr_cluster, elements);
+            
+                    // clusterCounts.count(structure, sites, repr_cluster);
+                }
+                else
+                {
+                    std::vector<int> elements(sites.size());
+                    for (size_t i = 0; i < sites.size(); i++)
+                    {
+                        elements[i] = structure.getElement(sites[i].index);
+                    }
+                    clusterCounts.countCluster(repr_cluster, elements);
+            
+                    // clusterCounts.count(structure, sites, repr_cluster);
+                }
+            }
+        }
+    }
+    return clusterCounts;
+}
+
 /**
 This is the default clusterfunction
 */
@@ -65,19 +124,16 @@ double ClusterSpace::defaultClusterFunction(const int Mi, const int clusterFunct
     //     return 1.0;
     // }
 
-    if (((clusterFunction+2) % 2) == 0)
+    if (((clusterFunction + 2) % 2) == 0)
     {
-        return -cos(2.0 * M_PI * (double) ((int) (clusterFunction + 2) / 2)
-        * (double) element / ((double) Mi));
+        return -cos(2.0 * M_PI * (double)((int)(clusterFunction + 2) / 2) * (double)element / ((double)Mi));
 
         // return -cos(2.0 * M_PI * (double) ((int) (clusterFunction + 2) / 2)
         // * (double) element / ((double) Mi));
     }
     else
     {
-        return -sin(2.0 * M_PI * (double) ((int) (clusterFunction + 2) / 2)
-        * (double) element / ((double) Mi));
-
+        return -sin(2.0 * M_PI * (double)((int)(clusterFunction + 2) / 2) * (double)element / ((double)Mi));
 
         // return -sin(2.0 * M_PI * (double) ((int) (clusterFunction + 2) / 2)
         // * (double) element / ((double) Mi));
@@ -91,7 +147,7 @@ double ClusterSpace::getClusterProduct(const std::vector<int> &mcVector, const s
     for (int i = 0; i < elements.size(); i++)
     {
         // std::cout<<Mi[i]<< " "<< (mcVector[i]  )<< " "<< _elementRepresentation.at(elements[i])<< " "<<defaultClusterFunction(Mi[i], mcVector[i], _elementRepresentation.at(elements[i]) )<< std::endl;
-        clusterProduct *= defaultClusterFunction(Mi[i], mcVector[i], _elementRepresentation.at(elements[i]) );
+        clusterProduct *= defaultClusterFunction(Mi[i], mcVector[i], _elementRepresentation.at(elements[i]));
     }
     return clusterProduct;
 }
@@ -108,52 +164,47 @@ std::vector<int> ClusterSpace::getAllowedOccupations(const Structure &structure,
     return Mi;
 }
 
-
 ///Setup the clusterspace info
 void ClusterSpace::setupClusterspaceInfo()
 {
     _clusterSpaceInfo.clear();
 
-    for(int i=0; i < _primitive_orbitlist.size(); i++)
+    for (int i = 0; i < _primitive_orbitlist.size(); i++)
     {
         auto allowedOccupations = getAllowedOccupations(_primitive_structure, _primitive_orbitlist.getOrbit(i).getRepresentativeSites());
         auto mcVectors = _primitive_orbitlist.getOrbit(i).getMCVectors(allowedOccupations);
-        for(const auto &mcVector : mcVectors)
+        for (const auto &mcVector : mcVectors)
         {
             _clusterSpaceInfo.push_back(std::make_pair(i, mcVector));
         }
     }
     _isClusterspaceInitialized = true;
-
 }
 
 ///Get a clusterspace info
-std::pair<int, std::vector<int>> ClusterSpace::getClusterSpaceInfo(const unsigned int index) 
+std::pair<int, std::vector<int>> ClusterSpace::getClusterSpaceInfo(const unsigned int index)
 {
-    if(!_isClusterspaceInitialized)
+    if (!_isClusterspaceInitialized)
     {
         setupClusterspaceInfo();
     }
 
-    if(index >=_clusterSpaceInfo.size() )
+    if (index >= _clusterSpaceInfo.size())
     {
-        std::string errMSG = "Error: out of range in ClusterSpace::getClusterSpaceInfo " + std::to_string(index) +" >= "+ std::to_string(_clusterSpaceInfo.size());
+        std::string errMSG = "Error: out of range in ClusterSpace::getClusterSpaceInfo " + std::to_string(index) + " >= " + std::to_string(_clusterSpaceInfo.size());
         throw std::out_of_range(errMSG);
     }
 
     return _clusterSpaceInfo[index];
-    
 }
-
 
 ///Returns the clusterspace size i.e. the length of a clustervector
 size_t ClusterSpace::getClusterSpaceSize()
 {
-    if(!_isClusterspaceInitialized)
+    if (!_isClusterspaceInitialized)
     {
         setupClusterspaceInfo();
     }
 
     return _clusterSpaceInfo.size();
-
 }

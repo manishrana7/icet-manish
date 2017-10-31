@@ -94,7 +94,9 @@ class ClusterSpace
         return _primitive_structure;
     }
 
-  private:
+    ClusterCounts getNativeClusters(const Structure &structure) const;
+    
+  private:    
     ///Currently we have constant Mi for development but will later change to dynamic Mi
     std::vector<int> _Mi;
 
