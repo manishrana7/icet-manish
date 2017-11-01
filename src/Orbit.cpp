@@ -49,14 +49,18 @@ int Orbit::getNumberOfDuplicates(int verbosity) const
 }
 
 /**
-  Returns the inequivalent MC vectors for this orbit
+  @Brief Returns the inequivalent MC vectors for this orbit
+    @Param
+        Mi_local : Vector of the number of allowed sites
 
-  step1: get all possible mc vectors
-  step2: remove 
-  
  */
-std::vector<std::vector<int>> Orbit::getMCVectors(std::vector<int> &Mi_local) const
+std::vector<std::vector<int>> Orbit::getMCVectors(const std::vector<int> &Mi_local) const
 {
+    if( std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i){ return  i<2; }))
+    {
+        std::vector<std::vector<int>> emptyVector;
+        return emptyVector;
+    }
     auto allMCVectors = getAllPossibleMCVectorPermutations(Mi_local);
     std::sort(allMCVectors.begin(), allMCVectors.end());
     std::vector<std::vector<int>> distinctMCVectors;
