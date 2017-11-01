@@ -200,7 +200,13 @@ def get_Mi_from_dict(Mi, structure):
 
 
 def __get_clustervector(self, crystal_structure):
-    """ Get clustervector"""
+    """ 
+    Get clustervector
+    
+    crystal_structure: either an ASE Atoms object or icet structure
+    
+    
+    """
 
     if isinstance(crystal_structure, Atoms):
             structure = structure_from_atoms(crystal_structure)
@@ -210,4 +216,6 @@ def __get_clustervector(self, crystal_structure):
             "Error: no known crystal structure format added to function create_clusterspace")
     else:
         structure = crystal_structure
-    return self._c
+    return self._get_clustervector(structure)
+
+ClusterSpace.get_clustervector = __get_clustervector
