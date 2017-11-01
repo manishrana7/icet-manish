@@ -12,6 +12,8 @@
 #include "LatticeNeighbor.hpp"
 #include "hash_functions.hpp"
 #include "Vector3dCompare.hpp"
+#include "Symmetry.hpp"
+#include "Geometry.hpp"
 /**
 Class OrbitList
 
@@ -101,7 +103,6 @@ class OrbitList
     Prints information about the orbitlist
     */
 
-
     void print(int verbosity = 0) const
     {
         int orbitCount = 0;
@@ -131,10 +132,10 @@ class OrbitList
     bool validatedCluster(const std::vector<LatticeNeighbor> &) const;
     void addOrbitsFromPM(const Structure &, const std::vector<std::vector<std::vector<LatticeNeighbor>>> &);
     void addOrbitFromPM(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &);
-    void checkEquivalentClusters(const Structure &) const;
+    void checkEquivalentClusters() const;
 
     std::vector<LatticeNeighbor> translateSites(const std::vector<LatticeNeighbor> &, const unsigned int) const;
-    std::vector<std::vector<LatticeNeighbor>> getSitesTranslatedToUnitcell(const std::vector<LatticeNeighbor> &) const;
+    std::vector<std::vector<LatticeNeighbor>> getSitesTranslatedToUnitcell(const std::vector<LatticeNeighbor> &, bool sortit = true) const;
     std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<int>>> getMatchesInPM(const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<LatticeNeighbor> &) const;
 
     void transformSiteToSupercell(LatticeNeighbor &site, const Structure &superCell, std::unordered_map<LatticeNeighbor, LatticeNeighbor> &primToSuperMap) const;
@@ -150,8 +151,8 @@ class OrbitList
     }
     /// += a orbitlist to another, first assert that they have the same number of orbits or that this is empty and then add equivalent sites of orbit i of rhs to orbit i to ->this
     OrbitList &operator+=(const OrbitList &rhs_ol)
-    {   
-        if(size() == 0)
+    {
+        if (size() == 0)
         {
             _orbitList = rhs_ol.getOrbitList();
             return *this;
@@ -159,19 +160,36 @@ class OrbitList
 
         if (size() != rhs_ol.size())
         {
-            std::string errorMsg = "Error: lhs.size() and rhs.size() are not equal in  OrbitList& operator+= " + std::to_string(size()) + " != " +std::to_string(rhs_ol.size());
+            std::string errorMsg = "Error: lhs.size() and rhs.size() are not equal in  OrbitList& operator+= " + std::to_string(size()) + " != " + std::to_string(rhs_ol.size());
             throw std::runtime_error(errorMsg);
         }
-        
+
         for (size_t i = 0; i < rhs_ol.size(); i++)
         {
-            _orbitList[i].addEquivalentSites(rhs_ol.getOrbit(i).getEquivalentSites());
+            _orbitList[i] += rhs_ol.getOrbit(i); // .addEquivalentSites(.getEquivalentSites());
         }
         return *this;
     }
 
     OrbitList getSupercellOrbitlist(const Structure &superCell) const;
 
+    ///Adds the permutation information to the orbits
+    void addPermutationInformationToOrbits(const std::vector<LatticeNeighbor> &, const std::vector<std::vector<LatticeNeighbor>> &);
+    
+    ///Returns all columns from the given rows in permutation matrix    
+    std::vector<std::vector<LatticeNeighbor>> getAllColumnsFromRow(const std::vector<int> &, const std::vector<std::vector<LatticeNeighbor>> &, bool, bool sortIt=true ) const;
+    
+    ///First construct rows_sort = sorted(rows)  then returns true/false if rows_sort exists in taken_rows
+    bool isRowsTaken(const std::unordered_set<std::vector<int>, VectorHash> &taken_rows, std::vector<int> rows) const;
+
+    ///Will find the sites in col1, extract and return all columns along with their unit cell translated indistinguishable sites
+    std::vector<std::vector<LatticeNeighbor>> getAllColumnsFromSites(const std::vector<LatticeNeighbor> &, 
+        const std::vector<LatticeNeighbor> &,
+        const std::vector<std::vector<LatticeNeighbor>> & ) const;
+
+    ///Check that the lattice neighbors do not have any unitcell offsets in a pbc=false direction        
+    bool isSitesPBCCorrect(const std::vector<LatticeNeighbor> &sites) const;
+        
   private:
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;
     Structure _primitiveStructure;

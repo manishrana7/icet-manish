@@ -11,9 +11,11 @@ Welcome to icet's documentation!
    :caption: Contents:
 
    background
+   tutorials/index
    bibliography
    glossary
    genindex
+
 
 
 Indices and tables

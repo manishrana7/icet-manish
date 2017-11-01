@@ -15,10 +15,11 @@ Structure::Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &pos,
                      const std::vector<bool> &pbc)
 {
     setPositions(pos);
-    setStrElements(elements);    
+    setStrElements(elements);
     _cell = cell;
     _pbc = pbc;
     _uniqueSites.resize(elements.size());
+    _allowedComponents.resize(pos.rows());
 }
 
 /**
@@ -30,7 +31,6 @@ Returns the distance between two indices with MIC = false
 
 double Structure::getDistance(const int index1, const int index2) const
 {
-    
 
     if (index1 >= _positions.rows() or index2 >= _positions.rows())
     {

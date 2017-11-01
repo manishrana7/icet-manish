@@ -10,16 +10,35 @@ from icetdev.structure import structure_from_atoms
 from icetdev.tools.geometry import get_scaled_positions
 
 
+def __vacuum_on_non_pbc(atoms):
+    """ add vacuum to directions where pbc is false"""
+    vacuum_axis = []
+    for i,pbc in enumerate(atoms.pbc):
+        if not pbc:
+            vacuum_axis.append(i)
+
+    if len(vacuum_axis) > 0:
+        atoms.center(30, axis=vacuum_axis)
+        atoms.wrap()
+            
+    return atoms
+
 def __get_primitive_structure(atoms):
     """
     Returns primitive atoms object.
     """
-    lattice, scaled_positions, numbers = spglib.standardize_cell(
-        atoms, to_primitive=True)
 
+    atoms = __vacuum_on_non_pbc(atoms)
+    lattice, scaled_positions, numbers = spglib.standardize_cell(
+        atoms, to_primitive=True, no_idealize=True)
+
+
+    scaled_positions = [np.round(pos,12) for pos in scaled_positions]
+    
     # create the primitive atoms object
     atoms_prim = Atoms(scaled_positions=scaled_positions,
                        numbers=numbers, cell=lattice, pbc=atoms.pbc)
+    atoms_prim.wrap()                       
     return atoms_prim
 
 
@@ -104,11 +123,17 @@ def permutation_matrix_from_atoms(atoms, cutoff=None, find_prim=True, verbosity=
     atoms = atoms.copy()
     # set each element to the same since we only care about geometry when
     # taking primitive
-    atoms.set_chemical_symbols(len(atoms) * [atoms[0].symbol])
+    if len(atoms)>0:
+        atoms.set_chemical_symbols(len(atoms) * [atoms[0].symbol])
+    else:
+        raise Exception("Len of atoms are {}".format(len(atoms)))
+                
 
     atoms_prim = atoms
     if find_prim:
         atoms_prim = __get_primitive_structure(atoms)
+
+
 
     if verbosity >= 3:
         print("size of atoms_prim {}".format(len(atoms_prim)))
