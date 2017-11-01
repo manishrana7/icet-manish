@@ -58,7 +58,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'icet'
-copyright = u'2016, Mattias Ångqvist'
+copyright = u'2017, Mattias Ångqvist'
 author = u'Mattias Ångqvist'
 
 # The version info for the project you're documenting, acts as replacement for

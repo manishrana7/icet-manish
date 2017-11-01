@@ -4,12 +4,12 @@
    single: Tutorials; construction of clustervector
 
 Construction of a clustervector 
-********************************************
+===================================
 
 This example demonstrates the generation of a clustervector.
 
 Step 1: Prepare your clusterspace  
-*********************************
+----------------------------------
 To be able to construct a clustervector first you need to define the clusterspace, i.e. what clusters and subelements will be considered
 when mapping a crystal structure into a clustervector. In icet the clusterspace object keeps track of all these definitions.
 of this clusterspace. First we want to define the lattice. Here we use
@@ -47,8 +47,8 @@ To summarize here are the final example script needed to setup a basic clustersp
 
 .. literalinclude:: ../../../../examples/get_clustervector.py
    :language: python
-   :start-after: #Step 1
-   :end-before: #Step 1.1
+   :start-after: # Step 1
+   :end-before: # Step 1.1
 
 To get information about the clusters included we could simple print the clusterspace
 
@@ -88,7 +88,7 @@ To get information about the clusters included we could simple print the cluster
 
 
 Step 2: Get a clustervector
-***************************
+----------------------------------
 When a clusterspace has been initialized it can find the clustervector from a structure based on the same lattice and subelements.
 
 Let's again construct a bulk crystal structure but this time let it contain a few more atoms,
@@ -108,3 +108,47 @@ Now a clustervetor can be retrieved by:
     print(cv)
 
     
+    [1.0, -1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+
+The first element in a clustervector is always a 1. To know what the subsequent elements correspond to we can look at the 
+clusterspace information we got when printing. The first cluster is made from only one site in the lattice and is this the singlet and
+will end up on the second element in the clustervector. This has a value of -1 meaning that Si has a "element spin" of -1. Next are three pairs, here the values 
+are 1.0 since these will all be the spin squared. The remaining elements in the clustervectors are -1 since these have their spin cubed.
+
+
+Let's insert a germanium in the supercell and get the clustervector:
+
+.. literalinclude:: ../../../../examples/get_clustervector.py
+   :language: python
+   :start-after: # Step 3
+   
+
+Resulting with
+
+.. code-block:: python
+
+    [1.0, -0.875, 0.75, 0.75, 0.75, -0.625, -0.625, -0.625, -0.625, -0.625, -0.625, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+
+
+Now the singlet became -0.875 since the supercell is a 2x2x2 with 2 atoms in the basis since
+
+.. math::
+
+    \left ( -1\sum Si  + \sum Ge \right ) / 16 = (-15+1)/16 = -0.875.
+
+
+Similarly we can understand the 0.75 for pairs by imagining that a site can, for each pair, form x bonds. All Si-Si and Ge-Ge bonds will
+contribute with 1/multicplicty to the clustervector-element. Thus the site that changed from one Si to a Ge will create x Si-Ge bonds out of a total x * 2x2x2 bonds (no double counting a bond).
+Thus:
+
+.. math::
+
+    (((8-1)x - x)/8x = 0.75
+
+
+Entire example script:
+----------------------------------
+
+.. literalinclude:: ../../../../examples/get_clustervector.py
+   :language: python
+
