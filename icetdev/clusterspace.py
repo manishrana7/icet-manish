@@ -3,6 +3,8 @@ from icetdev import Structure
 from icetdev.structure import structure_from_atoms
 from icetdev.orbitList import create_orbit_list
 from ase import Atoms
+from icetdev import permutationMap
+import numpy
 
 
 def create_clusterspace(crystal_structure, cutoffs, subelements, Mi=None, verbosity=0):
@@ -16,7 +18,7 @@ def create_clusterspace(crystal_structure, cutoffs, subelements, Mi=None, verbos
     atoms: ASE atoms object (bi-optional)
         The structure on which to base the clusterspace on.
         Atleast one of structure or atoms need to be non-None
-    structure: icet structure object (bi-optional)         
+    structure: icet structure object (bi-optional)
         The structure on which to base the clusterspace on.
         Atleast one of structure or atoms need to be non-None
     verbosity: int
@@ -87,7 +89,7 @@ def __represent_clusterspace(self):
         if len(self) > print_threshold and i > 10 and i < len(self) - 10:
             i = len(self) - 10
             rep += "\n...... \n\n"
-        
+
         clusterspace_info = self.get_clusterspace_info(i)
         orbit_index = clusterspace_info[0]
         mc_vector = clusterspace_info[1]
@@ -95,7 +97,8 @@ def __represent_clusterspace(self):
         cluster = self.get_orbit(orbit_index).get_representative_cluster()
         multiplicity = len(self.get_orbit(orbit_index).get_equivalent_sites())
 
-        rep += " {0} : {1:.4f} : {2} : ({3} : {4}) : {5}".format( len(cluster), cluster.get_geometrical_size(), multiplicity, i, orbit_index, mc_vector)
+        rep += " {0} : {1:.4f} : {2} : ({3} : {4}) : {5}".format(len(
+            cluster), cluster.get_geometrical_size(), multiplicity, i, orbit_index, mc_vector)
 
         rep += "\n"
         i += 1
@@ -109,10 +112,10 @@ def get_singlet_info(crystal_structure, return_clusterspace=False):
     """
     Get information about the singlets in this structure.
 
-    crystal_structure: icet structure object or ASE atoms object       
+    crystal_structure: icet structure object or ASE atoms object
 
     return_clusterspace: bool
-        If true it will return the created clusterspace        
+        If true it will return the created clusterspace
     """
 
     # if structure==None:
@@ -182,7 +185,7 @@ def get_Mi_from_dict(Mi, structure):
     """
     Mi maps orbit index to allowed components
     this function will return a list, where
-    Mi_ret[i] will be the allowed components on site index i    
+    Mi_ret[i] will be the allowed components on site index i
 
     """
     cluster_data = get_singlet_info(structure)
@@ -200,22 +203,35 @@ def get_Mi_from_dict(Mi, structure):
 
 
 def __get_clustervector(self, crystal_structure):
-    """ 
-    Get clustervector
-    
-    crystal_structure: either an ASE Atoms object or icet structure
-    
-    
     """
+    Get clustervector
 
+    crystal_structure: either an ASE Atoms object or icet structure
+
+
+    """
+    # Check that final format is Structure
     if isinstance(crystal_structure, Atoms):
-            structure = structure_from_atoms(crystal_structure)
+        structure = structure_from_atoms(crystal_structure)
     elif not isinstance(crystal_structure, Structure):
         print(type(crystal_structure))
         raise Exception(
             "Error: no known crystal structure format added to function create_clusterspace")
     else:
         structure = crystal_structure
+
+    # if pbc is not true one needs to massage the structure a bit
+    if not numpy.array(structure.get_pbc()).all() == True:
+        atoms = structure.to_atoms()
+        permutationMap.__vacuum_on_non_pbc(atoms)
+        structure = structure_from_atoms(atoms)
+    else:
+        atoms = structure.to_atoms()
+        atoms.wrap()
+        structure = structure_from_atoms(atoms)
+  
+
     return self._get_clustervector(structure)
+
 
 ClusterSpace.get_clustervector = __get_clustervector

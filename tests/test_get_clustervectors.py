@@ -19,20 +19,20 @@ def generateRandomStructure(atoms_prim, subelements):
     and fill it randomly with elements in subelements
     """
 
-    repeat = [1]*3
+    repeat = [1] * 3
     for i, pbc in enumerate(atoms_prim.pbc):
         if pbc:
             repeat[i] = 5
 
-    
     atoms = atoms_prim.copy().repeat(repeat)
-    
+
     for at in atoms:
         element = random.choice(subelements)
         at.symbol = element
 
     if len(atoms) < len(atoms_prim):
-        raise Exception("Error: generate random structure produced a smaller system")
+        raise Exception(
+            "Error: generate random structure produced a smaller system")
     return atoms
 
 
@@ -42,8 +42,8 @@ def generateCVSet(n, atoms_prim, subelements, clusterspace):
     """
     clustervectors = []
     for i in range(n):
-        conf = generateRandomStructure(atoms_prim, subelements)        
-            
+        conf = generateRandomStructure(atoms_prim, subelements)
+
         conf = structure_from_atoms(conf)
         cv = clusterspace.get_clustervector(conf)
         clustervectors.append(cv)
@@ -59,11 +59,10 @@ def getColumnCorrelation(i, j, cv_matrix):
     """
     col_i = cv_matrix[:, i]
     col_j = cv_matrix[:, j]
-    
-    
+
     corr = np.dot(col_i, col_j) / \
         (np.linalg.norm(col_i) * np.linalg.norm(col_j))
-          
+
     return corr
 
 
@@ -73,7 +72,7 @@ def assertNoCorrelation(cvs, tol=0.99):
     """
     cvs_matrix = np.array(cvs)
     for i in range(len(cvs[0])):
-        if i == 0: #dont loop over zerolet since this is always ones
+        if i == 0:  # dont loop over zerolet since this is always ones
             continue
         for j in range(len(cvs[0])):
             if j <= i:
@@ -88,18 +87,11 @@ db = connect("structures_for_testing.db")
 subelements = ["H", "He", "Pb"]
 for row in db.select():
     atoms_row = row.toatoms()
-    atoms_tag = row.tag
-    cutoffs = [1.4] * 3
-    if len(atoms_row) == 0:
-        continue
-    if atoms_row.get_pbc().all() == True:
-        atoms_row.wrap()
-    if True: # atoms_row.get_pbc().all() == True:
-        print("Testing finding cv for structure: {} with cutoffs {}".format(atoms_tag, cutoffs))
-        
-        clusterspace = create_clusterspace(atoms_row,cutoffs,subelements)
-        if not atoms_row.get_pbc().all() == True:
-            permutationMap.__vacuum_on_non_pbc(atoms_row)
 
-        cvs = generateCVSet(5, atoms_row, subelements, clusterspace)
-            
+    cutoffs = [1.4] * 3
+
+    print("Testing finding cv for structure: {} with cutoffs {}".format(
+        row.tag, cutoffs))
+
+    clusterspace = create_clusterspace(atoms_row, cutoffs, subelements)
+    cvs = generateCVSet(5, atoms_row, subelements, clusterspace)
