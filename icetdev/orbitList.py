@@ -5,6 +5,7 @@ from icetdev.manybodyNeighborlist import ManybodyNeighborlist
 from _icetdev import OrbitList
 from icetdev.neighborlist import get_neighborlists
 from icetdev.permutationMap import permutation_matrix_from_atoms
+
 def __fractional_to_position(structure, row):
     """
     Return real xyz positions from fractional positions
@@ -29,15 +30,28 @@ def __get_latNbr_permutation_matrix(structure, permutation_matrix, prune=True, v
     pm_latNbrs = []
     for row in pm_frac:
         positions = __fractional_to_position(structure, row)
-        lat_nbrs = structure.findLatticeNeighborsFromPositions(positions)
-        pm_latNbrs.append(lat_nbrs)
-
+        lat_nbrs = []
+        if structure.pbc == [True, True, True]:
+            lat_nbrs = structure.findLatticeNeighborsFromPositions(positions)
+        else:
+            for pos in positions:
+                try:
+                    lat_nbr = structure.findLatticeNeighborFromPosition(pos)
+                    lat_nbrs.append(lat_nbr)
+                except:
+                    continue                            
+        if len(lat_nbrs) >0:
+            pm_latNbrs.append(lat_nbrs)
+        else:
+            print("lat nbrs are zero")            
     if prune:
         if verbosity >2:
             print("size before pruning {} ".format(len(pm_latNbrs)))
         pm_latNbrs = __prune_permutation_matrix(pm_latNbrs, verbosity=0)
-        if verbosity >2:
+        if verbosity > 2:
             print("size after pruning {} ".format(len(pm_latNbrs)))
+    
+            
     return pm_latNbrs
 
 
@@ -93,7 +107,7 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
 
     t0 = time.time()
     #transform permutation_matrix to be in lattice neigbhor format
-    pm_lattice_neighbors = __get_latNbr_permutation_matrix(prim_structure, permutation_matrix, verbosity)
+    pm_lattice_neighbors = __get_latNbr_permutation_matrix(prim_structure, permutation_matrix, prune=True, verbosity=verbosity)
     t1 = time.time()
     time_taken = t1 - t0
     total_time_taken += time_taken

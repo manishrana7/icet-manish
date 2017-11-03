@@ -24,7 +24,7 @@ class PermutationMap
     {
         _translations = translations;
         _rotations = rotations;
-        symprec = 1e-5;
+        symprec = 1e-7;
     }
 
     ///Build the permutationmap usng the input positions

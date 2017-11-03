@@ -23,18 +23,17 @@ Cluster::Cluster(const Structure &structure, const std::vector<LatticeNeighbor> 
         }
     }
 
-    // std::cout<<latticeNeighbors.size() << " "<<sites.size()<<" "<< distances.size()<<std::endl;
-    // for(auto latnbr : latticeNeighbors)
-    // {
-    //     latnbr.print();
-    // }
-    // std::cout<<"===="<<std::endl;
+
     _sites = sites;
     _distances = distances;
     _sortedCluster = sortedCluster;
     _clusterTag = clusterTag;
+    _geometricalSize = icet::getGeometricalRadius(latticeNeighbors, structure);
     if (_sortedCluster)
     {
         sortCluster();
     }
 }
+
+
+
