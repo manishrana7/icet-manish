@@ -1,7 +1,5 @@
-
 from __future__ import print_function
 import os
-import sys
 import unittest
 from glob import glob
 
@@ -41,7 +39,7 @@ def run_test(verbosity=2, files=None):
 
     test_dir = os.path.dirname(os.path.realpath(__file__))
     testSuite = unittest.TestSuite()
-    
+
     files = glob(test_dir + '/*')
     sdirtests = []  # tests from subdirectories: only one level assumed
     tests = []
@@ -71,5 +69,5 @@ def run_test(verbosity=2, files=None):
 
 if __name__ == '__main__':
     results = run_test()
-    assert len(results.failures) == 0, "ERROR: all tests did not succeed: "
-    assert len(results.errors) == 0, "ERROR: all tests did not succeed "
+    assert len(results.failures) == 0, "ERROR: at least one test failed"
+    assert len(results.errors) == 0, "ERROR: at least one test failed"
