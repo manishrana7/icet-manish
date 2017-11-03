@@ -19,7 +19,7 @@ def __vacuum_on_non_pbc(atoms):
 
     if len(vacuum_axis) > 0:
         atoms.center(30, axis=vacuum_axis)
-        atoms.wrap()
+    atoms.wrap()
             
     return atoms
 

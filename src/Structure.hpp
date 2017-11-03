@@ -210,20 +210,21 @@ class Structure
         Vector3d fractional = _cell.transpose().partialPivLu().solve(position);
         
         // Vector3d fractional = cell2.transpose().partialPivLu().solve(position);
-        // std::cout << "fractional " << fractional << std::endl;
+        //  std::cout << "1 fractional " << fractional << std::endl;
         // Vector3d unitcellOffset = {int(round(fractional[0])), int(round(fractional[1])), int(round(fractional[2]))};
-        Vector3d unitcellOffset = {int(floor(coordinateRound((double)fractional[0]))),
-                                   int(floor(coordinateRound((double)fractional[1]))),
-                                   int(floor(coordinateRound((double)fractional[2])))};
-        // std::cout << "unitcellOffset " << unitcellOffset << std::endl;
-        for (int i = 0; i < 3; i++)
+        Vector3d unitcellOffset;
+        for(int i=0; i < 3; i++)
         {
-            if (!has_pbc(i))
+            unitcellOffset[i] = int(floor(coordinateRound((double)fractional[i])));
+            if ( fabs(unitcellOffset[i] - fractional[i]) > (1.0-position_tolerance)   && has_pbc(i))
             {
-                // fractional[i]=0;
-                // unitcellOffset[i]=0;
-            }
+                unitcellOffset[i] =    int(round(fractional[i]));
+            } 
         }
+        // {int(floor(coordinateRound((double)fractional[0]))),
+        //                            int(floor(coordinateRound((double)fractional[1]))),
+        //                            int(floor(coordinateRound((double)fractional[2])))};
+        //  std::cout << "2 unitcellOffset " << unitcellOffset << std::endl;
         Vector3d remainder = (fractional - unitcellOffset).transpose() * _cell;
 
         // std::cout << "remainder " << remainder << std::endl;
@@ -260,6 +261,8 @@ class Structure
         LatticeNeighbor ret = LatticeNeighbor(index, unitcellOffset);
         return ret;
     }
+
+
 
     ///Round to nearest integer toward zero
     int nearestIntegerTowardZero(const double value) const
