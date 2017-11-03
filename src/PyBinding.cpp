@@ -26,7 +26,14 @@ PYBIND11_PLUGIN(_icetdev)
         .def(py::init<const Eigen::Matrix<double, Dynamic, 3, Eigen::RowMajor> &,
                       const std::vector<std::string> &,
                       const Eigen::Matrix3d &,
-                      const std::vector<bool> &>())
+                      const std::vector<bool> &,
+                      double>(),
+             "Initialize a structure.",
+             py::arg("positions"),
+             py::arg("elements"),
+             py::arg("cell"),
+             py::arg("pbc"),
+             py::arg("precision") = 1e-5)
         .def("set_positions", &Structure::setPositions)
         .def("set_elements", &Structure::setElements)
         .def("get_elements", &Structure::getElements)
@@ -37,12 +44,15 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_position", &Structure::getPosition)
         .def("get_distance", &Structure::getDistance)
         .def("get_distance2", &Structure::getDistance2)
-        .def("find_index_of_position_pybind", &Structure::findIndexOfPosition,
-             py::arg("position"), py::arg("position_tolerance") = 1e-5)
-        .def("findLatticeNeighborFromPosition", &Structure::findLatticeNeighborFromPosition,
-             py::arg("position"), py::arg("position_tolerance") = 1e-5)
-        .def("findLatticeNeighborsFromPositions", &Structure::findLatticeNeighborsFromPositions,
-             py::arg("positions"), py::arg("position_tolerance") = 1e-5)
+        .def("find_index_of_position_pybind",
+             &Structure::findIndexOfPosition,
+             py::arg("position"))
+        .def("findLatticeNeighborFromPosition",
+             &Structure::findLatticeNeighborFromPosition,
+             py::arg("position"))
+        .def("findLatticeNeighborsFromPositions",
+             &Structure::findLatticeNeighborsFromPositions,
+             py::arg("positions"))
         .def("has_pbc", &Structure::has_pbc)
         .def("get_pbc", &Structure::get_pbc)
         .def("set_pbc", &Structure::set_pbc)
@@ -120,7 +130,7 @@ PYBIND11_PLUGIN(_icetdev)
             {
                 py::dict d;
                 for (const auto &vecInt_intPair : mapPair.second)
-                {   
+                {
                     d[py::tuple(py::cast(vecInt_intPair.first))] = vecInt_intPair.second;
                 }
                 clusterCountDict[py::cast(mapPair.first)] = d;
@@ -136,7 +146,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_representative_cluster", &Orbit::getRepresentativeCluster)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
         .def("get_representative_sites", &Orbit::getRepresentativeSites)
-        .def("get_equivalent_sites_permutations", &Orbit::getEquivalentSitesPermutations)        
+        .def("get_equivalent_sites_permutations", &Orbit::getEquivalentSitesPermutations)
         .def("get_sites_with_permutation", &Orbit::getSitesWithPermutation)
         .def("size", &Orbit::size)
         .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
@@ -169,7 +179,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_prim_to_supercell_map", &LocalOrbitlistGenerator::getPrimToSupercellMap)
         .def("get_unique_primcell_offsets", &LocalOrbitlistGenerator::getUniquePrimcellOffsets);
 
-        py::class_<ClusterSpace>(m, "ClusterSpace",py::dynamic_attr())        
+        py::class_<ClusterSpace>(m, "ClusterSpace",py::dynamic_attr())
         .def(py::init<std::vector<int>, std::vector<std::string>, const OrbitList &>())
         .def("_get_clustervector",&ClusterSpace::generateClustervector)
         .def("get_orbit", &ClusterSpace::getOrbit)

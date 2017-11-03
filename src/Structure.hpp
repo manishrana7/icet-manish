@@ -7,264 +7,172 @@
 #include <string>
 #include "PeriodicTable.hpp"
 #include "LatticeNeighbor.hpp"
-using namespace Eigen;
 
+using namespace Eigen;
 namespace py = pybind11;
 
+/**
+  @brief Class for storing a structure.
+  @details This class stores the cell metric, positions, chemical symbols, and
+  periodic boundary conditions. It also holds information pertaining to the
+  components that are allowed on each site. It also provides functionality for
+  computing e.g., distances between sites.
+  @todo rename element/elements/_elements to atomicNumber/atomicNumbers/_atomicNumbers
+*/
 class Structure
 {
   public:
+
+    /// Constructor.
     Structure(){};
+
+    /// Constructor.
     Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &,
               const std::vector<std::string> &,
               const Eigen::Matrix3d &,
-              const std::vector<bool> &);
+              const std::vector<bool> &,
+              double);
 
+    /// Return distance vector between two sites.
     double getDistance(const int, const int) const;
 
-    /**
-        Returns the distance for index1 with unitcell offset offset 1 to index2 with unit-cell offset offset2
+    /// Return distance vector between two sites.
+    double getDistance2(const int, const Vector3d, const int, const Vector3d) const;
 
-        @TODO: use overloading here instead
-    */
-    double getDistance2(const int index1, const Vector3d offset1,
-                        const int index2, const Vector3d offset2) const
-    {
-        if (index1 >= _positions.rows() or index2 >= _positions.rows())
-        {
-            throw std::out_of_range("Error: Tried accessing position at out of bound index. Structure::getDistance2");
-        }
-        Vector3d pos1 = _positions.row(index1) + offset1.transpose() * _cell;
-        Vector3d pos2 = _positions.row(index2) + offset2.transpose() * _cell;
-        return (pos1 - pos2).norm();
-    }
+    /// Return the position of a site in Cartesian coordinates.
+    Vector3d getPosition(const LatticeNeighbor &) const;
 
-    // Getters - Setters
-    void setPositions(const Eigen::Matrix<double, Dynamic, 3> &positions)
-    {
-        _positions = positions;
-    }
+    /// Return atomic number of site.
+    int getElement(const unsigned int) const;
 
-    ///Get position from a lattice neighbor
-    Vector3d getPosition(const LatticeNeighbor &latticeNeighbor) const
-    {
-        if (latticeNeighbor.index >= _positions.rows() || latticeNeighbor.index < 0)
-        {
-            throw std::out_of_range("Error: Tried accessing position at out of bound index. Structure::getPosition");
-        }
-        Vector3d position = _positions.row(latticeNeighbor.index) + latticeNeighbor.unitcellOffset.transpose() * _cell;
-        return position;
-    }
+    /// Return the list of unique sites.
+    std::vector<int> getUniqueSites() const { return _uniqueSites; }
 
-    ///Return positions
-    Eigen::Matrix<double, Dynamic, 3, RowMajor> getPositions() const
-    {
-        return _positions;
-    }
+    /// Set list of unique sites.
+    /// @todo add example for how the unique sites are supposed to work.
+    void setUniqueSites(const std::vector<int> &);
 
-    /**set elements using a string vector 
-    @TODO: think about overloading to setElements
-    */
+    /// Return a unique site.
+    /// @todo rename to getUniqueSite
+    int getSite(const size_t) const;
+
+    /// Return index of site that matches the given position.
+    /// @todo rename to findSiteByPosition
+    int findIndexOfPosition(const Vector3d &) const;
+
+    /// Return LatticeNeighbor object that matches the given position.
+    /// @todo rename to findLatticeNeighborByPosition
+    LatticeNeighbor findLatticeNeighborFromPosition(const Vector3d &) const;
+
+    /// Return list of LatticeNeighbor objects that matche a given list of positions.
+    std::vector<LatticeNeighbor> findLatticeNeighborsFromPositions(const std::vector<Vector3d> &) const;
+
+
+  public:
+
+    /// Return the size of the structure, i.e., the number of sites.
+    size_t size() const { return (_elements.size()); }
+
+    // Set the atomic positions.
+    void setPositions(const Eigen::Matrix<double, Dynamic, 3> &positions) { _positions = positions; }
+
+    /// Return positions.
+    Eigen::Matrix<double, Dynamic, 3, RowMajor> getPositions() const { return _positions; }
+
+    /// Set elements.
+    /// @todo Rename to setAtomicNumbers
+    /// @todo Rename to setChemicalSymbols
+    /// @todo Think about overloading to setElements
+    void setElements(const std::vector<int> &elements) { _elements = elements; }
     void setStrElements(const std::vector<std::string> &elements)
     {
         _strelements = elements;
         setElements(convertStrElements(_strelements));
     }
-    ///return the elements as strings
-    std::vector<std::string> getStrElements() const
-    {
-        return _strelements;
-    }
 
-    ///set elements using integer vector
-    void setElements(const std::vector<int> &elements)
-    {
-        _elements = elements;
-    }
-    ///get elements as vector<int>
-    std::vector<int> getElements() const
-    {
-        return _elements;
-    }
+    /// Return elements.
+    std::vector<int> getElements() const { return _elements; }
+    std::vector<std::string> getStrElements() const { return _strelements; }
 
-    /// Get integer element of index i
-    int getElement(const unsigned int i) const
+    /**
+      @brief Return periodic boundary condition along a given direction.
+      @details Return True if periodic boundary conditions are active along direction.
+      @param k index to direction [0, 1, 2]
+    **/
+    bool has_pbc(const int k) const { return _pbc[k]; }
+
+    /// Return periodic boundary conditions.
+    std::vector<bool> get_pbc() const { return _pbc; }
+
+    /// Set periodic boundary conditions.
+    void set_pbc(const std::vector<bool> pbc) { _pbc = pbc; }
+
+    /// Set the cell metric.
+    /// @todo switch to CamelCase
+    void set_cell(const Eigen::Matrix<double, 3, 3> &cell) { _cell = cell; }
+
+    /// Return the cell metric.
+    /// @todo switch to CamelCase
+    Eigen::Matrix<double, 3, 3> get_cell() const { return _cell; }
+
+    /// Set allowed components for each site.
+    /// @todo rename to setNumberOfAllowedComponents
+    void setAllowedComponents(const std::vector<int> &);
+    void setAllowedComponents(const int numberOfAllowedComponents);
+
+    /// Return number of allowed components on each site.
+    /// @todo rename to getNumberOfAllowedComponents
+    int getMi(const unsigned int) const;
+
+    /// Set tolerance.
+    void setTolerance(double tolerance) { _tolerance = tolerance; }
+
+    /// Return tolerance.
+    double getTolerance() const { return _tolerance; }
+
+
+  private:
+
+    /**
+      @brief Convert chemical symbols to atomic numbers.
+      @param elements vector of strings to be converted
+      @todo rename to convertChemicalSymbolsToAtomicNumbers
+    **/
+    std::vector<int> convertStrElements(const std::vector<std::string> &elements)
     {
-        if (i >= _elements.size())
+        std::vector<int> intElements(elements.size());
+        for (int i = 0; i < elements.size(); i++)
         {
-            std::string errorMessage = "Error: out of range in function get element:index : elements.size()  _elements.size() ";
-            errorMessage += std::to_string(i) + " : ";
-            errorMessage += std::to_string(_elements.size());
-            throw std::out_of_range(errorMessage);
+            intElements[i] = PeriodicTable::strInt[elements[i]];
         }
-
-        return _elements[i];
-    }
-
-    ///Set the symmetrically distinct sites using vector<int> where length of vector should match number of positions
-    void setUniqueSites(const std::vector<int> &sites)
-    {
-        if (sites.size() != _positions.rows())
-        {
-            throw std::out_of_range("Sites are not the same size as positions");
-        }
-        _uniqueSites = sites;
-    }
-    ///Returns the symettrically distinct sites if index i and index j has the same unique site they are considered equal
-    std::vector<int> getUniqueSites() const
-    {
-        return _uniqueSites;
-    }
-    ///Return the symmetrically distinct site
-    int getSite(const size_t i) const
-    {
-        if (i >= _uniqueSites.size())
-        {
-            std::string errorMessage = "Error: out of range in function getSite : index :  _uniqueSites.size() ";
-            errorMessage += std::to_string(i) + " : ";
-            errorMessage += std::to_string(_uniqueSites.size());
-
-            throw std::out_of_range(errorMessage);
-        }
-        return _uniqueSites[i];
-    }
-
-    ///rTrue if this structure has pbc along cell axis k
-    bool has_pbc(const int k) const
-    {
-        return _pbc[k];
-    }
-    ///return the pbc vector
-    std::vector<bool> get_pbc() const
-    {
-        return _pbc;
-    }
-    ///set the pbc vector
-    void set_pbc(const std::vector<bool> pbc)
-    {
-        _pbc = pbc;
-    }
-    ///set the lattice cell matrix
-    void set_cell(const Eigen::Matrix<double, 3, 3> &cell)
-    {
-        _cell = cell;
-    }
-    ///returns the lattice cell matrix
-    Eigen::Matrix<double, 3, 3> get_cell() const
-    {
-        return _cell;
-    }
-
-    ///Returns size of the structure i.e. number of atoms, sites, or positions in the structure
-    size_t size() const
-    {
-        if (_elements.size() != _positions.rows())
-        {
-            throw std::out_of_range("Error: Positions and elements do not match in size");
-        }
-        return (_elements.size());
+        return intElements;
     }
 
     /**
-    Search for the position and returns the index of the found position.
-
-    If it does not find the position it will return -1
-
-    argument: const double position_tolerance if the norm of difference of positions is less than this
-    then equality is assumed.
-    */
-    int findIndexOfPosition(const Vector3d &position, const double position_tolerance = 1e-5) const
+      @brief Convert chemical symbols to atomic numbers.
+      @param elements vector of strings to be converted
+      @todo rename to convertAtomicNumbersToChemicalSymbols
+    **/
+    std::vector<std::string> convertIntElements(const std::vector<int> &elements)
     {
-        for (size_t i = 0; i < _positions.rows(); i++)
+        std::vector<std::string> strElements(elements.size());
+        for (int i = 0; i < elements.size(); i++)
         {
-            if ((_positions.row(i).transpose() - position).norm() < position_tolerance)
-            {
-                return i;
-            }
+            strElements[i] = PeriodicTable::intStr[elements[i]];
         }
-
-        return -1;
+        return strElements;
     }
 
-    /**
-    Finds the LatticeNeigbhor object from the position.
-
-    The algorithm works by first extracting the fractional position.
-    From the fractional position the unitcelloffset is taken by rounding the fractional coordinates to the nearest integer.
-    When subtracting the fractional position with the unitcelloffset and taking the dot product with the cell 
-    the remainder position is found.
-
-    The index is found by searching for the remainder position in structure.
-
-    if no index is found a runtime_error gets thrown.
-    */
-    LatticeNeighbor findLatticeNeighborFromPosition(const Vector3d &position, const double position_tolerance = 1e-5) const
+    /// Round float number to given tolerance.
+    /// @todo rename to roundFloat
+    /// @todo move to a more general location.
+    double coordinateRound(const double &val, const double rounding_tolerance = 1e-7) const
     {
-
-        ///ldlt require positive or negative semidefinite cell
-        // std::cout << "position " << position << std::endl;
-        //  std::cout<<"cell "<< _cell<<std::endl;
-        //  Vector3d position = {coordinateRound(position1[0]), coordinateRound(position1[1]), coordinateRound(position1[2]) };
-
-         
-        Vector3d fractional = _cell.transpose().partialPivLu().solve(position);
-        
-        // Vector3d fractional = cell2.transpose().partialPivLu().solve(position);
-        //  std::cout << "1 fractional " << fractional << std::endl;
-        // Vector3d unitcellOffset = {int(round(fractional[0])), int(round(fractional[1])), int(round(fractional[2]))};
-        Vector3d unitcellOffset;
-        for(int i=0; i < 3; i++)
-        {
-            unitcellOffset[i] = int(floor(coordinateRound((double)fractional[i])));
-            if ( fabs(unitcellOffset[i] - fractional[i]) > (1.0-position_tolerance)   && has_pbc(i))
-            {
-                unitcellOffset[i] =    int(round(fractional[i]));
-            } 
-        }
-        // {int(floor(coordinateRound((double)fractional[0]))),
-        //                            int(floor(coordinateRound((double)fractional[1]))),
-        //                            int(floor(coordinateRound((double)fractional[2])))};
-        //  std::cout << "2 unitcellOffset " << unitcellOffset << std::endl;
-        Vector3d remainder = (fractional - unitcellOffset).transpose() * _cell;
-
-        // std::cout << "remainder " << remainder << std::endl;
-
-        auto index = findIndexOfPosition(remainder, position_tolerance);
-        if (index == -1)
-        {
-            std::cout << "Positions" << std::endl;
-            for (int i = 0; i < size(); i++)
-            {
-                Vector3d pos = _positions.row(i);
-                std::cout << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
-            }
-            std::cout << "Positions done" << std::endl;
-            ///ldlt require positive or negative semidefinite cell
-            std::cout << "position " << position << std::endl;
-            std::cout << "cell " << _cell << std::endl;
-            // std::cout<<"cell2 "<< cell2<<std::endl;
-            std::cout << "pbc " << std::boolalpha << _pbc[0] << " " << _pbc[1] << " " << _pbc[2] << std::endl;
-            std::cout << "fractional " << fractional << std::endl;
-            // Vector3d unitcellOffset = {int(round(fractional[0])), int(round(fractional[1])), int(round(fractional[2]))};
-            std::cout << "unitcellOffset " << unitcellOffset << std::endl;
-            std::cout << "remainder " << remainder << std::endl;
-
-            throw std::runtime_error("Did not find position in function findLatticeNeighborFromPosition in Structure");
-        }
-        for (int i = 0; i < 3; i++)
-        {
-            if (!has_pbc(i) && unitcellOffset[i] != 0)
-            {
-                throw std::runtime_error("Error, created a lattice neigbor with a unitcell offset in a pbc=false direction");
-            }
-        }
-        LatticeNeighbor ret = LatticeNeighbor(index, unitcellOffset);
-        return ret;
+        return round(val * 1.0 / rounding_tolerance) / (1.0 / rounding_tolerance);
     }
 
-
-
-    ///Round to nearest integer toward zero
+    /// Round to nearest integer toward zero.
+    /// @todo move to a more general location.
     int nearestIntegerTowardZero(const double value) const
     {
         if (value > 0)
@@ -276,86 +184,33 @@ class Structure
             return int(floor(value));
         }
     }
-    /**
-    Finds a vector of lattice neigbhors from a vector of positions
-
-    */
-    std::vector<LatticeNeighbor> findLatticeNeighborsFromPositions(const std::vector<Vector3d> &positions, const double position_tolerance = 1e-5) const
-    {
-        std::vector<LatticeNeighbor> latNbrVector;
-        latNbrVector.reserve(positions.size());
-
-        for (const Vector3d position : positions)
-        {
-            latNbrVector.push_back(findLatticeNeighborFromPosition(position, position_tolerance));
-        }
-
-        return latNbrVector;
-    }
-
-    /// Return number of allowed components on site i
-    int getMi(const unsigned int i) const
-    {
-        if (i >= _allowedComponents.size())
-        {
-            std::string errorMessage = "Error: out of range in function getMi : index :  _allowedComponents.size() ";
-            errorMessage += std::to_string(i) + " : ";
-            errorMessage += std::to_string(_allowedComponents.size());
-
-            throw std::out_of_range(errorMessage);
-        }
-        return _allowedComponents[i];
-    }
-
-    ///Set allowed components on each site
-    void setAllowedComponents(const std::vector<int> &allowedComponents)
-    {
-        if(allowedComponents.size() != size())
-        {
-            std::string errMSG = "Error: Input allowed components is a different size than structure: allowed comps != structure.size():= " +std::to_string(allowedComponents.size()) + " != "+ std::to_string(size());
-            throw std::out_of_range(errMSG);
-        }
-        _allowedComponents = allowedComponents;
-    }
-
-    void setAllowedComponents(const int allowedComponents)
-    {
-        std::vector<int> allowedComps(_elements.size(), allowedComponents);
-        _allowedComponents = allowedComps;
-    }
 
   private:
+
+    /// Positions of sites.
     Eigen::Matrix<double, Dynamic, 3, RowMajor> _positions;
+
+    /// Cell metric.
     Eigen::Matrix3d _cell;
+
+    /// List of atomic numbers.
     std::vector<int> _elements;
+
+    /// List of chemical symbols
+    /// @todo get rid of it; the information should only be generated on-demand
     std::vector<std::string> _strelements;
+
+    /// Periodic boundary conditions.
     std::vector<bool> _pbc;
+
+    /// List of unique sites.
+    /// @todo currently not used
     std::vector<int> _uniqueSites;
-    std::vector<int> _allowedComponents;
 
-    std::vector<int> convertStrElements(const std::vector<std::string> &elements)
-    {
-        std::vector<int> intElements(elements.size());
-        for (int i = 0; i < elements.size(); i++)
-        {
-            intElements[i] = PeriodicTable::strInt[elements[i]];
-        }
-        return intElements;
-    }
+    /// List of the number of allowed components on each site.
+    std::vector<int> _numbersOfAllowedComponents;
 
-    std::vector<std::string> convertIntElements(const std::vector<int> &elements)
-    {
-        std::vector<std::string> strElements(elements.size());
-        for (int i = 0; i < elements.size(); i++)
-        {
-            strElements[i] = PeriodicTable::intStr[elements[i]];
-        }
-        return strElements;
-    }
-    ///rounds val to precision
-    double coordinateRound(const double &val) const
-    {
-        double precision = 1e-7;
-        return round(val * 1.0 / precision) / (1.0 / precision);
-    }
+    /// tolerance used for rounding positions.
+    double _tolerance;
+
 };
