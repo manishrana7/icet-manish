@@ -1,5 +1,8 @@
 from ase.db import connect
 import icetdev as icet
+import numpy as np
+
+_tolerance = 1e-9
 
 '''
 Testing icet structure against ASE
@@ -15,22 +18,20 @@ for row in db.select():
     ''' Convert ASE atoms to icet structures '''
     structure = icet.structure_from_atoms(atoms_row)
 
-    ''' Test that each position is equal '''
-    msg = 'Test for len of positions failed for structure {}'.format(row.tag)
-    assert len(atoms_row) == len(structure.get_positions()), msg
+    ''' Test that structures have the same length '''
+    msg = 'Test of len failed for structure {}'.format(row.tag)
+    assert len(atoms_row) == len(structure), msg
 
+    ''' Test that positions are equal '''
     for ase_pos, struct_pos in zip(atoms_row.positions,
-                                   structure.get_positions()):
+                                   structure.positions):
         msg = 'Test for positions failed for structure {}'.format(row.tag)
-        assert (ase_pos == struct_pos).all(), msg
+        assert (np.abs(ase_pos - struct_pos) < _tolerance).all(), msg
 
-    ''' Test that each element is equal '''
-    msg = 'Test for len of elements failed for structure {}'.format(row.tag)
-    assert len(atoms_row) == len(structure.get_elements()), msg
-
+    ''' Test that chemical symbols are equal '''
     for ase_symbol, struct_symbol in zip(atoms_row.get_atomic_numbers(),
-                                         structure.get_elements()):
-        msg = 'Test for elements failed for structure {}'.format(row.tag)
+                                         structure.get_atomic_numbers()):
+        msg = 'Test for atomic numbers failed for structure {}'.format(row.tag)
         msg += '; {} != {}'.format(ase_symbol, struct_symbol)
         assert ase_symbol == struct_symbol, msg
 

@@ -15,7 +15,7 @@ The length of the clustervector will be 1 + sum_i( orbit_i * orbit_i.multicimpon
 std::vector<double> ClusterSpace::generateClustervector(const Structure &structure2) const
 {
     Structure structure = structure2;
-    //structure.setAllowedComponents(_Mi);
+    //structure.setNumberOfAllowedComponents(_Mi);
     bool orderIntact = true; // count the clusters in the orbit with the same orientation as the prototype cluster
     LocalOrbitlistGenerator localOrbitListGenerator = LocalOrbitlistGenerator(_primitive_orbitlist, structure);
     size_t uniqueOffsets = localOrbitListGenerator.getUniqueOffsetsCount();
@@ -91,7 +91,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                     std::vector<int> elements(sites.size());
                     for (size_t i = 0; i < sites.size(); i++)
                     {
-                        elements[i] = structure.getElement(sites[i].index());
+                        elements[i] = structure.getAtomicNumber(sites[i].index());
                     }
                     clusterCounts.countCluster(repr_cluster, elements);
 
@@ -102,7 +102,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                     std::vector<int> elements(sites.size());
                     for (size_t i = 0; i < sites.size(); i++)
                     {
-                        elements[i] = structure.getElement(sites[i].index());
+                        elements[i] = structure.getAtomicNumber(sites[i].index());
                     }
                     clusterCounts.countCluster(repr_cluster, elements);
 
@@ -159,7 +159,7 @@ std::vector<int> ClusterSpace::getAllowedOccupations(const Structure &structure,
     Mi.reserve(latticeNeighbors.size());
     for (const auto &latnbr : latticeNeighbors)
     {
-        Mi.push_back(structure.getMi(latnbr.index()));
+        Mi.push_back(structure.getNumberOfAllowedComponents(latnbr.index()));
     }
     return Mi;
 }

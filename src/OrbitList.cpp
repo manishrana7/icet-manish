@@ -440,7 +440,7 @@ and translate the other sites with the same translation.
 This translation will give rise to equivalent sites that sometimes are not found by using the set of crystal symmetries given
 by spglib
 
-An added requirement to this is that if _primitiveStructure.has_pbc(i) == false then this function should not give rise to any sites
+An added requirement to this is that if _primitiveStructure.hasPBC(i) == false then this function should not give rise to any sites
  in the ith direction
 
 */
@@ -488,7 +488,7 @@ bool OrbitList::isSitesPBCCorrect(const std::vector<LatticeNeighbor> &sites) con
     {
         for (int i = 0; i < 3; i++)
         {
-            if (!_primitiveStructure.has_pbc(i) && latNbr.unitcellOffset()[i] != 0)
+            if (!_primitiveStructure.hasPBC(i) && latNbr.unitcellOffset()[i] != 0)
             {
                 return false;
             }

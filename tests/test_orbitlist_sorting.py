@@ -40,12 +40,12 @@ structure2 = structure_from_atoms(atoms2)
 orbitlist_2 = create_orbit_list(structure2, cutoffs, verbosity=0)
 
 
-assert orbitlist_1.size() == orbitlist_2.size(
-), "The sizes of the different orbitlists should be equal"
+assert len(orbitlist_1) == len(orbitlist_2), \
+    "The sizes of the different orbitlists should be equal"
 
 orbitlist_1.sort()
 orbitlist_2.sort()
 
-for i in range(orbitlist_1.size()):
+for i in range(len(orbitlist_1)):
     assert orbitlist_1.get_orbit(i).get_representative_cluster() == orbitlist_2.get_orbit(
         i).get_representative_cluster(), "Representative clusters should be the same in the different orbits"

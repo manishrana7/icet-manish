@@ -1,50 +1,54 @@
 from _icetdev import ManybodyNeighborlist
-
 from icetdev.latticeNeighbor import LatticeNeighbor
 from icetdev.neighborlist import get_neighborlists
 from icetdev.structure import structure_from_atoms
 
-def get_all_lattice_neighbors(atoms=None, structure=None, neighborlists=None, cutoffs=None):
-    """
-     Return lattice neighbors from a configuration and cutoffs
 
-    return list of lattice neighbors in mbnl format, list(neighborlists)
+def get_all_lattice_neighbors(atoms=None, structure=None,
+                              neighborlists=None, cutoffs=None):
+    '''
+    Generate lattice neighbors for a configuration.
+
     Parameters
     ----------
-    atoms:
-        ASE atoms object (bi-optional) need atleast this or structure
-    structure:
-        icet structure object (bi-optional) need atleast this or atoms
-    neighborlists:
-        array/list of icet neighborlist object
-        if None: then it will be created
-    cutoffs:
-        positive floats indicating the cutoffs for the various clusters
-        it is not used if nl != None
-        (plus one since the first cutoff is for pairs)
-    """
+    atoms : ASE Atoms object
+        input structure (bi-optional)
+    structure :  icet Structure object
+        input structure (bi-optional)
+    neighborlists : array/list of icet NeighborList objects
+        neighbor lists; if None neighbor lists will be created, which
+        requires cutoffs to be specified
+    cutoffs : list of floats
+        cutoffs for the clusters of increasing order; only used if
+        `neighborlists` is None; note that the first value in the list refers
+        to pairs
+
+    Returns
+    -------
+    list of tuples
+        the first part of each tuple identifies the lattice neighbor, the
+        second part is a list of neighbors (by index)
+    '''
 
     bothways = False
     lattice_neighbors = []
     # get structure
     if structure is None:
         if atoms is None:
-            raise Exception(
-                "Error: both atoms and structure is None in get_mbnls")
+            raise Exception('Need to specify either atoms or structure')
         else:
             structure = structure_from_atoms(atoms)
 
-    # get neigbhorlists
+    # get neigbhor lists
     if neighborlists is None:
         neighborlists = []
         if cutoffs is None:
-            raise Exception(
-                "Error: both nl and cutoffs is None in count clusters")
+            raise Exception('Need to specify either neighbor list or cutoffs')
         else:
             neighborlists = get_neighborlists(
                 structure=structure, cutoffs=cutoffs)
     else:
-        # build the neighborlists
+        # build the neighbor lists
         for nl in neighborlists:
             nl.build(structure)
 
@@ -53,15 +57,15 @@ def get_all_lattice_neighbors(atoms=None, structure=None, neighborlists=None, cu
     mbnl = ManybodyNeighborlist()
     # add the mbnl lattice neighbors
     if order >= 2:
-        for lattice_index in range(structure.size()):
-            lattice_neighbor = mbnl.build(neighborlists, lattice_index, bothways)
-            #print("order: {} len of  mbnl {}".format(order, len(lattice_neighbor)))
+        for lattice_index in range(len(structure)):
+            lattice_neighbor = mbnl.build(neighborlists,
+                                          lattice_index, bothways)
             for lat_nbrs in lattice_neighbor:
                 lattice_neighbors.append(lat_nbrs)
 
     # add the pairs and singlets
-    for lattice_index in range(structure.size()):
-        lat_nbr_i = LatticeNeighbor(lattice_index, [.0, .0, .0])
+    for lattice_index in range(len(structure)):
+        lat_nbr_i = LatticeNeighbor(lattice_index, [0.0, 0.0, 0.0])
         lattice_neighbors.append(([lat_nbr_i], []))  # singlet
         lattice_neighbors.append(
             ([lat_nbr_i], neighborlists[0].get_neighbors(lattice_index)))

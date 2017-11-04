@@ -43,41 +43,31 @@ def generate_clustervector_set(n, atoms_prim, subelements, clusterspace):
     return clustervectors
 
 
-def get_column_correlation(i, j, matrix):
-    '''
-    Returns the correlation between two columns i and j of the input matrix.
-
-    Parameters
-    ----------
-    i : int
-        index of first column
-    j : int
-        index of second column
-    matrix: NumPy array
-        input matrix
-    '''
-    col_i = matrix[:, i]
-    col_j = matrix[:, j]
-    corr = np.dot(col_i, col_j)
-    corr /= np.linalg.norm(col_i) * np.linalg.norm(col_j)
-    return corr
-
-
-def assert_decorrelation(matrix, tol=0.99):
+def assert_decorrelation(matrix, tolerance=0.99):
     '''
     Confirm that the correlation between any two columns of the input matrix
     does not exceed the tolerance specified.
+
+    Parameters
+    ----------
+    matrix : list of lists/NumPy array
+        input matrix
+    tolerance : float
+        the correlation of any two columns must be lower than this value
     '''
     A = np.array(matrix)
     for i in range(len(matrix[0])):
         if i == 0:  # skip zerolets (always one)
             continue
+        col_i = matrix[:, i]
         for j in range(len(matrix[0])):
             if j <= i:
                 continue
-            corr = get_column_correlation(i, j, A)
+            col_j = A[:, j]
+            corr = np.dot(col_i, col_j)
+            corr /= np.linalg.norm(col_i) * np.linalg.norm(col_j)
             msg = 'columns {} and {} correlated <i|j>= {}'.format(i, j, corr)
-            assert corr < tol, msg
+            assert corr < tolerance, msg
 
 
 print('')

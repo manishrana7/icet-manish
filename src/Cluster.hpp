@@ -478,7 +478,7 @@ class Cluster
     /**
     Bruteforce attempt to find minumum cluster
     */
-    std::tuple<std::vector<int>, std::vector<double>, std::vector<int>> getMinimumStateBruteForce()
+    std::tuple<std::vector<int>, std::vector<double>, std::vector<int>> getNumberOfAllowedComponentsnimumStateBruteForce()
     {
 
         std::vector<int> atomic_order(_sites.size());
@@ -514,7 +514,7 @@ class Cluster
     void validateSorting()
     {
 
-        auto minBruteForce = getMinimumStateBruteForce();
+        auto minBruteForce = getNumberOfAllowedComponentsnimumStateBruteForce();
         auto bruteforce_order = std::get<0>(minBruteForce);
         auto bruteForceDists = std::get<1>(minBruteForce);
         auto bruteForceSites = std::get<2>(minBruteForce);

@@ -14,11 +14,11 @@ void Neighborlist::build(const Structure &conf)
     latticeIndices.resize(nbrOfSites);
     offsets.resize(nbrOfSites);
     _neighbors.resize(nbrOfSites);
-    Matrix3d cellInverse = conf.get_cell().inverse();
+    Matrix3d cellInverse = conf.getCell().inverse();
     std::vector<int> unitCellExpanse(3);
     for (int i = 0; i < 3; i++)
     {
-        if (conf.has_pbc(i))
+        if (conf.hasPBC(i))
         {
             auto v = cellInverse.col(i);
             double dotProduct = v.dot(v);

@@ -34,13 +34,31 @@ PYBIND11_PLUGIN(_icetdev)
              py::arg("cell"),
              py::arg("pbc"),
              py::arg("precision") = 1e-5)
+        .def("get_positions", &Structure::getPositions)
         .def("set_positions", &Structure::setPositions)
-        .def("set_elements", &Structure::setElements)
-        .def("get_elements", &Structure::getElements)
+        .def_property("positions",
+                      &Structure::getPositions,
+                      &Structure::setPositions,
+                      "list of lists : atomic positions")
+        .def("get_atomic_numbers", &Structure::getAtomicNumbers)
+        .def("set_atomic_numbers", &Structure::setAtomicNumbers)
+        .def_property("atomic_numbers",
+                      &Structure::getAtomicNumbers,
+                      &Structure::setAtomicNumbers,
+                      "list of ints : atomic numbers of species on each site")
+        .def("get_chemical_symbols", &Structure::getChemicalSymbols)
+        .def("set_chemical_symbols", &Structure::setChemicalSymbols)
+        .def_property("chemical_symbols",
+                      &Structure::getChemicalSymbols,
+                      &Structure::setChemicalSymbols,
+                      "list of strings : chemical symbols of species on each site")
         .def("set_unique_sites", &Structure::setUniqueSites)
         .def("get_unique_sites", &Structure::getUniqueSites)
+        .def_property("unique_sites",
+                      &Structure::getUniqueSites,
+                      &Structure::setUniqueSites,
+                      "list of ints : unique sites")
         .def("get_unique_site", &Structure::getSite)
-        .def("get_positions", &Structure::getPositions)
         .def("get_position", &Structure::getPosition)
         .def("get_distance", &Structure::getDistance)
         .def("get_distance2", &Structure::getDistance2)
@@ -53,19 +71,26 @@ PYBIND11_PLUGIN(_icetdev)
         .def("findLatticeNeighborsFromPositions",
              &Structure::findLatticeNeighborsFromPositions,
              py::arg("positions"))
-        .def("has_pbc", &Structure::has_pbc)
-        .def("get_pbc", &Structure::get_pbc)
-        .def("set_pbc", &Structure::set_pbc)
-        .def("get_cell", &Structure::get_cell)
-        .def("set_cell", &Structure::set_cell)
-        .def("size", &Structure::size);
+        .def("get_pbc", &Structure::getPBC)
+        .def("set_pbc", &Structure::setPBC)
+        .def_property("pbc",
+                      &Structure::getPBC,
+                      &Structure::setPBC,
+                      "3-dimensional vector : periodic boundary conditions")
+        .def("get_cell", &Structure::getCell)
+        .def("set_cell", &Structure::setCell)
+        .def_property("cell",
+                      &Structure::getCell,
+                      &Structure::setCell,
+                      "3x3 array : cell metric")
+        .def("__len__", &Structure::size);
 
     py::class_<Neighborlist>(m, "Neighborlist")
         .def(py::init<const double>())
         .def("build", &Neighborlist::build)
         .def("is_neighbor", &Neighborlist::isNeighbor)
         .def("get_neighbors", &Neighborlist::getNeighbors)
-        .def("size", &Neighborlist::size)
+        .def("__len__", &Neighborlist::size)
 
         ;
 
@@ -121,7 +146,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<LatticeNeighbor> &)) & ClusterCounts::count)
         .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &, const Cluster &)) & ClusterCounts::count)
         .def("count_orbitlist",&ClusterCounts::countOrbitlist)
-        .def("size", &ClusterCounts::size)
+        .def("__len__", &ClusterCounts::size)
         .def("reset", &ClusterCounts::reset)
         .def("get_cluster_counts", [](const ClusterCounts &clusterCounts) {
             //&ClusterCounts::getClusterCounts
@@ -148,7 +173,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_representative_sites", &Orbit::getRepresentativeSites)
         .def("get_equivalent_sites_permutations", &Orbit::getEquivalentSitesPermutations)
         .def("get_sites_with_permutation", &Orbit::getSitesWithPermutation)
-        .def("size", &Orbit::size)
+        .def("__len__", &Orbit::size)
         .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
         .def("get_MC_vectors",&Orbit::getMCVectors)
         .def(py::self < py::self)
@@ -166,7 +191,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("sort", &OrbitList::sort)
         .def("get_orbitList", &OrbitList::getOrbitList)
         .def("get_primitive_structure",&OrbitList::getPrimitiveStructure)
-        .def("size", &OrbitList::size)
+        .def("__len__", &OrbitList::size)
         .def("print", &OrbitList::print, py::arg("verbosity") = 0)
         .def("get_supercell_orbitlist", &OrbitList::getSupercellOrbitlist);
 
@@ -186,7 +211,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_cluster_product", &ClusterSpace::getClusterProduct)
         .def("get_clusterspace_info", &ClusterSpace::getClusterSpaceInfo)
         .def("get_clusterspace_size", &ClusterSpace::getClusterSpaceSize)
-        .def("get_elements", &ClusterSpace::getElements)
+        .def("get_elements", &ClusterSpace::getAtomicNumbers)
         .def("get_cutoffs",&ClusterSpace::getCutoffs)
         .def("get_primitive_structure",&ClusterSpace::getPrimitiveStructure)
         .def("get_native_clusters",&ClusterSpace::getNativeClusters)

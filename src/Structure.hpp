@@ -1,7 +1,4 @@
 #pragma once
-#include <pybind11/pybind11.h>
-#include <iostream>
-#include <pybind11/eigen.h>
 #include <Eigen/Dense>
 #include <vector>
 #include <string>
@@ -9,15 +6,13 @@
 #include "LatticeNeighbor.hpp"
 
 using namespace Eigen;
-namespace py = pybind11;
 
 /**
   @brief Class for storing a structure.
   @details This class stores the cell metric, positions, chemical symbols, and
-  periodic boundary conditions. It also holds information pertaining to the
-  components that are allowed on each site. It also provides functionality for
-  computing e.g., distances between sites.
-  @todo rename element/elements/_elements to atomicNumber/atomicNumbers/_atomicNumbers
+  periodic boundary conditions that describe a structure. It also holds
+  information pertaining to the components that are allowed on each site and
+  provides functionality for computing distances between sites.
 */
 class Structure
 {
@@ -43,7 +38,7 @@ class Structure
     Vector3d getPosition(const LatticeNeighbor &) const;
 
     /// Return atomic number of site.
-    int getElement(const unsigned int) const;
+    int getAtomicNumber(const unsigned int) const;
 
     /// Return the list of unique sites.
     std::vector<int> getUniqueSites() const { return _uniqueSites; }
@@ -70,97 +65,68 @@ class Structure
   public:
 
     /// Return the size of the structure, i.e., the number of sites.
-    size_t size() const { return (_elements.size()); }
+    size_t size() const { return (_atomicNumbers.size()); }
 
-    // Set the atomic positions.
+    /// Set the atomic positions.
     void setPositions(const Eigen::Matrix<double, Dynamic, 3> &positions) { _positions = positions; }
 
     /// Return positions.
     Eigen::Matrix<double, Dynamic, 3, RowMajor> getPositions() const { return _positions; }
 
-    /// Set elements.
-    /// @todo Rename to setAtomicNumbers
-    /// @todo Rename to setChemicalSymbols
-    /// @todo Think about overloading to setElements
-    void setElements(const std::vector<int> &elements) { _elements = elements; }
-    void setStrElements(const std::vector<std::string> &elements)
+    /// Set atomic numbers.
+    void setAtomicNumbers(const std::vector<int> &atomicNumbers) { _atomicNumbers = atomicNumbers; }
+
+    /// Return atomic numbers.
+    std::vector<int> getAtomicNumbers() const { return _atomicNumbers; }
+
+    /// Set atomic numbers via chemical symbols.
+    void setChemicalSymbols(const std::vector<std::string> &chemicalSymbols)
     {
-        _strelements = elements;
-        setElements(convertStrElements(_strelements));
+        setAtomicNumbers(convertChemicalSymbolsToAtomicNumbers(chemicalSymbols));
     }
 
-    /// Return elements.
-    std::vector<int> getElements() const { return _elements; }
-    std::vector<std::string> getStrElements() const { return _strelements; }
+    /// Return chemical symbols.
+    std::vector<std::string> getChemicalSymbols() const
+    {
+        return convertAtomicNumbersToChemicalSymbols(_atomicNumbers);
+    }
 
-    /**
-      @brief Return periodic boundary condition along a given direction.
-      @details Return True if periodic boundary conditions are active along direction.
-      @param k index to direction [0, 1, 2]
-    **/
-    bool has_pbc(const int k) const { return _pbc[k]; }
+    /// Return periodic boundary condition along direction k.
+    bool hasPBC(const int k) const { return _pbc[k]; }
 
     /// Return periodic boundary conditions.
-    std::vector<bool> get_pbc() const { return _pbc; }
+    std::vector<bool> getPBC() const { return _pbc; }
 
     /// Set periodic boundary conditions.
-    void set_pbc(const std::vector<bool> pbc) { _pbc = pbc; }
+    void setPBC(const std::vector<bool> pbc) { _pbc = pbc; }
 
     /// Set the cell metric.
-    /// @todo switch to CamelCase
-    void set_cell(const Eigen::Matrix<double, 3, 3> &cell) { _cell = cell; }
+    void setCell(const Eigen::Matrix<double, 3, 3> &cell) { _cell = cell; }
 
     /// Return the cell metric.
-    /// @todo switch to CamelCase
-    Eigen::Matrix<double, 3, 3> get_cell() const { return _cell; }
+    Eigen::Matrix<double, 3, 3> getCell() const { return _cell; }
 
     /// Set allowed components for each site.
-    /// @todo rename to setNumberOfAllowedComponents
-    void setAllowedComponents(const std::vector<int> &);
-    void setAllowedComponents(const int);
+    void setNumberOfAllowedComponents(const std::vector<int> &);
+    void setNumberOfAllowedComponents(const int);
 
     /// Return number of allowed components on each site.
-    /// @todo rename to getNumberOfAllowedComponents
-    int getMi(const unsigned int) const;
+    int getNumberOfAllowedComponents(const unsigned int) const;
 
-    /// Set tolerance.
+    /// Set tolerance applied when comparing positions.
     void setTolerance(double tolerance) { _tolerance = tolerance; }
 
-    /// Return tolerance.
+    /// Return tolerance applied when comparing positions.
     double getTolerance() const { return _tolerance; }
 
 
   private:
 
-    /**
-      @brief Convert chemical symbols to atomic numbers.
-      @param elements vector of strings to be converted
-      @todo rename to convertChemicalSymbolsToAtomicNumbers
-    **/
-    std::vector<int> convertStrElements(const std::vector<std::string> &elements)
-    {
-        std::vector<int> intElements(elements.size());
-        for (int i = 0; i < elements.size(); i++)
-        {
-            intElements[i] = PeriodicTable::strInt[elements[i]];
-        }
-        return intElements;
-    }
+    /// Convert chemical symbols to atomic numbers.
+    std::vector<int> convertChemicalSymbolsToAtomicNumbers(const std::vector<std::string> &) const;
 
-    /**
-      @brief Convert chemical symbols to atomic numbers.
-      @param elements vector of strings to be converted
-      @todo rename to convertAtomicNumbersToChemicalSymbols
-    **/
-    std::vector<std::string> convertIntElements(const std::vector<int> &elements)
-    {
-        std::vector<std::string> strElements(elements.size());
-        for (int i = 0; i < elements.size(); i++)
-        {
-            strElements[i] = PeriodicTable::intStr[elements[i]];
-        }
-        return strElements;
-    }
+    /// Convert chemical symbols to atomic numbers.
+    std::vector<std::string> convertAtomicNumbersToChemicalSymbols(const std::vector<int> &) const;
 
     /// Round float number to given tolerance.
     /// @todo rename to roundFloat
@@ -193,11 +159,7 @@ class Structure
     Eigen::Matrix3d _cell;
 
     /// List of atomic numbers.
-    std::vector<int> _elements;
-
-    /// List of chemical symbols
-    /// @todo get rid of it; the information should only be generated on-demand
-    std::vector<std::string> _strelements;
+    std::vector<int> _atomicNumbers;
 
     /// Periodic boundary conditions.
     std::vector<bool> _pbc;

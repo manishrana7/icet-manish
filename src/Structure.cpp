@@ -1,29 +1,24 @@
 #include "Structure.hpp"
-#include <pybind11/pybind11.h>
 #include <iostream>
-#include <pybind11/eigen.h>
-#include <pybind11/stl.h>
 #include <Eigen/Dense>
 #include <vector>
 #include <string>
 
 using namespace Eigen;
-namespace py = pybind11;
-
 
 /// Constructor.
 Structure::Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &positions,
-                     const std::vector<std::string> &elements,
+                     const std::vector<std::string> &chemicalSymbols,
                      const Eigen::Matrix3d &cell,
                      const std::vector<bool> &pbc,
                      double tolerance)
 {
     setPositions(positions);
-    setStrElements(elements);
+    setChemicalSymbols(chemicalSymbols);
     _cell = cell;
     _pbc = pbc;
     _tolerance = tolerance;
-    _uniqueSites.resize(elements.size());
+    _uniqueSites.resize(chemicalSymbols.size());
     _numbersOfAllowedComponents.resize(positions.rows());
 }
 
@@ -98,19 +93,18 @@ Vector3d Structure::getPosition(const LatticeNeighbor &latticeNeighbor) const
   @details This function returns the atomic number of a site.
   @param i index of site
   @returns atomic number
-  @todo rename to getAtomicNumber
 **/
-int Structure::getElement(const unsigned int i) const
+int Structure::getAtomicNumber(const unsigned int i) const
 {
-    if (i >= _elements.size())
+    if (i >= _atomicNumbers.size())
     {
         std::string errorMessage = "Site index out of bounds";
         errorMessage += " i: " + std::to_string(i);
-        errorMessage += " nsites: " + std::to_string(_elements.size());
-        errorMessage += " (Structure::getElement)";
+        errorMessage += " nsites: " + std::to_string(_atomicNumbers.size());
+        errorMessage += " (Structure::getAtomicNumber)";
         throw std::out_of_range(errorMessage);
     }
-    return _elements[i];
+    return _atomicNumbers[i];
 }
 
 /**
@@ -197,7 +191,7 @@ LatticeNeighbor Structure::findLatticeNeighborFromPosition(const Vector3d &posit
     Vector3d unitcellOffset;
     for (int i = 0; i < 3 ; i++)
     {
-        if (has_pbc(i))
+        if (hasPBC(i))
         {
             unitcellOffset[i] = floor(coordinateRound((double)fractional[i]));
             if (fabs(unitcellOffset[i] - fractional[i]) > 1.0 - _tolerance)
@@ -252,7 +246,7 @@ std::vector<LatticeNeighbor> Structure::findLatticeNeighborsFromPositions(const 
   @param numbersOfAllowedComponents list with the number of components
   allowed on each site
 **/
-void Structure::setAllowedComponents(const std::vector<int> &numbersOfAllowedComponents)
+void Structure::setNumberOfAllowedComponents(const std::vector<int> &numbersOfAllowedComponents)
 {
     if (numbersOfAllowedComponents.size() != size())
     {
@@ -260,7 +254,7 @@ void Structure::setAllowedComponents(const std::vector<int> &numbersOfAllowedCom
         errorMessage += "Size of input list incompatible with structure";
         errorMessage += " length: " + std::to_string(numbersOfAllowedComponents.size());
         errorMessage += " nsites: " + std::to_string(size());
-        errorMessage += " (Structure::setAllowedComponents)";
+        errorMessage += " (Structure::setNumberOfAllowedComponents)";
         throw std::out_of_range(errorMessage);
     }
     _numbersOfAllowedComponents = numbersOfAllowedComponents;
@@ -273,9 +267,9 @@ void Structure::setAllowedComponents(const std::vector<int> &numbersOfAllowedCom
   site #2.
   @param numberOfAllowedComponents number of components allowed
 **/
-void Structure::setAllowedComponents(const int numberOfAllowedComponents)
+void Structure::setNumberOfAllowedComponents(const int numberOfAllowedComponents)
 {
-    std::vector<int> numbersOfAllowedComponents(_elements.size(), numberOfAllowedComponents);
+    std::vector<int> numbersOfAllowedComponents(_atomicNumbers.size(), numberOfAllowedComponents);
     _numbersOfAllowedComponents = numbersOfAllowedComponents;
 }
 
@@ -285,15 +279,43 @@ void Structure::setAllowedComponents(const int numberOfAllowedComponents)
   @param i index of the site
   @returns the number of the allowed components
 **/
-int Structure::getMi(const unsigned int i) const
+int Structure::getNumberOfAllowedComponents(const unsigned int i) const
 {
     if (i >= _numbersOfAllowedComponents.size())
     {
         std::string errorMessage = "Site index out of bounds";
         errorMessage += " i: " + std::to_string(i);
         errorMessage += " nsites: " + std::to_string(_numbersOfAllowedComponents.size());
-        errorMessage += " (Structure::getMi)";
+        errorMessage += " (Structure::getNumberOfAllowedComponents)";
         throw std::out_of_range(errorMessage);
     }
     return _numbersOfAllowedComponents[i];
+}
+
+/**
+  @details This function turns a list of chemical symbols into a list of atomic numbers.
+  @param chemicalSymbols vector of chemical symbols (strings) to be converted
+**/
+std::vector<int> Structure::convertChemicalSymbolsToAtomicNumbers(const std::vector<std::string> &chemicalSymbols) const
+{
+    std::vector<int> atomicNumbers(chemicalSymbols.size());
+    for (int i = 0; i < chemicalSymbols.size(); i++)
+    {
+        atomicNumbers[i] = PeriodicTable::strInt[chemicalSymbols[i]];
+    }
+    return atomicNumbers;
+}
+
+/**
+  @details This function turns a list of atomic numbers into a list of chemical symbols.
+  @param atomicNumbers vector of atomic numbers (ints) to be converted
+**/
+std::vector<std::string> Structure::convertAtomicNumbersToChemicalSymbols(const std::vector<int> &atomicNumbers) const
+{
+    std::vector<std::string> chemicalSymbols(atomicNumbers.size());
+    for (int i = 0; i < atomicNumbers.size(); i++)
+    {
+        chemicalSymbols[i] = PeriodicTable::intStr[atomicNumbers[i]];
+    }
+    return chemicalSymbols;
 }

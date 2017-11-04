@@ -29,7 +29,7 @@ class ClusterSpace
         _Mi = Mi;        
         _primitive_orbitlist = primOrbitList;        
         _primitive_structure = primOrbitList.getPrimitiveStructure();
-        _primitive_structure.setAllowedComponents(_Mi);        
+        _primitive_structure.setNumberOfAllowedComponents(_Mi);        
         initElementMap(elements);
         _isClusterspaceInitialized= false;
     };
@@ -74,7 +74,7 @@ class ClusterSpace
     }
 
     ///Get elements in str format
-    std::vector<std::string> getElements() const
+    std::vector<std::string> getAtomicNumbers() const
     {
         std::vector<std::string> elements;
         for(const auto &intEl : _elements )

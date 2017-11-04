@@ -210,9 +210,9 @@ def test_no_symmetry_vs_symmetry_count(atoms_primitive, atoms_tag,
 
     msg = 'Testing count orbitlist of symmetry case failed'
     msg += ' for {} when counts  {}!={}'.format(atoms_tag,
-                                                orbitlist_symmetry.size(),
-                                                orbitlist_no_symmetry.size())
-    assert orbitlist_symmetry.size() == orbitlist_no_symmetry.size(), msg
+                                                len(orbitlist_symmetry),
+                                                len(orbitlist_no_symmetry))
+    assert len(orbitlist_symmetry) == len(orbitlist_no_symmetry), msg
 
     for key1, key2 in zip(sorted(cluster_map_no_symmetry.keys()),
                           sorted(cluster_map_symmetry.keys())):
