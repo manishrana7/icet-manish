@@ -140,7 +140,7 @@ void Structure::setUniqueSites(const std::vector<int> &sites)
 **/
 int Structure::getSite(const size_t i) const
 {
-    if (i < 0 || i >= _uniqueSites.size())
+    if (i >= _uniqueSites.size())
     {
         std::string errorMessage = "Site index out of bounds";
         errorMessage += " i: " + std::to_string(i);

@@ -67,6 +67,14 @@ class Structure
     /// Return list of LatticeNeighbor objects that matche a given list of positions.
     std::vector<LatticeNeighbor> findLatticeNeighborsFromPositions(const std::vector<Vector3d> &) const;
 
+    /// Representation of class as string (cast).
+    operator std::string () const
+    {
+        std::string str;
+        str += "Structure";
+        str += " nsites: " + std::to_string(_positions.size());
+        return str;
+    }
 
   public:
 
@@ -118,7 +126,7 @@ class Structure
     /// Set allowed components for each site.
     /// @todo rename to setNumberOfAllowedComponents
     void setAllowedComponents(const std::vector<int> &);
-    void setAllowedComponents(const int numberOfAllowedComponents);
+    void setAllowedComponents(const int);
 
     /// Return number of allowed components on each site.
     /// @todo rename to getNumberOfAllowedComponents
