@@ -36,6 +36,7 @@ coverage:
   script:
     - export PYTHONPATH=/builds/icet/icet-dev:$PYTHONPATH
     - export PYTHONPATH=/builds/icet/icet-dev/build/src/:$PYTHONPATH
+    - pip3 install coverage
     - coverage run tests/__init__.py
     - coverage report -m
     - coverage html -d coverage
