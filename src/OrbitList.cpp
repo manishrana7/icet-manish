@@ -183,7 +183,7 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
     }
 }
 
-/** 
+/**
     Add permutation stuff to orbits
 
     steps:
@@ -205,9 +205,9 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
                  that permutation is then related to rep_sites through that permutation
               else:
                  continue
-                  
-        
-            
+
+
+
 */
 void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeNeighbor> &col1, const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix)
 {
@@ -397,7 +397,7 @@ bool OrbitList::isRowsTaken(const std::unordered_set<std::vector<int>, VectorHas
     }
 }
 
-/** 
+/**
 Returns all columns from the given rows in permutation matrix
 
 includeTranslatedSites: bool
@@ -458,7 +458,7 @@ std::vector<std::vector<LatticeNeighbor>> OrbitList::getSitesTranslatedToUnitcel
     Vector3d zeroVector = {0.0, 0.0, 0.0};
     for (int i = 0; i < latticeNeighbors.size(); i++)
     {
-        if ((latticeNeighbors[i].unitcellOffset - zeroVector).norm() > 0.1) //only translate those outside unitcell
+        if ((latticeNeighbors[i].unitcellOffset() - zeroVector).norm() > 0.1) //only translate those outside unitcell
         {
             auto translatedSites = translateSites(latticeNeighbors, i);
             if (sortIt)
@@ -488,7 +488,7 @@ bool OrbitList::isSitesPBCCorrect(const std::vector<LatticeNeighbor> &sites) con
     {
         for (int i = 0; i < 3; i++)
         {
-            if (!(_primitiveStructure.has_pbc(i)) && latNbr.unitcellOffset[i] != 0)
+            if (!(_primitiveStructure.has_pbc(i)) && latNbr.unitcellOffset()[i] != 0)
             {
                 return false;
             }
@@ -500,11 +500,11 @@ bool OrbitList::isSitesPBCCorrect(const std::vector<LatticeNeighbor> &sites) con
 ///Take all lattice neighbors in vector latticeNeighbors and subtract the unitcelloffset of site latticeNeighbors[index]
 std::vector<LatticeNeighbor> OrbitList::translateSites(const std::vector<LatticeNeighbor> &latticeNeighbors, const unsigned int index) const
 {
-    Vector3d offset = latticeNeighbors[index].unitcellOffset;
+    Vector3d offset = latticeNeighbors[index].unitcellOffset();
     auto translatedNeighbors = latticeNeighbors;
     for (auto &latNbr : translatedNeighbors)
     {
-        latNbr.unitcellOffset -= offset;
+        latNbr.addUnitcellOffset(-offset);
     }
     return translatedNeighbors;
 }
@@ -521,7 +521,7 @@ void OrbitList::checkEquivalentClusters() const
             Cluster equivalentCluster = Cluster(_primitiveStructure, sites);
             if (representative_cluster != equivalentCluster)
             {
-                std::cout << " found a \"equivalent\" cluster that were not equal representative cluster" << std::endl;
+                std::cout << " found an 'equivalent' cluster that was not equal representative cluster" << std::endl;
                 std::cout << "representative_cluster:" << std::endl;
                 representative_cluster.print();
 
@@ -702,7 +702,7 @@ bool OrbitList::validatedCluster(const std::vector<LatticeNeighbor> &latticeNeig
     Vector3d zeroVector = {0., 0., 0.};
     for (const auto &latNbr : latticeNeighbors)
     {
-        if (latNbr.unitcellOffset == zeroVector)
+        if (latNbr.unitcellOffset() == zeroVector)
         {
             return true;
         }
@@ -711,7 +711,7 @@ bool OrbitList::validatedCluster(const std::vector<LatticeNeighbor> &latticeNeig
 }
 
 /**
- Searches for latticeNeighbors in col1 of permutation matrix and find the corresponding rows 
+ Searches for latticeNeighbors in col1 of permutation matrix and find the corresponding rows
 */
 std::vector<int> OrbitList::findRowsFromCol1(const std::vector<LatticeNeighbor> &col1, const std::vector<LatticeNeighbor> &latNbrs, bool sortIt) const
 {
@@ -768,7 +768,7 @@ std::vector<LatticeNeighbor> OrbitList::getColumn1FromPM(const std::vector<std::
     the Vector3d is the offset you translate the orbit with
     the map maps primitive lattice neighbors to lattice neighbors in the supercell
     the const unsigned int is the index of the orbit
-    
+
     strategy is to get the translated orbit and then map it using the map and that should be the partial supercell orbit of this site
     add together all sites and you get the full supercell porbot
     */
@@ -798,7 +798,7 @@ Orbit OrbitList::getSuperCellOrbit(const Structure &superCell, const Vector3d &c
 
 /**
 
-Takes the site and tries to find it in the map to supercell 
+Takes the site and tries to find it in the map to supercell
 
 if it does not find it it gets the xyz position and then find the lattice neighbor in the supercell corresponding to that position and adds it to the map
 
@@ -820,8 +820,8 @@ void OrbitList::transformSiteToSupercell(LatticeNeighbor &site, const Structure 
     }
 
     //write over site to match supercell index offset
-    site.index = supercellSite.index;
-    site.unitcellOffset = supercellSite.unitcellOffset;
+    site.setIndex(supercellSite.index());
+    site.setUnitcellOffset(supercellSite.unitcellOffset());
 }
 
 ///Create and return a "local" orbitList by offsetting each site in the primitve by cellOffset
@@ -856,7 +856,7 @@ OrbitList OrbitList::getSupercellOrbitlist(const Structure &superCell) const
         LatticeNeighbor primitive_site = _primitiveStructure.findLatticeNeighborFromPosition(position_i);
         LatticeNeighbor super_site = superCell.findLatticeNeighborFromPosition(position_i);
         primToSuperMap[primitive_site] = super_site;
-        uniqueCellOffsets.insert(primitive_site.unitcellOffset);
+        uniqueCellOffsets.insert(primitive_site.unitcellOffset());
     }
     // Vector3d zeroOffset = {0.0, 0.0, 0.0};
     // auto findZero = uniqueCellOffsets.find(zeroOffset);

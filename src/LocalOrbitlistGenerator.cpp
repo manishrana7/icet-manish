@@ -25,7 +25,7 @@ void LocalOrbitlistGenerator::mapSitesAndFindCellOffsets()
         // LatticeNeighbor super_site = _supercell.findLatticeNeighborFromPosition(position_i);
 
         // _primToSupercellMap[primitive_site] = super_site;
-        uniqueCellOffsets.insert(primitive_site.unitcellOffset);
+        uniqueCellOffsets.insert(primitive_site.unitcellOffset());
     }
 
     _uniquePrimcellOffsets.clear();

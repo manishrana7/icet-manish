@@ -68,7 +68,7 @@ class Orbit
 
     ///Returns equivalent sites
     std::vector<std::vector<LatticeNeighbor>> getPermutatedEquivalentSites() const
-    {   
+    {
         std::vector<std::vector<LatticeNeighbor>> permutatedSites(_equivalentSites.size());
         for(size_t i =0; i < _equivalentSites.size(); i++)
         {
@@ -77,7 +77,7 @@ class Orbit
         return permutatedSites;
     }
 
-                                      
+
 
     ///Return the equivalent sites at position `index`
     std::vector<LatticeNeighbor> GetSitesOfIndex(unsigned int index) const
@@ -102,7 +102,7 @@ class Orbit
             std::string errMSG = "Index out of range for _equivalentSitesPermutations in function Orbit::getSitesWithPermutation index: " + std::to_string(index) + " >= "  + std::to_string( _equivalentSitesPermutations.size());
             throw std::out_of_range(errMSG);
         }
-        
+
         return icet::getPermutatedVector<LatticeNeighbor>( _equivalentSites[index],_equivalentSitesPermutations[index]);
     }
 
@@ -129,19 +129,19 @@ class Orbit
             if (orbit1.getRepresentativeCluster().getNumberOfBodies() != orbit2.getRepresentativeCluster().getNumberOfBodies())
             {
                 return false;
-            }            
+            }
             ///not equal size: compare by geometrical size
             if (fabs(orbit1.getGeometricalSize() - orbit2.getGeometricalSize()) > 1e-5) // @TODO: remove 1e-4 and add tunable parameter
             {
                 return false;
             }
-            
+
             // check size of vector of equivalent sites
             if (orbit1.size() != orbit2.size())
             {
                 return false;
             }
-            
+
             //Now size of  equivalent sites vector are the same, then check the individual equivalent sites
             return orbit1.getEquivalentSites() == orbit2.getEquivalentSites();
         }
@@ -197,14 +197,14 @@ class Orbit
             return _equivalentSites[0];
         }
 
-        /** 
+        /**
     Returns the number of exactly equal sites in equivalent sites vector
     This is used among other things to debug orbits when duplicates is not expected
     */
         int getNumberOfDuplicates(int verbosity = 0) const;
 
         /**
-        Creates a copy of this orbit and translates all LatticeNeighbor offsets in equivalent sites 
+        Creates a copy of this orbit and translates all LatticeNeighbor offsets in equivalent sites
         this will also transfer any existing permutations directly which should be fine since an offset doesn't change permutations to the prototype sites)
     */
         friend Orbit operator+(const Orbit &orbit, const Eigen::Vector3d &offset)
@@ -253,17 +253,17 @@ class Orbit
 
             for (size_t i = 0; i < rep_sites_this.size(); i++)
             {
-                if (rep_sites_this[i].index != rep_sites_rhs[i].index)
+                if (rep_sites_this[i].index() != rep_sites_rhs[i].index())
                 {
                     throw std::runtime_error("Error: this orbit and orbit_rhs do not have the same reference cluster in function: Orbit &operator+=");
                 }
                 if (i == 0)
                 {
-                    offsetOfOffsets = rep_sites_this[i].unitcellOffset - rep_sites_rhs[i].unitcellOffset;
+                    offsetOfOffsets = rep_sites_this[i].unitcellOffset() - rep_sites_rhs[i].unitcellOffset();
                 }
                 else //check that the offsets between sites at position `i` is the same as `i-1`
                 {
-                    Vector3d newOffset = rep_sites_this[i].unitcellOffset - rep_sites_rhs[i].unitcellOffset;
+                    Vector3d newOffset = rep_sites_this[i].unitcellOffset() - rep_sites_rhs[i].unitcellOffset();
                     if ((newOffset - offsetOfOffsets).norm() > 0.1)
                     {
                         throw std::runtime_error("Error: this orbit and orbit_rhs do not have the same offsets between sites in function : Orbit &operator+=");

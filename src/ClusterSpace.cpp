@@ -70,13 +70,13 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
         for (int j = 0; j < local_orbitlist.size(); j++)
         {
             Cluster repr_cluster = local_orbitlist.getOrbit(j).getRepresentativeCluster();
-            
+
             for (const auto sites : local_orbitlist.getOrbit(j).getPermutatedEquivalentSites())
             {
                 bool cont = true;
                 for (auto site : sites)
                 {
-                    if (site.unitcellOffset.norm() > 0.1)
+                    if (site.unitcellOffset().norm() > 0.1)
                     {
                         cont = false;
                     }
@@ -91,10 +91,10 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                     std::vector<int> elements(sites.size());
                     for (size_t i = 0; i < sites.size(); i++)
                     {
-                        elements[i] = structure.getElement(sites[i].index);
+                        elements[i] = structure.getElement(sites[i].index());
                     }
                     clusterCounts.countCluster(repr_cluster, elements);
-            
+
                     // clusterCounts.count(structure, sites, repr_cluster);
                 }
                 else
@@ -102,10 +102,10 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                     std::vector<int> elements(sites.size());
                     for (size_t i = 0; i < sites.size(); i++)
                     {
-                        elements[i] = structure.getElement(sites[i].index);
+                        elements[i] = structure.getElement(sites[i].index());
                     }
                     clusterCounts.countCluster(repr_cluster, elements);
-            
+
                     // clusterCounts.count(structure, sites, repr_cluster);
                 }
             }
@@ -159,7 +159,7 @@ std::vector<int> ClusterSpace::getAllowedOccupations(const Structure &structure,
     Mi.reserve(latticeNeighbors.size());
     for (const auto &latnbr : latticeNeighbors)
     {
-        Mi.push_back(structure.getMi(latnbr.index));
+        Mi.push_back(structure.getMi(latnbr.index()));
     }
     return Mi;
 }

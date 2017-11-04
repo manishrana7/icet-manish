@@ -14,7 +14,7 @@
         }
     }
 
-    this means that if originalNeigbhors.size() == 2 then for each lattice site in manyNeigbhors 
+    this means that if originalNeigbhors.size() == 2 then for each lattice site in manyNeigbhors
     you can combine it with originalNeigbhors to get all triplets that have these first two original neighbors (lattice indices)
 
 
@@ -87,7 +87,7 @@ void ManybodyNeighborlist::addPairs(const int index, const Neighborlist &neighbo
 /**
 This will use the permutationmatrix together with the neighborlist to construct the distinct and indistinct sets of points
 
-The output will be std::vector<std::vector<std::vector<LatticeNeighbor>>> 
+The output will be std::vector<std::vector<std::vector<LatticeNeighbor>>>
 the next outer vector contains the set of indistinct set of lattice neighbors.
 
 
@@ -97,17 +97,17 @@ Algorithm
 The algorithm will work by taking the first column of permutation matrix: col1 = permutation_matrix[:,0]
 
 and it will take Ni (lattice neighbors of i) and find the intersection of Ni and col1, intersection(Ni, col1) = Ni_pm
-all j in Ni_c1 are then within the cutoff of site i, then depending on the order all the pairs/triplets will be constructed from the 
+all j in Ni_c1 are then within the cutoff of site i, then depending on the order all the pairs/triplets will be constructed from the
 lattice neighbors in Ni_pm.
 
 This will be repeated for all the sites in the neighborlist. In the end all the pair/triplet terms will have been generated from col1.
 
 Then you will take the first vector<LatticeNeighbors> and find the rows of these LatNbrs in col1 of the permutation matrix.
-then you traverse through all the columns in the permutation matrix. These vector<latticeNeighbors> are then indistinct from the original. 
+then you traverse through all the columns in the permutation matrix. These vector<latticeNeighbors> are then indistinct from the original.
 Note that here a validity check is made to ensure that atleast one LatticeNeigbhor originate in the original lattice (unitcell offset = [0,0,0])
 otherwise we are including a  "ghost cluster".
 
-The new vector<latticeNeighbors> found when traversing the columns are likely to have been found from the combinations in Ni_pm and these must then 
+The new vector<latticeNeighbors> found when traversing the columns are likely to have been found from the combinations in Ni_pm and these must then
 be removed/overlooked when moving to the next vector<LatticeNeighbor>.
 
 */
@@ -158,10 +158,10 @@ void ManybodyNeighborlist::combineToHigherOrder(const Neighborlist &nl,
         auto originalNeighborCopy = currentOriginalNeighbors;
         originalNeighborCopy.push_back(j); // put j in originalNeigbhors
 
-        auto Nj = nl.getNeighbors(j.index);
+        auto Nj = nl.getNeighbors(j.index());
 
         //translate the neighbors
-        translateAllNi(Nj, j.unitcellOffset);
+        translateAllNi(Nj, j.unitcellOffset());
 
         //exclude smaller neighbors
         if (!saveBothWays)
@@ -203,19 +203,19 @@ std::vector<LatticeNeighbor> ManybodyNeighborlist::getFilteredNj(const std::vect
      offset j.offset with "unitCellOffset"
 
 */
-void ManybodyNeighborlist::translateAllNi(std::vector<LatticeNeighbor> &Ni, const Vector3d &unitCellOffset) const
+void ManybodyNeighborlist::translateAllNi(std::vector<LatticeNeighbor> &Ni, const Vector3d &offset) const
 {
     for (auto &latNbr : Ni)
     {
-        latNbr.unitcellOffset += unitCellOffset;
+        latNbr.addUnitcellOffset(offset);
     }
 }
 
-/** Get size of _latticeNeighbors 
+/** Get size of _latticeNeighbors
 
-    This can be used in conjunction with 
+    This can be used in conjunction with
     getNumberOfSites(int index)
-    and 
+    and
     ManybodyNeighborlist::getSites
     To loop over possible manybody neighbors
 
@@ -233,7 +233,7 @@ size_t ManybodyNeighborlist::getNumberOfSites(const unsigned int index) const
     return _latticeNeighbors[index].second.size();
 }
 
-/** Return the manybody neighbor at "firstIndex"  and "secondIndex " 
+/** Return the manybody neighbor at "firstIndex"  and "secondIndex "
     in _latticeNeighbors and _latticeNeighbors[firstIndex] respectively
 */
 std::vector<LatticeNeighbor> ManybodyNeighborlist::getSites(const unsigned int &firstIndex,

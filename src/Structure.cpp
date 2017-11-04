@@ -82,15 +82,15 @@ double Structure::getDistance2(const int index1, const Vector3d offset1,
 */
 Vector3d Structure::getPosition(const LatticeNeighbor &latticeNeighbor) const
 {
-    if (latticeNeighbor.index < 0 || latticeNeighbor.index >= _positions.rows())
+    if (latticeNeighbor.index() < 0 || latticeNeighbor.index() >= _positions.rows())
     {
         std::string errorMessage = "Site index out of bounds";
-        errorMessage += " index: " + std::to_string(latticeNeighbor.index);
+        errorMessage += " index: " + std::to_string(latticeNeighbor.index());
         errorMessage += " npositions: " + std::to_string(_positions.rows());
         errorMessage += " (Structure::getPosition)";
         throw std::out_of_range(errorMessage);
     }
-    Vector3d position = _positions.row(latticeNeighbor.index) + latticeNeighbor.unitcellOffset.transpose() * _cell;
+    Vector3d position = _positions.row(latticeNeighbor.index()) + latticeNeighbor.unitcellOffset().transpose() * _cell;
     return position;
 }
 

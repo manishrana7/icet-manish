@@ -39,7 +39,7 @@ void ClusterCounts::count(const Structure &structure,
     std::vector<int> elements(clusterSize);
     for (size_t i = 0; i < latticeNeighbors.size(); i++)
     {
-        elements[i] = structure.getElement(latticeNeighbors[i].index);
+        elements[i] = structure.getElement(latticeNeighbors[i].index());
     }
 
     Cluster cluster = Cluster(structure, latticeNeighbors);
@@ -58,7 +58,7 @@ void ClusterCounts::count(const Structure &structure, const std::vector<std::vec
         std::vector<int> elements(latnbrs.size());
         for (size_t i = 0; i < latnbrs.size(); i++)
         {
-            elements[i] = structure.getElement(latnbrs[i].index);
+            elements[i] = structure.getElement(latnbrs[i].index());
         }
         countCluster(cluster, elements);
     }
@@ -84,7 +84,7 @@ void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> 
         icet orbitlist class
 */
 void ClusterCounts::countOrbitlist(const Structure &structure, const OrbitList &orbitlist, bool orderIntact)
-{   
+{
 
     for (int i = 0; i < orbitlist.size(); i++)
     {

@@ -39,9 +39,9 @@ class Neighborlist
     {
         for (const auto &nbr : _neighbors[index1])
         {
-            if (nbr.index == index2) // index are the same
+            if (nbr.index() == index2) // index are the same
             {
-                if (nbr.unitcellOffset == offset) // are the offsets equal?
+                if (nbr.unitcellOffset() == offset) // are the offsets equal?
                 {
                     return true;
                 }
