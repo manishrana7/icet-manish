@@ -67,15 +67,6 @@ class Structure
     /// Return list of LatticeNeighbor objects that matche a given list of positions.
     std::vector<LatticeNeighbor> findLatticeNeighborsFromPositions(const std::vector<Vector3d> &) const;
 
-    /// Representation of class as string (cast).
-    operator std::string () const
-    {
-        std::string str;
-        str += "Structure";
-        str += " nsites: " + std::to_string(_positions.size());
-        return str;
-    }
-
   public:
 
     /// Return the size of the structure, i.e., the number of sites.
