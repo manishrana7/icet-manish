@@ -1,33 +1,4 @@
-image: ubuntu:latest
-
-before_script:
-  - apt-get -yqq update
-  - apt-get -yqq install cmake
-                         git
-                         build-essential
-                         libboost-all-dev
-                         libeigen3-dev
-                         libboost-system-dev
-                         libboost-thread-dev
-                         libboost-filesystem-dev
-                         python3-dev
-                         python-dev
-                         python3-numpy
-                         python-numpy
-                         python3-pip
-                         python3-sphinx
-                         python-sphinx
-                         python3-joblib
-                         python-joblib
-                         python
-                         libgsl-dev
-                         python-tk
-                         python3-coverage
-                         pylint3
-  - pip3 install --upgrade --user ase
-  - pip3 install --upgrade --user spglib
-  
-  
+image: registry.gitlab.com/icet/icet-dev:latest
 
 build_linux:
   stage: build
