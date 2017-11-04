@@ -488,7 +488,7 @@ bool OrbitList::isSitesPBCCorrect(const std::vector<LatticeNeighbor> &sites) con
     {
         for (int i = 0; i < 3; i++)
         {
-            if (!(_primitiveStructure.has_pbc(i)) && latNbr.unitcellOffset()[i] != 0)
+            if (!_primitiveStructure.has_pbc(i) && latNbr.unitcellOffset()[i] != 0)
             {
                 return false;
             }

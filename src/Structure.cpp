@@ -57,7 +57,7 @@ double Structure::getDistance(const int index1, const int index2) const
   @todo Use overloading here instead
 */
 double Structure::getDistance2(const int index1, const Vector3d offset1,
-                    const int index2, const Vector3d offset2) const
+                               const int index2, const Vector3d offset2) const
 {
     if (index1 < 0 || index1 >= _positions.rows() or
         index2 < 0 || index2 >= _positions.rows())
@@ -193,15 +193,19 @@ int Structure::findIndexOfPosition(const Vector3d &position) const
 */
 LatticeNeighbor Structure::findLatticeNeighborFromPosition(const Vector3d &position) const
 {
-
     Vector3d fractional = _cell.transpose().partialPivLu().solve(position);
     Vector3d unitcellOffset;
     for (int i = 0; i < 3 ; i++)
     {
-        unitcellOffset[i] = floor(coordinateRound((double)fractional[i]));
-        if ( fabs(unitcellOffset[i] - fractional[i]) > 1.0 - _tolerance && has_pbc(i))
+        if (has_pbc(i))
         {
-            unitcellOffset[i] = int(round(fractional[i]));
+            unitcellOffset[i] = floor(coordinateRound((double)fractional[i]));
+            if (fabs(unitcellOffset[i] - fractional[i]) > 1.0 - _tolerance)
+            {
+                unitcellOffset[i] = int(round(fractional[i]));
+            }
+        } else {
+            unitcellOffset[i] = 0.0;
         }
     }
     Vector3d remainder = (fractional - unitcellOffset).transpose() * _cell;

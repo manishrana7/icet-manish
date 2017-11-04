@@ -1,5 +1,6 @@
 image: registry.gitlab.com/icet/icet-dev:latest
 
+
 build_linux:
   stage: build
   tags:
@@ -10,8 +11,9 @@ build_linux:
     - cmake ..
     - make
   artifacts:
-      paths:
-        - build
+    paths:
+      - build
+
 
 run_tests:
   stage: test
@@ -31,33 +33,32 @@ coverage:
     - linux
   dependencies:
     - build_linux
-  script:   
+  script:
     - export PYTHONPATH=/builds/icet/icet-dev:$PYTHONPATH
     - export PYTHONPATH=/builds/icet/icet-dev/build/src/:$PYTHONPATH
     - python3-coverage run tests/__init__.py
     - python3-coverage report -m
-    - python3-coverage html -d coverage     
+    - python3-coverage html -d coverage
   coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
   artifacts:
     name: coverage
-    expire_in: 30 days 
-    paths:      
+    expire_in: 15 days
+    paths:
       - coverage/
 
 
 pages:
   stage: deploy
-  dependencies:    
+  dependencies:
     - coverage
   script:
     - mv public/ .public/ || true
-    - mkdir public/ || true        
+    - mkdir public/ || true
     - mkdir public/coverage || true
-    - mv coverage/index.html public/coverage/ || true    
+    - mv coverage/index.html public/coverage/ || true
   artifacts:
     paths:
       - public
     expire_in: 30 days
   only:
     - master
-
