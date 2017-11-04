@@ -154,11 +154,11 @@ int Structure::getSite(const size_t i) const
 /**
   @details This function returns the index of the site the position of
   which matches the input position to the tolerance specified for this
-  structure. If the function failes to find a match it returns -1
+  structure.
 
   @param position position vector to match
 
-  @returns index of site
+  @returns index of site; -1 = failed to find a match.
 **/
 int Structure::findIndexOfPosition(const Vector3d &position) const
 {
