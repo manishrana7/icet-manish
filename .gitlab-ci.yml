@@ -15,48 +15,51 @@ build_linux:
       - build
 
 
-run_tests:
+tests:
   stage: test
   tags:
     - linux
   dependencies:
     - build_linux
   script:
-    - export PYTHONPATH=/builds/icet/icet-dev:$PYTHONPATH
-    - export PYTHONPATH=/builds/icet/icet-dev/build/src/:$PYTHONPATH
-    - python3 tests/__init__.py
-
-
-coverage:
-  stage: test
-  tags:
-    - linux
-  dependencies:
-    - build_linux
-  script:
-    - export PYTHONPATH=/builds/icet/icet-dev:$PYTHONPATH
-    - export PYTHONPATH=/builds/icet/icet-dev/build/src/:$PYTHONPATH
     - pip3 install coverage
+    - export PYTHONPATH=$PWD:$PYTHONPATH
+    - export PYTHONPATH=$PWD/build/src/:$PYTHONPATH
     - coverage run tests/__init__.py
     - coverage report -m
     - coverage html -d coverage
   coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
   artifacts:
-    name: coverage
     expire_in: 15 days
     paths:
       - coverage/
 
 
+pyflakes_pep8:
+  stage: test
+  tags:
+    - linux
+  script:
+    - python3 tests/check_pep8_pyflakes__.py
+  allow_failure: true
+
+
 pages:
   stage: deploy
   dependencies:
-    - coverage
+    - build_linux
+    - tests
   script:
-    - mv public/ .public/ || true
-    - mkdir public/ || true
-    - mkdir public/coverage || true
-    - mv coverage/index.html public/coverage/ || true
+    - mkdir -p public/
+    - cp doc/homepage/robots.txt public/
+    - wget https://github.com/jasonlong/cayman-theme/archive/master.zip
+    - unzip master.zip
+    - mv cayman-theme-master public/.test/
+    - cp doc/homepage/index.html public/.test/index.html
+    - sphinx-build doc/userguide/ public/.test/userguide/
+    - doxygen doc/apidoc/Doxyfile
+    - mv html/ public/.test/apidoc/
+    - mv coverage/ public/.test/
   artifacts:
     paths:
       - public
