@@ -8,20 +8,16 @@ from icetdev.structure import structure_from_atoms
 from ase.build import bulk, make_supercell
 import numpy as np
 
-
-print(__doc__)
-
 cutoffs = [8.0, 7.0]
 subelements = ['Re', 'Ti']
 
+print('')
 prototype = bulk('Re')
-
-print(prototype)
-
 cs = create_clusterspace(prototype, cutoffs, subelements)
 
+# structure #1
+print(' structure #1')
 conf = structure_from_atoms(prototype.copy())
-print('Structure no. 1 (nat= {}):'.format(len(conf)))
 cv = cs.get_clustervector(conf)
 cv_target = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                       1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
@@ -33,17 +29,16 @@ cv_target = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                       1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                       1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                       1.0, 1.0])
-
 assert np.all(np.abs(cv_target - cv) < 1e-6)
 
+# structure #2
+print(' structure #2')
 conf = make_supercell(prototype, [[2, 0, 1],
                                   [0, 1, 0],
                                   [0, 1, 2]])
-
 conf[0].symbol = 'Ti'
 conf[1].symbol = 'Ti'
 conf = structure_from_atoms(conf)
-print('Structure no. 2 (nat= {}):'.format(len(conf)))
 cv = cs.get_clustervector(conf)
 cv_target = np.array([1.0, 0.6666666666666666, 0.3888888888888889,
                       0.5555555555555556, 0.1111111111111111, 0.0,
@@ -85,15 +80,15 @@ cv_target = np.array([1.0, 0.6666666666666666, 0.3888888888888889,
                       0.16666666666666666, 0.25])
 assert np.all(np.abs(cv_target - cv) < 1e-6)
 
+# structure #3
+print(' structure #3')
 conf = make_supercell(prototype, [[1,  0, 1],
                                   [0,  1, 1],
                                   [0, -1, 3]])
-
 conf[0].symbol = 'Ti'
 conf[1].symbol = 'Ti'
 conf[2].symbol = 'Ti'
 conf = structure_from_atoms(conf)
-print('Structure no. 3 (nat= {}):'.format(len(conf)))
 cv = cs.get_clustervector(conf)
 cv_target = np.array([1.0, 0.14285714285714285, -0.5238095238095238,
                       0.5714285714285714, -0.5238095238095238,

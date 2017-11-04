@@ -40,7 +40,10 @@ def run_test(verbosity=2, files=None):
     test_dir = os.path.dirname(os.path.realpath(__file__))
     testSuite = unittest.TestSuite()
 
-    files = glob(test_dir + '/*')
+    if files:
+        files = [os.path.join(test_dir, f) for f in files]
+    else:
+        files = glob(test_dir + '/*')
     sdirtests = []  # tests from subdirectories: only one level assumed
     tests = []
     for f in files:
@@ -62,7 +65,6 @@ def run_test(verbosity=2, files=None):
     print('')
     ttr = unittest.TextTestRunner(verbosity=verbosity)
     results = ttr.run(testSuite)
-
 
     return results
 

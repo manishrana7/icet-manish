@@ -14,7 +14,9 @@ DISTTOL = 1e-8
 ''' Fetch structures from database '''
 db = connect('structures_for_testing.db')
 
+print('')
 for row in db.select():
+    print(' structure: {}'.format(row.tag))
     atoms_row = row.toatoms()
     structure = icet.structure_from_atoms(atoms_row)
     nl = NeighborList(len(atoms_row)*[2.6])
