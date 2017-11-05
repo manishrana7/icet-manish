@@ -83,8 +83,7 @@ for row in db.select():
     if atoms_row.get_pbc().all() == True:
         print("Testing structure: {} with cutoffs {}".format(atoms_tag, cutoffs))
         atoms_row.wrap()
-        clusterspace = create_clusterspace(
-            subelements, cutoffs, atoms=atoms_row)
+        clusterspace = create_clusterspace(atoms_row,cutoffs,subelements)
 
         cvs = generateCVSet(20, atoms_row, subelements, clusterspace)
         assertNoCorrelation(cvs)

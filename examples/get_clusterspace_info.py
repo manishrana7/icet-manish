@@ -13,7 +13,7 @@ cutoffs = [10.0, 7.0]
 subelements = ['Re', 'Ti',"H"]
 prototype = bulk('Re',"bcc",a=3).repeat(3)
 prototype.pbc = [False, False, False]
-clusterspace = create_clusterspace(subelements, cutoffs, atoms=prototype)
+clusterspace = create_clusterspace(prototype, cutoffs, subelements)
 
 #Get clusterspace details by printing
 print(clusterspace)

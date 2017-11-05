@@ -8,7 +8,7 @@ from ase import Atoms
 from ase.build import bulk
 import time
 import ase.neighborlist as asenl
-from tests import manybodyNeighborlistTester
+from tests.test_manybody_neighborlist import manybodyNeighborlistTester
 
 
 def benchmark_cpp_mbnl(structure, order, cutoff):
@@ -24,7 +24,7 @@ def benchmark_cpp_mbnl(structure, order, cutoff):
         neighborlists.append(nl)     
 
     mbnl = ManybodyNeighborlist()
-    for i in range(structure.size()):
+    for i in range(len(structure)):
         mbnl.build(neighborlists, i, False)
 
 
@@ -32,14 +32,19 @@ def benchmark_python_mbnl(atoms, order, cutoff):
     """
     Finds all the indices up to "order" within the cutoffs using the python implemented mbnl
     """
-    mbnl_T = manybodyNeighborlistTester.manybodyNeighborlistTester()
+    mbnl_T = manybodyNeighborlistTester()
     ase_nl = asenl.NeighborList(len(atoms) * [cutoff / 2.0], skin=1e-8,
                                 bothways=True, self_interaction=False)
     ase_nl.update(atoms)
+    cutoffs = (order-1)*[cutoff]
+    neighborlists = []
+    for co in cutoffs:
+        ase_nl.build(structure)
+        neighborlists.append(ase_nl)     
 
     bothways = False
     for i in range(len(atoms)):
-        mbnl_T.build(ase_nl, i, order, bothways=bothways)
+        mbnl_T.build(neighborlists, i, bothways=bothways)
 
 
 if __name__ == "__main__":

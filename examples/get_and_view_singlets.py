@@ -13,7 +13,7 @@ import numpy as np
 prototype = bulk('Re',"bcc",a=3).repeat(3)
 prototype.pbc = False
 
-cluster_data = get_singlet_info(atoms=prototype)
+cluster_data = get_singlet_info(prototype)
 
 #print singlet information
 for singlet in cluster_data:
@@ -23,4 +23,4 @@ for singlet in cluster_data:
 
 
 #Visually inspect singlets in this structure
-view_singlets(atoms=prototype)
+view_singlets(prototype)

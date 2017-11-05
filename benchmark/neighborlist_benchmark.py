@@ -8,7 +8,7 @@ from ase import Atoms
 from ase.build import bulk
 import time
 import ase.neighborlist as asenl
-from tests import manybodyNeighborlistTester
+from tests.test_manybody_neighborlist import manybodyNeighborlistTester
 
 
 def benchmark_cpp_nl(structure, cutoff):
