@@ -34,7 +34,12 @@ double Structure::getDistance(const int index1, const int index2) const
 
     if (index1 >= _positions.rows() or index2 >= _positions.rows())
     {
-        throw std::out_of_range("Error: Tried accessing position at out of bound index. Structure::getDistance");
+        std::string errorMessage = "At least one site index out of bounds ";
+        errorMessage += " index1:" + std::to_string(index1);
+        errorMessage += " index2:" + std::to_string(index2);
+        errorMessage += " npositions: " + std::to_string(_positions.rows());
+        errorMessage += " (Structure::getDistance)";
+        throw std::out_of_range(errorMessage);
     }
 
     const Eigen::Vector3d pos1 = _positions.row(index1);
@@ -57,9 +62,9 @@ double Structure::getDistance2(const int index1, const Vector3d offset1,
     if (index1 < 0 || index1 >= _positions.rows() or
         index2 < 0 || index2 >= _positions.rows())
     {
-        std::string errorMessage = "Site index out of bounds ";
+        std::string errorMessage = "At least one site index out of bounds ";
         errorMessage += " index1:" + std::to_string(index1);
-        errorMessage += " index2:" + std::to_string(index1);
+        errorMessage += " index2:" + std::to_string(index2);
         errorMessage += " npositions: " + std::to_string(_positions.rows());
         errorMessage += " (Structure::getDistance2)";
         throw std::out_of_range(errorMessage);
@@ -127,19 +132,18 @@ void Structure::setUniqueSites(const std::vector<int> &sites)
 }
 
 /**
-  @details This function returns the index of a unique site from the list of
-  unique sites.
+  @details This function returns the index of a unique site from the list of unique sites.
   @param i index of site
   @returns index of unique site
 **/
-int Structure::getSite(const size_t i) const
+int Structure::getUniqueSite(const size_t i) const
 {
     if (i >= _uniqueSites.size())
     {
         std::string errorMessage = "Site index out of bounds";
         errorMessage += " i: " + std::to_string(i);
         errorMessage += " nsites: " + std::to_string(_uniqueSites.size());
-        errorMessage += " (Structure::getSite)";
+        errorMessage += " (Structure::getUniqueSite)";
         throw std::out_of_range(errorMessage);
     }
     return _uniqueSites[i];
@@ -150,11 +154,11 @@ int Structure::getSite(const size_t i) const
   which matches the input position to the tolerance specified for this
   structure.
 
-  @param position position vector to match
+  @param position position to match in fractional coordinates
 
   @returns index of site; -1 = failed to find a match.
 **/
-int Structure::findIndexOfPosition(const Vector3d &position) const
+int Structure::findSiteByPosition(const Vector3d &position) const
 {
     for (size_t i = 0; i < _positions.rows(); i++)
     {
@@ -181,11 +185,11 @@ int Structure::findIndexOfPosition(const Vector3d &position) const
   The index is found by searching for the remainder position in structure.
   If no index is found a runtime_error is thrown.
 
-  @param position position vector to match
+  @param position position to match in fractional coordinates
 
   @returns LatticeNeighbor object
 */
-LatticeNeighbor Structure::findLatticeNeighborFromPosition(const Vector3d &position) const
+LatticeNeighbor Structure::findLatticeNeighborByPosition(const Vector3d &position) const
 {
     Vector3d fractional = _cell.transpose().partialPivLu().solve(position);
     Vector3d unitcellOffset;
@@ -193,7 +197,7 @@ LatticeNeighbor Structure::findLatticeNeighborFromPosition(const Vector3d &posit
     {
         if (hasPBC(i))
         {
-            unitcellOffset[i] = floor(coordinateRound((double)fractional[i]));
+            unitcellOffset[i] = floor(roundFloat((double)fractional[i]));
             if (fabs(unitcellOffset[i] - fractional[i]) > 1.0 - _tolerance)
             {
                 unitcellOffset[i] = int(round(fractional[i]));
@@ -204,10 +208,10 @@ LatticeNeighbor Structure::findLatticeNeighborFromPosition(const Vector3d &posit
     }
     Vector3d remainder = (fractional - unitcellOffset).transpose() * _cell;
 
-    auto index = findIndexOfPosition(remainder);
+    auto index = findSiteByPosition(remainder);
     if (index == -1)
     {
-        std::string errorMessage = "Failed to find site by position (findLatticeNeighborFromPosition)";
+        std::string errorMessage = "Failed to find site by position (findLatticeNeighborByPosition)";
         throw std::runtime_error(errorMessage);
     }
 
@@ -219,20 +223,20 @@ LatticeNeighbor Structure::findLatticeNeighborFromPosition(const Vector3d &posit
   @details This function returns a list ofLatticeNeighbor object the position
   of each matches the respective entry in the list of input positions to the
   tolerance specified for this structure. Internally this function uses
-  Structure::findLatticeNeighborFromPosition.
+  Structure::findLatticeNeighborByPosition.
 
-  @param positions list of position vectors to match
+  @param positions list of position to match in fractional coordinates
 
   @returns list of LatticeNeighbor objects
 */
-std::vector<LatticeNeighbor> Structure::findLatticeNeighborsFromPositions(const std::vector<Vector3d> &positions) const
+std::vector<LatticeNeighbor> Structure::findLatticeNeighborsByPositions(const std::vector<Vector3d> &positions) const
 {
     std::vector<LatticeNeighbor> latNbrVector;
     latNbrVector.reserve(positions.size());
 
     for (const Vector3d position : positions)
     {
-        latNbrVector.push_back(findLatticeNeighborFromPosition(position));
+        latNbrVector.push_back(findLatticeNeighborByPosition(position));
     }
 
     return latNbrVector;
@@ -240,9 +244,9 @@ std::vector<LatticeNeighbor> Structure::findLatticeNeighborsFromPositions(const 
 
 /**
   @details This function allows one to specify the number of components
-  that are allowed on each lattice site. This can be employed to construct
-  "parallel" cluster expansions such as in (A,B) on site #1 with h(C,D) on
-  site #2.
+  that are allowed on each lattice site via a vector. This can be employed to
+  construct "parallel" cluster expansions such as in (A,B) on site #1 with
+  (C,D) on site #2.
   @param numbersOfAllowedComponents list with the number of components
   allowed on each site
 **/
@@ -262,9 +266,9 @@ void Structure::setNumberOfAllowedComponents(const std::vector<int> &numbersOfAl
 
 /**
   @details This function allows one to specify the number of components
-  that are allowed on each lattice site. This can be employed to construct
-  "parallel" cluster expansions such as in (A,B) on site #1 with h(C,D) on
-  site #2.
+  that are allowed on each lattice site via a scalar. This can be employed to
+  construct "parallel" cluster expansions such as in (A,B) on site #1 with
+  (C,D) on site #2.
   @param numberOfAllowedComponents number of components allowed
 **/
 void Structure::setNumberOfAllowedComponents(const int numberOfAllowedComponents)

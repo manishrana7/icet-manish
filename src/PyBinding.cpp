@@ -58,18 +58,22 @@ PYBIND11_PLUGIN(_icetdev)
                       &Structure::getUniqueSites,
                       &Structure::setUniqueSites,
                       "list of ints : unique sites")
-        .def("get_unique_site", &Structure::getSite)
+        .def("get_unique_site", &Structure::getUniqueSite)
         .def("get_position", &Structure::getPosition)
         .def("get_distance", &Structure::getDistance)
         .def("get_distance2", &Structure::getDistance2)
-        .def("find_index_of_position_pybind",
-             &Structure::findIndexOfPosition,
+        .def("find_site_by_position",
+             &Structure::findSiteByPosition,
+             py::arg("position"),
+             "Returns the index of the site that matches the position.\n\n"
+             "Parameters\n----------\n"
+             "position : list/NumPy array\n"
+             "    position in fractional coordinates")
+        .def("find_lattice_neighbor_by_position",
+             &Structure::findLatticeNeighborByPosition,
              py::arg("position"))
-        .def("findLatticeNeighborFromPosition",
-             &Structure::findLatticeNeighborFromPosition,
-             py::arg("position"))
-        .def("findLatticeNeighborsFromPositions",
-             &Structure::findLatticeNeighborsFromPositions,
+        .def("find_lattice_neighbors_by_positions",
+             &Structure::findLatticeNeighborsByPositions,
              py::arg("positions"))
         .def("get_pbc", &Structure::getPBC)
         .def("set_pbc", &Structure::setPBC)

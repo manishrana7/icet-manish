@@ -48,19 +48,16 @@ class Structure
     void setUniqueSites(const std::vector<int> &);
 
     /// Return a unique site.
-    /// @todo rename to getUniqueSite
-    int getSite(const size_t) const;
+    int getUniqueSite(const size_t) const;
 
     /// Return index of site that matches the given position.
-    /// @todo rename to findSiteByPosition
-    int findIndexOfPosition(const Vector3d &) const;
+    int findSiteByPosition(const Vector3d &) const;
 
     /// Return LatticeNeighbor object that matches the given position.
-    /// @todo rename to findLatticeNeighborByPosition
-    LatticeNeighbor findLatticeNeighborFromPosition(const Vector3d &) const;
+    LatticeNeighbor findLatticeNeighborByPosition(const Vector3d &) const;
 
     /// Return list of LatticeNeighbor objects that matche a given list of positions.
-    std::vector<LatticeNeighbor> findLatticeNeighborsFromPositions(const std::vector<Vector3d> &) const;
+    std::vector<LatticeNeighbor> findLatticeNeighborsByPositions(const std::vector<Vector3d> &) const;
 
   public:
 
@@ -106,8 +103,10 @@ class Structure
     /// Return the cell metric.
     Eigen::Matrix<double, 3, 3> getCell() const { return _cell; }
 
-    /// Set allowed components for each site.
+    /// Set allowed components for each site by vector.
     void setNumberOfAllowedComponents(const std::vector<int> &);
+
+    /// Set allowed components for each site by scalar.
     void setNumberOfAllowedComponents(const int);
 
     /// Return number of allowed components on each site.
@@ -129,9 +128,8 @@ class Structure
     std::vector<std::string> convertAtomicNumbersToChemicalSymbols(const std::vector<int> &) const;
 
     /// Round float number to given tolerance.
-    /// @todo rename to roundFloat
     /// @todo move to a more general location.
-    double coordinateRound(const double &val, const double rounding_tolerance = 1e-7) const
+    double roundFloat(const double &val, const double rounding_tolerance = 1e-7) const
     {
         return round(val * 1.0 / rounding_tolerance) / (1.0 / rounding_tolerance);
     }
@@ -152,7 +150,7 @@ class Structure
 
   private:
 
-    /// Positions of sites.
+    /// Positions of sites in fractional coordinates.
     Eigen::Matrix<double, Dynamic, 3, RowMajor> _positions;
 
     /// Cell metric.
@@ -165,7 +163,6 @@ class Structure
     std::vector<bool> _pbc;
 
     /// List of unique sites.
-    /// @todo currently not used
     std::vector<int> _uniqueSites;
 
     /// List of the number of allowed components on each site.

@@ -811,7 +811,7 @@ void OrbitList::transformSiteToSupercell(LatticeNeighbor &site, const Structure 
     if (find == primToSuperMap.end())
     {
         Vector3d sitePosition = _primitiveStructure.getPosition(site);
-        supercellSite = superCell.findLatticeNeighborFromPosition(sitePosition);
+        supercellSite = superCell.findLatticeNeighborByPosition(sitePosition);
         primToSuperMap[site] = supercellSite;
     }
     else
@@ -853,8 +853,8 @@ OrbitList OrbitList::getSupercellOrbitlist(const Structure &superCell) const
     for (size_t i = 0; i < superCell.size(); i++)
     {
         Vector3d position_i = superCell.getPositions().row(i);
-        LatticeNeighbor primitive_site = _primitiveStructure.findLatticeNeighborFromPosition(position_i);
-        LatticeNeighbor super_site = superCell.findLatticeNeighborFromPosition(position_i);
+        LatticeNeighbor primitive_site = _primitiveStructure.findLatticeNeighborByPosition(position_i);
+        LatticeNeighbor super_site = superCell.findLatticeNeighborByPosition(position_i);
         primToSuperMap[primitive_site] = super_site;
         uniqueCellOffsets.insert(primitive_site.unitcellOffset());
     }
