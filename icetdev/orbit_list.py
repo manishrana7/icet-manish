@@ -3,7 +3,7 @@ import numpy as np
 import time
 from _icetdev import OrbitList
 from icetdev.neighborlist import get_neighborlists
-from icetdev.permutationMap import permutation_matrix_from_atoms
+from icetdev.permutation_map import permutation_matrix_from_atoms
 
 
 def __fractional_to_cartesian(fractional_coordinates, cell):

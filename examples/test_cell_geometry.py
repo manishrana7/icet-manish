@@ -1,4 +1,4 @@
-from icetdev.tools.geometry import get_scaled_positions, find_latticeSite_from_position_python
+from icetdev.tools.geometry import get_scaled_positions, find_lattice_site_from_position_python
 
 from icetdev.structure import *
 from icetdev.neighborlist import *
@@ -35,13 +35,13 @@ lat_nbrs = structure.findLatticeSitesFromPositions(pos_neighbors)
 
 # for fpos, pos in zip(frac_coordinates,pos_neighbors):
 #     lat_nbr = structure.findLatticeSiteFromPosition(pos)
-#     #lat_nbr = find_latticeSite_from_position_python(structure, pos)
+#     #lat_nbr = find_lattice_site_from_position_python(structure, pos)
 #     #lat_pos = structure.positions[lat_nbr.index] + np.dot(lat_nbr.unitcellOffset, structure.cell)
 #     #print(fpos, pos, np.dot(fpos, atoms.cell), lat_nbr, lat_pos-pos )
 
 # for fpos, pos, lat_nbr in zip(frac_coordinates,pos_neighbors, lat_nbrs):
 #     #lat_nbr = structure.findLatticeSiteFromPosition(pos)
-#     #lat_nbr = find_latticeSite_from_position_python(structure, pos)
+#     #lat_nbr = find_lattice_site_from_position_python(structure, pos)
 #     lat_pos = structure.positions[lat_nbr.index] + np.dot(lat_nbr.unitcellOffset, structure.cell)
 #     print(fpos, pos, np.dot(fpos, atoms.cell), lat_nbr, lat_pos-pos )
 

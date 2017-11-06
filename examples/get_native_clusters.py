@@ -1,5 +1,5 @@
 from icetdev.clusterspace import create_clusterspace
-from icetdev.clusterCounts import ClusterCounts
+from icetdev.cluster_counts import ClusterCounts
 from icetdev.structure import structure_from_atoms
 from ase.build import bulk
 from ase import Atoms

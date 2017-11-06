@@ -1,8 +1,8 @@
-from icetdev import orbitList
+from icetdev import orbit_list
 from ase.db import connect
 from icetdev.neighborlist import get_neighborlists
-from icetdev.orbitList import create_orbit_list
-from icetdev.clusterCounts import *
+from icetdev.orbit_list import create_orbit_list
+from icetdev.cluster_counts import *
 import random
 import numpy as np
 
@@ -72,12 +72,12 @@ def test_no_symmetry_local_orbitlist_counting(atoms_primitive, atoms_tag,
         atoms=atoms_repeat, cutoffs=cutoffs)
 
     ''' Orbitlist primitive '''
-    orbitlist_primitive = orbitList.OrbitList(
+    orbitlist_primitive = orbit_list.OrbitList(
         neighborlists_primitive, structure)
     orbitlist_primitive.sort()
 
     ''' Orbitlist supercell '''
-    orbitlist_supercell = orbitList.OrbitList(
+    orbitlist_supercell = orbit_list.OrbitList(
         neighborlists_supercell, structure_repeat)
     orbitlist_supercell.sort()
 
@@ -184,7 +184,7 @@ def test_no_symmetry_vs_symmetry_count(atoms_primitive, atoms_tag,
     neighborlists = get_neighborlists(atoms=atoms, cutoffs=cutoffs)
 
     ''' Get orbitlist no symmetry case '''
-    orbitlist_no_symmetry = orbitList.OrbitList(neighborlists, structure)
+    orbitlist_no_symmetry = orbit_list.OrbitList(neighborlists, structure)
     orbitlist_no_symmetry.sort()
     ''' Set up cluster count and count '''
     clusterCount_no_symmetry = ClusterCounts()

@@ -1,6 +1,6 @@
 from icetdev import *
 from icetdev.structure import *
-from icetdev.manybodyNeighborlist import *
+from icetdev.manybody_neighborlist import *
 import numpy.random as random
 import numpy as np
 from ase import Atoms
@@ -8,7 +8,7 @@ from ase import Atoms
 from ase.build import bulk
 import time
 import ase.neighborlist as asenl
-from tests.test_manybody_neighborlist import manybodyNeighborlistTester
+from tests.test_manybody_neighborlist import manybody_neighborlistTester
 
 
 def benchmark_cpp_nl(structure, cutoff):

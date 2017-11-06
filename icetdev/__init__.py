@@ -7,9 +7,9 @@ from __future__ import print_function, division
 
 from .structure import *
 from .neighborlist import *
-from .manybodyNeighborlist import *
+from .manybody_neighborlist import *
 from .cluster import *
-from .permutationMap import *
-from .clusterCounts import *
+from .permutation_map import *
+from .cluster_counts import *
 from .clusterspace import *
-from .orbitList import *
+from .orbit_list import *

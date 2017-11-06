@@ -1,5 +1,5 @@
-from icetdev import orbitList, Structure
-from icetdev.orbitList import create_orbit_list
+from icetdev import orbit_list, Structure
+from icetdev.orbit_list import create_orbit_list
 from icetdev.structure import structure_from_atoms
 from ase.build import bulk
 

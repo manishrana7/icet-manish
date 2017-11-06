@@ -17,7 +17,7 @@ def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
     '''
 
     prim_size = len(
-        icetdev.permutationMap.__get_primitive_structure(atoms.copy()))
+        icetdev.permutation_map.__get_primitive_structure(atoms.copy()))
 
     Mi_int = allowed_sites
     Mi_list = [allowed_sites] * prim_size

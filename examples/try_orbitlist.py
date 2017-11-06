@@ -1,13 +1,13 @@
-from icetdev.orbitList import create_orbit_list
+from icetdev.orbit_list import create_orbit_list
 from ase import Atoms
 from ase.build import bulk
-from icetdev.permutationMap import PermutationMap, permutation_maps_from_atoms
+from icetdev.permutation_map import PermutationMap, permutation_maps_from_atoms
 from icetdev.structure import structure_from_atoms
-from icetdev.manybodyNeighborlist import get_all_lattice_neighbors, ManybodyNeighborlist
+from icetdev.manybody_neighborlist import get_all_lattice_neighbors, ManybodyNeighborlist
 import numpy as np
-from icetdev.clusterCounts import ClusterCounts
+from icetdev.cluster_counts import ClusterCounts
 
-from icetdev.orbitList import create_orbit_list, __get_latNbr_permutation_matrix
+from icetdev.orbit_list import create_orbit_list, __get_latNbr_permutation_matrix
 from time import time
 atoms = bulk("Al", "fcc", a=2.0).repeat(1)
 
@@ -58,12 +58,12 @@ print("len of clusters ",len(clusters))
 #get lattice neighbors
 
 
-clusterCounts = ClusterCounts()
+cluster_counts = ClusterCounts()
 
-clusterCounts.count_clusters(atoms=atoms, cutoffs=cutoffs)
+cluster_counts.count_clusters(atoms=atoms, cutoffs=cutoffs)
 
 
-print("Found {} clusters".format(clusterCounts.size()))
+print("Found {} clusters".format(cluster_counts.size()))
 # for cl in clusters:
 #     print(cl[0][2].unitcellOffset, np.dot(cl[0][2].unitcellOffset,prim_structure.cell.T))
 #print(clusters[0][0:4])

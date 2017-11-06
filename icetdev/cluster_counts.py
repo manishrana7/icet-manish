@@ -1,9 +1,9 @@
 from _icetdev import ClusterCounts
 from icetdev.structure import structure_from_atoms
 from icetdev.neighborlist import Neighborlist
-from icetdev.manybodyNeighborlist import ManybodyNeighborlist
+from icetdev.manybody_neighborlist import ManybodyNeighborlist
 from icetdev.cluster import Cluster
-from icetdev.localOrbitlistGenerator import LocalOrbitlistGenerator
+from icetdev.local_orbitlist_generator import LocalOrbitlistGenerator
 
 
 def __count_each_local_orbitlist(self, structure, prim_orbitlist, keepOrderIntact=False):

@@ -5,7 +5,7 @@ its  clustervector computed
 
 from icetdev.clusterspace import create_clusterspace
 from icetdev.structure import structure_from_atoms
-from icetdev import permutationMap
+from icetdev import permutation_map
 import numpy as np
 import random
 from ase.db import connect
@@ -84,6 +84,6 @@ for row in db.select():
         print(' structure: {}'.format(row.tag))
         clusterspace = create_clusterspace(atoms_row, cutoffs, subelements)
         if not atoms_row.get_pbc().all():
-            permutationMap.__vacuum_on_non_pbc(atoms_row)
+            permutation_map.__vacuum_on_non_pbc(atoms_row)
         cvs = generate_clustervector_set(5, atoms_row,
                                          subelements, clusterspace)

@@ -5,7 +5,7 @@ from ase.build import bulk
 import numpy as np
 import pdb 
 
-class manybodyNeighborlistTester():
+class manybody_neighborlistTester():
 
     """
     This is a python implementation of icet's  manybody neighborlist.
@@ -46,7 +46,7 @@ class manybodyNeighborlistTester():
 
         if not neighborlists:
             raise RuntimeError(
-                "Neighborlists is empty in manybodyNeighborlistTester::build ")
+                "Neighborlists is empty in manybody_neighborlistTester::build ")
 
         manybody_neighbor_indices = []
 

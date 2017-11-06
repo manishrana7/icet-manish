@@ -1,7 +1,7 @@
 from _icetdev import ClusterSpace
 from icetdev import Structure
 from icetdev.structure import structure_from_atoms
-from icetdev.orbitList import create_orbit_list
+from icetdev.orbit_list import create_orbit_list
 from ase import Atoms
 
 
@@ -34,21 +34,21 @@ def create_clusterspace(crystal_structure, cutoffs, subelements, Mi=None, verbos
     else:
         structure = crystal_structure
 
-    orbitList = create_orbit_list(structure, cutoffs, verbosity=verbosity)
-    orbitList.sort()
+    orbit_list = create_orbit_list(structure, cutoffs, verbosity=verbosity)
+    orbit_list.sort()
     if Mi == None:
         Mi = len(subelements)
     if isinstance(Mi, dict):
-        Mi = get_Mi_from_dict(Mi, orbitList.get_primitive_structure())
+        Mi = get_Mi_from_dict(Mi, orbit_list.get_primitive_structure())
     if not isinstance(Mi, list):
         if not isinstance(Mi, int):
             raise Exception("Error: Mi has wrong type in create_clusterspace")
         else:
-            Mi = [Mi] * len(orbitList.get_primitive_structure())
+            Mi = [Mi] * len(orbit_list.get_primitive_structure())
 
-    assert len(Mi) == len(orbitList.get_primitive_structure()), "Error: len(Mi) is not len(primitive_structure). {} != {}".format(
-        len(Mi), len(orbitList.get_primitive_structure()))
-    clusterspace = ClusterSpace(Mi, subelements, orbitList)
+    assert len(Mi) == len(orbit_list.get_primitive_structure()), "Error: len(Mi) is not len(primitive_structure). {} != {}".format(
+        len(Mi), len(orbit_list.get_primitive_structure()))
+    clusterspace = ClusterSpace(Mi, subelements, orbit_list)
     clusterspace.cutoffs = cutoffs
     return clusterspace
 
