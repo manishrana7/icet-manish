@@ -12,6 +12,8 @@ Welcome to icet's documentation!
 
    background
    tutorials/index
+   moduleref/index
+
    bibliography
    glossary
    genindex

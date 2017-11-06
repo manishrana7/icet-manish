@@ -50,16 +50,21 @@ pages:
     - build_linux
     - tests
   script:
+    # homepage
     - mkdir -p public/
     - cp doc/homepage/robots.txt public/
     - wget https://github.com/jasonlong/cayman-theme/archive/master.zip
     - unzip master.zip
     - mv cayman-theme-master public/.test/
     - cp doc/homepage/index.html public/.test/index.html
-    - sphinx-build doc/userguide/ public/.test/userguide/
+    # doxygen
     - cd doc/apidoc/
     - doxygen Doxyfile
-    - cd ../../
+    - cd ../..
+    # sphinx
+    - pip3 install breathe
+    - sphinx-build doc/userguide/ public/.test/userguide/
+    # consolidate
     - mv doc/apidoc/html/ public/.test/apidoc/
     - mv coverage/ public/.test/
   artifacts:

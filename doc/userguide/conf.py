@@ -22,6 +22,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../../icetdev'))
 sys.path.insert(0, os.path.abspath('../../examples'))
+sys.path.insert(0, os.path.abspath('../../build/src'))
 
 # -- General configuration ------------------------------------------------
 
@@ -37,7 +38,8 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.todo',
     'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode'
+    'sphinx.ext.viewcode',
+    'breathe'
 ]
 napoleon_use_ivar = True
 # Add any paths that contain templates here, relative to this directory.
@@ -342,3 +344,7 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #
 # texinfo_no_detailmenu = False
+
+breathe_projects = {'icet-dev': '../apidoc/xml/'}
+breathe_default_project = 'icet-dev'
+breathe_domain_by_extension = {'h': 'cpp'}
