@@ -61,7 +61,7 @@ void Neighborlist::build(const Structure &conf)
 
                             if (distance_ij <= _cutoff && distance_ij > 2 * DISTTOL)
                             {
-                                LatticeNeighbor neighbor = LatticeNeighbor(j, extVector);
+                                LatticeSite neighbor = LatticeSite(j, extVector);
                                 auto find_neighbor = std::find(_neighbors[i].begin(),_neighbors[i].end(), neighbor);
                                 if(find_neighbor == _neighbors[i].end())
                                 {

@@ -4,7 +4,7 @@
 #include <pybind11/eigen.h>
 #include <vector>
 #include <string>
-#include "LatticeNeighbor.hpp"
+#include "LatticeSite.hpp"
 #include "Cluster.hpp"
 #include "hash_functions.hpp"
 #include "Symmetry.hpp"
@@ -13,7 +13,7 @@ using namespace Eigen;
 /**
 Class Orbit
 
-contains equivalent vector<LatticeNeighbors>
+contains equivalent vector<LatticeSites>
 contains a sorted Cluster for representation
 
 Can be compared to other orbits
@@ -26,7 +26,7 @@ class Orbit
     Orbit(const Cluster &);
 
     ///Add a group sites that are equivalent to the ones in this orbit
-    void addEquivalentSites(const std::vector<LatticeNeighbor> &latNbrs, bool sort = false)
+    void addEquivalentSites(const std::vector<LatticeSite> &latNbrs, bool sort = false)
     {
         _equivalentSites.push_back(latNbrs);
         if (sort)
@@ -35,9 +35,9 @@ class Orbit
         }
     }
     ///add many lattice neigbhors
-    void addEquivalentSites(const std::vector<std::vector<LatticeNeighbor>> &LatticeNeighbors, bool sort = false)
+    void addEquivalentSites(const std::vector<std::vector<LatticeSite>> &LatticeSites, bool sort = false)
     {
-        _equivalentSites.insert(_equivalentSites.end(), LatticeNeighbors.begin(), LatticeNeighbors.end());
+        _equivalentSites.insert(_equivalentSites.end(), LatticeSites.begin(), LatticeSites.end());
         if (sort)
         {
             sortOrbit();
@@ -61,15 +61,15 @@ class Orbit
     }
 
     ///Returns equivalent sites
-    std::vector<std::vector<LatticeNeighbor>> getEquivalentSites() const
+    std::vector<std::vector<LatticeSite>> getEquivalentSites() const
     {
         return _equivalentSites;
     }
 
     ///Returns equivalent sites
-    std::vector<std::vector<LatticeNeighbor>> getPermutatedEquivalentSites() const
+    std::vector<std::vector<LatticeSite>> getPermutatedEquivalentSites() const
     {
-        std::vector<std::vector<LatticeNeighbor>> permutatedSites(_equivalentSites.size());
+        std::vector<std::vector<LatticeSite>> permutatedSites(_equivalentSites.size());
         for(size_t i =0; i < _equivalentSites.size(); i++)
         {
             permutatedSites[i] = getSitesWithPermutation(i);
@@ -80,7 +80,7 @@ class Orbit
 
 
     ///Return the equivalent sites at position `index`
-    std::vector<LatticeNeighbor> GetSitesOfIndex(unsigned int index) const
+    std::vector<LatticeSite> GetSitesOfIndex(unsigned int index) const
     {
         if (index >= _equivalentSites.size())
         {
@@ -90,7 +90,7 @@ class Orbit
     }
 
     ///Return the equivalent sites at position `index` by using the permutation to rep. cluster
-    std::vector<LatticeNeighbor> getSitesWithPermutation(unsigned int index) const
+    std::vector<LatticeSite> getSitesWithPermutation(unsigned int index) const
     {
         if (index >= _equivalentSites.size())
         {
@@ -103,11 +103,11 @@ class Orbit
             throw std::out_of_range(errMSG);
         }
 
-        return icet::getPermutatedVector<LatticeNeighbor>( _equivalentSites[index],_equivalentSitesPermutations[index]);
+        return icet::getPermutatedVector<LatticeSite>( _equivalentSites[index],_equivalentSitesPermutations[index]);
     }
 
         ///This sets the equivalent sites
-        void setEquivalentSites(const std::vector<std::vector<LatticeNeighbor>> &equivalentSites)
+        void setEquivalentSites(const std::vector<std::vector<LatticeSite>> &equivalentSites)
         {
             _equivalentSites = equivalentSites;
         }
@@ -192,7 +192,7 @@ class Orbit
         }
 
         ///Return the representative sites of this orbit (if any equivalentSites permutations exists it is to these sites they refer to)
-        std::vector<LatticeNeighbor> getRepresentativeSites() const
+        std::vector<LatticeSite> getRepresentativeSites() const
         {
             return _equivalentSites[0];
         }
@@ -204,7 +204,7 @@ class Orbit
         int getNumberOfDuplicates(int verbosity = 0) const;
 
         /**
-        Creates a copy of this orbit and translates all LatticeNeighbor offsets in equivalent sites
+        Creates a copy of this orbit and translates all LatticeSite offsets in equivalent sites
         this will also transfer any existing permutations directly which should be fine since an offset doesn't change permutations to the prototype sites)
     */
         friend Orbit operator+(const Orbit &orbit, const Eigen::Vector3d &offset)
@@ -277,7 +277,7 @@ class Orbit
 
             //All tests passed, can now add equivalent sites and equivalent sites permutations
 
-            //_equivalentSites.insert(_equivalentSites.end(), LatticeNeighbors.begin(), LatticeNeighbors.end());
+            //_equivalentSites.insert(_equivalentSites.end(), LatticeSites.begin(), LatticeSites.end());
 
             const auto rhsEquivalentSites = orbit_rhs.getEquivalentSites();
             const auto rhsEquivalentSitesPermutations = orbit_rhs.getEquivalentSitesPermutations();
@@ -299,7 +299,7 @@ class Orbit
         Cluster _representativeCluster;
 
         ///Container of equivalent sites for this orbit
-        std::vector<std::vector<LatticeNeighbor>> _equivalentSites;
+        std::vector<std::vector<LatticeSite>> _equivalentSites;
 
         ///Contains the permutations of the equivalent sites which takes it to the order of the reference cluster
         std::vector<std::vector<int>> _equivalentSitesPermutations;

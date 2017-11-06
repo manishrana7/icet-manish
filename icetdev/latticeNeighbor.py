@@ -1,4 +1,4 @@
-from _icetdev import LatticeNeighbor
+from _icetdev import LatticeSite
 
 
 
@@ -10,5 +10,5 @@ def __latNbr_repr(self):
     rep = str(self.index) +" : " + str(co)
     return rep
 
-LatticeNeighbor.__repr__ = __latNbr_repr
+LatticeSite.__repr__ = __latNbr_repr
 

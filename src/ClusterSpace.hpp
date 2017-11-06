@@ -132,7 +132,7 @@ class ClusterSpace
     double defaultClusterFunction(const int Mi, const int clusterFunction, const int element) const;
 
     //////Returns the allowed occupations on the sites
-    std::vector<int> getAllowedOccupations(const Structure &structure, const std::vector<LatticeNeighbor> &latticeNeighbors) const;
+    std::vector<int> getAllowedOccupations(const Structure &structure, const std::vector<LatticeSite> &latticeNeighbors) const;
 
     //Maps real elements  to a 0,1,2, ... representation
     std::map<int, int> _elementRepresentation;

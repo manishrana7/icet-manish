@@ -3,7 +3,7 @@
 #include "ManybodyNeighborlist.hpp"
 #include "Cluster.hpp"
 #include "PermutationMap.hpp"
-#include "LatticeNeighbor.hpp"
+#include "LatticeSite.hpp"
 #include "ClusterCounts.hpp"
 #include "LocalOrbitlistGenerator.hpp"
 #include "ClusterSpace.hpp"
@@ -70,10 +70,10 @@ PYBIND11_PLUGIN(_icetdev)
              "position : list/NumPy array\n"
              "    position in fractional coordinates")
         .def("find_lattice_neighbor_by_position",
-             &Structure::findLatticeNeighborByPosition,
+             &Structure::findLatticeSiteByPosition,
              py::arg("position"))
         .def("find_lattice_neighbors_by_positions",
-             &Structure::findLatticeNeighborsByPositions,
+             &Structure::findLatticeSitesByPositions,
              py::arg("positions"))
         .def("get_pbc", &Structure::getPBC)
         .def("set_pbc", &Structure::setPBC)
@@ -106,7 +106,7 @@ PYBIND11_PLUGIN(_icetdev)
     py::class_<Cluster>(m, "Cluster")
         // .def(py::init<std::vector<int> &, std::vector<double> &, const bool, const int>(), pybind11::arg("sites"),
         //      pybind11::arg("distances"), pybind11::arg("sortedCluster") = true, pybind11::arg("clusterTag") = 0)
-        .def(py::init<const Structure &, const std::vector<LatticeNeighbor> &, const bool, const int>(), pybind11::arg("structure"),
+        .def(py::init<const Structure &, const std::vector<LatticeSite> &, const bool, const int>(), pybind11::arg("structure"),
              pybind11::arg("latticeNeighbors"), pybind11::arg("sortedCluster") = true, pybind11::arg("clusterTag") = 0)
         .def("count", &Cluster::count)
         .def("get_count", &Cluster::getCount)
@@ -132,23 +132,23 @@ PYBIND11_PLUGIN(_icetdev)
 
         ;
 
-    py::class_<LatticeNeighbor>(m, "LatticeNeighbor")
+    py::class_<LatticeSite>(m, "LatticeSite")
         .def(py::init<const int, const Vector3d &>())
-        .def("print", &LatticeNeighbor::print)
-        .def_property("index", &LatticeNeighbor::index, &LatticeNeighbor::setIndex)
-        .def_property("unitcellOffset", &LatticeNeighbor::unitcellOffset, &LatticeNeighbor::setUnitcellOffset)
+        .def("print", &LatticeSite::print)
+        .def_property("index", &LatticeSite::index, &LatticeSite::setIndex)
+        .def_property("unitcellOffset", &LatticeSite::unitcellOffset, &LatticeSite::setUnitcellOffset)
         .def(py::self < py::self)
         .def(py::self == py::self)
         .def(py::self + Eigen::Vector3d())
-        .def("__hash__", [](const LatticeNeighbor &latticeNeighbor) { return std::hash<LatticeNeighbor>{}(latticeNeighbor); })
+        .def("__hash__", [](const LatticeSite &latticeNeighbor) { return std::hash<LatticeSite>{}(latticeNeighbor); })
 
         ;
 
     py::class_<ClusterCounts>(m, "ClusterCounts")
         .def(py::init<>())
-        .def("count_lattice_neighbors", &ClusterCounts::countLatticeNeighbors)
-        .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<LatticeNeighbor> &)) & ClusterCounts::count)
-        .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &, const Cluster &)) & ClusterCounts::count)
+        .def("count_lattice_neighbors", &ClusterCounts::countLatticeSites)
+        .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<LatticeSite> &)) & ClusterCounts::count)
+        .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &)) & ClusterCounts::count)
         .def("count_orbitlist",&ClusterCounts::countOrbitlist)
         .def("__len__", &ClusterCounts::size)
         .def("reset", &ClusterCounts::reset)
@@ -170,8 +170,8 @@ PYBIND11_PLUGIN(_icetdev)
 
     py::class_<Orbit>(m, "Orbit")
         .def(py::init<const Cluster &>())
-        .def("add_equivalent_sites", (void (Orbit::*)(const std::vector<LatticeNeighbor> &, bool)) & Orbit::addEquivalentSites, py::arg("lattice_neighbors"), py::arg("sort")=false)
-        .def("add_equivalent_sites", (void (Orbit::*)(const std::vector<std::vector<LatticeNeighbor>> &, bool)) & Orbit::addEquivalentSites, py::arg("lattice_neighbors"), py::arg("sort")=false)
+        .def("add_equivalent_sites", (void (Orbit::*)(const std::vector<LatticeSite> &, bool)) & Orbit::addEquivalentSites, py::arg("lattice_neighbors"), py::arg("sort")=false)
+        .def("add_equivalent_sites", (void (Orbit::*)(const std::vector<std::vector<LatticeSite>> &, bool)) & Orbit::addEquivalentSites, py::arg("lattice_neighbors"), py::arg("sort")=false)
         .def("get_representative_cluster", &Orbit::getRepresentativeCluster)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
         .def("get_representative_sites", &Orbit::getRepresentativeSites)
@@ -187,7 +187,7 @@ PYBIND11_PLUGIN(_icetdev)
     py::class_<OrbitList>(m, "OrbitList")
         .def(py::init<>())
         .def(py::init<const std::vector<Neighborlist> &, const Structure &>())
-        .def(py::init<const Structure &, const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<Neighborlist> &>())
+        .def(py::init<const Structure &, const std::vector<std::vector<LatticeSite>> &, const std::vector<Neighborlist> &>())
         .def("add_orbit", &OrbitList::addOrbit)
         .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters)
         .def("get_orbit", &OrbitList::getOrbit)

@@ -1,8 +1,8 @@
-from icetdev.latticeNeighbor import LatticeNeighbor
+from icetdev.latticeNeighbor import LatticeSite
 
 index = 1
 offset = [0., 0., 0.,]
-latnbr = LatticeNeighbor(index, offset)
+latnbr = LatticeSite(index, offset)
 
 
 #Test that it is hashable

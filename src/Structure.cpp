@@ -78,9 +78,9 @@ double Structure::getDistance2(const int index1, const Vector3d offset1,
   @details This function returns the position of a site.
   @param latticeNeighbor site for which to obtain the position
   @returns a 3-dimensional position vector
-  @todo rename LatticeNeighbor class
+  @todo rename LatticeSite class
 */
-Vector3d Structure::getPosition(const LatticeNeighbor &latticeNeighbor) const
+Vector3d Structure::getPosition(const LatticeSite &latticeNeighbor) const
 {
     if (latticeNeighbor.index() < 0 || latticeNeighbor.index() >= _positions.rows())
     {
@@ -172,7 +172,7 @@ int Structure::findSiteByPosition(const Vector3d &position) const
 }
 
 /**
-  @details This function returns the LatticeNeighbor object the position of
+  @details This function returns the LatticeSite object the position of
   which matches the input position to the tolerance specified for this
   structure.
 
@@ -187,9 +187,9 @@ int Structure::findSiteByPosition(const Vector3d &position) const
 
   @param position position to match in fractional coordinates
 
-  @returns LatticeNeighbor object
+  @returns LatticeSite object
 */
-LatticeNeighbor Structure::findLatticeNeighborByPosition(const Vector3d &position) const
+LatticeSite Structure::findLatticeSiteByPosition(const Vector3d &position) const
 {
     Vector3d fractional = _cell.transpose().partialPivLu().solve(position);
     Vector3d unitcellOffset;
@@ -211,32 +211,32 @@ LatticeNeighbor Structure::findLatticeNeighborByPosition(const Vector3d &positio
     auto index = findSiteByPosition(remainder);
     if (index == -1)
     {
-        std::string errorMessage = "Failed to find site by position (findLatticeNeighborByPosition)";
+        std::string errorMessage = "Failed to find site by position (findLatticeSiteByPosition)";
         throw std::runtime_error(errorMessage);
     }
 
-    LatticeNeighbor ret = LatticeNeighbor(index, unitcellOffset);
+    LatticeSite ret = LatticeSite(index, unitcellOffset);
     return ret;
 }
 
 /**
-  @details This function returns a list ofLatticeNeighbor object the position
+  @details This function returns a list ofLatticeSite object the position
   of each matches the respective entry in the list of input positions to the
   tolerance specified for this structure. Internally this function uses
-  Structure::findLatticeNeighborByPosition.
+  Structure::findLatticeSiteByPosition.
 
   @param positions list of position to match in fractional coordinates
 
-  @returns list of LatticeNeighbor objects
+  @returns list of LatticeSite objects
 */
-std::vector<LatticeNeighbor> Structure::findLatticeNeighborsByPositions(const std::vector<Vector3d> &positions) const
+std::vector<LatticeSite> Structure::findLatticeSitesByPositions(const std::vector<Vector3d> &positions) const
 {
-    std::vector<LatticeNeighbor> latNbrVector;
+    std::vector<LatticeSite> latNbrVector;
     latNbrVector.reserve(positions.size());
 
     for (const Vector3d position : positions)
     {
-        latNbrVector.push_back(findLatticeNeighborByPosition(position));
+        latNbrVector.push_back(findLatticeSiteByPosition(position));
     }
 
     return latNbrVector;

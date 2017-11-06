@@ -4,7 +4,7 @@ import spglib as spglib
 from ase import Atoms
 from _icetdev import PermutationMap
 from icetdev.neighborlist import get_neighborlists, Neighborlist
-from icetdev.latticeNeighbor import LatticeNeighbor
+from icetdev.latticeNeighbor import LatticeSite
 from icetdev.structure import structure_from_atoms
 from icetdev.tools.geometry import get_scaled_positions
 
@@ -67,7 +67,7 @@ def __get_fractional_positions_from_nl(structure, neighborlist):
     '''
     neighbor_positions = []
     fractional_positions = []
-    latnbr_i = LatticeNeighbor(0, [0, 0, 0])
+    latnbr_i = LatticeSite(0, [0, 0, 0])
     for i in range(len(neighborlist)):
         latnbr_i.index = i
         position = structure.get_position(latnbr_i)

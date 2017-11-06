@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include "PeriodicTable.hpp"
-#include "LatticeNeighbor.hpp"
+#include "LatticeSite.hpp"
 
 using namespace Eigen;
 
@@ -35,7 +35,7 @@ class Structure
     double getDistance2(const int, const Vector3d, const int, const Vector3d) const;
 
     /// Return the position of a site in Cartesian coordinates.
-    Vector3d getPosition(const LatticeNeighbor &) const;
+    Vector3d getPosition(const LatticeSite &) const;
 
     /// Return atomic number of site.
     int getAtomicNumber(const unsigned int) const;
@@ -53,11 +53,11 @@ class Structure
     /// Return index of site that matches the given position.
     int findSiteByPosition(const Vector3d &) const;
 
-    /// Return LatticeNeighbor object that matches the given position.
-    LatticeNeighbor findLatticeNeighborByPosition(const Vector3d &) const;
+    /// Return LatticeSite object that matches the given position.
+    LatticeSite findLatticeSiteByPosition(const Vector3d &) const;
 
-    /// Return list of LatticeNeighbor objects that matche a given list of positions.
-    std::vector<LatticeNeighbor> findLatticeNeighborsByPositions(const std::vector<Vector3d> &) const;
+    /// Return list of LatticeSite objects that matche a given list of positions.
+    std::vector<LatticeSite> findLatticeSitesByPositions(const std::vector<Vector3d> &) const;
 
   public:
 

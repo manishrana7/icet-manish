@@ -4,12 +4,12 @@
 Counts clusters given this compact form of latticeneighbors (see ManybodyNeighborlist for more details)
 */
 // build(const Neighborlist &nl, int index, int order, bool);
-void ClusterCounts::countLatticeNeighbors(const Structure &structure,
-                                          const std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &latticeNeighbors)
+void ClusterCounts::countLatticeSites(const Structure &structure,
+                                          const std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &latticeNeighbors)
 {
     for (const auto &neighborPair : latticeNeighbors)
     {
-        //Now we have std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>
+        //Now we have std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>
         //pair.first == the base indices and pair.second is all indices that form clusters with the base indices
         if (neighborPair.second.size() > 0)
         {
@@ -33,7 +33,7 @@ The simplest form of counting clusters using the mbnl format
 Get the indice of one set of indices and counts this
 */
 void ClusterCounts::count(const Structure &structure,
-                          const std::vector<LatticeNeighbor> &latticeNeighbors)
+                          const std::vector<LatticeSite> &latticeNeighbors)
 {
     size_t clusterSize = latticeNeighbors.size();
     std::vector<int> elements(clusterSize);
@@ -49,7 +49,7 @@ void ClusterCounts::count(const Structure &structure,
 /**
 Will count the vectors in latticeNeighbors and assuming these sets of sites are represented by the cluster 'cluster'
 */
-void ClusterCounts::count(const Structure &structure, const std::vector<std::vector<LatticeNeighbor>> &latticeNeighbors,
+void ClusterCounts::count(const Structure &structure, const std::vector<std::vector<LatticeSite>> &latticeNeighbors,
                           const Cluster &cluster)
 {
 

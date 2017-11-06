@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <unordered_map>
-#include "LatticeNeighbor.hpp"
+#include "LatticeSite.hpp"
 #include "Structure.hpp"
 #include "OrbitList.hpp"
 #include "Vector3dCompare.hpp"
@@ -57,7 +57,7 @@ class LocalOrbitlistGenerator
     }
 
     ///Return the primitive lattice neighbor to supercell latticeneigbhor map
-    std::unordered_map<LatticeNeighbor, LatticeNeighbor> getPrimToSupercellMap() const
+    std::unordered_map<LatticeSite, LatticeSite> getPrimToSupercellMap() const
     {
         return _primToSupercellMap;
     }
@@ -87,7 +87,7 @@ class LocalOrbitlistGenerator
     Structure _supercell;
 
     ///this maps a latticeNeighbor from the primitive and get the equivalent in supercell
-    std::unordered_map<LatticeNeighbor, LatticeNeighbor> _primToSupercellMap;
+    std::unordered_map<LatticeSite, LatticeSite> _primToSupercellMap;
 
     ///The unique offsets of the primitive cell required to "cover" the supercell
     std::vector<Vector3d> _uniquePrimcellOffsets;

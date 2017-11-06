@@ -7,22 +7,23 @@ using boost::hash_combine;
 using boost::hash_value;
 
 /**
-@brief Class for storing information concerning a lattice site.
-@details This class provides functionality for handling
+@brief Structure for storing information concerning a lattice site.
+@details This structure provides functionality for handling lattice sites
+most notably including comparison operators.
 */
-struct LatticeNeighbor
+struct LatticeSite
 {
 
 public:
     /// Empty constructor.
-    LatticeNeighbor() { }
+    LatticeSite() { }
 
     /**
     @brief Constructor.
     @param index site index
     @param unitcellOffset offset of site relative to unit cell at origin in units of lattice vectors
     */
-    LatticeNeighbor(const int index, const Eigen::Vector3d unitcellOffset)
+    LatticeSite(const int index, const Eigen::Vector3d unitcellOffset)
     {
         _index = index;
         _unitcellOffset = unitcellOffset;
@@ -44,7 +45,7 @@ public:
     void addUnitcellOffset(Eigen::Vector3d offset) { _unitcellOffset += offset; }
 
     /// Smaller than operator.
-    bool operator<(const LatticeNeighbor &other) const
+    bool operator<(const LatticeSite &other) const
     {
         if (_index == other.index())
         {
@@ -60,7 +61,7 @@ public:
     }
 
     /// Equality operator.
-    bool operator==(const LatticeNeighbor &other) const
+    bool operator==(const LatticeSite &other) const
     {
         if (_index != other.index())
         {
@@ -78,23 +79,23 @@ public:
     }
 
     /// Addition operator.
-    friend LatticeNeighbor operator+(const LatticeNeighbor &latticeNeighbor, const Eigen::Vector3d &offset)
+    friend LatticeSite operator+(const LatticeSite &latticeSite, const Eigen::Vector3d &offset)
     {
-        LatticeNeighbor latnbr = LatticeNeighbor(latticeNeighbor.index(), latticeNeighbor.unitcellOffset() + offset);
+        LatticeSite latnbr = LatticeSite(latticeSite.index(), latticeSite.unitcellOffset() + offset);
         return latnbr;
     }
 
     /// Substraction operator.
-    friend LatticeNeighbor operator-(const LatticeNeighbor &latticeNeighbor, const Eigen::Vector3d &offset)
+    friend LatticeSite operator-(const LatticeSite &latticeSite, const Eigen::Vector3d &offset)
     {
-        LatticeNeighbor latnbr = LatticeNeighbor(latticeNeighbor.index(), latticeNeighbor.unitcellOffset() - offset);
+        LatticeSite latnbr = LatticeSite(latticeSite.index(), latticeSite.unitcellOffset() - offset);
         return latnbr;
     }
 
     /// Addition and assignment operator.
-    friend LatticeNeighbor operator+=(const LatticeNeighbor &latticeNeighbor, const Eigen::Vector3d &offset)
+    friend LatticeSite operator+=(const LatticeSite &latticeSite, const Eigen::Vector3d &offset)
     {
-        LatticeNeighbor latnbr = LatticeNeighbor(latticeNeighbor.index(), latticeNeighbor.unitcellOffset() + offset);
+        LatticeSite latnbr = LatticeSite(latticeSite.index(), latticeSite.unitcellOffset() + offset);
         return latnbr;
     }
 
@@ -132,13 +133,14 @@ private:
 
 namespace std
 {
+
+    /// Compute hash for an individual lattice site.
     template <>
-    struct hash<LatticeNeighbor>
+    struct hash<LatticeSite>
     {
         size_t
-        operator()(const LatticeNeighbor &k) const
+        operator()(const LatticeSite &k) const
         {
-
             // Compute individual hash values for first,
             // second and third and combine them using XOR
             // and bit shifting:
@@ -153,20 +155,20 @@ namespace std
         }
     };
 
+    /// Compute hash for a list lattice site.
     template <>
-    struct hash<std::vector<LatticeNeighbor>>
+    struct hash<std::vector<LatticeSite>>
     {
         size_t
-        operator()(const std::vector<LatticeNeighbor> &k) const
+        operator()(const std::vector<LatticeSite> &k) const
         {
-
             // Compute individual hash values for first,
             // second and third and combine them using XOR
             // and bit shifting:
             size_t seed = 0;
             for (const auto &latNbr : k)
             {
-                hash_combine(seed, std::hash<LatticeNeighbor>{}(latNbr));
+                hash_combine(seed, std::hash<LatticeSite>{}(latNbr));
             }
             return seed;
         }

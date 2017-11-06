@@ -7,7 +7,7 @@
 #include <utility>
 #include <string>
 #include "Structure.hpp"
-#include "LatticeNeighbor.hpp"
+#include "LatticeSite.hpp"
 
 using namespace Eigen;
 
@@ -25,7 +25,7 @@ class Neighborlist
     void build(const Structure &);
     void update(const Structure &);
 
-    std::vector<LatticeNeighbor> getNeighbors(int index) const
+    std::vector<LatticeSite> getNeighbors(int index) const
     {
 
         if (index >= _neighbors.size() || index < 0)
@@ -58,7 +58,7 @@ class Neighborlist
   private:
     std::vector<std::vector<int>> latticeIndices;
     std::vector<std::vector<Vector3d>> offsets;
-    std::vector<std::vector<LatticeNeighbor>> _neighbors;
+    std::vector<std::vector<LatticeSite>> _neighbors;
     double _cutoff;
     double DISTTOL = 1e-7;
 };

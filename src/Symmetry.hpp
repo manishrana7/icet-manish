@@ -4,7 +4,7 @@
 #include <pybind11/eigen.h>
 #include <Eigen/Dense>
 #include <vector>
-#include "LatticeNeighbor.hpp"
+#include "LatticeSite.hpp"
 
 namespace icet
 {

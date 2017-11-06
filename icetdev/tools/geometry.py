@@ -1,5 +1,5 @@
 import numpy as np
-from icetdev.latticeNeighbor import LatticeNeighbor
+from icetdev.latticeNeighbor import LatticeSite
 import math
 
 
@@ -28,7 +28,7 @@ def find_latticeNeighbor_from_position_python(structure, position):
     """
     Get lattice neighbor from position
 
-    This is the Python version of structure.findLatticeNeighborFromPosition(position)
+    This is the Python version of structure.findLatticeSiteFromPosition(position)
 
     It is slower but kept as help for debugging and if further development is needed
     """
@@ -45,5 +45,5 @@ def find_latticeNeighbor_from_position_python(structure, position):
         print(structure.positions)
         exit(1)
 
-    latNbr = LatticeNeighbor(index, unit_cell_offset)
+    latNbr = LatticeSite(index, unit_cell_offset)
     return latNbr

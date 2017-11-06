@@ -2,7 +2,7 @@
 
 
 Cluster::Cluster(const Structure &structure,
-                 const std::vector<LatticeNeighbor> &latticeNeighbors,
+                 const std::vector<LatticeSite> &latticeNeighbors,
                  const bool sortedCluster,
                  const int clusterTag )
 {

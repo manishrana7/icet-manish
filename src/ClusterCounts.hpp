@@ -9,7 +9,7 @@
 #include "ManybodyNeighborlist.hpp"
 #include "Structure.hpp"
 #include "Cluster.hpp"
-#include "LatticeNeighbor.hpp"
+#include "LatticeSite.hpp"
 #include "PeriodicTable.hpp"
 #include "OrbitList.hpp"
 
@@ -25,11 +25,11 @@ public:
     symprec = 1e-5;
     //empty constructor
   }
-  void countLatticeNeighbors(const Structure &,
-                             const std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &);
+  void countLatticeSites(const Structure &,
+                             const std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &);
   void count(const Structure &,
-             const std::vector<LatticeNeighbor> &);
-  void count(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &,
+             const std::vector<LatticeSite> &);
+  void count(const Structure &, const std::vector<std::vector<LatticeSite>> &,
              const Cluster &);
   void countCluster(const Cluster &, const std::vector<int> &);
   void countOrbitlist(const Structure &, const OrbitList &, bool orderIntact);

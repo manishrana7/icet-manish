@@ -153,7 +153,7 @@ double ClusterSpace::getClusterProduct(const std::vector<int> &mcVector, const s
 }
 
 ///Returns the allowed occupations on the sites
-std::vector<int> ClusterSpace::getAllowedOccupations(const Structure &structure, const std::vector<LatticeNeighbor> &latticeNeighbors) const
+std::vector<int> ClusterSpace::getAllowedOccupations(const Structure &structure, const std::vector<LatticeSite> &latticeNeighbors) const
 {
     std::vector<int> Mi;
     Mi.reserve(latticeNeighbors.size());

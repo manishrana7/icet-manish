@@ -4,7 +4,7 @@
 namespace icet
 {
 /// Returns the geomtetrical radius from the vectors of latticeneighbors and a unitcell
-double getGeometricalRadius(const std::vector<LatticeNeighbor> &latticeNeigbhors, const Structure &structure)
+double getGeometricalRadius(const std::vector<LatticeSite> &latticeNeigbhors, const Structure &structure)
 {
     Vector3d centerPosition = {0.0, 0.0, 0.0};
     for(const auto &latnbr : latticeNeigbhors)

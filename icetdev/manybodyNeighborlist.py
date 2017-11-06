@@ -1,5 +1,5 @@
 from _icetdev import ManybodyNeighborlist
-from icetdev.latticeNeighbor import LatticeNeighbor
+from icetdev.latticeNeighbor import LatticeSite
 from icetdev.neighborlist import get_neighborlists
 from icetdev.structure import structure_from_atoms
 
@@ -65,7 +65,7 @@ def get_all_lattice_neighbors(atoms=None, structure=None,
 
     # add the pairs and singlets
     for lattice_index in range(len(structure)):
-        lat_nbr_i = LatticeNeighbor(lattice_index, [0.0, 0.0, 0.0])
+        lat_nbr_i = LatticeSite(lattice_index, [0.0, 0.0, 0.0])
         lattice_neighbors.append(([lat_nbr_i], []))  # singlet
         lattice_neighbors.append(
             ([lat_nbr_i], neighborlists[0].get_neighbors(lattice_index)))

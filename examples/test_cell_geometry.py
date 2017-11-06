@@ -31,16 +31,16 @@ import time
 t0 = time.time()
 #print to see what happens
 print("#1: frac pos #2: position #3: fpos*cell")
-lat_nbrs = structure.findLatticeNeighborsFromPositions(pos_neighbors)
+lat_nbrs = structure.findLatticeSitesFromPositions(pos_neighbors)
 
 # for fpos, pos in zip(frac_coordinates,pos_neighbors):
-#     lat_nbr = structure.findLatticeNeighborFromPosition(pos)
+#     lat_nbr = structure.findLatticeSiteFromPosition(pos)
 #     #lat_nbr = find_latticeNeighbor_from_position_python(structure, pos)
 #     #lat_pos = structure.positions[lat_nbr.index] + np.dot(lat_nbr.unitcellOffset, structure.cell)
 #     #print(fpos, pos, np.dot(fpos, atoms.cell), lat_nbr, lat_pos-pos )
 
 # for fpos, pos, lat_nbr in zip(frac_coordinates,pos_neighbors, lat_nbrs):
-#     #lat_nbr = structure.findLatticeNeighborFromPosition(pos)
+#     #lat_nbr = structure.findLatticeSiteFromPosition(pos)
 #     #lat_nbr = find_latticeNeighbor_from_position_python(structure, pos)
 #     lat_pos = structure.positions[lat_nbr.index] + np.dot(lat_nbr.unitcellOffset, structure.cell)
 #     print(fpos, pos, np.dot(fpos, atoms.cell), lat_nbr, lat_pos-pos )
@@ -49,4 +49,4 @@ lat_nbrs = structure.findLatticeNeighborsFromPositions(pos_neighbors)
 
 t1 = time.time()
 print("time for finding latnbrs: {} ms ".format( round((t0-t1)*1e3,4)))
-print("Found {} LatticeNeighbors".format(len(lat_nbrs)))
+print("Found {} LatticeSites".format(len(lat_nbrs)))

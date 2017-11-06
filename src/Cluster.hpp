@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include "Structure.hpp"
-#include "LatticeNeighbor.hpp"
+#include "LatticeSite.hpp"
 #include "Geometry.hpp"
 
 #include <boost/functional/hash.hpp>
@@ -273,7 +273,7 @@ class Cluster
 
     ///Create cluster from a structure and latticeNeigbhors
     Cluster(const Structure &structure,
-            const std::vector<LatticeNeighbor> &latticeNeighbors,
+            const std::vector<LatticeSite> &latticeNeighbors,
             const bool sortedCluster = true, const int clusterTag = 0);
 
     //counts the elements

@@ -9,7 +9,7 @@
 #include "Neighborlist.hpp"
 #include <unordered_map>
 #include <unordered_set>
-#include "LatticeNeighbor.hpp"
+#include "LatticeSite.hpp"
 #include "hash_functions.hpp"
 #include "Vector3dCompare.hpp"
 #include "Symmetry.hpp"
@@ -27,7 +27,7 @@ class OrbitList
   public:
     OrbitList();
     OrbitList(const std::vector<Neighborlist> &neighborlists, const Structure &);
-    OrbitList(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<Neighborlist> &);
+    OrbitList(const Structure &, const std::vector<std::vector<LatticeSite>> &, const std::vector<Neighborlist> &);
 
     /**
     The structure is a super cell
@@ -38,9 +38,9 @@ class OrbitList
     strategy is to get the translated orbit and then map it using the map and that should be the partial supercell orbit of this site
     add together all sites and you get the full supercell porbot
     */
-    Orbit getSuperCellOrbit(const Structure &, const Vector3d &, const unsigned int, std::unordered_map<LatticeNeighbor, LatticeNeighbor> &) const;
+    Orbit getSuperCellOrbit(const Structure &, const Vector3d &, const unsigned int, std::unordered_map<LatticeSite, LatticeSite> &) const;
 
-    OrbitList getLocalOrbitList(const Structure &, const Vector3d &, std::unordered_map<LatticeNeighbor, LatticeNeighbor> &) const;
+    OrbitList getLocalOrbitList(const Structure &, const Vector3d &, std::unordered_map<LatticeSite, LatticeSite> &) const;
     ///Add a group sites that are equivalent to the ones in this orbit
     void addOrbit(const Orbit &orbit)
     {
@@ -121,24 +121,24 @@ class OrbitList
         }
     }
 
-    void addClusterToOrbitlist(const Cluster &cluster, const std::vector<LatticeNeighbor> &, std::unordered_map<Cluster, int> &);
+    void addClusterToOrbitlist(const Cluster &cluster, const std::vector<LatticeSite> &, std::unordered_map<Cluster, int> &);
 
-    void addPermutationMatrixColumns(std::vector<std::vector<std::vector<LatticeNeighbor>>> &lattice_neighbors, std::unordered_set<std::vector<int>, VectorHash> &taken_rows, const std::vector<LatticeNeighbor> &lat_nbrs, const std::vector<int> &pm_rows,
-                                     const std::vector<std::vector<LatticeNeighbor>> &permutation_matrix, const std::vector<LatticeNeighbor> &col1, bool) const;
+    void addPermutationMatrixColumns(std::vector<std::vector<std::vector<LatticeSite>>> &lattice_neighbors, std::unordered_set<std::vector<int>, VectorHash> &taken_rows, const std::vector<LatticeSite> &lat_nbrs, const std::vector<int> &pm_rows,
+                                     const std::vector<std::vector<LatticeSite>> &permutation_matrix, const std::vector<LatticeSite> &col1, bool) const;
 
-    std::vector<LatticeNeighbor> getColumn1FromPM(const std::vector<std::vector<LatticeNeighbor>> &, bool sortIt = true) const;
-    std::vector<int> findRowsFromCol1(const std::vector<LatticeNeighbor> &col1, const std::vector<LatticeNeighbor> &latNbrs, bool sortit = true) const;
+    std::vector<LatticeSite> getColumn1FromPM(const std::vector<std::vector<LatticeSite>> &, bool sortIt = true) const;
+    std::vector<int> findRowsFromCol1(const std::vector<LatticeSite> &col1, const std::vector<LatticeSite> &latNbrs, bool sortit = true) const;
 
-    bool validatedCluster(const std::vector<LatticeNeighbor> &) const;
-    void addOrbitsFromPM(const Structure &, const std::vector<std::vector<std::vector<LatticeNeighbor>>> &);
-    void addOrbitFromPM(const Structure &, const std::vector<std::vector<LatticeNeighbor>> &);
+    bool validatedCluster(const std::vector<LatticeSite> &) const;
+    void addOrbitsFromPM(const Structure &, const std::vector<std::vector<std::vector<LatticeSite>>> &);
+    void addOrbitFromPM(const Structure &, const std::vector<std::vector<LatticeSite>> &);
     void checkEquivalentClusters() const;
 
-    std::vector<LatticeNeighbor> translateSites(const std::vector<LatticeNeighbor> &, const unsigned int) const;
-    std::vector<std::vector<LatticeNeighbor>> getSitesTranslatedToUnitcell(const std::vector<LatticeNeighbor> &, bool sortit = true) const;
-    std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<int>>> getMatchesInPM(const std::vector<std::vector<LatticeNeighbor>> &, const std::vector<LatticeNeighbor> &) const;
+    std::vector<LatticeSite> translateSites(const std::vector<LatticeSite> &, const unsigned int) const;
+    std::vector<std::vector<LatticeSite>> getSitesTranslatedToUnitcell(const std::vector<LatticeSite> &, bool sortit = true) const;
+    std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> getMatchesInPM(const std::vector<std::vector<LatticeSite>> &, const std::vector<LatticeSite> &) const;
 
-    void transformSiteToSupercell(LatticeNeighbor &site, const Structure &superCell, std::unordered_map<LatticeNeighbor, LatticeNeighbor> &primToSuperMap) const;
+    void transformSiteToSupercell(LatticeSite &site, const Structure &superCell, std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap) const;
     void setPrimitiveStructure(const Structure &primitive)
     {
         _primitiveStructure = primitive;
@@ -174,21 +174,21 @@ class OrbitList
     OrbitList getSupercellOrbitlist(const Structure &superCell) const;
 
     ///Adds the permutation information to the orbits
-    void addPermutationInformationToOrbits(const std::vector<LatticeNeighbor> &, const std::vector<std::vector<LatticeNeighbor>> &);
+    void addPermutationInformationToOrbits(const std::vector<LatticeSite> &, const std::vector<std::vector<LatticeSite>> &);
     
     ///Returns all columns from the given rows in permutation matrix    
-    std::vector<std::vector<LatticeNeighbor>> getAllColumnsFromRow(const std::vector<int> &, const std::vector<std::vector<LatticeNeighbor>> &, bool, bool sortIt=true ) const;
+    std::vector<std::vector<LatticeSite>> getAllColumnsFromRow(const std::vector<int> &, const std::vector<std::vector<LatticeSite>> &, bool, bool sortIt=true ) const;
     
     ///First construct rows_sort = sorted(rows)  then returns true/false if rows_sort exists in taken_rows
     bool isRowsTaken(const std::unordered_set<std::vector<int>, VectorHash> &taken_rows, std::vector<int> rows) const;
 
     ///Will find the sites in col1, extract and return all columns along with their unit cell translated indistinguishable sites
-    std::vector<std::vector<LatticeNeighbor>> getAllColumnsFromSites(const std::vector<LatticeNeighbor> &, 
-        const std::vector<LatticeNeighbor> &,
-        const std::vector<std::vector<LatticeNeighbor>> & ) const;
+    std::vector<std::vector<LatticeSite>> getAllColumnsFromSites(const std::vector<LatticeSite> &, 
+        const std::vector<LatticeSite> &,
+        const std::vector<std::vector<LatticeSite>> & ) const;
 
     ///Check that the lattice neighbors do not have any unitcell offsets in a pbc=false direction        
-    bool isSitesPBCCorrect(const std::vector<LatticeNeighbor> &sites) const;
+    bool isSitesPBCCorrect(const std::vector<LatticeSite> &sites) const;
         
   private:
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;

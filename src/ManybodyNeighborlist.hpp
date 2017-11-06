@@ -7,7 +7,7 @@
 #include "Vector3dCompare.hpp"
 #include "Neighborlist.hpp"
 #include <vector>
-#include "LatticeNeighbor.hpp"
+#include "LatticeSite.hpp"
 /**
 Design approach:
     input pair neighbors and calculate higher order neighbors
@@ -22,15 +22,15 @@ class ManybodyNeighborlist
         //empty...
     }
 
-    std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> build(const std::vector<Neighborlist> &, int index, bool);
+    std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> build(const std::vector<Neighborlist> &, int index, bool);
 
     void combineToHigherOrder(const Neighborlist &nl,
-                              std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &manybodyNeighborIndex,
-                              const std::vector<LatticeNeighbor> &Ni, std::vector<LatticeNeighbor> &currentOriginalNeighbrs, bool saveBothWays, const int);
+                              std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &manybodyNeighborIndex,
+                              const std::vector<LatticeSite> &Ni, std::vector<LatticeSite> &currentOriginalNeighbrs, bool saveBothWays, const int);
 
-    std::vector<LatticeNeighbor> getIntersection(const std::vector<LatticeNeighbor> &Ni, const std::vector<LatticeNeighbor> &Nj)
+    std::vector<LatticeSite> getIntersection(const std::vector<LatticeSite> &Ni, const std::vector<LatticeSite> &Nj)
     {
-        std::vector<LatticeNeighbor> N_intersection;
+        std::vector<LatticeSite> N_intersection;
         N_intersection.reserve(Ni.size());
         std::set_intersection(Ni.begin(), Ni.end(),
                               Nj.begin(), Nj.end(),
@@ -39,20 +39,20 @@ class ManybodyNeighborlist
     }
     
 
-    void translateAllNi(std::vector<LatticeNeighbor> &Ni, const Vector3d &unitCellOffset) const;
+    void translateAllNi(std::vector<LatticeSite> &Ni, const Vector3d &unitCellOffset) const;
 
     size_t getNumberOfSites() const;
 
     size_t getNumberOfSites(const unsigned int index) const;
 
-    std::vector<LatticeNeighbor> getSites(const unsigned int &,
+    std::vector<LatticeSite> getSites(const unsigned int &,
                                           const unsigned int &) const;
 
-    void addSinglet(const int, std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &) const;
-    void addPairs(const int, const Neighborlist &, std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> &, bool) const;
+    void addSinglet(const int, std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &) const;
+    void addPairs(const int, const Neighborlist &, std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &, bool) const;
 
   private:
     std::vector<double> _cutoffs;
-    std::vector<LatticeNeighbor> getFilteredNj(const std::vector<LatticeNeighbor> &, const LatticeNeighbor &) const;
-    std::vector<std::pair<std::vector<LatticeNeighbor>, std::vector<LatticeNeighbor>>> _latticeNeighbors;
+    std::vector<LatticeSite> getFilteredNj(const std::vector<LatticeSite> &, const LatticeSite &) const;
+    std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> _latticeNeighbors;
 };
