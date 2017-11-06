@@ -6,8 +6,8 @@ of components on different sites.
 import numpy as np
 from ase.db import connect
 import icetdev
-from icetdev.clusterspace import create_clusterspace, get_singlet_info
-from icetdev import Structure
+from icetdev.clusterspace import get_singlet_info
+from icetdev import Structure, ClusterSpace
 
 
 def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
@@ -26,14 +26,9 @@ def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
     for singlet in singlet_data:
         Mi_dict[singlet['orbit_index']] = allowed_sites
 
-    clusterspace_int = create_clusterspace(atoms, cutoffs, subelements,
-                                           Mi=Mi_int)
-
-    clusterspace_list = create_clusterspace(atoms, cutoffs, subelements,
-                                            Mi=Mi_list)
-
-    clusterspace_dict = create_clusterspace(atoms, cutoffs, subelements,
-                                            Mi=Mi_dict)
+    clusterspace_int = ClusterSpace(atoms, cutoffs, subelements,  Mi=Mi_int)
+    clusterspace_list = ClusterSpace(atoms, cutoffs, subelements, Mi=Mi_list)
+    clusterspace_dict = ClusterSpace(atoms, cutoffs, subelements, Mi=Mi_dict)
 
     atoms_prim = clusterspace_int.get_primitive_structure().to_atoms()
 

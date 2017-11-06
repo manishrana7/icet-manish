@@ -3,8 +3,8 @@ This script checks that all atom objects in the database can have
 its  clustervector computed
 '''
 
-from icetdev.clusterspace import create_clusterspace
-from icetdev.structure import Structure
+#from icetdev.clusterspace import create_clusterspace
+from icetdev import Structure, ClusterSpace
 from icetdev import permutation_map
 import numpy as np
 import random
@@ -82,7 +82,7 @@ for row in db.select():
     if atoms_row.get_pbc().all():
         atoms_row.wrap()
         print(' structure: {}'.format(row.tag))
-        clusterspace = create_clusterspace(atoms_row, cutoffs, subelements)
+        clusterspace = ClusterSpace(atoms_row, cutoffs, subelements)
         if not atoms_row.get_pbc().all():
             permutation_map.__vacuum_on_non_pbc(atoms_row)
         cvs = generate_clustervector_set(5, atoms_row,

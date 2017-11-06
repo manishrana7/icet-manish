@@ -3,8 +3,7 @@ This script checks the computation of cluster vectors for three HCP-based
 structures.
 """
 
-from icetdev import Structure
-from icetdev.clusterspace import create_clusterspace
+from icetdev import Structure, ClusterSpace
 from ase.build import bulk, make_supercell
 import numpy as np
 
@@ -13,7 +12,8 @@ subelements = ['Re', 'Ti']
 
 print('')
 prototype = bulk('Re')
-cs = create_clusterspace(prototype, cutoffs, subelements)
+cs = ClusterSpace(prototype, cutoffs, subelements)
+print(cs)
 
 # structure #1
 print(' structure #1')

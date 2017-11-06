@@ -3,8 +3,8 @@ This scripts checks the computation of cluster vectors for three body centerd
 cubic based structures.
 '''
 
-from icetdev import Structure
-from icetdev.clusterspace import create_clusterspace
+from icetdev import Structure, ClusterSpace
+from icetdev.clusterspace import get_singlet_info
 from ase.build import bulk, make_supercell
 import numpy as np
 
@@ -13,7 +13,11 @@ subelements = ['W', 'Ti']
 
 print('')
 prototype = bulk('W')
-cs = create_clusterspace(prototype, cutoffs, subelements)
+cs = ClusterSpace(prototype, cutoffs, subelements)
+
+# testing info functionality
+print(cs)
+print(get_singlet_info(prototype))
 
 # structure #1
 print(' structure #1')
