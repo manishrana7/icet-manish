@@ -1,5 +1,5 @@
 import numpy as np
-from icetdev.latticeNeighbor import LatticeSite
+from icetdev.latticeSite import LatticeSite
 import math
 
 
@@ -24,7 +24,7 @@ def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
     return fractional
 
 
-def find_latticeNeighbor_from_position_python(structure, position):
+def find_latticeSite_from_position_python(structure, position):
     """
     Get lattice neighbor from position
 

@@ -1,5 +1,5 @@
 from _icetdev import ManybodyNeighborlist
-from icetdev.latticeNeighbor import LatticeSite
+from icetdev.latticeSite import LatticeSite
 from icetdev.neighborlist import get_neighborlists
 from icetdev.structure import structure_from_atoms
 

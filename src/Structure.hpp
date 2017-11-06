@@ -18,39 +18,36 @@ class Structure
 {
   public:
 
-    /// Constructor.
+    /// Default constructor.
     Structure(){};
 
-    /// Constructor.
+    /// Overloaded constructor.
     Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &,
               const std::vector<std::string> &,
               const Eigen::Matrix3d &,
               const std::vector<bool> &,
               double);
 
-    /// Return distance vector between two sites.
-    double getDistance(const int, const int) const;
-
-    /// Return distance vector between two sites.
-    double getDistance2(const int, const Vector3d, const int, const Vector3d) const;
+    /// Returns distance vector between two sites.
+    double getDistance(const int, const int, const Vector3d, const Vector3d) const;
 
     /// Return the position of a site in Cartesian coordinates.
     Vector3d getPosition(const LatticeSite &) const;
 
-    /// Return atomic number of site.
+    /// Returns atomic number of site.
     int getAtomicNumber(const unsigned int) const;
 
-    /// Return the list of unique sites.
+    /// Returns the list of unique sites.
     std::vector<int> getUniqueSites() const { return _uniqueSites; }
 
     /// Set list of unique sites.
     /// @todo add example for how the unique sites are supposed to work.
     void setUniqueSites(const std::vector<int> &);
 
-    /// Return a unique site.
+    /// Returns a unique site.
     int getUniqueSite(const size_t) const;
 
-    /// Return index of site that matches the given position.
+    /// Returns index of site that matches the given position.
     int findSiteByPosition(const Vector3d &) const;
 
     /// Return LatticeSite object that matches the given position.
@@ -61,19 +58,19 @@ class Structure
 
   public:
 
-    /// Return the size of the structure, i.e., the number of sites.
+    /// Returns the size of the structure, i.e., the number of sites.
     size_t size() const { return (_atomicNumbers.size()); }
 
     /// Set the atomic positions.
     void setPositions(const Eigen::Matrix<double, Dynamic, 3> &positions) { _positions = positions; }
 
-    /// Return positions.
+    /// Returns positions.
     Eigen::Matrix<double, Dynamic, 3, RowMajor> getPositions() const { return _positions; }
 
     /// Set atomic numbers.
     void setAtomicNumbers(const std::vector<int> &atomicNumbers) { _atomicNumbers = atomicNumbers; }
 
-    /// Return atomic numbers.
+    /// Returns atomic numbers.
     std::vector<int> getAtomicNumbers() const { return _atomicNumbers; }
 
     /// Set atomic numbers via chemical symbols.
@@ -82,16 +79,16 @@ class Structure
         setAtomicNumbers(convertChemicalSymbolsToAtomicNumbers(chemicalSymbols));
     }
 
-    /// Return chemical symbols.
+    /// Returns chemical symbols.
     std::vector<std::string> getChemicalSymbols() const
     {
         return convertAtomicNumbersToChemicalSymbols(_atomicNumbers);
     }
 
-    /// Return periodic boundary condition along direction k.
+    /// Returns periodic boundary condition along direction k.
     bool hasPBC(const int k) const { return _pbc[k]; }
 
-    /// Return periodic boundary conditions.
+    /// Returns periodic boundary conditions.
     std::vector<bool> getPBC() const { return _pbc; }
 
     /// Set periodic boundary conditions.
@@ -100,7 +97,7 @@ class Structure
     /// Set the cell metric.
     void setCell(const Eigen::Matrix<double, 3, 3> &cell) { _cell = cell; }
 
-    /// Return the cell metric.
+    /// Returns the cell metric.
     Eigen::Matrix<double, 3, 3> getCell() const { return _cell; }
 
     /// Set allowed components for each site by vector.
@@ -109,13 +106,13 @@ class Structure
     /// Set allowed components for each site by scalar.
     void setNumberOfAllowedComponents(const int);
 
-    /// Return number of allowed components on each site.
+    /// Returns number of allowed components on each site.
     int getNumberOfAllowedComponents(const unsigned int) const;
 
     /// Set tolerance applied when comparing positions.
     void setTolerance(double tolerance) { _tolerance = tolerance; }
 
-    /// Return tolerance applied when comparing positions.
+    /// Returns tolerance applied when comparing positions.
     double getTolerance() const { return _tolerance; }
 
 
@@ -150,7 +147,7 @@ class Structure
 
   private:
 
-    /// Positions of sites in fractional coordinates.
+    /// Positions of sites in Cartesian coordinates.
     Eigen::Matrix<double, Dynamic, 3, RowMajor> _positions;
 
     /// Cell metric.

@@ -1,4 +1,4 @@
-from icetdev.latticeNeighbor import LatticeSite
+from icetdev.latticeSite import LatticeSite
 
 index = 1
 offset = [0., 0., 0.,]

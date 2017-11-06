@@ -4,7 +4,7 @@ import spglib as spglib
 from ase import Atoms
 from _icetdev import PermutationMap
 from icetdev.neighborlist import get_neighborlists, Neighborlist
-from icetdev.latticeNeighbor import LatticeSite
+from icetdev.latticeSite import LatticeSite
 from icetdev.structure import structure_from_atoms
 from icetdev.tools.geometry import get_scaled_positions
 

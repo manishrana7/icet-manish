@@ -37,11 +37,11 @@ def __get_latNbr_permutation_matrix(structure, permutation_matrix,
         positions = __fractional_to_cartesian(row, structure.cell)
         lat_nbrs = []
         if np.all(structure.pbc):
-            lat_nbrs = structure.find_lattice_neighbors_by_positions(positions)
+            lat_nbrs = structure.find_lattice_sites_by_positions(positions)
         else:
             for pos in positions:
                 try:
-                    lat_nbr = structure.find_lattice_neighbor_by_position(pos)
+                    lat_nbr = structure.find_lattice_site_by_position(pos)
                     lat_nbrs.append(lat_nbr)
                 except:
                     continue
@@ -78,17 +78,20 @@ def __prune_permutation_matrix(permutation_matrix, verbosity=0):
 
 def create_orbit_list(structure, cutoffs, verbosity=0):
     '''
-    Build an orbit list from a primitive structure, a many-body neighbor list
-    (mbnl) object, and a permutation matrix.
+    Build an orbit list.
 
     Parameters
     ----------
     structure: icet structure object
         input configuration used to initialize mbnl and permutation matrix
-    lattice_neighbors : mbnl object
-        lattice neighbors
-    permutation_matrix : icet permutation matrix object
-        permutation matrix
+    cutoffs : list of float
+        cutoff radii for each order
+    verbosity : int
+        verbosity level
+
+    Returns
+    -------
+    OrbitList object
     '''
     max_cutoff = np.max(cutoffs)
     total_time_taken = 0
