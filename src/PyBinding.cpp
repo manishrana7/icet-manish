@@ -38,14 +38,23 @@ PYBIND11_PLUGIN(_icetdev)
                       const Eigen::Matrix3d &,
                       const std::vector<bool> &,
                       double>(),
-             "Initialize a structure.\n\n"
-
-             ,
+             "Initializes an icet Structure instance.\n"
+             "\nParameters\n----------\n"
+             "positions : list of vector\n"
+             "    list of positions in Cartesian coordinates\n"
+             "chemical_symbols : list of strings\n"
+             "    chemical symbol of each case\n"
+             "cell : 3x3 array\n"
+             "     cell metric\n"
+             "pbc : list of booleans\n"
+             "    periodic boundary conditions\n"
+             "tolerance : float\n"
+             "    numerical tolerance imposed when testing for equality of positions and distances",
              py::arg("positions"),
-             py::arg("elements"),
+             py::arg("chemical_symbols"),
              py::arg("cell"),
              py::arg("pbc"),
-             py::arg("precision") = 1e-5)
+             py::arg("tolerance") = 1e-5)
         .def("get_positions",
              &Structure::getPositions,
              "Returns the positions in Cartesian coordinates.\n"

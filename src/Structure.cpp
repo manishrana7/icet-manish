@@ -12,7 +12,7 @@ using namespace Eigen;
   @param chemicalSymbols list of chemical symbols
   @param cell cell metric
   @param pbc periodic boundary conditions
-  @param tolerance numerical tolerance imposed when testing for equality of positions and distancess
+  @param tolerance numerical tolerance imposed when testing for equality of positions and distances
 **/
 Structure::Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &positions,
                      const std::vector<std::string> &chemicalSymbols,
