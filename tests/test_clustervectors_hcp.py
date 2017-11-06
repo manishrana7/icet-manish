@@ -4,6 +4,7 @@ structures.
 """
 
 from icetdev import Structure, ClusterSpace
+from icetdev.clusterspace import get_singlet_info
 from ase.build import bulk, make_supercell
 import numpy as np
 
@@ -13,7 +14,16 @@ subelements = ['Re', 'Ti']
 print('')
 prototype = bulk('Re')
 cs = ClusterSpace(prototype, cutoffs, subelements)
-print(cs)
+
+# testing info functionality
+try:
+    print(cs)
+except:
+    assert False, '__repr__ function fails for ClusterSpace'
+try:
+    print(get_singlet_info(prototype))
+except:
+    assert False, 'get_singlet_info function fails for ClusterSpace'
 
 # structure #1
 print(' structure #1')

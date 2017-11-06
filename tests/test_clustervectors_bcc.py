@@ -16,8 +16,14 @@ prototype = bulk('W')
 cs = ClusterSpace(prototype, cutoffs, subelements)
 
 # testing info functionality
-print(cs)
-print(get_singlet_info(prototype))
+try:
+    print(cs)
+except:
+    assert False, '__repr__ function fails for ClusterSpace'
+try:
+    print(get_singlet_info(prototype))
+except:
+    assert False, 'get_singlet_info function fails for ClusterSpace'
 
 # structure #1
 print(' structure #1')
