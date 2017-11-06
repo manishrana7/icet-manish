@@ -16,10 +16,10 @@ Cluster::Cluster(const Structure &structure,
         sites[i] = structure.getUniqueSite(latticeNeighbors[i].index());
         for (size_t j = i + 1; j < latticeNeighbors.size(); j++)
         {
-            double distance = roundDouble(structure.getDistance2(latticeNeighbors[i].index(),
-                                                                 latticeNeighbors[i].unitcellOffset(),
-                                                                 latticeNeighbors[j].index(),
-                                                                 latticeNeighbors[j].unitcellOffset()));
+            double distance = roundDouble(structure.getDistance(latticeNeighbors[i].index(),
+                                                                latticeNeighbors[j].index(),
+                                                                latticeNeighbors[i].unitcellOffset(),
+                                                                latticeNeighbors[j].unitcellOffset()));
 
             distances.push_back(distance);
         }

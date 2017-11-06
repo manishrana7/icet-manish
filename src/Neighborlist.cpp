@@ -57,7 +57,7 @@ void Neighborlist::build(const Structure &conf)
                         {
                             Vector3d noOffset(0, 0, 0);
 
-                            double distance_ij = conf.getDistance2(i, noOffset, j, extVector);
+                            double distance_ij = conf.getDistance(i, j, noOffset, extVector);
 
                             if (distance_ij <= _cutoff && distance_ij > 2 * DISTTOL)
                             {

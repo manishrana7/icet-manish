@@ -21,68 +21,174 @@ PYBIND11_PLUGIN(_icetdev)
 {
     py::module m("_icetdev", "pybind11 _icetdev plugin");
 
-    py::class_<Structure>(m, "Structure")
+        // Disable the automatically generated signatures that prepend the
+        // docstrings by default.
+        py::options options;
+        options.disable_function_signatures();
+
+        py::class_<Structure>(m, "Structure",
+            "This class stores the cell metric, positions, chemical symbols,"
+            " and periodic boundary conditions that describe a structure. It"
+            " also holds information pertaining to the components that are"
+            " allowed on each site and provides functionality for computing"
+            " distances between sites.")
         .def(py::init<>())
         .def(py::init<const Eigen::Matrix<double, Dynamic, 3, Eigen::RowMajor> &,
                       const std::vector<std::string> &,
                       const Eigen::Matrix3d &,
                       const std::vector<bool> &,
                       double>(),
-             "Initialize a structure.",
+             "Initialize a structure.\n\n"
+
+             ,
              py::arg("positions"),
              py::arg("elements"),
              py::arg("cell"),
              py::arg("pbc"),
              py::arg("precision") = 1e-5)
-        .def("get_positions", &Structure::getPositions)
-        .def("set_positions", &Structure::setPositions)
+        .def("get_positions",
+             &Structure::getPositions,
+             "Returns the positions in Cartesian coordinates.\n"
+             "\nReturns\n-------\n"
+             "list of NumPy arrays")
+        .def("set_positions",
+             &Structure::setPositions,
+             py::arg("positions"),
+             "Set the positions in Cartesian coordinates.\n"
+             "\nParameters\n----------\n"
+             "positions : list of NumPy arrays\n"
+             "    new positions in Cartesian coordinates")
         .def_property("positions",
                       &Structure::getPositions,
                       &Structure::setPositions,
-                      "list of lists : atomic positions")
-        .def("get_atomic_numbers", &Structure::getAtomicNumbers)
-        .def("set_atomic_numbers", &Structure::setAtomicNumbers)
+                      "list of lists : atomic positions in Cartesian coordinates")
+        .def("get_atomic_numbers",
+             &Structure::getAtomicNumbers,
+             "Returns a list of the species occupying each site by atomic number.")
+        .def("set_atomic_numbers",
+             &Structure::setAtomicNumbers,
+             py::arg("atomic_numbers"),
+             "Sets the species occupying each site by atomic number.\n"
+             "\nParameters\n----------\n"
+             "atomic_numbers : list of ints\n"
+             "    new species by atomic number")
         .def_property("atomic_numbers",
                       &Structure::getAtomicNumbers,
                       &Structure::setAtomicNumbers,
                       "list of ints : atomic numbers of species on each site")
-        .def("get_chemical_symbols", &Structure::getChemicalSymbols)
-        .def("set_chemical_symbols", &Structure::setChemicalSymbols)
+        .def("get_chemical_symbols",
+             &Structure::getChemicalSymbols,
+             "Returns a list of the species occupying each site by chemical symbol.")
+        .def("set_chemical_symbols",
+             &Structure::setChemicalSymbols,
+             py::arg("atomic_numbers"),
+             "Sets the species occupying each site by chemical symbol.\n"
+             "\nParameters\n----------\n"
+             "chemical_symbols : list of strings\n"
+             "    new species by chemical symbol")
         .def_property("chemical_symbols",
                       &Structure::getChemicalSymbols,
                       &Structure::setChemicalSymbols,
                       "list of strings : chemical symbols of species on each site")
-        .def("set_unique_sites", &Structure::setUniqueSites)
-        .def("get_unique_sites", &Structure::getUniqueSites)
+        .def("set_unique_sites",
+             &Structure::setUniqueSites,
+             py::arg("unique_sites"),
+             "Set unique sites.\n"
+             "This allows one to specify for each site in the structure the"
+             " unique site it is related to.\n"
+             "\nParameters\n----------\n"
+             "unique_sites : list of ints\n"
+             "    site of interest")
+        .def("get_unique_sites",
+             &Structure::getUniqueSites,
+             "Returns the unique sites.\n"
+             "\nReturns\n-------\n"
+             "list of ints")
         .def_property("unique_sites",
                       &Structure::getUniqueSites,
                       &Structure::setUniqueSites,
                       "list of ints : unique sites")
-        .def("get_unique_site", &Structure::getUniqueSite)
-        .def("get_position", &Structure::getPosition)
-        .def("get_distance", &Structure::getDistance)
-        .def("get_distance2", &Structure::getDistance2)
+        .def("get_unique_site",
+             &Structure::getUniqueSite,
+             py::arg("index"),
+             "Returns unique site.\n"
+             "\nParameters\n----------\n"
+             "index : int\n"
+             "    index of site of interest\n"
+             "\nReturns\n-------\n"
+             "int\n"
+             "    index of unique site")
+        .def("get_position",
+             &Structure::getPosition,
+             py::arg("site"),
+             "Returns position of specified site\n"
+             "\nParameters\n----------\n"
+             "site : LatticeNeighbor object\n"
+             "    site of interest\n"
+             "\nReturns\n-------\n"
+             "vector\n"
+             "    position in Cartesian coordinates")
+        .def("get_distance",
+             &Structure::getDistance,
+             py::arg("index1"),
+             py::arg("index2"),
+             py::arg("offset1") = Vector3d(0, 0, 0),
+             py::arg("offset2") = Vector3d(0, 0, 0),
+             "Returns distance between two sites\n"
+             "\nParameters\n----------\n"
+             "index1 : int\n"
+             "    index of the first site\n",
+             "index2 : int\n"
+             "    index of the second site\n",
+             "offset1 : vector\n"
+             "    offset to be applied to the first site\n",
+             "offset2 : vector\n"
+             "    offset to be applied to the second site\n",
+             "\nReturns\n-------\n"
+             "float\n"
+             "    distance in length units")
         .def("find_site_by_position",
              &Structure::findSiteByPosition,
              py::arg("position"),
-             "Returns the index of the site that matches the position.\n\n"
-             "Parameters\n----------\n"
+             "Returns the index of the site that matches the position.\n"
+             "\nParameters\n----------\n"
              "position : list/NumPy array\n"
-             "    position in fractional coordinates")
+             "    position in Cartesian coordinates\n",
+             "\nReturns\n-------\n"
+             "int\n"
+             "    site index")
         .def("find_lattice_neighbor_by_position",
              &Structure::findLatticeNeighborByPosition,
-             py::arg("position"))
+             py::arg("position"),
+             "Returns the lattice neighbor that matches the position.\n"
+             "\nParameters\n----------\n"
+             "position : list/NumPy array\n"
+             "    position in Cartesian coordinates\n",
+             "\nReturns\n-------\n"
+             "LatticeNeighbor object\n"
+             "    lattice neighbor")
         .def("find_lattice_neighbors_by_positions",
              &Structure::findLatticeNeighborsByPositions,
-             py::arg("positions"))
-        .def("get_pbc", &Structure::getPBC)
-        .def("set_pbc", &Structure::setPBC)
+             py::arg("positions"),
+             "Returns the lattice neighbors that match the positions.\n"
+             "\nParameters\n----------\n"
+             "positions : list of lists/NumPy arrays\n"
+             "    list of positions in Cartesian coordinates\n",
+             "\nReturns\n-------\n"
+             "list of LatticeNeighbor object\n"
+             "    list of lattice neighbors")
+        .def("get_pbc", &Structure::getPBC,
+             "Returns the periodic boundary conditions.")
+        .def("set_pbc", &Structure::setPBC,
+             "Sets the periodic boundary conditions.")
         .def_property("pbc",
                       &Structure::getPBC,
                       &Structure::setPBC,
                       "3-dimensional vector : periodic boundary conditions")
-        .def("get_cell", &Structure::getCell)
-        .def("set_cell", &Structure::setCell)
+        .def("get_cell", &Structure::getCell,
+             "Returns the cell metric.")
+        .def("set_cell", &Structure::setCell,
+             "Sets the cell metric.")
         .def_property("cell",
                       &Structure::getCell,
                       &Structure::setCell,

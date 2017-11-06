@@ -6,7 +6,14 @@
 
 using namespace Eigen;
 
-/// Constructor.
+/**
+  @details Initializes an icet Structure instance.
+  @param positions list of positions in Cartesian coordinates
+  @param chemicalSymbols list of chemical symbols
+  @param cell cell metric
+  @param pbc periodic boundary conditions
+  @param tolerance numerical tolerance imposed when testing for equality of positions and distancess
+**/
 Structure::Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &positions,
                      const std::vector<std::string> &chemicalSymbols,
                      const Eigen::Matrix3d &cell,
@@ -26,38 +33,13 @@ Structure::Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &position
   @details This function computes the distance between two sites.
   @param index1 index of the first site
   @param index2 index of the second site
-  @todo Use overloading here instead
-  @todo Add  mic functionality
-*/
-double Structure::getDistance(const int index1, const int index2) const
-{
-
-    if (index1 >= _positions.rows() or index2 >= _positions.rows())
-    {
-        std::string errorMessage = "At least one site index out of bounds ";
-        errorMessage += " index1:" + std::to_string(index1);
-        errorMessage += " index2:" + std::to_string(index2);
-        errorMessage += " npositions: " + std::to_string(_positions.rows());
-        errorMessage += " (Structure::getDistance)";
-        throw std::out_of_range(errorMessage);
-    }
-
-    const Eigen::Vector3d pos1 = _positions.row(index1);
-    const Eigen::Vector3d pos2 = _positions.row(index2);
-
-    return (pos1 - pos2).norm();
-}
-
-/**
-  @details This function computes the distance between two sites.
-  @param index1 index of the first site
-  @param index2 index of the second site
   @param offset1 offset of site 1 relative to origin in units of lattice vectors
   @param offset2 offset of site 2 relative to origin in units of lattice vectors
-  @todo Use overloading here instead
+  @todo Add  mic functionality
 */
-double Structure::getDistance2(const int index1, const Vector3d offset1,
-                               const int index2, const Vector3d offset2) const
+double Structure::getDistance(const int index1, const int index2,
+                              const Vector3d offset1 = {0.0, 0.0, 0.0},
+                              const Vector3d offset2 = {0.0, 0.0, 0.0}) const
 {
     if (index1 < 0 || index1 >= _positions.rows() or
         index2 < 0 || index2 >= _positions.rows())
@@ -66,7 +48,7 @@ double Structure::getDistance2(const int index1, const Vector3d offset1,
         errorMessage += " index1:" + std::to_string(index1);
         errorMessage += " index2:" + std::to_string(index2);
         errorMessage += " npositions: " + std::to_string(_positions.rows());
-        errorMessage += " (Structure::getDistance2)";
+        errorMessage += " (Structure::getDistance)";
         throw std::out_of_range(errorMessage);
     }
     Vector3d pos1 = _positions.row(index1) + offset1.transpose() * _cell;
@@ -154,7 +136,7 @@ int Structure::getUniqueSite(const size_t i) const
   which matches the input position to the tolerance specified for this
   structure.
 
-  @param position position to match in fractional coordinates
+  @param position position to match in Cartesian coordinates
 
   @returns index of site; -1 = failed to find a match.
 **/
@@ -185,7 +167,7 @@ int Structure::findSiteByPosition(const Vector3d &position) const
   The index is found by searching for the remainder position in structure.
   If no index is found a runtime_error is thrown.
 
-  @param position position to match in fractional coordinates
+  @param position position to match in Cartesian coordinates
 
   @returns LatticeNeighbor object
 */
@@ -225,7 +207,7 @@ LatticeNeighbor Structure::findLatticeNeighborByPosition(const Vector3d &positio
   tolerance specified for this structure. Internally this function uses
   Structure::findLatticeNeighborByPosition.
 
-  @param positions list of position to match in fractional coordinates
+  @param positions list of position to match in Cartesian coordinates
 
   @returns list of LatticeNeighbor objects
 */
