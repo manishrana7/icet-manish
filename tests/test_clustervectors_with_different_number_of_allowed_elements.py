@@ -4,11 +4,10 @@ of components on different sites.
 '''
 
 import numpy as np
-
-import icetdev
 from ase.db import connect
+import icetdev
 from icetdev.clusterspace import create_clusterspace, get_singlet_info
-from icetdev.structure import structure_from_atoms
+from icetdev import Structure
 
 
 def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
@@ -47,7 +46,7 @@ def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
     for at in conf:
         at.symbol = np.random.choice(subelements)
 
-    conf = structure_from_atoms(conf)
+    conf = Structure.from_atoms(conf)
 
     cv_int = clusterspace_int.get_clustervector(conf)
     cv_list = clusterspace_list.get_clustervector(conf)

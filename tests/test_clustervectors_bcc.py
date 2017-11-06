@@ -3,8 +3,8 @@ This scripts checks the computation of cluster vectors for three body centerd
 cubic based structures.
 '''
 
+from icetdev import Structure
 from icetdev.clusterspace import create_clusterspace
-from icetdev.structure import structure_from_atoms
 from ase.build import bulk, make_supercell
 import numpy as np
 
@@ -17,7 +17,7 @@ cs = create_clusterspace(prototype, cutoffs, subelements)
 
 # structure #1
 print(' structure #1')
-conf = structure_from_atoms(prototype.copy())
+conf = Structure.from_atoms(prototype)
 cv = cs.get_clustervector(conf)
 cv_target = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                       1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
@@ -34,7 +34,7 @@ conf = make_supercell(prototype, [[2, 0, 1],
                                   [0, 1, 2]])
 conf[0].symbol = 'Ti'
 conf[1].symbol = 'Ti'
-conf = structure_from_atoms(conf)
+conf = Structure.from_atoms(conf)
 cv = cs.get_clustervector(conf)
 cv_target = np.array([1.0, 0.0, 0.0, -0.3333333333333333,
                       -0.3333333333333333, 0.0, 1.0, 1.0,
@@ -53,7 +53,7 @@ conf = make_supercell(prototype, [[1,  0, 1],
 conf[0].symbol = 'Ti'
 conf[1].symbol = 'Ti'
 conf[2].symbol = 'Ti'
-conf = structure_from_atoms(conf)
+conf = Structure.from_atoms(conf)
 cv = cs.get_clustervector(conf)
 cv_target = np.array([1.0, -0.5, 0.0, 0.6666666666666666,
                       0.3333333333333333, 0.0, 0.0, 1.0,

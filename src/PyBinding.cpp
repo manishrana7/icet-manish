@@ -209,20 +209,23 @@ PYBIND11_PLUGIN(_icetdev)
         .def("build", &Neighborlist::build)
         .def("is_neighbor", &Neighborlist::isNeighbor)
         .def("get_neighbors", &Neighborlist::getNeighbors)
-        .def("__len__", &Neighborlist::size)
-
-        ;
+        .def("__len__", &Neighborlist::size);
 
     py::class_<ManybodyNeighborlist>(m, "ManybodyNeighborlist")
         .def(py::init<>())
-        .def("calc_intersection", &ManybodyNeighborlist::getIntersection)
+        .def("calculate_intersection", &ManybodyNeighborlist::getIntersection)
         .def("build", &ManybodyNeighborlist::build);
 
     py::class_<Cluster>(m, "Cluster")
         // .def(py::init<std::vector<int> &, std::vector<double> &, const bool, const int>(), pybind11::arg("sites"),
         //      pybind11::arg("distances"), pybind11::arg("sortedCluster") = true, pybind11::arg("clusterTag") = 0)
-        .def(py::init<const Structure &, const std::vector<LatticeSite> &, const bool, const int>(), pybind11::arg("structure"),
-             pybind11::arg("latticeNeighbors"), pybind11::arg("sortedCluster") = true, pybind11::arg("clusterTag") = 0)
+        .def(py::init<const Structure &,
+             const std::vector<LatticeSite> &,
+             const bool, const int>(),
+             pybind11::arg("structure"),
+             pybind11::arg("latticeNeighbors"),
+             pybind11::arg("sortedCluster") = true,
+             pybind11::arg("clusterTag") = 0)
         .def("count", &Cluster::count)
         .def("get_count", &Cluster::getCount)
         .def("get_sites", &Cluster::getSites)
@@ -285,8 +288,14 @@ PYBIND11_PLUGIN(_icetdev)
 
     py::class_<Orbit>(m, "Orbit")
         .def(py::init<const Cluster &>())
-        .def("add_equivalent_sites", (void (Orbit::*)(const std::vector<LatticeSite> &, bool)) & Orbit::addEquivalentSites, py::arg("lattice_neighbors"), py::arg("sort")=false)
-        .def("add_equivalent_sites", (void (Orbit::*)(const std::vector<std::vector<LatticeSite>> &, bool)) & Orbit::addEquivalentSites, py::arg("lattice_neighbors"), py::arg("sort")=false)
+        .def("add_equivalent_sites",
+             (void (Orbit::*)(const std::vector<LatticeSite> &, bool)) & Orbit::addEquivalentSites,
+             py::arg("lattice_neighbors"),
+             py::arg("sort")=false)
+        .def("add_equivalent_sites",
+             (void (Orbit::*)(const std::vector<std::vector<LatticeSite>> &, bool)) & Orbit::addEquivalentSites,
+             py::arg("lattice_neighbors"),
+             py::arg("sort")=false)
         .def("get_representative_cluster", &Orbit::getRepresentativeCluster)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
         .def("get_representative_sites", &Orbit::getRepresentativeSites)
@@ -323,7 +332,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_prim_to_supercell_map", &LocalOrbitlistGenerator::getPrimToSupercellMap)
         .def("get_unique_primcell_offsets", &LocalOrbitlistGenerator::getUniquePrimcellOffsets);
 
-        py::class_<ClusterSpace>(m, "ClusterSpace",py::dynamic_attr())
+    py::class_<ClusterSpace>(m, "ClusterSpace",py::dynamic_attr())
         .def(py::init<std::vector<int>, std::vector<std::string>, const OrbitList &>())
         .def("_get_clustervector",&ClusterSpace::generateClustervector)
         .def("get_orbit", &ClusterSpace::getOrbit)
@@ -334,6 +343,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_cutoffs",&ClusterSpace::getCutoffs)
         .def("get_primitive_structure",&ClusterSpace::getPrimitiveStructure)
         .def("get_native_clusters",&ClusterSpace::getNativeClusters)
+        .def("__len__", &ClusterSpace::getClusterSpaceSize)
         ;
 
 

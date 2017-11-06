@@ -1,18 +1,20 @@
-from icetdev import orbit_list, Structure
+from icetdev import Structure
 from icetdev.orbit_list import create_orbit_list
-from icetdev.structure import structure_from_atoms
 from ase.build import bulk
 
+'''
+This test will construct two orbitlists each from the same atom structure but
+one will have shuffled atoms. The test will assert that the orbits in the
+orbitlists are the same from both orbitlists
 
-# This test will construct two orbitlists each from the same atom structure but one will have shuffled atoms.
-# The test will assert that the orbits in the orbitlists are the same from both orbitlists
-# TODO: given that create_orbit_list get the primitive cell is this really
-# a good test?
+Todo
+----
+given that create_orbit_list get the primitive cell is this really a good test?
+'''
 
-atoms1 = bulk(
-    "Al", "bcc", a=1).repeat(3)
+atoms1 = bulk('Al', 'bcc', a=1).repeat(3)
 cutoffs = [3, 2.5, 2]
-structure = structure_from_atoms(atoms1)
+structure = Structure.from_atoms(atoms1)
 
 
 orbitlist_1 = create_orbit_list(structure, cutoffs, verbosity=0)
@@ -34,18 +36,19 @@ for i in range(len(atoms2)):
 # just to make sure repeat the shuffled structure
 atoms2 = atoms2.repeat(2)
 
-structure2 = structure_from_atoms(atoms2)
+structure2 = Structure.from_atoms(atoms2)
 
 #create orbitlist from shuffled structure
 orbitlist_2 = create_orbit_list(structure2, cutoffs, verbosity=0)
 
 
 assert len(orbitlist_1) == len(orbitlist_2), \
-    "The sizes of the different orbitlists should be equal"
+    'The sizes of the different orbitlists should be equal'
 
 orbitlist_1.sort()
 orbitlist_2.sort()
 
 for i in range(len(orbitlist_1)):
-    assert orbitlist_1.get_orbit(i).get_representative_cluster() == orbitlist_2.get_orbit(
-        i).get_representative_cluster(), "Representative clusters should be the same in the different orbits"
+    assert orbitlist_1.get_orbit(i).get_representative_cluster() \
+        == orbitlist_2.get_orbit(i).get_representative_cluster(), \
+        'Representative clusters should be the same in the different orbits'

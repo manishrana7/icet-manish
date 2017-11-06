@@ -16,7 +16,7 @@ for row in db.select():
     atoms_row = row.toatoms()
 
     ''' Convert ASE atoms to icet structures '''
-    structure = icet.structure_from_atoms(atoms_row)
+    structure = icet.Structure.from_atoms(atoms_row)
 
     ''' Test that structures have the same length '''
     msg = 'Test of len failed for structure {}'.format(row.tag)

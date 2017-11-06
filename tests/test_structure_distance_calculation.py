@@ -19,7 +19,7 @@ for row in db.select():
     print(' structure: {}'.format(row.tag))
 
     atoms_row = row.toatoms()
-    structure = icet.structure_from_atoms(atoms_row)
+    structure = icet.Structure.from_atoms(atoms_row)
     nl = NeighborList(len(atoms_row)*[2.6], self_interaction=False,)
     nl.update(atoms_row)
     for index in range(len(atoms_row)):

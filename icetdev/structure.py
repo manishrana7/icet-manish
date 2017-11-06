@@ -1,7 +1,8 @@
 from _icetdev import Structure
 
 
-def structure_from_atoms(conf):
+@classmethod
+def __structure_from_atoms(self, conf):
     '''
     Creates an icet structure object from an ASE atoms object.
 
@@ -15,13 +16,16 @@ def structure_from_atoms(conf):
     icet structure object
         output configuration
     '''
-    return Structure(conf.positions,
-                     conf.get_chemical_symbols(),
-                     conf.cell,
-                     conf.pbc.tolist())
+    return self(conf.positions,
+                conf.get_chemical_symbols(),
+                conf.cell,
+                conf.pbc.tolist())
 
 
-def __Structure_to_atoms(self):
+Structure.from_atoms = __structure_from_atoms
+
+
+def __structure_to_atoms(self):
     '''
     Returns the structure as an ASE atoms object.
 
@@ -40,7 +44,7 @@ def __Structure_to_atoms(self):
     return conf
 
 
-Structure.to_atoms = __Structure_to_atoms
+Structure.to_atoms = __structure_to_atoms
 
 
 def __repr_function(self):

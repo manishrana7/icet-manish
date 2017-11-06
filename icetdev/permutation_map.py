@@ -5,7 +5,7 @@ from ase import Atoms
 from _icetdev import PermutationMap
 from icetdev.neighborlist import get_neighborlists, Neighborlist
 from icetdev.lattice_site import LatticeSite
-from icetdev.structure import structure_from_atoms
+from icetdev.structure import Structure
 from icetdev.tools.geometry import get_scaled_positions
 
 
@@ -118,7 +118,7 @@ def permutation_matrices_from_atoms(atoms, cutoffs=None,
     permutation_matrices = PermutationMap(translations, rotations)
 
     # Create neighborlists from the different cutoffs
-    prim_structure = structure_from_atoms(atoms_prim)
+    prim_structure = Structure.from_atoms(atoms_prim)
     neighborlists = get_neighborlists(structure=prim_structure,
                                       cutoffs=cutoffs)
     # get fractional positions for each neighborlist
@@ -175,7 +175,7 @@ def permutation_matrix_from_atoms(atoms, cutoff=None,
     permutation_matrix = PermutationMap(translations, rotations)
 
     # Create neighborlists from the different cutoffs
-    prim_structure = structure_from_atoms(atoms_prim)
+    prim_structure = Structure.from_atoms(atoms_prim)
     neighborlist = Neighborlist(cutoff)
     neighborlist.build(prim_structure)
 

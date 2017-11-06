@@ -4,7 +4,7 @@ its  clustervector computed
 '''
 
 from icetdev.clusterspace import create_clusterspace
-from icetdev.structure import structure_from_atoms
+from icetdev.structure import Structure
 from icetdev import permutation_map
 import numpy as np
 import random
@@ -35,8 +35,8 @@ def generate_clustervector_set(n, atoms_prim, subelements, clusterspace):
     '''
     clustervectors = []
     for i in range(n):
-        conf = generate_mixed_structure(atoms_prim, subelements)
-        conf = structure_from_atoms(conf)
+        atoms = generate_mixed_structure(atoms_prim, subelements)
+        conf = Structure.from_atoms(atoms)
         cv = clusterspace.get_clustervector(conf)
         clustervectors.append(cv)
 

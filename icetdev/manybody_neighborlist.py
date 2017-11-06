@@ -1,7 +1,7 @@
 from _icetdev import ManybodyNeighborlist
 from icetdev.lattice_site import LatticeSite
 from icetdev.neighborlist import get_neighborlists
-from icetdev.structure import structure_from_atoms
+from icetdev.structure import Structure
 
 
 def get_all_lattice_neighbors(atoms=None, structure=None,
@@ -37,7 +37,7 @@ def get_all_lattice_neighbors(atoms=None, structure=None,
         if atoms is None:
             raise Exception('Need to specify either atoms or structure')
         else:
-            structure = structure_from_atoms(atoms)
+            structure = Structure.from_atoms(atoms)
 
     # get neigbhor lists
     if neighborlists is None:

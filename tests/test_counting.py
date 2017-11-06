@@ -2,7 +2,8 @@ from icetdev import orbit_list
 from ase.db import connect
 from icetdev.neighborlist import get_neighborlists
 from icetdev.orbit_list import create_orbit_list
-from icetdev.cluster_counts import *
+from icetdev.cluster_counts import ClusterCounts
+from icetdev import Structure
 import random
 import numpy as np
 
@@ -66,8 +67,8 @@ def test_no_symmetry_local_orbitlist_counting(atoms_primitive, atoms_tag,
 
     ''' Set up neighborlists '''
     neighborlists_primitive = get_neighborlists(atoms=atoms, cutoffs=cutoffs)
-    structure = structure_from_atoms(atoms)
-    structure_repeat = structure_from_atoms(atoms_repeat)
+    structure = Structure.from_atoms(atoms)
+    structure_repeat = Structure.from_atoms(atoms_repeat)
     neighborlists_supercell = get_neighborlists(
         atoms=atoms_repeat, cutoffs=cutoffs)
 
@@ -84,7 +85,7 @@ def test_no_symmetry_local_orbitlist_counting(atoms_primitive, atoms_tag,
     ''' Set up clustercounts and count cluster '''
     clusterCount_local = ClusterCounts()
 
-    clusterCount_local.count_each_local_orbitlist(
+    clusterCount_local.count_clusters(
         structure_repeat, orbitlist_primitive, False)
 
     clusterCount_supercell = ClusterCounts()
@@ -167,8 +168,8 @@ def test_no_symmetry_vs_symmetry_count(atoms_primitive, atoms_tag,
         if random.random() < 0.3:
             atom.symbol = 'H'
 
-    structure_repeat = structure_from_atoms(atoms_repeat)
-    structure = structure_from_atoms(atoms)
+    structure_repeat = Structure.from_atoms(atoms_repeat)
+    structure = Structure.from_atoms(atoms)
 
     ####################################
     #                                  #
@@ -179,7 +180,7 @@ def test_no_symmetry_vs_symmetry_count(atoms_primitive, atoms_tag,
     # get neighborlist
     neighborlists = get_neighborlists(atoms=atoms, cutoffs=cutoffs)
 
-    structure = structure_from_atoms(atoms)
+    structure = Structure.from_atoms(atoms)
 
     neighborlists = get_neighborlists(atoms=atoms, cutoffs=cutoffs)
 
@@ -190,7 +191,7 @@ def test_no_symmetry_vs_symmetry_count(atoms_primitive, atoms_tag,
     clusterCount_no_symmetry = ClusterCounts()
     msg = 'Here we use a cutoff so that no extra clusters are found in the'
     msg += 'symmetry case and compare the counts found in both methods.'
-    clusterCount_no_symmetry.count_each_local_orbitlist(
+    clusterCount_no_symmetry.count_clusters(
         structure_repeat, orbitlist_no_symmetry, False), msg
 
     ''' Get the clustercount map '''
@@ -202,7 +203,7 @@ def test_no_symmetry_vs_symmetry_count(atoms_primitive, atoms_tag,
 
     ''' Set up clustercount and count '''
     clusterCount_symmetry = ClusterCounts()
-    clusterCount_symmetry.count_each_local_orbitlist(
+    clusterCount_symmetry.count_clusters(
         structure_repeat, orbitlist_symmetry, False)
 
     ''' Get the clustercount map '''

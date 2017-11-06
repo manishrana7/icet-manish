@@ -1,93 +1,87 @@
 from _icetdev import ClusterSpace
 from icetdev import Structure
-from icetdev.structure import structure_from_atoms
 from icetdev.orbit_list import create_orbit_list
 from ase import Atoms
 
 
-def create_clusterspace(crystal_structure, cutoffs, subelements, Mi=None, verbosity=0):
-    """
+def create_clusterspace(atoms, cutoffs, chemical_symbols,
+                        Mi=None, verbosity=0):
+    '''
     Creates a clusterspace.
 
-    subelements: list of strings
-        The strings are required to be one of the short descriptions in the periodic table
-    cutoffs: list of floats
-        Cutoffs that define the clusterspace
-    atoms: ASE atoms object (bi-optional)
+    Parameters
+    ----------
+    atoms : ASE atoms object / icet structure object (bi-optional)
         The structure on which to base the clusterspace on.
-        Atleast one of structure or atoms need to be non-None
-    structure: icet structure object (bi-optional)         
-        The structure on which to base the clusterspace on.
-        Atleast one of structure or atoms need to be non-None
-    verbosity: int
-        sets the verbosity level
+    cutoffs : list of floats
+        cutoff radii per order that define the clusterspace
+    chemical_symbols : list of strings
+        list of chemical symbols, each of which must map to an element of the
+        periodic table
+    verbosity : int
+        verbosity level
 
-    """
+    Todo
+    ----
+    * document `Mi`
+    '''
 
-    # get structure
-    if isinstance(crystal_structure, Atoms):
-        structure = structure_from_atoms(crystal_structure)
-    elif not isinstance(crystal_structure, Structure):
-        print(type(crystal_structure))
-        raise Exception(
-            "Error: no known crystal structure format added to function create_clusterspace")
+    if isinstance(atoms, Atoms):
+        structure = Structure.from_atoms(atoms)
+    elif isinstance(atoms, Structure):
+        structure = atoms
     else:
-        structure = crystal_structure
+        msg = 'Unknown structure format'
+        msg += ' {} (create_clusterspace)'.format(type(atoms))
+        raise Exception(msg)
 
     orbit_list = create_orbit_list(structure, cutoffs, verbosity=verbosity)
     orbit_list.sort()
-    if Mi == None:
-        Mi = len(subelements)
+    if Mi is None:
+        Mi = len(chemical_symbols)
     if isinstance(Mi, dict):
         Mi = get_Mi_from_dict(Mi, orbit_list.get_primitive_structure())
     if not isinstance(Mi, list):
         if not isinstance(Mi, int):
-            raise Exception("Error: Mi has wrong type in create_clusterspace")
+            raise Exception('Mi has wrong type in create_clusterspace')
         else:
             Mi = [Mi] * len(orbit_list.get_primitive_structure())
 
-    assert len(Mi) == len(orbit_list.get_primitive_structure()), "Error: len(Mi) is not len(primitive_structure). {} != {}".format(
-        len(Mi), len(orbit_list.get_primitive_structure()))
-    clusterspace = ClusterSpace(Mi, subelements, orbit_list)
+    msg = ['len(Mi) does not equal len(primitive_structure).']
+    msg += ['{} != {}'.format(len(Mi),
+                              len(orbit_list.get_primitive_structure()))]
+    assert len(Mi) == len(orbit_list.get_primitive_structure()), ' '.join(msg)
+    clusterspace = ClusterSpace(Mi, chemical_symbols, orbit_list)
     clusterspace.cutoffs = cutoffs
     return clusterspace
 
 
-def __size_of_clusterspace(self):
-    """"
-    Returns the size of the clusterspace, i.e. the length of a clustervector in this space
-    """
-    return self.get_clusterspace_size()
-
-
-ClusterSpace.__len__ = __size_of_clusterspace
-
-
-def __represent_clusterspace(self):
-    """
+def __clusterspace__repr__(self):
+    '''
     String representation of the clusterspcace
-    """
-    rep = "Clusterspace \n"
+    '''
+    s = ['Clusterspace']
+    s += ['Subelements: {}'.format(' '.join(self.get_chemical_symbols()))]
+    s += ['Cutoffs: {}'.format(' '.join(['{}'.format(co)
+                                         for co in self.cutoffs]))]
+    s += ['Total size of clusterspace: {}'.format(len(self))]
 
-    rep += "Subelements: "
-    for el in self.get_elements():
-        rep += el
-    rep += " \n"
+    t = ['Cluster bodies']
+    t += ['cluster radius']
+    t += ['multiplicity']
+    t += ['(clusterspace index']
+    t += [':orbit index)']
+    t += ['mc vector']
+    s += [' : '.join(t)]
+    s += ['{:-^{l}}'.format(l=len(' : '.join(t)))]
 
-    rep += "Cutoffs: "
-    for co in self.cutoffs:
-        rep += str(co) + " "
-    rep += " \n"
-    rep += "Total number of dimensions {} \n".format(len(self))
-    rep += "Cluster bodies : cluster radius : multiplicity : (clusterspace index : orbit index)  : mc vector\n"
-    rep += "-------------------------------------\n"
     i = 0
     print_threshold = 50
     while i < len(self):
         if len(self) > print_threshold and i > 10 and i < len(self) - 10:
             i = len(self) - 10
-            rep += "\n...... \n\n"
-        
+            s += ['......\n\n']
+
         clusterspace_info = self.get_clusterspace_info(i)
         orbit_index = clusterspace_info[0]
         mc_vector = clusterspace_info[1]
@@ -95,34 +89,34 @@ def __represent_clusterspace(self):
         cluster = self.get_orbit(orbit_index).get_representative_cluster()
         multiplicity = len(self.get_orbit(orbit_index).get_equivalent_sites())
 
-        rep += " {0} : {1:.4f} : {2} : ({3} : {4}) : {5}".format( len(cluster), cluster.get_geometrical_size(), multiplicity, i, orbit_index, mc_vector)
+        t = ['{}'.format(len(cluster))]
+        t += ['{.4f}'.format(cluster.get_geometrical_size())]
+        t += ['{}'.format(multiplicity)]
+        t += ['({}'.format(i)]
+        t += ['{})'.format(orbit_index)]
+        t += ['{}'.format(mc_vector)]
+        s += [' : '.join(t)]
 
-        rep += "\n"
         i += 1
-    return rep
+
+    return '\n'.join(s)
 
 
-ClusterSpace.__repr__ = __represent_clusterspace
+ClusterSpace.__repr__ = __clusterspace__repr__
 
 
 def get_singlet_info(crystal_structure, return_clusterspace=False):
-    """
+    '''
     Get information about the singlets in this structure.
 
-    crystal_structure: icet structure object or ASE atoms object       
+    crystal_structure: icet structure object or ASE atoms object
 
     return_clusterspace: bool
-        If true it will return the created clusterspace        
-    """
-
-    # if structure==None:
-    #     if atoms == None:
-    #         Exception("Error: neither structure or atoms were defined in function: Clusterspace.py : get_singlet_info")
-    #     else:
-    #         structure = structure_from_atoms(atoms)
+        If true it will return the created clusterspace
+    '''
 
     # create dummy elements and cutoffs
-    subelements = ["H", "He"]
+    subelements = ['H', 'He']
     cutoffs = [0.0]
 
     clusterspace = create_clusterspace(crystal_structure, cutoffs, subelements)
@@ -136,15 +130,15 @@ def get_singlet_info(crystal_structure, return_clusterspace=False):
             orbit_index).get_representative_cluster()
         multiplicity = len(clusterspace.get_orbit(
             orbit_index).get_equivalent_sites())
-        assert len(
-            cluster) == 1, "Error: cluster in singlet only clusterspace has non-singlets"
+        assert len(cluster) == 1, \
+            'Cluster in singlet only clusterspace has non-singlets'
 
         singlet = {}
-        singlet["orbit_index"] = orbit_index
-        singlet["sites"] = clusterspace.get_orbit(
+        singlet['orbit_index'] = orbit_index
+        singlet['sites'] = clusterspace.get_orbit(
             orbit_index).get_equivalent_sites()
-        singlet["multiplicity"] = multiplicity
-        singlet["representative_site"] = clusterspace.get_orbit(
+        singlet['multiplicity'] = multiplicity
+        singlet['representative_site'] = clusterspace.get_orbit(
             orbit_index).get_representative_sites()
         singlet_data.append(singlet)
 
@@ -154,24 +148,24 @@ def get_singlet_info(crystal_structure, return_clusterspace=False):
         return singlet_data
 
 
-def view_singlets(crystal_structure):
-    """
+def view_singlets(structure):
+    '''
     Visualize the singlets in the structure,
     singlet 0 is represented by a H,
     singlet 1 is represented by a He etc...
-    """
+    '''
 
-    cluster_data, clusterspace = get_singlet_info(
-        crystal_structure, return_clusterspace=True)
+    cluster_data, clusterspace = get_singlet_info(structure,
+                                                  return_clusterspace=True)
 
     primitive_atoms = clusterspace.get_primitive_structure().to_atoms()
 
     from ase.visualize import view
-    from ase.data import atomic_numbers, chemical_symbols
+    from ase.data import chemical_symbols
 
     for singlet in cluster_data:
-        for site in singlet["sites"]:
-            element = chemical_symbols[singlet["orbit_index"]]
+        for site in singlet['sites']:
+            element = chemical_symbols[singlet['orbit_index']]
             atom_index = site[0].index
             primitive_atoms[atom_index].symbol = element
 
@@ -179,41 +173,41 @@ def view_singlets(crystal_structure):
 
 
 def get_Mi_from_dict(Mi, structure):
-    """
+    '''
     Mi maps orbit index to allowed components
     this function will return a list, where
-    Mi_ret[i] will be the allowed components on site index i    
+    Mi_ret[i] will be the allowed components on site index i
 
-    """
+    '''
     cluster_data = get_singlet_info(structure)
     Mi_ret = [-1] * len(structure)
     for singlet in cluster_data:
-        for site in singlet["sites"]:
-            Mi_ret[site[0].index] = Mi[singlet["orbit_index"]]
+        for site in singlet['sites']:
+            Mi_ret[site[0].index] = Mi[singlet['orbit_index']]
 
     for all_comp in Mi_ret:
         if all_comp == -1:
             raise Exception(
-                "Error: the calculated Mi from dict did not cover all sites on input structure. \n Were all sites in primitive mapped?")
+                'Error: the calculated Mi from dict did not cover all sites on input structure. \n Were all sites in primitive mapped?')
 
     return Mi_ret
 
 
 def __get_clustervector(self, crystal_structure):
-    """ 
+    '''
     Get clustervector
-    
+
     crystal_structure: either an ASE Atoms object or icet structure
-    
-    
-    """
+
+
+    '''
 
     if isinstance(crystal_structure, Atoms):
-            structure = structure_from_atoms(crystal_structure)
+            structure = Structure.from_atoms(crystal_structure)
     elif not isinstance(crystal_structure, Structure):
         print(type(crystal_structure))
         raise Exception(
-            "Error: no known crystal structure format added to function create_clusterspace")
+            'Error: no known crystal structure format added to function create_clusterspace')
     else:
         structure = crystal_structure
     return self._get_clustervector(structure)
