@@ -16,7 +16,7 @@ class ClusterSpace(_ClusterSpace):
         Parameters
         ----------
         atoms : ASE atoms object / icet structure object (bi-optional)
-            The structure on which to base the clusterspace on.
+            atomic configuration
         cutoffs : list of floats
             cutoff radii per order that define the clusterspace
         chemical_symbols : list of strings
@@ -132,7 +132,7 @@ class ClusterSpace(_ClusterSpace):
         Parameters
         ----------
         atoms : ASE atoms object / icet structure object (bi-optional)
-            The structure on which to base the clusterspace on.
+            atomic configuration
 
         Returns
         -------
@@ -156,7 +156,7 @@ def get_singlet_info(atoms, return_clusterspace=False):
     Parameters
     ----------
     atoms : ASE atoms object / icet structure object (bi-optional)
-        The structure on which to base the clusterspace on.
+        atomic configuration
     return_clusterspace : boolean
         return the clusterspace created in the process
 
@@ -199,15 +199,20 @@ def get_singlet_info(atoms, return_clusterspace=False):
         return singlet_data
 
 
-def view_singlets(structure):
+def view_singlets(atoms):
     '''
     Visualize singlets in a structure using the ASE gui.
+
+    Parameters
+    ----------
+    atoms : ASE atoms object / icet structure object (bi-optional)
+        atomic configuration
     '''
 
     from ase.visualize import view
     from ase.data import chemical_symbols
 
-    cluster_data, clusterspace = get_singlet_info(structure,
+    cluster_data, clusterspace = get_singlet_info(atoms,
                                                   return_clusterspace=True)
     primitive_atoms = clusterspace.get_primitive_structure().to_atoms()
     for singlet in cluster_data:
@@ -224,6 +229,17 @@ def get_Mi_from_dict(Mi, structure):
     this function will return a list, where
     Mi_ret[i] will be the allowed components on site index i
 
+    Parameters
+    ----------
+    Mi : xx
+        xx
+    atoms : ASE atoms object / icet structure object (bi-optional)
+        atomic configuration
+
+    Todo
+    ----
+    * rename function, remove `Mi`
+    * complete docstring
     '''
     cluster_data = get_singlet_info(structure)
     Mi_ret = [-1] * len(structure)
