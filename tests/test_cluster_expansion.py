@@ -1,44 +1,38 @@
-"""
-This scripts checks that cluster expansion model can be initialized with any structure
-in the test database and can predict a property
-
-"""
-
-import numpy as np
+'''
+This test checks that a cluster expansion model can be initialized
+with any structure in the test database and can predict a property.
+'''
 
 from ase.db import connect
-from icetdev.clusterspace import create_clusterspace
-from icetdev.cluster_expansion import ClusterExpansion
-print(__doc__)
+from icetdev import ClusterSpace, ClusterExpansion
 
 
 def test_clusterexpansion_model(atoms, cutoffs, subelements):
-    """
+    '''
     Test clusterexpansion init and prediction
-        :param atoms: ASE Atoms object
-        :param subelements: list of atomic symbols
-    """
-    cs = create_clusterspace(atoms, cutoffs, subelements)
+
+    Parameters
+    ----------
+    atoms : ASE Atoms object
+        atomic configuration
+    subelements : list of strings (chemical symbols)
+        list of elements that are allowed
+    '''
+    cs = ClusterSpace(atoms, cutoffs, subelements)
     params_len = cs.get_clusterspace_size() + 1  # plus one for singlet
-    params = np.random.rand(params_len)
+    params = list(range(params_len))
 
     ce = ClusterExpansion(cs, params)
     predicted_val = ce.predict(atoms)
 
-    assert isinstance(predicted_val, float)
+    assert isinstance(predicted_val, float), 'Prediction is not of float type'
 
 
-db = connect("structures_for_testing.db")
-subelements = ["H", "He", "Pb"]
-
+db = connect('structures_for_testing.db')
+subelements = ['H', 'He', 'Pb']
+cutoffs = [1.4] * 3
 for row in db.select():
-
+    print(' structure: {}'.format(row.tag))
     atoms_row = row.toatoms()
-    cutoffs = [1.4] * 3
-
-    print("Testing cluster expansion for structure: {} with cutoffs {}".format(
-        row.tag, cutoffs))
-
-    for at in atoms_row:
-        at.symbol = subelements[0]
+    atoms_row.set_chemical_symbols(len(atoms_row) * [subelements[0]])
     test_clusterexpansion_model(atoms_row, cutoffs, subelements)

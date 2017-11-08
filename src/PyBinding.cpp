@@ -271,6 +271,7 @@ PYBIND11_PLUGIN(_icetdev)
         .def("__hash__", [](const Cluster &cluster) { return std::hash<Cluster>{}(cluster); })
         .def(py::self < py::self)
         .def(py::self == py::self)
+        .def("__len__", &Cluster::getNumberOfBodies);
         // .def(hash(py::self))
         ;
 

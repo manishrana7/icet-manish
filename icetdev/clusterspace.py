@@ -2,8 +2,6 @@ from _icetdev import ClusterSpace as _ClusterSpace
 from icetdev import Structure
 from icetdev.orbit_list import create_orbit_list
 from ase import Atoms
-from icetdev import permutationMap
-import numpy
 
 
 class ClusterSpace(_ClusterSpace):
