@@ -7,7 +7,7 @@ using boost::hash_combine;
 using boost::hash_value;
 
 /**
-@brief Structure for storing information concerning a lattice site.
+@brief Struct for storing information concerning a lattice site.
 @details This structure provides functionality for handling lattice sites
 most notably including comparison operators.
 */
