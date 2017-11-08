@@ -60,7 +60,6 @@ double Structure::getDistance(const int index1, const int index2,
   @details This function returns the position of a site.
   @param latticeNeighbor site for which to obtain the position
   @returns a 3-dimensional position vector
-  @todo rename LatticeSite class
 */
 Vector3d Structure::getPosition(const LatticeSite &latticeNeighbor) const
 {
