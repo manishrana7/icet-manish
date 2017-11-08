@@ -12,53 +12,57 @@
 using namespace Eigen;
 
 /**
-class Neighborlist
+@brief Class for maintaining a neighbor list.
 
-Builds a (pair) neighborlist for each lattice site
+@details This class provides functionality for building and storing a
+(conventional) pair-wise neighbor list (as opposed to the specialized many-body
+neighbor list defined by ManybodyNeighborlist).
 
+@see ManybodyNeighborlist
+
+@todo get rid of local DISTTOL definition
 */
-
 class Neighborlist
 {
-  public:
-    Neighborlist(const double);
+public:
+
+    /**
+    @brief Initialize a neighbor list instance.
+    @param cutoff cutoff to be used for constructing the neighbor list.
+    */
+    Neighborlist(const double cutoff) : _cutoff(cutoff) { };
+
+    /// Build a neighbor list based on the given structure.
     void build(const Structure &);
+
+    /// Update a neighbor list based on the given structure.
     void update(const Structure &);
 
-    std::vector<LatticeSite> getNeighbors(int index) const
-    {
+    /// Check if two sites are neighbors.
+    bool isNeighbor(const int, const int, const Vector3d) const;
 
-        if (index >= _neighbors.size() || index < 0)
-        {
-            throw std::out_of_range("Error: Tried accessing position at out of bound index. Neighborlist::getNeighbors");
-        }
-        return _neighbors[index];
-    }
-    ///Check if index1 and index2 are neighbors
-    bool isNeighbor(const int index1, const int index2, const Vector3d offset) const
-    {
-        for (const auto &nbr : _neighbors[index1])
-        {
-            if (nbr.index() == index2) // index are the same
-            {
-                if (nbr.unitcellOffset() == offset) // are the offsets equal?
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+    /// Returns list of neighbors.
+    std::vector<LatticeSite> getNeighbors(int) const;
 
-    size_t size() const
-    {
-        return _neighbors.size();
-    }
+    /// Returns size of neighbor list.
+    size_t size() const { return _neighbors.size(); }
+
+    /// Returns cutoff radius used for building the neighbor list.
+    double cutoff() const { return _cutoff; }
 
   private:
-    std::vector<std::vector<int>> latticeIndices;
-    std::vector<std::vector<Vector3d>> offsets;
+    /**
+    @brief Neighbor list.
+
+    @details Each entry in the outer vector corresponds to one position in the
+    structure used to build the neighbor list; each inner vector specifies the
+    neighbors of said position in the form of lattice sites.
+    */
     std::vector<std::vector<LatticeSite>> _neighbors;
+
+    /// Cutoff radius used for building the neighbor list.
     double _cutoff;
+
+    /// Tolerance imposed for distance comparison.
     double DISTTOL = 1e-7;
 };

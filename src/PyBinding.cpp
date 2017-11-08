@@ -205,10 +205,43 @@ PYBIND11_PLUGIN(_icetdev)
         .def("__len__", &Structure::size);
 
     py::class_<Neighborlist>(m, "Neighborlist")
-        .def(py::init<const double>())
-        .def("build", &Neighborlist::build)
-        .def("is_neighbor", &Neighborlist::isNeighbor)
-        .def("get_neighbors", &Neighborlist::getNeighbors)
+        .def(py::init<const double>(),
+             py::arg("cutoff"),
+             "Initialize a neighbor list instance.\n"
+             "\nParameters\n----------\n"
+             "cutoff : float\n"
+             "    cutoff to be used for constructing the neighbor list")
+        .def("build",
+             &Neighborlist::build,
+             py::arg("structure"),
+             "Build a neighbor list for the given atomic configuration.\n"
+             "\nParameters\n----------\n"
+             "structure : icet Structure instance\n"
+             "    atomic configuration")
+        .def("is_neighbor",
+             &Neighborlist::isNeighbor,
+             py::arg("index1"),
+             py::arg("index2"),
+             py::arg("offset"),
+             "Check if two sites are neighbors.\n",
+             "\nParameters\n----------\n"
+             "index1 : int\n"
+             "    index of the first site\n"
+             "index2 : int\n"
+             "    index of the second site\n"
+             "offset : NumPy array\n"
+             "    offset between the two sites in units of lattice vectors\n"
+             "\nReturns\n-------\n"
+             "boolean")
+        .def("get_neighbors",
+             &Neighborlist::getNeighbors,
+             py::arg("index"),
+             "Returns a vector of lattice sites that identify the neighbors of site in question.\n"
+             "\nParameters\n----------\n"
+             "index : int\n"
+             "    index of site in structure for which neighbor list was build\n"
+             "\nReturns\n-------\n"
+             "list of LatticeSite instances")
         .def("__len__", &Neighborlist::size);
 
     py::class_<ManybodyNeighborlist>(m, "ManybodyNeighborlist")
