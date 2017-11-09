@@ -40,7 +40,8 @@ pyflakes_pep8:
   tags:
     - linux
   script:
-    - python3 tests/check_pep8_pyflakes__.py
+    - cd tests/
+    - python3 check_pep8_pyflakes__.py
   allow_failure: true
 
 

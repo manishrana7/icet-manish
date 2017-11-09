@@ -59,6 +59,15 @@ def __get_primitive_structure(atoms):
     atoms_prim.wrap()
     return atoms_prim
 
+def vacuum_on_non_pbc(atoms):
+    '''
+    Returns atoms with non pbc after adding vacuum along non 
+    periodic directions 
+
+    '''
+    atoms = __vacuum_on_non_pbc(atoms)
+    return atoms
+
 
 def __get_fractional_positions_from_nl(structure, neighborlist):
     '''
