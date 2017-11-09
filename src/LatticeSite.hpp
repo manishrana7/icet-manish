@@ -113,12 +113,12 @@ public:
     /// Write class information to stdout.
     void print() const
     {
-        std::cout << _index << " : ";
+        std::string str = std::to_string(_index) + " :";
         for (int i = 0; i < 3; i++)
         {
-            std::cout << _unitcellOffset[i] << " ";
+            str += " " + std::to_string(_unitcellOffset[i]);
         }
-        std::cout << std::endl;
+        std::cout << str << std::endl;
     }
 
 private:
