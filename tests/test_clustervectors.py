@@ -3,7 +3,6 @@ This script checks that all atom objects in the database can have
 its  clustervector computed
 '''
 
-#from icetdev.clusterspace import create_clusterspace
 from icetdev import Structure, ClusterSpace
 from icetdev import permutation_map
 import numpy as np

@@ -1,6 +1,6 @@
 from __future__ import print_function, division
 from .structure import Structure
-from .clusterspace import ClusterSpace
+from .cluster_space import ClusterSpace
 from .cluster_expansion import ClusterExpansion
 
 '''

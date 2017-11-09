@@ -33,9 +33,9 @@ class ScriptTestCase(unittest.TestCase):
 
 
 def run_test(verbosity=2, files=None):
-    """
+    '''
     Run test
-    """
+    '''
 
     test_dir = os.path.dirname(os.path.realpath(__file__))
     testSuite = unittest.TestSuite()
@@ -71,5 +71,5 @@ def run_test(verbosity=2, files=None):
 
 if __name__ == '__main__':
     results = run_test()
-    assert len(results.failures) == 0, "ERROR: at least one test failed"
-    assert len(results.errors) == 0, "ERROR: at least one test failed"
+    assert len(results.failures) == 0, 'At least one test failed'
+    assert len(results.errors) == 0, 'At least one test failed'

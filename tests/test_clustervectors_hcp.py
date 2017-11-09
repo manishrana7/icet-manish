@@ -4,7 +4,7 @@ structures.
 """
 
 from icetdev import Structure, ClusterSpace
-from icetdev.clusterspace import get_singlet_info
+from icetdev.cluster_space import get_singlet_info
 from ase.build import bulk, make_supercell
 import numpy as np
 

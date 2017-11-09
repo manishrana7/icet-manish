@@ -5,9 +5,9 @@ of components on different sites.
 
 import numpy as np
 from ase.db import connect
-import icetdev
-from icetdev.clusterspace import get_singlet_info
 from icetdev import Structure, ClusterSpace
+from icetdev.cluster_space import get_singlet_info
+from icetdev import permutation_map
 
 
 def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
@@ -16,7 +16,7 @@ def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
     '''
 
     prim_size = len(
-        icetdev.permutation_map.__get_primitive_structure(atoms.copy()))
+        permutation_map.__get_primitive_structure(atoms.copy()))
 
     Mi_int = allowed_sites
     Mi_list = [allowed_sites] * prim_size

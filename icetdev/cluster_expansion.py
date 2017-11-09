@@ -1,5 +1,4 @@
 import numpy as np
-from icetdev import clusterspace
 
 class ClusterExpansion(object):
     """
