@@ -63,7 +63,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
     size_t uniqueOffsets = localOrbitListGenerator.getUniqueOffsetsCount();
     ClusterCounts clusterCounts = ClusterCounts();
 
-    int clusterTags=0;
+    int tags=0;
     for (int i = 0; i < uniqueOffsets; i++)
     {
         const auto local_orbitlist = localOrbitListGenerator.generateLocalOrbitlist(i);
@@ -86,7 +86,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                     continue;
                 }
                 repr_cluster.setClusterTag(j);
-                if (repr_cluster.getNumberOfBodies() != 1)
+                if (repr_cluster.order() != 1)
                 {
                     std::vector<int> elements(sites.size());
                     for (size_t i = 0; i < sites.size(); i++)

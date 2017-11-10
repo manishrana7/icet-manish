@@ -90,7 +90,7 @@ void ClusterCounts::countOrbitlist(const Structure &structure, const OrbitList &
     {
         Cluster repr_cluster = orbitlist.getOrbit(i).getRepresentativeCluster();
         repr_cluster.setClusterTag(i);
-        if(orderIntact && repr_cluster.getNumberOfBodies()!= 1)
+        if(orderIntact && repr_cluster.order()!= 1)
         {
             count(structure, orbitlist.getOrbit(i).getPermutatedEquivalentSites(), repr_cluster);
         }
