@@ -53,6 +53,12 @@ class Cluster
 
   public:
 
+    /// Returns the order (i.e., the number of sites) of the cluster.
+    unsigned int order() const { return _sites.size(); }
+
+    /// Returns the geometrical size of the cluster.
+    double geometricalSize() const { return _geometricalSize; }
+
     // Returns the sites in the cluster.
     std::vector<int> sites() const { return _sites; }
 
@@ -75,20 +81,14 @@ class Cluster
         _tag = tag;
     }
 
-    /// Returns the order (i.e., the number of sites) of the cluster.
-    unsigned int order() const { return _sites.size(); }
+// CONTINUE CLEAN UP HERE
 
-    /// Returns the geometrical size of the cluster.
-    double geometricalSize() const { return _geometricalSize; }
-
-/// CONTINUE CLEAN UP HERE
-
-
+    /// The following "count" functions were deactivated since they were not used anywhere and their function is unclear.
     // counts the elements
-    void count(const std::vector<int> &elements) { _element_counts[elements]++; }
+    //void count(const std::vector<int> &elements) { _element_counts[elements]++; }
 
-    /// get count of a specific element vector
-    int getCount(const std::vector<int> &) const;
+    // get count of a specific element vector
+    //int getCount(const std::vector<int> &) const;
 
     /// Brute force attempt to find minimum clusters
     std::tuple<std::vector<int>, std::vector<double>, std::vector<int>> getNumberOfAllowedComponentsnimumStateBruteForce();
@@ -226,7 +226,8 @@ private:
     /// List of distances between points in cluster.
     std::vector<double> _distances;
 
-    std::map<std::vector<int>, int> _element_counts;
+    /// @todo what is this? The _element_counts member was deactivated since it is not in use.
+    // std::map<std::vector<int>, int> _element_counts;
 
     /// Geometrical size of cluster.
     double _geometricalSize;
@@ -251,18 +252,21 @@ private:
 
 namespace std
 {
+/**
+@brief Compute hash for a cluster
+@details The hash is obtained by computing individual hash values for tag,
+distances, and sites, and then combining them using XOR and bit shifting.
+*/
 template <>
 struct hash<Cluster>
 {
-    /// Compute individual hash values for tag, distances, and sites, and
-    /// combine them using XOR and bit shifting:
     size_t
     operator()(const Cluster &k) const
     {
 
         size_t seed = 0;
 
-        //if unsorted just use the tag as seed
+        // If unsorted just use the tag as seed
         if (!k.isSorted())
         {
             hash_combine(seed, k.tag());

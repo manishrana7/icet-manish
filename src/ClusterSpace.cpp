@@ -94,8 +94,6 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                         elements[i] = structure.getAtomicNumber(sites[i].index());
                     }
                     clusterCounts.countCluster(repr_cluster, elements);
-
-                    // clusterCounts.count(structure, sites, repr_cluster);
                 }
                 else
                 {
@@ -105,8 +103,6 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                         elements[i] = structure.getAtomicNumber(sites[i].index());
                     }
                     clusterCounts.countCluster(repr_cluster, elements);
-
-                    // clusterCounts.count(structure, sites, repr_cluster);
                 }
             }
         }

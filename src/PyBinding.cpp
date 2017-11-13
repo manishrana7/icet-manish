@@ -267,8 +267,8 @@ PYBIND11_PLUGIN(_icetdev)
              "    True if the cluster is sorted\n",
              "tag : int\n"
              "    cluster tag")
-        .def("count", &Cluster::count)
-        .def("get_count", &Cluster::getCount)
+        //.def("count", &Cluster::count)
+        //.def("get_count", &Cluster::getCount)
         .def("print", &Cluster::print)
         .def_property_readonly("sites",
                                &Cluster::sites,
@@ -289,9 +289,9 @@ PYBIND11_PLUGIN(_icetdev)
                                &Cluster::order,
                                "int : order of the cluster (= number of sites)")
         .def("__hash__", [](const Cluster &cluster) { return std::hash<Cluster>{}(cluster); })
+        .def("__len__", &Cluster::order)
         .def(py::self < py::self)
-        .def(py::self == py::self)
-        .def("__len__", &Cluster::order);
+        .def(py::self == py::self);
         ;
 
     py::class_<PermutationMap>(m, "PermutationMap")

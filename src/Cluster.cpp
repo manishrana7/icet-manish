@@ -12,6 +12,7 @@ Cluster::Cluster(const Structure &structure,
                  const bool sorted,
                  const int tag)
 {
+    /// @todo remove class/function specific numerical tolerances.
     _symprec = 1e-6;
 
     size_t clusterSize = latticeSites.size();
@@ -33,10 +34,9 @@ Cluster::Cluster(const Structure &structure,
     }
     _sites = sites;
     _distances = distances;
-
-    _sorted = sorted;
     _tag = tag;
     _geometricalSize = icet::getGeometricalRadius(latticeSites, structure);
+    _sorted = sorted;
     if (_sorted)
     {
         sort();
@@ -57,6 +57,8 @@ neighbor is the second site and so on/
 
 There are then some special cases which need to be distinguished.
 
+@todo clean up docstring
+
 Case 1:
     Two or more distances are equal
 
@@ -75,7 +77,7 @@ Case 3:
     Problem:
         What is the problem here?
 
-Colution for case 1:
+Solution for case 1:
     1) assume case 2 and 3 do not apply.
         a) get "getDistIndices" and getReorderedSites for each case
         b) compare to each other. The lowest should be the one to use
@@ -83,7 +85,7 @@ Colution for case 1:
         a) for each smallest \a i_dist get solution from case 2
         b) compare case 2 solutions of \a i_dist to find minimum.
 
-Colution case 2:
+Solution case 2:
     for each \a j,k,l.. indices in \a i_nbr that have \a i_dists equal:
         @code
         for combination in all_combinations(j,k,l,...):
@@ -119,7 +121,7 @@ void Cluster::sort()
     auto equal_minimum_first_sites = getEqual_minimum_first_sites(localEnvironments);
     if (equal_minimum_first_sites.size() > 1)
     {
-        /// Case 1
+        // Case 1
         auto min_data = case1_min_indices(equal_minimum_first_sites);
         min_distance = std::get<0>(min_data);
         min_sites = std::get<1>(min_data);
@@ -127,14 +129,14 @@ void Cluster::sort()
     }
     else
     {
-        /// Case 2
+        // Case 2
         auto min_data = case2_min_indices(localEnvironments[0]);
         min_distance = std::get<0>(min_data);
         min_sites = std::get<1>(min_data);
         min_indices = std::get<2>(min_data);
     }
 
-    /// Some validation of algorithm and debugging
+    // Some validation of algorithm and debugging
     if (min_distance.size() != _distances.size())
     {
         std::cout << "min_distances.size() = " << min_distance.size()
@@ -390,18 +392,18 @@ void Cluster::setThisOrder(const std::vector<int> &minimumOrder)
 }
 
 //get count of a specific element vector
-int Cluster::getCount(const std::vector<int> &elements) const
-{
-    const auto find = _element_counts.find(elements);
-    if (find == _element_counts.end())
-    {
-        return 0;
-    }
-    else
-    {
-        return _element_counts.at(elements);
-    }
-}
+// int Cluster::getCount(const std::vector<int> &elements) const
+// {
+//     const auto find = _element_counts.find(elements);
+//     if (find == _element_counts.end())
+//     {
+//         return 0;
+//     }
+//     else
+//     {
+//         return _element_counts.at(elements);
+//     }
+// }
 
 /**
 Gets the min order of indices as given by this "first dists"
