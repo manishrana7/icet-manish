@@ -30,6 +30,8 @@ def get_snfs_and_dangerous_rotations(hnfs, A, Ainv, rotations_inv):
     list of tuples
         SNF matrices. Each tuple contains the diagonal element of each
         occuring SNF matrix.
+    list of ndarrays
+        Matrices multiplying SNF from the left.
     list of lists
         Map from SNF to HNF. Each sublist correponds to an SNF, and the
         elements of the SNF are indices to HNF in the input list of hnfs.
@@ -39,6 +41,7 @@ def get_snfs_and_dangerous_rotations(hnfs, A, Ainv, rotations_inv):
         defined by that HNF unchanged.
     '''
     snfs = []
+    Ls = []
     snf_to_hnf_map = []
     hnf_rots = []
 
@@ -56,6 +59,7 @@ def get_snfs_and_dangerous_rotations(hnfs, A, Ainv, rotations_inv):
                 break
         if snf_is_new:
             snfs.append(snf)
+            Ls.append(L)
             snf_to_hnf_map.append([hnf_index])
 
         # Save transformations (based on rotations) that turns the
@@ -74,10 +78,10 @@ def get_snfs_and_dangerous_rotations(hnfs, A, Ainv, rotations_inv):
                 hnf_rots_single.append(LARLA)
         hnf_rots.append(hnf_rots_single)
 
-    return snfs, snf_to_hnf_map, hnf_rots
+    return snfs, Ls, snf_to_hnf_map, hnf_rots
 
 
-def yield_symmetry_equivalent(original, snf, sites, include_self=False):
+def yield_symmetry_equivalent(original, snf, L, sites, include_self=False):
     '''
     Yield labelings that are equivalent to original labeling
     under translations as dictated by snf.
@@ -96,10 +100,21 @@ def yield_symmetry_equivalent(original, snf, sites, include_self=False):
     tuple
         labeling that is equivalent to original
     '''
-
     N = snf[0] * snf[1] * snf[2]
     assert(len(original) == N*sites)
 
+    G = get_group_representation(snf, sites)
+    for i in range(snf[0]):
+        for j in range(snf[1]):
+            for k in range(snf[2]):
+                if not include_self and i + j + k == 0:
+                    continue
+                translation = np.dot(L, [i, j, k])
+                yield get_rotated_labeling(original, snf, G, sites, translation)
+                
+
+
+    '''
     # Compute size of each block within which translations occur
     size_1 = sites * N // snf[0]
     size_2 = sites * size_1 // snf[1]
@@ -129,7 +144,7 @@ def yield_symmetry_equivalent(original, snf, sites, include_self=False):
                             labeling_translated += block_2[
                                 size_3 * k:size_3 * k + size_3]
                 yield labeling_translated
-
+    '''
 
 def is_superperiodic(labeling, N):
     '''
@@ -179,7 +194,7 @@ def get_group_representation(snf, sites):
     return G
 
 
-def get_labelings(snf, nbr_of_elements, sites):
+def get_labelings(snf, L, nbr_of_elements, sites):
     '''
     Get all labelings corresponding to a Smith Normal Form. Superperiodic
     labelings as well as labelings that are equivalent for this particular SNF
@@ -205,7 +220,7 @@ def get_labelings(snf, nbr_of_elements, sites):
         unique = True
         if is_superperiodic(labeling, N):
             continue
-        for labeling_symm in yield_symmetry_equivalent(labeling, snf, sites):
+        for labeling_symm in yield_symmetry_equivalent(labeling, snf, L, sites):
             if labeling_symm == labeling:
                 unique = False
                 break
@@ -220,7 +235,7 @@ def get_labelings(snf, nbr_of_elements, sites):
     return labelings
 
 
-def get_rotated_labeling(labeling, snf, Gp, sites):
+def get_rotated_labeling(labeling, snf, Gp, sites, translation=[0, 0, 0]):
     '''
     Rotate labeling based on group representation defined by Gp.
 
@@ -255,12 +270,12 @@ def get_rotated_labeling(labeling, snf, Gp, sites):
     for member in Gp:
         index = 0
         for i in range(3):
-            index += (member[i] % snf[i]) * blocks[i]
+            index += ((member[i] + translation[i]) % snf[i]) * blocks[i]
         labeling_rotated += (labeling[index],)
     return labeling_rotated
 
 
-def yield_unique_labelings(labelings, snf, hnf_rots, G, sites):
+def yield_unique_labelings(labelings, snf, L, hnf_rots, G, sites):
     '''
     Yield labelings that are unique in every imaginable sense.
 
@@ -300,7 +315,7 @@ def yield_unique_labelings(labelings, snf, hnf_rots, G, sites):
             if labeling_rot == labeling:
                 continue
             for labeling_rot_symm in \
-                    yield_symmetry_equivalent(labeling_rot, snf, sites,
+                    yield_symmetry_equivalent(labeling_rot, snf, L, sites,
                                               include_self=True):
                 for labeling_previous in labelings_yielded:
                     if labeling_previous == labeling_rot_symm:
@@ -441,18 +456,17 @@ def enumerate_structures(atoms, sizes, subelements):
     # Loop over each cell size
     for N in sizes:
         hnfs = get_reduced_hermite_normal_forms(N, A, rotations_inv)
-        snfs, snf_to_hnf_map, hnf_rots = get_snfs_and_dangerous_rotations(
+        snfs, Ls, snf_to_hnf_map, hnf_rots = get_snfs_and_dangerous_rotations(
             hnfs, A, np.linalg.inv(A), rotations_inv)
-
         for snf_index, snf in enumerate(snfs):
-
-            labelings = get_labelings(snf, nbr_of_elements, sites)
+            L = Ls[snf_index]
+            labelings = get_labelings(snf, L, nbr_of_elements, sites)
             G = get_group_representation(snf, sites)
-
+            
             for hnf_index in snf_to_hnf_map[snf_index]:
                 hnf = hnfs[hnf_index]
                 for labeling in yield_unique_labelings(labelings,
-                                                       snf,
+                                                       snf, L,
                                                        hnf_rots[hnf_index], G,
                                                        sites):
                     yield get_atoms_from_labeling(labeling, A, hnf,
@@ -487,8 +501,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     size = range(1, int(args.size)+1)
-    #atoms = bulk('Au', a=4.0, crystalstructure='hcp')
-    atoms = fcc111('Au', a=4.0, size=(1,1,5), vacuum=7.0)
+    atoms = bulk('Au', a=4.0, crystalstructure='fcc')
+    #atoms = fcc111('Au', a=4.0, size=(1,1,5), vacuum=7.0)
     
     #print(atoms)
     cell = atoms.cell
