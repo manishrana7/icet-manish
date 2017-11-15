@@ -77,7 +77,7 @@ def get_snfs_and_dangerous_rotations(hnfs, A, Ainv, rotations_inv):
     return snfs, snf_to_hnf_map, hnf_rots
 
 
-def yield_symmetry_equivalent(original, snf, include_self=False):
+def yield_symmetry_equivalent(original, snf, sites, include_self=False):
     '''
     Yield labelings that are equivalent to original labeling
     under translations as dictated by snf.
@@ -98,12 +98,12 @@ def yield_symmetry_equivalent(original, snf, include_self=False):
     '''
 
     N = snf[0] * snf[1] * snf[2]
-    assert(len(original) == N)
+    assert(len(original) == N*sites)
 
     # Compute size of each block within which translations occur
-    size_1 = N // snf[0]
-    size_2 = size_1 // snf[1]
-    size_3 = size_2 // snf[2]
+    size_1 = sites * N // snf[0]
+    size_2 = sites * size_1 // snf[1]
+    size_3 = sites * size_2 // snf[2]
 
     # Loop over each possible translation
     for trans_1 in range(snf[0]):
@@ -155,7 +155,7 @@ def is_superperiodic(labeling, N):
     return False
 
 
-def get_group_representation(snf):
+def get_group_representation(snf, sites):
     '''
     Get group represantation of an SNF matrix (the G matrix in HarFor08).
 
@@ -173,12 +173,13 @@ def get_group_representation(snf):
     for i in range(snf[0]):
         for j in range(snf[1]):
             for k in range(snf[2]):
-                G.append([i, j, k])
+                for site in range(sites):
+                    G.append([i, j, k])
     G = np.array(G).T
     return G
 
 
-def get_labelings(snf, nbr_of_elements):
+def get_labelings(snf, nbr_of_elements, sites):
     '''
     Get all labelings corresponding to a Smith Normal Form. Superperiodic
     labelings as well as labelings that are equivalent for this particular SNF
@@ -189,7 +190,9 @@ def get_labelings(snf, nbr_of_elements):
     Paramters
     ---------
     snf : tuple
-        The three diagonal elements of an SNF matrix
+        The three diagonal elements of an SNF matrix.
+    sites : int
+        Number of sites per primitive cell.
 
     Returns
     -------
@@ -198,11 +201,11 @@ def get_labelings(snf, nbr_of_elements):
     '''
     N = snf[0] * snf[1] * snf[2]
     labelings = []
-    for labeling in itertools.product(list(range(nbr_of_elements)), repeat=N):
+    for labeling in itertools.product(list(range(nbr_of_elements)), repeat=N*sites):
         unique = True
         if is_superperiodic(labeling, N):
             continue
-        for labeling_symm in yield_symmetry_equivalent(labeling, snf):
+        for labeling_symm in yield_symmetry_equivalent(labeling, snf, sites):
             if labeling_symm == labeling:
                 unique = False
                 break
@@ -217,7 +220,7 @@ def get_labelings(snf, nbr_of_elements):
     return labelings
 
 
-def get_rotated_labeling(labeling, snf, Gp):
+def get_rotated_labeling(labeling, snf, Gp, sites):
     '''
     Rotate labeling based on group representation defined by Gp.
 
@@ -236,13 +239,14 @@ def get_rotated_labeling(labeling, snf, Gp):
         Labeling rotated based on Gp.
     '''
     N = snf[0] * snf[1] * snf[2]
-    assert N == len(labeling)
-    assert N == len(Gp[0])
+    assert N*sites == len(labeling)
+    assert N*sites == len(Gp[0])
 
     # Gp should only contain integers
     assert((abs(Gp - np.round(Gp)) < 1e-3).all())
     Gp = np.round(Gp).astype(np.int64).T
 
+    
     blocks = [N // snf[0]]
     for i in range(1, 3):
         blocks.append(blocks[-1] // snf[i])
@@ -256,7 +260,7 @@ def get_rotated_labeling(labeling, snf, Gp):
     return labeling_rotated
 
 
-def yield_unique_labelings(labelings, snf, hnf_rots, G):
+def yield_unique_labelings(labelings, snf, hnf_rots, G, sites):
     '''
     Yield labelings that are unique in every imaginable sense.
 
@@ -269,9 +273,11 @@ def yield_unique_labelings(labelings, snf, hnf_rots, G):
         Diagonal elements of matrix on Smith Normal Form.
     hnf_rots : list of ndarrays
         Rotations that leaves the supercell unchanged but not necessarily the
-        labeling
+        labeling.
     G : ndarray
         Group representation corresponding to snf.
+    sites : int
+        Number of sites in the primitive cell.
 
     Yields
     ------
@@ -286,7 +292,7 @@ def yield_unique_labelings(labelings, snf, hnf_rots, G):
         unique = True
         for transformation in hnf_rots:
             labeling_rot = get_rotated_labeling(
-                labeling, snf, np.dot(transformation, G))
+                labeling, snf, np.dot(transformation, G), sites)
 
             # Commonly, the transformation leaves the labeling
             # unchanged, so check that first as a special case
@@ -294,7 +300,7 @@ def yield_unique_labelings(labelings, snf, hnf_rots, G):
             if labeling_rot == labeling:
                 continue
             for labeling_rot_symm in \
-                    yield_symmetry_equivalent(labeling_rot, snf,
+                    yield_symmetry_equivalent(labeling_rot, snf, sites,
                                               include_self=True):
                 for labeling_previous in labelings_yielded:
                     if labeling_previous == labeling_rot_symm:
@@ -411,27 +417,44 @@ def enumerate_structures(atoms, sizes, subelements):
     nbr_of_elements = len(subelements)
     assert nbr_of_elements > 1
 
+    
+    sites = len(atoms)
+    '''
+    print(sites)
+    
+    basis = atoms.get_positions()
+    print(basis)
+    '''
+    print()
     rotations_inv, translations = get_symmetry_operations(atoms)
     A = atoms.cell.T
+
+    '''
+    #print(translations)
+    for translation in translations:
+        print(translation)
+        #print(np.dot(A, translation))
+    print()
+    '''
+    #exit(0)
 
     # Loop over each cell size
     for N in sizes:
         hnfs = get_reduced_hermite_normal_forms(N, A, rotations_inv)
-        print(len(hnfs))
-        exit(0)
         snfs, snf_to_hnf_map, hnf_rots = get_snfs_and_dangerous_rotations(
             hnfs, A, np.linalg.inv(A), rotations_inv)
 
         for snf_index, snf in enumerate(snfs):
 
-            labelings = get_labelings(snf, nbr_of_elements)
-            G = get_group_representation(snf)
+            labelings = get_labelings(snf, nbr_of_elements, sites)
+            G = get_group_representation(snf, sites)
 
             for hnf_index in snf_to_hnf_map[snf_index]:
                 hnf = hnfs[hnf_index]
                 for labeling in yield_unique_labelings(labelings,
                                                        snf,
-                                                       hnf_rots[hnf_index], G):
+                                                       hnf_rots[hnf_index], G,
+                                                       sites):
                     yield get_atoms_from_labeling(labeling, A, hnf,
                                                   subelements)
                     # yield labeling
@@ -454,41 +477,42 @@ def enumerate_structures(atoms, sizes, subelements):
 
 if __name__ == '__main__':
     from ase.build import bulk
+    from ase.build import fcc111
     import time
     import argparse
-    from icetdev.clusterspace import ClusterSpace, Structure
 
     parser = argparse.ArgumentParser(description='Enumerate structures')
     parser.add_argument('size', help='Maximum number of atoms in enumerated'
                         ' structures')
     args = parser.parse_args()
 
-    size = int(args.size)
-
-    atoms = bulk('Au', a=4.0, crystalstructure='fcc')
+    size = range(1, int(args.size)+1)
+    #atoms = bulk('Au', a=4.0, crystalstructure='hcp')
+    atoms = fcc111('Au', a=4.0, size=(1,1,5), vacuum=7.0)
+    
+    #print(atoms)
     cell = atoms.cell
     cell[0] = cell[0]
     atoms.set_cell(cell)
-
+    
     subelements = ['Au', 'Ag']
-    cutoffs = [11, 8, 5]
+    #cutoffs = [11, 8, 5]
 
     #cs = ClusterSpace(atoms, cutoffs, subelements)
 
     start = time.time()
 
-    from ase.db import connect
+    #from ase.db import connect
     # db = connect(
     #    '~/repos/structure-enumeration/databases/fcc_binary_12atoms.db')
-    db = connect('test.db')
+    #db = connect('test.db')
 
     #from ase.visualize import view
     count_structures = 0
     cvs_my = []
     cvs_en = []
     a = 0
-    for structure in get_enumerated_structures(atoms, size, subelements):
-
+    for structure in enumerate_structures(atoms, size, subelements):
         # if len(structure) < size:
         #    continue
         # print(np.linalg.det(structure.get_cell()))
