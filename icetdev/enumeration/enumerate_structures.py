@@ -314,7 +314,7 @@ def yield_unique_labelings(labelings, snf, hnf_rots, G):
             labelings_yielded.append(labeling)
 
 
-def get_inverse_rotation_matrices(atoms):
+def get_symmetry_operations(atoms):
     '''
     Use spglib to calculate the symmetry operations of atoms and return their
     inverse matrices.
@@ -347,7 +347,7 @@ def get_inverse_rotation_matrices(atoms):
     for r in rotations:
         R = np.dot(np.dot(A.T, r), np.linalg.inv(A.T))
         rotations_inv.append(np.linalg.inv(R))
-    return rotations_inv
+    return rotations_inv, symmetries['translations']
 
 
 def get_atoms_from_labeling(labeling, A, hnf, subelements):
@@ -382,11 +382,11 @@ def get_atoms_from_labeling(labeling, A, hnf, subelements):
             a = j * hnf[2, 1]
             offset_21 = a // hnf[1, 1] + a % hnf[1, 1]
             for k in range(hnf[2, 2]):
-                positions.append(i * A[:, 0] + (j + offset_10) * A[:, 1] + \
-                    (k + offset_20 + offset_21) * A[:, 2])
+                positions.append(i * A[:, 0] + (j + offset_10) * A[:, 1] +
+                                 (k + offset_20 + offset_21) * A[:, 2])
                 symbols.append(subelements[labeling[count]])
                 count += 1
-    return Atoms(symbols, positions, cell=np.dot(A, hnf).T, pbc=(True, True, True)) 
+    return Atoms(symbols, positions, cell=np.dot(A, hnf).T, pbc=(True, True, True))
 
 
 def enumerate_structures(atoms, sizes, subelements):
@@ -411,12 +411,14 @@ def enumerate_structures(atoms, sizes, subelements):
     nbr_of_elements = len(subelements)
     assert nbr_of_elements > 1
 
-    rotations_inv = get_inverse_rotation_matrices(atoms)
+    rotations_inv, translations = get_symmetry_operations(atoms)
     A = atoms.cell.T
-        
+
     # Loop over each cell size
     for N in sizes:
         hnfs = get_reduced_hermite_normal_forms(N, A, rotations_inv)
+        print(len(hnfs))
+        exit(0)
         snfs, snf_to_hnf_map, hnf_rots = get_snfs_and_dangerous_rotations(
             hnfs, A, np.linalg.inv(A), rotations_inv)
 
@@ -476,10 +478,10 @@ if __name__ == '__main__':
     start = time.time()
 
     from ase.db import connect
-    #db = connect(
+    # db = connect(
     #    '~/repos/structure-enumeration/databases/fcc_binary_12atoms.db')
     db = connect('test.db')
-    
+
     #from ase.visualize import view
     count_structures = 0
     cvs_my = []
@@ -489,23 +491,23 @@ if __name__ == '__main__':
 
         # if len(structure) < size:
         #    continue
-        #print(np.linalg.det(structure.get_cell()))
+        # print(np.linalg.det(structure.get_cell()))
         count_structures += 1
-        #print(count_structures)
+        # print(count_structures)
         #cv = cs.get_clustervector(structure)
 
-        #try:
+        # try:
         #    cv = cs.get_clustervector(structure)
-        #except:
-            #view(structure)
-            #enumlib_structure = db.get_atoms(count_structures)
-            #view(enumlib_structure)
-            #exit(0)
+        # except:
+        # view(structure)
+        #enumlib_structure = db.get_atoms(count_structures)
+        # view(enumlib_structure)
+        # exit(0)
 
-        #print(count_structures)
-        #db.write(structure)
-        #cvs_my.append(cv)
-        
+        # print(count_structures)
+        # db.write(structure)
+        # cvs_my.append(cv)
+
         '''
         for c in cv:
             print('{:8.4f}'.format(c), end='')
@@ -514,7 +516,7 @@ if __name__ == '__main__':
 
         #enumlib_structure = db.get_atoms(count_structures)
         #cv = cs.get_clustervector(enumlib_structure)
-        #cvs_en.append(cv)
+        # cvs_en.append(cv)
 
         '''
         for c in cv:
