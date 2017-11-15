@@ -463,7 +463,7 @@ def get_atoms_from_labeling(labeling, A, hnf, subelements):
     return Atoms(symbols, positions, cell=np.dot(A, hnf).T, pbc=(True, True, True)) 
 
 
-def get_enumerated_structures(atoms, size, subelements):
+def enumerate_structures(atoms, size, subelements):
     '''
     Generate enumerated structures, i.e. all inequivalent structures up to a
     certain size
