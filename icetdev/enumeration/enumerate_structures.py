@@ -1,6 +1,6 @@
 import itertools
 from spglib import get_symmetry
-from smith_normal_form import get_smith_normal_form
+from icetdev.enumeration.smith_normal_form import get_smith_normal_form
 import numpy as np
 from ase import Atoms
 
