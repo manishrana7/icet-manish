@@ -389,7 +389,7 @@ def get_atoms_from_labeling(labeling, A, hnf, subelements):
     return Atoms(symbols, positions, cell=np.dot(A, hnf).T, pbc=(True, True, True)) 
 
 
-def enumerate_structures(atoms, size, subelements):
+def enumerate_structures(atoms, sizes, subelements):
     '''
     Generate enumerated structures, i.e. all inequivalent structures up to a
     certain size
@@ -399,7 +399,7 @@ def enumerate_structures(atoms, size, subelements):
     atoms : ASE Atoms
         Primitive structure from which derivative superstructures should be
         generated.
-    size : int or list of ints
+    size : list of ints
         Maximum number of atoms in the returned structures.
     subelements : list of str
         Elements to decorate the structure, e.g. ['Au', 'Ag']
@@ -413,11 +413,6 @@ def enumerate_structures(atoms, size, subelements):
 
     rotations_inv = get_inverse_rotation_matrices(atoms)
     A = atoms.cell.T
-
-    if isinstance(size, int):
-        sizes = list(range(1, size + 1))
-    else:
-        sizes = size
         
     # Loop over each cell size
     for N in sizes:
