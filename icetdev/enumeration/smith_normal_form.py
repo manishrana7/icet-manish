@@ -59,6 +59,7 @@ class SmithNormalForm:
         self.S = tuple([A[i, i] for i in range(3)])
         self.L = L
         self.R = R
+        self.G = None
         self.hnfs = []
 
 
