@@ -441,14 +441,16 @@ def enumerate_structures(atoms, sizes, subelements):
     rotations_inv, translations = get_symmetry_operations(atoms)
     A = atoms.cell.T
 
-    '''
+    
     #print(translations)
     for translation in translations:
         print(translation)
         #print(np.dot(A, translation))
     print()
+    
+    exit(0)
+
     '''
-    #exit(0)
 
     # Loop over each cell size
     for N in sizes:
@@ -503,7 +505,7 @@ if __name__ == '__main__':
     
     #print(atoms)
     cell = atoms.cell
-    cell[0] = 1.5*cell[0]
+    cell[0] = 1.0*cell[0]
     atoms.set_cell(cell)
     
     subelements = ['Au', 'Ag']
