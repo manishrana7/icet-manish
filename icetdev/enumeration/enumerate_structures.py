@@ -15,9 +15,11 @@ def dehash_labelkey(labelkey, nbr_of_atoms, nbr_of_elements):
     return labeling
 
 
-def get_integer_matrix(A):
-    assert (abs(A - np.round(A)) < 1e-3).all()
-    return np.round(A).astype(np.int64)
+def hash_labeling(labeling, nbr_of_atoms, nbr_of_elements):
+    labelkey = 0
+    for i in range(nbr_of_atoms):
+        labelkey += labeling[i] * nbr_of_elements**i
+    return labelkey
 
 
 def get_snfs_and_dangerous_rotations(hnfs, rotations, basis_shifts):
@@ -50,10 +52,7 @@ def get_snfs_and_dangerous_rotations(hnfs, rotations, basis_shifts):
         defined by that HNF unchanged.
     '''
     snfs = []
-    Ls = []
-    snf_to_hnf_map = []
-    hnf_rots = []
-
+    
     for hnf_index, hnf in enumerate(hnfs):
         # Get SNF for HNF matrix
         #snf_matrix, L, _ = get_smith_normal_form(hnf)
@@ -80,13 +79,17 @@ def get_snfs_and_dangerous_rotations(hnfs, rotations, basis_shifts):
             check = np.dot(np.dot(np.linalg.inv(hnf.H), R), hnf.H)
             check = check - np.round(check)
             if (abs(check) < 1e-3).all():
-                LRL = np.dot(hnf.snf.L, np.dot(R, np.linalg.inv(hnf.snf.L)))                
-                LRL = get_integer_matrix(LRL)
+                LRL = np.dot(hnf.snf.L, np.dot(R, np.linalg.inv(hnf.snf.L)))
+
+                # Should be an integer matrix
+                assert (abs(LRL - np.round(LRL)) < 1e-3).all()
+                LRL = np.round(LRL).astype(np.int64)
+            
                 hnf.add_transformation([LRL, basis_shift])
     return snfs
 
 
-def yield_translation_permutations(original, snf, nbr_of_sites, include_self=False):
+def yield_translation_permutations(original, snf, nbr_of_sites, nbr_of_elements, include_self=False):
     '''
     Yield labelings that are equivalent to original labeling
     under translations as dictated by snf.
@@ -105,50 +108,39 @@ def yield_translation_permutations(original, snf, nbr_of_sites, include_self=Fal
     tuple
         labeling that is equivalent to original
     '''
-    S = snf.S
 
-    assert(len(original) == nbr_of_sites*S[0]*S[1]*S[2])
-
-    for i in range(S[0]):
-        for j in range(S[1]):
-            for k in range(S[2]):
-                if not include_self and i + j + k == 0:
-                    continue
-                translation = np.dot(snf.L, [i, j, k])
-                yield permute_labeling(original, snf, nbr_of_sites, translation=translation)
-                
-
-    '''
     # Compute size of each block within which translations occur
-    size_1 = sites * N // snf[0]
-    size_2 = sites * size_1 // snf[1]
-    size_3 = sites * size_2 // snf[2]
-
+    size_1 = nbr_of_sites * snf.blocks[0]
+    size_2 = nbr_of_sites * snf.blocks[1]
+    size_3 = nbr_of_sites * snf.blocks[2]
+    
     # Loop over each possible translation
-    for trans_1 in range(snf[0]):
-        for trans_2 in range(snf[1]):
-            for trans_3 in range(snf[2]):
+    for trans_1 in range(snf.S[0]):
+        for trans_2 in range(snf.S[1]):
+            for trans_3 in range(snf.S[2]):
                 if not include_self and trans_1 + trans_2 + trans_3 == 0:
                     continue
+                
                 # Calculate the positions to which the atoms will be moved
-                new_positions_1 = [(i + trans_1) % snf[0]
-                                   for i in range(snf[0])]
-                new_positions_2 = [(i + trans_2) % snf[1]
-                                   for i in range(snf[1])]
-                new_positions_3 = [(i + trans_3) % snf[2]
-                                   for i in range(snf[2])]
-
-                # Construct new labeling by building up tuple step by step
-                labeling_translated = ()
+                new_positions_1 = [(i + trans_1) % snf.S[0]
+                                   for i in range(snf.S[0])]
+                new_positions_2 = [(i + trans_2) % snf.S[1]
+                                   for i in range(snf.S[1])]
+                new_positions_3 = [(i + trans_3) % snf.S[2]
+                                   for i in range(snf.S[2])]
+                
+                labelkey = 0
+                count = 0
                 for i in new_positions_1:
-                    block_1 = original[size_1 * i:size_1 * i + size_1]
+                    block_1 = original[size_1 * i:size_1 * (i + 1)]
                     for j in new_positions_2:
                         block_2 = block_1[size_2 * j:size_2 * j + size_2]
                         for k in new_positions_3:
-                            labeling_translated += block_2[
-                                size_3 * k:size_3 * k + size_3]
-                yield labeling_translated
-    '''
+                            for label in block_2[size_3 * k:size_3 * k + size_3]: 
+                                labelkey += label*nbr_of_elements**count
+                                count += 1
+                yield labelkey
+    
 
 def is_superperiodic(labeling, N):
     '''
@@ -217,28 +209,35 @@ def get_labelings(snf, nbr_of_elements, nbr_of_sites):
         Symmetrically inequivalent labelings
     '''
     N = snf.N
-    labelkey_tracker = [False] * (N * nbr_of_sites)**nbr_of_elements
+    nbr_of_atoms = N*nbr_of_sites
+    labelkey_tracker = [False] * nbr_of_elements**nbr_of_atoms
     labelings = []
-    for labeling in itertools.product(list(range(nbr_of_elements)), repeat=N*nbr_of_sites):
+    for labeling in itertools.product(list(range(nbr_of_elements)), repeat=nbr_of_atoms):
+        labelkey = hash_labeling(labeling, nbr_of_atoms, nbr_of_elements)
+        
         unique = True
-        if is_superperiodic(labeling, N):
-            continue
-        for labeling_symm in yield_translation_permutations(labeling, snf, nbr_of_sites):
-            if labeling_symm == labeling:
+        #if is_superperiodic(labeling, N):
+        #    continue
+        for labelkey_symm in yield_translation_permutations(labeling, snf, nbr_of_sites, nbr_of_elements, include_self=False):
+            if labelkey == labelkey_symm:
                 unique = False
                 break
-            for labeling_comp in labelings:
-                if labeling_symm == labeling_comp:
-                    unique = False
-                    break
+
+            # Check with previous labelings,
+            # if labeling can be translated into a previously
+            # added labeling, then it is not unique
+            if labelkey_tracker[labelkey_symm]:
+                unique = False
+                break
             if not unique:
                 break
         if unique:
             labelings.append(labeling)
+            labelkey_tracker[labelkey] = True
     return labelings
 
 
-def permute_labeling(labeling, snf, nbr_of_sites, rotation=None, translation=None, basis_shift=None):
+def permute_labeling(labeling, snf, nbr_of_sites, nbr_of_elements, rotation, basis_shift):
     '''
     Rotate labeling based on group representation defined by Gp.
 
@@ -257,28 +256,24 @@ def permute_labeling(labeling, snf, nbr_of_sites, rotation=None, translation=Non
         Labeling rotated based on Gp.
     '''
 
-    if rotation is None:
-        Gp = snf.G
-    else:
-        Gp = np.dot(snf.G, rotation.T)
-    if translation is None:
-        translation = [0, 0, 0]
-    if basis_shift is None:
-        basis_shift = range(nbr_of_sites)
 
-    labeling_permuted = ()
+    Gp = np.dot(snf.G, rotation.T)
+   
+    labelkey = 0
+    count = 0
     for member in Gp:
         cell_index = 0
         for i in range(3):
-            cell_index += ((member[i] + translation[i]) % snf.S[i]) * snf.blocks[i]
+            cell_index += (member[i] % snf.S[i]) * snf.blocks[i]
         index = cell_index
         for basis_index in basis_shift:
             index = nbr_of_sites*cell_index + basis_index
-            labeling_permuted += (labeling[index],)
-    return labeling_permuted
+            labelkey += labeling[index]*nbr_of_elements**count
+            count += 1
+    return labelkey
 
 
-def yield_unique_labelings(labelings, snf, transformations, nbr_of_sites):
+def yield_unique_labelings(labelings, snf, transformations, nbr_of_sites, nbr_of_elements):
     '''
     Yield labelings that are unique in every imaginable sense.
 
@@ -302,41 +297,41 @@ def yield_unique_labelings(labelings, snf, transformations, nbr_of_sites):
     tuple
         Labeling, each and every one unique.
     '''
+    nbr_of_atoms = snf.N * nbr_of_sites
+    labelkey_tracker = [False]*nbr_of_elements**nbr_of_atoms
     labelings_yielded = []
     for labeling in labelings:
-
+        labelkey = hash_labeling(labeling, nbr_of_atoms, nbr_of_elements)
+        
         # Check whether labeling is just a rotated version of a previous
         # labeling
         unique = True
         for transformation in transformations:
-            labeling_rot = permute_labeling(labeling, snf, nbr_of_sites, 
+            labelkey_rot = permute_labeling(labeling, snf, nbr_of_sites, nbr_of_elements, 
                                             rotation=transformation[0],
                                             basis_shift=transformation[1])
-
+    
             # Commonly, the transformation leaves the labeling
             # unchanged, so check that first as a special case
             # (yields a quite significant speedup)
-            if labeling_rot == labeling:
+            if labelkey_rot == labelkey:
                 continue
-            for labeling_rot_trans in \
-                    yield_translation_permutations(labeling_rot, snf, nbr_of_sites,
+            labeling_rot = dehash_labelkey(labelkey_rot, nbr_of_atoms, nbr_of_elements)
+            
+            for labelkey_rot_trans in \
+                    yield_translation_permutations(labeling_rot, snf, nbr_of_sites, nbr_of_elements,
                                               include_self=True):
-                for labeling_previous in labelings_yielded:
-                    if labeling_previous == labeling_rot_trans:
-                        unique = False
-                        break
-                # if not unique: # This is not necessarily wrong
-                #    break       # but gives no speedup
+                                
+                if labelkey_tracker[labelkey_rot_trans]:
+                    unique = False
+                    break
             if not unique:
                 break
         if unique:
             # Then we have finally found a unique structure
             # defined by an HNF matrix and a labeling
-            yield labeling
-
-            # Still needs to save the labeling so perhaps this should not be a
-            # generator...
-            labelings_yielded.append(labeling)
+            yield labeling    
+            labelkey_tracker[labelkey] = True
 
 
 def get_symmetry_operations(atoms, basis):
@@ -468,7 +463,7 @@ def enumerate_structures(atoms, sizes, subelements):
                 for labeling in yield_unique_labelings(labelings,
                                                        snf,
                                                        hnf.transformations,
-                                                       nbr_of_sites):
+                                                       nbr_of_sites, nbr_of_elements):
                     yield get_atoms_from_labeling(labeling, A, hnf.H,
                                                   subelements, basis)
                     count += 1
@@ -504,7 +499,7 @@ if __name__ == '__main__':
     
     #print(atoms)
     cell = atoms.cell
-    cell[0] = 1.5*cell[0]
+    cell[0] = 1.0*cell[0]
     atoms.set_cell(cell)
     
     subelements = ['Au', 'Ag']
