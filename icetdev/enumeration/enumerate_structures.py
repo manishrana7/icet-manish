@@ -110,9 +110,8 @@ def yield_translation_permutations(original, snf, sites, include_self=False):
                 if not include_self and i + j + k == 0:
                     continue
                 translation = np.dot(snf.L, [i, j, k])
-                yield permute_labeling(original, snf, snf.G, sites, translation)
+                yield permute_labeling(original, snf, sites, translation=translation)
                 
-
 
     '''
     # Compute size of each block within which translations occur
@@ -235,7 +234,7 @@ def get_labelings(snf, nbr_of_elements, sites):
     return labelings
 
 
-def permute_labeling(labeling, snf, Gp, sites, translation, basis_shift=None):
+def permute_labeling(labeling, snf, sites, rotate=None, translate=None, shift_basis=None):
     '''
     Rotate labeling based on group representation defined by Gp.
 
@@ -254,10 +253,14 @@ def permute_labeling(labeling, snf, Gp, sites, translation, basis_shift=None):
         Labeling rotated based on Gp.
     '''
 
+    if rotate is None:
+        Gp = snf.G.T
+    else:
+        Gp = np.dot(rotate, snf.G).T
+    if translate is None:
+        translate = [0, 0, 0]
     if basis_shift is None:
         basis_shift = range(sites)
-
-    Gp = Gp.T
 
     labeling_permuted = ()
     for member in Gp:
@@ -302,8 +305,9 @@ def yield_unique_labelings(labelings, snf, transformations, sites):
         # labeling
         unique = True
         for transformation in transformations:
-            labeling_rot = permute_labeling(labeling, snf, 
-                np.dot(transformation[0], snf.G), sites, [0, 0, 0], transformation[1])
+            labeling_rot = permute_labeling(labeling, snf, sites, 
+                                            rotate=transformation[0],
+                                            shift_basis=transformation[1])
 
             # Commonly, the transformation leaves the labeling
             # unchanged, so check that first as a special case
