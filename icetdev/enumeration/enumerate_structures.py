@@ -234,7 +234,7 @@ def get_labelings(snf, nbr_of_elements, sites):
     return labelings
 
 
-def permute_labeling(labeling, snf, sites, rotate=None, translate=None, shift_basis=None):
+def permute_labeling(labeling, snf, sites, rotation=None, translation=None, basis_shift=None):
     '''
     Rotate labeling based on group representation defined by Gp.
 
@@ -253,12 +253,12 @@ def permute_labeling(labeling, snf, sites, rotate=None, translate=None, shift_ba
         Labeling rotated based on Gp.
     '''
 
-    if rotate is None:
+    if rotation is None:
         Gp = snf.G.T
     else:
-        Gp = np.dot(rotate, snf.G).T
-    if translate is None:
-        translate = [0, 0, 0]
+        Gp = np.dot(rotation, snf.G).T
+    if translation is None:
+        translation = [0, 0, 0]
     if basis_shift is None:
         basis_shift = range(sites)
 
@@ -306,8 +306,8 @@ def yield_unique_labelings(labelings, snf, transformations, sites):
         unique = True
         for transformation in transformations:
             labeling_rot = permute_labeling(labeling, snf, sites, 
-                                            rotate=transformation[0],
-                                            shift_basis=transformation[1])
+                                            rotation=transformation[0],
+                                            basis_shift=transformation[1])
 
             # Commonly, the transformation leaves the labeling
             # unchanged, so check that first as a special case
