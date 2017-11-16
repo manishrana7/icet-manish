@@ -45,6 +45,7 @@ def get_snfs_and_dangerous_rotations(hnfs, A, Ainv, rotations_inv):
     snf_to_hnf_map = []
     hnf_rots = []
 
+
     for hnf_index, hnf in enumerate(hnfs):
         # Get SNF for HNF matrix
         snf_matrix, L, _ = get_smith_normal_form(hnf)
@@ -351,20 +352,16 @@ def get_symmetry_operations(atoms):
         Inverse of matrices for rotation operatios of atoms.
     '''
 
-    # The spglib documentations says atoms.get_cell().T but that seems to be
-    # wrong...?
-    A = atoms.get_cell()
-    lattice = np.array(A, dtype='double', order='C')
-    positions = np.array(atoms.get_scaled_positions(), dtype='double',
-                         order='C')
-    numbers = np.array(atoms.get_atomic_numbers(), dtype='intc')
-    cell = (lattice, positions, numbers)
-    symmetries = get_symmetry(cell, symprec=1e-5)
+
+
+    symmetries = get_symmetry(atoms)
     rotations = symmetries['rotations']
 
     # Save rotations in Cartesian coordinates.
     # We actually only need the inverse matrices.
     rotations_inv = []
+    translations = []
+    A = atoms.get_cell()
     for r in rotations:
         R = np.dot(np.dot(A.T, r), np.linalg.inv(A.T))
         rotations_inv.append(np.linalg.inv(R))
@@ -506,7 +503,7 @@ if __name__ == '__main__':
     
     #print(atoms)
     cell = atoms.cell
-    cell[0] = cell[0]
+    cell[0] = 1.5*cell[0]
     atoms.set_cell(cell)
     
     subelements = ['Au', 'Ag']
