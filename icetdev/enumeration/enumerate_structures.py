@@ -12,7 +12,7 @@ def get_integer_matrix(A):
     return np.round(A).astype(np.int64)
 
 
-def get_snfs_and_dangerous_rotations(hnfs, rotations, translations, basis_shifts):
+def get_snfs_and_dangerous_rotations(hnfs, rotations, basis_shifts):
     '''
     For a list of HNF matrices, calculate their corresponding SNFs (Smith
     Normal Form matrices). Also calculate the rotations of the parent lattice
@@ -69,8 +69,9 @@ def get_snfs_and_dangerous_rotations(hnfs, rotations, translations, basis_shifts
 
         # Save transformations (based on rotations) that turns the
         # supercell into an equivalent supercell
+        # Should be moved to HNF
         hnf_rots_single = []
-        for R, t, basis_shift in zip(rotations, translations, basis_shifts):
+        for R, basis_shift in zip(rotations, basis_shifts):
             check = np.dot(np.dot(np.linalg.inv(hnf.H), R), hnf.H)
             check = check - np.round(check)
             if (abs(check) < 1e-3).all():
@@ -80,7 +81,7 @@ def get_snfs_and_dangerous_rotations(hnfs, rotations, translations, basis_shifts
     return snfs
 
 
-def yield_symmetry_equivalent(original, snf, sites, include_self=False):
+def yield_translation_permutations(original, snf, sites, include_self=False):
     '''
     Yield labelings that are equivalent to original labeling
     under translations as dictated by snf.
@@ -109,7 +110,7 @@ def yield_symmetry_equivalent(original, snf, sites, include_self=False):
                 if not include_self and i + j + k == 0:
                     continue
                 translation = np.dot(snf.L, [i, j, k])
-                yield get_rotated_labeling(original, snf.S, snf.G, sites, translation)
+                yield permute_labeling(original, snf.S, snf.G, sites, translation)
                 
 
 
@@ -219,7 +220,7 @@ def get_labelings(snf, nbr_of_elements, sites):
         unique = True
         if is_superperiodic(labeling, N):
             continue
-        for labeling_symm in yield_symmetry_equivalent(labeling, snf, sites):
+        for labeling_symm in yield_translation_permutations(labeling, snf, sites):
             if labeling_symm == labeling:
                 unique = False
                 break
@@ -234,7 +235,7 @@ def get_labelings(snf, nbr_of_elements, sites):
     return labelings
 
 
-def get_rotated_labeling(labeling, snf, Gp, sites, translation, basis_shift=None):
+def permute_labeling(labeling, snf, Gp, sites, translation, basis_shift=None):
     '''
     Rotate labeling based on group representation defined by Gp.
 
@@ -267,7 +268,7 @@ def get_rotated_labeling(labeling, snf, Gp, sites, translation, basis_shift=None
     for i in range(1, 3):
         blocks.append(blocks[-1] // snf[i])
 
-    labeling_rotated = ()
+    labeling_permuted = ()
     for member in Gp:
         cell_index = 0
         for i in range(3):
@@ -275,8 +276,8 @@ def get_rotated_labeling(labeling, snf, Gp, sites, translation, basis_shift=None
         index = cell_index
         for basis_index in basis_shift:
             index = sites*cell_index + basis_index
-            labeling_rotated += (labeling[index],)
-    return labeling_rotated
+            labeling_permuted += (labeling[index],)
+    return labeling_permuted
 
 
 def yield_unique_labelings(labelings, snf, transformations, sites):
@@ -310,7 +311,7 @@ def yield_unique_labelings(labelings, snf, transformations, sites):
         # labeling
         unique = True
         for transformation in transformations:
-            labeling_rot = get_rotated_labeling(labeling, snf.S, 
+            labeling_rot = permute_labeling(labeling, snf.S, 
                 np.dot(transformation[0], snf.G), sites, [0, 0, 0], transformation[1])
 
             # Commonly, the transformation leaves the labeling
@@ -318,11 +319,11 @@ def yield_unique_labelings(labelings, snf, transformations, sites):
             # (yields a quite significant speedup)
             if labeling_rot == labeling:
                 continue
-            for labeling_rot_symm in \
-                    yield_symmetry_equivalent(labeling_rot, snf, sites,
+            for labeling_rot_trans in \
+                    yield_translation_permutations(labeling_rot, snf, sites,
                                               include_self=True):
                 for labeling_previous in labelings_yielded:
-                    if labeling_previous == labeling_rot_symm:
+                    if labeling_previous == labeling_rot_trans:
                         unique = False
                         break
                 # if not unique: # This is not necessarily wrong
@@ -488,8 +489,7 @@ def enumerate_structures(atoms, sizes, subelements):
         count = 0
         hnfs = get_reduced_hermite_normal_forms(N, rotations)
 
-        snfs = get_snfs_and_dangerous_rotations(hnfs, rotations, translations, 
-                                                basis_shifts)
+        snfs = get_snfs_and_dangerous_rotations(hnfs, rotations, basis_shifts)
         for snf_index, snf in enumerate(snfs):
             labelings = get_labelings(snf, nbr_of_elements, sites)
             
