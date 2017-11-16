@@ -1,5 +1,72 @@
 import numpy as np
 
+class SmithNormalForm:
+    def __init__(self, H):
+        '''
+        Get Smith Normal Form for 3x3 matrix.
+        
+        Parameters
+        ----------
+        H : ndarray
+            3x3 matrix
+        
+        Returns
+        -------
+        ndarray
+            Smith Normal form matrix S for H
+        ndarray
+            Matrix L that multiplies H from the left.
+        ndarray
+            Matrix R that multuplies R from the right such that L*H*R=S
+        '''
+        A = H.copy()
+        L = np.eye(3, dtype=int)
+        R = np.eye(3, dtype=int)
+        while True:
+            # Clear upper row and leftmost column in such
+            # a way that greatest common denominator ends
+            # up in A[0, 0], in a standard Smith Normal Form way
+            # (Euclidean algorithm for finding greatest common divisor)
+            while(sorted(A[0])[1] != 0 or sorted(A[:, 0])[1] != 0):
+                A, R = _clear_row(A, R, 0)
+                A, L = _clear_column(A, L, 0)
+
+            # Do the same thing for lower 2x2 matrix 
+            while(sorted(A[1, 1:])[0] != 0 or sorted(A[1:, 1])[0] != 0):
+                A, R = _clear_row(A, R, 1)
+                A, L = _clear_column(A, L, 1)
+
+            # If last diagonal entry is negative,
+            # make it positive
+            if A[2, 2] < 0:
+                A[2, 2] = -A[2, 2]
+                L[2] = -L[2]
+                
+            # Check that the diagonal entry i,i divides
+            # diagonal entry i+1, i+1. Otherwise,
+            # add row i+1 to i and start over.
+            if A[2, 2] % A[1, 1] != 0:
+                A[1] = A[1] + A[2]
+                L[1] = L[1] + L[2]
+            elif A[1, 1] % A[0, 0] != 0:
+                A[0] = A[0] + A[1]
+                L[0] = L[0] + L[1]
+            else:
+                break
+        assert (abs(np.dot(np.dot(L, H), R) - A) < 1e-3).all()
+
+        self.S_matrix = A
+        self.S = tuple([A[i, i] for i in range(3)])
+        self.L = L
+        self.R = R
+        self.hnfs = []
+
+
+    def add_hnf(self, hnf):
+        self.hnfs.append(hnf)
+
+
+
 def _switch_rows(A, i, j):
     '''
     Switch rows in matrix.
@@ -145,63 +212,6 @@ def _clear_column(A, L, j):
     A = _switch_rows(A, j, max_index)
     L = _switch_rows(L, j, max_index)
     return A, L
-
-
-def get_smith_normal_form(H):
-    '''
-    Get Smith Normal Form for 3x3 matrix.
-    
-    Parameters
-    ----------
-    H : ndarray
-        3x3 matrix
-    
-    Returns
-    -------
-    ndarray
-        Smith Normal form matrix S for H
-    ndarray
-        Matrix L that multiplies H from the left.
-    ndarray
-        Matrix R that multuplies R from the right such that L*H*R=S
-    '''
-    A = H.copy()
-    L = np.eye(3, dtype=int)
-    R = np.eye(3, dtype=int)
-    while True:
-        # Clear upper row and leftmost column in such
-        # a way that greatest common denominator ends
-        # up in A[0, 0], in a standard Smith Normal Form way
-        # (Euclidean algorithm for finding greatest common divisor)
-        while(sorted(A[0])[1] != 0 or sorted(A[:, 0])[1] != 0):
-            A, R = _clear_row(A, R, 0)
-            A, L = _clear_column(A, L, 0)
-
-        # Do the same thing for lower 2x2 matrix 
-        while(sorted(A[1, 1:])[0] != 0 or sorted(A[1:, 1])[0] != 0):
-            A, R = _clear_row(A, R, 1)
-            A, L = _clear_column(A, L, 1)
-
-        # If last diagonal entry is negative,
-        # make it positive
-        if A[2, 2] < 0:
-            A[2, 2] = -A[2, 2]
-            L[2] = -L[2]
-            
-        # Check that the diagonal entry i,i divides
-        # diagonal entry i+1, i+1. Otherwise,
-        # add row i+1 to i and start over.
-        if A[2, 2] % A[1, 1] != 0:
-            A[1] = A[1] + A[2]
-            L[1] = L[1] + L[2]
-        elif A[1, 1] % A[0, 0] != 0:
-            A[0] = A[0] + A[1]
-            L[0] = L[0] + L[1]
-        else:
-            break
-    assert (abs(np.dot(np.dot(L, H), R) - A) < 1e-3).all()
-    return A, L, R
-
 
 if __name__=='__main__':
     A = np.array([[2, 4, 4], [-6, 6, 12], [10, -4, -16]])
