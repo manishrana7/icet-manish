@@ -57,10 +57,17 @@ class SmithNormalForm:
 
         self.S_matrix = A
         self.S = tuple([A[i, i] for i in range(3)])
+        self.N = A[0, 0] * A[1, 1] * A[2, 2]
         self.L = L
         self.R = R
         self.G = None
         self.hnfs = []
+
+        # Help list for permuting labelings
+        blocks = [self.N // self.S[0]]
+        for i in range(1, 3):
+            blocks.append(blocks[-1] // self.S[i])
+        self.blocks = blocks
 
 
     def add_hnf(self, hnf):
