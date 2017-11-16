@@ -1,5 +1,15 @@
 import numpy as np
+from icetdev.enumeration.smith_normal_form import SmithNormalForm
 
+class HermiteNormalForm:
+    def __init__(self, H):
+        self.H = H
+        self.snf = SmithNormalForm(H)
+        self.transformations = []
+
+
+    def add_transformation(self, transformation):
+        self.transformations.append(transformation)
 
 def yield_hermite_normal_forms(det):
     '''
@@ -29,7 +39,7 @@ def yield_hermite_normal_forms(det):
                                 yield np.array(hnf)
 
 
-def get_reduced_hermite_normal_forms(N, A, rotations_inv):
+def get_reduced_hermite_normal_forms(N, rotations):
     '''
     For a fixed determinant N (i.e., a number of atoms N), yield all
     Hermite Normal Forms (HNF) that are inequivalent under symmetry
@@ -50,18 +60,18 @@ def get_reduced_hermite_normal_forms(N, A, rotations_inv):
         Symmetrically inequivalent HNFs with determinant N.
     '''
     hnfs = []
-    Bs_previous = []
     for hnf in yield_hermite_normal_forms(N):
 
-        B_i = np.dot(A, hnf)
-        B_i_inv = np.linalg.inv(B_i)
+        #B_i = np.dot(A, hnf)
+        #B_i_inv = np.linalg.inv(B_i)
 
         # Throw away HNF:s that yield equivalent supercells
+        hnf_inv = np.linalg.inv(hnf)
         duplicate = False
-        for R_inv in rotations_inv:
-            BR = np.dot(B_i_inv, R_inv)
-            for B_j in Bs_previous:
-                check = np.dot(BR, B_j)
+        for R in rotations:
+            HR = np.dot(hnf_inv, R)
+            for hnf_previous in hnfs:
+                check = np.dot(HR, hnf_previous.H)
                 check = check - np.round(check)
                 if (abs(check) < 1e-3).all():
                     duplicate = True
@@ -73,6 +83,5 @@ def get_reduced_hermite_normal_forms(N, A, rotations_inv):
 
         # If it's not a duplicate, save the hnf
         # and the supercell so that it can be compared to
-        hnfs.append(hnf)
-        Bs_previous.append(B_i)
+        hnfs.append(HermiteNormalForm(hnf))
     return hnfs
