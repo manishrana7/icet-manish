@@ -12,7 +12,7 @@ def get_integer_matrix(A):
     return np.round(A).astype(np.int64)
 
 
-def get_snfs_and_dangerous_rotations(hnfs, rotations, translations):
+def get_snfs_and_dangerous_rotations(hnfs, rotations, translations, basis_shifts):
     '''
     For a list of HNF matrices, calculate their corresponding SNFs (Smith
     Normal Form matrices). Also calculate the rotations of the parent lattice
@@ -67,7 +67,7 @@ def get_snfs_and_dangerous_rotations(hnfs, rotations, translations):
         # Save transformations (based on rotations) that turns the
         # supercell into an equivalent supercell
         hnf_rots_single = []
-        for R, t in zip(rotations, translations):
+        for R, t, basis_shift in zip(rotations, translations, basis_shifts):
             check = np.dot(np.dot(np.linalg.inv(hnf.H), R), hnf.H)
             check = check - np.round(check)
             if (abs(check) < 1e-3).all():
@@ -75,13 +75,12 @@ def get_snfs_and_dangerous_rotations(hnfs, rotations, translations):
                 LRL = np.dot(hnf.snf.L, np.dot(R, np.linalg.inv(hnf.snf.L)))                
                 LRL = get_integer_matrix(LRL)
                 Lt = np.dot(hnf.snf.L, t)
-                print(Lt)
-                Lt = get_integer_matrix(Lt)
-
-                hnf.add_transformation([LRL, Lt])
+                Lt = [0, 0, 0]
+                #Lt = get_integer_matrix(Lt)
+                hnf.add_transformation([LRL, Lt, basis_shift])
     return snfs
 
-def yield_symmetry_equivalent(original, snf, L, sites, include_self=False):
+def yield_symmetry_equivalent(original, snf, sites, include_self=False):
     '''
     Yield labelings that are equivalent to original labeling
     under translations as dictated by snf.
@@ -100,17 +99,21 @@ def yield_symmetry_equivalent(original, snf, L, sites, include_self=False):
     tuple
         labeling that is equivalent to original
     '''
-    N = snf[0] * snf[1] * snf[2]
+    S = snf.S
+    N = S[0] * S[1] * S[2]
+
     assert(len(original) == N*sites)
 
-    G = get_group_representation(snf, sites)
-    for i in range(snf[0]):
-        for j in range(snf[1]):
-            for k in range(snf[2]):
+    G = get_group_representation(S, sites)
+    for i in range(S[0]):
+        for j in range(S[1]):
+            for k in range(S[2]):
                 if not include_self and i + j + k == 0:
                     continue
-                translation = np.dot(L, [i, j, k])
-                yield get_rotated_labeling(original, snf, G, sites, translation)
+                translation = np.dot(snf.L, [i, j, k])
+                hej = get_rotated_labeling(original, snf.S, G, sites, translation)
+
+                yield hej
                 
 
 
@@ -188,13 +191,13 @@ def get_group_representation(snf, sites):
     for i in range(snf[0]):
         for j in range(snf[1]):
             for k in range(snf[2]):
-                for site in range(sites):
-                    G.append([i, j, k])
+                #for site in range(sites):
+                G.append([i, j, k])
     G = np.array(G).T
     return G
 
 
-def get_labelings(snf, L, nbr_of_elements, sites):
+def get_labelings(snf, nbr_of_elements, sites):
     '''
     Get all labelings corresponding to a Smith Normal Form. Superperiodic
     labelings as well as labelings that are equivalent for this particular SNF
@@ -214,13 +217,13 @@ def get_labelings(snf, L, nbr_of_elements, sites):
     list of tuples
         Symmetrically inequivalent labelings
     '''
-    N = snf[0] * snf[1] * snf[2]
+    N = snf.S[0] * snf.S[1] * snf.S[2]
     labelings = []
     for labeling in itertools.product(list(range(nbr_of_elements)), repeat=N*sites):
         unique = True
         if is_superperiodic(labeling, N):
             continue
-        for labeling_symm in yield_symmetry_equivalent(labeling, snf, L, sites):
+        for labeling_symm in yield_symmetry_equivalent(labeling, snf, sites):
             if labeling_symm == labeling:
                 unique = False
                 break
@@ -235,7 +238,7 @@ def get_labelings(snf, L, nbr_of_elements, sites):
     return labelings
 
 
-def get_rotated_labeling(labeling, snf, Gp, sites, translation=[0, 0, 0]):
+def get_rotated_labeling(labeling, snf, Gp, sites, translation, basis_shift=None):
     '''
     Rotate labeling based on group representation defined by Gp.
 
@@ -253,14 +256,18 @@ def get_rotated_labeling(labeling, snf, Gp, sites, translation=[0, 0, 0]):
     tuple
         Labeling rotated based on Gp.
     '''
+
+    if basis_shift is None:
+        basis_shift = range(sites)
+
     N = snf[0] * snf[1] * snf[2]
     assert N*sites == len(labeling)
-    assert N*sites == len(Gp[0])
+    assert N == len(Gp[0])
+    assert len(basis_shift) == sites
 
     # Gp should only contain integers
     assert((abs(Gp - np.round(Gp)) < 1e-3).all())
     Gp = np.round(Gp).astype(np.int64).T
-
     
     blocks = [N // snf[0]]
     for i in range(1, 3):
@@ -268,14 +275,18 @@ def get_rotated_labeling(labeling, snf, Gp, sites, translation=[0, 0, 0]):
 
     labeling_rotated = ()
     for member in Gp:
-        index = 0
+        cell_index = 0
         for i in range(3):
-            index += ((member[i] + translation[i]) % snf[i]) * blocks[i]
-        labeling_rotated += (labeling[index],)
+            cell_index += ((member[i] + translation[i]) % snf[i]) * blocks[i]
+
+        index = cell_index
+        for basis_index in basis_shift:
+            index = sites*cell_index + basis_index
+            labeling_rotated += (labeling[index],)
     return labeling_rotated
 
 
-def yield_unique_labelings(labelings, snf, L, hnf_rots, G, sites):
+def yield_unique_labelings(labelings, snf, transformations, G, sites):
     '''
     Yield labelings that are unique in every imaginable sense.
 
@@ -305,16 +316,21 @@ def yield_unique_labelings(labelings, snf, L, hnf_rots, G, sites):
         # Check whether labeling is just a rotated version of a previous
         # labeling
         unique = True
-        for transformation in hnf_rots:
-            labeling_rot = get_rotated_labeling(
-                labeling, snf, np.dot(transformation[0], G), sites, transformation[1])
+        for transformation in transformations:
+            labeling_rot = get_rotated_labeling(labeling, snf.S, 
+                np.dot(transformation[0], G), sites, transformation[1], transformation[2])
+            #print()
+            #print(transformation[2])
+            #print(transformation[0])
+            #print(labeling_rot)
+            #   print(labeling)
             # Commonly, the transformation leaves the labeling
             # unchanged, so check that first as a special case
             # (yields a quite significant speedup)
             if labeling_rot == labeling:
                 continue
             for labeling_rot_symm in \
-                    yield_symmetry_equivalent(labeling_rot, snf, L, sites,
+                    yield_symmetry_equivalent(labeling_rot, snf, sites,
                                               include_self=True):
                 for labeling_previous in labelings_yielded:
                     if labeling_previous == labeling_rot_symm:
@@ -367,7 +383,7 @@ def get_symmetry_operations(atoms):
     return rotations, symmetries['translations']
 
 
-def get_atoms_from_labeling(labeling, A, hnf, subelements):
+def get_atoms_from_labeling(labeling, A, hnf, subelements, basis):
     '''
     Get ASE Atoms object from labeling, HNF matrix and parent lattice.
 
@@ -399,10 +415,12 @@ def get_atoms_from_labeling(labeling, A, hnf, subelements):
             a = j * hnf[2, 1]
             offset_21 = a // hnf[1, 1] + a % hnf[1, 1]
             for k in range(hnf[2, 2]):
-                positions.append(i * A[:, 0] + (j + offset_10) * A[:, 1] +
-                                 (k + offset_20 + offset_21) * A[:, 2])
-                symbols.append(subelements[labeling[count]])
-                count += 1
+                for basis_vector in basis:
+                    positions.append(i * A[:, 0] + (j + offset_10) * A[:, 1] +
+                                    (k + offset_20 + offset_21) * A[:, 2] +
+                                    np.dot(A, basis_vector))
+                    symbols.append(subelements[labeling[count]])
+                    count += 1
     return Atoms(symbols, positions, cell=np.dot(A, hnf).T, pbc=(True, True, True))
 
 
@@ -430,19 +448,16 @@ def enumerate_structures(atoms, sizes, subelements):
 
     
     sites = len(atoms)
-    
-    #print(sites)
+    print(atoms)
     
     basis = atoms.get_scaled_positions()
-    print(basis)
-    
-    print()
+
     rotations, translations = get_symmetry_operations(atoms)
     assert len(rotations) == len(translations)
 
     A = atoms.cell.T
 
-    basis_change = np.zeros((len(rotations), len(basis)))    
+    basis_shifts = np.zeros((len(rotations), len(basis)), dtype='int64')    
     for i in range(len(rotations)):
         rotation = rotations[i]
         translation = translations[i]
@@ -457,10 +472,9 @@ def enumerate_structures(atoms, sizes, subelements):
             for basis_index, basis_element_comp in enumerate(basis):
                 if (abs(Rd - basis_element_comp) < 1e-3).all():
                     assert not found
-                    basis_change[i, j] = basis_index
+                    basis_shifts[i, j] = basis_index
                     found = True
             assert found
-    print(basis_change)
 
     #exit(0)
 
@@ -483,21 +497,31 @@ def enumerate_structures(atoms, sizes, subelements):
 
     # Loop over each cell size
     for N in sizes:
+        count = 0
         hnfs = get_reduced_hermite_normal_forms(N, rotations)
-        snfs = get_snfs_and_dangerous_rotations(hnfs, rotations, translations)
+        print('reduced hnfs:', len(hnfs))
+
+        snfs = get_snfs_and_dangerous_rotations(hnfs, rotations, translations, 
+                                                basis_shifts)
         for snf_index, snf in enumerate(snfs):
-            L = snf.L
-            labelings = get_labelings(snf.S, L, nbr_of_elements, sites)
+            labelings = get_labelings(snf, nbr_of_elements, sites)
+
+            for labeling in labelings:
+                print('--labeling still around-', labeling)
+            
             G = get_group_representation(snf.S, sites)
             
             for hnf in snf.hnfs:
+                print('------- new hnf --------')
                 for labeling in yield_unique_labelings(labelings,
-                                                       snf.S, snf.L,
+                                                       snf,
                                                        hnf.transformations, G,
                                                        sites):
+                    #print(labeling)
+                    #print('Found:', labeling)
                     yield get_atoms_from_labeling(labeling, A, hnf.H,
-                                                  subelements)
-                    # yield labeling
+                                                  subelements, basis), labeling
+                    count += 1
                     if False:
                         print('{:7}  '.format(count_structures), end='')
                         for i in snf:
@@ -511,7 +535,10 @@ def enumerate_structures(atoms, sizes, subelements):
                         for i in labeling:
                             print(i, end='')
                         print()
-
+        print('{} cells, {} structures'.format(N, count))
+        print()
+        print()
+            
 
 if __name__ == '__main__':
     from ase.build import bulk
