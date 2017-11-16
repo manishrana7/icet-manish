@@ -187,10 +187,8 @@ def get_group_representation(snf, sites):
     for i in range(snf[0]):
         for j in range(snf[1]):
             for k in range(snf[2]):
-                #for site in range(sites):
                 G.append([i, j, k])
-    G = np.array(G).T
-    return G
+    return np.array(G)
 
 
 def get_labelings(snf, nbr_of_elements, sites):
@@ -254,9 +252,9 @@ def permute_labeling(labeling, snf, sites, rotation=None, translation=None, basi
     '''
 
     if rotation is None:
-        Gp = snf.G.T
+        Gp = snf.G
     else:
-        Gp = np.dot(rotation, snf.G).T
+        Gp = np.dot(snf.G, rotation.T)
     if translation is None:
         translation = [0, 0, 0]
     if basis_shift is None:
