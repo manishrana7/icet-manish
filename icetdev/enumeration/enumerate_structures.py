@@ -110,7 +110,7 @@ def yield_translation_permutations(original, snf, sites, include_self=False):
                 if not include_self and i + j + k == 0:
                     continue
                 translation = np.dot(snf.L, [i, j, k])
-                yield permute_labeling(original, snf.S, snf.G, sites, translation)
+                yield permute_labeling(original, snf, snf.G, sites, translation)
                 
 
 
@@ -257,22 +257,13 @@ def permute_labeling(labeling, snf, Gp, sites, translation, basis_shift=None):
     if basis_shift is None:
         basis_shift = range(sites)
 
-    N = snf[0] * snf[1] * snf[2]
-    assert N*sites == len(labeling)
-    assert N == len(Gp[0])
-    assert len(basis_shift) == sites
-
     Gp = Gp.T
-    
-    blocks = [N // snf[0]]
-    for i in range(1, 3):
-        blocks.append(blocks[-1] // snf[i])
 
     labeling_permuted = ()
     for member in Gp:
         cell_index = 0
         for i in range(3):
-            cell_index += ((member[i] + translation[i]) % snf[i]) * blocks[i]
+            cell_index += ((member[i] + translation[i]) % snf.S[i]) * snf.blocks[i]
         index = cell_index
         for basis_index in basis_shift:
             index = sites*cell_index + basis_index
@@ -311,7 +302,7 @@ def yield_unique_labelings(labelings, snf, transformations, sites):
         # labeling
         unique = True
         for transformation in transformations:
-            labeling_rot = permute_labeling(labeling, snf.S, 
+            labeling_rot = permute_labeling(labeling, snf, 
                 np.dot(transformation[0], snf.G), sites, [0, 0, 0], transformation[1])
 
             # Commonly, the transformation leaves the labeling
