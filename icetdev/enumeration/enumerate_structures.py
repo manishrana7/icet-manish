@@ -90,8 +90,8 @@ def get_unique_snfs(hnfs):
     return snfs
 
 
-def _translation_permutations(labeling, snf, nsites, nelements,
-                              include_self=False):
+def _translate_labelings(labeling, snf, nsites, nelements,
+                         include_self=False):
     '''
     Yield labelings that are equivalent to original labeling
     under translations as dictated by snf.
@@ -190,9 +190,9 @@ def _get_labelkeys(snf, nelements, nsites):
         labeling = _dehash_labelkey(labelkey, natoms, nelements)
         unique = True
 
-        for labelkey_trans in _translation_permutations(labeling, snf, nsites,
-                                                        nelements,
-                                                        include_self=False):
+        for labelkey_trans in _translate_labelings(labeling, snf, nsites,
+                                                   nelements,
+                                                   include_self=False):
             if labelkey == labelkey_trans:
                 unique = False
                 break
@@ -304,8 +304,8 @@ def _yield_unique_labelings(labelkeys, snf, hnf, nsites, nelements):
 
             # Translate in all possible ways
             for labelkey_rot_trans in \
-                    _translation_permutations(labeling_rot, snf, nsites,
-                                              nelements, include_self=True):
+                    _translate_labelings(labeling_rot, snf, nsites, nelements,
+                                         include_self=True):
                 if labelkey_tracker[labelkey_rot_trans]:
                     # Then we have rotated and translated the labeling
                     # into one that was already yielded
