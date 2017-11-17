@@ -431,7 +431,7 @@ def _get_atoms_from_labeling(labeling, cell, hnf, subelements, basis):
                                      np.dot(cell, basis_vector))
                     symbols.append(subelements[labeling[count]])
                     count += 1
-    return Atoms(symbols, positions, cell=np.dot(hnf.H.T, cell),
+    return Atoms(symbols, positions, cell=np.dot(hnf.H.T, cell).T,
                  pbc=(True, True, True))
 
 
