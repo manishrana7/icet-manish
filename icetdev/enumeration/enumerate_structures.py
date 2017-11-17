@@ -222,15 +222,18 @@ def permute_labeling(labeling, snf, transformation, nsites, nelements):
     ---------
     labeling : tuple
         Labeling to be rotated
-    snf : tuple
-        Diagonal of matrix on Smith Normal Form
-    Gp : ndarray
-        New group representation of labeling in SNF
+    snf : SmithNormalForm object
+    transformation : list of ndarrays
+        Transformations based on rotation, translation and basis shift
+    nsites : int
+        Number of sites in the primtive cell.
+    nelements : int
+        Number of elements in the enumeration.
 
     Returns
     -------
-    tuple
-        Labeling rotated based on Gp.
+    int
+        Hashkey of permuted labeling.
     '''
 
     # Calculate transformation imposed by LRL multiplication
@@ -241,16 +244,15 @@ def permute_labeling(labeling, snf, transformation, nsites, nelements):
     for member_index, member in enumerate(new_group_order):
 
         # Transform according to Gp,
-        # but each site also transforms in its own way
+        # but each site in the primitive cell also transforms in its own way
         for basis in range(nsites):
             new_cell = member + transformation[1][basis]
 
             # Calculate new index, first by finding the right block,
-            # then the basis index in that block
+            # then by adding the basis index to that block
             new_index = 0
             for i in range(3):
-                new_index += (new_cell[i] % snf.S[i]) * \
-                    snf.blocks[i] * nsites
+                new_index += (new_cell[i] % snf.S[i]) * snf.blocks[i] * nsites
             new_index += transformation[2][basis]
 
             # Add the contribution to the hash key
@@ -275,7 +277,7 @@ def yield_unique_labelings(labelings, snf, hnf, nsites, nelements):
         labeling.
     G : ndarray
         Group representation corresponding to snf.
-    sites : int
+    nsites : int
         Number of sites in the primitive cell.
 
     Yields
@@ -319,8 +321,8 @@ def yield_unique_labelings(labelings, snf, hnf, nsites, nelements):
         if unique:
             # Then we have finally found a unique structure
             # defined by an HNF matrix and a labeling
-            yield labeling
             labelkey_tracker[labelkey] = True
+            yield labeling
 
 
 def get_symmetry_operations(atoms, basis):
@@ -344,34 +346,43 @@ def get_symmetry_operations(atoms, basis):
     rotations = symmetries['rotations']
     translations = symmetries['translations']
 
-    # Calculate how atoms within the primitive cell are
-    # shifted upon operation with rotation matrix
+    # Calculate how atoms within the primitive cell are shifted (from one site
+    # to another) and translated (from one primtive cell to another) upon
+    # operation with rotation matrix. Note that the translations are needed
+    # here because different sites translate differently.
     basis_shifts = np.zeros((len(rotations), len(basis)), dtype='int64')
-    rotation_translations = []
+    sites_translations = []
     for i, rotation in enumerate(rotations):
         translation = translations[i]
-        rotation_translation = []
+        site_translations = []
         for j, basis_element in enumerate(basis):
-            rot_trans = np.dot(rotation, basis_element) + translation
-            translation_basis = [0, 0, 0]
+
+            # Calculate how the site is transformed when operated on by
+            # symmetry of parent lattice (rotation and translation)
+            site_rot_trans = np.dot(rotation, basis_element) + translation
+
+            # The site may now have been moved to a different site in a
+            # different cell. We want to separate the two. (In NelFor09,
+            # basis_shift corresponds to d_Nd and translation_basis to t_Nd)
+            site_translation = [0, 0, 0]
             for index in range(3):
-                while rot_trans[index] < -1e-3:
-                    rot_trans[index] += 1
-                    translation_basis[index] -= 1
-                while rot_trans[index] > 1 - 1e-3:
-                    rot_trans[index] -= 1
-                    translation_basis[index] += 1
-            rotation_translation.append(translation_basis)
+                while site_rot_trans[index] < -1e-3:
+                    site_rot_trans[index] += 1
+                    site_translation[index] -= 1
+                while site_rot_trans[index] > 1 - 1e-3:
+                    site_rot_trans[index] -= 1
+                    site_translation[index] += 1
+            site_translations.append(site_translation)
             found = False
             for basis_index, basis_element_comp in enumerate(basis):
-                if (abs(rot_trans - basis_element_comp) < 1e-3).all():
+                if (abs(site_rot_trans - basis_element_comp) < 1e-3).all():
                     assert not found
                     basis_shifts[i, j] = basis_index
                     found = True
             assert found
-        rotation_translations.append(np.array(rotation_translation))
+        sites_translations.append(np.array(site_translations))
 
-    symmetries['translations'] = rotation_translations
+    symmetries['translations'] = sites_translations
     symmetries['basis_shifts'] = basis_shifts
     return symmetries
 
