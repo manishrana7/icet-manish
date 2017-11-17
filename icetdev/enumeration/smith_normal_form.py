@@ -1,23 +1,35 @@
+'''Handling of Smith Normal Form matrices
+'''
+
 import numpy as np
 
-class SmithNormalForm:
+
+class SmithNormalForm(object):
+    '''
+    Smith Normal Form matrix.
+    '''
+
     def __init__(self, H):
+        self.compute_snf(H)
+        self.S = tuple([self.S_matrix[i, i] for i in range(3)])
+        self.ncells = self.S[0] * self.S[1] * self.S[2]
+        self.group_order = None
+        self.hnfs = []
+
+        # Help list for permuting labelings
+        blocks = [self.ncells // self.S[0]]
+        for i in range(1, 3):
+            blocks.append(blocks[-1] // self.S[i])
+        self.blocks = blocks
+
+    def compute_snf(self, H):
         '''
-        Get Smith Normal Form for 3x3 matrix.
-        
+        Compute Smith Normal Form for 3x3 matrix. Note that H = L*S*R.
+
         Parameters
         ----------
         H : ndarray
             3x3 matrix
-        
-        Returns
-        -------
-        ndarray
-            Smith Normal form matrix S for H
-        ndarray
-            Matrix L that multiplies H from the left.
-        ndarray
-            Matrix R that multuplies R from the right such that L*H*R=S
         '''
         A = H.copy()
         L = np.eye(3, dtype=int)
@@ -27,12 +39,12 @@ class SmithNormalForm:
             # a way that greatest common denominator ends
             # up in A[0, 0], in a standard Smith Normal Form way
             # (Euclidean algorithm for finding greatest common divisor)
-            while(sorted(A[0])[1] != 0 or sorted(A[:, 0])[1] != 0):
+            while sorted(A[0])[1] != 0 or sorted(A[:, 0])[1] != 0:
                 A, R = _clear_row(A, R, 0)
                 A, L = _clear_column(A, L, 0)
 
-            # Do the same thing for lower 2x2 matrix 
-            while(sorted(A[1, 1:])[0] != 0 or sorted(A[1:, 1])[0] != 0):
+            # Do the same thing for lower 2x2 matrix
+            while sorted(A[1, 1:])[0] != 0 or sorted(A[1:, 1])[0] != 0:
                 A, R = _clear_row(A, R, 1)
                 A, L = _clear_column(A, L, 1)
 
@@ -41,7 +53,7 @@ class SmithNormalForm:
             if A[2, 2] < 0:
                 A[2, 2] = -A[2, 2]
                 L[2] = -L[2]
-                
+
             # Check that the diagonal entry i,i divides
             # diagonal entry i+1, i+1. Otherwise,
             # add row i+1 to i and start over.
@@ -54,31 +66,23 @@ class SmithNormalForm:
             else:
                 break
         assert (abs(np.dot(np.dot(L, H), R) - A) < 1e-3).all()
-
         self.S_matrix = A
-        self.S = tuple([A[i, i] for i in range(3)])
-        self.N = A[0, 0] * A[1, 1] * A[2, 2]
         self.L = L
-        self.R = R
-        self.group_order = None
-        self.hnfs = []
-
-        # Help list for permuting labelings
-        blocks = [self.N // self.S[0]]
-        for i in range(1, 3):
-            blocks.append(blocks[-1] // self.S[i])
-        self.blocks = blocks
-
 
     def add_hnf(self, hnf):
-        self.hnfs.append(hnf)
+        '''Add HNF to SNF.
 
+        Paramaters
+        ----------
+        hnf : HermiteNormalForm object
+        '''
+        self.hnfs.append(hnf)
 
 
 def _switch_rows(A, i, j):
     '''
     Switch rows in matrix.
-    
+
     Parameters
     ---------
     A : ndarray
@@ -102,7 +106,7 @@ def _switch_rows(A, i, j):
 def _switch_columns(A, i, j):
     '''
     Switch columns in matrix.
-    
+
     Parameters
     ---------
     A : ndarray
@@ -137,7 +141,7 @@ def _clear_row(A, R, i):
         Matrix that should be subject to the same operations.
     i : int
         Index of row to be treated.
-    
+
     Returns
     -------
     ndarray
@@ -147,9 +151,9 @@ def _clear_row(A, R, i):
     '''
     for j in range(i, 3):
         if A[i, j] < 0:
-            A[:, j] = -1*A[:, j]
-            R[:, j] = -1*R[:, j]
-    while(np.sort(A[i, i:])[1-i] > 0):
+            A[:, j] = -1 * A[:, j]
+            R[:, j] = -1 * R[:, j]
+    while np.sort(A[i, i:])[1 - i] > 0:
         max_index = np.argmax(A[i, i:]) + i
         min_index = np.argmin(A[i, i:]) + i
         if max_index == min_index:
@@ -172,6 +176,7 @@ def _clear_row(A, R, i):
     R = _switch_columns(R, i, max_index)
     return A, R
 
+
 def _clear_column(A, L, j):
     '''
     Use row operations to make A[i, i] the greatest common
@@ -186,7 +191,7 @@ def _clear_column(A, L, j):
         Matrix that should be subject to the same operations.
     i : int
         Index of column to be treated.
-    
+
     Returns
     -------
     ndarray
@@ -196,9 +201,9 @@ def _clear_column(A, L, j):
     '''
     for i in range(j, 3):
         if A[i, j] < 0:
-            A[i] = -1*A[i]
-            L[i] = -1*L[i]
-    while(np.sort(A[j:, j])[1-j] > 0):
+            A[i] = -1 * A[i]
+            L[i] = -1 * L[i]
+    while np.sort(A[j:, j])[1 - j] > 0:
         max_index = np.argmax(A[j:, j]) + j
         min_index = np.argmin(A[j:, j]) + j
         if max_index == min_index:
@@ -220,9 +225,3 @@ def _clear_column(A, L, j):
     A = _switch_rows(A, j, max_index)
     L = _switch_rows(L, j, max_index)
     return A, L
-
-if __name__=='__main__':
-    A = np.array([[2, 4, 4], [-6, 6, 12], [10, -4, -16]])
-    S, L, R = get_smith_normal_form(A.copy())
-    print(S)
-    print(L)

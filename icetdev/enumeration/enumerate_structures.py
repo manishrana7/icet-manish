@@ -181,8 +181,7 @@ def _get_labelkeys(snf, nelements, nsites):
     list of ints
         Hash keys to inequivalent labelings
     '''
-    ncells = snf.N
-    natoms = ncells * nsites
+    natoms = snf.ncells * nsites
     labelkey_tracker = [False] * nelements**natoms
     labelkeys = []
     for labelkey in range(nelements**natoms):
@@ -279,7 +278,7 @@ def _yield_unique_labelings(labelkeys, snf, hnf, nsites, nelements):
     tuple
         Labeling, each and every one unique.
     '''
-    natoms = snf.N * nsites
+    natoms = snf.ncells * nsites
     labelkey_tracker = [False] * nelements**natoms
     for labelkey in labelkeys:
         labeling = _dehash_labelkey(labelkey, natoms, nelements)
