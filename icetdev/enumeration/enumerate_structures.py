@@ -428,10 +428,10 @@ def _get_atoms_from_labeling(labeling, cell, hnf, subelements, basis):
                     positions.append(i * cell[0] +
                                      (j + offset10) * cell[1] +
                                      (k + offset20 + offset21) * cell[2] +
-                                     np.dot(cell, basis_vector))
+                                     np.dot(cell.T, basis_vector))
                     symbols.append(subelements[labeling[count]])
                     count += 1
-    return Atoms(symbols, positions, cell=np.dot(hnf.H.T, cell).T,
+    return Atoms(symbols, positions, cell=np.dot(cell.T, hnf.H).T,
                  pbc=(True, True, True))
 
 
@@ -476,6 +476,7 @@ def enumerate_structures(atoms, sizes, subelements):
             for hnf in snf.hnfs:
                 for labeling in _yield_unique_labelings(labelkeys, snf, hnf,
                                                         nsites, nelements):
+                    print(labeling)
                     yield _get_atoms_from_labeling(labeling, atoms.cell, hnf,
                                                    subelements, basis)
                     count += 1
