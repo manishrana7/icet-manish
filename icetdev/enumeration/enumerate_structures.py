@@ -4,59 +4,11 @@ the derivative superstructures having a certain size defined by the user.
 '''
 
 from itertools import product
+import itertools
 import numpy as np
 from spglib import get_symmetry
 from ase import Atoms
 from icetdev.enumeration.hermite_normal_form import get_reduced_hnfs
-
-
-def _dehash_labelkey(labelkey, natoms, nelements):
-    '''
-    Calculate labeling from hashkey.
-
-    Parameters
-    ----------
-    labelkey : int
-        Hash key to a labeling.
-    natoms : int
-        Number of atoms in the labeling.
-    nelements : int
-        Number of elements in the enumeration.
-
-    Returns
-    -------
-    tuple of ints
-        Labeling corresponding to labelkey.
-    '''
-    labeling = ()
-    for _ in range(natoms):
-        labeling += (labelkey % nelements,)
-        labelkey = labelkey // nelements
-    return labeling
-
-
-def _hash_labeling(labeling, natoms, nelements):
-    '''
-    Calculate hash.
-
-    Parameters
-    ----------
-    labelkey : int
-        Hash key to a labeling.
-    natoms : int
-        Number of atoms in the labeling.
-    nelements : int
-        Number of elements in the enumeration.
-
-    Returns
-    -------
-    tuple of ints
-        Labeling corresponding to labelkey.
-    '''
-    labelkey = 0
-    for i in range(natoms):
-        labelkey += labeling[i] * nelements**i
-    return labelkey
 
 
 def get_unique_snfs(hnfs):
@@ -90,7 +42,7 @@ def get_unique_snfs(hnfs):
     return snfs
 
 
-def _translate_labelings(labeling, snf, nsites, nelements,
+def _translate_labelings(labeling, snf, nsites,
                          include_self=False):
     '''
     Yield labelings that are equivalent to original labeling
@@ -110,8 +62,8 @@ def _translate_labelings(labeling, snf, nsites, nelements,
 
     Yields
     ------
-    int
-        Hash key to translated labeling.
+    tuple of ints
+        Translated labeling.
     '''
 
     # Compute size of each block within which translations occur
@@ -119,12 +71,10 @@ def _translate_labelings(labeling, snf, nsites, nelements,
 
     # Loop over all possible translations within group as defined by snf
     for trans in product(range(snf.S[0]), range(snf.S[1]), range(snf.S[2])):
-        if not include_self and trans[0] + trans[1] + trans[2] == 0:
+        if not include_self and sum(trans) == 0:
             continue
 
-        labelkey = 0
-        count = 0
-
+        labeling_trans = ()
         for i in range(snf.S[0]):
             group = (i + trans[0]) % snf.S[0]
             block_i = labeling[sizes[0] * group:sizes[0] * (group + 1)]
@@ -133,11 +83,9 @@ def _translate_labelings(labeling, snf, nsites, nelements,
                 block_j = block_i[sizes[1] * group:sizes[1] * (group + 1)]
                 for k in range(snf.S[2]):
                     group = (k + trans[2]) % snf.S[2]
-                    for label in block_j[sizes[2] * group:
-                                         sizes[2] * (group + 1)]:
-                        labelkey += label * nelements**count
-                        count += 1
-        yield labelkey
+                    labeling_trans += tuple(block_j[sizes[2] * group:
+                                                    sizes[2] * (group + 1)])
+        yield labeling_trans
 
 
 def _get_group_order(snf):
@@ -161,7 +109,7 @@ def _get_group_order(snf):
     return np.array(group_order)
 
 
-def _get_labelkeys(snf, nelements, nsites):
+def _get_labelings(snf, nelements, nsites):
     '''
     Get all labelings corresponding to a Smith Normal Form matrix.
     Superperiodic labelings as well as labelings that are equivalent under
@@ -180,38 +128,33 @@ def _get_labelkeys(snf, nelements, nsites):
 
     Returns
     -------
-    list of ints
-        Hash keys to inequivalent labelings
+    list of tuples
+        Inequivalent labelings.
     '''
     natoms = snf.ncells * nsites
-    labelkey_tracker = [False] * nelements**natoms
-    labelkeys = []
-    for labelkey in range(nelements**natoms):
-        labeling = _dehash_labelkey(labelkey, natoms, nelements)
+    labelings = []
+    for labeling in itertools.product(range(nelements), repeat=natoms):
         unique = True
-
-        for labelkey_trans in _translate_labelings(labeling, snf, nsites,
-                                                   nelements,
+        for labeling_trans in _translate_labelings(labeling, snf, nsites,
                                                    include_self=False):
-            if labelkey == labelkey_trans:
+            # Check whether it translates into itself. If so,
+            # then it has been added with a smaller cell.
+            if labeling == labeling_trans:
                 unique = False
                 break
 
             # Check with previous labelings,
             # if labeling can be translated into a previously
             # added labeling, then it is not unique
-            if labelkey_tracker[labelkey_trans]:
+            if labeling_trans in labelings:
                 unique = False
                 break
-            if not unique:
-                break
         if unique:
-            labelkeys.append(labelkey)
-            labelkey_tracker[labelkey] = True
-    return labelkeys
+            labelings.append(labeling)
+    return labelings
 
 
-def _permute_labeling(labeling, snf, transformation, nsites, nelements):
+def _permute_labeling(labeling, snf, transformation, nsites):
     '''
     Rotate labeling based on group representation defined by Gp.
 
@@ -229,15 +172,15 @@ def _permute_labeling(labeling, snf, transformation, nsites, nelements):
 
     Returns
     -------
-    int
-        Hashkey of permuted labeling.
+    tuple of ints
+        Permuted labeling.
     '''
 
     # Calculate transformation imposed by LRL multiplication
     new_group_order = np.dot(snf.group_order, transformation[0].T)
 
     # Loop over every atom to find its new position
-    labelkey = 0
+    labeling_new = [0]*len(labeling)
     for member_index, member in enumerate(new_group_order):
 
         # Transform according to Gp,
@@ -254,11 +197,11 @@ def _permute_labeling(labeling, snf, transformation, nsites, nelements):
 
             # Add the contribution to the hash key
             element = labeling[member_index * nsites + basis]
-            labelkey += element * nelements**new_index
-    return labelkey
+            labeling_new[new_index] = element
+    return tuple(labeling_new)
 
 
-def _yield_unique_labelings(labelkeys, snf, hnf, nsites, nelements):
+def _yield_unique_labelings(labelings, snf, hnf, nsites):
     '''
     Yield labelings that are unique in every imaginable sense.
 
@@ -280,10 +223,8 @@ def _yield_unique_labelings(labelkeys, snf, hnf, nsites, nelements):
     tuple
         Labeling, each and every one unique.
     '''
-    natoms = snf.ncells * nsites
-    labelkey_tracker = [False] * nelements**natoms
-    for labelkey in labelkeys:
-        labeling = _dehash_labelkey(labelkey, natoms, nelements)
+    saved_labelings = []
+    for labeling in labelings:
 
         # Check whether labeling is just a rotated version of a previous
         # labeling. Apply transformation that is specific to the hnf
@@ -291,22 +232,20 @@ def _yield_unique_labelings(labelkeys, snf, hnf, nsites, nelements):
         unique = True
         for transformation in hnf.transformations:
 
-            labelkey_rot = _permute_labeling(labeling, snf, transformation,
-                                             nsites, nelements)
+            labeling_rot = _permute_labeling(labeling, snf, transformation,
+                                             nsites)
 
             # Commonly, the transformation leaves the labeling
             # unchanged, so check that first as a special case
             # (yields a quite significant speedup)
-            if labelkey_rot == labelkey:
+            if labeling_rot == labeling:
                 continue
 
-            labeling_rot = _dehash_labelkey(labelkey_rot, natoms, nelements)
-
             # Translate in all possible ways
-            for labelkey_rot_trans in \
-                    _translate_labelings(labeling_rot, snf, nsites, nelements,
+            for labeling_rot_trans in \
+                    _translate_labelings(labeling_rot, snf, nsites,
                                          include_self=True):
-                if labelkey_tracker[labelkey_rot_trans]:
+                if labeling_rot_trans in saved_labelings:
                     # Then we have rotated and translated the labeling
                     # into one that was already yielded
                     unique = False
@@ -316,7 +255,7 @@ def _yield_unique_labelings(labelkeys, snf, hnf, nsites, nelements):
         if unique:
             # Then we have finally found a unique structure
             # defined by an HNF matrix and a labeling
-            labelkey_tracker[labelkey] = True
+            saved_labelings.append(labeling)
             yield labeling
 
 
@@ -338,7 +277,6 @@ def get_symmetry_operations(atoms):
     '''
 
     symmetries = get_symmetry(atoms)
-
     rotations = symmetries['rotations']
     translations = symmetries['translations']
 
@@ -457,8 +395,6 @@ def enumerate_structures(atoms, sizes, subelements):
 
     '''
     nelements = len(subelements)
-    assert nelements > 1
-
     nsites = len(atoms)
     basis = atoms.get_scaled_positions()
     symmetries = get_symmetry_operations(atoms)
@@ -471,12 +407,10 @@ def enumerate_structures(atoms, sizes, subelements):
         snfs = get_unique_snfs(hnfs)
 
         for snf in snfs:
-            labelkeys = _get_labelkeys(snf, nelements, nsites)
-
+            labelings = _get_labelings(snf, nelements, nsites)
             for hnf in snf.hnfs:
-                for labeling in _yield_unique_labelings(labelkeys, snf, hnf,
-                                                        nsites, nelements):
-                    print(labeling)
+                for labeling in _yield_unique_labelings(labelings, snf, hnf,
+                                                        nsites):
                     yield _get_atoms_from_labeling(labeling, atoms.cell, hnf,
                                                    subelements, basis)
                     count += 1
