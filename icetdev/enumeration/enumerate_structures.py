@@ -126,30 +126,6 @@ def translation_permutations(labeling, snf, nsites, nelements, include_self=Fals
                 yield labelkey
 
 
-def is_superperiodic(labeling, N):
-    '''
-    Check whether labeling is superperiodic, i.e. ABCABC or AABBAABB. These
-    should be generated with a smaller cell, i.e. we should already have ABC
-    and AABB among our labelings.
-
-    Parameters
-    ----------
-    labeling : tuple
-        labeling to be checked
-
-    Returns
-    -------
-    bool
-        True if labeling is superperiodic, False otherwise
-    '''
-    for translate in range(1, N):
-        labeling_translated = tuple(
-            [labeling[(i + translate) % N] for i in range(N)])
-        if labeling_translated == labeling:
-            return True
-    return False
-
-
 def get_group_representation(snf):
     '''
     Get group represantation of an SNF matrix (the G matrix in HarFor08).
