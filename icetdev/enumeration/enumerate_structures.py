@@ -90,7 +90,8 @@ def get_unique_snfs(hnfs):
     return snfs
 
 
-def _translation_permutations(labeling, snf, nsites, nelements, include_self=False):
+def _translation_permutations(labeling, snf, nsites, nelements,
+                              include_self=False):
     '''
     Yield labelings that are equivalent to original labeling
     under translations as dictated by snf.
@@ -132,7 +133,8 @@ def _translation_permutations(labeling, snf, nsites, nelements, include_self=Fal
                 block_j = block_i[sizes[1] * group:sizes[1] * (group + 1)]
                 for k in range(snf.S[2]):
                     group = (k + trans[2]) % snf.S[2]
-                    for label in block_j[sizes[2] * group:sizes[2] * (group + 1)]:
+                    for label in block_j[sizes[2] * group:
+                                         sizes[2] * (group + 1)]:
                         labelkey += label * nelements**count
                         count += 1
         yield labelkey
@@ -161,7 +163,7 @@ def _get_group_order(snf):
 
 def _get_labelkeys(snf, nelements, nsites):
     '''
-    Get all labelings corresponding to a Smith Normal Form matrix. 
+    Get all labelings corresponding to a Smith Normal Form matrix.
     Superperiodic labelings as well as labelings that are equivalent under
     translations for this particular SNF will not be included. However,
     labelings that are equivalent by rotations that leave the cell (but not
