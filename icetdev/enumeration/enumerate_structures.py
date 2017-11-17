@@ -22,7 +22,7 @@ def hash_labeling(labeling, natoms, nelements):
     return labelkey
 
 
-def get_snfs_and_dangerous_rotations(hnfs, symmetries):
+def get_unique_snfs(hnfs):
     '''
     For a list of HNF matrices, calculate their corresponding SNFs (Smith
     Normal Form matrices). Also calculate the rotations of the parent lattice
@@ -52,10 +52,6 @@ def get_snfs_and_dangerous_rotations(hnfs, symmetries):
         defined by that HNF unchanged.
     '''
     snfs = []
-
-    rotations = symmetries['rotations']
-    translations = symmetries['translations']
-    basis_shifts = symmetries['basis_shifts']
     for hnf_index, hnf in enumerate(hnfs):
         # Get SNF for HNF matrix
         #snf_matrix, L, _ = get_smith_normal_form(hnf)
@@ -73,24 +69,8 @@ def get_snfs_and_dangerous_rotations(hnfs, symmetries):
             snf.G = get_group_representation(snf.S)
             snf.add_hnf(hnf)
             snfs.append(snf)
-
-        # Save transformations (based on rotations) that turns the
-        # supercell into an equivalent supercell
-        # Should be moved to HNF
-        hnf_rots_single = []
-        for R, T, basis_shift in zip(rotations, translations,
-                                                      basis_shifts):
-            check = np.dot(np.dot(np.linalg.inv(hnf.H), R), hnf.H)
-            check = check - np.round(check)
-            if (abs(check) < 1e-3).all():
-                LRL = np.dot(hnf.snf.L, np.dot(R, np.linalg.inv(hnf.snf.L)))
-
-                # Should be an integer matrix
-                assert (abs(LRL - np.round(LRL)) < 1e-3).all()
-                LRL = np.round(LRL).astype(np.int64)
-                LT = np.dot(T, hnf.snf.L.T)
-                hnf.add_transformation([LRL, LT, basis_shift])
     return snfs
+
 
 
 def translation_permutations(labeling, snf, nsites, nelements, include_self=False):
@@ -482,8 +462,8 @@ def enumerate_structures(atoms, sizes, subelements):
         count = 0
 
         natoms = N * nsites
-        hnfs = get_reduced_hermite_normal_forms(N, symmetries['rotations'])
-        snfs = get_snfs_and_dangerous_rotations(hnfs, symmetries)
+        hnfs = get_reduced_hermite_normal_forms(N, symmetries)
+        snfs = get_unique_snfs(hnfs)
 
         for snf_index, snf in enumerate(snfs):
             labelings = get_labelings(snf, nelements, nsites)
