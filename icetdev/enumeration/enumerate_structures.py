@@ -42,8 +42,7 @@ def get_unique_snfs(hnfs):
     return snfs
 
 
-def _translate_labelings(labeling, snf, nsites,
-                         include_self=False):
+def _translate_labelings(labeling, snf, nsites, include_self=False):
     '''
     Yield labelings that are equivalent to original labeling
     under translations as dictated by snf.
@@ -55,8 +54,6 @@ def _translate_labelings(labeling, snf, nsites,
     snf : SmithNormalForm object
     nsites : int
         Number of sites in the primtive cell.
-    nelements : int
-        Number of elements in enumeration.
     include_self : bool
         Inlcude original labeling or not.
 
@@ -109,7 +106,7 @@ def _get_group_order(snf):
     return np.array(group_order)
 
 
-def _get_labelings(snf, nelements, nsites):
+def _get_labelings(snf, iter_elements, nsites):
     '''
     Get all labelings corresponding to a Smith Normal Form matrix.
     Superperiodic labelings as well as labelings that are equivalent under
@@ -131,9 +128,8 @@ def _get_labelings(snf, nelements, nsites):
     list of tuples
         Inequivalent labelings.
     '''
-    natoms = snf.ncells * nsites
     labelings = []
-    for labeling in itertools.product(range(nelements), repeat=natoms):
+    for labeling in itertools.product(*iter_elements*snf.ncells):
         unique = True
         for labeling_trans in _translate_labelings(labeling, snf, nsites,
                                                    include_self=False):
@@ -167,8 +163,6 @@ def _permute_labeling(labeling, snf, transformation, nsites):
         Transformations based on rotation, translation and basis shift
     nsites : int
         Number of sites in the primtive cell.
-    nelements : int
-        Number of elements in the enumeration.
 
     Returns
     -------
@@ -215,8 +209,6 @@ def _yield_unique_labelings(labelings, snf, hnf, nsites):
     hnf : HermiteNormalForm object
     nsites : int
         Number of sites in the primitive cell.
-    nelements : int
-        Number of elements in the enumeration.
 
     Yields
     ------
@@ -327,7 +319,7 @@ def get_symmetry_operations(atoms):
     return symmetries
 
 
-def _get_atoms_from_labeling(labeling, cell, hnf, subelements, basis):
+def _get_atoms_from_labeling(labeling, cell, hnf, elements, basis):
     '''
     Get ASE Atoms object from labeling, HNF matrix and parent lattice.
 
@@ -339,7 +331,7 @@ def _get_atoms_from_labeling(labeling, cell, hnf, subelements, basis):
         Basis vectors listed row-wise.
     hnf : ndarray
         HNF object defining the supercell.
-    subelements : list of str
+    elements : list of str
         List of elements, e.g. ['Au', 'Ag']
     basis : ndarray
         Scaled coordinates to all sites in the primitive cell.
@@ -367,7 +359,7 @@ def _get_atoms_from_labeling(labeling, cell, hnf, subelements, basis):
                                      (j + offset10) * cell[1] +
                                      (k + offset20 + offset21) * cell[2] +
                                      np.dot(cell.T, basis_vector))
-                    symbols.append(subelements[labeling[count]])
+                    symbols.append(elements[labeling[count]])
                     count += 1
     return Atoms(symbols, positions, cell=np.dot(cell.T, hnf.H).T,
                  pbc=(True, True, True))
@@ -383,7 +375,7 @@ def enumerate_structures(atoms, sizes, subelements):
     atoms : ASE Atoms
         Primitive structure from which derivative superstructures should be
         generated.
-    size : list of ints
+    sizes : list of ints
         Maximum number of atoms in the returned structures.
     subelements : list of str
         Elements to decorate the structure, e.g. ['Au', 'Ag']
@@ -394,9 +386,26 @@ def enumerate_structures(atoms, sizes, subelements):
         Enumerated structure, each and every unique.
 
     '''
-    nelements = len(subelements)
+
     nsites = len(atoms)
     basis = atoms.get_scaled_positions()
+
+    if isinstance(subelements[0], str):
+        iter_elements = [range(len(subelements))]*nsites
+        elements = subelements
+    elif len(subelements) == nsites:
+        assert isinstance(subelements[0][0], str)
+        elements = []
+        for site in subelements:
+            for element in site:
+                if element not in elements:
+                    elements.append(element)
+        iter_elements = []
+        for site in subelements:
+            iter_elements.append([elements.index(i) for i in site])
+    else:
+        raise Exception()
+
     symmetries = get_symmetry_operations(atoms)
 
     # Loop over each cell size
@@ -407,10 +416,10 @@ def enumerate_structures(atoms, sizes, subelements):
         snfs = get_unique_snfs(hnfs)
 
         for snf in snfs:
-            labelings = _get_labelings(snf, nelements, nsites)
+            labelings = _get_labelings(snf, iter_elements, nsites)
             for hnf in snf.hnfs:
                 for labeling in _yield_unique_labelings(labelings, snf, hnf,
                                                         nsites):
                     yield _get_atoms_from_labeling(labeling, atoms.cell, hnf,
-                                                   subelements, basis)
+                                                   elements, basis)
                     count += 1
