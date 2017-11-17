@@ -1,8 +1,14 @@
+'''Handling of Hermite Normal Form matrices
+'''
+
 import numpy as np
 from icetdev.enumeration.smith_normal_form import SmithNormalForm
 
 
 class HermiteNormalForm(object):
+    '''
+    Hermite Normal Form matrix.
+    '''
 
     def __init__(self, H, rotations, translations, basis_shifts):
         self.H = H
@@ -11,8 +17,13 @@ class HermiteNormalForm(object):
         self.compute_transformations(rotations, translations, basis_shifts)
 
     def compute_transformations(self, rotations, translations, basis_shifts):
-        # Save transformations (based on rotations) that turns the
-        # supercell into an equivalent supercell
+        '''
+        Save transformations (based on rotations) that turns the supercell
+        into an equivalent supercell. Precompute these these transformations,
+        consisting of permutation as well as translation and basis shift, for
+        later use.
+        '''
+
         for R, T, basis_shift in zip(rotations, translations,
                                      basis_shifts):
             check = np.dot(np.dot(np.linalg.inv(self.H), R), self.H)
