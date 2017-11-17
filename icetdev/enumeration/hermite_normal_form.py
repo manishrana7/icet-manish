@@ -1,15 +1,34 @@
 import numpy as np
 from icetdev.enumeration.smith_normal_form import SmithNormalForm
 
+
 class HermiteNormalForm:
-    def __init__(self, H):
+
+    def __init__(self, H, rotations, translations, basis_shifts):
         self.H = H
         self.snf = SmithNormalForm(H)
         self.transformations = []
-
+        self.compute_transformations(rotations, translations, basis_shifts)
 
     def add_transformation(self, transformation):
         self.transformations.append(transformation)
+
+    def compute_transformations(self, rotations, translations, basis_shifts):
+        # Save transformations (based on rotations) that turns the
+        # supercell into an equivalent supercell
+        for R, T, basis_shift in zip(rotations, translations,
+                                     basis_shifts):
+            check = np.dot(np.dot(np.linalg.inv(self.H), R), self.H)
+            check = check - np.round(check)
+            if (abs(check) < 1e-3).all():
+                LRL = np.dot(self.snf.L, np.dot(R, np.linalg.inv(self.snf.L)))
+
+                # Should be an integer matrix
+                assert (abs(LRL - np.round(LRL)) < 1e-3).all()
+                LRL = np.round(LRL).astype(np.int64)
+                LT = np.dot(T, self.snf.L.T)
+                self.transformations.append([LRL, LT, basis_shift])
+
 
 def yield_hermite_normal_forms(det):
     '''
@@ -39,7 +58,7 @@ def yield_hermite_normal_forms(det):
                                 yield np.array(hnf)
 
 
-def get_reduced_hermite_normal_forms(N, rotations):
+def get_reduced_hermite_normal_forms(N, symmetries):
     '''
     For a fixed determinant N (i.e., a number of atoms N), yield all
     Hermite Normal Forms (HNF) that are inequivalent under symmetry
@@ -59,6 +78,9 @@ def get_reduced_hermite_normal_forms(N, rotations):
     list of ndarrays
         Symmetrically inequivalent HNFs with determinant N.
     '''
+    rotations = symmetries['rotations']
+    translations = symmetries['translations']
+    basis_shifts = symmetries['basis_shifts']
     hnfs = []
     for hnf in yield_hermite_normal_forms(N):
 
@@ -83,5 +105,6 @@ def get_reduced_hermite_normal_forms(N, rotations):
 
         # If it's not a duplicate, save the hnf
         # and the supercell so that it can be compared to
-        hnfs.append(HermiteNormalForm(hnf))
+        hnf = HermiteNormalForm(hnf, rotations, translations, basis_shifts)
+        hnfs.append(hnf)
     return hnfs
