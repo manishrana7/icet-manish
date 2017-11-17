@@ -60,7 +60,7 @@ class SmithNormalForm:
         self.N = A[0, 0] * A[1, 1] * A[2, 2]
         self.L = L
         self.R = R
-        self.G = None
+        self.group_order = None
         self.hnfs = []
 
         # Help list for permuting labelings
