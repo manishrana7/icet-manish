@@ -84,7 +84,7 @@ def get_unique_snfs(hnfs):
                 snf_comp.add_hnf(hnf)
                 break
         if snf_is_new:
-            snf.group_order = _get_group_order(snf.S)
+            snf.group_order = _get_group_order(snf)
             snf.add_hnf(hnf)
             snfs.append(snf)
     return snfs
@@ -97,8 +97,8 @@ def _translation_permutations(labeling, snf, nsites, nelements, include_self=Fal
 
     Paramters
     ---------
-    original : tuple
-        labelings to be translated
+    labeling : tuple
+        labeling to be translated
     snf : SmithNormalForm object
     nsites : int
         Number of sites in the primtive cell.
@@ -114,7 +114,7 @@ def _translation_permutations(labeling, snf, nsites, nelements, include_self=Fal
     '''
 
     # Compute size of each block within which translations occur
-    sizes = [nsites*block for block in snf.blocks]
+    sizes = [nsites * block for block in snf.blocks]
 
     # Loop over all possible translations within group as defined by snf
     for trans in product(range(snf.S[0]), range(snf.S[1]), range(snf.S[2])):
@@ -140,12 +140,11 @@ def _translation_permutations(labeling, snf, nsites, nelements, include_self=Fal
 
 def _get_group_order(snf):
     '''
-    Get group represantation of an SNF matrix (the G matrix in HarFor08).
+    Get group representation of an SNF matrix (the G matrix in HarFor08).
 
-    Paramters
+    Parameters
     ---------
-    snf : tuple
-        Diagonal of matrix on Smith Normal Form
+    snf : SmithNormalForm object
 
     Returns
     -------
@@ -153,32 +152,34 @@ def _get_group_order(snf):
         Group representation, shape 3xN where N is product of elements in snf.
     '''
     group_order = []
-    for i in range(snf[0]):
-        for j in range(snf[1]):
-            for k in range(snf[2]):
+    for i in range(snf.S[0]):
+        for j in range(snf.S[1]):
+            for k in range(snf.S[2]):
                 group_order.append([i, j, k])
     return np.array(group_order)
 
 
 def _get_labelkeys(snf, nelements, nsites):
     '''
-    Get all labelings corresponding to a Smith Normal Form. Superperiodic
-    labelings as well as labelings that are equivalent for this particular SNF
-    will not be included. However, labelings that are equivalent by rotations
-    that leave the cell (but not the labeling) unchanged will still be
-    included, since these have to be removed for each HNF.
+    Get all labelings corresponding to a Smith Normal Form matrix. 
+    Superperiodic labelings as well as labelings that are equivalent under
+    translations for this particular SNF will not be included. However,
+    labelings that are equivalent by rotations that leave the cell (but not
+    the labeling) unchanged will still be included, since these have to be
+    removed for each HNF.
 
     Paramters
     ---------
-    snf : tuple
-        The three diagonal elements of an SNF matrix.
-    sites : int
-        Number of sites per primitive cell.
+    snf : SmithNormalForm object
+    nelements : int
+        Number of elements in enumeration.
+    nsites : int
+        Number of sites per primtive cell.
 
     Returns
     -------
-    list of tuples
-        Symmetrically inequivalent labelings
+    list of ints
+        Hash keys to inequivalent labelings
     '''
     ncells = snf.N
     natoms = ncells * nsites
@@ -256,24 +257,22 @@ def _permute_labeling(labeling, snf, transformation, nsites, nelements):
     return labelkey
 
 
-def _yield_unique_labelings(labelings, snf, hnf, nsites, nelements):
+def _yield_unique_labelings(labelkeys, snf, hnf, nsites, nelements):
     '''
     Yield labelings that are unique in every imaginable sense.
 
     Parameters
     ----------
-    labelings : list of tuples
-        List of labelings that may still contain labelings that are equivalent
-        under rotations that leaves the supercell shape unchanged.
-    snf : tuple
-        Diagonal elements of matrix on Smith Normal Form.
-    hnf_rots : list of ndarrays
-        Rotations that leaves the supercell unchanged but not necessarily the
-        labeling.
-    G : ndarray
-        Group representation corresponding to snf.
+    labelkeys : list of ints
+        List of hash keys to labelings that may still contain labelings that
+        are equivalent under rotations that leaves the supercell shape
+        unchanged.
+    snf : SmithNormalForm object
+    hnf : HermiteNormalForm object
     nsites : int
         Number of sites in the primitive cell.
+    nelements : int
+        Number of elements in the enumeration.
 
     Yields
     ------
@@ -282,7 +281,7 @@ def _yield_unique_labelings(labelings, snf, hnf, nsites, nelements):
     '''
     natoms = snf.N * nsites
     labelkey_tracker = [False] * nelements**natoms
-    for labelkey in labelings:
+    for labelkey in labelkeys:
         labeling = _dehash_labelkey(labelkey, natoms, nelements)
 
         # Check whether labeling is just a rotated version of a previous
@@ -323,7 +322,8 @@ def _yield_unique_labelings(labelings, snf, hnf, nsites, nelements):
 def get_symmetry_operations(atoms):
     '''
     Use spglib to calculate the symmetry operations of atoms and return their
-    inverse matrices. basis_shifts correspond to d_N,d, rotation_translations t_N,d
+    inverse matrices. basis_shifts correspond to d_N,d, rotation_translations
+    t_N,d
 
     Parameters
     ----------
@@ -396,12 +396,14 @@ def _get_atoms_from_labeling(labeling, cell, hnf, subelements, basis):
     ---------
     labeling : tuple
         Permutation of index of elements.
-    A : ndarray
-        Parent lattice (basis vectors listed column wise).
+    cell : ndarray
+        Basis vectors listed row-wise.
     hnf : ndarray
-        HNF matrix defining the supercell.
+        HNF object defining the supercell.
     subelements : list of str
         List of elements, e.g. ['Au', 'Ag']
+    basis : ndarray
+        Scaled coordinates to all sites in the primitive cell.
 
     Returns
     -------
@@ -449,6 +451,8 @@ def enumerate_structures(atoms, sizes, subelements):
 
     Yields
     ------
+    ASE Atoms
+        Enumerated structure, each and every unique.
 
     '''
     nelements = len(subelements)
