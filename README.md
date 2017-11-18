@@ -6,7 +6,7 @@ icet2 &mdash; The tea party for runaways
 ========================================
 
 This repo represents the next stage in the development of *icet*
-&,dash; the pythonic approach to cluster expansions. Eventually, the
+&dash; the pythonic approach to cluster expansions. Eventually, the
 code will enable the construction and sampling of cluster expansions
 for multi-component systems. Extensive functionality will be provided
 to access both high and low-level information concerning, e.g.,
