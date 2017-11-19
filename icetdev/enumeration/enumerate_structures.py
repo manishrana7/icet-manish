@@ -6,7 +6,7 @@ the derivative superstructures having a certain size defined by the user.
 from itertools import product
 import itertools
 import numpy as np
-from spglib import get_symmetry
+from spglib import get_symmetry, niggli_reduce
 from ase import Atoms
 from icetdev.enumeration.hermite_normal_form import get_reduced_hnfs
 from icetdev.enumeration.smith_normal_form import get_unique_snfs
@@ -268,7 +268,7 @@ def get_symmetry_operations(atoms):
     return symmetries
 
 
-def _get_atoms_from_labeling(labeling, cell, hnf, elements, basis):
+def _labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements):
     '''
     Get ASE Atoms object from labeling, HNF matrix and parent lattice.
 
@@ -276,14 +276,16 @@ def _get_atoms_from_labeling(labeling, cell, hnf, elements, basis):
     ---------
     labeling : tuple
         Permutation of index of elements.
-    cell : ndarray
-        Basis vectors listed row-wise.
     hnf : ndarray
         HNF object defining the supercell.
-    elements : list of str
-        List of elements, e.g. ['Au', 'Ag']
+    cell : ndarray
+        Basis vectors of primtive cell listed row-wise.
+    new_cell : ndarray
+        New cell shape.
     basis : ndarray
         Scaled coordinates to all sites in the primitive cell.
+    elements : list of str
+        List of elements, e.g. ['Au', 'Ag']
 
     Returns
     -------
@@ -303,18 +305,18 @@ def _get_atoms_from_labeling(labeling, cell, hnf, elements, basis):
             offset21 = coord // hnf.H[1, 1] + coord % hnf.H[1, 1]
             for k in range(hnf.H[2, 2]):
                 for basis_vector in basis:
-
                     positions.append(i * cell[0] +
                                      (j + offset10) * cell[1] +
                                      (k + offset20 + offset21) * cell[2] +
                                      np.dot(cell.T, basis_vector))
                     symbols.append(elements[labeling[count]])
                     count += 1
-    return Atoms(symbols, positions, cell=np.dot(cell.T, hnf.H).T,
-                 pbc=(True, True, True))
+    atoms = Atoms(symbols, positions, cell=new_cell, pbc=(True, True, True))
+    atoms.wrap()
+    return atoms
 
 
-def enumerate_structures(atoms, sizes, subelements):
+def enumerate_structures(atoms, sizes, subelements, niggli_reduction=True):
     '''
     Generate enumerated structures, i.e. all inequivalent structures up to a
     certain size
@@ -328,6 +330,8 @@ def enumerate_structures(atoms, sizes, subelements):
         Maximum number of atoms in the returned structures.
     subelements : list of str
         Elements to decorate the structure, e.g. ['Au', 'Ag']
+    niggle_reduction : bool
+        If True, perform a Niggli reduction with spglib for each structure.
 
     Yields
     ------
@@ -339,6 +343,7 @@ def enumerate_structures(atoms, sizes, subelements):
     nsites = len(atoms)
     basis = atoms.get_scaled_positions()
 
+    # Construct descriptor of where species are allowed to be
     if isinstance(subelements[0], str):
         iter_elements = [range(len(subelements))]*nsites
         elements = subelements
@@ -361,7 +366,6 @@ def enumerate_structures(atoms, sizes, subelements):
     for ncells in sizes:
         if ncells == 0:
             continue
-        count = 0
 
         hnfs = get_reduced_hnfs(ncells, symmetries)
         snfs = get_unique_snfs(hnfs)
@@ -369,8 +373,11 @@ def enumerate_structures(atoms, sizes, subelements):
         for snf in snfs:
             labelings = _get_labelings(snf, iter_elements, nsites)
             for hnf in snf.hnfs:
+                if niggli_reduction:
+                    new_cell = niggli_reduce(np.dot(atoms.cell.T, hnf.H).T)
+                else:
+                    new_cell = np.dot(atoms.cell.T, hnf.H).T
                 for labeling in _yield_unique_labelings(labelings, snf, hnf,
                                                         nsites):
-                    yield _get_atoms_from_labeling(labeling, atoms.cell, hnf,
-                                                   elements, basis)
-                    count += 1
+                    yield _labeling_to_atoms(labeling, hnf, atoms.cell,
+                                             new_cell, basis, elements)
