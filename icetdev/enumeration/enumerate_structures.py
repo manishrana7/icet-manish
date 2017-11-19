@@ -359,6 +359,8 @@ def enumerate_structures(atoms, sizes, subelements):
 
     # Loop over each cell size
     for ncells in sizes:
+        if ncells == 0:
+            continue
         count = 0
 
         hnfs = get_reduced_hnfs(ncells, symmetries)
