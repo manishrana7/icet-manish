@@ -1,6 +1,11 @@
-'''This module has the purpose of enumerating structures. Given a lattice
+'''
+This module has the purpose of enumerating structures. Given a lattice
 (possibly with as basis) and a number of elements, the code generates all
 the derivative superstructures having a certain size defined by the user.
+
+The algorithm was developed by Gus L. W Hart and Rodney W. Forcade  in
+* Hart, G. L. W. and Forcade, R. W., Phys. Rev. B 77, 224115 (2008)
+* Hart, G. L. W. and Forcade, R. W., Phys. Rev. B 80, 014120 (2009)
 '''
 
 from itertools import product
@@ -239,7 +244,7 @@ def get_symmetry_operations(atoms):
             site_rot_trans = np.dot(rotation, basis_element) + translation
 
             # The site may now have been moved to a different site in a
-            # different cell. We want to separate the two. (In NelFor09,
+            # different cell. We want to separate the two. (In HarFor09,
             # basis_shift (site_rot_trans) corresponds to d_Nd and
             # site_translation to t_Nd)
             site_translation = [0, 0, 0]
