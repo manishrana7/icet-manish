@@ -1,2 +1,1 @@
 from icetdev.enumeration.enumerate_structures import enumerate_structures
-from icetdev.enumeration.smith_normal_form import SmithNormalForm
