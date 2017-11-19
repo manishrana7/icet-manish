@@ -19,9 +19,15 @@ class HermiteNormalForm(object):
     def compute_transformations(self, rotations, translations, basis_shifts):
         '''
         Save transformations (based on rotations) that turns the supercell
-        into an equivalent supercell. Precompute these these transformations,
+        into an equivalent supercell. Precompute these transformations,
         consisting of permutation as well as translation and basis shift, for
         later use.
+
+        Parameters
+        ----------
+        rotations : list of ndarrays
+        translations : list of ndarrays
+        basis_shifts : ndarray
         '''
 
         for R, T, basis_shift in zip(rotations, translations,

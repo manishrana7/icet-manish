@@ -101,7 +101,7 @@ def _get_labelings(snf, iter_elements, nsites):
 
 def _permute_labeling(labeling, snf, transformation, nsites):
     '''
-    Rotate labeling based on group representation defined by Gp.
+    Permute labeling according to transformations defined by transformation.
 
     Paramters
     ---------
@@ -109,7 +109,7 @@ def _permute_labeling(labeling, snf, transformation, nsites):
         Labeling to be rotated
     snf : SmithNormalForm object
     transformation : list of ndarrays
-        Transformations based on rotation, translation and basis shift
+        Transformations consisting of rotation, translation and basis shift
     nsites : int
         Number of sites in the primtive cell.
 

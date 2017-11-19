@@ -1,4 +1,5 @@
-'''Handling of Smith Normal Form matrices
+'''
+Handling of Smith Normal Form matrices
 '''
 
 import numpy as np
@@ -199,7 +200,7 @@ def _clear_column(A, L, j):
     ----------
     A : ndarray
         Matrix whose column is to be cleared.
-    R : ndarray
+    L : ndarray
         Matrix that should be subject to the same operations.
     i : int
         Index of column to be treated.
@@ -268,4 +269,3 @@ def get_unique_snfs(hnfs):
             snf.add_hnf(hnf)
             snfs.append(snf)
     return snfs
-
