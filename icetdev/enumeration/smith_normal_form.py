@@ -79,6 +79,18 @@ class SmithNormalForm(object):
         self.hnfs.append(hnf)
 
 
+    def set_group_order(self):
+        '''
+        Set group representation of an SNF matrix (the G matrix in HarFor08).
+        '''
+        group_order = []
+        for i in range(self.S[0]):
+            for j in range(self.S[1]):
+                for k in range(self.S[2]):
+                    group_order.append([i, j, k])
+        self.group_order = group_order
+
+
 def _switch_rows(A, i, j):
     '''
     Switch rows in matrix.
@@ -225,3 +237,35 @@ def _clear_column(A, L, j):
     A = _switch_rows(A, j, max_index)
     L = _switch_rows(L, j, max_index)
     return A, L
+
+
+def get_unique_snfs(hnfs):
+    '''
+    For a list of Hermite Normal Forms, obtain the set of unique Smith Normal
+    Forms.
+
+    Paramters
+    ---------
+    hnfs : list of HermiteNormalForm objects
+
+    Returns
+    -------
+    list of SmithNormalForm objects
+        The unique Smith Normal Form matrices.
+    '''
+    snfs = []
+    for hnf in hnfs:
+        # Check whether the snf is new or already encountered
+        snf = hnf.snf
+        snf_is_new = True
+        for snf_comp in snfs:
+            if snf_comp.S == snf.S:
+                snf_is_new = False
+                snf_comp.add_hnf(hnf)
+                break
+        if snf_is_new:
+            snf.set_group_order()
+            snf.add_hnf(hnf)
+            snfs.append(snf)
+    return snfs
+
