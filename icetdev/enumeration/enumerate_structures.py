@@ -9,37 +9,7 @@ import numpy as np
 from spglib import get_symmetry
 from ase import Atoms
 from icetdev.enumeration.hermite_normal_form import get_reduced_hnfs
-
-
-def get_unique_snfs(hnfs):
-    '''
-    For a list of Hermite Normal Forms, obtain the set of unique Smith Normal
-    Forms.
-
-    Paramters
-    ---------
-    hnfs : list of HermiteNormalForm objects
-
-    Returns
-    -------
-    list of SmithNormalForm objects
-        The unique Smith Normal Form matrices.
-    '''
-    snfs = []
-    for hnf in hnfs:
-        # Check whether the snf is new or already encountered
-        snf = hnf.snf
-        snf_is_new = True
-        for snf_comp in snfs:
-            if snf_comp.S == snf.S:
-                snf_is_new = False
-                snf_comp.add_hnf(hnf)
-                break
-        if snf_is_new:
-            snf.group_order = _get_group_order(snf)
-            snf.add_hnf(hnf)
-            snfs.append(snf)
-    return snfs
+from icetdev.enumeration.smith_normal_form import get_unique_snfs
 
 
 def _translate_labelings(labeling, snf, nsites, include_self=False):
@@ -83,27 +53,6 @@ def _translate_labelings(labeling, snf, nsites, include_self=False):
                     labeling_trans += tuple(block_j[sizes[2] * group:
                                                     sizes[2] * (group + 1)])
         yield labeling_trans
-
-
-def _get_group_order(snf):
-    '''
-    Get group representation of an SNF matrix (the G matrix in HarFor08).
-
-    Parameters
-    ---------
-    snf : SmithNormalForm object
-
-    Returns
-    -------
-    ndarray
-        Group representation, shape 3xN where N is product of elements in snf.
-    '''
-    group_order = []
-    for i in range(snf.S[0]):
-        for j in range(snf.S[1]):
-            for k in range(snf.S[2]):
-                group_order.append([i, j, k])
-    return np.array(group_order)
 
 
 def _get_labelings(snf, iter_elements, nsites):
