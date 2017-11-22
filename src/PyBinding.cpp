@@ -374,12 +374,14 @@ PYBIND11_PLUGIN(_icetdev)
         .def("get_primitive_structure",&OrbitList::getPrimitiveStructure)
         .def("__len__", &OrbitList::size)
         .def("print", &OrbitList::print, py::arg("verbosity") = 0)
-        .def("get_supercell_orbitlist", &OrbitList::getSupercellOrbitlist);
+        // .def("get_supercell_orbitlist", &OrbitList::getSupercellOrbitlist)
+        ;
 
     py::class_<LocalOrbitlistGenerator>(m, "LocalOrbitlistGenerator")
         .def(py::init<const OrbitList &, const Structure &>())
         .def("generate_local_orbitlist", (OrbitList(LocalOrbitlistGenerator::*)(const unsigned int)) & LocalOrbitlistGenerator::generateLocalOrbitlist)
-        .def("generate_local_orbitlist", (OrbitList(LocalOrbitlistGenerator::*)(const Vector3d &)) & LocalOrbitlistGenerator::generateLocalOrbitlist)
+        .def("generate_local_orbitlist", (OrbitList(LocalOrbitlistGenerator::*)(const Vector3d &)) & LocalOrbitlistGenerator::generateLocalOrbitlist)        
+        .def("generate_full_orbitlist",  &LocalOrbitlistGenerator::generateFullOrbitlist)
         .def("clear", &LocalOrbitlistGenerator::clear)
         .def("get_unique_offsets_count", &LocalOrbitlistGenerator::getUniqueOffsetsCount)
         .def("get_prim_to_supercell_map", &LocalOrbitlistGenerator::getPrimToSupercellMap)
