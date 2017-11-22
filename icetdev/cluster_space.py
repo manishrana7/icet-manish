@@ -210,6 +210,49 @@ def get_singlet_info(atoms, return_clusterspace=False):
         return singlet_data
 
 
+def get_singlet_configuration(atoms, to_primitive=False):
+    '''
+    Returns ase atoms object decorate with a element for each wyckoff site
+
+    Parameters
+    ----------
+    atoms : ASE atoms object / icet structure object (bi-optional)
+        atomic configuration
+    to_primitive : bool
+        use primitive of atoms or not
+
+    Returns
+    -------
+    atoms_singlet
+    '''
+
+    from ase.data import chemical_symbols
+    cluster_data, clusterspace = get_singlet_info(atoms,
+                                                  return_clusterspace=True)
+
+    if to_primitive:
+        singlet_configuration = clusterspace.get_primitive_structure().to_atoms()
+        for singlet in cluster_data:
+            for site in singlet['sites']:
+                element = chemical_symbols[singlet['orbit_index'] + 1]
+                atom_index = site[0].index
+                singlet_configuration[atom_index].symbol = element
+    else:
+        singlet_configuration = atoms.copy()
+        singlet_configuration = vacuum_on_non_pbc(singlet_configuration)
+        orbitlist = clusterspace.get_orbit_list()
+        orbitlist_supercell = orbitlist.get_supercell_orbitlist(singlet_configuration)        
+        for singlet in cluster_data:
+            for site in singlet['sites']:
+                element = chemical_symbols[singlet['orbit_index'] + 1]
+                sites = orbitlist_supercell.get_orbit(
+                    singlet['orbit_index']).get_equivalent_sites()
+                for lattice_site in sites:
+                    singlet_configuration[lattice_site[0].index].symbol = element
+
+    return singlet_configuration
+
+
 def view_singlets(atoms, to_primitive=False):
     '''
     Visualize singlets in a structure using the ASE gui.
@@ -218,39 +261,14 @@ def view_singlets(atoms, to_primitive=False):
     ----------
     atoms : ASE atoms object / icet structure object (bi-optional)
         atomic configuration
+    to_primitive : bool
+        use primitive of atoms or not
     '''
 
     from ase.visualize import view
-    from ase.data import chemical_symbols
-
-
-    atoms_supercell = atoms.copy()
-    atoms_supercell = vacuum_on_non_pbc(atoms_supercell)
-
-    cluster_data, clusterspace = get_singlet_info(atoms,
-                                                  return_clusterspace=True)
-    if not to_primitive:
-        orbitlist = clusterspace.get_orbit_list()
-        orbitlist_supercell = orbitlist.get_supercell_orbitlist(atoms_supercell)        
-
-    primitive_atoms = clusterspace.get_primitive_structure().to_atoms()
-    for singlet in cluster_data:
-        for site in singlet['sites']:
-            element = chemical_symbols[singlet['orbit_index'] +1 ]
-            if not to_primitive:
-                sites = orbitlist_supercell.get_orbit(
-                    singlet['orbit_index']).get_equivalent_sites()
-                for lattice_site in sites:
-                    atoms_supercell[lattice_site[0].index].symbol = element
-            else:
-                atom_index = site[0].index
-                primitive_atoms[atom_index].symbol = element
-    if not to_primitive:
-        view(atoms_supercell)
-        return atoms_supercell
-    else:
-        view(primitive_atoms)
-        return primitive_atoms
+    singlet_configuration = get_singlet_configuration(
+        atoms, to_primitive=to_primitive)
+    view(singlet_configuration)
 
 
 def get_Mi_from_dict(Mi, structure):
