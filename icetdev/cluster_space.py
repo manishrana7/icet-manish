@@ -68,7 +68,7 @@ class ClusterSpace(_ClusterSpace):
         '''
 
         def repr_cluster(index, cluster, multiplicity=0,
-                         orbit_index=0, mc_vector=[0]*5):
+                         orbit_index=0, mc_vector=[0] * 5):
             from collections import OrderedDict
             fields = OrderedDict([
                 ('order',   '{:2}'.format(cluster.order)),
@@ -93,7 +93,7 @@ class ClusterSpace(_ClusterSpace):
         s += ['{s:-^{n}}'.format(s=' Cluster Space ', n=n)]
         s += [' subelements: {}'.format(' '.join(self.get_atomic_numbers()))]
         s += [' cutoffs: {}'.format(' '.join(['{}'.format(co)
-                                             for co in self.cutoffs]))]
+                                              for co in self.cutoffs]))]
         s += [' number of orbits: {}'.format(len(self))]
 
         # table header
@@ -210,7 +210,7 @@ def get_singlet_info(atoms, return_clusterspace=False):
         return singlet_data
 
 
-def view_singlets(atoms):
+def view_singlets(atoms, to_primitive=False):
     '''
     Visualize singlets in a structure using the ASE gui.
 
@@ -223,15 +223,35 @@ def view_singlets(atoms):
     from ase.visualize import view
     from ase.data import chemical_symbols
 
+
+    atoms_supercell = atoms.copy()
+    atoms_supercell = vacuum_on_non_pbc(atoms_supercell)
+    structure = Structure.from_atoms(atoms)
+
     cluster_data, clusterspace = get_singlet_info(atoms,
                                                   return_clusterspace=True)
+    if not to_primitive:
+        orbitlist = clusterspace.get_orbit_list()
+        orbitlist_supercell = orbitlist.get_supercell_orbitlist(atoms_supercell)        
+
     primitive_atoms = clusterspace.get_primitive_structure().to_atoms()
     for singlet in cluster_data:
         for site in singlet['sites']:
-            element = chemical_symbols[singlet['orbit_index']]
-            atom_index = site[0].index
-            primitive_atoms[atom_index].symbol = element
-    view(primitive_atoms)
+            element = chemical_symbols[singlet['orbit_index'] +1 ]
+            if not to_primitive:
+                sites = orbitlist_supercell.get_orbit(
+                    singlet['orbit_index']).get_equivalent_sites()
+                for lattice_site in sites:
+                    atoms_supercell[lattice_site[0].index].symbol = element
+            else:
+                atom_index = site[0].index
+                primitive_atoms[atom_index].symbol = element
+    if not to_primitive:
+        view(atoms_supercell)
+        return atoms_supercell
+    else:
+        view(primitive_atoms)
+        return primitive_atoms
 
 
 def get_Mi_from_dict(Mi, structure):
