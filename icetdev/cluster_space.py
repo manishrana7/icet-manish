@@ -226,7 +226,6 @@ def view_singlets(atoms, to_primitive=False):
 
     atoms_supercell = atoms.copy()
     atoms_supercell = vacuum_on_non_pbc(atoms_supercell)
-    structure = Structure.from_atoms(atoms)
 
     cluster_data, clusterspace = get_singlet_info(atoms,
                                                   return_clusterspace=True)
