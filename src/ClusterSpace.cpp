@@ -22,6 +22,8 @@ std::vector<double> ClusterSpace::generateClustervector(const Structure &structu
     ClusterCounts clusterCounts = ClusterCounts();
     for (int i = 0; i < uniqueOffsets; i++)
     {
+        Vector3d offset = localOrbitListGenerator.getUniquePrimcellOffsets()[i];
+        std::cout<<i<< ": "<< offset[0]<< " "<<offset[1]<< " "<<offset[2]<<std::endl;
         const auto local_orbitlist = localOrbitListGenerator.generateLocalOrbitlist(i);
         clusterCounts.countOrbitlist(structure, local_orbitlist, orderIntact);
     }
@@ -47,7 +49,7 @@ std::vector<double> ClusterSpace::generateClustervector(const Structure &structu
                 clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                 multiplicity += elementsCountPair.second;
             }
-
+            std::cout<< "order "<< mcVector.size()<<" multiplicity "<<multiplicity<<std::endl;
             clusterVectorElement /= ((double)multiplicity);
             clusterVector.push_back(clusterVectorElement);
         }
