@@ -4,7 +4,6 @@ import spglib
 
 from icetdev.core.lattice_site import LatticeSite
 
-
 def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
     '''Get positions in reduced (scaled) coordinates.
 
@@ -52,6 +51,7 @@ def find_lattice_site_from_position_python(structure, position):
     return latNbr
 
 
+<<<<<<< 22c86099023a31d91b3ad073c6d3e712c33bcf6a
 def add_vacuum_in_non_pbc(atoms):
     '''
     Add vacuum in non-periodic directions.
@@ -125,3 +125,79 @@ def get_fractional_positions_from_neighbor_list(structure, neighbor_list):
             structure.cell, wrap=False,
             pbc=structure.pbc)
     return fractional_positions
+=======
+
+
+# def transform_cell_to_cell(atoms, atoms_template):
+#     '''
+#     Transform atoms_transform to look like a simple repeat of
+#     atoms_template.
+#     '''
+
+#     atoms = atoms.copy()
+
+#     cell_transform = atoms.cell
+#     cell_template = atoms_template.cell
+
+#     #get rotation matrix to rotate atoms into atoms_template
+#     rotation_matrix = np.linalg.solve(cell_transform, cell_template)/np.linalg.norm(cell_transform )
+#     # rotation_matrix = np.linalg.solve(cell_transform,cell_transform)/np.linalg.norm(cell_transform )
+
+#     atoms.cell = np.dot(cell_transform, cell_template)/np.linalg.norm(cell_template)
+
+#     for atom in atoms:
+#         atom.position = np.dot(rotation_matrix, atom.position)
+
+#     return atoms
+
+
+
+
+def transform_cell_to_cell(atoms, atoms_template, tolerance = 1e-3):
+    '''
+    Transform atoms_transform to look like a simple repeat of
+    atoms_template.
+    '''
+
+    atoms = atoms.copy()
+    atoms_template = atoms_template.copy()
+    cell_transform = atoms.cell
+    cell_template = atoms_template.cell
+    atoms.wrap()
+    atoms_template.wrap()
+
+    # get fractional coordinates of supercell positions relative primitive cell
+    fractional_positions = get_scaled_positions(atoms.positions, atoms_template.cell, wrap=False)
+
+    # print(atoms.positions)
+    
+    offsets = []
+
+    for pos in fractional_positions:
+        offset = tuple(np.floor(pos).astype(int))
+        offsets.append(offset)
+
+
+    unique_offsets = list(set(offsets))
+    max_offset = list(max(unique_offsets))
+    for i in range(3):
+        if max_offset[i] < 0 :
+            max_offset[i] = 0
+        max_offset[i] +=1
+    print(max_offset)    
+    
+    atoms_new = atoms_template.copy().repeat(max_offset)
+    
+    scaled_positions = atoms_new.get_scaled_positions()
+
+    print(atoms_new.cell)
+    supercell_fractional = get_scaled_positions(atoms.positions,  atoms_new.cell, wrap=True)
+
+    for i, atom in enumerate(atoms_new):
+        for j in range( len(supercell_fractional)):
+            if np.linalg.norm(scaled_positions[i] - supercell_fractional[j]) < tolerance:
+                atom.symbol = atoms[j].symbol
+
+    return atoms_new
+
+>>>>>>> WIP, #55: implemented cell transformation before cv-calculation

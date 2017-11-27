@@ -21,8 +21,15 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
     ClusterCounts clusterCounts = ClusterCounts();
     for (int i = 0; i < uniqueOffsets; i++)
     {
+<<<<<<< 22c86099023a31d91b3ad073c6d3e712c33bcf6a
         const auto local_orbit_list = localOrbitListGenerator.generateLocalOrbitList(i);
         clusterCounts.countOrbitList(structure, local_orbit_list, orderIntact);
+=======
+        Vector3d offset = localOrbitListGenerator.getUniquePrimcellOffsets()[i];
+        std::cout<<i<< ": "<< offset[0]<< " "<<offset[1]<< " "<<offset[2]<<std::endl;
+        const auto local_orbitlist = localOrbitListGenerator.generateLocalOrbitlist(i);
+        clusterCounts.countOrbitlist(structure, local_orbitlist, orderIntact);
+>>>>>>> WIP, #55: implemented cell transformation before cv-calculation
     }
 
     const auto clusterMap = clusterCounts.getClusterCounts();
@@ -46,7 +53,7 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
                 clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                 multiplicity += elementsCountPair.second;
             }
-
+            std::cout<< "order "<< mcVector.size()<<" multiplicity "<<multiplicity<<std::endl;
             clusterVectorElement /= ((double)multiplicity);
             clusterVector.push_back(clusterVectorElement);
         }
