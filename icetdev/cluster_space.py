@@ -2,6 +2,8 @@ from _icetdev import ClusterSpace as _ClusterSpace
 from icetdev import Structure
 from icetdev.orbit_list import create_orbit_list
 from icetdev.permutation_map import vacuum_on_non_pbc
+from icetdev.tools.map_sites import map_configuration_to_reference
+from icetdev.tools.geometry import transform_cell_to_cell
 from ase import Atoms
 import numpy
 
@@ -150,13 +152,19 @@ class ClusterSpace(_ClusterSpace):
 
         # if pbc is not true one needs to massage the structure a bit
         if not numpy.array(structure.get_pbc()).all() == True:
-            atoms = structure.to_atoms()
-            vacuum_on_non_pbc(atoms)
+            atoms = structure.to_atoms()            
+            
+            vacuum_on_non_pbc(atoms)            
             structure = Structure.from_atoms(atoms)
         else:
             atoms = structure.to_atoms()
             atoms.wrap()
+            
+            if len(self.get_primitive_structure().to_atoms()) > 1 :
+                atoms = transform_cell_to_cell(atoms, self.get_primitive_structure().to_atoms())
+            atoms.wrap()
             structure = Structure.from_atoms(atoms)
+
         return _ClusterSpace.get_clustervector(self, structure)
 
 
