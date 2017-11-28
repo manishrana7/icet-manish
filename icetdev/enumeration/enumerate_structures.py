@@ -3,7 +3,7 @@ This module has the purpose of enumerating structures. Given a lattice
 (possibly with as basis) and a number of elements, the code generates all
 the derivative superstructures having a certain size defined by the user.
 
-The algorithm was developed by Gus L. W Hart and Rodney W. Forcade  in
+The algorithm was developed by Gus L. W Hart and Rodney W. Forcade in
 * Hart, G. L. W. and Forcade, R. W., Phys. Rev. B 77, 224115 (2008)
 * Hart, G. L. W. and Forcade, R. W., Phys. Rev. B 80, 014120 (2009)
 '''
@@ -207,9 +207,10 @@ def _yield_unique_labelings(labelings, snf, hnf, nsites):
 
 def get_symmetry_operations(atoms):
     '''
-    Use spglib to calculate the symmetry operations of atoms and return their
-    inverse matrices. basis_shifts correspond to d_N,d, rotation_translations
-    t_N,d
+    Use spglib to calculate the symmetry operations of atoms. The
+    symmetry operations consist of three parts: rotations, translation
+    and "basis_shifts". The latter define the way that the sublattices
+    shift upon rotation (correponds to d_Nd in HarFor09).
 
     Parameters
     ----------
@@ -220,6 +221,7 @@ def get_symmetry_operations(atoms):
     -------
     dict of lists
         Containing rotations, translations and basis_shifts.
+
     '''
 
     symmetries = get_symmetry(atoms)
