@@ -32,13 +32,6 @@ def count_structures(atoms, sizes, species, correct_count, tag):
     msg = 'Structure enumeration failed for {}'.format(tag)
     assert count == correct_count, msg
 
-tag = 'BCC, 2 elements'
-atoms = bulk('Au', crystalstructure='bcc', a=4.0)
-species = ['Au', 'Pd']
-sizes = range(1, 13)
-correct_count = 10850
-count_structures(atoms, sizes, species, correct_count, tag)
-
 tag = 'FCC, 3 elements'
 atoms = bulk('Au', crystalstructure='fcc')
 species = ['Au', 'Pd', 'Cu']
@@ -46,14 +39,15 @@ sizes = range(1, 7)
 correct_count = 1081
 count_structures(atoms, sizes, species, correct_count, tag)
 
-tag = 'FCC, elongated cell'
+tag = 'FCC, elongated cell, two sites'
 atoms = bulk('Au', crystalstructure='fcc', a=4.0)
 cell = atoms.cell
 cell[0] = 1.33*cell[0]
 atoms.cell = cell
-species = ['Au', 'Pd']
-sizes = range(1, 8)
-correct_count = 1155
+atoms.append(Atom('H', (2.0, 2.0, 2.0)))
+species = [['Au', 'Pd'], ['H', 'V']]
+sizes = range(1, 5)
+correct_count = 1500
 count_structures(atoms, sizes, species, correct_count, tag)
 
 tag = 'HCP'
@@ -61,12 +55,4 @@ atoms = bulk('Au', crystalstructure='hcp', a=4.0)
 species = ['Au', 'Pd']
 sizes = range(1, 7)
 correct_count = 5777
-count_structures(atoms, sizes, species, correct_count, tag)
-
-tag = 'FCC with two sites'
-atoms = bulk('Au', crystalstructure='fcc', a=4.0)
-atoms.append(Atom('H', (2.0, 2.0, 2.0)))
-species = [['Au', 'Pd'], ['H', 'V']]
-sizes = range(1, 7)
-correct_count = 4771
 count_structures(atoms, sizes, species, correct_count, tag)
