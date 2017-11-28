@@ -205,7 +205,7 @@ def _yield_unique_labelings(labelings, snf, hnf, nsites):
             yield labeling
 
 
-def get_symmetry_operations(atoms):
+def get_symmetry_operations(atoms, tol=1e-3):
     '''
     Use spglib to calculate the symmetry operations of atoms. The
     symmetry operations consist of three parts: rotations, translation
@@ -251,10 +251,10 @@ def get_symmetry_operations(atoms):
             # site_translation to t_Nd)
             site_translation = [0, 0, 0]
             for index in range(3):
-                while site_rot_trans[index] < -1e-3:
+                while site_rot_trans[index] < -tol:
                     site_rot_trans[index] += 1
                     site_translation[index] -= 1
-                while site_rot_trans[index] > 1 - 1e-3:
+                while site_rot_trans[index] > 1 - tol:
                     site_rot_trans[index] -= 1
                     site_translation[index] += 1
             site_translations.append(site_translation)
@@ -262,7 +262,7 @@ def get_symmetry_operations(atoms):
             # Find the basis element that the shifted basis correponds to
             found = False
             for basis_index, basis_element_comp in enumerate(basis):
-                if (abs(site_rot_trans - basis_element_comp) < 1e-3).all():
+                if (abs(site_rot_trans - basis_element_comp) < tol).all():
                     assert not found
                     basis_shifts[i, j] = basis_index
                     found = True

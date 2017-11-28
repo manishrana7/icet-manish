@@ -16,7 +16,8 @@ class HermiteNormalForm(object):
         self.transformations = []
         self.compute_transformations(rotations, translations, basis_shifts)
 
-    def compute_transformations(self, rotations, translations, basis_shifts):
+    def compute_transformations(self, rotations, translations, basis_shifts,
+                                tol=1e-3):
         '''
         Save transformations (based on rotations) that turns the supercell
         into an equivalent supercell. Precompute these transformations,
@@ -34,11 +35,11 @@ class HermiteNormalForm(object):
                                      basis_shifts):
             check = np.dot(np.dot(np.linalg.inv(self.H), R), self.H)
             check = check - np.round(check)
-            if (abs(check) < 1e-3).all():
+            if (abs(check) < tol).all():
                 LRL = np.dot(self.snf.L, np.dot(R, np.linalg.inv(self.snf.L)))
 
                 # Should be an integer matrix
-                assert (abs(LRL - np.round(LRL)) < 1e-3).all()
+                assert (abs(LRL - np.round(LRL)) < tol).all()
                 LRL = np.round(LRL).astype(np.int64)
                 LT = np.dot(T, self.snf.L.T)
                 self.transformations.append([LRL, LT, basis_shift])
@@ -72,7 +73,7 @@ def yield_hermite_normal_forms(det):
                                 yield np.array(hnf)
 
 
-def get_reduced_hnfs(ncells, symmetries):
+def get_reduced_hnfs(ncells, symmetries, tol=1e-3):
     '''
     For a fixed determinant N (i.e., a number of atoms N), yield all
     Hermite Normal Forms (HNF) that are inequivalent under symmetry
@@ -104,7 +105,7 @@ def get_reduced_hnfs(ncells, symmetries):
             for hnf_previous in hnfs:
                 check = np.dot(HR, hnf_previous.H)
                 check = check - np.round(check)
-                if (abs(check) < 1e-3).all():
+                if (abs(check) < tol).all():
                     duplicate = True
                     break
             if duplicate:

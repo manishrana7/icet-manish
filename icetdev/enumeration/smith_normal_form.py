@@ -23,7 +23,7 @@ class SmithNormalForm(object):
             blocks.append(blocks[-1] // self.S[i])
         self.blocks = blocks
 
-    def compute_snf(self, H):
+    def compute_snf(self, H, tol=1e-3):
         '''
         Compute Smith Normal Form for 3x3 matrix. Note that H = L*S*R.
 
@@ -66,7 +66,7 @@ class SmithNormalForm(object):
                 L[0] = L[0] + L[1]
             else:
                 break
-        assert (abs(np.dot(np.dot(L, H), R) - A) < 1e-3).all()
+        assert (abs(np.dot(np.dot(L, H), R) - A) < tol).all()
         self.S_matrix = A
         self.L = L
 
