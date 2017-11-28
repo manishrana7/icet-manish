@@ -365,7 +365,8 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduction=True):
         for site in subelements:
             iter_elements.append([elements.index(i) for i in site])
     else:
-        raise Exception()
+        raise Exception('subelements needs to be a list of strings '
+                        'or a list of list of strings.')
 
     symmetries = get_symmetry_operations(atoms)
 
