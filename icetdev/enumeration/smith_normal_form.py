@@ -41,13 +41,13 @@ class SmithNormalForm(object):
             # up in A[0, 0], in a standard Smith Normal Form way
             # (Euclidean algorithm for finding greatest common divisor)
             while sorted(A[0])[1] != 0 or sorted(A[:, 0])[1] != 0:
-                A, R = _clear_row(A, R, 0)
-                A, L = _clear_column(A, L, 0)
+                A, R = _gcd_reduce_row(A, R, 0)
+                A, L = _gcd_reduce_column(A, L, 0)
 
             # Do the same thing for lower 2x2 matrix
             while sorted(A[1, 1:])[0] != 0 or sorted(A[1:, 1])[0] != 0:
-                A, R = _clear_row(A, R, 1)
-                A, L = _clear_column(A, L, 1)
+                A, R = _gcd_reduce_row(A, R, 1)
+                A, L = _gcd_reduce_column(A, L, 1)
 
             # If last diagonal entry is negative,
             # make it positive
@@ -140,10 +140,10 @@ def _switch_columns(A, i, j):
     return A
 
 
-def _clear_row(A, R, i):
+def _gcd_reduce_row(A, R, i):
     '''
     Use column operations to make A[i, i] the greatest common
-    denominator of the elements in the row and the other elements
+    denominator of the elements in row i and the other elements
     zero.
 
     Parameters
@@ -190,10 +190,10 @@ def _clear_row(A, R, i):
     return A, R
 
 
-def _clear_column(A, L, j):
+def _gcd_reduce_column(A, L, j):
     '''
     Use row operations to make A[i, i] the greatest common
-    denominator of the elements in the column and the other elements
+    denominator of the elements in column i and the other elements
     zero.
 
     Parameters
