@@ -4,6 +4,7 @@ import spglib
 
 from icetdev.core.lattice_site import LatticeSite
 
+
 def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
     '''Get positions in reduced (scaled) coordinates.
 
@@ -50,8 +51,6 @@ def find_lattice_site_from_position_python(structure, position):
     latNbr = LatticeSite(index, unit_cell_offset)
     return latNbr
 
-
-<<<<<<< 22c86099023a31d91b3ad073c6d3e712c33bcf6a
 def add_vacuum_in_non_pbc(atoms):
     '''
     Add vacuum in non-periodic directions.
@@ -125,35 +124,8 @@ def get_fractional_positions_from_neighbor_list(structure, neighbor_list):
             structure.cell, wrap=False,
             pbc=structure.pbc)
     return fractional_positions
-=======
 
-
-# def transform_cell_to_cell(atoms, atoms_template):
-#     '''
-#     Transform atoms_transform to look like a simple repeat of
-#     atoms_template.
-#     '''
-
-#     atoms = atoms.copy()
-
-#     cell_transform = atoms.cell
-#     cell_template = atoms_template.cell
-
-#     #get rotation matrix to rotate atoms into atoms_template
-#     rotation_matrix = np.linalg.solve(cell_transform, cell_template)/np.linalg.norm(cell_transform )
-#     # rotation_matrix = np.linalg.solve(cell_transform,cell_transform)/np.linalg.norm(cell_transform )
-
-#     atoms.cell = np.dot(cell_transform, cell_template)/np.linalg.norm(cell_template)
-
-#     for atom in atoms:
-#         atom.position = np.dot(rotation_matrix, atom.position)
-
-#     return atoms
-
-
-
-
-def transform_cell_to_cell(atoms, atoms_template, tolerance = 1e-3):
+def transform_cell_to_cell(atoms, atoms_template, tolerance=1e-3):
     '''
     Transform atoms_transform to look like a simple repeat of
     atoms_template.
@@ -167,37 +139,70 @@ def transform_cell_to_cell(atoms, atoms_template, tolerance = 1e-3):
     atoms_template.wrap()
 
     # get fractional coordinates of supercell positions relative primitive cell
-    fractional_positions = get_scaled_positions(atoms.positions, atoms_template.cell, wrap=False)
+    fractional_positions = get_scaled_positions(
+        atoms.positions, atoms_template.cell, wrap=False)
 
     # print(atoms.positions)
-    
+
     offsets = []
 
     for pos in fractional_positions:
         offset = tuple(np.floor(pos).astype(int))
         offsets.append(offset)
 
-
     unique_offsets = list(set(offsets))
     max_offset = list(max(unique_offsets))
     for i in range(3):
-        if max_offset[i] < 0 :
+        if max_offset[i] < 0:
             max_offset[i] = 0
-        max_offset[i] +=1
-    print(max_offset)    
-    
+        max_offset[i] += 1
+    print(max_offset)
+
     atoms_new = atoms_template.copy().repeat(max_offset)
-    
+
     scaled_positions = atoms_new.get_scaled_positions()
 
     print(atoms_new.cell)
-    supercell_fractional = get_scaled_positions(atoms.positions,  atoms_new.cell, wrap=True)
+    supercell_fractional = get_scaled_positions(
+        atoms.positions,  atoms_new.cell, wrap=True)
 
     for i, atom in enumerate(atoms_new):
-        for j in range( len(supercell_fractional)):
+        for j in range(len(supercell_fractional)):
             if np.linalg.norm(scaled_positions[i] - supercell_fractional[j]) < tolerance:
                 atom.symbol = atoms[j].symbol
 
     return atoms_new
 
->>>>>>> WIP, #55: implemented cell transformation before cv-calculation
+def get_permutation_matrix(input_configuration,
+                           reference_structure,
+                           tolerance_cell=0.05):
+    '''
+    Computes and returns the permutation matrix that takes the reference cell to the input cell,
+    i.e. permutation_matrix * reference_cell = input_cell
+    '''
+
+    input_cell = input_configuration.cell
+    reference_cell = reference_structure.cell
+
+    # obtain the (in general non-integer) transformation matrix
+    # connecting the input configuration to the reference structure
+    # L = L_p.P --> P = L_p^-1.L
+    P = np.dot(input_cell, np.linalg.inv(reference_structure.cell))
+
+    # assert that the transformation matrix does not deviate too
+    # strongly from the nearest integer matrix
+    if np.linalg.norm(P - np.around(P)) / 9 > tolerance_cell:
+        s = 'Failed to map configuration to reference'
+        s += 'structure (tolerance_cell exceeded).\n'
+        s += 'reference:\n {}\n'.format(reference_structure.cell)
+        s += 'input:\n {}\n'.format(input_configuration.cell)
+        s += 'input_cell:\n {}\n'.format(input_cell)
+        s += 'P:\n {}\n'.format(P)
+        s += 'P_round:\n {}\n'.format(np.around(P))
+        s += 'Deviation: {}\n'.format(np.linalg.norm(P - np.around(P)) / 9)
+        s += 'You can try raising `tolerance_cell`.'
+        raise Exception(s)
+
+    # reduce the (real) transformation matrix to the nearest integer one
+    P = np.around(P)
+    return P
