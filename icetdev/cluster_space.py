@@ -160,8 +160,6 @@ class ClusterSpace(_ClusterSpace):
             atoms = structure.to_atoms()
             atoms.wrap()
             
-            if len(self.get_primitive_structure().to_atoms()) > 1 :
-                atoms = transform_cell_to_cell(atoms, self.get_primitive_structure().to_atoms())
             atoms.wrap()
             structure = Structure.from_atoms(atoms)
 
