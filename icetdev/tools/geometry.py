@@ -4,6 +4,7 @@ import spglib
 
 from icetdev.core.lattice_site import LatticeSite
 
+
 def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
     '''Get positions in reduced (scaled) coordinates.
 
@@ -124,9 +125,7 @@ def get_fractional_positions_from_neighbor_list(structure, neighbor_list):
             pbc=structure.pbc)
     return fractional_positions
 
-
-
-def transform_cell_to_cell(atoms, atoms_template, tolerance = 1e-3):
+def transform_cell_to_cell(atoms, atoms_template, tolerance=1e-3):
     '''
     Transform atoms_transform to look like a simple repeat of
     atoms_template.
@@ -140,34 +139,35 @@ def transform_cell_to_cell(atoms, atoms_template, tolerance = 1e-3):
     atoms_template.wrap()
 
     # get fractional coordinates of supercell positions relative primitive cell
-    fractional_positions = get_scaled_positions(atoms.positions, atoms_template.cell, wrap=False)
+    fractional_positions = get_scaled_positions(
+        atoms.positions, atoms_template.cell, wrap=False)
 
     # print(atoms.positions)
-    
+
     offsets = []
 
     for pos in fractional_positions:
         offset = tuple(np.floor(pos).astype(int))
         offsets.append(offset)
 
-
     unique_offsets = list(set(offsets))
     max_offset = list(max(unique_offsets))
     for i in range(3):
-        if max_offset[i] < 0 :
+        if max_offset[i] < 0:
             max_offset[i] = 0
-        max_offset[i] +=1
-    print(max_offset)    
-    
+        max_offset[i] += 1
+    print(max_offset)
+
     atoms_new = atoms_template.copy().repeat(max_offset)
-    
+
     scaled_positions = atoms_new.get_scaled_positions()
 
     print(atoms_new.cell)
-    supercell_fractional = get_scaled_positions(atoms.positions,  atoms_new.cell, wrap=True)
+    supercell_fractional = get_scaled_positions(
+        atoms.positions,  atoms_new.cell, wrap=True)
 
     for i, atom in enumerate(atoms_new):
-        for j in range( len(supercell_fractional)):
+        for j in range(len(supercell_fractional)):
             if np.linalg.norm(scaled_positions[i] - supercell_fractional[j]) < tolerance:
                 atom.symbol = atoms[j].symbol
 
