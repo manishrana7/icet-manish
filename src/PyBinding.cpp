@@ -404,7 +404,9 @@ PYBIND11_PLUGIN(_icetdev)
 
 
     auto tools = m.def_submodule("tools");
-    tools.def("get_unit_cell_permutation", &icet::getUnitcellPermutation);    
+    tools.def("get_unit_cell_permutation", &icet::getUnitcellPermutation, py::arg("input_cell"),py::arg("reference_cell"),  py::arg("tolerance_cell") = 0.05);
+    tools.def("get_unit_cell_sub_permutations", &icet::getUnitcellSubPermutations);
+    
 
     return m.ptr();
 }

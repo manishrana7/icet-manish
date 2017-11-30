@@ -83,4 +83,7 @@ Eigen::Vector3d transformPosition2(const Eigen::Vector3d &position, const Eigen:
 bool next_cartesian_product(const std::vector<std::vector<int>> &items, std::vector<int> &currentProduct);
 
 Eigen::Matrix3i getUnitcellPermutation(const Eigen::Matrix3d &inputCell, const Eigen::Matrix3d &referenceCell, double tolerance_cell=0.05);
+
+std::vector<Eigen::Matrix3i> getUnitcellSubPermutations(Eigen::Matrix3i &);
+
 }
