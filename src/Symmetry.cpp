@@ -62,4 +62,47 @@ Eigen::Matrix3i getUnitcellPermutation(const Eigen::Matrix3d &inputCell, const E
 
     return integerPermutationMatrix;
 }
+
+std::vector<Eigen::Matrix3i> getUnitcellSubPermutations(Eigen::Matrix3i &permutation_matrix)
+{
+    // 1 get vector form of matrix
+    Eigen::Map<Eigen::RowVectorXi> v1(permutation_matrix.data(), permutation_matrix.size());
+
+    // Create the cartesian items that will be used to generate sub permutations
+    std::vector<std::vector<int>> cartesianItems(9, std::vector<int>(1));
+    for (int i = 0; i < 9; i++)
+    { //In case an element is negative,
+        int sign_of_vi = 1;
+        if (v1(i) != 0)
+        {
+            sign_of_vi = v1(i) / abs(v1(i));
+        }
+        for (int j = 1; j < abs(v1(i)); j++)
+        {
+            // Multiply with sign as to add cartesian items from -inf to zero
+            cartesianItems[i].push_back(j * sign_of_vi);
+        }
+        std::sort(cartesianItems[i].begin(), cartesianItems[i].end());
+    }
+
+    // 2 Create vector representation of subpermutation matrices
+    std::vector<int> currentMatrix(9);
+    for (int i = 0; i < 9; i++)
+    {
+        currentMatrix[i] = cartesianItems[i][0];
+    }
+
+
+    // 3 Generate the sub permutation matrices with cartesian product
+    std::vector<Eigen::Matrix3i> subPermutationMatrices;
+    do
+    {
+        Eigen::Matrix3i matrixSubPermutation(currentMatrix.data());
+        subPermutationMatrices.push_back(matrixSubPermutation);
+
+    } while (next_cartesian_product(cartesianItems, currentMatrix));
+
+
+    return subPermutationMatrices;
+}
 }
