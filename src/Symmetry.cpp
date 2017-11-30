@@ -39,12 +39,12 @@ Eigen::Matrix3i getUnitcellPermutation(const Eigen::Matrix3d &inputCell, const E
     // L = L_p.P --> P = L_p^-1.L
     Eigen::Matrix3d permutationMatrix = inputCell * referenceCell.inverse();
 
-    Eigen::Matrix3d roundedPermutationMatrix;
+    Eigen::Matrix3d roundedPermutationMatrix = permutationMatrix;
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 3; j++)
         {
-            roundedPermutationMatrix(i, j) = roundedPermutationMatrix(i, j);
+            roundedPermutationMatrix(i, j) = round(roundedPermutationMatrix(i, j));
         }
     }
 

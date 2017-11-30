@@ -76,6 +76,7 @@ getAllPermutations(
 }
 
 /// Return the transformed position `position` using the input translation and rotation
+/// @TODO whys is there a '2' here?
 Eigen::Vector3d transformPosition2(const Eigen::Vector3d &position, const Eigen::Vector3d &translation, const Eigen::Matrix3d &rotation);
 
 ///Returns the next cartesian product of currentProduct using the vector of vectors items items[0] is the possible combinations for element n

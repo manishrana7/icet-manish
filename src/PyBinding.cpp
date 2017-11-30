@@ -403,5 +403,8 @@ PYBIND11_PLUGIN(_icetdev)
         ;
 
 
+    auto tools = m.def_submodule("tools");
+    tools.def("get_unit_cell_permutation", &icet::getUnitcellPermutation);    
+
     return m.ptr();
 }
