@@ -81,5 +81,5 @@ Eigen::Vector3d transformPosition2(const Eigen::Vector3d &position, const Eigen:
 ///Returns the next cartesian product of currentProduct using the vector of vectors items items[0] is the possible combinations for element n
 bool next_cartesian_product(const std::vector<std::vector<int>> &items, std::vector<int> &currentProduct);
 
-
+Eigen::Matrix3i getUnitcellPermutation(const Eigen::Matrix3d &inputCell, const Eigen::Matrix3d &referenceCell, double tolerance_cell=0.05);
 }
