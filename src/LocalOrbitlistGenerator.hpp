@@ -40,7 +40,7 @@ class LocalOrbitlistGenerator
     LocalOrbitlistGenerator(const OrbitList &, const Structure &);
 
  
-
+    
     ///generate and returns the local orbitlist with the input index
     OrbitList generateLocalOrbitlist(const unsigned int ) ;
 
@@ -82,6 +82,9 @@ class LocalOrbitlistGenerator
     */    
     void mapSitesAndFindCellOffsets();
 
+    /// Find the sub permutation matrices that maps the basis atoms onto the supercell
+    void findPermutationMatrices();
+
 
     ///Primitive orbitlist
     OrbitList _orbitlist;
@@ -94,4 +97,7 @@ class LocalOrbitlistGenerator
 
     ///The unique offsets of the primitive cell required to "cover" the supercell
     std::vector<Vector3d> _uniquePrimcellOffsets;
+
+    /// The sub permutation matrices that will together map the basis atoms unto the supercell.
+    std::vector<Matrix3i> _subPermutationMatrices;
 };

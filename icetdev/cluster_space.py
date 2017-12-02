@@ -141,6 +141,7 @@ class ClusterSpace(_ClusterSpace):
         -------
         NumPy array
         '''
+        from ase.build import niggli_reduce
         if isinstance(atoms, Atoms):
             structure = Structure.from_atoms(atoms)
         elif isinstance(atoms, Structure):
@@ -149,7 +150,6 @@ class ClusterSpace(_ClusterSpace):
             msg = 'Unknown structure format'
             msg += ' {} (ClusterSpace.get_clustervector)'.format(type(atoms))
             raise Exception(msg)
-
         # if pbc is not true one needs to massage the structure a bit
         if not numpy.array(structure.get_pbc()).all() == True:
             atoms = structure.to_atoms()            
@@ -158,9 +158,12 @@ class ClusterSpace(_ClusterSpace):
             structure = Structure.from_atoms(atoms)
         else:
             atoms = structure.to_atoms()
+            # niggli_reduce(atoms)
+            # print(atoms.cell)
+            # from ase.visualize import view
+            # view(atoms)
             atoms.wrap()
             
-            atoms.wrap()
             structure = Structure.from_atoms(atoms)
 
         return _ClusterSpace.get_clustervector(self, structure)
