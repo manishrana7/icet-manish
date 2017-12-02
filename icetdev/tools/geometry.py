@@ -124,7 +124,36 @@ def get_fractional_positions_from_neighbor_list(structure, neighbor_list):
             pbc=structure.pbc)
     return fractional_positions
 
+def required_offsets_to_map_supercell(supercell, atoms_prim):
+    '''
+    Calculates the minimum number of offsets 
+    of atoms prim needed to completely cover the atoms object
 
+    Paramaters
+    ----------
+    supercell: ASE atoms object
+        The supercell
+    atoms_prim: ASE atombs object
+        The primitive cell
+
+    Returns
+    ------
+    required_offsets: List of lists
+        A minimum set of offsets of the primitive 
+        needed to cover the supercell
+    '''
+    # Get fractional coordinates of supercell positions given in primitive cell
+    fractional_positions = get_scaled_positions(supercell.positions, atoms_prim.cell, wrap=False)
+
+    offsets = []
+
+    for pos in fractional_positions:
+        offset = tuple(np.floor(pos).astype(int))
+        offsets.append(offset)
+
+    required_offsets = list(set(offsets))
+    
+    return required_offsets
 
 def transform_cell_to_cell(atoms, atoms_template, tolerance = 1e-3):
     '''
