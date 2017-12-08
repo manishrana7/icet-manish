@@ -64,7 +64,7 @@ class ClusterSpace(_ClusterSpace):
 
     def __repr__(self):
         '''
-        String representation of the clusterspcace.
+        String representation of the clusterspace.
         '''
 
         def repr_cluster(index, cluster, multiplicity=0,
@@ -301,3 +301,4 @@ def get_Mi_from_dict(Mi, structure):
                 'Error: the calculated Mi from dict did not cover all sites on input structure. \n Were all sites in primitive mapped?')
 
     return Mi_ret
+
