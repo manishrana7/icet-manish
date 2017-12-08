@@ -11,7 +11,7 @@ from icetdev.tools.geometry import get_scaled_positions
 
 def __vacuum_on_non_pbc(atoms):
     '''
-    Add vacuum along non-periodic directions.
+    Add vacuum in non-periodic directions.
 
     Parameters
     ----------
@@ -23,6 +23,7 @@ def __vacuum_on_non_pbc(atoms):
     ASE Atoms object
         output structure
     '''
+
     vacuum_axis = []
     for i, pbc in enumerate(atoms.pbc):
         if not pbc:
@@ -69,20 +70,20 @@ def vacuum_on_non_pbc(atoms):
     return atoms
 
 
-def __get_fractional_positions_from_nl(structure, neighborlist):
+def __get_fractional_positions_from_neigborlist(structure, neighborlist):
     '''
-    Returns the fractional positions in structure from the neighbors in the nl
-
+    Returns the fractional positions in structure from the neighbors in the
+    neighbor list.
     '''
     neighbor_positions = []
     fractional_positions = []
-    latnbr_i = LatticeSite(0, [0, 0, 0])
+    lattice_site = LatticeSite(0, [0, 0, 0])
     for i in range(len(neighborlist)):
-        latnbr_i.index = i
-        position = structure.get_position(latnbr_i)
+        lattice_site.index = i
+        position = structure.get_position(lattice_site)
         neighbor_positions.append(position)
-        for latNbr in neighborlist.get_neighbors(i):
-            position = structure.get_position(latNbr)
+        for neighbor in neighborlist.get_neighbors(i):
+            position = structure.get_position(neighbor)
             neighbor_positions.append(position)
     if len(neighbor_positions) > 0:
         fractional_positions = get_scaled_positions(
@@ -92,21 +93,26 @@ def __get_fractional_positions_from_nl(structure, neighborlist):
     return fractional_positions
 
 
-def permutation_matrices_from_atoms(atoms, cutoffs=None,
+def permutation_matrices_from_atoms(atoms, cutoffs,
                                     find_prim=True, verbosity=0):
-    '''
-    Setup a list of permutation maps from an atoms object.
+    '''Set up a list of permutation maps from an atoms object.
 
     Parameters
     ----------
     atoms : ASE Atoms object
         input structure
-    cutoffs : list
-        cutoffs per cluster order
+    cutoffs : list of float
+        cutoff radii
     find_primitive : boolean
         if True the symmetries of the primitive structure will be employed
     verbosity : int
         level of verbosity
+
+    Returns
+    -------
+    PermutationMap, icet Structure object, list of NeighborList objects
+        the tuple comprises the permutation matrices, the primitive structure,
+        and the neighbor lists
     '''
 
     atoms = atoms.copy()
@@ -128,14 +134,14 @@ def permutation_matrices_from_atoms(atoms, cutoffs=None,
 
     # Create neighborlists from the different cutoffs
     prim_structure = Structure.from_atoms(atoms_prim)
-    neighborlists = get_neighborlists(structure=prim_structure,
+    neighborlists = get_neighborlists(prim_structure,
                                       cutoffs=cutoffs)
     # get fractional positions for each neighborlist
     for i, neighborlist in enumerate(neighborlists):
         if verbosity >= 3:
             print('building permutation map {}/{}'.format(i,
                                                           len(neighborlists)))
-        frac_positions = __get_fractional_positions_from_nl(
+        frac_positions = __get_fractional_positions_from_neigborlist(
             prim_structure, neighborlist)
         if verbosity >= 3:
             print('number of positions: {}'.format(len(frac_positions)))
@@ -145,21 +151,26 @@ def permutation_matrices_from_atoms(atoms, cutoffs=None,
     return permutation_matrices, prim_structure, neighborlists
 
 
-def permutation_matrix_from_atoms(atoms, cutoff=None,
+def permutation_matrix_from_atoms(atoms, cutoff,
                                   find_prim=True, verbosity=0):
-    '''
-    Setup a list of permutation maps from an atoms object.
+    '''Set up a list of permutation maps from an atoms object.
 
     Parameters
     ----------
     atoms : ASE Atoms object
         input structure
-    cutoffs : list
-        cutoffs per cluster order
+    cutoff : float
+        cutoff radius
     find_primitive : boolean
         if True the symmetries of the primitive structure will be employed
     verbosity : int
         level of verbosity
+
+    Returns
+    -------
+    matrix, icet Structure object, NeighborList object
+        the tuple comprises the permutation matrix, the primitive structure,
+        and the neighbor list
     '''
 
     atoms = atoms.copy()
@@ -189,7 +200,7 @@ def permutation_matrix_from_atoms(atoms, cutoff=None,
     neighborlist.build(prim_structure)
 
     # get fractional positions for neighborlist
-    frac_positions = __get_fractional_positions_from_nl(
+    frac_positions = __get_fractional_positions_from_neigborlist(
         prim_structure, neighborlist)
     if verbosity >= 3:
         print('number of positions: {}'.format(len(frac_positions)))
