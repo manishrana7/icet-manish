@@ -17,21 +17,21 @@
 #include <Eigen/Dense>
 #include <pybind11/operators.h>
 
-PYBIND11_MODULE(_icetdev, m)
+PYBIND11_PLUGIN(_icetdev)
 {
-    m.doc() = "pybind11 _icetdev plugin";
+    py::module m("_icetdev", "pybind11 _icetdev plugin");
 
-    // Disable the automatically generated signatures that prepend the
-    // docstrings by default.
-    py::options options;
-    options.disable_function_signatures();
+        // Disable the automatically generated signatures that prepend the
+        // docstrings by default.
+        py::options options;
+        options.disable_function_signatures();
 
-    py::class_<Structure>(m, "Structure",
-        "This class stores the cell metric, positions, chemical symbols,"
-        " and periodic boundary conditions that describe a structure. It"
-        " also holds information pertaining to the components that are"
-        " allowed on each site and provides functionality for computing"
-        " distances between sites.")
+        py::class_<Structure>(m, "Structure",
+            "This class stores the cell metric, positions, chemical symbols,"
+            " and periodic boundary conditions that describe a structure. It"
+            " also holds information pertaining to the components that are"
+            " allowed on each site and provides functionality for computing"
+            " distances between sites.")
         .def(py::init<>())
         .def(py::init<const Eigen::Matrix<double, Dynamic, 3, Eigen::RowMajor> &,
                       const std::vector<std::string> &,
@@ -380,7 +380,7 @@ PYBIND11_MODULE(_icetdev, m)
     py::class_<LocalOrbitlistGenerator>(m, "LocalOrbitlistGenerator")
         .def(py::init<const OrbitList &, const Structure &>())
         .def("generate_local_orbitlist", (OrbitList(LocalOrbitlistGenerator::*)(const unsigned int)) & LocalOrbitlistGenerator::generateLocalOrbitlist)
-        .def("generate_local_orbitlist", (OrbitList(LocalOrbitlistGenerator::*)(const Vector3d &)) & LocalOrbitlistGenerator::generateLocalOrbitlist)
+        .def("generate_local_orbitlist", (OrbitList(LocalOrbitlistGenerator::*)(const Vector3d &)) & LocalOrbitlistGenerator::generateLocalOrbitlist)        
         .def("generate_full_orbitlist",  &LocalOrbitlistGenerator::generateFullOrbitlist)
         .def("clear", &LocalOrbitlistGenerator::clear)
         .def("get_unique_offsets_count", &LocalOrbitlistGenerator::getUniqueOffsetsCount)
@@ -402,4 +402,6 @@ PYBIND11_MODULE(_icetdev, m)
         .def("__len__", &ClusterSpace::getClusterSpaceSize)
         ;
 
+
+    return m.ptr();
 }
