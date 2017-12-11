@@ -1,5 +1,5 @@
 #pragma once
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #include <boost/functional/hash.hpp>
 #include <iostream>
 using boost::hash;
