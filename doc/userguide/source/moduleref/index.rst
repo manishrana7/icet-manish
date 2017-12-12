@@ -11,7 +11,7 @@ Python interface
    :caption: Contents:
 
    cluster_space
-   structures
+   structure_container
    cluster_expansion
    enumeration
    core
