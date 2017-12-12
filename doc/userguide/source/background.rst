@@ -4,7 +4,8 @@
 Background
 **********
 
-(expand and add more references)
+(expand and add more references; some references to topics such as cluster
+functions are intentionally left broken as a reminder to cover these things)
 
 .. _cluster-expansions:
 .. index::

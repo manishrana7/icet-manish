@@ -1,13 +1,17 @@
 .. _moduleref:
 .. index::
-   single: Function reference; general
-   single: Class reference; general
+   single: Function reference; Python interface
+   single: Class reference; Python interface
 
-Function reference
-******************
+Python interface
+****************
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   structure
+   cluster_space
+   structures
+   cluster_expansion
+   enumeration
+   core

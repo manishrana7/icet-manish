@@ -24,6 +24,7 @@ external libraries including the `atomic simulation environment (ASE)
    tutorial/index
    examples/index
    moduleref/index
+   cppref/index
 
    bibliography
    glossary

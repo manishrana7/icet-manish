@@ -20,9 +20,10 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../icetdev'))
-sys.path.insert(0, os.path.abspath('../../examples'))
-sys.path.insert(0, os.path.abspath('../../build/src'))
+sys.path.insert(0, os.path.abspath('../../../icetdev'))
+sys.path.insert(0, os.path.abspath('../../../build/src'))
+sys.path.insert(0, os.path.abspath('../../../tutorial'))
+sys.path.insert(0, os.path.abspath('../../../examples'))
 
 # -- General configuration ------------------------------------------------
 
@@ -345,6 +346,6 @@ texinfo_documents = [
 #
 # texinfo_no_detailmenu = False
 
-breathe_projects = {'icet-dev': '../apidoc/xml/'}
-breathe_default_project = 'icet-dev'
+breathe_projects = {'icet': '../../apidoc/xml/'}
+breathe_default_project = 'icet'
 breathe_domain_by_extension = {'h': 'cpp'}
