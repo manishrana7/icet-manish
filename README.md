@@ -2,8 +2,7 @@
 [![coverage report](https://gitlab.com/icet/icet-dev/badges/master/coverage.svg)](https://icet.gitlab.io/icet-dev/.test/coverage)
 
 
-icet &mdash; The Pythonic approach to cluster expansions
-========================================================
+# icet &mdash; The Pythonic approach to cluster expansions
 
 `icet` is a Python environment for the construction and sampling of alloy
 cluster expansions. It features a Python interface that enables seamless
@@ -13,4 +12,5 @@ integration with other Python libraries including for example
 written in C++ providing performance while maintaining portability.
 
 A detailed description of the features of `icet` along with background
-information and tutorials can be found in the user guide.
+information and tutorials can be found in the
+[user guide](https://materials-modeling.gitlab.io/icet/.test/userguide/index.html).
