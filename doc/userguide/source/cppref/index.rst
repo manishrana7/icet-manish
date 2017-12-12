@@ -13,7 +13,7 @@ C++ components
    cluster
    cluster_counts
    cluster_space
-   geometry
+   general
    lattice_site
    local_environment
    local_orbit_list_generator
@@ -24,4 +24,3 @@ C++ components
    periodic_table
    permutation_map
    structure
-   symmetry

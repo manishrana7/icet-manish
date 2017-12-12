@@ -1,5 +1,5 @@
 .. index::
-   single: Class reference (C++); LocalOrbitlistGenerator
+   single: C++ reference; LocalOrbitlistGenerator
 
 LocalOrbitlistGenerator
 =======================

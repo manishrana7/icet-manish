@@ -1,5 +1,5 @@
 .. index::
-   single: Class reference (C++); Orbit
+   single: C++ reference; Orbit
 
 Orbit
 =====

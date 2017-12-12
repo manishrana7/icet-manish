@@ -1,10 +1,10 @@
 .. index::
-   single: Class reference (C++); LocalEnvironment
+   single: C++ reference; LocalEnvironment
 
 LocalEnvironment
 ================
 
-.. doxygenclass:: LocalEnvironment
+.. doxygenstruct:: LocalEnvironment
    :project: icet
    :members:
    :undoc-members:

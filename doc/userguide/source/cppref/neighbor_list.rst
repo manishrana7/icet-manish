@@ -1,5 +1,5 @@
 .. index::
-   single: Class reference (C++); Neighborlist
+   single: C++ reference; Neighborlist
 
 NeighborList
 ============

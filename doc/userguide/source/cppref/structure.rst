@@ -1,5 +1,5 @@
 .. index::
-   single: Class reference (C++); Structure
+   single: C++ reference; Structure
 
 Structure
 =========

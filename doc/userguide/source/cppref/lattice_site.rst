@@ -1,10 +1,10 @@
 .. index::
-   single: Class reference (C++); LatticeSite
+   single: C++ reference; LatticeSite
 
 LatticeSite
 ===========
 
-.. doxygenclass:: LatticeSite
+.. doxygenstruct:: LatticeSite
    :project: icet
    :members:
    :undoc-members:

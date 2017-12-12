@@ -1,5 +1,5 @@
 .. index::
-   single: Class reference (C++); ClusterCounts
+   single: C++ reference; ClusterCounts
 
 ClusterCounts
 =============

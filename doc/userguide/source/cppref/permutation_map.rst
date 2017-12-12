@@ -1,5 +1,5 @@
 .. index::
-   single: Class reference (C++); PermutationMap
+   single: C++ reference; PermutationMap
 
 PermutationMap
 ==============

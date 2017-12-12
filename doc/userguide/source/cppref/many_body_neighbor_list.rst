@@ -1,5 +1,5 @@
 .. index::
-   single: Class reference (C++); ManybodyNeighborlist
+   single: C++ reference; ManybodyNeighborlist
 
 ManybodyNeighborlist
 ====================

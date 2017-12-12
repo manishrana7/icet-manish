@@ -1,10 +1,10 @@
 .. index::
-   single: Class reference (C++); PeriodicTable
+   single: C++ reference; PeriodicTable
 
 PeriodicTable
 =============
 
-.. doxygenclass:: PeriodicTable
+.. doxygennamespace:: PeriodicTable
    :project: icet
    :members:
    :undoc-members:

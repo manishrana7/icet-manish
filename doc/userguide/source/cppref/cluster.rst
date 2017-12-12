@@ -1,5 +1,5 @@
 .. index::
-   single: Class reference (C++); Cluster
+   single: C++ reference; Cluster
 
 Cluster
 =========
