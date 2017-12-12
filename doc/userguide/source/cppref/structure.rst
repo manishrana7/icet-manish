@@ -2,7 +2,7 @@
    single: C++ reference; Structure
 
 Structure
-=========
+---------
 
 .. doxygenclass:: Structure
    :project: icet

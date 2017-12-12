@@ -2,7 +2,7 @@
    single: C++ reference; Neighborlist
 
 NeighborList
-============
+------------
 
 .. doxygenclass:: Neighborlist
    :project: icet

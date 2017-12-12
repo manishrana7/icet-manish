@@ -2,7 +2,7 @@
    single: C++ reference; LocalEnvironment
 
 LocalEnvironment
-================
+----------------
 
 .. doxygenstruct:: LocalEnvironment
    :project: icet

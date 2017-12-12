@@ -2,7 +2,7 @@
    single: C++ reference; LocalOrbitlistGenerator
 
 LocalOrbitlistGenerator
-=======================
+-----------------------
 
 .. doxygenclass:: LocalOrbitlistGenerator
    :project: icet

@@ -1,10 +1,10 @@
 .. _moduleref:
 .. index::
-   single: Function reference; Python interface
-   single: Class reference; Python interface
+   single: Function reference; User interface
+   single: Class reference; User interface
 
-Python interface
-****************
+User interface
+**************
 
 .. toctree::
    :maxdepth: 2

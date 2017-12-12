@@ -2,7 +2,7 @@
    single: C++ reference; LatticeSite
 
 LatticeSite
-===========
+-----------
 
 .. doxygenstruct:: LatticeSite
    :project: icet

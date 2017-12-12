@@ -2,7 +2,7 @@
    single: C++ reference; ManybodyNeighborlist
 
 ManybodyNeighborlist
-====================
+--------------------
 
 .. doxygenclass:: ManybodyNeighborlist
    :project: icet

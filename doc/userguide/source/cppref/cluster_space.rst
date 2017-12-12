@@ -2,7 +2,7 @@
    single: C++ reference; ClusterSpace
 
 ClusterSpace
-============
+------------
 
 .. doxygenclass:: ClusterSpace
    :project: icet
