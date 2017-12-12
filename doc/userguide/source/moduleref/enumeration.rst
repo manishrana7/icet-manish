@@ -5,6 +5,6 @@
 Structure enumeration
 =====================
 
-.. automodule:: enumeration.enumerate_structures
+.. automodule:: enumeration
    :members:
    :undoc-members:

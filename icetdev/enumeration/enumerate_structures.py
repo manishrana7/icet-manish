@@ -4,6 +4,7 @@ This module has the purpose of enumerating structures. Given a lattice
 the derivative superstructures having a certain size defined by the user.
 
 The algorithm was developed by Gus L. W Hart and Rodney W. Forcade in
+
 * Hart, G. L. W. and Forcade, R. W., Phys. Rev. B 77, 224115 (2008)
 * Hart, G. L. W. and Forcade, R. W., Phys. Rev. B 80, 014120 (2009)
 '''
@@ -17,13 +18,13 @@ from icetdev.enumeration.hermite_normal_form import get_reduced_hnfs
 from icetdev.enumeration.smith_normal_form import get_unique_snfs
 
 
-def _translate_labelings(labeling, snf, nsites, include_self=False):
+def __translate_labelings(labeling, snf, nsites, include_self=False):
     '''
     Yield labelings that are equivalent to original labeling
     under translations as dictated by snf.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     labeling : tuple
         labeling to be translated
     snf : SmithNormalForm object
@@ -60,7 +61,7 @@ def _translate_labelings(labeling, snf, nsites, include_self=False):
         yield labeling_trans
 
 
-def _get_labelings(snf, iter_elements, nsites):
+def __get_labelings(snf, iter_elements, nsites):
     '''
     Get all labelings corresponding to a Smith Normal Form matrix.
     Superperiodic labelings as well as labelings that are equivalent under
@@ -69,8 +70,8 @@ def _get_labelings(snf, iter_elements, nsites):
     the labeling) unchanged will still be included, since these have to be
     removed for each HNF.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     snf : SmithNormalForm object
     nelements : int
         Number of elements in enumeration.
@@ -85,8 +86,8 @@ def _get_labelings(snf, iter_elements, nsites):
     labelings = []
     for labeling in itertools.product(*iter_elements*snf.ncells):
         unique = True
-        for labeling_trans in _translate_labelings(labeling, snf, nsites,
-                                                   include_self=False):
+        for labeling_trans in __translate_labelings(labeling, snf, nsites,
+                                                    include_self=False):
             # Check whether it translates into itself. If so,
             # then it has been added with a smaller cell.
             if labeling == labeling_trans:
@@ -104,12 +105,12 @@ def _get_labelings(snf, iter_elements, nsites):
     return labelings
 
 
-def _permute_labeling(labeling, snf, transformation, nsites):
+def __permute_labeling(labeling, snf, transformation, nsites):
     '''
     Permute labeling according to transformations defined by transformation.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     labeling : tuple
         Labeling to be rotated
     snf : SmithNormalForm object
@@ -149,7 +150,7 @@ def _permute_labeling(labeling, snf, transformation, nsites):
     return tuple(labeling_new)
 
 
-def _yield_unique_labelings(labelings, snf, hnf, nsites):
+def __yield_unique_labelings(labelings, snf, hnf, nsites):
     '''
     Yield labelings that are unique in every imaginable sense.
 
@@ -178,8 +179,8 @@ def _yield_unique_labelings(labelings, snf, hnf, nsites):
         unique = True
         for transformation in hnf.transformations:
 
-            labeling_rot = _permute_labeling(labeling, snf, transformation,
-                                             nsites)
+            labeling_rot = __permute_labeling(labeling, snf, transformation,
+                                              nsites)
 
             # Commonly, the transformation leaves the labeling
             # unchanged, so check that first as a special case
@@ -189,8 +190,8 @@ def _yield_unique_labelings(labelings, snf, hnf, nsites):
 
             # Translate in all possible ways
             for labeling_rot_trans in \
-                    _translate_labelings(labeling_rot, snf, nsites,
-                                         include_self=True):
+                    __translate_labelings(labeling_rot, snf, nsites,
+                                          include_self=True):
                 if labeling_rot_trans in saved_labelings:
                     # Then we have rotated and translated the labeling
                     # into one that was already yielded
@@ -205,12 +206,60 @@ def _yield_unique_labelings(labelings, snf, hnf, nsites):
             yield labeling
 
 
+def __labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements):
+    '''
+    Get ASE Atoms object from labeling, HNF matrix and parent lattice.
+
+    Parameters
+    ---------
+    labeling : tuple
+        Permutation of index of elements.
+    hnf : ndarray
+        HNF object defining the supercell.
+    cell : ndarray
+        Basis vectors of primtive cell listed row-wise.
+    new_cell : ndarray
+        New cell shape.
+    basis : ndarray
+        Scaled coordinates to all sites in the primitive cell.
+    elements : list of str
+        List of elements, e.g. ['Au', 'Ag']
+
+    Returns
+    -------
+    ASE Atoms
+        Atoms object corresponding to the given labeling.
+    '''
+    symbols = []
+    positions = []
+    count = 0
+    for i in range(hnf.H[0, 0]):
+        coord = i * hnf.H[1, 0]
+        offset10 = coord // hnf.H[0, 0] + coord % hnf.H[0, 0]
+        coord = i * hnf.H[2, 0]
+        offset20 = coord // hnf.H[0, 0] + coord % hnf.H[0, 0]
+        for j in range(hnf.H[1, 1]):
+            coord = j * hnf.H[2, 1]
+            offset21 = coord // hnf.H[1, 1] + coord % hnf.H[1, 1]
+            for k in range(hnf.H[2, 2]):
+                for basis_vector in basis:
+                    positions.append(i * cell[0] +
+                                     (j + offset10) * cell[1] +
+                                     (k + offset20 + offset21) * cell[2] +
+                                     np.dot(cell.T, basis_vector))
+                    symbols.append(elements[labeling[count]])
+                    count += 1
+    atoms = Atoms(symbols, positions, cell=new_cell, pbc=(True, True, True))
+    atoms.wrap()
+    return atoms
+
+
 def get_symmetry_operations(atoms, tol=1e-3):
     '''
     Use spglib to calculate the symmetry operations of atoms. The
     symmetry operations consist of three parts: rotations, translation
     and "basis_shifts". The latter define the way that the sublattices
-    shift upon rotation (correponds to d_Nd in HarFor09).
+    shift upon rotation (correponds to `d_Nd` in [HarFor09]_).
 
     Parameters
     ----------
@@ -275,61 +324,19 @@ def get_symmetry_operations(atoms, tol=1e-3):
     return symmetries
 
 
-def _labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements):
-    '''
-    Get ASE Atoms object from labeling, HNF matrix and parent lattice.
-
-    Parameters
-    ---------
-    labeling : tuple
-        Permutation of index of elements.
-    hnf : ndarray
-        HNF object defining the supercell.
-    cell : ndarray
-        Basis vectors of primtive cell listed row-wise.
-    new_cell : ndarray
-        New cell shape.
-    basis : ndarray
-        Scaled coordinates to all sites in the primitive cell.
-    elements : list of str
-        List of elements, e.g. ['Au', 'Ag']
-
-    Returns
-    -------
-    ASE Atoms
-        Atoms object corresponding to the given labeling.
-    '''
-    symbols = []
-    positions = []
-    count = 0
-    for i in range(hnf.H[0, 0]):
-        coord = i * hnf.H[1, 0]
-        offset10 = coord // hnf.H[0, 0] + coord % hnf.H[0, 0]
-        coord = i * hnf.H[2, 0]
-        offset20 = coord // hnf.H[0, 0] + coord % hnf.H[0, 0]
-        for j in range(hnf.H[1, 1]):
-            coord = j * hnf.H[2, 1]
-            offset21 = coord // hnf.H[1, 1] + coord % hnf.H[1, 1]
-            for k in range(hnf.H[2, 2]):
-                for basis_vector in basis:
-                    positions.append(i * cell[0] +
-                                     (j + offset10) * cell[1] +
-                                     (k + offset20 + offset21) * cell[2] +
-                                     np.dot(cell.T, basis_vector))
-                    symbols.append(elements[labeling[count]])
-                    count += 1
-    atoms = Atoms(symbols, positions, cell=new_cell, pbc=(True, True, True))
-    atoms.wrap()
-    return atoms
-
-
 def enumerate_structures(atoms, sizes, subelements, niggli_reduction=True):
     '''
     Generate enumerated structures, i.e. all inequivalent structures up to a
-    certain size
+    certain size.
 
-    Paramters
-    ---------
+    The algorithm implemented here was developed by Gus L. W. Hart and Rodney
+    W. Forcade in
+
+    * Phys. Rev. B 77, 224115 (2008) [HarFor08]_
+    * Phys. Rev. B 80, 014120 (2009) [HarFor09]_
+
+    Parameters
+    ----------
     atoms : ASE Atoms
         Primitive structure from which derivative superstructures should be
         generated.
@@ -337,13 +344,13 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduction=True):
         Maximum number of atoms in the returned structures.
     subelements : list of str
         Elements to decorate the structure, e.g. ['Au', 'Ag']
-    niggle_reduction : bool
-        If True, perform a Niggli reduction with spglib for each structure.
+    niggli_reduction : bool
+        If True perform a Niggli reduction with spglib for each structure.
 
     Yields
     ------
     ASE Atoms
-        Enumerated structure, each and every unique.
+        Enumerated structure, each and every one of which is unique.
 
     '''
 
@@ -379,13 +386,13 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduction=True):
         snfs = get_unique_snfs(hnfs)
 
         for snf in snfs:
-            labelings = _get_labelings(snf, iter_elements, nsites)
+            labelings = __get_labelings(snf, iter_elements, nsites)
             for hnf in snf.hnfs:
                 if niggli_reduction:
                     new_cell = niggli_reduce(np.dot(atoms.cell.T, hnf.H).T)
                 else:
                     new_cell = np.dot(atoms.cell.T, hnf.H).T
-                for labeling in _yield_unique_labelings(labelings, snf, hnf,
-                                                        nsites):
-                    yield _labeling_to_atoms(labeling, hnf, atoms.cell,
-                                             new_cell, basis, elements)
+                for labeling in __yield_unique_labelings(labelings, snf, hnf,
+                                                         nsites):
+                    yield __labeling_to_atoms(labeling, hnf, atoms.cell,
+                                              new_cell, basis, elements)

@@ -9,13 +9,13 @@ Bibliography
    | *Optimization of the Thermoelectric Power Factor:*
    | *Coupling between Chemical Order and Transport Properties*
    | Chem. Mater. **28**, 6877 (2016)
-   | `doi: 10.1021/acs.chemmater.6b02117 <http://dx.doi.org/10.1021/acs.chemmater.6b02117>`_   
+   | `doi: 10.1021/acs.chemmater.6b02117 <http://dx.doi.org/10.1021/acs.chemmater.6b02117>`_
 
 .. [CanWak08]
    | E. J. Candès and M. B. Wakin
    | *An Introduction To Compressive Sampling*
    | Signal Processing Magazine, IEEE **25**, 201 (2008)
-   | `doi: 10.1109/MSP.2007.914731 <http://dx.doi.org/10.1109/MSP.2007.914731>`_ 
+   | `doi: 10.1109/MSP.2007.914731 <http://dx.doi.org/10.1109/MSP.2007.914731>`_
 
 .. [HalYinZha08]
    | Elaine T. Hale, Wotao Yin, and Yin Zhang
@@ -23,17 +23,29 @@ Bibliography
    | SIAM J. Optim. **19**, 1107 (2008)
    | `doi: 10.1137/070698920 <http://dx.doi.org/10.1137/070698920>`_
 
+.. [HarFor08]
+   | G. L. W. Hart and R. W. Forcade
+   | *Algorithm for generating derivative structures*
+   | Physical Review B **77**, 224115 (2008)
+   | `doi: 10.1103/PhysRevB.77.224115 <http://dx.doi.org/10.1103/PhysRevB.77.224115>`_
+
+.. [HarFor09]
+   | G. L. W. Hart and R. W. Forcade
+   | *Generating derivative structures from multilattices: Algorithm and application to hcp alloys*
+   | Physical Review B **80**, 014120 (2009)
+   | `doi: 10.1103/PhysRevB.80.014120 <http://dx.doi.org/10.1103/PhysRevB.80.014120>`_
+
 .. [NelHarZho13]
    | L. J. Nelson, G. L. W. Hart, F. Zhou, and V. Ozoliņš
    | *Compressive sensing as a new paradigm for model building*
    | Phys. Rev. B **87**, 035125 (2013)
-   | `doi: 10.1103/PhysRevB.87.035125 <http://dx.doi.org/10.1103/PhysRevB.87.035125>`_ 
+   | `doi: 10.1103/PhysRevB.87.035125 <http://dx.doi.org/10.1103/PhysRevB.87.035125>`_
 
 .. [NelOzoRee13]
    | L. J. Nelson, V. Ozoliņš, C. S. Reese, F. Zhou, and G. L. W. Hart
    | *Cluster expansion made easy with Bayesian compressive sensing*
    | Phys. Rev. B **88**, 155105 (2013)
-   | `doi: 10.1103/PhysRevB.88.155105 <http://dx.doi.org/10.1103/PhysRevB.88.155105>`_ 
+   | `doi: 10.1103/PhysRevB.88.155105 <http://dx.doi.org/10.1103/PhysRevB.88.155105>`_
 
 .. [SanDucGra84]
    | J. M. Sanchez, F. Ducastelle, and D. Gratias
@@ -45,7 +57,7 @@ Bibliography
    | J. M. Sanchez
    | *Cluster expansion and the configurational theory of alloys*
    | Phys. Rev. B **81**, 224202 (2010)
-   | `doi: <http://dx.doi.org/>`_   
+   | `doi: <http://dx.doi.org/>`_
 
 .. [Wal09]
    | A. van de Walle
