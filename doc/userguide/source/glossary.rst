@@ -47,7 +47,7 @@ Glossary
         method for performing variable selection and regularization in
         problems in statistics and machine learning. More information
         can be found `on the LASSO Wikipedia entry
-        <https://en.wikipedia.org/wiki/Lasso_(statistics)>`.
+        <https://en.wikipedia.org/wiki/Lasso_(statistics)>`_.
 
    LOOCV
         The :ref:`leave one out cross validation (LOOCV) score
@@ -60,8 +60,3 @@ Glossary
         :ref:`Monte Carlo (MC) simulations <monte-carlo-simulations>`
         are an effective method for sampling a multi-dimensional
         space.
-   
-   SGI
-        The generation of structures is a key step in the construction
-        of :term:`CEs` and is greatly simplied by the :ref:`structure
-        generation interface (SGI) <structure-generation>`

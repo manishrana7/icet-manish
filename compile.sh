@@ -1,5 +1,5 @@
-#rm -r build
-#mkdir build
+rm -r build
+mkdir build >& /dev/null
 cd build
 cmake ..
 make -j 4
