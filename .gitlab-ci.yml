@@ -64,7 +64,7 @@ pages:
     - cd ../..
     # sphinx
     - pip3 install breathe
-    - sphinx-build doc/userguide/ public/.test/userguide/
+    - sphinx-build doc/userguide/source/ public/.test/userguide/
     # consolidate
     - mv doc/apidoc/html/ public/.test/apidoc/
     - mv coverage/ public/.test/
