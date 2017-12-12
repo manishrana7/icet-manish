@@ -1,6 +1,5 @@
 import numpy as np
 from icetdev.lattice_site import LatticeSite
-import math
 
 
 def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
@@ -28,11 +27,13 @@ def find_lattice_site_from_position_python(structure, position):
     """
     Get lattice neighbor from position
 
-    This is the Python version of structure.findLatticeSiteFromPosition(position)
+    This is the Python version of
+    structure.findLatticeSiteFromPosition(position)
 
-    It is slower but kept as help for debugging and if further development is needed
+    It is slower but kept as help for debugging and if further development is
+    needed.
     """
-    
+
     fractional = np.linalg.solve(structure.cell.T, np.array(position).T).T
     unit_cell_offset = [int(round(x)) for x in fractional]
 
@@ -40,10 +41,10 @@ def find_lattice_site_from_position_python(structure, position):
     try:
         index = structure.find_index_of_position(remainder)
     except:
-        print("error did not find index with pos: {}".format(remainder))
-        print("position in structure are:")
-        print(structure.positions)
-        exit(1)
+        msg = ['error did not find index with pos: {}'.format(remainder)]
+        msg += ['position in structure are:']
+        msg += ['\n' + str(structure.positions)]
+        raise Exception(' '.join(msg))
 
     latNbr = LatticeSite(index, unit_cell_offset)
     return latNbr

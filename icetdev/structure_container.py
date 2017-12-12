@@ -2,8 +2,10 @@ import numpy as np
 from ase import Atoms
 from ase.calculators.calculator import PropertyNotImplementedError
 
+
 class StructureContainer(object):
-    def __init__(self, clusterspace, 
+
+    def __init__(self, clusterspace,
                  list_of_atoms=None,
                  list_of_properties=None):
 
@@ -20,7 +22,7 @@ class StructureContainer(object):
 
         list_of_atoms : list or list of tuples (bi-optional)
             list of input structures (ASE Atom objects) or list of pairs
-            structures-user_tag, e.g. [(atom, user_tag)], where user_tag 
+            structures-user_tag, e.g. [(atom, user_tag)], where user_tag
             should be a type str
 
         list_of_properties : list of dict
@@ -31,11 +33,11 @@ class StructureContainer(object):
 
        # Add atomic structures
         if list_of_atoms is not None:
-            assert isinstance(list_of_atoms, (list, tuple)
-                             ), 'list_of_atoms must be list or tuple or None'
+            assert isinstance(list_of_atoms, (list, tuple)), \
+                'list_of_atoms must be list or tuple or None'
 
             if list_of_properties is not None:
-                msg = ['len(list_of_properties) does not equal len(list_of_atoms)']
+                msg = 'len(list_of_properties) not equal len(list_of_atoms)'
                 assert(len(list_of_properties) == len(list_of_atoms)), msg
             else:
                 list_of_properties = [None]*len(list_of_atoms)
@@ -45,9 +47,11 @@ class StructureContainer(object):
                 list_of_atoms = [(atoms, None) for atoms in list_of_atoms]
 
             self._structure_list = []
-            for (atoms, user_tag), properties in zip(list_of_atoms, list_of_properties):
+            for (atoms, user_tag), properties in zip(list_of_atoms,
+                                                     list_of_properties):
                 try:
-                    self.add_structure(atoms=atoms, user_tag=user_tag, properties=properties)
+                    self.add_structure(atoms=atoms, user_tag=user_tag,
+                                       properties=properties)
                 except ValueError:
                     print('Skipping list_of_atoms object')
 
@@ -71,7 +75,8 @@ class StructureContainer(object):
         list of integers
             List of structure's indices
         '''
-        return [i for i, s in enumerate(self) if user_tag is None or s.user_tag == user_tag]
+        return [i for i, s in enumerate(self)
+                if user_tag is None or s.user_tag == user_tag]
 
     def __repr__(self):
         '''
@@ -120,7 +125,6 @@ class StructureContainer(object):
 
         return '\n'.join(s)
 
-
     def add_structure(self, atoms, user_tag=None,
                       properties=None):
         '''
@@ -133,8 +137,8 @@ class StructureContainer(object):
         user_tag : str
             custom user tag to label structure
         properties : dict
-            scalar properties. If properties are not specified the atoms 
-            object are required to have an attached ASE calculator object 
+            scalar properties. If properties are not specified the atoms
+            object are required to have an attached ASE calculator object
             with a calculated potential energy
 
         '''
@@ -146,7 +150,8 @@ class StructureContainer(object):
         atoms_copy = atoms.copy()
         if properties is None:
             properties = {}
-            assert atoms.calc is not None, 'Neither property or calculator could be found'
+            assert atoms.calc is not None, \
+                'Neither property or calculator could be found'
             msg = 'Not relaxed structure, calculation required'
             assert len(atoms.calc.check_state(atoms)) == 0, msg
             try:
@@ -199,10 +204,10 @@ class StructureContainer(object):
                 prop_list.append(self._structure_list[i].properties[key])
 
         if len(cv_list) == 0:
-            raise Exception('No available fit data for {}'.format(structure_indices))
+            raise Exception('No available fit data for'
+                            ' {}'.format(structure_indices))
 
         return np.array(cv_list), np.array(prop_list)
-
 
     def add_properties(self, structure_indices=None, properties=None):
         '''
@@ -228,7 +233,6 @@ class StructureContainer(object):
             for i, prop in zip(structure_indices, properties):
                 self._structure_list[i].set_properties(prop)
 
-
     def get_properties(self, structure_indices=None, key='energy'):
         '''
         Return a list with the value of properties with key='key'
@@ -252,7 +256,6 @@ class StructureContainer(object):
                 prop_list.append(self._structure_list[i].properties[key])
 
         return prop_list
-
 
     def get_structure(self, structure_indices=None):
         '''
@@ -280,7 +283,6 @@ class StructureContainer(object):
         Returns the icet ClusterSpace object.
         '''
         return self._clusterspace
-
 
 
 class FitStructure:
