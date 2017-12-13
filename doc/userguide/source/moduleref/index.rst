@@ -12,6 +12,7 @@ User interface
 
    cluster_space
    structure_container
+   optimizer
    cluster_expansion
    enumeration
    core

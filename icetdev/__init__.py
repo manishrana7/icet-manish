@@ -3,6 +3,7 @@ from .structure import Structure
 from .cluster_space import ClusterSpace
 from .cluster_expansion import ClusterExpansion
 from .structure_container import StructureContainer
+from .fitting import Optimizer
 
 '''
 icet module
@@ -23,6 +24,7 @@ __version__ = '0.1'
 __all__ = ['ClusterSpace',
            'ClusterExpansion',
            'StructureContainer',
-           'Structure']
+           'Structure',
+           'Optimizer']
 __status__ = 'beta-version'
 __url__ = 'http://www.icet.org/'
