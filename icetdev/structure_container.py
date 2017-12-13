@@ -31,7 +31,7 @@ class StructureContainer(object):
 
         self._clusterspace = clusterspace
 
-       # Add atomic structures
+        # Add atomic structures
         if list_of_atoms is not None:
             assert isinstance(list_of_atoms, (list, tuple)), \
                 'list_of_atoms must be list or tuple or None'

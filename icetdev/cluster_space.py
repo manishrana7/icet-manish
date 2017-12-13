@@ -149,7 +149,7 @@ class ClusterSpace(_ClusterSpace):
             raise Exception(msg)
 
         # if pbc is not true one needs to massage the structure a bit
-        if not numpy.array(structure.get_pbc()).all() == True:
+        if not numpy.array(structure.get_pbc()).all():
             atoms = structure.to_atoms()
             vacuum_on_non_pbc(atoms)
             structure = Structure.from_atoms(atoms)
@@ -231,7 +231,8 @@ def get_singlet_configuration(atoms, to_primitive=False):
                                                   return_clusterspace=True)
 
     if to_primitive:
-        singlet_configuration = clusterspace.get_primitive_structure().to_atoms()
+        singlet_configuration = \
+            clusterspace.get_primitive_structure().to_atoms()
         for singlet in cluster_data:
             for site in singlet['sites']:
                 element = chemical_symbols[singlet['orbit_index'] + 1]
@@ -241,14 +242,16 @@ def get_singlet_configuration(atoms, to_primitive=False):
         singlet_configuration = atoms.copy()
         singlet_configuration = vacuum_on_non_pbc(singlet_configuration)
         orbitlist = clusterspace.get_orbit_list()
-        orbitlist_supercell = orbitlist.get_supercell_orbitlist(singlet_configuration)        
+        orbitlist_supercell \
+            = orbitlist.get_supercell_orbitlist(singlet_configuration)
         for singlet in cluster_data:
             for site in singlet['sites']:
                 element = chemical_symbols[singlet['orbit_index'] + 1]
                 sites = orbitlist_supercell.get_orbit(
                     singlet['orbit_index']).get_equivalent_sites()
                 for lattice_site in sites:
-                    singlet_configuration[lattice_site[0].index].symbol = element
+                    k = lattice_site[0].index
+                    singlet_configuration[k].symbol = element
 
     return singlet_configuration
 
@@ -259,7 +262,7 @@ def view_singlets(atoms, to_primitive=False):
 
     Parameters
     ----------
-    atoms : ASE atoms object / icet structure object (bi-optional)
+    atoms : ASE atoms object or icet structure object
         atomic configuration
     to_primitive : bool
         use primitive of atoms or not
@@ -297,8 +300,9 @@ def get_Mi_from_dict(Mi, structure):
 
     for all_comp in Mi_ret:
         if all_comp == -1:
-            raise Exception(
-                'Error: the calculated Mi from dict did not cover all sites on input structure. \n Were all sites in primitive mapped?')
+            s = ['The calculated Mi from dict did not cover all sites of'
+                 ' the input structure.']
+            s += ['Were all sites in primitive mapped?']
+            raise Exception('\n'.join(s))
 
     return Mi_ret
-

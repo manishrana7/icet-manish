@@ -44,7 +44,7 @@ def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
                 try:
                     lat_nbr = structure.find_lattice_site_by_position(pos)
                     lat_nbrs.append(lat_nbr)
-                except:
+                except:  # NOQA
                     continue
         if len(lat_nbrs) > 0:
             pm_lattice_sites.append(lat_nbrs)
@@ -90,6 +90,8 @@ def _get_supercell_orbitlist(self, atoms):
     supercell_orbitlist = log.generate_full_orbitlist()
 
     return supercell_orbitlist
+
+
 OrbitList.get_supercell_orbitlist = _get_supercell_orbitlist
 
 
