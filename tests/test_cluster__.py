@@ -4,24 +4,26 @@ import numpy as np
 # set up a test cluster
 sites = np.array([0, 0, 0])
 distances = np.array([.0, 1.0, 3.0])
-cluster = it.Cluster( distances=distances, sites=sites, sortedCluster=True)
+cluster = it.Cluster(distances=distances, sites=sites, sortedCluster=True)
 
 # TODO :set up a cluster using structure and lattice neigbhors
 
 
 assert cluster.get_count(
-    [0, 0, 0]) == 0, "if no count has happened, then its zero"
+    [0, 0, 0]) == 0, 'if no count has happened, then its zero'
 
 # count
 cluster.count([0, 0, 0])
 
-assert cluster.get_count([0, 0, 0]) == 1, "first count is one"
+assert cluster.get_count([0, 0, 0]) == 1, 'first count is one'
 
-# test getters (note that the distances are allready sorted otherwise they will reorder to lowest form)
-assert (cluster.get_distances() == distances).all(
-), "The distances should be equal, {} {}".format(cluster.get_distances(), distances)
+# test getters (note that the distances are allready sorted otherwise they will
+# reorder to lowest form)
+assert (cluster.get_distances() == distances).all(), \
+    'The distances should be equal {} {}'.format(cluster.get_distances(),
+                                                 distances)
 
-assert (cluster.get_sites() == sites).all(), "The sites should be equal"
+assert (cluster.get_sites() == sites).all(), 'The sites should be equal'
 
 
 # test equality
@@ -30,7 +32,7 @@ sites_big = np.array([10, 10, 10])
 distances_big = np.array([10, 10, 10])
 cluster_big = it.Cluster(sites_big, distances_big)
 
-assert cluster < cluster_big, "cluster_big is not bigger"
+assert cluster < cluster_big, 'cluster_big is not bigger'
 
 # try distances equal but sites different
 
@@ -40,7 +42,8 @@ cluster_slightly_bigger = it.Cluster(
     sites_slightly_bigger, distances_slightly_bigger)
 
 
-assert cluster_big < cluster_slightly_bigger, "cluster slightly bigger is not bigger"
+assert cluster_big < cluster_slightly_bigger, \
+    'cluster slightly bigger is not bigger'
 
 # try distances different but sites same
 
@@ -70,7 +73,6 @@ assert cluster_pair < cluster_big
 
 my_clusters = [cluster_big, cluster_slightly_bigger,
                cluster_pair, cluster_equal]
-
 my_clusters.sort()
 
 # check that cluster_pair is at the front

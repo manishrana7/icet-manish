@@ -4,6 +4,7 @@ import unittest
 from glob import glob
 import test_structure_container as TestStructureContainer
 
+
 class ScriptTestCase(unittest.TestCase):
     def __init__(self, methodname='testfile', filename=None):
         unittest.TestCase.__init__(self, methodname)

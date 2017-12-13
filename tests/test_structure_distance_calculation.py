@@ -36,10 +36,10 @@ for row in db.select():
     ''' Test interface to get_distance function '''
     try:
         dr = structure.get_distance(index, i, offset2=offset)
-    except:
+    except:  # NOQA
         assert False, 'get_distance function failed interface test (1)'
 
     try:
         dr = structure.get_distance(index, i, offset1=offset)
-    except:
+    except:  # NOQA
         assert False, 'get_distance function failed interface test (2)'

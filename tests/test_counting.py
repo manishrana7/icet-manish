@@ -247,6 +247,7 @@ def test_no_symmetry_vs_symmetry_count(atoms_primitive, atoms_tag,
             assert (cluster_map_no_symmetry[key1][element_key]
                     == cluster_map_symmetry[key2][element_key]), msg
 
+
 print('')
 db = connect('structures_for_testing.db')
 for row in db.select():

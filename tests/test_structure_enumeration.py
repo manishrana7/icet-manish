@@ -32,6 +32,7 @@ def count_structures(atoms, sizes, species, correct_count, tag):
     msg = 'Structure enumeration failed for {}'.format(tag)
     assert count == correct_count, msg
 
+
 tag = 'FCC, 3 elements'
 atoms = bulk('Au', crystalstructure='fcc')
 species = ['Au', 'Pd', 'Cu']

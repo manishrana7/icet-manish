@@ -113,7 +113,6 @@ class TestStructureContainer(unittest.TestCase):
             This unit test is not completely isolated since the
             `get_structure_indices` method is being called here.
         '''
-        #structure #4
         conf_4 = atoms_supercell.copy()
         conf_4[0].symbol = 'Au'
         conf_4[1].symbol = 'Au'
