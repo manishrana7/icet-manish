@@ -10,8 +10,11 @@ prim = bulk('Au')
 subelements = ['Ag', 'Au']
 
 # step 2: Enumerate structures, then relax and add them to the database
-sizes = range(1, 9)
-for atoms in enumerate_structures(prim, sizes, subelements):
+sizes = range(1, 7)
+for k, atoms in enumerate(enumerate_structures(prim, sizes, subelements)):
+    # skip if structure is already present in database
+    if any(db.select(structure_id=k)):
+        continue
     # remember the original (unrelaxed) positions
     original_positions = atoms.get_positions()
     # relax structure
@@ -19,4 +22,5 @@ for atoms in enumerate_structures(prim, sizes, subelements):
     dyn = BFGS(atoms)
     dyn.run(fmax=0.01)
     # add structure to database
-    db.write(atoms, data={'original_positions': original_positions})
+    db.write(atoms, structure_id=k,
+             data={'original_positions': original_positions})

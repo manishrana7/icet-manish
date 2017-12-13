@@ -31,6 +31,39 @@ Construct a cluster expansion
 
 (etc)
 
+(Step 3)
+------------------------
+
+(Please fill in)
+
+.. literalinclude:: ../../../../tutorial/construct_cluster_expansion.py
+   :start-after: # step 3
+   :end-before: # step 4
+
+(etc)
+
+(Step 4)
+------------------------
+
+(Please fill in)
+
+.. literalinclude:: ../../../../tutorial/construct_cluster_expansion.py
+   :start-after: # step 4
+   :end-before: # step 5
+
+(etc)
+
+(Step 5)
+------------------------
+
+(Please fill in)
+
+.. literalinclude:: ../../../../tutorial/construct_cluster_expansion.py
+   :start-after: # step 5
+
+(etc)
+
+(include figures with results)
 
 Source code
 -----------
@@ -39,7 +72,7 @@ Source code
 
     .. container:: header
 
-       The complete source code for constructing a cluster expansion is
-       available in ``tutorial/construct_cluster_expansion.py``
+       The complete source code is available in
+       ``tutorial/construct_cluster_expansion.py``
 
     .. literalinclude:: ../../../../tutorial/construct_cluster_expansion.py

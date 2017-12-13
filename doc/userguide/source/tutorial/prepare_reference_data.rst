@@ -37,16 +37,7 @@ Source code
 
     .. container:: header
 
-       The complete source code fore preparing the reference data is available
-       in ``tutorial/prepare_reference_data.py``
+       The complete source code is available in
+       ``tutorial/prepare_reference_data.py``
 
     .. literalinclude:: ../../../../tutorial/prepare_reference_data.py
-
-.. container:: toggle
-
-    .. container:: header
-
-       The mixing energy can be plotted using the script
-       ``tutorial/plot_mixing_energy.py``
-
-    .. literalinclude:: ../../../../tutorial/plot_mixing_energy.py

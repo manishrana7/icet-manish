@@ -22,3 +22,4 @@ accessed below.
    :maxdepth: 1
 
    construct_cluster_expansion
+   run_monte_carlo

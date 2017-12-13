@@ -1,24 +1,81 @@
-from icetdev import ClusterSpace, StructureContainer
+from icetdev import (ClusterSpace,
+                     StructureContainer,
+                     Optimizer,
+                     ClusterExpansion)
+from icetdev.enumeration import enumerate_structures
 from ase.db import connect
 from ase.build import bulk
+import matplotlib.pyplot as plt
+import numpy as np
 
-# step 1: Setting up the basic structure and a cluster space
+# step 1: Set up the basic structure and a cluster space
 prim = bulk('Au')
 cutoffs = [6.0, 5.0, 4.0]
 subelements = ['Ag', 'Au']
 cs = ClusterSpace(prim, cutoffs, subelements)
 print(cs)
 
-# step 2: Parsing input structures and setting up a structure container
+# step 2: Parse input structures and set up a structure container
 db = connect('structures.db')
+# get reference energies for elements (input data)
+eref = {}
+for elem in subelements:
+    for row in db.select('{}=1'.format(elem), natoms=1):
+        eref[elem] = row.energy / row.natoms
+        break
+# compile structures into structure container and add mixing energy
 atoms_list = []
 properties = []
 for row in db.select():
+    conc = float(row.count_atoms().get('Ag', 0)) / row.natoms
+    emix = row.energy / row.natoms
+    emix -= conc * eref['Ag'] + (1.0 - conc) * eref['Au']
+    properties.append({'energy': emix})
     atoms = row.toatoms()
-    properties.append({'energy': row.energy})
     atoms.set_positions(row.data['original_positions'])
     atoms_list.append(atoms)
 sc = StructureContainer(cs, atoms_list, properties)
 print(sc)
 
-# step 3: Training cluster expansions
+# step 3: Train parameters
+opt = Optimizer(sc.get_fit_data())
+opt.train()
+print(opt)
+
+# step 4: Compare predicted and target data
+ce = ClusterExpansion(cs, opt.parameters)
+data = []
+for row in db.select():
+    conc = float(row.count_atoms().get('Ag', 0)) / row.natoms
+    emix = row.energy / row.natoms
+    emix -= conc * eref['Ag'] + (1.0 - conc) * eref['Au']
+    atoms = row.toatoms()
+    atoms.set_positions(row.data['original_positions'])
+    emix_ce = ce.predict(atoms)
+    data.append([conc, emix, emix_ce])
+data = np.array(data).T
+# plot results
+fig, ax = plt.subplots()
+ax.set_xlabel(r'Ag concentration')
+ax.set_ylabel(r'Mixing energy (meV/atom)')
+ax.set_xlim([0, 1])
+ax.scatter(data[0], 1e3 * data[1], marker='o')
+ax.scatter(data[0], 1e3 * data[2], marker='x')
+plt.savefig('mixing-energy-comparison.pdf', bbox_inches='tight')
+
+# step 5: Predict energies for a many structures
+# enumerate structures and compile predicted energies
+data = []
+for atoms in enumerate_structures(prim, range(1, 16), subelements):
+    conc = float(atoms.get_chemical_symbols().count('Ag')) / len(atoms)
+    emix = ce.predict(atoms)
+    data.append([conc, emix])
+print('Predicted energies for {} structures'.format(len(data)))
+data = np.array(data).T
+# plot results
+fig, ax = plt.subplots()
+ax.set_xlabel(r'Ag concentration')
+ax.set_ylabel(r'Mixing energy (meV/atom)')
+ax.set_xlim([0, 1])
+ax.scatter(data[0], 1e3 * data[1], marker='x')
+plt.savefig('mixing-energy-predicted.pdf', bbox_inches='tight')
