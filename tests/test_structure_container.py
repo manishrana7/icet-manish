@@ -138,7 +138,6 @@ class TestStructureContainer(unittest.TestCase):
     def test_repr(self):
         '''
         Testing repr functionality
-
         '''
         retval = self.sc.__repr__()
         target = """------------- Structure Container --------------

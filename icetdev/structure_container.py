@@ -109,7 +109,7 @@ class StructureContainer(object):
         s = []
         s += ['{s:-^{n}}'.format(s=' Structure Container ', n=n)]
         s += ['Total number of structures: {}'.format(len(self))]
-        s += [repr_structure(-1, dummy)]
+        s += [repr_structure(-1, dummy).rstrip()]
         s += [horizontal_line]
         # table body
         index = 0
