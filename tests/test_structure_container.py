@@ -3,19 +3,19 @@
 '''
 This file contains unit tests and other tests. It can be executed by
 simply executing this file from a shell prompt:
-    
+
     $ ./test_structure_container.py
-    
+
 In which case it will use the system's default python version. If a specific
 python version should be used, run that python version with this file as input,
 e.g.:
-    
+
     python3 test_structure_container.py
 
 For a description of the python unit testing framework, see this link:
 https://docs.python.org/3/library/unittest.html
 
-When executing this file doc testing is also performed on all doc tests in 
+When executing this file doc testing is also performed on all doc tests in
 the structure_container.py file
 
 '''
@@ -35,7 +35,7 @@ atoms_supercell = atoms_prim.repeat(2)
 
 cs = ClusterSpace(atoms_supercell, cutoffs, subelements)
 
-atoms_list=[]
+atoms_list = []
 
 # structure #1
 conf_1 = atoms_supercell.copy()
@@ -57,9 +57,10 @@ properties = []
 
 for conf in atoms_list:
     conf.set_calculator(calc)
-    conf.properties = {'energy':conf.get_potential_energy(), 
-                       'volume':conf.get_volume()}
+    conf.properties = {'energy': conf.get_potential_energy(),
+                       'volume': conf.get_volume()}
     properties.append(conf.properties)
+
 
 class TestStructureContainer(unittest.TestCase):
     '''
@@ -108,9 +109,9 @@ class TestStructureContainer(unittest.TestCase):
     def test_add_structure(self):
         '''
         Testing add_structure functionality
-        TODO: 
-            This unit test is not completely isolated since  
-            `get_structure_indices` method is being called here.        
+        TODO:
+            This unit test is not completely isolated since the
+            `get_structure_indices` method is being called here.
         '''
         #structure #4
         conf_4 = atoms_supercell.copy()
@@ -134,7 +135,6 @@ class TestStructureContainer(unittest.TestCase):
         self.assertTrue(isinstance(prop, float) for prop in target_properties)
         self.assertTrue(isinstance(cv, float) for cv in clustervectors)
 
-
     def test_repr(self):
         '''
         Testing repr functionality
@@ -143,13 +143,12 @@ class TestStructureContainer(unittest.TestCase):
         retval = self.sc.__repr__()
         target = """------------- Structure Container --------------
 Total number of structures: 3
-index |   user_tag   | natoms | energy | volume 
+index |   user_tag   | natoms | energy | volume
 ------------------------------------------------
    0  | None         |     8  | 0.013  | 136.836
    1  | None         |     8  | -0.007 | 136.836
    2  | None         |     8  | -0.026 | 136.836"""
         self.assertEqual(target, retval)
-
 
     def test_get_properties(self):
         '''
@@ -206,15 +205,14 @@ class TestFitStructure(unittest.TestCase):
         '''
         Testing clustervector attribute
         '''
-        cv  = self.fit_structure.clustervector
+        cv = self.fit_structure.clustervector
         self.assertTrue(all(isinstance(val, float) for val in cv))
 
-    
     def test_atoms(self):
         '''
         Testing atoms attribute
         '''
-        atoms  = self.fit_structure.atoms
+        atoms = self.fit_structure.atoms
         self.assertTrue(isinstance(atoms, Atoms))
 
     def test_user_tag(self):
@@ -223,7 +221,7 @@ class TestFitStructure(unittest.TestCase):
         '''
         user_tag = self.fit_structure.user_tag
         self.assertTrue(isinstance(user_tag, str))
-        
+
     def test_properties(self):
         '''
         Testing properties attribute
@@ -245,7 +243,7 @@ class TestFitStructure(unittest.TestCase):
         Testing set_clustervector functionality
         '''
         self.fit_structure.set_clustervector(None)
-        cv  = self.fit_structure.clustervector
+        cv = self.fit_structure.clustervector
         self.assertTrue(cv is None)
 
 
