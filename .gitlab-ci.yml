@@ -23,8 +23,7 @@ tests:
     - build_linux
   script:
     - export PATH=${PATH}:${HOME}/.local/bin
-    - export PYTHONPATH=$PWD:$PYTHONPATH
-    - export PYTHONPATH=$PWD/build/src/:$PYTHONPATH
+    - export PYTHONPATH=$PWD:$PWD/build/src/:$PYTHONPATH
     - coverage run tests/__init__.py
     - coverage report -m
     - coverage html -d coverage
@@ -64,6 +63,7 @@ pages:
     - cd ../..
     # sphinx
     - pip3 install breathe
+    - export PYTHONPATH=$PWD:$PWD/build/src/:$PYTHONPATH
     - sphinx-build doc/userguide/source/ public/.test/userguide/
     # consolidate
     - mv doc/apidoc/html/ public/.test/apidoc/
