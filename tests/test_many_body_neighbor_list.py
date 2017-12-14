@@ -5,7 +5,7 @@ import numpy as np
 class many_body_neighbor_listTester():
 
     """
-    This is a python implementation of icet's  manybody neighbor_list.
+    This is a python implementation of icet's  many-body neighbor list.
     This is used both as a tester of the c++ version and also as a venue
     to try out new functionalities.
 
@@ -92,7 +92,7 @@ class many_body_neighbor_listTester():
             False will return all indices that are bigger than site "index"
             True will return also return indices that are smaller.
         order : int
-            highest order for manybody neighbor indices.
+            highest order for many-body neighbor indices.
         """
         for j in ngb_i:
 
@@ -126,14 +126,14 @@ class many_body_neighbor_listTester():
 
     def add_singlet(self, index, mbn_indices):
         """
-        Add singlet to manybody neighbor indices
+        Add singlet to many-body neighbor indices
         """
         offset = [0., 0., 0.]
         mbn_indices.append([index, offset])
 
     def add_pairs(self, index, neigbhorlist, mbn_indices, bothways):
         """
-        Add pairs from neigbhorlist to manybody neighbor indices
+        Add pairs from neigbhorlist to many-body neighbor indices
         """
         offset = [0., 0., 0.]
         first_site = [index, offset]

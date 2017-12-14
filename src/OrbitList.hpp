@@ -26,7 +26,7 @@ class OrbitList
 {
   public:
     OrbitList();
-    OrbitList(const std::vector<NeighborList> &neighborlists, const Structure &);
+    OrbitList(const std::vector<NeighborList> &neighbor_lists, const Structure &);
     OrbitList(const Structure &, const std::vector<std::vector<LatticeSite>> &, const std::vector<NeighborList> &);
 
     /**

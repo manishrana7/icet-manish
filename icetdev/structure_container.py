@@ -5,7 +5,7 @@ from ase.calculators.calculator import PropertyNotImplementedError
 
 class StructureContainer(object):
 
-    def __init__(self, clusterspace,
+    def __init__(self, cluster_space,
                  list_of_atoms=None,
                  list_of_properties=None):
 
@@ -17,19 +17,19 @@ class StructureContainer(object):
 
         Attributes:
         -----------
-        clusterspace : icet ClusterSpace object
+        cluster_space : ClusterSpace object
             the cluster space used for evaluating the cluster vectors
 
-        list_of_atoms : list or list of tuples (bi-optional)
-            list of input structures (ASE Atom objects) or list of pairs
-            structures-user_tag, e.g. [(atom, user_tag)], where user_tag
-            should be a type str
+        list_of_atoms : list / list of tuples (bi-optional)
+            list of input structures (ASE Atoms objects) or list of pairs
+            structures-user_tag, e.g. `[(atom, user_tag)]`, where `user_tag`
+            should be a string type
 
-        list_of_properties : list of dict
-            list of properties. properties should be given as dict
+        list_of_properties : list of dicts
+            list of properties, which are provided in dicts
         '''
 
-        self._cluster_space = clusterspace
+        self._cluster_space = cluster_space
 
         # Add atomic structures
         if list_of_atoms is not None:
@@ -193,14 +193,14 @@ class StructureContainer(object):
 
         '''
         if structure_indices is None:
-            cv_list = [s.clustervector
+            cv_list = [s.cluster_vector
                        for s in self._structure_list]
             prop_list = [s.properties[key]
                          for s in self._structure_list]
         else:
             cv_list, prop_list = [], []
             for i in structure_indices:
-                cv_list.append(self._structure_list[i].clustervector)
+                cv_list.append(self._structure_list[i].cluster_vector)
                 prop_list.append(self._structure_list[i].properties[key])
 
         if len(cv_list) == 0:
@@ -288,7 +288,7 @@ class StructureContainer(object):
 class FitStructure:
     '''
     This class holds a supercell along its property as well as
-    the fit clustervector.
+    the fit cluster vector.
 
     Attributes
     ----------
@@ -297,7 +297,7 @@ class FitStructure:
     user_tag : str
         custom user tag
     cvs : list of floats
-        calculated clustervector for actual structure
+        calculated cluster vector for actual structure
     properties : dict
         the properties dictionary
     '''
@@ -310,8 +310,8 @@ class FitStructure:
         self.set_properties(properties)
 
     @property
-    def clustervector(self):
-        '''numpy array : the fit clustervector'''
+    def cluster_vector(self):
+        '''numpy array : the fit cluster vector'''
         return self._cluster_vector
 
     @property
@@ -331,12 +331,12 @@ class FitStructure:
 
     def set_cluster_vector(self, cv):
         '''
-        Set the clustervectors to structure.
+        Set the cluster vectors to structure.
 
         Parameters
         ----------
         cv : list of float
-            clustervector
+            cluster vector
 
         '''
         if cv is not None:

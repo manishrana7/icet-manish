@@ -9,7 +9,7 @@ OrbitList::OrbitList()
 }
 
 ///Construct orbitlist from mbnl and structure
-OrbitList::OrbitList(const std::vector<NeighborList> &neighborlists, const Structure &structure)
+OrbitList::OrbitList(const std::vector<NeighborList> &neighbor_lists, const Structure &structure)
 {
     _primitiveStructure = structure;
     std::unordered_map<Cluster, int> clusterIndexMap;
@@ -17,7 +17,7 @@ OrbitList::OrbitList(const std::vector<NeighborList> &neighborlists, const Struc
 
     for (int index = 0; index < structure.size(); index++)
     {
-        mbnl.build(neighborlists, index, false); //bothways=false
+        mbnl.build(neighbor_lists, index, false); //bothways=false
         for (size_t i = 0; i < mbnl.getNumberOfSites(); i++)
         {
             //special case for singlet
@@ -103,11 +103,11 @@ int OrbitList::findOrbit(const Cluster &cluster, const std::unordered_map<Cluste
     }
 }
 
-OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<LatticeSite>> &permutation_matrix, const std::vector<NeighborList> &neighborlists)
+OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<LatticeSite>> &permutation_matrix, const std::vector<NeighborList> &neighbor_lists)
 {
     _primitiveStructure = structure;
     std::vector<std::vector<std::vector<LatticeSite>>> lattice_neighbors;
-    std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> manybodyNeighborIndices;
+    std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> many_bodyNeighborIndices;
     bool saveBothWays = false;
     ManyBodyNeighborList mbnl = ManyBodyNeighborList();
 
@@ -121,10 +121,10 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
         std::string errMSG = "Found duplicates in column1 of permutation matrix " + std::to_string(col1.size()) + " != " + std::to_string(col1_uniques.size());
         throw std::runtime_error(errMSG);
     }
-    for (size_t index = 0; index < neighborlists[0].size(); index++)
+    for (size_t index = 0; index < neighbor_lists[0].size(); index++)
     {
 
-        std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> mbnl_latnbrs = mbnl.build(neighborlists, index, saveBothWays);
+        std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> mbnl_latnbrs = mbnl.build(neighbor_lists, index, saveBothWays);
         for (const auto &mbnl_pair : mbnl_latnbrs)
         {
 

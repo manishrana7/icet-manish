@@ -12,7 +12,7 @@ from icetdev import permutation_map
 
 def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
     '''
-    Test that int Mi, list Mi and dict Mi produces the same clustervectors.
+    Test that int Mi, list Mi and dict Mi produces the same cluster vectors.
     '''
 
     prim_size = len(
@@ -26,13 +26,13 @@ def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
     for singlet in singlet_data:
         Mi_dict[singlet['orbit_index']] = allowed_sites
 
-    clusterspace_int = ClusterSpace(atoms, cutoffs, subelements,  Mi=Mi_int)
-    clusterspace_list = ClusterSpace(atoms, cutoffs, subelements, Mi=Mi_list)
-    clusterspace_dict = ClusterSpace(atoms, cutoffs, subelements, Mi=Mi_dict)
+    cluster_space_int = ClusterSpace(atoms, cutoffs, subelements,  Mi=Mi_int)
+    cluster_space_list = ClusterSpace(atoms, cutoffs, subelements, Mi=Mi_list)
+    cluster_space_dict = ClusterSpace(atoms, cutoffs, subelements, Mi=Mi_dict)
 
-    atoms_prim = clusterspace_int.get_primitive_structure().to_atoms()
+    atoms_prim = cluster_space_int.get_primitive_structure().to_atoms()
 
-    # create and populate a supercell and get cv
+    # create and populate a supercell and get cluster vector
     repeat = [1] * 3
     for i, pbc in enumerate(atoms_prim.pbc):
         if pbc:
@@ -43,9 +43,9 @@ def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
 
     conf = Structure.from_atoms(conf)
 
-    cv_int = clusterspace_int.get_cluster_vector(conf)
-    cv_list = clusterspace_list.get_cluster_vector(conf)
-    cv_dict = clusterspace_dict.get_cluster_vector(conf)
+    cv_int = cluster_space_int.get_cluster_vector(conf)
+    cv_list = cluster_space_list.get_cluster_vector(conf)
+    cv_dict = cluster_space_dict.get_cluster_vector(conf)
 
     msg = 'Cluster vectors were not equal for an equivalent Mi (int vs list)'
     assert (np.array(cv_int) == np.array(cv_list)).all, msg

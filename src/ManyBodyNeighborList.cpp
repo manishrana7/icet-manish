@@ -1,16 +1,16 @@
 #include "ManyBodyNeighborList.hpp"
 
 /**
-    This will use the neighborlist to combine all possible neighbors up to the given order.
+    This will use the neighbor_list to combine all possible neighbors up to the given order.
     The output will be: std::vector<std::pair<originalNeighbors, manyNeigbhors>>
     the many body neigbhors can be retrieved by doing:
-    for (const auto nbr : manybodyNeighborIndices)
+    for (const auto nbr : many_bodyNeighborIndices)
     {
         std::vector<std::pair<int,Vector3d>> neighbors = nbr.first; // this are the first orignal neighbors
         for(const auto manynbr : nbr.second)
         {
-            manybody_neigbhor = neighbors;
-            manybody_neigbhor.append(manynbr);
+            many_body_neigbhor = neighbors;
+            many_body_neigbhor.append(manynbr);
         }
     }
 
@@ -23,34 +23,34 @@
     otherwise only i,j,k will be saved if i < j < k
 */
 
-std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> ManyBodyNeighborList::build(const std::vector<NeighborList> &neighborlists, int index, bool saveBothWays)
+std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> ManyBodyNeighborList::build(const std::vector<NeighborList> &neighbor_lists, int index, bool saveBothWays)
 {
 
-    if (neighborlists.empty())
+    if (neighbor_lists.empty())
     {
         throw std::runtime_error("Error: neigbhorlist vector is empty in ManyBodyNeighborList::build");
     }
-    std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> manybodyNeighborIndices;
+    std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> many_bodyNeighborIndices;
 
-    addSinglet(index, manybodyNeighborIndices);
-    addPairs(index, neighborlists[0], manybodyNeighborIndices, saveBothWays);
+    addSinglet(index, many_bodyNeighborIndices);
+    addPairs(index, neighbor_lists[0], many_bodyNeighborIndices, saveBothWays);
 
-    for (size_t c = 2; c < neighborlists.size() + 2; c++)
+    for (size_t c = 2; c < neighbor_lists.size() + 2; c++)
     {
-        auto Ni = neighborlists[c - 2].getNeighbors(index);
-        int numberOfSites = neighborlists[c - 2].size();
+        auto Ni = neighbor_lists[c - 2].getNeighbors(index);
+        int numberOfSites = neighbor_lists[c - 2].size();
         Vector3d zeroVector = {0.0, 0.0, 0.0};
         std::vector<LatticeSite> currentOriginalNeighbors;
         currentOriginalNeighbors.push_back(LatticeSite(index, zeroVector)); // index is always first index
 
-        combineToHigherOrder(neighborlists[c - 2], manybodyNeighborIndices, Ni, currentOriginalNeighbors, saveBothWays, c);
+        combineToHigherOrder(neighbor_lists[c - 2], many_bodyNeighborIndices, Ni, currentOriginalNeighbors, saveBothWays, c);
     }
-    _latticeNeighbors = manybodyNeighborIndices;
-    return manybodyNeighborIndices;
+    _latticeNeighbors = many_bodyNeighborIndices;
+    return many_bodyNeighborIndices;
 }
 
-///Adds singlet from the index to manybodyNeighborIndices
-void ManyBodyNeighborList::addSinglet(const int index, std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &manybodyNeighborIndices) const
+///Adds singlet from the index to many_bodyNeighborIndices
+void ManyBodyNeighborList::addSinglet(const int index, std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &many_bodyNeighborIndices) const
 {
     Vector3d zeroVector = {0.0, 0.0, 0.0};
     LatticeSite latticeNeighborSinglet = LatticeSite(index, zeroVector);
@@ -58,12 +58,12 @@ void ManyBodyNeighborList::addSinglet(const int index, std::vector<std::pair<std
     singletLatticeSites.push_back(latticeNeighborSinglet);
 
     std::vector<LatticeSite> latNbrsEmpty;
-    manybodyNeighborIndices.push_back(std::make_pair(singletLatticeSites, latNbrsEmpty));
+    many_bodyNeighborIndices.push_back(std::make_pair(singletLatticeSites, latNbrsEmpty));
 }
 
-///Add all pairs originating from index using neighborlist
+///Add all pairs originating from index using neighbor_list
 void ManyBodyNeighborList::addPairs(const int index, const NeighborList &neighborList,
-                                    std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &manybodyNeighborIndices, bool saveBothWays) const
+                                    std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &many_bodyNeighborIndices, bool saveBothWays) const
 
 {
     Vector3d zeroVector = {0.0, 0.0, 0.0};
@@ -81,11 +81,11 @@ void ManyBodyNeighborList::addPairs(const int index, const NeighborList &neighbo
     {
         return;
     }
-    manybodyNeighborIndices.push_back(std::make_pair(firstSite, Ni));
+    many_bodyNeighborIndices.push_back(std::make_pair(firstSite, Ni));
 }
 
 /**
-This will use the permutationmatrix together with the neighborlist to construct the distinct and indistinct sets of points
+This will use the permutationmatrix together with the neighbor_list to construct the distinct and indistinct sets of points
 
 The output will be std::vector<std::vector<std::vector<LatticeSite>>>
 the next outer vector contains the set of indistinct set of lattice neighbors.
@@ -100,7 +100,7 @@ and it will take Ni (lattice neighbors of i) and find the intersection of Ni and
 all j in Ni_c1 are then within the cutoff of site i, then depending on the order all the pairs/triplets will be constructed from the
 lattice neighbors in Ni_pm.
 
-This will be repeated for all the sites in the neighborlist. In the end all the pair/triplet terms will have been generated from col1.
+This will be repeated for all the sites in the neighbor_list. In the end all the pair/triplet terms will have been generated from col1.
 
 Then you will take the first vector<LatticeSites> and find the rows of these LatNbrs in col1 of the permutation matrix.
 then you traverse through all the columns in the permutation matrix. These vector<latticeNeighbors> are then indistinct from the original.
@@ -119,7 +119,7 @@ be removed/overlooked when moving to the next vector<LatticeSite>.
     what is saved is then i,j and N_ij up to the desired order "maxorder"
 */
 void ManyBodyNeighborList::combineToHigherOrder(const NeighborList &nl,
-                                                std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &manybodyNeighborIndices,
+                                                std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &many_bodyNeighborIndices,
                                                 const std::vector<LatticeSite> &Ni, std::vector<LatticeSite> &currentOriginalNeighbors, bool saveBothWays, const int maxOrder)
 {
 
@@ -174,12 +174,12 @@ void ManyBodyNeighborList::combineToHigherOrder(const NeighborList &nl,
 
         if (originalNeighborCopy.size() + 1 < maxOrder)
         {
-            combineToHigherOrder(nl, manybodyNeighborIndices, intersection_N_ij, originalNeighborCopy, saveBothWays, maxOrder);
+            combineToHigherOrder(nl, many_bodyNeighborIndices, intersection_N_ij, originalNeighborCopy, saveBothWays, maxOrder);
         }
 
         if (intersection_N_ij.size() > 0 && originalNeighborCopy.size() == (maxOrder - 1))
         {
-            manybodyNeighborIndices.push_back(std::make_pair(originalNeighborCopy, intersection_N_ij));
+            many_bodyNeighborIndices.push_back(std::make_pair(originalNeighborCopy, intersection_N_ij));
         }
     }
 }
@@ -217,7 +217,7 @@ void ManyBodyNeighborList::translateAllNi(std::vector<LatticeSite> &Ni, const Ve
     getNumberOfSites(int index)
     and
     ManyBodyNeighborList::getSites
-    To loop over possible manybody neighbors
+    To loop over possible many_body neighbors
 
 */
 size_t ManyBodyNeighborList::getNumberOfSites() const
@@ -233,7 +233,7 @@ size_t ManyBodyNeighborList::getNumberOfSites(const unsigned int index) const
     return _latticeNeighbors[index].second.size();
 }
 
-/** Return the manybody neighbor at "firstIndex"  and "secondIndex "
+/** Return the many_body neighbor at "firstIndex"  and "secondIndex "
     in _latticeNeighbors and _latticeNeighbors[firstIndex] respectively
 */
 std::vector<LatticeSite> ManyBodyNeighborList::getSites(const unsigned int &firstIndex,

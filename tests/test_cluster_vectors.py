@@ -1,6 +1,6 @@
 '''
 This script checks that all atom objects in the database can have
-its  clustervector computed
+its cluster vector computed
 '''
 
 from icetdev import Structure, ClusterSpace
@@ -28,18 +28,18 @@ def generate_mixed_structure(atoms_prim, subelements):
     return atoms
 
 
-def generate_cluster_vector_set(n, atoms_prim, subelements, clusterspace):
+def generate_cluster_vector_set(n, atoms_prim, subelements, cluster_space):
     '''
-    Generate a set of clustervectors from clusterspace.
+    Generate a set of cluster vectors from cluster space.
     '''
-    clustervectors = []
+    cluster_vectors = []
     for i in range(n):
         atoms = generate_mixed_structure(atoms_prim, subelements)
         conf = Structure.from_atoms(atoms)
-        cv = clusterspace.get_cluster_vector(conf)
-        clustervectors.append(cv)
+        cv = cluster_space.get_cluster_vector(conf)
+        cluster_vectors.append(cv)
 
-    return clustervectors
+    return cluster_vectors
 
 
 def assert_decorrelation(matrix, tolerance=0.99):
@@ -81,8 +81,8 @@ for row in db.select():
     if atoms_row.get_pbc().all():
         atoms_row.wrap()
         print(' structure: {}'.format(row.tag))
-        clusterspace = ClusterSpace(atoms_row, cutoffs, subelements)
+        cluster_space = ClusterSpace(atoms_row, cutoffs, subelements)
         if not atoms_row.get_pbc().all():
             permutation_map.__vacuum_on_non_pbc(atoms_row)
         cvs = generate_cluster_vector_set(5, atoms_row,
-                                          subelements, clusterspace)
+                                          subelements, cluster_space)

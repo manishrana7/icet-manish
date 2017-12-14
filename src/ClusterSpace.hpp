@@ -61,10 +61,10 @@ class ClusterSpace
     ///setup  _clusterSpaceInfo
     void setupClusterSpaceInfo();
 
-    ///Returns clusterspace information (orbit index and mc vector)
+    ///Returns cluster space information (orbit index and mc vector)
     std::pair<int, std::vector<int>> getClusterSpaceInfo(const unsigned int);
 
-    ///Gets the clusterspace size, i.e. the length of a cluster vector
+    ///Gets the cluster space size, i.e. the length of a cluster vector
     size_t getClusterSpaceSize();
 
     ///Returns the cutoffs
@@ -112,16 +112,16 @@ class ClusterSpace
     ///Primitive orbitlist based on the structure and the global cutoffs
     OrbitList _primitive_orbit_list;
 
-    ///Unique id for this clusterspace
+    ///Unique id for this cluster space
     int clusterSpace_ID;
 
     ///The radial cutoffs for neigbhor inclusion. First element in vector is pairs, then triplets etc.
     std::vector<double> _clusterCutoffs;
 
-    ///Elements considered in this clusterspace (The integers represent their order in the periodic table)
+    ///Elements considered in this cluster space (The integers represent their order in the periodic table)
     std::vector<int> _elements;
 
-    ///Cluster space information, the vector is over all dimension of the clusterspace. the first int is the orbit index, the vector of ints are MC vectors
+    ///Cluster space information, the vector is over all dimension of the cluster space. the first int is the orbit index, the vector of ints are MC vectors
     std::vector<std::pair<int, std::vector<int>>> _clusterSpaceInfo;
 
     ///a boolean to keep track if this is initialized or not

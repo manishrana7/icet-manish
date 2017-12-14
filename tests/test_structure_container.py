@@ -130,9 +130,9 @@ class TestStructureContainer(unittest.TestCase):
         '''
         Testing get_fit_data functionality
         '''
-        clustervectors, target_properties = self.sc.get_fit_data()
+        cluster_vectors, target_properties = self.sc.get_fit_data()
         self.assertTrue(isinstance(prop, float) for prop in target_properties)
-        self.assertTrue(isinstance(cv, float) for cv in clustervectors)
+        self.assertTrue(isinstance(cv, float) for cv in cluster_vectors)
 
     def test_repr(self):
         '''
@@ -177,7 +177,7 @@ index |   user_tag   | natoms | energy | volume
 
     def test_cluster_space(self):
         '''
-        Testing clusterspace functionality
+        Testing cluster space functionality
         '''
         cs_onlyread = self.sc.cluster_space
         self.assertEqual(cs_onlyread, cs)
@@ -201,9 +201,9 @@ class TestFitStructure(unittest.TestCase):
 
     def test_cluster_vector(self):
         '''
-        Testing clustervector attribute
+        Testing cluster vector attribute
         '''
-        cv = self.fit_structure.clustervector
+        cv = self.fit_structure.cluster_vector
         self.assertTrue(all(isinstance(val, float) for val in cv))
 
     def test_atoms(self):
@@ -241,7 +241,7 @@ class TestFitStructure(unittest.TestCase):
         Testing set_cluster_vector functionality
         '''
         self.fit_structure.set_cluster_vector(None)
-        cv = self.fit_structure.clustervector
+        cv = self.fit_structure.cluster_vector
         self.assertTrue(cv is None)
 
 
