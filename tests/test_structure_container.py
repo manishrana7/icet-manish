@@ -188,7 +188,7 @@ class TestFitStructure(unittest.TestCase):
         '''
         Instantiate class before each test
         '''
-        cv = cs.get_clustervector(conf_1)
+        cv = cs.get_cluster_vector(conf_1)
         prop = properties[0]
         self.fit_structure = FitStructure(conf_1, "conf_1", cv, prop)
 
@@ -199,7 +199,7 @@ class TestFitStructure(unittest.TestCase):
         '''
         self.fit_structure = FitStructure(conf_1, None)
 
-    def test_clustervector(self):
+    def test_cluster_vector(self):
         '''
         Testing clustervector attribute
         '''
@@ -236,11 +236,11 @@ class TestFitStructure(unittest.TestCase):
         properties_dict = self.fit_structure.properties
         self.assertTrue(isinstance(properties_dict, dict))
 
-    def test_set_clustervector(self):
+    def test_set_cluster_vector(self):
         '''
-        Testing set_clustervector functionality
+        Testing set_cluster_vector functionality
         '''
-        self.fit_structure.set_clustervector(None)
+        self.fit_structure.set_cluster_vector(None)
         cv = self.fit_structure.clustervector
         self.assertTrue(cv is None)
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import print_function, division
 from .structure import Structure
 from .cluster_space import ClusterSpace
@@ -23,8 +24,8 @@ __credits__ = ['Mattias Ångqvist',
 __version__ = '0.1'
 __all__ = ['ClusterSpace',
            'ClusterExpansion',
-           'StructureContainer',
            'Structure',
+           'StructureContainer',
            'Optimizer']
-__status__ = 'beta-version'
+__status__ = 'alpha-version'
 __url__ = 'http://www.icet.org/'

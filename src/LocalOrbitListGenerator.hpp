@@ -19,10 +19,10 @@ the primToSupercellMap
 you can query this object with
 
 ///Give number of possible local orbitlists one can make from current supercell and the primitive orbitlist
-size_t number_of_possible_local_orbitlists();
+size_t number_of_possible_local_orbit_lists();
 
 ///Generate the orbitlist from the primitive offset with count i
-OrbitList getLocalOrbitlist(int i);
+OrbitList getLocalOrbitList(int i);
 
 std::vector<Vector3d> getUniqueOffsets() const;
 
@@ -34,21 +34,21 @@ void reset();
 etc...
 */
 
-class LocalOrbitlistGenerator
+class LocalOrbitListGenerator
 {
   public:
-    LocalOrbitlistGenerator(const OrbitList &, const Structure &);
+    LocalOrbitListGenerator(const OrbitList &, const Structure &);
 
  
 
     ///generate and returns the local orbitlist with the input index
-    OrbitList generateLocalOrbitlist(const unsigned int ) ;
+    OrbitList generateLocalOrbitList(const unsigned int ) ;
 
     ///generate and returns the local orbitlist with the input offset (require that the offset is in uniquecell offset?)
-    OrbitList generateLocalOrbitlist(const Vector3d & ) ;
+    OrbitList generateLocalOrbitList(const Vector3d & ) ;
 
     /// Generate the full orbitlist from this structure
-    OrbitList generateFullOrbitlist();
+    OrbitList generateFullOrbitList();
     
     //clears the unordered_map and the vector    
     void clear();
@@ -84,7 +84,7 @@ class LocalOrbitlistGenerator
 
 
     ///Primitive orbitlist
-    OrbitList _orbitlist;
+    OrbitList _orbit_list;
 
     ///supercell structure from which the local orbitlist will be based upon
     Structure _supercell;

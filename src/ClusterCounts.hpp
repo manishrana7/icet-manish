@@ -6,7 +6,7 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <string>
-#include "ManybodyNeighborlist.hpp"
+#include "ManyBodyNeighborList.hpp"
 #include "Structure.hpp"
 #include "Cluster.hpp"
 #include "LatticeSite.hpp"
@@ -32,7 +32,7 @@ public:
   void count(const Structure &, const std::vector<std::vector<LatticeSite>> &,
              const Cluster &);
   void countCluster(const Cluster &, const std::vector<int> &);
-  void countOrbitlist(const Structure &, const OrbitList &, bool orderIntact);
+  void countOrbitList(const Structure &, const OrbitList &, bool orderIntact);
   std::unordered_map<Cluster, std::map<std::vector<int>, int>> getClusterCounts() const
   {
     return _clusterCounts;

@@ -1,6 +1,6 @@
 from icetdev import Structure
-from _icetdev import Neighborlist
-from ase.neighborlist import NeighborList
+from _icetdev import NeighborList
+from ase.neighborlist import NeighborList as ASENeighborList
 from ase.db import connect
 import spglib as spg
 
@@ -20,30 +20,30 @@ neighbor_cutoff = 1.6
 for row in db.select('natoms>1'):
 
     atoms_row = row.toatoms()
-    # ASE neighborlist
-    ase_nl = NeighborList(len(atoms_row)*[neighbor_cutoff/2], skin=1e-8,
-                          bothways=True, self_interaction=False)
+    # ASE neighbor_list
+    ase_nl = ASENeighborList(len(atoms_row)*[neighbor_cutoff/2], skin=1e-8,
+                             bothways=True, self_interaction=False)
     ase_nl.update(atoms_row)
     ase_indices, ase_offsets = ase_nl.get_neighbors(1)
 
-    # icet neighborlist
+    # icet neighbor_list
     structure = Structure.from_atoms(atoms_row)
-    nl = Neighborlist(neighbor_cutoff)
+    nl = NeighborList(neighbor_cutoff)
     nl.build(structure)
     neighbors = nl.get_neighbors(1)
     indices = []
     offsets = []
     for ngb in neighbors:
         indices.append(ngb.index)
-        offsets.append(ngb.unitcellOffset)
+        offsets.append(ngb.unitcell_offset)
 
-    msg = ['Testing size of neighborlist indices']
+    msg = ['Testing size of neighbor_list indices']
     msg += ['failed for {}'.format(row.tag)]
     msg += ['{} != {} '.format(len(indices), len(ase_indices))]
     msg = ' '.join(msg)
     assert len(indices) == len(ase_indices), msg
 
-    msg = ['Testing size of neighborlist indices']
+    msg = ['Testing size of neighbor_list indices']
     msg += ['failed for {}'.format(row.tag)]
     msg += ['{} != {} '.format(len(offsets), len(ase_offsets))]
     msg = ' '.join(msg)

@@ -1,9 +1,9 @@
 #include "ClusterCounts.hpp"
 
 /**
-Counts clusters given this compact form of latticeneighbors (see ManybodyNeighborlist for more details)
+Counts clusters given this compact form of latticeneighbors (see ManyBodyNeighborList for more details)
 */
-// build(const Neighborlist &nl, int index, int order, bool);
+// build(const NeighborList &nl, int index, int order, bool);
 void ClusterCounts::countLatticeSites(const Structure &structure,
                                       const std::vector<std::pair<std::vector<LatticeSite>,std::vector<LatticeSite>>> &latticeNeighbors)
 {
@@ -83,7 +83,7 @@ void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> 
     orbitlist:
         icet orbitlist class
 */
-void ClusterCounts::countOrbitlist(const Structure &structure, const OrbitList &orbitlist, bool orderIntact)
+void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &orbitlist, bool orderIntact)
 {
 
     for (int i = 0; i < orbitlist.size(); i++)

@@ -3,10 +3,10 @@
 #include <iostream>
 #include <vector>
 #include "Orbit.hpp"
-#include "ManybodyNeighborlist.hpp"
+#include "ManyBodyNeighborList.hpp"
 #include "Structure.hpp"
 #include "Cluster.hpp"
-#include "Neighborlist.hpp"
+#include "NeighborList.hpp"
 #include <unordered_map>
 #include <unordered_set>
 #include "LatticeSite.hpp"
@@ -26,8 +26,8 @@ class OrbitList
 {
   public:
     OrbitList();
-    OrbitList(const std::vector<Neighborlist> &neighborlists, const Structure &);
-    OrbitList(const Structure &, const std::vector<std::vector<LatticeSite>> &, const std::vector<Neighborlist> &);
+    OrbitList(const std::vector<NeighborList> &neighborlists, const Structure &);
+    OrbitList(const Structure &, const std::vector<std::vector<LatticeSite>> &, const std::vector<NeighborList> &);
 
     /**
     The structure is a super cell
@@ -121,7 +121,7 @@ class OrbitList
         }
     }
 
-    void addClusterToOrbitlist(const Cluster &cluster, const std::vector<LatticeSite> &, std::unordered_map<Cluster, int> &);
+    void addClusterToOrbitList(const Cluster &cluster, const std::vector<LatticeSite> &, std::unordered_map<Cluster, int> &);
 
     void addPermutationMatrixColumns(std::vector<std::vector<std::vector<LatticeSite>>> &lattice_neighbors, std::unordered_set<std::vector<int>, VectorHash> &taken_rows, const std::vector<LatticeSite> &lat_nbrs, const std::vector<int> &pm_rows,
                                      const std::vector<std::vector<LatticeSite>> &permutation_matrix, const std::vector<LatticeSite> &col1, bool) const;
@@ -171,7 +171,7 @@ class OrbitList
         return *this;
     }
 
-    // OrbitList getSupercellOrbitlist(const Structure &superCell) const;
+    // OrbitList getSupercellOrbitList(const Structure &superCell) const;
 
     ///Adds the permutation information to the orbits
     void addPermutationInformationToOrbits(const std::vector<LatticeSite> &, const std::vector<std::vector<LatticeSite>> &);

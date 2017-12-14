@@ -9,11 +9,11 @@ OrbitList::OrbitList()
 }
 
 ///Construct orbitlist from mbnl and structure
-OrbitList::OrbitList(const std::vector<Neighborlist> &neighborlists, const Structure &structure)
+OrbitList::OrbitList(const std::vector<NeighborList> &neighborlists, const Structure &structure)
 {
     _primitiveStructure = structure;
     std::unordered_map<Cluster, int> clusterIndexMap;
-    ManybodyNeighborlist mbnl = ManybodyNeighborlist();
+    ManyBodyNeighborList mbnl = ManyBodyNeighborList();
 
     for (int index = 0; index < structure.size(); index++)
     {
@@ -25,14 +25,14 @@ OrbitList::OrbitList(const std::vector<Neighborlist> &neighborlists, const Struc
             {
                 std::vector<LatticeSite> sites = mbnl.getSites(i, 0);
                 Cluster cluster = Cluster(structure, sites);
-                addClusterToOrbitlist(cluster, sites, clusterIndexMap);
+                addClusterToOrbitList(cluster, sites, clusterIndexMap);
             }
 
             for (size_t j = 0; j < mbnl.getNumberOfSites(i); j++)
             {
                 std::vector<LatticeSite> sites = mbnl.getSites(i, j);
                 Cluster cluster = Cluster(structure, sites);
-                addClusterToOrbitlist(cluster, sites, clusterIndexMap);
+                addClusterToOrbitList(cluster, sites, clusterIndexMap);
             }
         }
     }
@@ -50,7 +50,7 @@ OrbitList::OrbitList(const std::vector<Neighborlist> &neighborlists, const Struc
 }
 
 ///add cluster to orbitlist, if cluster exists add sites if not create a new orbit
-void OrbitList::addClusterToOrbitlist(const Cluster &cluster, const std::vector<LatticeSite> &sites, std::unordered_map<Cluster, int> &clusterIndexMap)
+void OrbitList::addClusterToOrbitList(const Cluster &cluster, const std::vector<LatticeSite> &sites, std::unordered_map<Cluster, int> &clusterIndexMap)
 {
     int orbitNumber = findOrbit(cluster, clusterIndexMap);
     if (orbitNumber == -1)
@@ -103,13 +103,13 @@ int OrbitList::findOrbit(const Cluster &cluster, const std::unordered_map<Cluste
     }
 }
 
-OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<LatticeSite>> &permutation_matrix, const std::vector<Neighborlist> &neighborlists)
+OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<LatticeSite>> &permutation_matrix, const std::vector<NeighborList> &neighborlists)
 {
     _primitiveStructure = structure;
     std::vector<std::vector<std::vector<LatticeSite>>> lattice_neighbors;
     std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> manybodyNeighborIndices;
     bool saveBothWays = false;
-    ManybodyNeighborlist mbnl = ManybodyNeighborlist();
+    ManyBodyNeighborList mbnl = ManyBodyNeighborList();
 
     //if [0,1,2] exists in taken_rows then these three rows (with columns) have been accounted for and should not be looked at
     std::unordered_set<std::vector<int>, VectorHash> taken_rows;

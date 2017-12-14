@@ -1,4 +1,4 @@
-#include "Neighborlist.hpp"
+#include "NeighborList.hpp"
 #include "Structure.hpp"
 #include "Vector3dCompare.hpp"
 
@@ -10,14 +10,14 @@ neighbors of site in question.
 
 @returns vector of LatticeSite objects
 */
-std::vector<LatticeSite> Neighborlist::getNeighbors(int index) const
+std::vector<LatticeSite> NeighborList::getNeighbors(int index) const
 {
     if (index < 0 || index >= _neighbors.size())
     {
         std::string errorMessage = "Site index out of bounds";
         errorMessage += " index: " + std::to_string(index);
         errorMessage += " nnbrs: " + std::to_string(_neighbors.size());
-        errorMessage += " (Neighborlist::getNeighbors)";
+        errorMessage += " (NeighborList::getNeighbors)";
         throw std::out_of_range(errorMessage);
     }
     return _neighbors[index];
@@ -31,7 +31,7 @@ their respective indices are (not) neighbors of each other.
 @param index2 second site
 @param offset \
 */
-bool Neighborlist::isNeighbor(const int index1, const int index2, const Vector3d offset) const
+bool NeighborList::isNeighbor(const int index1, const int index2, const Vector3d offset) const
 {
     if (index1 < 0 || index1 >= _neighbors.size() || index2 < 0 || index2 >= _neighbors.size())
     {
@@ -39,7 +39,7 @@ bool Neighborlist::isNeighbor(const int index1, const int index2, const Vector3d
         errorMessage += " index1: " + std::to_string(index1);
         errorMessage += " index2: " + std::to_string(index2);
         errorMessage += " nnbrs: " + std::to_string(_neighbors.size());
-        errorMessage += " (Neighborlist::isNeighbor)";
+        errorMessage += " (NeighborList::isNeighbor)";
         throw std::out_of_range(errorMessage);
     }
 
@@ -62,7 +62,7 @@ bool Neighborlist::isNeighbor(const int index1, const int index2, const Vector3d
 
 @param structure atomic configuration
 **/
-void Neighborlist::build(const Structure &conf)
+void NeighborList::build(const Structure &conf)
 {
     int numberOfSites = conf.size();
     _neighbors.resize(numberOfSites);

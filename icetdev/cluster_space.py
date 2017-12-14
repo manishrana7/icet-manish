@@ -11,14 +11,14 @@ class ClusterSpace(_ClusterSpace):
     def __init__(self, atoms, cutoffs, chemical_symbols,
                  Mi=None, verbosity=0):
         '''
-        Initializes a clusterspace object.
+        Prepare a cluster space.
 
         Parameters
         ----------
-        atoms : ASE atoms object / icet structure object (bi-optional)
+        atoms : ASE Atoms object / icet Structure object (bi-optional)
             atomic configuration
         cutoffs : list of floats
-            cutoff radii per order that define the clusterspace
+            cutoff radii per order that define the cluster space
         chemical_symbols : list of strings
             list of chemical symbols, each of which must map to an element of
             the periodic table
@@ -64,7 +64,7 @@ class ClusterSpace(_ClusterSpace):
 
     def __repr__(self):
         '''
-        String representation of the clusterspace.
+        String representation of the cluster space.
         '''
 
         def repr_cluster(index, cluster, multiplicity=0,
@@ -106,14 +106,14 @@ class ClusterSpace(_ClusterSpace):
         index = 0
         print_threshold = 50
         while index < len(self):
-            if (len(self) > print_threshold
-                    and index > 10 and index < len(self) - 10):
+            if (len(self) > print_threshold and
+                    index > 10 and index < len(self) - 10):
                 index = len(self) - 10
                 s += [' ...']
 
-            clusterspace_info = self.get_clusterspace_info(index)
-            orbit_index = clusterspace_info[0]
-            mc_vector = clusterspace_info[1]
+            cluster_space_info = self.get_cluster_space_info(index)
+            orbit_index = cluster_space_info[0]
+            mc_vector = cluster_space_info[1]
             cluster = self.get_orbit(orbit_index).get_representative_cluster()
             multiplicity = len(self.get_orbit(
                                orbit_index).get_equivalent_sites())
@@ -126,18 +126,19 @@ class ClusterSpace(_ClusterSpace):
 
         return '\n'.join(s)
 
-    def get_clustervector(self, atoms):
+    def get_cluster_vector(self, atoms):
         '''
         Returns the cluster vector for a structure.
 
         Parameters
         ----------
-        atoms : ASE atoms object / icet structure object (bi-optional)
+        atoms : ASE Atoms object / icet Structure object (bi-optional)
             atomic configuration
 
         Returns
         -------
         NumPy array
+            the cluster vector
         '''
         if isinstance(atoms, Atoms):
             structure = Structure.from_atoms(atoms)
@@ -145,7 +146,7 @@ class ClusterSpace(_ClusterSpace):
             structure = atoms
         else:
             msg = 'Unknown structure format'
-            msg += ' {} (ClusterSpace.get_clustervector)'.format(type(atoms))
+            msg += ' {} (ClusterSpace.get_cluster_vector)'.format(type(atoms))
             raise Exception(msg)
 
         # if pbc is not true one needs to massage the structure a bit
@@ -157,82 +158,83 @@ class ClusterSpace(_ClusterSpace):
             atoms = structure.to_atoms()
             atoms.wrap()
             structure = Structure.from_atoms(atoms)
-        return _ClusterSpace.get_clustervector(self, structure)
+        return _ClusterSpace.get_cluster_vector(self, structure)
 
 
-def get_singlet_info(atoms, return_clusterspace=False):
+def get_singlet_info(atoms, return_cluster_space=False):
     '''
-    Get information concerning the singlets in this structure.
+    Retrieve information concerning the singlets in the input structure.
 
     Parameters
     ----------
-    atoms : ASE atoms object / icet structure object (bi-optional)
+    atoms : ASE Stoms object / icet Structure object (bi-optional)
         atomic configuration
-    return_clusterspace : boolean
-        return the clusterspace created in the process
+    return_cluster_space : boolean
+        return the cluster space created during the process
 
     Returns
     -------
-    list of dictionaries or tuple of list of dicts and ClusterSpace object
-        each dictionary represents one orbit
+    list of dicts
+        each dictionary in the list represents one orbit
+    ClusterSpace object (optional)
+        cluster space created during the process
     '''
 
     # create dummy elements and cutoffs
     subelements = ['H', 'He']
     cutoffs = [0.0]
 
-    clusterspace = ClusterSpace(atoms, cutoffs, subelements)
+    cs = ClusterSpace(atoms, cutoffs, subelements)
 
     singlet_data = []
 
-    for i in range(len(clusterspace)):
-        clusterspace_info = clusterspace.get_clusterspace_info(i)
-        orbit_index = clusterspace_info[0]
-        cluster = clusterspace.get_orbit(
-            orbit_index).get_representative_cluster()
-        multiplicity = len(clusterspace.get_orbit(
-            orbit_index).get_equivalent_sites())
-        assert len(cluster) == 1, \
-            'Cluster in singlet only clusterspace has non-singlets'
+    for i in range(len(cs)):
+        cluster_space_info = cs.get_cluster_space_info(i)
+        orbit_index = cluster_space_info[0]
+        cluster = cs.get_orbit(orbit_index).get_representative_cluster()
+        multiplicity = len(cs.get_orbit(orbit_index).get_equivalent_sites())
+        assert len(cluster) == 1, 'Cluster space contains not only singlets'
 
         singlet = {}
         singlet['orbit_index'] = orbit_index
-        singlet['sites'] = clusterspace.get_orbit(
-            orbit_index).get_equivalent_sites()
+        singlet['sites'] = cs.get_orbit(orbit_index).get_equivalent_sites()
         singlet['multiplicity'] = multiplicity
-        singlet['representative_site'] = clusterspace.get_orbit(
+        singlet['representative_site'] = cs.get_orbit(
             orbit_index).get_representative_sites()
         singlet_data.append(singlet)
 
-    if return_clusterspace:
-        return singlet_data, clusterspace
+    if return_cluster_space:
+        return singlet_data, cs
     else:
         return singlet_data
 
 
 def get_singlet_configuration(atoms, to_primitive=False):
     '''
-    Returns ase atoms object decorate with a element for each wyckoff site
+    Return atomic configuration decorated with a different element for each
+    Wyckoff site. This is useful for visualization and analysis.
 
     Parameters
     ----------
-    atoms : ASE atoms object / icet structure object (bi-optional)
+    atoms : ASE Atoms object / icet structure object (bi-optional)
         atomic configuration
-    to_primitive : bool
-        use primitive of atoms or not
+    to_primitive : boolean
+        if True the input structure will be reduced to its primitive unit cell
+        before further processing
 
     Returns
     -------
-    atoms_singlet
+    ASE Atoms object
+        structure with singlets highlighted by different elements
     '''
 
     from ase.data import chemical_symbols
-    cluster_data, clusterspace = get_singlet_info(atoms,
-                                                  return_clusterspace=True)
+    cluster_data, cluster_space = get_singlet_info(atoms,
+                                                   return_cluster_space=True)
 
     if to_primitive:
         singlet_configuration = \
-            clusterspace.get_primitive_structure().to_atoms()
+            cluster_space.get_primitive_structure().to_atoms()
         for singlet in cluster_data:
             for site in singlet['sites']:
                 element = chemical_symbols[singlet['orbit_index'] + 1]
@@ -241,9 +243,9 @@ def get_singlet_configuration(atoms, to_primitive=False):
     else:
         singlet_configuration = atoms.copy()
         singlet_configuration = vacuum_on_non_pbc(singlet_configuration)
-        orbitlist = clusterspace.get_orbit_list()
+        orbitlist = cluster_space.get_orbit_list()
         orbitlist_supercell \
-            = orbitlist.get_supercell_orbitlist(singlet_configuration)
+            = orbitlist.get_supercell_orbit_list(singlet_configuration)
         for singlet in cluster_data:
             for site in singlet['sites']:
                 element = chemical_symbols[singlet['orbit_index'] + 1]
@@ -258,16 +260,16 @@ def get_singlet_configuration(atoms, to_primitive=False):
 
 def view_singlets(atoms, to_primitive=False):
     '''
-    Visualize singlets in a structure using the ASE gui.
+    Visualize singlets in a structure using the ASE graphical user interface.
 
     Parameters
     ----------
-    atoms : ASE atoms object or icet structure object
+    atoms : ASE Atoms object / icet structure object (bi-optional)
         atomic configuration
     to_primitive : bool
-        use primitive of atoms or not
+        if True the input structure will be reduced to its primitive unit cell
+        before further processing
     '''
-
     from ase.visualize import view
     singlet_configuration = get_singlet_configuration(
         atoms, to_primitive=to_primitive)
@@ -286,6 +288,11 @@ def get_Mi_from_dict(Mi, structure):
         xx
     atoms : ASE atoms object / icet structure object (bi-optional)
         atomic configuration
+
+    Returns
+    -------
+    list
+        xxx
 
     Todo
     ----

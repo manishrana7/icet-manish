@@ -5,7 +5,7 @@
 #include <pybind11/stl.h>
 #include <Eigen/Dense>
 #include "Vector3dCompare.hpp"
-#include "Neighborlist.hpp"
+#include "NeighborList.hpp"
 #include <vector>
 #include "LatticeSite.hpp"
 /**
@@ -14,17 +14,17 @@ Design approach:
     using set intersection.
 */
 
-class ManybodyNeighborlist
+class ManyBodyNeighborList
 {
   public:
-    ManybodyNeighborlist()
+    ManyBodyNeighborList()
     {
         //empty...
     }
 
-    std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> build(const std::vector<Neighborlist> &, int index, bool);
+    std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> build(const std::vector<NeighborList> &, int index, bool);
 
-    void combineToHigherOrder(const Neighborlist &nl,
+    void combineToHigherOrder(const NeighborList &nl,
                               std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &manybodyNeighborIndex,
                               const std::vector<LatticeSite> &Ni, std::vector<LatticeSite> &currentOriginalNeighbrs, bool saveBothWays, const int);
 
@@ -49,7 +49,7 @@ class ManybodyNeighborlist
                                           const unsigned int &) const;
 
     void addSinglet(const int, std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &) const;
-    void addPairs(const int, const Neighborlist &, std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &, bool) const;
+    void addPairs(const int, const NeighborList &, std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &, bool) const;
 
   private:
     std::vector<double> _cutoffs;

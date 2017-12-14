@@ -1,6 +1,6 @@
-#include "LocalOrbitlistGenerator.hpp"
+#include "LocalOrbitListGenerator.hpp"
 
-LocalOrbitlistGenerator::LocalOrbitlistGenerator(const OrbitList &primitiveOrbitlist, const Structure &superCell) : _orbitlist(primitiveOrbitlist), _supercell(superCell)
+LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &primitiveOrbitList, const Structure &superCell) : _orbit_list(primitiveOrbitList), _supercell(superCell)
 {
     mapSitesAndFindCellOffsets();
 }
@@ -10,7 +10,7 @@ LocalOrbitlistGenerator::LocalOrbitlistGenerator(const OrbitList &primitiveOrbit
     Will loop through all sites in supercell and map them to the primitive structures cell
     and find the unique primitive cell offsets
     */
-void LocalOrbitlistGenerator::mapSitesAndFindCellOffsets()
+void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
 {
     _primToSupercellMap.clear();
 
@@ -21,7 +21,7 @@ void LocalOrbitlistGenerator::mapSitesAndFindCellOffsets()
     {
         Vector3d position_i = _supercell.getPositions().row(i);
 
-        LatticeSite primitive_site = _orbitlist.getPrimitiveStructure().findLatticeSiteByPosition(position_i);
+        LatticeSite primitive_site = _orbit_list.getPrimitiveStructure().findLatticeSiteByPosition(position_i);
         // LatticeSite super_site = _supercell.findLatticeSiteByPosition(position_i);
 
         // _primToSupercellMap[primitive_site] = super_site;
@@ -36,19 +36,19 @@ void LocalOrbitlistGenerator::mapSitesAndFindCellOffsets()
 }
 
 ///generate and returns the local orbitlist with the input index
-OrbitList LocalOrbitlistGenerator::generateLocalOrbitlist(const unsigned int index)
+OrbitList LocalOrbitListGenerator::generateLocalOrbitList(const unsigned int index)
 {
     if (index >= _uniquePrimcellOffsets.size())
     {
-        std::string errMsg = "Error: attempting to generateLocalOrbitlist with index " + std::to_string(index) + " when size of unique offsets are: " + std::to_string(_uniquePrimcellOffsets.size()) + ".";
+        std::string errMsg = "Error: attempting to generateLocalOrbitList with index " + std::to_string(index) + " when size of unique offsets are: " + std::to_string(_uniquePrimcellOffsets.size()) + ".";
         throw std::out_of_range(errMsg);
     }
 
-    return _orbitlist.getLocalOrbitList(_supercell, _uniquePrimcellOffsets[index], _primToSupercellMap);
+    return _orbit_list.getLocalOrbitList(_supercell, _uniquePrimcellOffsets[index], _primToSupercellMap);
 }
 
 ///generate and returns the local orbitlist with the input offset (require that the offset is in uniquecell offset?)
-OrbitList LocalOrbitlistGenerator::generateLocalOrbitlist(const Vector3d &primOffset)
+OrbitList LocalOrbitListGenerator::generateLocalOrbitList(const Vector3d &primOffset)
 {
     auto find = std::find(_uniquePrimcellOffsets.begin(), _uniquePrimcellOffsets.end(), primOffset);
     if (find == _uniquePrimcellOffsets.end())
@@ -56,17 +56,17 @@ OrbitList LocalOrbitlistGenerator::generateLocalOrbitlist(const Vector3d &primOf
         std::cout << "Warning: generating local orbitlist with offset not found in _uniquePrimcellOffsets" << std::endl;
     }
 
-    return _orbitlist.getLocalOrbitList(_supercell, primOffset, _primToSupercellMap);
+    return _orbit_list.getLocalOrbitList(_supercell, primOffset, _primToSupercellMap);
 }
 
 
 /// Generate the complete orbitlist (the sum of all local orbitlists)
-OrbitList LocalOrbitlistGenerator::generateFullOrbitlist()
+OrbitList LocalOrbitListGenerator::generateFullOrbitList()
 {
     OrbitList orbitList = OrbitList();
     for(int i = 0; i < getUniqueOffsetsCount(); i++)
     {
-        orbitList += generateLocalOrbitlist(i);
+        orbitList += generateLocalOrbitList(i);
     }
     return orbitList;
 
@@ -75,7 +75,7 @@ OrbitList LocalOrbitlistGenerator::generateFullOrbitlist()
 
 
 //clears the unordered_map and the vector
-void LocalOrbitlistGenerator::clear()
+void LocalOrbitListGenerator::clear()
 {
     _primToSupercellMap.clear();
     _uniquePrimcellOffsets.clear();

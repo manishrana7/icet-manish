@@ -1,11 +1,11 @@
-from tests import manybody_neighborlistTester
-from ase.neighborlist import NeighborList
+from tests import many_body_neighbor_listTester
+from ase.neighbor_list import NeighborList
 from ase.db import connect
 import spglib as spg
 
 '''
-Testing manybodyneighborlist implemented in python (mblnl.tester) againts ASE
-neighborlist
+Testing manybodyneighbor_list implemented in python (mblnl.tester) againts ASE
+neighbor_list
 
 Parameters
 ----------
@@ -20,7 +20,7 @@ AssertionError
     if lists of neighbors obatined from mbnl.tester and ASE are not the same
 '''
 
-mbnl_tester = manybody_neighborlistTester.manybody_neighborlistTester()
+mbnl_tester = many_body_neighbor_listTester.many_body_neighbor_listTester()
 
 neighbor_cutoff = 1.4
 
@@ -36,7 +36,7 @@ for row in db.select('natoms>1'):
 
     order = 3
 
-    mbnl_tester = manybody_neighborlistTester.manybody_neighborlistTester()
+    mbnl_tester = many_body_neighbor_listTester.many_body_neighbor_listTester()
     count_neighbors = {}
 
     dataset = spg.get_symmetry_dataset(atoms_row, symprec=1e-5,
@@ -52,7 +52,7 @@ for row in db.select('natoms>1'):
         else:
             count_neighbors[equiv_index] = len(neighbors)
 
-    mbnl_tester = manybody_neighborlistTester.manybody_neighborlistTester()
+    mbnl_tester = many_body_neighbor_listTester.many_body_neighbor_listTester()
     count_neighbors = {}
 
     for index, equiv_index in enumerate(dataset['equivalent_atoms']):

@@ -2,10 +2,10 @@ from __future__ import print_function, division
 import numpy as np
 
 
-class manybody_neighborlistTester():
+class many_body_neighbor_listTester():
 
     """
-    This is a python implementation of icet's  manybody neighborlist.
+    This is a python implementation of icet's  manybody neighbor_list.
     This is used both as a tester of the c++ version and also as a venue
     to try out new functionalities.
 
@@ -26,52 +26,52 @@ class manybody_neighborlistTester():
     def __init__(self):
         self.initiated = True
 
-    def build(self, neighborlists, index, bothways=False):
+    def build(self, neighbor_lists, index, bothways=False):
         """
-        Will take the neighborlist object (nl) and combine the neighbors
+        Will take the neighbor_list object (nl) and combine the neighbors
         of index "index" up to order "order".
 
         Parameters
         ----------
-        neighborlists : list
-            ASE neighborlists
+        neighbor_lists : list
+            ASE neighbor_lists
         index : int
-            index to return neighbors from neighborlist
+            index to return neighbors from neighbor_list
         bothways : boolean
             False will return all indices that are bigger than site "index"
             True will return also return indices that are smaller.
         """
-        if not isinstance(neighborlists, list):
-            neighborlists = [neighborlists]
+        if not isinstance(neighbor_lists, list):
+            neighbor_lists = [neighbor_lists]
 
-        if not neighborlists:
+        if not neighbor_lists:
             raise RuntimeError(
-                "neighborlists empty in manybody_neighborlistTester::build ")
+                'neighbor_lists empty in many_body_neighbor_listTester::build')
 
-        manybody_neighbor_indices = []
+        many_body_neighbor_indices = []
 
-        self.add_singlet(index, manybody_neighbor_indices)
+        self.add_singlet(index, many_body_neighbor_indices)
 
-        self.add_pairs(index, neighborlists[0],
-                       manybody_neighbor_indices, bothways)
+        self.add_pairs(index, neighbor_lists[0],
+                       many_body_neighbor_indices, bothways)
 
         """ Add neighbors of higher order (k>=2) """
-        for k in range(2, len(neighborlists) + 2):
+        for k in range(2, len(neighbor_lists) + 2):
 
             """ Get neighbors of index in icet format """
-            ngb = self.get_ngb_from_nl(neighborlists[k - 2], index)
+            ngb = self.get_ngb_from_nl(neighbor_lists[k - 2], index)
 
             zero_vector = np.array([0., 0., 0., ])
 
             current_original_neighbors = [[index, zero_vector]]
 
             self.combine_to_higher_order(
-                neighborlists[k - 2], manybody_neighbor_indices, ngb,
+                neighbor_lists[k - 2], many_body_neighbor_indices, ngb,
                 current_original_neighbors, bothways, k)
 
-        return manybody_neighbor_indices
+        return many_body_neighbor_indices
 
-    def combine_to_higher_order(self, nl, manybody_neighbor_indices, ngb_i,
+    def combine_to_higher_order(self, nl, many_body_neighbor_indices, ngb_i,
                                 current_original_neighbors, bothways, order):
 
         """
@@ -82,9 +82,9 @@ class manybody_neighborlistTester():
 
         Parameters
         ----------
-        nl : ASE neighborlist object
-        manybody_neighbor_indices: list
-            neighborlists, each inner list is made up.
+        nl : ASE neighbor_list object
+        many_body_neighbor_indices: list
+            neighbor_lists, each inner list is made up.
         ngb_i : list
             neighbors of a chosen index in the icet format [[index,offset]]
         current_original_neighbors :
@@ -116,12 +116,12 @@ class manybody_neighborlistTester():
 
             if len(originalNeighborCopy) + 1 < order:
                 self.combine_to_higher_order(
-                    nl, manybody_neighbor_indices, intersection_with_j,
+                    nl, many_body_neighbor_indices, intersection_with_j,
                     originalNeighborCopy, bothways, order)
 
             if (len(intersection_with_j) > 0 and
                     len(originalNeighborCopy) == (order - 1)):
-                manybody_neighbor_indices.append(
+                many_body_neighbor_indices.append(
                     [originalNeighborCopy, intersection_with_j])
 
     def add_singlet(self, index, mbn_indices):

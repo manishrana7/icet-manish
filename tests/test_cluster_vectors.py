@@ -28,7 +28,7 @@ def generate_mixed_structure(atoms_prim, subelements):
     return atoms
 
 
-def generate_clustervector_set(n, atoms_prim, subelements, clusterspace):
+def generate_cluster_vector_set(n, atoms_prim, subelements, clusterspace):
     '''
     Generate a set of clustervectors from clusterspace.
     '''
@@ -36,7 +36,7 @@ def generate_clustervector_set(n, atoms_prim, subelements, clusterspace):
     for i in range(n):
         atoms = generate_mixed_structure(atoms_prim, subelements)
         conf = Structure.from_atoms(atoms)
-        cv = clusterspace.get_clustervector(conf)
+        cv = clusterspace.get_cluster_vector(conf)
         clustervectors.append(cv)
 
     return clustervectors
@@ -84,5 +84,5 @@ for row in db.select():
         clusterspace = ClusterSpace(atoms_row, cutoffs, subelements)
         if not atoms_row.get_pbc().all():
             permutation_map.__vacuum_on_non_pbc(atoms_row)
-        cvs = generate_clustervector_set(5, atoms_row,
-                                         subelements, clusterspace)
+        cvs = generate_cluster_vector_set(5, atoms_row,
+                                          subelements, clusterspace)

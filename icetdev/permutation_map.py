@@ -3,7 +3,7 @@ import spglib as spglib
 
 from ase import Atoms
 from _icetdev import PermutationMap
-from icetdev.neighborlist import get_neighborlists, Neighborlist
+from icetdev.neighbor_list import get_neighbor_lists, NeighborList
 from icetdev.lattice_site import LatticeSite
 from icetdev.structure import Structure
 from icetdev.tools.geometry import get_scaled_positions
@@ -71,7 +71,7 @@ def vacuum_on_non_pbc(atoms):
     return atoms
 
 
-def __get_fractional_positions_from_neigborlist(structure, neighborlist):
+def __get_fractional_positions_from_neigborlist(structure, neighbor_list):
     '''
     Returns the fractional positions in structure from the neighbors in the
     neighbor list.
@@ -79,11 +79,11 @@ def __get_fractional_positions_from_neigborlist(structure, neighborlist):
     neighbor_positions = []
     fractional_positions = []
     lattice_site = LatticeSite(0, [0, 0, 0])
-    for i in range(len(neighborlist)):
+    for i in range(len(neighbor_list)):
         lattice_site.index = i
         position = structure.get_position(lattice_site)
         neighbor_positions.append(position)
-        for neighbor in neighborlist.get_neighbors(i):
+        for neighbor in neighbor_list.get_neighbors(i):
             position = structure.get_position(neighbor)
             neighbor_positions.append(position)
     if len(neighbor_positions) > 0:
@@ -133,23 +133,23 @@ def permutation_matrices_from_atoms(atoms, cutoffs,
     rotations = symmetry['rotations']
     permutation_matrices = PermutationMap(translations, rotations)
 
-    # Create neighborlists from the different cutoffs
+    # Create neighbor_lists from the different cutoffs
     prim_structure = Structure.from_atoms(atoms_prim)
-    neighborlists = get_neighborlists(prim_structure,
-                                      cutoffs=cutoffs)
-    # get fractional positions for each neighborlist
-    for i, neighborlist in enumerate(neighborlists):
+    neighbor_lists = get_neighbor_lists(prim_structure,
+                                        cutoffs=cutoffs)
+    # get fractional positions for each neighbor_list
+    for i, neighbor_list in enumerate(neighbor_lists):
         if verbosity >= 3:
             print('building permutation map {}/{}'.format(i,
-                                                          len(neighborlists)))
+                                                          len(neighbor_lists)))
         frac_positions = __get_fractional_positions_from_neigborlist(
-            prim_structure, neighborlist)
+            prim_structure, neighbor_list)
         if verbosity >= 3:
             print('number of positions: {}'.format(len(frac_positions)))
         if len(frac_positions) > 0:
             permutation_matrices[i].build(frac_positions)
 
-    return permutation_matrices, prim_structure, neighborlists
+    return permutation_matrices, prim_structure, neighbor_lists
 
 
 def permutation_matrix_from_atoms(atoms, cutoff,
@@ -195,17 +195,17 @@ def permutation_matrix_from_atoms(atoms, cutoff,
 
     permutation_matrix = PermutationMap(translations, rotations)
 
-    # Create neighborlists from the different cutoffs
+    # Create neighbor_lists from the different cutoffs
     prim_structure = Structure.from_atoms(atoms_prim)
-    neighborlist = Neighborlist(cutoff)
-    neighborlist.build(prim_structure)
+    neighbor_list = NeighborList(cutoff)
+    neighbor_list.build(prim_structure)
 
-    # get fractional positions for neighborlist
+    # get fractional positions for neighbor_list
     frac_positions = __get_fractional_positions_from_neigborlist(
-        prim_structure, neighborlist)
+        prim_structure, neighbor_list)
     if verbosity >= 3:
         print('number of positions: {}'.format(len(frac_positions)))
     if len(frac_positions) > 0:
         permutation_matrix.build(frac_positions)
 
-    return permutation_matrix, prim_structure, neighborlist
+    return permutation_matrix, prim_structure, neighbor_list

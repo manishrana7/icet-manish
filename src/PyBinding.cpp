@@ -1,11 +1,11 @@
 #include "Structure.hpp"
-#include "Neighborlist.hpp"
-#include "ManybodyNeighborlist.hpp"
+#include "NeighborList.hpp"
+#include "ManyBodyNeighborList.hpp"
 #include "Cluster.hpp"
 #include "PermutationMap.hpp"
 #include "LatticeSite.hpp"
 #include "ClusterCounts.hpp"
-#include "LocalOrbitlistGenerator.hpp"
+#include "LocalOrbitListGenerator.hpp"
 #include "ClusterSpace.hpp"
 #include <pybind11/pybind11.h>
 #include "Symmetry.hpp"
@@ -74,21 +74,21 @@ PYBIND11_PLUGIN(_icetdev)
            :members:
            :undoc-members:
 
-        LocalOrbitlistGenerator
+        LocalOrbitListGenerator
         -----------------------
-        .. autoclass:: LocalOrbitlistGenerator
+        .. autoclass:: LocalOrbitListGenerator
            :members:
            :undoc-members:
 
-        Neighborlist
+        NeighborList
         ------------
-        .. autoclass:: Neighborlist
+        .. autoclass:: NeighborList
            :members:
            :undoc-members:
 
-        ManybodyNeighborlist
+        ManyBodyNeighborList
         --------------------
-        .. autoclass:: ManybodyNeighborlist
+        .. autoclass:: ManyBodyNeighborList
            :members:
            :undoc-members:
 
@@ -349,7 +349,7 @@ PYBIND11_PLUGIN(_icetdev)
          )pbdoc")
     .def("__len__", &Structure::size);
 
-py::class_<Neighborlist>(m, "Neighborlist")
+py::class_<NeighborList>(m, "NeighborList")
     .def(py::init<const double>(),
          py::arg("cutoff"),
          R"pbdoc(
@@ -361,7 +361,7 @@ py::class_<Neighborlist>(m, "Neighborlist")
                  cutoff to be used for constructing the neighbor list
          )pbdoc")
     .def("build",
-         &Neighborlist::build,
+         &NeighborList::build,
          py::arg("structure"),
          R"pbdoc(
              Build a neighbor list for the given atomic configuration.
@@ -372,7 +372,7 @@ py::class_<Neighborlist>(m, "Neighborlist")
                  atomic configuration
          )pbdoc")
     .def("is_neighbor",
-         &Neighborlist::isNeighbor,
+         &NeighborList::isNeighbor,
          py::arg("index1"),
          py::arg("index2"),
          py::arg("offset"),
@@ -392,7 +392,7 @@ py::class_<Neighborlist>(m, "Neighborlist")
                  boolean
          )pbdoc")
     .def("get_neighbors",
-         &Neighborlist::getNeighbors,
+         &NeighborList::getNeighbors,
          py::arg("index"),
          R"pbdoc(
              Returns a vector of lattice sites that identify the neighbors of site in question.
@@ -405,12 +405,12 @@ py::class_<Neighborlist>(m, "Neighborlist")
              -------
              list of LatticeSite instances
          )pbdoc")
-    .def("__len__", &Neighborlist::size);
+    .def("__len__", &NeighborList::size);
 
-py::class_<ManybodyNeighborlist>(m, "ManybodyNeighborlist")
+py::class_<ManyBodyNeighborList>(m, "ManyBodyNeighborList")
     .def(py::init<>())
-    .def("calculate_intersection", &ManybodyNeighborlist::getIntersection)
-    .def("build", &ManybodyNeighborlist::build);
+    .def("calculate_intersection", &ManyBodyNeighborList::getIntersection)
+    .def("build", &ManyBodyNeighborList::build);
 
 py::class_<Cluster>(m, "Cluster")
     .def(py::init<const Structure &,
@@ -474,7 +474,7 @@ py::class_<LatticeSite>(m, "LatticeSite")
     .def(py::init<const int, const Vector3d &>())
     .def("print", &LatticeSite::print)
     .def_property("index", &LatticeSite::index, &LatticeSite::setIndex)
-    .def_property("unitcellOffset", &LatticeSite::unitcellOffset, &LatticeSite::setUnitcellOffset)
+    .def_property("unitcell_offset", &LatticeSite::unitcellOffset, &LatticeSite::setUnitcellOffset)
     .def(py::self < py::self)
     .def(py::self == py::self)
     .def(py::self + Eigen::Vector3d())
@@ -487,7 +487,7 @@ py::class_<ClusterCounts>(m, "ClusterCounts")
     .def("count_lattice_neighbors", &ClusterCounts::countLatticeSites)
     .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<LatticeSite> &)) & ClusterCounts::count)
     .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &)) & ClusterCounts::count)
-    .def("count_orbitlist",&ClusterCounts::countOrbitlist)
+    .def("count_orbit_list",&ClusterCounts::countOrbitList)
     .def("__len__", &ClusterCounts::size)
     .def("reset", &ClusterCounts::reset)
     .def("get_cluster_counts", [](const ClusterCounts &clusterCounts) {
@@ -530,38 +530,38 @@ py::class_<Orbit>(m, "Orbit")
 
 py::class_<OrbitList>(m, "OrbitList")
     .def(py::init<>())
-    .def(py::init<const std::vector<Neighborlist> &, const Structure &>())
-    .def(py::init<const Structure &, const std::vector<std::vector<LatticeSite>> &, const std::vector<Neighborlist> &>())
+    .def(py::init<const std::vector<NeighborList> &, const Structure &>())
+    .def(py::init<const Structure &, const std::vector<std::vector<LatticeSite>> &, const std::vector<NeighborList> &>())
     .def("add_orbit", &OrbitList::addOrbit)
     .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters)
     .def("get_orbit", &OrbitList::getOrbit)
     .def("clear", &OrbitList::clear)
     .def("sort", &OrbitList::sort)
-    .def("get_orbitList", &OrbitList::getOrbitList)
+    .def("get_orbit_list", &OrbitList::getOrbitList)
     .def("get_primitive_structure",&OrbitList::getPrimitiveStructure)
     .def("__len__", &OrbitList::size)
     .def("print", &OrbitList::print, py::arg("verbosity") = 0)
-    // .def("get_supercell_orbitlist", &OrbitList::getSupercellOrbitlist)
+    // .def("get_supercell_orbit_list", &OrbitList::getSupercellOrbitList)
     ;
 
-py::class_<LocalOrbitlistGenerator>(m, "LocalOrbitlistGenerator")
+py::class_<LocalOrbitListGenerator>(m, "LocalOrbitListGenerator")
     .def(py::init<const OrbitList &, const Structure &>())
-    .def("generate_local_orbitlist", (OrbitList(LocalOrbitlistGenerator::*)(const unsigned int)) & LocalOrbitlistGenerator::generateLocalOrbitlist)
-    .def("generate_local_orbitlist", (OrbitList(LocalOrbitlistGenerator::*)(const Vector3d &)) & LocalOrbitlistGenerator::generateLocalOrbitlist)
-    .def("generate_full_orbitlist",  &LocalOrbitlistGenerator::generateFullOrbitlist)
-    .def("clear", &LocalOrbitlistGenerator::clear)
-    .def("get_unique_offsets_count", &LocalOrbitlistGenerator::getUniqueOffsetsCount)
-    .def("get_prim_to_supercell_map", &LocalOrbitlistGenerator::getPrimToSupercellMap)
-    .def("get_unique_primcell_offsets", &LocalOrbitlistGenerator::getUniquePrimcellOffsets);
+    .def("generate_local_orbit_list", (OrbitList(LocalOrbitListGenerator::*)(const unsigned int)) & LocalOrbitListGenerator::generateLocalOrbitList)
+    .def("generate_local_orbit_list", (OrbitList(LocalOrbitListGenerator::*)(const Vector3d &)) & LocalOrbitListGenerator::generateLocalOrbitList)
+    .def("generate_full_orbit_list",  &LocalOrbitListGenerator::generateFullOrbitList)
+    .def("clear", &LocalOrbitListGenerator::clear)
+    .def("get_unique_offsets_count", &LocalOrbitListGenerator::getUniqueOffsetsCount)
+    .def("get_prim_to_supercell_map", &LocalOrbitListGenerator::getPrimToSupercellMap)
+    .def("get_unique_primcell_offsets", &LocalOrbitListGenerator::getUniquePrimcellOffsets);
 
 py::class_<ClusterSpace>(m, "ClusterSpace",py::dynamic_attr())
     .def(py::init<std::vector<int>, std::vector<std::string>, const OrbitList &>())
-    .def("get_clustervector",&ClusterSpace::generateClustervector)
+    .def("get_cluster_vector",&ClusterSpace::generateClusterVector)
     .def("get_orbit_list",&ClusterSpace::getOrbitList)
     .def("get_orbit", &ClusterSpace::getOrbit)
     .def("get_cluster_product", &ClusterSpace::getClusterProduct)
-    .def("get_clusterspace_info", &ClusterSpace::getClusterSpaceInfo)
-    .def("get_clusterspace_size", &ClusterSpace::getClusterSpaceSize)
+    .def("get_cluster_space_info", &ClusterSpace::getClusterSpaceInfo)
+    .def("get_cluster_space_size", &ClusterSpace::getClusterSpaceSize)
     .def("get_atomic_numbers", &ClusterSpace::getAtomicNumbers)
     .def("get_cutoffs",&ClusterSpace::getCutoffs)
     .def("get_primitive_structure",&ClusterSpace::getPrimitiveStructure)

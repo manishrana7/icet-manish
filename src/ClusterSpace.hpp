@@ -9,13 +9,13 @@
 #include <math.h>
 #include "Structure.hpp"
 #include "OrbitList.hpp"
-#include "LocalOrbitlistGenerator.hpp"
+#include "LocalOrbitListGenerator.hpp"
 #include "ClusterCounts.hpp"
 #include "PeriodicTable.hpp"
 using namespace Eigen;
 
 /**
-This is the cluster space object. 
+This is the cluster space object.
 
 It will have the definition of the cluster space a cluster expansion is based on.
 
@@ -26,12 +26,12 @@ class ClusterSpace
   public:
     ClusterSpace(std::vector<int> Mi, std::vector<std::string> elements, const OrbitList primOrbitList)
     {
-        _Mi = Mi;        
-        _primitive_orbitlist = primOrbitList;        
+        _Mi = Mi;
+        _primitive_orbit_list = primOrbitList;
         _primitive_structure = primOrbitList.getPrimitiveStructure();
-        _primitive_structure.setNumberOfAllowedComponents(_Mi);        
+        _primitive_structure.setNumberOfAllowedComponents(_Mi);
         initElementMap(elements);
-        _isClusterspaceInitialized= false;
+        _isClusterSpaceInitialized= false;
     };
 
     void initElementMap(std::vector<std::string> elements)
@@ -43,7 +43,7 @@ class ClusterSpace
             intElements.push_back(PeriodicTable::strInt[el]);
         }
         std::sort(intElements.begin(), intElements.end());
-        
+
         for (size_t i = 0; i < elements.size(); i++)
         {
             _elementRepresentation[intElements[i]] = i;
@@ -52,19 +52,19 @@ class ClusterSpace
         _elements = intElements;
     }
 
-    ///Generate the clustervector on the input structure
-    std::vector<double> generateClustervector(const Structure &) const;
+    ///Generate the cluster vector on the input structure
+    std::vector<double> generateClusterVector(const Structure &) const;
 
     ///Return the full cluster product of entire cluster (elements vector). Assuming all sites have same Mi
     double getClusterProduct(const std::vector<int> &mcVector, const std::vector<int> &Mi, const std::vector<int> &elements) const;
 
     ///setup  _clusterSpaceInfo
-    void setupClusterspaceInfo();
+    void setupClusterSpaceInfo();
 
     ///Returns clusterspace information (orbit index and mc vector)
     std::pair<int, std::vector<int>> getClusterSpaceInfo(const unsigned int);
-        
-    ///Gets the clusterspace size, i.e. the length of a clustervector
+
+    ///Gets the clusterspace size, i.e. the length of a cluster vector
     size_t getClusterSpaceSize();
 
     ///Returns the cutoffs
@@ -86,23 +86,23 @@ class ClusterSpace
     ///returns a orbit from the orbitlist
     Orbit getOrbit(const size_t index) const
     {
-        return _primitive_orbitlist.getOrbit(index);
+        return _primitive_orbit_list.getOrbit(index);
     }
 
     OrbitList getOrbitList() const
     {
-        return _primitive_orbitlist;
-    }   
+        return _primitive_orbit_list;
+    }
 
-    ///returns the primitive structure    
+    ///returns the primitive structure
     Structure getPrimitiveStructure() const
     {
         return _primitive_structure;
     }
 
     ClusterCounts getNativeClusters(const Structure &structure) const;
-    
-  private:    
+
+  private:
     ///Currently we have constant Mi for development but will later change to dynamic Mi
     std::vector<int> _Mi;
 
@@ -110,7 +110,7 @@ class ClusterSpace
     Structure _primitive_structure;
 
     ///Primitive orbitlist based on the structure and the global cutoffs
-    OrbitList _primitive_orbitlist;
+    OrbitList _primitive_orbit_list;
 
     ///Unique id for this clusterspace
     int clusterSpace_ID;
@@ -125,7 +125,7 @@ class ClusterSpace
     std::vector<std::pair<int, std::vector<int>>> _clusterSpaceInfo;
 
     ///a boolean to keep track if this is initialized or not
-    bool _isClusterspaceInitialized;
+    bool _isClusterSpaceInitialized;
 
 
     /**

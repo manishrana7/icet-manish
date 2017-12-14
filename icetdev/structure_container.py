@@ -29,7 +29,7 @@ class StructureContainer(object):
             list of properties. properties should be given as dict
         '''
 
-        self._clusterspace = clusterspace
+        self._cluster_space = clusterspace
 
         # Add atomic structures
         if list_of_atoms is not None:
@@ -115,8 +115,8 @@ class StructureContainer(object):
         index = 0
         print_threshold = 24
         while index < len(self):
-            if (len(self) > print_threshold
-                    and index > 10 and index < len(self) - 10):
+            if (len(self) > print_threshold and
+                    index > 10 and index < len(self) - 10):
                 index = len(self) - 10
                 s += [' ...']
 
@@ -167,8 +167,8 @@ class StructureContainer(object):
 
         structure.set_properties(properties)
 
-        cv = self._clusterspace.get_clustervector(atoms_copy)
-        structure.set_clustervector(cv)
+        cv = self._cluster_space.get_cluster_vector(atoms_copy)
+        structure.set_cluster_vector(cv)
 
         self._structure_list.append(structure)
 
@@ -282,7 +282,7 @@ class StructureContainer(object):
         '''
         Returns the icet ClusterSpace object.
         '''
-        return self._clusterspace
+        return self._cluster_space
 
 
 class FitStructure:
@@ -306,13 +306,13 @@ class FitStructure:
         self._atoms = atoms
         self._user_tag = user_tag
         self._properties = {}
-        self.set_clustervector(cv)
+        self.set_cluster_vector(cv)
         self.set_properties(properties)
 
     @property
     def clustervector(self):
         '''numpy array : the fit clustervector'''
-        return self._clustervector
+        return self._cluster_vector
 
     @property
     def atoms(self):
@@ -329,7 +329,7 @@ class FitStructure:
         '''dict : properties'''
         return self._properties
 
-    def set_clustervector(self, cv):
+    def set_cluster_vector(self, cv):
         '''
         Set the clustervectors to structure.
 
@@ -340,9 +340,9 @@ class FitStructure:
 
         '''
         if cv is not None:
-            self._clustervector = cv
+            self._cluster_vector = cv
         else:
-            self._clustervector = None
+            self._cluster_vector = None
 
     def set_properties(self, properties):
         '''

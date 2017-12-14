@@ -43,9 +43,9 @@ def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
 
     conf = Structure.from_atoms(conf)
 
-    cv_int = clusterspace_int.get_clustervector(conf)
-    cv_list = clusterspace_list.get_clustervector(conf)
-    cv_dict = clusterspace_dict.get_clustervector(conf)
+    cv_int = clusterspace_int.get_cluster_vector(conf)
+    cv_list = clusterspace_list.get_cluster_vector(conf)
+    cv_dict = clusterspace_dict.get_cluster_vector(conf)
 
     msg = 'Cluster vectors were not equal for an equivalent Mi (int vs list)'
     assert (np.array(cv_int) == np.array(cv_list)).all, msg

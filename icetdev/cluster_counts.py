@@ -1,36 +1,37 @@
 from _icetdev import ClusterCounts
-from icetdev.local_orbitlist_generator import LocalOrbitlistGenerator
+from icetdev.local_orbit_list_generator import LocalOrbitListGenerator
 
 
-def __count_clusters(self, structure, prim_orbitlist, keep_order_intact=False):
+def __count_clusters(self, structure, prim_orbit_list,
+                     keep_order_intact=False):
     '''
-    Count all clusters in a structure by finding their local orbitlist.
+    Count all clusters in a structure by finding their local orbit list.
 
-    This will need to create the local_orbit_list_generator object for
-    generating the local orbitlists.
+    Note that this requires creating the local_orbit_list_generator object for
+    generating the local orbit lists.
 
     Parameters
     ----------
-    structure : icet structure object
-        supercell of the structure `prim_orbitlist` is based on
-    prim_orbitlist : icet orbitlist object
+    structure : icet Structure object
+        supercell of the structure `prim_orbit_list` is based on
+    prim_orbit_list : icet orbitlist object
         based on a primitive of the input structure
     keep_order_intact: bool
         count the clusters in the orbit with the same orientation as the
         prototype cluster
     '''
 
-    local_orbitlist_generator = LocalOrbitlistGenerator(prim_orbitlist,
-                                                        structure)
+    local_orbit_list_generator = LocalOrbitListGenerator(prim_orbit_list,
+                                                         structure)
 
-    for i in range(local_orbitlist_generator.get_unique_offsets_count()):
+    for i in range(local_orbit_list_generator.get_unique_offsets_count()):
         # sending local orbitlist directly into function was about 10% faster
         # than:
-        # local_orbitlist = \
-        #    local_orbit_list_generator.generate_local_orbitlist(i)
-        self.count_orbitlist(
+        # local_orbit_list = \
+        #    local_orbit_list_generator.generate_local_orbit_list(i)
+        self.count_orbit_list(
             structure,
-            local_orbitlist_generator.generate_local_orbitlist(i),
+            local_orbit_list_generator.generate_local_orbit_list(i),
             keep_order_intact)
 
 

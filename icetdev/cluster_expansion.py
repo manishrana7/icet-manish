@@ -7,51 +7,50 @@ class ClusterExpansion(object):
 
     Attributes
     ----------
-    clusterspace : icet ClusterSpace object
+    cluster_space : icet ClusterSpace object
         the cluster space that was used for constructing the cluster expansion
     parameters : list of floats
         effective cluster interactions (ECIs)
     '''
 
-    def __init__(self, clusterspace, parameters):
+    def __init__(self, cluster_space, parameters):
         '''
         Initialize a ClusterExpansion object.
 
         Parameters
         ----------
-        clusterspace : icet ClusterSpace object
+        cluster_space : icet ClusterSpace object
             the cluster space to be used for constructing the cluster expansion
         parameters : list of floats
             effective cluster interactions (ECIs)
         '''
-        self._clusterspace = clusterspace
+        self._cluster_space = cluster_space
         self._parameters = parameters
 
     def predict(self, structure):
         '''
-        Use the cluster expansion to predict the property of interest
-        (e.g., the energy) for the input structure.
+        Predict the property of interest (e.g., the energy) for the input
+        structure using the cluster expansion.
 
         Parameters
         ----------
-        structure : icet Structure or ASE Atoms object
-            input structure
+        structure : ASE Atoms object / icet Structure (bi-optional)
+            atomic configuration
 
         Returns
         -------
         float
             property value predicted by the cluster expansion
         '''
-
-        clustervector = self.clusterspace.get_clustervector(structure)
-        prop = np.dot(clustervector, self.parameters)
+        cluster_vector = self.cluster_space.get_cluster_vector(structure)
+        prop = np.dot(cluster_vector, self.parameters)
         return prop
 
     @property
-    def clusterspace(self):
-        '''icet ClusterSpace object : cluster space the cluster expansion is
+    def cluster_space(self):
+        '''ClusterSpace object : cluster space the cluster expansion is
         based on'''
-        return self._clusterspace
+        return self._cluster_space
 
     @property
     def parameters(self):

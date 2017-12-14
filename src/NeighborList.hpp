@@ -16,13 +16,13 @@ using namespace Eigen;
 
 @details This class provides functionality for building and storing a
 (conventional) pair-wise neighbor list (as opposed to the specialized many-body
-neighbor list defined by ManybodyNeighborlist).
+neighbor list defined by ManyBodyNeighborList).
 
-@see ManybodyNeighborlist
+@see ManyBodyNeighborList
 
 @todo get rid of local DISTTOL definition
 */
-class Neighborlist
+class NeighborList
 {
 public:
 
@@ -30,7 +30,7 @@ public:
     @brief Initialize a neighbor list instance.
     @param cutoff cutoff to be used for constructing the neighbor list.
     */
-    Neighborlist(const double cutoff) : _cutoff(cutoff) { };
+    NeighborList(const double cutoff) : _cutoff(cutoff) { };
 
     /// Build a neighbor list based on the given structure.
     void build(const Structure &);

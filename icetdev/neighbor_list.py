@@ -1,9 +1,9 @@
-from _icetdev import Neighborlist
+from _icetdev import NeighborList
 from icetdev.structure import Structure
 from ase import Atoms
 
 
-def get_neighborlists(atoms, cutoffs=None):
+def get_neighbor_lists(atoms, cutoffs=None):
     '''
     Return list of icet neigbhorlists from a configuration and cutoffs
 
@@ -16,7 +16,7 @@ def get_neighborlists(atoms, cutoffs=None):
 
     Returns
     -------
-    list of neighborlists
+    list of neighbor_lists
     '''
 
     # deal with different types of structure objects
@@ -29,16 +29,16 @@ def get_neighborlists(atoms, cutoffs=None):
         msg += ['{} (ClusterSpace)'.format(type(atoms))]
         raise Exception(' '.join(msg))
 
-    neighborlists = []
+    neighbor_lists = []
     if cutoffs is None:
         raise Exception('Both n and cutoffs is None in count clusters')
     else:
         for co in cutoffs:
-            nl = Neighborlist(co)
-            neighborlists.append(nl)
+            nl = NeighborList(co)
+            neighbor_lists.append(nl)
 
-    # build the neighborlists
-    for nl in neighborlists:
+    # build the neighbor_lists
+    for nl in neighbor_lists:
         nl.build(structure)
 
-    return neighborlists
+    return neighbor_lists

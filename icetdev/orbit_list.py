@@ -1,9 +1,9 @@
 import numpy as np
 import time
 from _icetdev import OrbitList
-from icetdev.neighborlist import get_neighborlists
+from icetdev.neighbor_list import get_neighbor_lists
 from icetdev.permutation_map import permutation_matrix_from_atoms
-from icetdev.local_orbitlist_generator import LocalOrbitlistGenerator
+from icetdev.local_orbit_list_generator import LocalOrbitListGenerator
 from icetdev.structure import Structure
 
 
@@ -78,21 +78,21 @@ def __prune_permutation_matrix(permutation_matrix, verbosity=0):
     return permutation_matrix
 
 
-def _get_supercell_orbitlist(self, atoms):
+def _get_supercell_orbit_list(self, atoms):
     """
     Returns a orbitlist for a supercell structure
 
     atoms: ASE atoms object
     """
     structure = Structure.from_atoms(atoms)
-    log = LocalOrbitlistGenerator(self, structure)
+    log = LocalOrbitListGenerator(self, structure)
 
-    supercell_orbitlist = log.generate_full_orbitlist()
+    supercell_orbit_list = log.generate_full_orbit_list()
 
-    return supercell_orbitlist
+    return supercell_orbit_list
 
 
-OrbitList.get_supercell_orbitlist = _get_supercell_orbitlist
+OrbitList.get_supercell_orbit_list = _get_supercell_orbit_list
 
 
 def create_orbit_list(structure, cutoffs, verbosity=0):
@@ -116,7 +116,7 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
     total_time_spent = 0
 
     t0 = time.time()
-    permutation_matrix, prim_structure, neighborlist \
+    permutation_matrix, prim_structure, neighbor_list \
         = permutation_matrix_from_atoms(structure.to_atoms(), max_cutoff)
     t1 = time.time()
     time_spent = t1 - t0
@@ -127,13 +127,13 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
     total_time_spent += time_spent
 
     t0 = time.time()
-    neighborlists = get_neighborlists(prim_structure, cutoffs=cutoffs)
+    neighbor_lists = get_neighbor_lists(prim_structure, cutoffs=cutoffs)
     t1 = time.time()
     time_spent = t1 - t0
     total_time_spent += time_spent
 
     if verbosity > 3:
-        print('Done getting neighborlists. Time {} s'.format(time_spent))
+        print('Done getting neighbor_lists. Time {} s'.format(time_spent))
 
     t0 = time.time()
     # transform permutation_matrix to be in lattice site format
@@ -152,7 +152,7 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
         print(' '.join(msg))
 
     t0 = time.time()
-    orbitlist = OrbitList(prim_structure, pm_lattice_sites, neighborlists)
+    orbitlist = OrbitList(prim_structure, pm_lattice_sites, neighbor_lists)
     t1 = time.time()
     time_spent = t1 - t0
     total_time_spent += time_spent

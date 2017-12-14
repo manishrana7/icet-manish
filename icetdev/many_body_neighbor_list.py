@@ -1,11 +1,11 @@
-from _icetdev import ManybodyNeighborlist
+from _icetdev import ManyBodyNeighborList
 from icetdev.lattice_site import LatticeSite
-from icetdev.neighborlist import get_neighborlists
+from icetdev.neighbor_list import get_neighbor_lists
 from icetdev.structure import Structure
 from ase import Atoms
 
 
-def get_all_lattice_neighbors(atoms, neighborlists=None, cutoffs=None):
+def get_all_lattice_neighbors(atoms, neighbor_lists=None, cutoffs=None):
     '''
     Generate lattice neighbors for a configuration.
 
@@ -13,12 +13,12 @@ def get_all_lattice_neighbors(atoms, neighborlists=None, cutoffs=None):
     ----------
     atoms : ASE atoms object / icet structure object (bi-optional)
         atomic configuration
-    neighborlists : array/list of icet NeighborList objects
+    neighbor_lists : array/list of icet NeighborList objects
         neighbor lists; if None neighbor lists will be created, which
         requires cutoffs to be specified
     cutoffs : list of floats
         cutoffs for the clusters of increasing order; only used if
-        `neighborlists` is None; note that the first value in the list refers
+        `neighbor_lists` is None; note that the first value in the list refers
         to pairs
 
     Returns
@@ -42,25 +42,25 @@ def get_all_lattice_neighbors(atoms, neighborlists=None, cutoffs=None):
         raise Exception(' '.join(msg))
 
     # get neigbhor lists
-    if neighborlists is None:
-        neighborlists = []
+    if neighbor_lists is None:
+        neighbor_lists = []
         if cutoffs is None:
             raise Exception('Need to specify either neighbor list or cutoffs')
         else:
-            neighborlists = get_neighborlists(
+            neighbor_lists = get_neighbor_lists(
                 structure=structure, cutoffs=cutoffs)
     else:
         # build the neighbor lists
-        for nl in neighborlists:
+        for nl in neighbor_lists:
             nl.build(structure)
 
     order = len(cutoffs) + 1
 
-    mbnl = ManybodyNeighborlist()
+    mbnl = ManyBodyNeighborList()
     # add the mbnl lattice neighbors
     if order >= 2:
         for lattice_index in range(len(structure)):
-            lattice_neighbor = mbnl.build(neighborlists,
+            lattice_neighbor = mbnl.build(neighbor_lists,
                                           lattice_index, bothways)
             for lat_nbrs in lattice_neighbor:
                 lattice_neighbors.append(lat_nbrs)
@@ -70,6 +70,6 @@ def get_all_lattice_neighbors(atoms, neighborlists=None, cutoffs=None):
         lat_nbr_i = LatticeSite(lattice_index, [0.0, 0.0, 0.0])
         lattice_neighbors.append(([lat_nbr_i], []))  # singlet
         lattice_neighbors.append(
-            ([lat_nbr_i], neighborlists[0].get_neighbors(lattice_index)))
+            ([lat_nbr_i], neighbor_lists[0].get_neighbors(lattice_index)))
 
     return lattice_neighbors
