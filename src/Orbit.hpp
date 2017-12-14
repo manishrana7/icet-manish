@@ -6,7 +6,7 @@
 #include <string>
 #include "LatticeSite.hpp"
 #include "Cluster.hpp"
-#include "hash_functions.hpp"
+#include "VectorHash.hpp"
 #include "Symmetry.hpp"
 using namespace Eigen;
 

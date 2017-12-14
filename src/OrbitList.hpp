@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include "LatticeSite.hpp"
-#include "hash_functions.hpp"
+#include "VectorHash.hpp"
 #include "Vector3dCompare.hpp"
 #include "Symmetry.hpp"
 #include "Geometry.hpp"
