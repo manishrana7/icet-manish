@@ -80,9 +80,9 @@ def __prune_permutation_matrix(permutation_matrix, verbosity=0):
 
 def _get_supercell_orbit_list(self, atoms):
     """
-    Returns a orbitlist for a supercell structure
+    Returns a orbit list for a supercell structure
 
-    atoms: ASE atoms object
+    atoms: ASE Atoms object
     """
     structure = Structure.from_atoms(atoms)
     log = LocalOrbitListGenerator(self, structure)
@@ -101,7 +101,7 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
 
     Parameters
     ----------
-    structure: icet structure object
+    structure: icet Structure object
         input configuration used to initialize mbnl and permutation matrix
     cutoffs : list of float
         cutoff radii for each order
@@ -152,16 +152,16 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
         print(' '.join(msg))
 
     t0 = time.time()
-    orbitlist = OrbitList(prim_structure, pm_lattice_sites, neighbor_lists)
+    orbit_list = OrbitList(prim_structure, pm_lattice_sites, neighbor_lists)
     t1 = time.time()
     time_spent = t1 - t0
     total_time_spent += time_spent
 
     if verbosity > 3:
-        print('Finished construction of orbitlist.'
+        print('Finished construction of orbit list.'
               ' Time {} s'.format(time_spent))
 
     if verbosity > 3:
         print('Total time {} s'.format(total_time_spent))
 
-    return orbitlist
+    return orbit_list

@@ -3,7 +3,7 @@ from icetdev import Structure
 from icetdev.orbit_list import create_orbit_list
 from icetdev.permutation_map import vacuum_on_non_pbc
 from ase import Atoms
-import numpy
+import numpy as np
 
 
 class ClusterSpace(_ClusterSpace):
@@ -150,7 +150,7 @@ class ClusterSpace(_ClusterSpace):
             raise Exception(msg)
 
         # if pbc is not true one needs to massage the structure a bit
-        if not numpy.array(structure.get_pbc()).all():
+        if not np.array(structure.get_pbc()).all():
             atoms = structure.to_atoms()
             vacuum_on_non_pbc(atoms)
             structure = Structure.from_atoms(atoms)
@@ -216,11 +216,11 @@ def get_singlet_configuration(atoms, to_primitive=False):
 
     Parameters
     ----------
-    atoms : ASE Atoms object / icet structure object (bi-optional)
+    atoms : ASE Atoms object / icet Structure object (bi-optional)
         atomic configuration
     to_primitive : boolean
         if True the input structure will be reduced to its primitive unit cell
-        before further processing
+        before processing
 
     Returns
     -------
@@ -243,13 +243,13 @@ def get_singlet_configuration(atoms, to_primitive=False):
     else:
         singlet_configuration = atoms.copy()
         singlet_configuration = vacuum_on_non_pbc(singlet_configuration)
-        orbitlist = cluster_space.get_orbit_list()
-        orbitlist_supercell \
-            = orbitlist.get_supercell_orbit_list(singlet_configuration)
+        orbit_list = cluster_space.get_orbit_list()
+        orbit_list_supercell \
+            = orbit_list.get_supercell_orbit_list(singlet_configuration)
         for singlet in cluster_data:
             for site in singlet['sites']:
                 element = chemical_symbols[singlet['orbit_index'] + 1]
-                sites = orbitlist_supercell.get_orbit(
+                sites = orbit_list_supercell.get_orbit(
                     singlet['orbit_index']).get_equivalent_sites()
                 for lattice_site in sites:
                     k = lattice_site[0].index
@@ -264,11 +264,11 @@ def view_singlets(atoms, to_primitive=False):
 
     Parameters
     ----------
-    atoms : ASE Atoms object / icet structure object (bi-optional)
+    atoms : ASE Atoms object / icet Structure object (bi-optional)
         atomic configuration
-    to_primitive : bool
+    to_primitive : boolean
         if True the input structure will be reduced to its primitive unit cell
-        before further processing
+        before processing
     '''
     from ase.visualize import view
     singlet_configuration = get_singlet_configuration(
@@ -286,7 +286,7 @@ def get_Mi_from_dict(Mi, structure):
     ----------
     Mi : xx
         xx
-    atoms : ASE atoms object / icet structure object (bi-optional)
+    atoms : ASE Atoms object / icet Structure object (bi-optional)
         atomic configuration
 
     Returns

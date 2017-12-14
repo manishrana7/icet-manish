@@ -9,8 +9,7 @@ from icetdev.fitting.base_optimizer import BaseOptimizer
 
 class Optimizer(BaseOptimizer):
     '''
-    Optimizer for single Ax = y fit
-
+    Optimizer for single `Ax = y` fit.
 
     Attributes
     ----------
@@ -23,13 +22,17 @@ class Optimizer(BaseOptimizer):
     def __init__(self, fit_data, fit_method='least-squares',
                  train_fraction=0.75, test_fraction=None, train_rows=None,
                  test_rows=None, seed=42, **kwargs):
-        ''' Initialize Optimizer
+        ''' Initialize Optimizer.
 
         Either specify train_fraction/test_fraction or train_rows/test_rows,
         these can not be used together.
 
         Note that Optimizer.train_fraction will be slightly different than
         the specified value.
+
+        Todo
+        ----
+        * document parameters
         '''
 
         super().__init__(fit_data, fit_method, seed)
@@ -83,7 +86,7 @@ class Optimizer(BaseOptimizer):
         ''' Setup train and test rows depending on which arguments are
         specified and which are None.
 
-        if train_rows and test_rows are none then fractions are used.
+        If `train_rows` and `test_rows` are `None` then `fractions` are used.
         '''
 
         if train_rows is None and test_rows is None:  # get rows from fraction
@@ -153,42 +156,42 @@ class Optimizer(BaseOptimizer):
 
     @property
     def rmse_train(self):
-        ''' float : Root mean squared error for training set '''
+        ''' float : root mean squared error for training set '''
         return self._rmse_train
 
     @property
     def rmse_test(self):
-        ''' float : Root mean squared error for test set '''
+        ''' float : root mean squared error for test set '''
         return self._rmse_test
 
     @property
     def train_rows(self):
-        ''' list : Indices for the rows included in training '''
+        ''' list : indices for the rows included in training '''
         return self._train_rows
 
     @property
     def test_rows(self):
-        ''' list : Indices for the rows included in testing '''
+        ''' list : indices for the rows included in testing '''
         return self._test_rows
 
     @property
     def train_fraction(self):
-        ''' float : Fraction of the total data included in training '''
-        return len(self._train_rows)/self.Nrows
+        ''' float : fraction of the total data included in training '''
+        return len(self._train_rows) / self.Nrows
 
     @property
     def test_fraction(self):
-        ''' float : Fraction of the total data included in testing '''
-        return len(self._test_rows)/self.Nrows
+        ''' float : fraction of the total data included in testing '''
+        return len(self._test_rows) / self.Nrows
 
     @property
     def train_size(self):
-        ''' int : Number of rows included in training '''
+        ''' int : number of rows included in training '''
         return len(self.train_rows)
 
     @property
     def test_size(self):
-        ''' int : Number of rows included in testing '''
+        ''' int : number of rows included in testing '''
         if self.test_rows is None:
             return 0
         return len(self.test_rows)

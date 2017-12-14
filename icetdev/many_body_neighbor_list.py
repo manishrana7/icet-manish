@@ -11,7 +11,7 @@ def get_all_lattice_neighbors(atoms, neighbor_lists=None, cutoffs=None):
 
     Parameters
     ----------
-    atoms : ASE atoms object / icet structure object (bi-optional)
+    atoms : ASE Atomss object / icet Structure object (bi-optional)
         atomic configuration
     neighbor_lists : array/list of icet NeighborList objects
         neighbor lists; if None neighbor lists will be created, which

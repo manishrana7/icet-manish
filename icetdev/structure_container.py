@@ -175,7 +175,7 @@ class StructureContainer(object):
     def get_fit_data(self, structure_indices=None, key='energy'):
         '''
         Return fit data for all structures. The cluster vectors and
-        target properties for all structures are stacked into numpy arrays.
+        target properties for all structures are stacked into NumPy arrays.
 
         Parameters
         ----------
@@ -188,7 +188,7 @@ class StructureContainer(object):
 
         Returns
         -------
-        numpy array, numpy array
+        NumPy array, NumPy array
             cluster vectors and target properties for desired structures
 
         '''
@@ -311,7 +311,7 @@ class FitStructure:
 
     @property
     def cluster_vector(self):
-        '''numpy array : the fit cluster vector'''
+        '''NumPy array : the fit cluster vector'''
         return self._cluster_vector
 
     @property

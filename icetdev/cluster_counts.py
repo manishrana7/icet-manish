@@ -12,11 +12,11 @@ def __count_clusters(self, structure, prim_orbit_list,
 
     Parameters
     ----------
-    structure : icet Structure object
+    structure : Structure object
         supercell of the structure `prim_orbit_list` is based on
-    prim_orbit_list : icet orbitlist object
-        based on a primitive of the input structure
-    keep_order_intact: bool
+    prim_orbit_list : OrbitList object
+        orbit list based on a primitive of the input structure
+    keep_order_intact: boolean
         count the clusters in the orbit with the same orientation as the
         prototype cluster
     '''
@@ -25,7 +25,7 @@ def __count_clusters(self, structure, prim_orbit_list,
                                                          structure)
 
     for i in range(local_orbit_list_generator.get_unique_offsets_count()):
-        # sending local orbitlist directly into function was about 10% faster
+        # sending local orbit list directly into function was about 10% faster
         # than:
         # local_orbit_list = \
         #    local_orbit_list_generator.generate_local_orbit_list(i)

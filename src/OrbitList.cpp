@@ -1,14 +1,14 @@
 #include "OrbitList.hpp"
 
 /**
-@TODO: Think about adding a string tag here to keep track of different orbitlists
+@TODO: Think about adding a string tag here to keep track of different orbit lists
 */
 OrbitList::OrbitList()
 {
     //Empty constructor
 }
 
-///Construct orbitlist from mbnl and structure
+///Construct orbit list from mbnl and structure
 OrbitList::OrbitList(const std::vector<NeighborList> &neighbor_lists, const Structure &structure)
 {
     _primitiveStructure = structure;
@@ -49,7 +49,7 @@ OrbitList::OrbitList(const std::vector<NeighborList> &neighbor_lists, const Stru
     }
 }
 
-///add cluster to orbitlist, if cluster exists add sites if not create a new orbit
+///add cluster to orbit list, if cluster exists add sites if not create a new orbit
 void OrbitList::addClusterToOrbitList(const Cluster &cluster, const std::vector<LatticeSite> &sites, std::unordered_map<Cluster, int> &clusterIndexMap)
 {
     int orbitNumber = findOrbit(cluster, clusterIndexMap);
@@ -57,7 +57,7 @@ void OrbitList::addClusterToOrbitList(const Cluster &cluster, const std::vector<
     {
         Orbit newOrbit = Orbit(cluster);
         addOrbit(newOrbit);
-        //add to back ( assuming addOrbit does not sort orbitlist )
+        //add to back ( assuming addOrbit does not sort orbit list )
         _orbitList.back().addEquivalentSites(sites);
         clusterIndexMap[cluster] = _orbitList.size() - 1;
         _orbitList.back().sortOrbit();
@@ -561,7 +561,7 @@ void OrbitList::addOrbitsFromPM(const Structure &structure, const std::vector<st
     }
 }
 
-///add these equivalent sites as an orbit to orbitlist
+///add these equivalent sites as an orbit to orbit list
 void OrbitList::addOrbitFromPM(const Structure &structure, const std::vector<std::vector<LatticeSite>> &equivalent_sites)
 {
 
@@ -690,7 +690,7 @@ std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> OrbitList::ge
         {
             row.print();
         }
-        throw std::runtime_error("Did not find any of the translated sites in col1 of permutation matrix in function getFirstMatchInPM in orbitlist");
+        throw std::runtime_error("Did not find any of the translated sites in col1 of permutation matrix in function getFirstMatchInPM in orbit list");
     }
 }
 /**

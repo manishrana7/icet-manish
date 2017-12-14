@@ -3,9 +3,9 @@ from icetdev.orbit_list import create_orbit_list
 from ase.build import bulk
 
 '''
-This test will construct two orbitlists each from the same atom structure but
+This test will construct two orbit lists each from the same atom structure but
 one will have shuffled atoms. The test will assert that the orbits in the
-orbitlists are the same from both orbitlists
+orbit lists are the same from both orbit lists.
 
 Todo
 ----
@@ -17,7 +17,7 @@ cutoffs = [3, 2.5, 2]
 structure = Structure.from_atoms(atoms1)
 
 
-orbitlist_1 = create_orbit_list(structure, cutoffs, verbosity=0)
+orbit_list_1 = create_orbit_list(structure, cutoffs, verbosity=0)
 
 atoms2 = atoms1.copy()
 
@@ -38,17 +38,17 @@ atoms2 = atoms2.repeat(2)
 
 structure2 = Structure.from_atoms(atoms2)
 
-# create orbitlist from shuffled structure
-orbitlist_2 = create_orbit_list(structure2, cutoffs, verbosity=4)
+# create orbit list from shuffled structure
+orbit_list_2 = create_orbit_list(structure2, cutoffs, verbosity=4)
 
 
-assert len(orbitlist_1) == len(orbitlist_2), \
-    'The sizes of the different orbitlists should be equal'
+assert len(orbit_list_1) == len(orbit_list_2), \
+    'The sizes of the different orbit lists should be equal'
 
-orbitlist_1.sort()
-orbitlist_2.sort()
+orbit_list_1.sort()
+orbit_list_2.sort()
 
-for i in range(len(orbitlist_1)):
-    assert orbitlist_1.get_orbit(i).get_representative_cluster() \
-        == orbitlist_2.get_orbit(i).get_representative_cluster(), \
+for i in range(len(orbit_list_1)):
+    assert orbit_list_1.get_orbit(i).get_representative_cluster() \
+        == orbit_list_2.get_orbit(i).get_representative_cluster(), \
         'Representative clusters should be the same in the different orbits'

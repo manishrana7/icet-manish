@@ -19,20 +19,19 @@ def compute_rmse(A, x, y_target):
     ''' Computes root mean squared error for a linear model.
 
     Computes error between y_predicted and y_target, where
-    f_predicted = dot(A, ax).
+    `f_predicted = dot(A, ax)`.
 
-    A : numpy array
+    A : NumPy array
         fit matrix
-    x : list / numpy vector
+    x : list / NumPy vector
         parameters
-    y_target : list / numpy vector
+    y_target : list / NumPy vector
         target vector
 
     Returns
     -------
     float
-        Root mean squared error
-
+        root mean squared error
     '''
     assert A.shape[0] == y_target.shape[0]
     if A.shape[0] == 0:
@@ -46,21 +45,22 @@ def compute_rmse(A, x, y_target):
 def compute_mae(A, x, y_target):
     ''' Computes mean absolute error for a linear model.
 
-    Computes error between y_predicted and y_target, where
-    f_predicted = dot(A, ax).
+    Computes error between `y_predicted` and `y_target`, where
+    `y_predicted = dot(A, ax)`.
 
-    A : numpy array
+    Parameters
+    ----------
+    A : NumPy array
         fit matrix
-    x : list / numpy vector
+    x : list / NumPy vector
         parameters
-    y_target : list / numpy vector
+    y_target : list / NumPy vector
         target vector
 
     Returns
     -------
     float
-        Mean absolute error
-
+        mean absolute error
     '''
     assert A.shape[0] == y_target.shape[0]
     if A.shape[0] == 0:
@@ -72,19 +72,19 @@ def compute_mae(A, x, y_target):
 
 
 def compute_correlation_matrix(A):
-    ''' Computes correlation matrix for rows in A
+    ''' Computes correlation matrix for rows in input matrix.
 
-    Naive implementation
+    Naive implementation.
 
     Parameters
     ----------
-    A : numpy array
+    A : NumPy array
         fit matrix
 
     Returns
     -------
     array
-        Correlation matrix
+        correlation matrix
     '''
     N = A.shape[0]
     C = np.zeros((N, N))

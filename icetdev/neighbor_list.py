@@ -9,7 +9,7 @@ def get_neighbor_lists(atoms, cutoffs=None):
 
     Parameters
     ----------
-    atoms : ASE atoms object / icet structure object (bi-optional)
+    atoms : ASE Atomss object / icet Structure object (bi-optional)
         atomic configuration
     cutoffs:
         positive floats indicating the cutoffs for the various clusters

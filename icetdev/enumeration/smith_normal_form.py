@@ -79,7 +79,6 @@ class SmithNormalForm(object):
         '''
         self.hnfs.append(hnf)
 
-
     def set_group_order(self):
         '''
         Set group representation of an SNF matrix (the G matrix in HarFor08).

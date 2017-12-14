@@ -85,13 +85,13 @@ class OrbitList
         _orbitList.clear();
     }
 
-    /// Sort the orbitlist
+    /// Sort the orbit list
     void sort()
     {
         std::sort(_orbitList.begin(), _orbitList.end());
     }
 
-    ///Returns orbitlist
+    ///Returns orbit list
     std::vector<Orbit> getOrbitList() const
     {
         return _orbitList;
@@ -100,7 +100,7 @@ class OrbitList
     int findOrbit(const Cluster &) const;
 
     /**
-    Prints information about the orbitlist
+    Prints information about the orbit list
     */
 
     void print(int verbosity = 0) const
@@ -149,7 +149,7 @@ class OrbitList
     {
         return _primitiveStructure;
     }
-    /// += a orbitlist to another, first assert that they have the same number of orbits or that this is empty and then add equivalent sites of orbit i of rhs to orbit i to ->this
+    /// += a orbit list to another, first assert that they have the same number of orbits or that this is empty and then add equivalent sites of orbit i of rhs to orbit i to ->this
     OrbitList &operator+=(const OrbitList &rhs_ol)
     {
         if (size() == 0)

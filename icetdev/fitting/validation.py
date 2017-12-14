@@ -16,17 +16,17 @@ validation_methods = {
 
 
 class CrossValidationEstimator(BaseOptimizer):
-    ''' Optimizer with cross validation
+    ''' Optimizer with cross validation.
 
     This optimizer carries out cross validation and computes the final model
     with the full data set.
 
-
+    Attributes
+    ----------
     train_scatter_data : ScatterData object (namedtuple)
         contains target and predicted value for the final training set
     validation_scatter_data : ScatterData object (namedtuple)
         contains target and predicted value for each row in each validation set
-
     '''
 
     def __init__(self, fit_data, fit_method='least-squares',
@@ -82,7 +82,7 @@ class CrossValidationEstimator(BaseOptimizer):
     def _set_kwargs(self, kwargs):
         ''' Sets up fit_kwargs and split_kwargs
 
-        The different split methods need different keywords
+        The different split methods need different keywords.
         '''
         self._fit_kwargs = {}
         self._split_kwargs = {}
@@ -110,27 +110,27 @@ class CrossValidationEstimator(BaseOptimizer):
 
     @property
     def n_splits(self):
-        ''' str : Number of splits (folds) for cross validation calculation '''
+        ''' str : number of splits (folds) for cross validation calculation '''
         return self._n_splits
 
     @property
     def rmse_train_final(self):
-        ''' float : Root mean squared error for the final training set '''
+        ''' float : root mean squared error for the final training set '''
         return self._rmse_train_final
 
     @property
     def rmse_train(self):
-        ''' list : All root mean squared training errors obtained during
+        ''' list : root mean squared training errors obtained during
                    cross validation calculation '''
         return self._rmse_train_split
 
     @property
     def rmse_validation(self):
-        ''' list : All root mean squared validation errors obtained during
+        ''' list : root mean squared validation errors obtained during
                    cross validation calculation '''
         return self._rmse_validation
 
     @property
     def validation_score(self):
-        ''' float : Average root mean squared validation error '''
+        ''' float : average root mean squared validation error '''
         return np.mean(self._rmse_validation)

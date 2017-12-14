@@ -83,7 +83,7 @@ class ClusterSpace
         }
         return elements;
     }
-    ///returns a orbit from the orbitlist
+    ///returns a orbit from the orbit list
     Orbit getOrbit(const size_t index) const
     {
         return _primitive_orbit_list.getOrbit(index);
@@ -109,7 +109,7 @@ class ClusterSpace
     ///Primitive cell/structure
     Structure _primitive_structure;
 
-    ///Primitive orbitlist based on the structure and the global cutoffs
+    ///Primitive orbit list based on the structure and the global cutoffs
     OrbitList _primitive_orbit_list;
 
     ///Unique id for this cluster space

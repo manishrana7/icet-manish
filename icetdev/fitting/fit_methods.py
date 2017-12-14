@@ -28,7 +28,7 @@ except Exception:
 def fit_least_squares(X, y):
     '''Return the least-squares solution `a` to the linear problem `Xa=y`.
 
-    This function is a wrapper to the `linalg.lstsq` function in numpy.
+    This function is a wrapper to the `linalg.lstsq` function in NumPy.
 
     Parameters
     -----------
@@ -55,8 +55,8 @@ def fit_lasso(X, y, alpha=None, fit_intercept=False, **kwargs):
 
         (1 / (2 * n_samples)) * ||y - Xw||^2_2 + alpha * ||w||_1
 
-    If `alpha is None` this function will conduct a grid search for an optimal
-    alpha value.
+    If `alpha` is `None` this function will conduct a grid search for an
+    optimal alpha value.
 
     Parameters
     -----------

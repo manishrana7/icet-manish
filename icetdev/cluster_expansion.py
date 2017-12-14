@@ -7,8 +7,8 @@ class ClusterExpansion(object):
 
     Attributes
     ----------
-    cluster_space : icet ClusterSpace object
-        the cluster space that was used for constructing the cluster expansion
+    cluster_space : ClusterSpace object
+        cluster space that was used for constructing the cluster expansion
     parameters : list of floats
         effective cluster interactions (ECIs)
     '''
@@ -19,7 +19,7 @@ class ClusterExpansion(object):
 
         Parameters
         ----------
-        cluster_space : icet ClusterSpace object
+        cluster_space : ClusterSpace object
             the cluster space to be used for constructing the cluster expansion
         parameters : list of floats
             effective cluster interactions (ECIs)

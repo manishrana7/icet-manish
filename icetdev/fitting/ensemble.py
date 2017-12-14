@@ -2,7 +2,7 @@
 Ensemble Optimizer
 
 https://en.wikipedia.org/wiki/Bootstrap_aggregating
-http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.BaggingRegressor.html
+http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.BaggingRegressor.html  # NOQA
 '''
 
 import numpy as np
@@ -71,7 +71,7 @@ class EnsembleOptimizer(BaseOptimizer):
     def get_error_matrix(self):
         ''' Get error matrix
 
-        error_matrix[i][j] is the error for row i for fit j
+        `error_matrix[i][j]` is the error for row `i` for fit `j`
         '''
         error_matrix = np.zeros((self.Nrows, self.n_splits))
         for i, parameters in enumerate(self.parameters_set):
@@ -89,21 +89,21 @@ class EnsembleOptimizer(BaseOptimizer):
 
     @property
     def n_splits(self):
-        ''' int : Number of fits (size of ensemble) '''
+        ''' int : number of fits (size of ensemble) '''
         return self._n_splits
 
     @property
     def bootstrap(self):
-        ''' bool : Boolean dictating if sampling with replacement or not '''
+        ''' bool : boolean dictating if sampling with replacement or not '''
         return self._bootstrap
 
     @property
     def train_size(self):
-        ''' int : Number of columns included in each fit '''
+        ''' int : number of columns included in each fit '''
         return self._train_size
 
     @property
     def train_fraction(self):
-        ''' float : Training fraction (note this might differ slightly from the
+        ''' float : training fraction (note this might differ slightly from the
                     value set in the __init__) '''
         return self.train_size/self.Nrows

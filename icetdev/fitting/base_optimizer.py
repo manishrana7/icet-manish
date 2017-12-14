@@ -18,19 +18,18 @@ fit_methods = OrderedDict([
 
 
 class BaseOptimizer:
-    ''' BaseOptimizer class
+    ''' BaseOptimizer class.
 
-    Serves as base for all Optimizers solving  Ax = y
+    Serves as base for all Optimizers solving `Ax = y`
 
     Attributes
     ----------
-    A : numpy array
+    A : NumPy array
         fit matrix
-    y : numpy array
+    y : NumPy array
         target values
     optimizer_function : function
         optimizer function to be called when training
-
     '''
 
     def __init__(self, fit_data, fit_method, seed):
@@ -48,13 +47,13 @@ class BaseOptimizer:
         self._fit_results = {'parameters': None}
 
     def compute_rmse(self, A, y):
-        ''' Comptues root mean square error for A, y with fitted parameters
+        ''' Computes root mean square error for `A`, `y` with fitted parameters
 
         Parameters
         ----------
-        A : numpy array
+        A : NumPy array
             matrix
-        y : numpu array
+        y : NumPy array
             target values
 
         Returns
@@ -65,26 +64,26 @@ class BaseOptimizer:
         return compute_rmse(A, self.parameters, y)
 
     def predict(self, A):
-        ''' Predict values for A
+        ''' Predict data given an input matrix `A`
 
         Parameters
         ----------
-        A : numpy array
+        A : NumPy array
             matrix
 
         Returns
         -------
         array
-            prediction for each row in A
+            prediction for each row in input matrix
         '''
         return np.dot(A, self.parameters)
 
     def contribution(self, A):
-        ''' computes the average contribution from each column (parameter)
+        ''' Compute the average contribution from each column (parameter)
 
         Parameters
         ----------
-        A : numpy array
+        A : NumPy array
             matrix
 
         Returns
@@ -114,12 +113,12 @@ class BaseOptimizer:
 
     @property
     def fit_method(self):
-        ''' str : Fit method name '''
+        ''' str : fit method name '''
         return self._fit_method
 
     @property
     def parameters(self):
-        ''' np.ndarry : Copy of the parameters '''
+        ''' np.ndarray : copy of the parameters '''
         if self.fit_results['parameters'] is None:
             return None
         else:
@@ -127,20 +126,20 @@ class BaseOptimizer:
 
     @property
     def Nrows(self):
-        ''' int : Number of rows in the A matrix '''
+        ''' int : number of rows in the A matrix '''
         return self._A.shape[0]
 
     @property
     def Ncols(self):
-        ''' int : Number of columns in the A matrix '''
+        ''' int : number of columns in the A matrix '''
         return self._A.shape[1]
 
     @property
     def seed(self):
-        ''' int : Random seed '''
+        ''' int : random seed '''
         return self._seed
 
     @property
     def fit_results(self):
-        ''' dict : Dictionary containing results obtained from fitting '''
+        ''' dict : dictionary containing results obtained from fitting '''
         return self._fit_results

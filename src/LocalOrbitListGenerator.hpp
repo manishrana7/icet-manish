@@ -10,7 +10,7 @@
 
 This is a small class that has a:
 
-orbitlist (from primitive structure)
+orbit list (from primitive structure)
 supercell
 list of unique primitive cell offsets that the supercell span
 the primToSupercellMap
@@ -18,10 +18,10 @@ the primToSupercellMap
 
 you can query this object with
 
-///Give number of possible local orbitlists one can make from current supercell and the primitive orbitlist
+///Give number of possible local orbit lists one can make from current supercell and the primitive orbit list
 size_t number_of_possible_local_orbit_lists();
 
-///Generate the orbitlist from the primitive offset with count i
+///Generate the orbit list from the primitive offset with count i
 OrbitList getLocalOrbitList(int i);
 
 std::vector<Vector3d> getUniqueOffsets() const;
@@ -39,18 +39,18 @@ class LocalOrbitListGenerator
   public:
     LocalOrbitListGenerator(const OrbitList &, const Structure &);
 
- 
 
-    ///generate and returns the local orbitlist with the input index
+
+    ///generate and returns the local orbit list with the input index
     OrbitList generateLocalOrbitList(const unsigned int ) ;
 
-    ///generate and returns the local orbitlist with the input offset (require that the offset is in uniquecell offset?)
+    ///generate and returns the local orbit list with the input offset (require that the offset is in uniquecell offset?)
     OrbitList generateLocalOrbitList(const Vector3d & ) ;
 
-    /// Generate the full orbitlist from this structure
+    /// Generate the full orbit list from this structure
     OrbitList generateFullOrbitList();
-    
-    //clears the unordered_map and the vector    
+
+    //clears the unordered_map and the vector
     void clear();
 
     ///Returns the number of unique offsets
@@ -79,14 +79,14 @@ class LocalOrbitListGenerator
     Maps supercell positions to reference to the primitive cell and find unique primitive cell offsets
     Will loop through all sites in supercell and map them to the primitive structures cell
     and find the unique primitive cell offsets
-    */    
+    */
     void mapSitesAndFindCellOffsets();
 
 
-    ///Primitive orbitlist
+    ///Primitive orbit list
     OrbitList _orbit_list;
 
-    ///supercell structure from which the local orbitlist will be based upon
+    ///supercell structure from which the local orbit list will be based upon
     Structure _supercell;
 
     ///this maps a latticeNeighbor from the primitive and get the equivalent in supercell

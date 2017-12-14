@@ -1,8 +1,6 @@
 #include "ClusterCounts.hpp"
 
-/**
-Counts clusters given this compact form of latticeneighbors (see ManyBodyNeighborList for more details)
-*/
+/// Count clusters given this compact form of lattice neighbors (see ManyBodyNeighborList for more details)
 // build(const NeighborList &nl, int index, int order, bool);
 void ClusterCounts::countLatticeSites(const Structure &structure,
                                       const std::vector<std::pair<std::vector<LatticeSite>,std::vector<LatticeSite>>> &latticeNeighbors)
@@ -73,30 +71,30 @@ void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> 
 }
 
 /**
-    Counts the clusters of the sites in each orbit of orbitlist
+    Count the clusters of the sites in each orbit of the orbit list
 
     Parameters
     ----------
     structure:
         icet structure object to be counted on
 
-    orbitlist:
-        icet orbitlist class
+    orbitList:
+        OrbitList object
 */
-void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &orbitlist, bool orderIntact)
+void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &orbitList, bool orderIntact)
 {
 
-    for (int i = 0; i < orbitlist.size(); i++)
+    for (int i = 0; i < orbitList.size(); i++)
     {
-        Cluster repr_cluster = orbitlist.getOrbit(i).getRepresentativeCluster();
+        Cluster repr_cluster = orbitList.getOrbit(i).getRepresentativeCluster();
         repr_cluster.setClusterTag(i);
         if(orderIntact && repr_cluster.order()!= 1)
         {
-            count(structure, orbitlist.getOrbit(i).getPermutatedEquivalentSites(), repr_cluster);
+            count(structure, orbitList.getOrbit(i).getPermutatedEquivalentSites(), repr_cluster);
         }
         else
         {
-            count(structure, orbitlist.getOrbit(i).getEquivalentSites(), repr_cluster);
+            count(structure, orbitList.getOrbit(i).getEquivalentSites(), repr_cluster);
         }
     }
 
