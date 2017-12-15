@@ -1,4 +1,4 @@
-[![pipeline status](https://gitlab.com/icet/icet/badges/master/pipeline.svg)](https://gitlab.com/icet/icet/commits/master)
+[![pipeline status](https://gitlab.com/materials-modeling/icet/badges/master/pipeline.svg)](https://gitlab.com/materials-modeling/icet/commits/master)
 [![coverage report](https://gitlab.com/materials-modeling/icet/badges/master/coverage.svg)](https://materials-modeling.gitlab.io/icet/.test/coverage/)
 
 
