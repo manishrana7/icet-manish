@@ -62,21 +62,37 @@ class ClusterSpace(_ClusterSpace):
         _ClusterSpace.__init__(self, Mi, chemical_symbols, orbit_list)
         self.cutoffs = cutoffs
 
-    def __repr__(self):
+    def get_overview(self, print_threshold=None, parameters=None):
         '''
-        String representation of the cluster space.
+        Obtain an overview of the cluster space in terms of the orbits (order,
+        radius, multiplicity etc) including optionally the associated
+        parameters (i.e., effective cluster interactions=ECIs).
+
+        Parameters
+        ----------
+        print_threshold : int
+            if the number of orbits exceeds this number print dots
+        parameters : list
+            parameters (ECIs) to be printed along side orbit information
+
+        Returns
+        -------
+        multi-line string
+            string representation of the cluster space.
         '''
 
         def repr_cluster(index, cluster, multiplicity=0,
-                         orbit_index=0, mc_vector=[0] * 5):
+                         orbit_index=0, mc_vector=[0] * 5, param=None):
             from collections import OrderedDict
             fields = OrderedDict([
                 ('order',   '{:2}'.format(cluster.order)),
                 ('radius',  '{:9.4f}'.format(cluster.geometrical_size)),
                 ('multiplicity', '{:4}'.format(multiplicity)),
                 ('index',     '{:4}'.format(index)),
-                ('orbit',     '{:4}'.format(orbit_index)),
-                ('MC vector', '{:}'.format(mc_vector))])
+                ('orbit',     '{:4}'.format(orbit_index))])
+            if param is not None:
+                fields['ECI'] = '{:13.6e}'.format(param)
+            fields['MC vector'] = '{:}'.format(mc_vector)
             s = []
             for name, value in fields.items():
                 n = max(len(name), len(value))
@@ -86,9 +102,17 @@ class ClusterSpace(_ClusterSpace):
                     s += ['{s:^{n}}'.format(s=value, n=n)]
             return ' | '.join(s)
 
+        if parameters is not None:
+            if len(parameters) - 1 != len(self):
+                raise Exception('Length of parameter vector incompatible'
+                                ' with cluster space size')
+            param = 1.0
+        else:
+            param = None
+
         # basic information
         cluster = self.get_orbit(0).get_representative_cluster()
-        n = len(repr_cluster(-1, cluster))
+        n = len(repr_cluster(-1, cluster, param=param))
         s = []
         s += ['{s:-^{n}}'.format(s=' Cluster Space ', n=n)]
         s += [' subelements: {}'.format(' '.join(self.get_atomic_numbers()))]
@@ -99,15 +123,16 @@ class ClusterSpace(_ClusterSpace):
         # table header
         horizontal_line = '{s:-^{n}}'.format(s='', n=n)
         s += [horizontal_line]
-        s += [repr_cluster(-1, cluster)]
+        s += [repr_cluster(-1, cluster, param=param)]
         s += [horizontal_line]
 
         # table body
         index = 0
-        print_threshold = 50
         while index < len(self):
-            if (len(self) > print_threshold and
-                    index > 10 and index < len(self) - 10):
+            if (print_threshold is not None and
+                    len(self) > print_threshold and
+                    index > 10 and
+                    index < len(self) - 10):
                 index = len(self) - 10
                 s += [' ...']
 
@@ -117,14 +142,22 @@ class ClusterSpace(_ClusterSpace):
             cluster = self.get_orbit(orbit_index).get_representative_cluster()
             multiplicity = len(self.get_orbit(
                                orbit_index).get_equivalent_sites())
+            if parameters is not None:
+                param = parameters[index+1]
             s += [repr_cluster(index, cluster, multiplicity,
-                               orbit_index, mc_vector)]
+                               orbit_index, mc_vector, param)]
 
             index += 1
 
         s += [horizontal_line]
 
         return '\n'.join(s)
+
+    def __repr__(self):
+        '''
+        String representation of the cluster space.
+        '''
+        return self.get_overview(50)
 
     def get_cluster_vector(self, atoms):
         '''
