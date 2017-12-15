@@ -119,6 +119,8 @@ class ClusterSpace(_ClusterSpace):
         s += [' cutoffs: {}'.format(' '.join(['{}'.format(co)
                                               for co in self.cutoffs]))]
         s += [' number of orbits: {}'.format(len(self))]
+        if parameters is not None:
+            s += [' ECI zerolet: {}'.format(parameters[0])]
 
         # table header
         horizontal_line = '{s:-^{n}}'.format(s='', n=n)
