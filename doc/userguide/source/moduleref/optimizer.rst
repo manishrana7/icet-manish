@@ -8,3 +8,4 @@ Optimizer
 .. automodule:: fitting
    :members:
    :undoc-members:
+   :inherited-members:

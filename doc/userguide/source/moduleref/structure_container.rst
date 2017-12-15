@@ -8,3 +8,4 @@ StructureContainer
 .. automodule:: structure_container
    :members:
    :undoc-members:
+   :inherited-members:

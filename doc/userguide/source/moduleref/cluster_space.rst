@@ -8,3 +8,4 @@ ClusterSpace
 .. automodule:: cluster_space
    :members:
    :undoc-members:
+   :inherited-members:

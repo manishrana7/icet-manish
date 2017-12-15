@@ -8,3 +8,4 @@ Structure enumeration
 .. automodule:: enumeration
    :members:
    :undoc-members:
+   :inherited-members:

@@ -5,26 +5,28 @@
 Core components
 ===============
 
-LocalOrbitlistGenerator
+LocalOrbitListGenerator
 -----------------------
 
-.. automodule:: local_orbitlist_generator
+.. automodule:: local_orbit_list_generator
    :members:
    :undoc-members:
 
 NeighborList
 ------------
 
-.. automodule:: neighborlist
+.. automodule:: neighbor_list
    :members:
    :undoc-members:
+   :inherited-members:
 
 ManyBodyNeighborList
 --------------------
 
-.. automodule:: manybody_neighborlist
+.. automodule:: many_body_neighbor_list
    :members:
    :undoc-members:
+   :inherited-members:
 
 Orbit
 -----
@@ -32,6 +34,7 @@ Orbit
 .. automodule:: orbit
    :members:
    :undoc-members:
+   :inherited-members:
 
 OrbitList
 ---------
@@ -39,6 +42,7 @@ OrbitList
 .. automodule:: orbit_list
    :members:
    :undoc-members:
+   :inherited-members:
 
 PermutationMap
 --------------
@@ -46,6 +50,7 @@ PermutationMap
 .. automodule:: permutation_map
    :members:
    :undoc-members:
+   :inherited-members:
 
 Geometry
 --------
@@ -53,3 +58,4 @@ Geometry
 .. automodule:: tools.geometry
    :members:
    :undoc-members:
+   :inherited-members:
