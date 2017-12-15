@@ -13,8 +13,8 @@ def count_structures(atoms, sizes, species, correct_count, tag):
     Count structures given by structure enumeration and assert that the
     right number is given.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     atoms : ASE Atoms
         Primitive structure for the enumeration.
     sizes : list of ints

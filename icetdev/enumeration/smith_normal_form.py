@@ -244,8 +244,8 @@ def get_unique_snfs(hnfs):
     For a list of Hermite Normal Forms, obtain the set of unique Smith Normal
     Forms.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     hnfs : list of HermiteNormalForm objects
 
     Returns

@@ -49,8 +49,8 @@ def yield_hermite_normal_forms(det):
     '''
     Yield all Hermite Normal Form matrices with determinant det.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     det : int
         Target determinant of HNFs
 
@@ -79,8 +79,8 @@ def get_reduced_hnfs(ncells, symmetries, tol=1e-3):
     Hermite Normal Forms (HNF) that are inequivalent under symmetry
     operations of the parent lattice.'
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     N : int
         Determinant (or, equivalently, the number of atoms) of the HNF.
     symmetries : dict of lists
