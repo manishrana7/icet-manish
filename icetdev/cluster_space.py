@@ -62,11 +62,12 @@ class ClusterSpace(_ClusterSpace):
         _ClusterSpace.__init__(self, Mi, chemical_symbols, orbit_list)
         self.cutoffs = cutoffs
 
-    def get_overview(self, print_threshold=None, parameters=None):
+    def __repr__(self, print_threshold=50, parameters=None):
         '''
-        Obtain an overview of the cluster space in terms of the orbits (order,
-        radius, multiplicity etc) including optionally the associated
-        parameters (i.e., effective cluster interactions=ECIs).
+        String representation of the cluster space that ptovides an overview of
+        the cluster space in terms of the orbits (order, radius, multiplicity
+        etc) including optionally the associated parameters (i.e., effective
+        cluster interactions=ECIs).
 
         Parameters
         ----------
@@ -86,7 +87,7 @@ class ClusterSpace(_ClusterSpace):
             from collections import OrderedDict
             fields = OrderedDict([
                 ('order',   '{:2}'.format(cluster.order)),
-                ('radius',  '{:9.4f}'.format(cluster.geometrical_size)),
+                ('radius',  '{:8.4f}'.format(cluster.geometrical_size)),
                 ('multiplicity', '{:4}'.format(multiplicity)),
                 ('index',     '{:4}'.format(index)),
                 ('orbit',     '{:4}'.format(orbit_index))])
@@ -106,7 +107,7 @@ class ClusterSpace(_ClusterSpace):
             if len(parameters) - 1 != len(self):
                 raise Exception('Length of parameter vector incompatible'
                                 ' with cluster space size')
-            param = 1.0
+            param = -1.0
         else:
             param = None
 
@@ -120,7 +121,7 @@ class ClusterSpace(_ClusterSpace):
                                               for co in self.cutoffs]))]
         s += [' number of orbits: {}'.format(len(self))]
         if parameters is not None:
-            s += [' ECI zerolet: {}'.format(parameters[0])]
+            s += [' ECI zerolet: {:13.6e}'.format(parameters[0])]
 
         # table header
         horizontal_line = '{s:-^{n}}'.format(s='', n=n)
@@ -155,11 +156,21 @@ class ClusterSpace(_ClusterSpace):
 
         return '\n'.join(s)
 
-    def __repr__(self):
+    def print_overview(self, print_threshold=None, parameters=None):
         '''
-        String representation of the cluster space.
+        Print an overview of the cluster space in terms of the orbits (order,
+        radius, multiplicity etc) including optionally the associated
+        parameters (i.e., effective cluster interactions=ECIs).
+
+        Parameters
+        ----------
+        print_threshold : int
+            if the number of orbits exceeds this number print dots
+        parameters : list
+            parameters (ECIs) to be printed along side orbit information
         '''
-        return self.get_overview(50)
+        print(self.__repr__(print_threshold=print_threshold,
+                            parameters=parameters))
 
     def get_cluster_vector(self, atoms):
         '''
