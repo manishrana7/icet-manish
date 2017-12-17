@@ -4,6 +4,7 @@ from icetdev.orbit_list import create_orbit_list
 from icetdev.permutation_map import vacuum_on_non_pbc
 from ase import Atoms
 import numpy as np
+from collections import OrderedDict
 
 
 class ClusterSpace(_ClusterSpace):
@@ -62,6 +63,44 @@ class ClusterSpace(_ClusterSpace):
         _ClusterSpace.__init__(self, Mi, chemical_symbols, orbit_list)
         self.cutoffs = cutoffs
 
+    def get_data(self, parameters=None):
+        '''
+        Overview of cluster space in the form of a list of orbits that provides
+        information concerning their order, radius, multiplicity etc)
+        optionally including the associated parameters (i.e., effective cluster
+        interactions=ECIs).
+
+        Parameters
+        ----------
+        parameters : list
+            parameters (ECIs) to be printed along side orbit information
+
+        Returns
+        -------
+        list of dictionaries
+            information about the cluster space.
+        '''
+        data = []
+        index = 0
+        while index < len(self):
+            cluster_space_info = self.get_cluster_space_info(index)
+            orbit_index = cluster_space_info[0]
+            mc_vector = cluster_space_info[1]
+            cluster = self.get_orbit(orbit_index).get_representative_cluster()
+            multiplicity = len(self.get_orbit(
+                               orbit_index).get_equivalent_sites())
+            record = OrderedDict({'index': index,
+                                  'order': cluster.order,
+                                  'size': cluster.geometrical_size,
+                                  'multiplicity': multiplicity,
+                                  'orbit_index': orbit_index})
+            if parameters is not None:
+                record['ECI'] = parameters[index+1]
+            record['mc_vector'] = mc_vector
+            data.append(record)
+            index += 1
+        return data
+
     def __repr__(self, print_threshold=50, parameters=None):
         '''
         String representation of the cluster space that ptovides an overview of
@@ -84,13 +123,12 @@ class ClusterSpace(_ClusterSpace):
 
         def repr_cluster(index, cluster, multiplicity=0,
                          orbit_index=0, mc_vector=[0] * 5, param=None):
-            from collections import OrderedDict
             fields = OrderedDict([
-                ('order',   '{:2}'.format(cluster.order)),
-                ('radius',  '{:8.4f}'.format(cluster.geometrical_size)),
+                ('order',        '{:2}'.format(cluster.order)),
+                ('radius',       '{:8.4f}'.format(cluster.geometrical_size)),
                 ('multiplicity', '{:4}'.format(multiplicity)),
-                ('index',     '{:4}'.format(index)),
-                ('orbit',     '{:4}'.format(orbit_index))])
+                ('index',        '{:4}'.format(index)),
+                ('orbit',        '{:4}'.format(orbit_index))])
             if param is not None:
                 fields['ECI'] = '{:13.6e}'.format(param)
             fields['MC vector'] = '{:}'.format(mc_vector)
@@ -148,7 +186,7 @@ class ClusterSpace(_ClusterSpace):
             if parameters is not None:
                 param = parameters[index+1]
             s += [repr_cluster(index, cluster, multiplicity,
-                               orbit_index, mc_vector, param)]
+                               orbit_index, mc_vector, param).rstrip()]
 
             index += 1
 
