@@ -4,6 +4,7 @@ import spglib
 
 from icetdev.core.lattice_site import LatticeSite
 
+
 def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
     '''Get positions in reduced (scaled) coordinates.
 
@@ -35,6 +36,12 @@ def find_lattice_site_from_position_python(structure, position):
     It is slower but kept for debugging and if further development is needed.
     '''
 
+<<<<<<< 1c0f42508bd7362df7e598120a7d00c215181349
+=======
+    It is slower but kept as help for debugging and if further development is needed
+    """
+
+>>>>>>> DEV #55: staking out the bug fix in python
     fractional = np.linalg.solve(structure.cell.T, np.array(position).T).T
     unit_cell_offset = [int(round(x)) for x in fractional]
 
@@ -54,6 +61,7 @@ def add_vacuum_in_non_pbc(atoms):
     '''
     Add vacuum in non-periodic directions.
 
+<<<<<<< 1c0f42508bd7362df7e598120a7d00c215181349
     Parameters
     ----------
     atoms : ASE Atoms object
@@ -69,6 +77,13 @@ def add_vacuum_in_non_pbc(atoms):
     for i, pbc in enumerate(atoms.pbc):
         if not pbc:
             vacuum_axis.append(i)
+=======
+# def transform_cell_to_cell(atoms, atoms_template):
+#     '''
+#     Transform atoms_transform to look like a simple repeat of
+#     atoms_template.
+#     '''
+>>>>>>> DEV #55: staking out the bug fix in python
 
     if len(vacuum_axis) > 0:
         atoms.center(30, axis=vacuum_axis)
@@ -129,11 +144,11 @@ def required_offsets_to_map_supercell(supercell, atoms_prim):
     Calculates the minimum number of offsets 
     of atoms prim needed to completely cover the atoms object
 
-    Paramaters
+    Parameters
     ----------
     supercell: ASE atoms object
         The supercell
-    atoms_prim: ASE atombs object
+    atoms_prim: ASE atoms object
         The primitive cell
 
     Returns
@@ -143,7 +158,8 @@ def required_offsets_to_map_supercell(supercell, atoms_prim):
         needed to cover the supercell
     '''
     # Get fractional coordinates of supercell positions given in primitive cell
-    fractional_positions = get_scaled_positions(supercell.positions, atoms_prim.cell, wrap=False)
+    fractional_positions = get_scaled_positions(
+        supercell.positions, atoms_prim.cell, wrap=False)
 
     offsets = []
 
@@ -152,10 +168,11 @@ def required_offsets_to_map_supercell(supercell, atoms_prim):
         offsets.append(offset)
 
     required_offsets = list(set(offsets))
-    
+
     return required_offsets
 
-def transform_cell_to_cell(atoms, atoms_template, tolerance = 1e-3):
+
+def transform_cell_to_cell(atoms, atoms_template, tolerance=1e-3):
     '''
     Transform atoms_transform to look like a simple repeat of
     atoms_template.
@@ -169,47 +186,52 @@ def transform_cell_to_cell(atoms, atoms_template, tolerance = 1e-3):
     atoms_template.wrap()
 
     # get fractional coordinates of supercell positions relative primitive cell
-    fractional_positions = get_scaled_positions(atoms.positions, atoms_template.cell, wrap=False)
+    fractional_positions = get_scaled_positions(
+        atoms.positions, atoms_template.cell, wrap=False)
 
     # print(atoms.positions)
-    
+
     offsets = []
 
     for pos in fractional_positions:
         offset = tuple(np.floor(pos).astype(int))
         offsets.append(offset)
 
-
     unique_offsets = list(set(offsets))
     max_offset = list(max(unique_offsets))
     for i in range(3):
-        if max_offset[i] < 0 :
+        if max_offset[i] < 0:
             max_offset[i] = 0
-        max_offset[i] +=1
-    print(max_offset)    
-    
+        max_offset[i] += 1
+    print(max_offset)
+
     atoms_new = atoms_template.copy().repeat(max_offset)
-    
+
     scaled_positions = atoms_new.get_scaled_positions()
 
     print(atoms_new.cell)
-    supercell_fractional = get_scaled_positions(atoms.positions,  atoms_new.cell, wrap=True)
+    supercell_fractional = get_scaled_positions(
+        atoms.positions,  atoms_new.cell, wrap=True)
 
     for i, atom in enumerate(atoms_new):
-        for j in range( len(supercell_fractional)):
+        for j in range(len(supercell_fractional)):
             if np.linalg.norm(scaled_positions[i] - supercell_fractional[j]) < tolerance:
                 atom.symbol = atoms[j].symbol
 
     return atoms_new
 
+<<<<<<< 1c0f42508bd7362df7e598120a7d00c215181349
+=======
+
+>>>>>>> DEV #55: staking out the bug fix in python
 def get_permutation_matrix(input_configuration,
-                                   reference_structure,
-                                   tolerance_cell=0.05,                                   
-                                   ):
+                           reference_structure,
+                           tolerance_cell=0.05,
+                           ):
     '''
     Computes and returns the permutation matrix that takes the reference cell to the input cell,
     i.e. permutation_matrix * reference_cell = input_cell
-    '''                                
+    '''
 
     input_cell = input_configuration.cell
     reference_cell = reference_structure.cell
@@ -236,3 +258,99 @@ def get_permutation_matrix(input_configuration,
     # reduce the (real) transformation matrix to the nearest integer one
     P = np.around(P)
     return P
+
+
+def get_smart_offsets(atoms, atoms_prim):
+    '''
+     Returns the maps (note plural) that maps each basis atom to the supercell once and only once
+     Each basis will get its own offset. 
+
+    Parameters
+    ----------
+    atoms: ASE atoms object
+        The supercell
+    atoms_prim: ASE atoms object
+        The primitive cell
+
+    Returns
+    ------
+    smart_offsets: List of list
+        each inner list contains a subset of the mapping
+        needed to map the entire supercell from the primitive cell.
+
+    Raises
+        Exception 
+            if the algorithm doesn't find any mapping to the supercelll
+    '''
+
+    smart_offsets = []
+
+    size_of_primitive = len(atoms_prim)
+    size_of_supercell = len(atoms)
+    expected_number_of_mappings = size_of_supercell // size_of_primitive
+    assert np.abs(expected_number_of_mappings - size_of_supercell /
+                  size_of_primitive) < 0.01, "Can not translate cell with {} atoms to a supercell with {} atoms".format(size_of_primitive, size_of_supercell)
+
+    unique_offsets = required_offsets_to_map_supercell(atoms, atoms_prim)
+
+    # Check if easy solution is possibly
+    if len(unique_offsets) == expected_number_of_mappings:
+        for offset in unique_offsets:
+            smart_offsets.append( [offset] * size_of_primitive )
+        return smart_offsets               
+    
+    # Sanity checks
+    if len(unique_offsets) * size_of_primitive < size_of_supercell:
+        raise Exception("Undefined behaviour in function get_smart_offsets")
+
+
+    mapped_supercell_atoms = []
+    
+    # Initialize map
+    supercell_maps = {}
+    for i,p in enumerate(atoms.positions):
+        supercell_maps[i] = []
+
+
+    for offset in unique_offsets:
+        positions = get_offset_positions(atoms_prim, offset)
+        for pos in positions:
+            matched_indices = get_indices_with_zero_component(atoms.positions - pos)
+            for i in matched_indices:
+                supercell_maps[i].append(offset)
+                
+
+    for key in supercell_maps.keys():
+        print(key, end= ': ')
+        for offsets in supercell_maps[key]:
+            print(offsets, end=', ')
+        print()            
+    return smart_offsets 
+
+
+
+def get_indices_with_zero_component(array, tolerance=1e-4):
+    """ 
+    Returns the indices of the array where the component is zero within a tolerance
+    """
+    indices = []
+    for i,a in enumerate(array):
+        if np.linalg.norm(a) < tolerance:
+            indices.append(i)
+    return indices            
+
+
+
+def get_offset_positions(atoms, offset):
+    ''' 
+    Get the offset positions
+    
+    parameters
+    ---------
+    atoms : ASE Atoms object
+        atoms object from which the positions are to be taken
+        and the offsets should be related to its unitcell
+    offset: list of int 
+        Offsets of the unitcell vectors in [O_x, O_y, O_z]
+     '''
+    return atoms.positions + np.dot(offset, atoms.cell)
