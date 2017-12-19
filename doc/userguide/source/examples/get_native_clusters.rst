@@ -17,7 +17,7 @@ In the present case it is necessary to import two :program:`iceT` classes, namel
    :start-after: # Start import
    :end-before: # End import
 
-.. _`discussed above`
+.. _above
 Generate prototype structure
 ----------------------------
 
@@ -30,13 +30,13 @@ The next step is to build a prototype structure, in the form of a silicon, bulk,
 Create the cluster space
 ------------------------
 
-The cluster space is created by simpling initiating a :class:`ClusterSpace <icetdev.ClusterSpace>` object and providing the prototype structure, cutoffs and subelements, `discussed above`_, as arguments.
+The cluster space is created by simpling initiating a :class:`ClusterSpace <icetdev.ClusterSpace>` object and providing the prototype structure, cutoffs and subelements, which were defined :ref:`above <_above>`, as arguments.
 
 .. literalinclude:: ../../../../examples/get_native_clusters.py
    :start-after: # Start clusterspace
    :end-before: # End clusterspace
 
-.. _`previous section`
+.. _previous-section
 Cluster vectors for Si supercells
 ---------------------------------
 
@@ -52,7 +52,7 @@ These lines ought to yield the following result: ::
 Cluster vectors for Si supercells
 ---------------------------------
 
-Finally, the steps described in the `previous section` are repeated after substituting one of the Si atoms in the supercell with Ge.
+Finally, the steps described in the :ref:`previous section <_previous-section>` are repeated after substituting one of the Si atoms in the supercell with Ge.
 
 .. literalinclude:: ../../../../examples/get_native_clusters.py
    :start-after: # Start cluster_vector2
