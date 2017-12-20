@@ -311,6 +311,15 @@ index | order |   size   | multiplicity | orbit index |  MC vector
             Mi = ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
         self.assertTrue('missing from dictionary' in str(context.exception))
 
+    def test_cutoffs(self):
+        ''' Testing cutoffs property '''
+        self.assertEqual(self.cs.cutoffs, self.cutoffs)
+
+    def test_structure(self):
+        ''' Testing structure property '''
+        self.assertEqual(len(self.cs.structure),
+                         len(self.atoms_prim))
+
 
 class TestClusterSpaceSurface(unittest.TestCase):
     '''

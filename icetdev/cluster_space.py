@@ -38,16 +38,18 @@ class ClusterSpace(_ClusterSpace):
 
         # deal with different types of structure objects
         if isinstance(atoms, Atoms):
-            structure = Structure.from_atoms(atoms)
+            self._structure = Structure.from_atoms(atoms)
         elif isinstance(atoms, Structure):
-            structure = atoms
+            self._structure = atoms
         else:
             msg = 'Unknown structure format'
             msg += ' {} (ClusterSpace)'.format(type(atoms))
             raise Exception(msg)
+        self._cutoffs = cutoffs
 
         # set up orbit list
-        orbit_list = create_orbit_list(structure, cutoffs, verbosity=verbosity)
+        orbit_list = create_orbit_list(self._structure, self._cutoffs,
+                                       verbosity=verbosity)
         orbit_list.sort()
         if Mi is None:
             Mi = len(chemical_symbols)
@@ -67,7 +69,6 @@ class ClusterSpace(_ClusterSpace):
 
         # call (base) C++ constructor
         _ClusterSpace.__init__(self, Mi, chemical_symbols, orbit_list)
-        self.cutoffs = cutoffs
 
     @staticmethod
     def _get_Mi_from_dict(Mi, structure):
@@ -150,7 +151,7 @@ class ClusterSpace(_ClusterSpace):
         s += ['{s:-^{n}}'.format(s=' Cluster Space ', n=n)]
         s += [' subelements: {}'.format(' '.join(self.get_atomic_numbers()))]
         s += [' cutoffs: {}'.format(' '.join(['{}'.format(co)
-                                              for co in self.cutoffs]))]
+                                              for co in self._cutoffs]))]
         s += [' number of orbits: {}'.format(len(self))]
 
         # table header
@@ -273,6 +274,20 @@ class ClusterSpace(_ClusterSpace):
             atoms.wrap()
             structure = Structure.from_atoms(atoms)
         return _ClusterSpace.get_cluster_vector(self, structure)
+
+    @property
+    def structure(self):
+        '''
+        Return the structure used for initializing the cluster space.
+        '''
+        return self._structure
+
+    @property
+    def cutoffs(self):
+        '''
+        Return the cutoffs used for initializing the cluster space.
+        '''
+        return self._cutoffs
 
 
 def get_singlet_info(atoms, return_cluster_space=False):
