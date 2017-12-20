@@ -70,6 +70,7 @@ def _assertEqualComplexList(self, retval, target):
             else:
                 self.assertEqual(row_retval[key], val, msg=info)
 
+
 unittest.TestCase.assertEqualComplexList = _assertEqualComplexList
 
 
@@ -85,6 +86,7 @@ def _assertAlmostEqualList(self, retval, target, places=6):
         s += ['target: {} ({})'.format(t, type(t))]
         info = '   '.join(s)
         self.assertAlmostEqual(r, t, places=places, msg=info)
+
 
 unittest.TestCase.assertAlmostEqualList = _assertAlmostEqualList
 
