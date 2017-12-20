@@ -278,15 +278,14 @@ class ClusterSpace(_ClusterSpace):
     @property
     def structure(self):
         '''
-        Return the structure used for initializing the cluster space.
+        icet Structure object : structure used for initializing the cluster
+        space
         '''
         return self._structure
 
     @property
     def cutoffs(self):
-        '''
-        Return the cutoffs used for initializing the cluster space.
-        '''
+        ''' list : cutoffs used for initializing the cluster space '''
         return self._cutoffs
 
 
