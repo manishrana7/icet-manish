@@ -3,6 +3,7 @@ import os
 import unittest
 from glob import glob
 import test_structure_container as TestStructureContainer
+import test_cluster_space as TestClusterSpace
 
 
 class ScriptTestCase(unittest.TestCase):
@@ -61,8 +62,10 @@ def run_test(verbosity=2, files=None):
     for test in tests:
         if test.endswith('__.py'):
             continue
-        elif test.endswith('_container.py'):
+        elif os.path.basename(test) == 'test_structure_container.py':
             testSuite.addTest(TestStructureContainer.suite())
+        elif os.path.basename(test) == 'test_cluster_space.py':
+            testSuite.addTest(TestClusterSpace.suite())
         else:
             testSuite.addTest(ScriptTestCase(filename=os.path.abspath(test)))
 

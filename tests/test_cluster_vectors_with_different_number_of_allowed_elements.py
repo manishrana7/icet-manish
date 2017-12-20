@@ -24,7 +24,7 @@ def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
 
     singlet_data = get_singlet_info(atoms.copy())
     for singlet in singlet_data:
-        Mi_dict[singlet['orbit_index']] = allowed_sites
+        Mi_dict[singlet['orbit index']] = allowed_sites
 
     cluster_space_int = ClusterSpace(atoms, cutoffs, subelements,  Mi=Mi_int)
     cluster_space_list = ClusterSpace(atoms, cutoffs, subelements, Mi=Mi_list)

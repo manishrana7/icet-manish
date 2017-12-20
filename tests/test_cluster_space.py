@@ -24,12 +24,9 @@ import unittest
 
 from icetdev import ClusterSpace
 from icetdev.cluster_space import (get_singlet_info,
-                                   get_singlet_configuration,
-                                   get_Mi_from_dict)
+                                   get_singlet_configuration)
 from icetdev.structure import Structure
 from icetdev.lattice_site import LatticeSite
-from ase.build import bulk
-from ase import Atoms
 from collections import OrderedDict
 
 
@@ -97,140 +94,194 @@ class TestClusterSpace(unittest.TestCase):
     Container for tests of the class functionality
     '''
 
+    def __init__(self, *args, **kwargs):
+        from ase.build import bulk
+        super(TestClusterSpace, self).__init__(*args, **kwargs)
+        self.subelements = ['Ag', 'Au']
+        self.cutoffs = [4.0] * 3
+        self.atoms_prim = bulk('Ag', a=4.09)
+        self.structure_list = []
+        for k in range(4):
+            atoms = self.atoms_prim.repeat(2)
+            symbols = [self.subelements[0]] * len(atoms)
+            symbols[:k] = [self.subelements[1]] * k
+            atoms.set_chemical_symbols(symbols)
+            self.structure_list.append(atoms)
+
     def setUp(self):
         '''
         Instantiate class before each test.
-
         '''
-        self.cs = ClusterSpace(atoms_prim, cutoffs, subelements)
+        self.cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
 
     def test_init(self):
         '''
         Just testing that the setup
         (initialization) of tested class work
-
         '''
         # initialize from ASE Atoms
-        cs = ClusterSpace(atoms_prim, cutoffs, subelements)
+        cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
         self.assertIsInstance(cs, ClusterSpace)
         self.assertEqual(len(cs), len(self.cs))
         # initialize from icet Structure
-        cs = ClusterSpace(Structure.from_atoms(atoms_prim), cutoffs,
-                          subelements)
+        cs = ClusterSpace(Structure.from_atoms(self.atoms_prim), self.cutoffs,
+                          self.subelements)
         self.assertIsInstance(cs, ClusterSpace)
         self.assertEqual(len(cs), len(self.cs))
-        cs = ClusterSpace(Structure.from_atoms(atoms_prim), cutoffs,
-                          subelements)
+        cs = ClusterSpace(Structure.from_atoms(self.atoms_prim), self.cutoffs,
+                          self.subelements)
         # check that other types fail
         with self.assertRaises(Exception) as context:
-            cs = ClusterSpace('something', cutoffs, subelements)
+            cs = ClusterSpace('something', self.cutoffs, self.subelements)
         self.assertTrue('Unknown structure format' in str(context.exception))
-
-        # check Mi
+        # check Mi as int
+        cs = ClusterSpace(self.atoms_prim, self.cutoffs,
+                          self.subelements, Mi=2)
+        self.assertIsInstance(cs, ClusterSpace)
+        self.assertEqual(len(cs), len(self.cs))
+        # check Mi as dict
+        cs = ClusterSpace(self.atoms_prim, self.cutoffs,
+                          self.subelements, Mi={0: 2})
+        self.assertIsInstance(cs, ClusterSpace)
+        self.assertEqual(len(cs), len(self.cs))
 
     def test_len(self):
         '''
         Testing len functionality
-
         '''
         number_orbits = self.cs.__len__()
         self.assertEqual(number_orbits, len(self.cs.get_orbit_list()))
 
-    def test_get_data(self):
+    def test_get_orbit_list_info(self):
         '''
-        Testing get_data functionality
+        Testing get_orbit_list_info functionality
         '''
         target = [OrderedDict([('index', 0), ('order', 1),
                                ('size', 0.0),
                                ('multiplicity', 1),
-                               ('orbit_index', 0),
-                               ('mc_vector', [0])]),
+                               ('orbit index', 0),
+                               ('MC vector', [0])]),
                   OrderedDict([('index', 1), ('order', 2),
                                ('size', 1.4460333675264896),
                                ('multiplicity', 6),
-                               ('orbit_index', 1),
-                               ('mc_vector', [0, 0])]),
+                               ('orbit index', 1),
+                               ('MC vector', [0, 0])]),
                   OrderedDict([('index', 2), ('order', 3),
                                ('size', 1.6697355079971996),
                                ('multiplicity', 8),
-                               ('orbit_index', 2),
-                               ('mc_vector', [0, 0, 0])]),
+                               ('orbit index', 2),
+                               ('MC vector', [0, 0, 0])]),
                   OrderedDict([('index', 3), ('order', 4),
                                ('size', 1.771021950739177),
                                ('multiplicity', 2),
-                               ('orbit_index', 3),
-                               ('mc_vector', [0, 0, 0, 0])])]
-        # without parameters
-        retval = self.cs.get_data()
-        self.assertEqualComplexList(retval, target)
-        # with parameters
-        parameters = list(range(len(self.cs)+1))
-        for k, row in enumerate(target, start=1):
-            row['ECI'] = float(k)
-        retval = self.cs.get_data(parameters=parameters)
+                               ('orbit index', 3),
+                               ('MC vector', [0, 0, 0, 0])])]
+        retval = self.cs.get_orbit_list_info()
         self.assertEqualComplexList(retval, target)
 
     def test_repr(self):
         '''
         Testing repr functionality
         '''
-        # without parameters
         retval = self.cs.__repr__()
         target = '''
-------------------------- Cluster Space -------------------------
+-------------------------- Cluster Space ---------------------------
  subelements: Ag Au
  cutoffs: 4.0 4.0 4.0
  number of orbits: 4
------------------------------------------------------------------
-order |  radius  | multiplicity | index | orbit |    MC vector
------------------------------------------------------------------
-  1   |   0.0000 |        1     |    0  |    0  |    [0]
-  2   |   1.4460 |        6     |    1  |    1  |  [0, 0]
-  3   |   1.6697 |        8     |    2  |    2  | [0, 0, 0]
-  4   |   1.7710 |        2     |    3  |    3  | [0, 0, 0, 0]
------------------------------------------------------------------
+--------------------------------------------------------------------
+index | order |   size   | multiplicity | orbit index |  MC vector
+--------------------------------------------------------------------
+   0  |   1   |   0.0000 |        1     |       0     |    [0]
+   1  |   2   |   1.4460 |        6     |       1     |  [0, 0]
+   2  |   3   |   1.6697 |        8     |       2     | [0, 0, 0]
+   3  |   4   |   1.7710 |        2     |       3     | [0, 0, 0, 0]
+--------------------------------------------------------------------
 '''
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
-        # with parameters
-        retval = self.cs.__repr__(parameters=range(len(self.cs)+1))
+
+    def test_get_string_representation(self):
+        '''
+        Testing _get_string_representation functionality
+        '''
+        retval = self.cs._get_string_representation(print_threshold=2,
+                                                    print_minimum=1)
         target = '''
---------------------------------- Cluster Space ---------------------------------
-subelements: Ag Au
-cutoffs: 4.0 4.0 4.0
-number of orbits: 4
-ECI zerolet:  0.000000e+00
----------------------------------------------------------------------------------
-order |  radius  | multiplicity | index | orbit |      ECI      |    MC vector
----------------------------------------------------------------------------------
-  1   |   0.0000 |        1     |    0  |    0  |  1.000000e+00 |    [0]
-  2   |   1.4460 |        6     |    1  |    1  |  2.000000e+00 |  [0, 0]
-  3   |   1.6697 |        8     |    2  |    2  |  3.000000e+00 | [0, 0, 0]
-  4   |   1.7710 |        2     |    3  |    3  |  4.000000e+00 | [0, 0, 0, 0]
----------------------------------------------------------------------------------
+-------------------------- Cluster Space ---------------------------
+ subelements: Ag Au
+ cutoffs: 4.0 4.0 4.0
+ number of orbits: 4
+--------------------------------------------------------------------
+index | order |   size   | multiplicity | orbit index |  MC vector
+--------------------------------------------------------------------
+   0  |   1   |   0.0000 |        1     |       0     |    [0]
+ ...
+   3  |   4   |   1.7710 |        2     |       3     | [0, 0, 0, 0]
+--------------------------------------------------------------------
 '''
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
+
+    def test_print_overview(self):
+        '''
+        Testing print_overview functionality
+        '''
+        # this runs the function but since the latter merely invokes another
+        # function to print some information to stdout there is not much to
+        # test here (other than the function not throwing an exception)
+        self.cs.print_overview()
+
+    def test_get_number_of_orbits_by_order(self):
+        '''
+        Testing get_number_of_orbits_by_order functionality
+        '''
+        retval = self.cs.get_number_of_orbits_by_order()
+        target = OrderedDict([(1, 1), (2, 1), (3, 1), (4, 1)])
+        self.assertEqual(target, retval)
 
     def test_get_cluster_vector(self):
         '''
         Testing get_cluster_vector functionality
         '''
-        for atoms, target in zip(list_atoms, target_cluster_vectors):
+        target_cluster_vectors = [
+            [1.0, -1.0, 1.0, -1.0, 1.0],
+            [1.0, -0.75, 0.5, -0.25, 0.0],
+            [1.0, -0.5, 0.16666666666666666, 0.0, 0.0],
+            [1.0, -0.25, 0.0, 0.0, 0.0]]
+        s = ['Error in test setup;']
+        s += ['number of cluster vectors ({})'.format(
+            len(target_cluster_vectors))]
+        s += ['does not match']
+        s += ['number of structures ({})'.format(len(self.structure_list))]
+        info = ' '.join(s)
+        self.assertEqual(len(target_cluster_vectors), len(self.structure_list),
+                         msg=info)
+        # use ASE Atoms
+        for atoms, target in zip(self.structure_list, target_cluster_vectors):
             retval = self.cs.get_cluster_vector(atoms)
             self.assertAlmostEqual(retval, target, places=9)
+        # use icet Structure
+        for atoms, target in zip(self.structure_list, target_cluster_vectors):
+            retval = self.cs.get_cluster_vector(Structure.from_atoms(atoms))
+            self.assertAlmostEqual(retval, target, places=9)
+        # check that other types fail
+        with self.assertRaises(Exception) as context:
+            retval = self.cs.get_cluster_vector('something')
+        self.assertTrue('Unknown structure format' in str(context.exception))
 
     def test_get_singlet_info(self):
         '''
         Testing get_singlet_info functionality
         '''
-        retval = get_singlet_info(atoms)
-        target = [{'orbit_index': 0,
+        retval = get_singlet_info(self.structure_list[0])
+        target = [{'orbit index': 0,
                    'sites': [[LatticeSite(0, [0., 0., 0.])]],
                    'multiplicity': 1,
-                   'representative_site': [LatticeSite(0, [0., 0., 0.])]}]
+                   'representative site': [LatticeSite(0, [0., 0., 0.])]}]
         self.assertEqualComplexList(retval, target)
-        retval1, retval2 = get_singlet_info(atoms, return_cluster_space=True)
+        retval1, retval2 = get_singlet_info(self.structure_list[0],
+                                            return_cluster_space=True)
         self.assertEqualComplexList(retval1, target)
         self.assertIsInstance(retval2, type(self.cs))
 
@@ -238,49 +289,128 @@ order |  radius  | multiplicity | index | orbit |      ECI      |    MC vector
         '''
         Testing get_singlet_configuration functionality
         '''
-        retval = get_singlet_configuration(atoms_prim)
+        from ase import Atoms
+        retval = get_singlet_configuration(self.atoms_prim)
         self.assertIsInstance(retval, Atoms)
         self.assertEqual(retval[0].symbol, 'H')
-        retval = get_singlet_configuration(list_atoms[0], to_primitive=True)
+        retval = get_singlet_configuration(self.structure_list[0],
+                                           to_primitive=True)
         self.assertIsInstance(retval, Atoms)
-        self.assertEqual(len(retval), len(atoms_prim))
+        self.assertEqual(len(retval), len(self.atoms_prim))
 
     def test_get_Mi_from_dict(self):
         '''
         Testing get_Mi_from_dict functionality
-        Todo
-        ----
-        implement a test for get_Mi_from_dict
         '''
-        #x = get_Mi_from_dict()
-        #print(x)
+        d = {0: len(self.subelements)}
+        Mi = ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
+        self.assertEqual(Mi, [2])
+        # check that function fails if dictionary is incomplete
+        del d[0]
+        with self.assertRaises(Exception) as context:
+            Mi = ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
+        self.assertTrue('missing from dictionary' in str(context.exception))
+
+
+class TestClusterSpaceSurface(unittest.TestCase):
+    '''
+    Container for tests of the class functionality for non-periodic structures
+    '''
+
+    def __init__(self, *args, **kwargs):
+        from ase.build import fcc111
+        super(TestClusterSpaceSurface, self).__init__(*args, **kwargs)
+        self.subelements = ['Ag', 'Au']
+        self.cutoffs = [4.0] * 3
+        self.atoms_prim = fcc111('Ag', a=4.09, vacuum=5.0, size=[1, 1, 3])
+        self.atoms_prim.pbc = [True, True, False]
+        self.structure_list = []
+        for k in range(3):
+            atoms = self.atoms_prim.repeat((2, 2, 1))
+            symbols = [self.subelements[0]] * len(atoms)
+            symbols[:k] = [self.subelements[1]] * k
+            atoms.set_chemical_symbols(symbols)
+            self.structure_list.append(atoms)
+
+    def setUp(self):
+        '''
+        Instantiate class before each test.
+        '''
+        self.cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
+
+    def test_get_cluster_vector(self):
+        '''
+        Testing get_cluster_vector functionality
+        '''
+        target_cluster_vectors = [
+            [1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0,
+             -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0],
+            [1.0, -0.3333333333333333, -1.0, -1.0, -0.1111111111111111,
+             0.5555555555555556, 1.0, 1.0, 1.0, 0.3333333333333333,
+             0.3333333333333333, -1.0, -1.0, -1.0, -1.0, 0.1111111111111111,
+             -0.5555555555555556, -1.0, -1.0, -0.3333333333333333,
+             0.6666666666666666, 1.0, 1.0],
+            [1.0, -0.3333333333333333, -0.3333333333333333, -1.0,
+             -0.1111111111111111, 0.3333333333333333, -0.1111111111111111,
+             0.4444444444444444, 1.0, 0.3333333333333333, 0.3333333333333333,
+             0.3333333333333333, 0.3333333333333333, -1.0, -1.0,
+             -0.1111111111111111, -0.1111111111111111, 0.1111111111111111,
+             -0.4444444444444444, 0.3333333333333333, -0.3333333333333333,
+             0.3333333333333333, -0.3333333333333333]]
+        s = ['Error in test setup;']
+        s += ['number of cluster vectors ({})'.format(
+            len(target_cluster_vectors))]
+        s += ['does not match']
+        s += ['number of structures ({})'.format(len(self.structure_list))]
+        info = ' '.join(s)
+        self.assertEqual(len(target_cluster_vectors), len(self.structure_list),
+                         msg=info)
+        # use ASE Atoms
+        for atoms, target in zip(self.structure_list, target_cluster_vectors):
+            retval = self.cs.get_cluster_vector(atoms)
+            self.assertAlmostEqual(retval, target, places=9)
+        # use icet Structure
+        for atoms, target in zip(self.structure_list, target_cluster_vectors):
+            retval = self.cs.get_cluster_vector(Structure.from_atoms(atoms))
+            self.assertAlmostEqual(retval, target, places=9)
+        # check that other types fail
+        with self.assertRaises(Exception) as context:
+            retval = self.cs.get_cluster_vector('something')
+        self.assertTrue('Unknown structure format' in str(context.exception))
+
+    def test_get_number_of_orbits_by_order(self):
+        '''
+        Testing get_number_of_orbits_by_order functionality
+        '''
+        retval = self.cs.get_number_of_orbits_by_order()
+        target = OrderedDict([(1, 3), (2, 5), (3, 10), (4, 4)])
+        self.assertEqual(target, retval)
+
+    def test_get_Mi_from_dict(self):
+        '''
+        Testing _get_Mi_from_dict functionality
+        '''
+        d = {}
+        for k in range(len(self.atoms_prim)):
+            d[k] = len(self.subelements)
+        d[1] = 1
+        Mi = ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
+        self.assertEqual(Mi, [2, 1, 2])
+        # check that function fails if dictionary is incomplete
+        del d[0]
+        with self.assertRaises(Exception) as context:
+            Mi = ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
+        self.assertTrue('missing from dictionary' in str(context.exception))
 
 
 def suite():
-    test_classes_to_run = [TestClusterSpace]
+    test_classes_to_run = [TestClusterSpace, TestClusterSpaceSurface]
     suites_list = []
     for test_class in test_classes_to_run:
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(test_class)
         suites_list.append(suite)
     test_suite = unittest.TestSuite(suites_list)
     return test_suite
-
-
-subelements = ['Ag', 'Au']
-cutoffs = [4.0] * 3
-atoms_prim = bulk('Ag')
-list_atoms = []
-for k in range(4):
-    atoms = atoms_prim.repeat(2)
-    symbols = ['Ag'] * len(atoms)
-    symbols[:k] = ['Au'] * k
-    atoms.set_chemical_symbols(symbols)
-    list_atoms.append(atoms)
-target_cluster_vectors = [
-    [1.0, -1.0, 1.0, -1.0, 1.0],
-    [1.0, -0.75, 0.5, -0.25, 0.0],
-    [1.0, -0.5, 0.16666666666666666, 0.0, 0.0],
-    [1.0, -0.25, 0.0, 0.0, 0.0]]
 
 
 if __name__ == '__main__':
