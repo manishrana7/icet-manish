@@ -4,7 +4,7 @@ from .structure import Structure
 from .cluster_space import ClusterSpace
 from .cluster_expansion import ClusterExpansion
 from .structure_container import StructureContainer
-from .fitting import Optimizer
+from .fitting import Optimizer, EnsembleOptimizer
 
 '''
 icet module
