@@ -27,8 +27,8 @@ class BaseOptimizer:
     Parameters
     ----------
     fit_data : tuple of (N, M) numpy.ndarray and (N) numpy.ndarray
-        the first element of the tuple should represent the fit matrix `A`
-        whereas the second element should represents the vector of target
+        the first element of the tuple represents the fit matrix `A`
+        whereas the second element represents the vector of target
         values `y`; here `N` (=rows of `A`, elements of `y`) equals the number
         of target values and `M` (=columns of `A`) equals the number of
         parameters
@@ -37,21 +37,6 @@ class BaseOptimizer:
         "least-squares", "lasso", "bayesian-ridge", "ardr"
     seed : int
         seed for pseudo random number generator
-
-    Attributes
-    ----------
-    parameters : numpy.ndarray
-        copy of parameter vector
-    fit_results : dict
-        results obtained during training
-    number_of_parameters : int
-        number of parameters (=columns in `A` matrix)
-    number_of_target_values : int
-        number of target values (=rows in `A` matrix)
-    fit_method : str
-        fit method
-    seed : int
-        seed used to initialize pseudo random number of generator
     '''
 
     def __init__(self, fit_data, fit_method, seed):
@@ -63,6 +48,7 @@ class BaseOptimizer:
             raise ValueError('Invalid fit data, shape did not match')
 
         self._A, self._y = fit_data
+        self._Nrows = self._A.shape()[0]
         self._fit_method = fit_method
         self._seed = seed
         self._optimizer_function = fit_methods[self.fit_method]
@@ -78,8 +64,8 @@ class BaseOptimizer:
             fit matrix where `N` (=rows of `A`, elements of `y`) equals the
             number of target values and `M` (=columns of `A`) equals the number
             of parameters (=elements of `x`)
-        y : (N) numpy.ndarray
-            vector of target values
+        y : numpy.ndarray
+            `N`-dimensional vector of target values
 
         Returns
         -------
@@ -101,12 +87,12 @@ class BaseOptimizer:
 
         Returns
         -------
-        (N) numpy.ndarray
-            vector of predicted values
+        numpy.ndarray
+            `N`-dimensional vector of predicted values
         '''
         return np.dot(A, self.parameters)
 
-    def contribution(self, A):
+    def get_contributions(self, A):
         ''' Compute the average contribution to the predicted values from each
         element of the parameter vector.
 
@@ -134,17 +120,15 @@ class BaseOptimizer:
         info = dict()
         info['parameters'] = self.parameters
         info['fit method'] = self.fit_method
-        info['number of target values (rows)'] = self.number_of_target_values
-        info['number of parameters (columns)'] = self.number_of_parameters
+        info['number of target values'] = self._Nrows
+        info['number of parameters'] = self._A.shape()[1]
         return info
 
     def __str__(self):
         s = []
-        s.append('Fit method : {}'.format(self.fit_method))
-        s.append('Number of target values : ({})'.format(
-            self.number_of_target_values))
-        s.append('Number of parameters : ({)'.format(
-            self.number_of_parameters))
+        for key, value in self.get_info():
+            if type(value) in [str, int, float]:
+                s.append('{:22} : {}'.format(key, value))
         return '\n'.join(s)
 
     def __repr__(self):
@@ -152,10 +136,12 @@ class BaseOptimizer:
 
     @property
     def fit_method(self):
+        ''' str : fit method '''
         return self._fit_method
 
     @property
     def parameters(self):
+        ''' numpy.ndarray : copy of parameter vector '''
         if self.fit_results['parameters'] is None:
             return None
         else:
@@ -163,16 +149,20 @@ class BaseOptimizer:
 
     @property
     def number_of_target_values(self):
+        ''' int : number of target values (=rows in `A` matrix) '''
         return self._A.shape[0]
 
     @property
     def number_of_parameters(self):
+        ''' int : number of parameters (=columns in `A` matrix) '''
         return self._A.shape[1]
 
     @property
     def seed(self):
+        ''' int : seed used to initialize pseudo random number of generator '''
         return self._seed
 
     @property
     def fit_results(self):
+        ''' dict : results obtained during training '''
         return self._fit_results
