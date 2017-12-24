@@ -78,8 +78,12 @@ class EnsembleOptimizer(BaseOptimizer):
             error_matrix[:, i] = np.dot(self._A, parameters) - self._y
         return error_matrix
 
+    def get_parameters_avg(self):
+        ''' Get average values of parameters '''
+        return np.average(self.parameters_set, axis=0)
+
     def get_parameters_stds(self):
-        ''' Get standard deviation of parameters '''
+        ''' Get standard deviations of parameters '''
         return np.std(self.parameters_set, axis=0)
 
     @property
