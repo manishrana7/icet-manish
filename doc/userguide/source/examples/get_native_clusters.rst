@@ -14,52 +14,75 @@ Import modules
 In the present case it is necessary to import two :program:`iceT` classes, namely :class:`ClusterSpace <icetdev.cluster_space.ClusterSpace>` and :class:`Structure <icetdev.structure.Structure>`. In particular, these objects are used to store information regarding a specific cluster space and structure, respectively. Additionally, the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.build.bulk` will be needed to generate the structures.
 
 .. literalinclude:: ../../../../examples/get_native_clusters.py
-   :start-after: # Start import
-   :end-before: # End import
+   :start-after: # Import modules
+   :end-before: # Create a prototype
 
-.. _above
-Generate prototype structure
-----------------------------
+.. _generate-prototype-si-cell
+Generate prototype Si cell
+--------------------------
 
-The next step is to build a prototype structure, in the form of a silicon, bulk, unit cell. It is, in addition, decided that the cluster vectors will be created by populating the sites with either silicon or germanium. Also, the cutoffs for pairs set to 10.0 Å.
-
-.. literalinclude:: ../../../../examples/get_native_clusters.py
-   :start-after: # Start setup
-   :end-before: # End setup
-
-Create the cluster space
-------------------------
-
-The cluster space is created by simpling initiating a :class:`ClusterSpace <icetdev.ClusterSpace>` object and providing the prototype structure, cutoffs and subelements, which were defined :ref:`above <_above>`, as arguments.
+The next step is to build a prototype, in the form of silicon, bulk, unit cell. It is, in addition, decided that the cluster vectors will be created by populating the sites with either silicon or germanium. Also, the cutoffs for pairs set to 10.0 Å.
 
 .. literalinclude:: ../../../../examples/get_native_clusters.py
-   :start-after: # Start clusterspace
-   :end-before: # End clusterspace
+   :start-after: # it with (Si,
+   :end-before: # Generate the cluster
 
-.. _previous-section
-Cluster vectors for Si supercells
----------------------------------
+.. _initiate-the-cluster-space
+Initiate the cluster space
+--------------------------
 
-After building a new structure in the form of a :math:`2\times2\times2` pure Si supercell. Using this :class:`ase.Atoms` object as input, the cluster vectors are constructed using the :func:`get_native_clusters` which is inherent to the :class:`ClusterSpace <icetdev.ClusterSpace>` class. The cluster vectors are printed, as a sequence of tables, with help of the :func:`print` function.
-
-.. literalinclude:: ../../../../examples/get_native_clusters.py
-   :start-after: # Start cluster_vector1
-   :end-before: # End cluster_vector1
-
-These lines ought to yield the following result: ::
-   [1.0, -1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-
-Cluster vectors for Si supercells
----------------------------------
-
-Finally, the steps described in the :ref:`previous section <_previous-section>` are repeated after substituting one of the Si atoms in the supercell with Ge.
+The cluster space is initiated by simpling initiating a :class:`ClusterSpace <icetdev.ClusterSpace>` object and providing the prototype structure, cutoffs and subelements, which were defined :ref:`above <_generate-prototype-si-cell>`, as arguments.
 
 .. literalinclude:: ../../../../examples/get_native_clusters.py
-   :start-after: # Start cluster_vector2
-   :end-before: # End cluster_vector2
+   :start-after: # Generate the cluster
+   :end-before: # Prepare 2x2x1 supercells
 
-In this case resulting output should be: ::
-   [1.0, -0.875, 0.75, 0.75, 0.75, -0.625, -0.625, -0.625, -0.625, -0.625, -0.625, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+.. _structure-from-si-ge-supercell
+Structure from Si/Ge supercell
+------------------------------
+
+First a :math:`2\times2\times1`, pure Si, supercell is built and then the sites are randomly populated with Si and Ge atoms. Thereafter, an :program:`iceT` structure is created by providing this :class:`ase.Atoms` object as input to the :meth:`Structure.from_atoms` method.
+
+.. literalinclude:: ../../../../examples/get_native_clusters.py
+   :start-after: # Prepare 2x2x1 supercells
+   :end-before: # Extract and print
+
+Extract the native clusters
+---------------------------
+
+The native clusters are extracted with help of the :meth:`ClusterSpace.get_native_clusters` method, with the structure defined in the :ref:`previous section <_structure-from-si-ge-supercell>` as input argument. Afterwards the structure itself and the native clusters are printed in a tabular format, in the latter case by using the :func:`ClusterSpace.print` method.
+
+.. literalinclude:: ../../../../examples/get_native_clusters.py
+   :start-after: # Extract and print
+
+The (partial) output produced by this script should similar to the following: ::
+   Cell:
+   [[ 0.     5.43   5.43 ]
+    [ 5.43   0.     5.43 ]
+    [ 2.715  2.715  0.   ]]
+
+   Element and positions:
+    Si  [ 0.  0.  0.]
+    Ge  [ 1.3575  1.3575  1.3575]
+    Si  [ 2.715  0.     2.715]
+    Si  [ 4.0725  1.3575  4.0725]
+    Si  [ 0.     2.715  2.715]
+    Ge  [ 1.3575  4.0725  4.0725]
+    Ge  [ 2.715  2.715  5.43 ]
+    Si  [ 4.0725  4.0725  6.7875]
+
+   Native cluster counts:
+   5.91721  :: 0 0 2.9586
+   ==============
+   Si Si 3
+   Si Ge 1
+   Total: 4
+   ...
+    :: 0 0
+   ==============
+   Si 5
+   Ge 3
+   Total: 8
 
 Source code
 -----------
