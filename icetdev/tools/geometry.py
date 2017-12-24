@@ -39,7 +39,7 @@ def find_lattice_site_from_position_python(structure, position):
     residual = np.dot(fractional - unit_cell_offset, structure.cell)
     try:
         index = structure.find_index_of_position(residual)
-    except:
+    except Exception:
         msg = ['error did not find index with pos: {}'.format(residual)]
         msg += ['position in structure are:']
         msg += ['\n' + str(structure.positions)]

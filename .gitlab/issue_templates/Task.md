@@ -4,13 +4,10 @@
 
 *("EXPLORE: Figure out how to use customized templates in gitlab")*
 
-### Description
+## Description
 *(Describe the task)*
 
-### Demonstration
-*(Describe how it can be shown that the task has been implemented successfully)*
-
-## Background
+### Background
 *(If needed provide some background)*
 
 ## Sub-tasks
@@ -21,6 +18,9 @@
 * [ ] *(task 1)*
 * [ ] *(task 2)*
 * [ ] *(task 3)*
+
+## Demonstration
+*(Describe how it can be shown that the task has been implemented successfully)*
 
 ______________________________________________________________
 

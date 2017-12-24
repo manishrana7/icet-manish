@@ -1,10 +1,10 @@
 .. index::
-   single: C++ reference; Neighborlist
+   single: C++ reference; NeighborList
 
 NeighborList
 ------------
 
-.. doxygenclass:: Neighborlist
+.. doxygenclass:: NeighborList
    :project: icet
    :members:
    :undoc-members:

@@ -10,9 +10,6 @@
 
 As a < type of user >, I want < some goal > [ so that < some reason > ].
 
-### Demonstration
-*(Describe how it can be shown that the user story has been implemented successfully)*
-
 ### Background
 *(Provide some brief and useful background information if needed)*
 
@@ -25,6 +22,9 @@ As a < type of user >, I want < some goal > [ so that < some reason > ].
 * [ ] *(e.g. Update user documentation)*
 * [ ] *(e.g. Prepare demonstration)*
 * [ ] *(task 4)*
+
+## Demonstration
+*(Describe how it can be shown that the user story has been implemented successfully)*
 
 ______________________________________________________________
 

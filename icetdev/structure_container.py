@@ -102,6 +102,9 @@ class StructureContainer(object):
                     s += ['{s:^{n}}'.format(s=value, n=n)]
             return ' | '.join(s)
 
+        if len(self._structure_list) == 0:
+            return 'empty structure container'
+
         dummy = self._structure_list[0]
         n = len(repr_structure(-1, dummy))
         horizontal_line = '{s:-^{n}}'.format(s='', n=n)

@@ -4,13 +4,13 @@ from .structure import Structure
 from .cluster_space import ClusterSpace
 from .cluster_expansion import ClusterExpansion
 from .structure_container import StructureContainer
-from .fitting import Optimizer
+from .fitting import Optimizer, EnsembleOptimizer
 
 '''
 icet module
 '''
 
-__description__ = 'The pythonic approach to cluster expansions'
+__description__ = 'The Pythonic approach to cluster expansions'
 __authors__ = ['Mattias Ångqvist',
                'William Armando Muñoz',
                'Thomas Holm Rod',
@@ -26,6 +26,7 @@ __all__ = ['ClusterSpace',
            'ClusterExpansion',
            'Structure',
            'StructureContainer',
+           'EnsembleOptimizer',
            'Optimizer']
 __status__ = 'alpha-version'
 __url__ = 'http://www.icet.org/'
