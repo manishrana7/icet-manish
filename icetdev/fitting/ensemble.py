@@ -22,7 +22,7 @@ class EnsembleOptimizer(BaseOptimizer):
     added to this class. (ScatterData might be too much for this optimizer)
     '''
 
-    def __init__(self, fit_data, fit_method='least-squares', n_splits=100,
+    def __init__(self, fit_data, fit_method='least-squares', n_splits=50,
                  train_fraction=0.7, bootstrap=True, seed=42, **kwargs):
 
         BaseOptimizer.__init__(self, fit_data, fit_method, seed)
