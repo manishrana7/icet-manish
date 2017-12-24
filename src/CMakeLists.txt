@@ -4,7 +4,7 @@ PROJECT(icetdev)
 SET(CMAKE_BUILD_TYPE Release)
 
 # This library depends on the pybind11 framework.
-ADD_SUBDIRECTORY("../3rdparty/pybind11" pybind11)
+ADD_SUBDIRECTORY("3rdparty/pybind11" pybind11)
 
 # List of source files that need to be compiled:
 SET(SourceFiles

@@ -17,10 +17,10 @@
 #include <Eigen/Dense>
 #include <pybind11/operators.h>
 
-PYBIND11_PLUGIN(_icetdev)
+PYBIND11_MODULE(_icetdev, m)
 {
-    py::module m("_icetdev",
-     R"pbdoc(
+
+    m.doc() = R"pbdoc(
         Python interface
         ================
 
@@ -97,7 +97,7 @@ PYBIND11_PLUGIN(_icetdev)
         .. autoclass:: PermutationMap
            :members:
            :undoc-members:
-    )pbdoc");
+    )pbdoc";
 
     // Disable the automatically generated signatures that prepend the
     // docstrings by default.
@@ -569,5 +569,4 @@ py::class_<ClusterSpace>(m, "ClusterSpace",py::dynamic_attr())
     .def("__len__", &ClusterSpace::getClusterSpaceSize)
     ;
 
-    return m.ptr();
 }
