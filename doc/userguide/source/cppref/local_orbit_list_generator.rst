@@ -1,10 +1,10 @@
 .. index::
-   single: C++ reference; LocalOrbitlistGenerator
+   single: C++ reference; LocalOrbitListGenerator
 
-LocalOrbitlistGenerator
+LocalOrbitListGenerator
 -----------------------
 
-.. doxygenclass:: LocalOrbitlistGenerator
+.. doxygenclass:: LocalOrbitListGenerator
    :project: icet
    :members:
    :undoc-members:
