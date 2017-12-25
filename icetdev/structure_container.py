@@ -21,9 +21,9 @@ class StructureContainer(object):
             the cluster space used for evaluating the cluster vectors
 
         list_of_atoms : list / list of tuples (bi-optional)
-            list of input structures (ASE Atoms objects) or list of pairs
-            structures-user_tag, e.g. `[(atom, user_tag)]`, where `user_tag`
-            should be a string type
+            list of structures (ASE Atoms objects) or list of pairs
+            of structures and user tag (list of [ASE Atoms object, string]
+            tuples)
 
         list_of_properties : list of dicts
             list of properties, which are provided in dicts
@@ -36,6 +36,9 @@ class StructureContainer(object):
             assert isinstance(list_of_atoms, (list, tuple)), \
                 'list_of_atoms must be list or tuple or None'
 
+            assert len(list_of_atoms) > 0, \
+                'list_of_atoms must contain at least one element'
+
             if list_of_properties is not None:
                 msg = 'len(list_of_properties) not equal len(list_of_atoms)'
                 assert(len(list_of_properties) == len(list_of_atoms)), msg
@@ -43,7 +46,7 @@ class StructureContainer(object):
                 list_of_properties = [None]*len(list_of_atoms)
 
             # transform list to tuple
-            if isinstance(list_of_atoms, list):
+            if isinstance(list_of_atoms[0], Atoms):
                 list_of_atoms = [(atoms, None) for atoms in list_of_atoms]
 
             self._structure_list = []

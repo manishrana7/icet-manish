@@ -81,6 +81,10 @@ class TestStructureContainer(unittest.TestCase):
 
         '''
         self.sc = StructureContainer(cs, atoms_list, properties)
+        atoms_list_with_tags = []
+        for k, atoms in enumerate(atoms_list, start=1):
+            atoms_list_with_tags.append((atoms, 'struct{}'.format(k)))
+        self.sc = StructureContainer(cs, atoms_list_with_tags, properties)
 
     def test_len(self):
         '''
