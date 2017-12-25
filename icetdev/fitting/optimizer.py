@@ -70,7 +70,8 @@ class Optimizer(BaseOptimizer):
         y_train = self._y[self.training_set]
 
         # perform training
-        print('Fit Method {}, N_params {}'.format(self.fit_method, self.Ncols))
+        print('Fit Method {}, N_params {}'.format(self.fit_method,
+                                                  self.number_of_parameters))
         print('Train size {}, Test size {} '
               .format(self.training_set_size, self.testing_set_size))
 
@@ -106,11 +107,11 @@ class Optimizer(BaseOptimizer):
 
         if training_set is None and testing_set is None:
             # get rows from fractions
-            training_set, testing_set = self._get_rows_via_fractions(
-                train_fraction, test_fraction)
+            training_set, testing_set = \
+                self._get_rows_via_fractions(train_fraction, test_fraction)
         else:  # get rows from specified rows
-            training_set, testing_set = self._get_rows_from_indices(
-                training_set, testing_set)
+            training_set, testing_set = \
+                self._get_rows_from_indices(training_set, testing_set)
 
         if len(training_set) == 0:
             raise ValueError('No training rows was selected from fit_data')
@@ -127,14 +128,16 @@ class Optimizer(BaseOptimizer):
         elif train_fraction is None and abs(test_fraction - 1.0) < 1e-10:
             raise ValueError('train rows is empty for these fractions')
         elif test_fraction is None and abs(train_fraction - 1.0) < 1e-10:
-            training_set = np.arange(self._A.shape[0])
+            training_set = np.arange(self._Nrows)
             testing_set = None
             return training_set, testing_set
 
         # split
-        training_set, testing_set = train_test_split(
-            np.arange(self._A.shape[0]), training_set_size=train_fraction,
-            testing_set_size=test_fraction, random_state=self.seed)
+        training_set, testing_set = \
+            train_test_split(np.arange(self._Nrows),
+                             train_size=train_fraction,
+                             test_size=test_fraction,
+                             random_state=self.seed)
         if len(testing_set) == 0:
             testing_set = None
         if len(training_set) == 0:
