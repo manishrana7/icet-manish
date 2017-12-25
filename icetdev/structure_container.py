@@ -81,16 +81,31 @@ class StructureContainer(object):
         return [i for i, s in enumerate(self)
                 if user_tag is None or s.user_tag == user_tag]
 
-    def __repr__(self):
+    def _get_string_representation(self, print_threshold=None,
+                                   print_minimum=10):
         '''
-        Print basic information about each structure in structure list
+        String representation of the structure container that provides an
+        overview of the structures in the container.
 
+        Parameters
+        ----------
+        print_threshold : int
+            if the number of structures exceeds this number print dots
+        print_minimum : int
+            number of lines printed from the top and the bottom of the
+            structure list if `print_threshold` is exceeded
+
+        Returns
+        -------
+        multi-line string
+            string representation of the structure container
         '''
-        def repr_structure(index, structure):
+
+        def repr_structure(structure, index=-1, header=False):
             from collections import OrderedDict
             fields = OrderedDict([
                 ('index',     '{:4}'.format(index)),
-                ('user_tag',  '{:12}'.format(structure.user_tag)),
+                ('user_tag',  '{:28}'.format(structure.user_tag)),
                 ('natoms',    '{:5}'.format(len(structure)))])
             fields.update(sorted(structure.properties.items()))
             for key, value in fields.items():
@@ -99,7 +114,7 @@ class StructureContainer(object):
             s = []
             for name, value in fields.items():
                 n = max(len(name), len(value))
-                if index < 0:
+                if header:
                     s += ['{s:^{n}}'.format(s=name, n=n)]
                 else:
                     s += ['{s:^{n}}'.format(s=value, n=n)]
@@ -108,28 +123,53 @@ class StructureContainer(object):
         if len(self._structure_list) == 0:
             return 'empty structure container'
 
-        dummy = self._structure_list[0]
-        n = len(repr_structure(-1, dummy))
+        # basic information
+        # (use last structure in list to obtain maximum line length)
+        dummy = self._structure_list[-1]
+        n = len(repr_structure(dummy))
         horizontal_line = '{s:-^{n}}'.format(s='', n=n)
 
+        # table header
         s = []
         s += ['{s:-^{n}}'.format(s=' Structure Container ', n=n)]
         s += ['Total number of structures: {}'.format(len(self))]
-        s += [repr_structure(-1, dummy).rstrip()]
         s += [horizontal_line]
+        s += [repr_structure(dummy, header=True).rstrip()]
+        s += [horizontal_line]
+
         # table body
         index = 0
-        print_threshold = 24
         while index < len(self):
-            if (len(self) > print_threshold and
-                    index > 10 and index < len(self) - 10):
+            if (print_threshold is not None and
+                    len(self) > print_threshold and
+                    index >= print_minimum and
+                    index <= len(self) - print_minimum):
                 index = len(self) - 10
                 s += [' ...']
-
-            s += [repr_structure(index, self._structure_list[index])]
+            s += [repr_structure(self._structure_list[index], index=index)]
             index += 1
+        s += [horizontal_line]
 
         return '\n'.join(s)
+
+    def __repr__(self):
+        ''' String representation. '''
+        return self._get_string_representation(print_threshold=50)
+
+    def print_overview(self, print_threshold=None, print_minimum=10):
+        '''
+        Print a list of structures in the structure container.
+
+        Parameters
+        ----------
+        print_threshold : int
+            if the number of orbits exceeds this number print dots
+        print_minimum : int
+            number of lines printed from the top and the bottom of the orbit
+            list if `print_threshold` is exceeded
+        '''
+        print(self._get_string_representation(print_threshold=print_threshold,
+                                              print_minimum=print_minimum))
 
     def add_structure(self, atoms, user_tag=None,
                       properties=None):

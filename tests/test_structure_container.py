@@ -28,6 +28,26 @@ from ase.build import bulk
 from ase.calculators.emt import EMT
 from ase import Atoms
 
+
+def strip_surrounding_spaces(input_string):
+    '''
+    Helper function that removes both leading and trailing spaces from a
+    multi-line string.
+
+    Returns
+    -------
+    str
+        original string minus surrounding spaces and empty lines
+    '''
+    from io import StringIO
+    s = []
+    for line in StringIO(input_string):
+        if len(line.strip()) == 0:
+            continue
+        s += [line.strip()]
+    return '\n'.join(s)
+
+
 subelements = ['Ag', 'Au']
 cutoffs = [4.0] * 3
 atoms_prim = bulk('Ag')
@@ -143,14 +163,19 @@ class TestStructureContainer(unittest.TestCase):
         Testing repr functionality
         '''
         retval = self.sc.__repr__()
-        target = """------------- Structure Container --------------
+        target = '''
+--------------------- Structure Container ----------------------
 Total number of structures: 3
-index |   user_tag   | natoms | energy | volume
-------------------------------------------------
-   0  | None         |     8  | 0.013  | 136.836
-   1  | None         |     8  | -0.007 | 136.836
-   2  | None         |     8  | -0.026 | 136.836"""
-        self.assertEqual(target, retval)
+----------------------------------------------------------------
+index |           user_tag           | natoms | energy | volume
+----------------------------------------------------------------
+   0  | None                         |     8  | 0.013  | 136.836
+   1  | None                         |     8  | -0.007 | 136.836
+   2  | None                         |     8  | -0.026 | 136.836
+----------------------------------------------------------------
+'''
+        self.assertEqual(strip_surrounding_spaces(target),
+                         strip_surrounding_spaces(retval))
 
     def test_get_properties(self):
         '''
@@ -194,7 +219,7 @@ class TestFitStructure(unittest.TestCase):
         '''
         cv = cs.get_cluster_vector(conf_1)
         prop = properties[0]
-        self.fit_structure = FitStructure(conf_1, "conf_1", cv, prop)
+        self.fit_structure = FitStructure(conf_1, 'conf_1', cv, prop)
 
     def test_init(self):
         '''
