@@ -1,10 +1,10 @@
 .. index::
-   single: C++ reference; ManybodyNeighborlist
+   single: C++ reference; ManyBodyNeighborList
 
-ManybodyNeighborlist
+ManyBodyNeighborList
 --------------------
 
-.. doxygenclass:: ManybodyNeighborlist
+.. doxygenclass:: ManyBodyNeighborList
    :project: icet
    :members:
    :undoc-members:
