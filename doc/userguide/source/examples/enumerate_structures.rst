@@ -17,7 +17,6 @@ The :func:`enumerate_structures <icetdev.enumeration.enumerate_structures>` func
    :start-after: # Import modules
    :end-before: # Generate all binary
 
-.. _generate-binary-au-pd-structures:
 Generate binary Au/Pd structures
 --------------------------------
 
@@ -30,7 +29,7 @@ Before being able to perform the *structural enumeration*, it is first necessary
 Generate PdH structures, with vacancies
 ---------------------------------------
 
-The :ref:`steps above <_generate-binary-au-pd-structures>` are now repeated to enumerate all palladium hydride structures with up to 4 primtive cells, which contain up to 4 Pd atoms and between 0 and 4 H atoms. In addition, vacancies, represented by vanadium, are also included, which results in ternary systems. The structures thus obtained are stored in database named ``PdHVac-fcc.db``.
+The steps above are now repeated to enumerate all palladium hydride structures with up to 4 primtive cells, which contain up to 4 Pd atoms and between 0 and 4 H atoms. In addition, vacancies, represented by vanadium, are also included, which results in ternary systems. The structures thus obtained are stored in a database named ``PdHVac-fcc.db``.
 
 .. literalinclude:: ../../../../examples/enumerate_structures.py
    :start-after: # either a hydrogen

@@ -18,7 +18,6 @@ Firstly, one needs to import the class :class:`ClusterSpace <icetdev.ClusterSpac
    :start-after: # Import modules
    :end-before: # Create a prototype
 
-.. _generate-prototype-re-structure
 Generate prototype Re structure
 -------------------------------
 
@@ -31,42 +30,44 @@ The next step is to build a prototype structure, in the form of a rhenium, bulk,
 Create the cluster space
 ------------------------
 
-The cluster space is created by simpling initiating a :class:`ClusterSpace <icetdev.ClusterSpace>` object and providing the prototype structure, cutoffs and subelements, :ref:`discussed above <_generate-prototype-re-structure>`, as arguments. Next, the :meth:`ClusterSpace.print` method is used to print all relevant information regarding the cluster space in a table format.
+The cluster space is created by simpling initiating a :class:`ClusterSpace <icetdev.ClusterSpace>` object and providing the prototype structure, cutoffs and subelements, discussed above, as arguments. Next, the :meth:`ClusterSpace.print` method is used to print all relevant information regarding the cluster space in a table format.
 
 .. literalinclude:: ../../../../examples/get_cluster_space_info.py
    :start-after: # Generate and print
    :end-before: # Extract and print
 
-Specifically, the final call should produce the following (partial) output: ::
-   ------------------------- Cluster Space -------------------------
-    subelements: Ti Mo W Re
-    cutoffs: 10.0 7.0 5.0
-    number of orbits: 3768
-   -----------------------------------------------------------------
-   order |  radius  | multiplicity | index | orbit |    MC vector
-   -----------------------------------------------------------------
-     1   |   0.0000 |        2     |    0  |    0  |    [0]
-     1   |   0.0000 |        2     |    1  |    0  |    [1]
-     1   |   0.0000 |        2     |    2  |    0  |    [2]
-     2   |   1.3699 |        6     |    3  |    1  |  [0, 0]
-   ...
-     4   |   2.7094 |       12     | 3767  |  135  | [2, 2, 2, 2]
-   -----------------------------------------------------------------
+Specifically, the final call should produce the following (partial) output::
+
+  ------------------------- Cluster Space -------------------------
+   subelements: Ti Mo W Re
+   cutoffs: 10.0 7.0 5.0
+   number of orbits: 3768
+  -----------------------------------------------------------------
+  order |  radius  | multiplicity | index | orbit |    MC vector
+  -----------------------------------------------------------------
+    1   |   0.0000 |        2     |    0  |    0  |    [0]
+    1   |   0.0000 |        2     |    1  |    0  |    [1]
+    1   |   0.0000 |        2     |    2  |    0  |    [2]
+    2   |   1.3699 |        6     |    3  |    1  |  [0, 0]
+  ...
+    4   |   2.7094 |       12     | 3767  |  135  | [2, 2, 2, 2]
+  -----------------------------------------------------------------
 
 Information regarding singlets
 ------------------------------
 
-Additonal information regarding the singlets is extracted with help of the :func:`get_singlet_info <icetdev.cluster_space.get_singlet_info` function. Afterwards, the corresponding clusters are printed by calling :func:`view_singlets <icetdev.cluster_space.view_singlets>`. One should not that both functions take the prototype :class:`ase.Atoms` object created :ref:`earlier <_generate-prototype-re-structure>` as input argument.
+Additonal information regarding the singlets is extracted with help of the :func:`get_singlet_info <icetdev.cluster_space.get_singlet_info>` function. Afterwards, the corresponding clusters are printed by calling :func:`view_singlets <icetdev.cluster_space.view_singlets>`. One should note that both functions take the prototype :class:`ase.Atoms` object created earlier as input argument.
 
 .. literalinclude:: ../../../../examples/get_cluster_space_info.py
    :start-after: # Extract and print
 
-These lines ought to yield the following result: ::
-   Singlets:
-    orbit_index            : 0
-    sites                  : [[0 : [ 0.  0.  0.]], [1 : [ 0.  0.  0.]]]
-    multiplicity           : 2
-    representative_site    : [0 : [ 0.  0.  0.]]
+These lines ought to yield the following result::
+
+  Singlets:
+   orbit_index            : 0
+   sites                  : [[0 : [ 0.  0.  0.]], [1 : [ 0.  0.  0.]]]
+   multiplicity           : 2
+   representative_site    : [0 : [ 0.  0.  0.]]
 
 Source code
 -----------

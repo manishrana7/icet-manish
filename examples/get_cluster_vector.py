@@ -6,7 +6,6 @@ from ase.build import bulk
 
 from icetdev.cluster_space import ClusterSpace
 
-
 # Create a prototype structure, decide which additional elements to populate
 # it with (Si, Ge) and set the cutoffs for pairs (5.0 Å), triplets (5.0 Å)
 # and quadruplets (5.0 Å).
@@ -17,7 +16,6 @@ subelements = ["Si", "Ge"]
 # Initiate and print the cluster space.
 clusterspace = ClusterSpace(conf, cutoffs, subelements)
 print(clusterspace)
-
 
 # Generate and print the cluster vector for a pure Si 2x2x2 supercell.
 supercell = bulk("Si").repeat(2)

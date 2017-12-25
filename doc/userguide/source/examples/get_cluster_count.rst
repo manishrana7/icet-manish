@@ -17,32 +17,29 @@ Firstly, one needs to import the classes :class:`ClusterCounts <icetdev.cluster_
    :start-after: # Import modules
    :end-before: # Create a titanium,
 
-.. _generate-prototype-ti-supercell
 Generate a prototype Ti supercell
 ---------------------------------
 
-The next step is to build a prototype supercell, in the form of a, :math:`2\times2\times1`, single layer sheet that is randomly populated with titanium and tungsten atoms. Moreover, the cutoffs for pairs is set to 4 Å.
+The next step is to build a prototype supercell, in the form of a, :math:`2\times2\times1`, single layer sheet that is randomly populated with titanium and tungsten atoms. Moreover, the cutoff for pairs is set to 4 Å.
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
    :start-after: # sites with W atoms.
    :end-before: # Create the orbit
 
-.. _create-a-primitive-orbit-list
 Create a primitive orbit list
 -----------------------------
 
-As will be seen :ref:`later <_calculate-cluster-counts>`, the orbit list corresponding to the primitive structure of the :class:`ase.Atoms` object, defined :ref:`earlier < _generate-prototype-ti-supercell>`, is required to calculate the cluster counts. More precisely, this is achieved by first calling the :func:`__get_primitive_structure <icetdev.permutation_map.__get_primitive_structure>` followed by the :meth:`Structure.from_atoms` method. Thereafter, the primitive structure thus obtained is provided as input to :func:`create_orbit_list <icetdev.orbit_list.create_orbit_list>`, together with the :class:`list` of cutoff distances for the clusters.
+As will be seen later, the orbit list corresponding to the primitive structure of the :class:`ase.Atoms` object, defined earlier, is required to calculate the cluster counts. More precisely, this is achieved by first calling the :func:`__get_primitive_structure <icetdev.permutation_map.__get_primitive_structure>` followed by the :meth:`Structure.from_atoms` method. Thereafter, the primitive structure thus obtained is provided as input to :func:`create_orbit_list <icetdev.orbit_list.create_orbit_list>`, together with the :class:`list` of cutoff distances for the clusters.
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
    :start-after: # Create the orbit
    :end-before: # Use the primitive
 
 
-.. _count-the-clusters
 Count the clusters
 ------------------
 
-To count the number of clusters a :class:`ClusterSpace <icetdev.ClusterSpace>` object is first initiated. Thereafter, a :class:`Structure <icetdev.structure.Structure>` is generated from the supercell that was definied :ref:`earlier <_generate-prototype-ti-supercell>` with help of the :meth:`Structure.from_atoms` method. To calculate the number of clusters, this structure together with the primitive orbit list that was created in the :ref:`previous section <_create-a-primitive-orbit-list>` are given as input arguments to the :meth:`ClusterSpace.count_clusters` method.
+To count the number of clusters a :class:`ClusterSpace <icetdev.ClusterSpace>` object is first initiated. Thereafter, a :class:`Structure <icetdev.structure.Structure>` is generated from the supercell that was generated above with help of the :meth:`Structure.from_atoms` method. To calculate the number of clusters, this structure together with the primitive orbit list that was created in the previous section are given as input arguments to the :meth:`ClusterSpace.count_clusters` method.
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
    :start-after: # Use the primitive
@@ -51,30 +48,32 @@ To count the number of clusters a :class:`ClusterSpace <icetdev.ClusterSpace>` o
 Print the cluster counts
 ------------------------
 
-Finally, the cluster counts, that were calculated by the :ref:`previous code block <_count-the-clusters>`, are printed using the :meth:`ClusterSpace.print` method.
+Finally, the cluster counts, that were calculated by the previous code block, are printed using the :meth:`ClusterSpace.print` method.
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
    :start-after: # Print all of
 
-The resulting output should be similar to the following: ::
-   number of atoms 4
-   Found 3 clusters
-   3.43  :: 0 0 1.715
-   ==============
-   Ti Ti 2
-   W W 2
-   Total: 4
+The resulting output should be similar to the following::
 
-   2.97047  :: 0 0 1.48523
-   ==============
-   Ti W 8
-   Total: 8
+  number of atoms 4
+  Found 3 clusters
+  3.43  :: 0 0 1.715
+  ==============
+  Ti Ti 2
+  Ti W 2
+  Total: 4
 
-    :: 0 0
-   ==============
-   Ti 2
-   W 2
-   Total: 4
+  2.97047  :: 0 0 1.48523
+  ==============
+  Ti Ti 4
+  Ti W 4
+  Total: 8
+
+   :: 0 0
+  ==============
+  Ti 3
+  W 1
+  Total: 4
 
 Source code
 -----------

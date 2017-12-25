@@ -11,6 +11,11 @@ showcase different features and modes of usage.
    :maxdepth: 2
    :caption: Contents
 
-   (example_file_1)
-   (example_file_2)
-   (example_file_3)
+   enumerate_structures.rst
+   get_cluster_count.rst
+   get_cluster_space_info.rst
+   get_cluster_vector.rst
+   get_native_clusters.rst
+   get_neighborlist.rst
+   get_permutationmap.rst
+   test_clustervector_correlation.rst
