@@ -8,7 +8,7 @@ from icetdev.neighbor_list import get_neighbor_lists
 from icetdev.structure import Structure
 
 
-# Generate an iceT structure from a 2x2x2 Al fcc supercell.
+# Generate an icet structure from a 2x2x2 Al fcc supercell.
 atoms = bulk("Al", "fcc", a=2).repeat(2)
 atoms.pbc = [True, True, True]
 structure = Structure.from_atoms(atoms)

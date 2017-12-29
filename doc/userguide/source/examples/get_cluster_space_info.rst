@@ -6,7 +6,7 @@
 Cluster space information
 =========================
 
-The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`iceT`, to obtain basic information about a cluster
+The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`icet`, to obtain basic information about a cluster
 space.
 
 Import modules

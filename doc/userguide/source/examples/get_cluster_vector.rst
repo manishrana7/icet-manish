@@ -6,7 +6,7 @@
 Cluster vectors
 ===============
 
-The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`iceT`, to construct cluster vectors.
+The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`icet`, to construct cluster vectors.
 
 Import modules
 --------------

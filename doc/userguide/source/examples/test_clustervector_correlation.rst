@@ -6,12 +6,12 @@
 Cluster vector correlations
 ===========================
 
-The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`iceT`, to test the correlation between cluster vectors.
+The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`icet`, to test the correlation between cluster vectors.
 
 Import modules
 --------------
 
-In the present case it is necessary to import two :program:`iceT` classes, namely :class:`ClusterSpace <icetdev.cluster_space.ClusterSpace>` and :class:`Structure <icetdev.structure.Structure>`. In particular, these objects are used to store information regarding a specific cluster space and structure, respectively. Additionally, the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.db.connect` will be needed to extract structures from a previously prepared database.
+In the present case it is necessary to import two :program:`icet` classes, namely :class:`ClusterSpace <icetdev.cluster_space.ClusterSpace>` and :class:`Structure <icetdev.structure.Structure>`. In particular, these objects are used to store information regarding a specific cluster space and structure, respectively. Additionally, the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.db.connect` will be needed to extract structures from a previously prepared database.
 
 .. literalinclude:: ../../../../examples/test_clustervector_correlation.py
    :start-after: # Import modules

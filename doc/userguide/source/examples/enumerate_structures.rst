@@ -6,7 +6,7 @@
 Structure enumeration
 =====================
 
-The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`iceT`, to *enumerate structures*. In the present context, this *structural enumeration* means *the generation of all inequivalent structures derived from a primitive structure up to a certain size*.
+The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`icet`, to *enumerate structures*. In the present context, this *structural enumeration* means *the generation of all inequivalent structures derived from a primitive structure up to a certain size*.
 
 Import modules
 --------------

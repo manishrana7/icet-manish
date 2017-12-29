@@ -6,12 +6,12 @@
 Permutation map
 ===============
 
-The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`iceT`, to extract a permutation map.
+The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`icet`, to extract a permutation map.
 
 Import modules
 --------------
 
-To extract permutation maps, only a single :program:`iceT` function is required, namely the :func:`permutation_matrix_from_atoms <icetdev.permutation_map.permutation_matrix_from_atoms>`. Additionally, the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.build.bulk` will be needed to generate the :class:`ase.Atoms` object.
+To extract permutation maps, only a single :program:`icet` function is required, namely the :func:`permutation_matrix_from_atoms <icetdev.permutation_map.permutation_matrix_from_atoms>`. Additionally, the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.build.bulk` will be needed to generate the :class:`ase.Atoms` object.
 
 .. literalinclude:: ../../../../examples/get_permutationmap.py
    :start-after: # Import modules

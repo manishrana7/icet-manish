@@ -6,12 +6,12 @@
 Native clusters
 ===============
 
-The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`iceT`, to extract native clusters.
+The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`icet`, to extract native clusters.
 
 Import modules
 --------------
 
-In the present case it is necessary to import two :program:`iceT` classes, namely :class:`ClusterSpace <icetdev.cluster_space.ClusterSpace>` and :class:`Structure <icetdev.structure.Structure>`. In particular, these objects are used to store information regarding a specific cluster space and structure, respectively. Additionally, the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.build.bulk` will be needed to generate the structures.
+In the present case it is necessary to import two :program:`icet` classes, namely :class:`ClusterSpace <icetdev.cluster_space.ClusterSpace>` and :class:`Structure <icetdev.structure.Structure>`. In particular, these objects are used to store information regarding a specific cluster space and structure, respectively. Additionally, the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.build.bulk` will be needed to generate the structures.
 
 .. literalinclude:: ../../../../examples/get_native_clusters.py
    :start-after: # Import modules
@@ -24,7 +24,7 @@ The next step is to build a prototype, in the form of silicon, bulk, unit cell. 
 
 .. literalinclude:: ../../../../examples/get_native_clusters.py
    :start-after: # it with (Si,
-   :end-before: # Generate the cluster
+   :end-before: # Initiate the cluster
 
 Initiate the cluster space
 --------------------------
@@ -32,13 +32,13 @@ Initiate the cluster space
 The cluster space is initiated by simpling initiating a :class:`ClusterSpace <icetdev.ClusterSpace>` object and providing the prototype structure, cutoffs and subelements, which were defined above, as arguments.
 
 .. literalinclude:: ../../../../examples/get_native_clusters.py
-   :start-after: # Generate the cluster
+   :start-after: # Initiate the cluster
    :end-before: # Prepare 2x2x1 supercells
 
 Structure from Si/Ge supercell
 ------------------------------
 
-First a :math:`2\times2\times1`, pure Si, supercell is built and then the sites are randomly populated with Si and Ge atoms. Thereafter, an :program:`iceT` structure is created by providing this :class:`ase.Atoms` object as input to the :meth:`Structure.from_atoms` method.
+First a :math:`2\times2\times1`, pure Si, supercell is built and then the sites are randomly populated with Si and Ge atoms. Thereafter, an :program:`icet` structure is created by providing this :class:`ase.Atoms` object as input to the :meth:`Structure.from_atoms` method.
 
 .. literalinclude:: ../../../../examples/get_native_clusters.py
    :start-after: # Prepare 2x2x1 supercells

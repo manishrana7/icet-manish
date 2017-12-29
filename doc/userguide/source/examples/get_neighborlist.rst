@@ -6,7 +6,7 @@
 Neighbor list
 =============
 
-The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`iceT`, to extract a list of neighbors.
+The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`icet`, to extract a list of neighbors.
 
 Import modules
 --------------
@@ -15,7 +15,7 @@ It is necessary to import the :class:`Structure <icetdev.structure.Structure>` c
 
 .. literalinclude:: ../../../../examples/get_neighborlist.py
    :start-after: # Import modules
-   :end-before: # Generate an iceT
+   :end-before: # Generate an icet
 
 Generate prototype Al supercell
 -------------------------------
@@ -23,7 +23,7 @@ Generate prototype Al supercell
 The next step is to build a prototype structure, in the form of a alumininum :math:`2\times2\times2` supercell.
 
 .. literalinclude:: ../../../../examples/get_neighborlist.py
-   :start-after: # Generate an iceT
+   :start-after: # Generate an icet
    :end-before: # Construct a list
 
 Obtain neighbor list

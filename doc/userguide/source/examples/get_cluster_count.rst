@@ -6,12 +6,12 @@
 Cluster counts
 ===============
 
-The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`iceT`, to construct cluster counts.
+The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`icet`, to construct cluster counts.
 
 Import modules
 --------------
 
-Firstly, one needs to import the classes :class:`ClusterCounts <icetdev.cluster_counts.ClusterCounts>` and :class:`Structure <icetdev.structure.Structure>`, which are used to store information regarding the cluster counts and :program:`iceT` structures, respectively, in addition to the functions :func:`create_orbit_list <icetdev.orbit_list.create_orbit_list>` and :func:`__get_primitive_structure <icetdev.permutation_map.__get_primitive_structure>`. In particular, the latter will be used to generate a primitive structure, for which an orbitlist will be created, using the former. Also, the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.build.bulk` is needed to generate the prototype structure.
+Firstly, one needs to import the classes :class:`ClusterCounts <icetdev.cluster_counts.ClusterCounts>` and :class:`Structure <icetdev.structure.Structure>`, which are used to store information regarding the cluster counts and :program:`icet` structures, respectively, in addition to the functions :func:`create_orbit_list <icetdev.orbit_list.create_orbit_list>` and :func:`__get_primitive_structure <icetdev.permutation_map.__get_primitive_structure>`. In particular, the latter will be used to generate a primitive structure, for which an orbitlist will be created, using the former. Also, the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.build.bulk` is needed to generate the prototype structure.
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
    :start-after: # Import modules
