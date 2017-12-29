@@ -1,12 +1,16 @@
+# import modules
+import matplotlib.pyplot as plt
+
+import numpy as np
+
+from ase.db import connect
+from ase.build import bulk
+
 from icetdev import (ClusterSpace,
                      StructureContainer,
                      Optimizer,
                      ClusterExpansion)
 from icetdev.enumeration import enumerate_structures
-from ase.db import connect
-from ase.build import bulk
-import matplotlib.pyplot as plt
-import numpy as np
 
 # step 1: Set up the basic structure and a cluster space
 prim = bulk('Au')

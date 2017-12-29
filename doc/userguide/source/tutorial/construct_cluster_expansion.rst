@@ -6,8 +6,7 @@
 Construct a cluster expansion
 =============================
 
-(Overview of task and basic introduction)
-
+This exercise is intended to provide an overview of the basic procedure for constructing a cluster expansion for a prototype system, using structures found in the databased generated in the preceeding part of the tutorial. In particular, the main objective is to determine the miscibility between silver and gold. This means that the property of interest is the mixing energy, which, therefore, be used as the cluster property. In the end, it will be possible to plot the predicted and original mixing energies versus the concentration of silver atoms.
 
 (Step 1)
 ------------------------
