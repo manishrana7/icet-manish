@@ -19,10 +19,10 @@ for k, atoms in enumerate(enumerate_structures(prim, sizes, subelements)):
         continue
     # remember the original (unrelaxed) positions
     original_positions = atoms.get_positions()
-    # relax structure
+    # relax the structure
     atoms.calc = EMT()
     dyn = BFGS(atoms)
     dyn.run(fmax=0.01)
-    # add structure to database
+    # add the structure to the database
     db.write(atoms, structure_id=k,
              data={'original_positions': original_positions})
