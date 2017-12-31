@@ -124,9 +124,9 @@ At this point, the task of constructing the cluster expansion is almost complete
    :start-after: # step 3
    :end-before: # step 4
 
-Be aware of the fact that the diagram, which is shown below, will not automatically appear since it is saved as an image file, ``mixing-energy-comparison.pdf``.
+Be aware of the fact that the diagram, which is shown below, will not automatically appear since it is saved as an image file, ``mixing-energy-comparison.png``.
 
-.. figure:: ../../../../tutorial/mixing-energy-comparison.pdf
+.. figure:: ../../../../tutorial/mixing-energy-comparison.png
 
   Plot of the predicted (crosses) and target (open cirecles) mixing energies versus the concentration of silver atoms for the structures used in the construction of the cluster expansion.
 
@@ -138,9 +138,9 @@ Since the construction of a cluster expansion is, generally, only the first part
 .. literalinclude:: ../../../../tutorial/construct_cluster_expansion.py
    :start-after: # step 5
 
-The result is a file, ``mixing-energy-predicted.pdf``, that contains an image of the following diagram:
+The result is a file, ``mixing-energy-predicted.png``, that contains an image of the following diagram:
 
-.. figure:: ../../../../tutorial/mixing-energy-predicted.pdf
+.. figure:: ../../../../tutorial/mixing-energy-predicted.png
 
   Plot of the predicted mixing energies versus the concentration of silver atoms for a set of randomly generated, enumerated, structures.
 
