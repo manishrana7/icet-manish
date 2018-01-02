@@ -127,7 +127,7 @@ class BaseOptimizer:
 
     def __str__(self):
         s = []
-        for key, value in self.get_info():
+        for key, value in self.get_info().items():
             if type(value) in [str, int, float]:
                 s.append('{:22} : {}'.format(key, value))
         return '\n'.join(s)
