@@ -70,7 +70,7 @@ plt.savefig('mixing-energy-comparison.png', bbox_inches='tight')
 # step 5: Predict energies for, multiple, enumerated structures
 # enumerate the structures and compile the predicted energies
 data = []
-for atoms in enumerate_structures(prim, range(1, 16), subelements):
+for atoms in enumerate_structures(prim, range(1, 12), subelements):
     conc = float(atoms.get_chemical_symbols().count('Ag')) / len(atoms)
     emix = ce.predict(atoms)
     data.append([conc, emix])
