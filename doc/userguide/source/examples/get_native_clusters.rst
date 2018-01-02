@@ -6,12 +6,17 @@
 Native clusters
 ===============
 
-The purpose of this example is to demonstrate how to use functionalities, which are built into :program:`icet`, to extract native clusters.
+The purpose of this example is to demonstrate how to extract native clusters.
 
 Import modules
 --------------
 
-In the present case it is necessary to import two :program:`icet` classes, namely :class:`ClusterSpace <icetdev.cluster_space.ClusterSpace>` and :class:`Structure <icetdev.structure.Structure>`. In particular, these objects are used to store information regarding a specific cluster space and structure, respectively. Additionally, the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.build.bulk` will be needed to generate the structures.
+In the present case it is necessary to import two :program:`icet` classes,
+namely :class:`ClusterSpace <icetdev.cluster_space.ClusterSpace>` and
+:class:`Structure <icetdev.structure.Structure>`. The respective objects are
+used to store information regarding a specific cluster space and structure.
+Additionally, the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function
+:func:`ase.build.bulk` will be used to generate the structures.
 
 .. literalinclude:: ../../../../examples/get_native_clusters.py
    :start-after: # Import modules
@@ -20,7 +25,10 @@ In the present case it is necessary to import two :program:`icet` classes, namel
 Generate prototype Si cell
 --------------------------
 
-The next step is to build a prototype, in the form of silicon, bulk, unit cell. It is, in addition, decided that the cluster vectors will be created by populating the sites with either silicon or germanium. Also, the cutoffs for pairs set to 10.0 Å.
+The next step is to build a prototype, here a unit cell of bulk silicon. It is
+furthermore decided that the cluster vectors will be created by populating the
+sites with either silicon or germanium. Also the cutoff for pairs is set to 10
+Å.
 
 .. literalinclude:: ../../../../examples/get_native_clusters.py
    :start-after: # it with (Si,
@@ -29,7 +37,9 @@ The next step is to build a prototype, in the form of silicon, bulk, unit cell. 
 Initiate the cluster space
 --------------------------
 
-The cluster space is initiated by simpling initiating a :class:`ClusterSpace <icetdev.ClusterSpace>` object and providing the prototype structure, cutoffs and subelements, which were defined above, as arguments.
+The cluster space is created by initiating a :class:`ClusterSpace
+<icetdev.ClusterSpace>` object and providing the prototype structure, cutoffs
+and list of elements that were defined above as arguments.
 
 .. literalinclude:: ../../../../examples/get_native_clusters.py
    :start-after: # Initiate the cluster
@@ -38,7 +48,10 @@ The cluster space is initiated by simpling initiating a :class:`ClusterSpace <ic
 Structure from Si/Ge supercell
 ------------------------------
 
-First a :math:`2\times2\times1`, pure Si, supercell is built and then the sites are randomly populated with Si and Ge atoms. Thereafter, an :program:`icet` structure is created by providing this :class:`ase.Atoms` object as input to the :meth:`Structure.from_atoms` method.
+First, a :math:`2\times2\times1` supercell is built, after which the sites are
+randomly populated with Si and Ge atoms. Thereafter, an :class:`icet Structure
+<icetdev.Structure>` object structure is created by providing an :class:`ASE
+Atoms` object as input to the :meth:`Structure.from_atoms` method.
 
 .. literalinclude:: ../../../../examples/get_native_clusters.py
    :start-after: # Prepare 2x2x1 supercells
@@ -47,7 +60,11 @@ First a :math:`2\times2\times1`, pure Si, supercell is built and then the sites 
 Extract the native clusters
 ---------------------------
 
-The native clusters are extracted with help of the :meth:`ClusterSpace.get_native_clusters` method, with the structure defined in the previous section as input argument. Afterwards the structure itself and the native clusters are printed in a tabular format, in the latter case by using the :func:`ClusterSpace.print` method.
+The native clusters are extracted with help of the
+:meth:`ClusterSpace.get_native_clusters` method, with the structure defined in
+the previous section as input argument. Afterwards the structure itself and the
+native clusters are printed in tabular format, in the latter case by using the
+:func:`ClusterSpace.print` method.
 
 .. literalinclude:: ../../../../examples/get_native_clusters.py
    :start-after: # Extract and print
