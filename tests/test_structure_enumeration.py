@@ -3,7 +3,7 @@ Test structure numeration by checking that it yields the correct
 number of structure.
 '''
 
-from icetdev.enumeration import enumerate_structures
+from icetdev.tools import enumerate_structures
 from ase.build import bulk
 from ase import Atom
 

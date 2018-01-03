@@ -3,12 +3,12 @@ from icetdev.lattice_site import LatticeSite
 
 
 def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
-    """Get positions relative to unit cell.
+    '''Get positions in reduced (scaled) coordinates.
 
     If wrap is True, positions outside the unit cell will be wrapped into
     the cell in those directions with periodic boundary conditions
     so that the scaled coordinates are between zero and one.
-    """
+    '''
 
     fractional = np.linalg.solve(cell.T, positions.T).T
 
@@ -24,14 +24,14 @@ def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
 
 
 def find_lattice_site_from_position_python(structure, position):
-    """
+    '''
     Get lattice neighbor from position.
 
     This is the Python version of
     `structure.findLatticeSiteFromPosition(position)`
 
     It is slower but kept for debugging and if further development is needed.
-    """
+    '''
 
     fractional = np.linalg.solve(structure.cell.T, np.array(position).T).T
     unit_cell_offset = [int(round(x)) for x in fractional]

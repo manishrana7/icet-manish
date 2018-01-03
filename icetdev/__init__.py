@@ -4,10 +4,12 @@ from .structure import Structure
 from .cluster_space import ClusterSpace
 from .cluster_expansion import ClusterExpansion
 from .structure_container import StructureContainer
-from .fitting import Optimizer, EnsembleOptimizer
+from .fitting import (Optimizer,
+                      EnsembleOptimizer,
+                      CrossValidationEstimator)
 
 '''
-icet module
+The main icet module.
 '''
 
 __description__ = 'The Pythonic approach to cluster expansions'
@@ -26,7 +28,8 @@ __all__ = ['ClusterSpace',
            'ClusterExpansion',
            'Structure',
            'StructureContainer',
+           'Optimizer',
            'EnsembleOptimizer',
-           'Optimizer']
+           'CrossValidationEstimator']
 __status__ = 'alpha-version'
 __url__ = 'http://www.icet.org/'

@@ -14,8 +14,8 @@ import itertools
 import numpy as np
 from spglib import get_symmetry, niggli_reduce
 from ase import Atoms
-from icetdev.enumeration.hermite_normal_form import get_reduced_hnfs
-from icetdev.enumeration.smith_normal_form import get_unique_snfs
+from .structure_enumeration_support.hermite_normal_form import get_reduced_hnfs
+from .structure_enumeration_support.smith_normal_form import get_unique_snfs
 
 
 def __translate_labelings(labeling, snf, nsites, include_self=False):
@@ -270,7 +270,6 @@ def get_symmetry_operations(atoms, tol=1e-3):
     -------
     dict of lists
         Containing rotations, translations and basis_shifts.
-
     '''
 
     symmetries = get_symmetry(atoms)
@@ -351,7 +350,6 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduction=True):
     ------
     ASE Atoms
         Enumerated structure, each and every one of which is unique.
-
     '''
 
     nsites = len(atoms)
