@@ -88,7 +88,7 @@ class Optimizer(BaseOptimizer):
             y_test = self._y[self.test_set]
             self._rmse_test_set = self.compute_rmse(A_test, y_test)
             self.test_scatter_data = ScatterData(y_test,
-                                                    self.predict(A_test))
+                                                 self.predict(A_test))
             print('Test  RMSE  {:5.5f}'.format(self.rmse_test_set))
         else:
             self._rmse_test_set = None
@@ -151,7 +151,7 @@ class Optimizer(BaseOptimizer):
             raise ValueError('Both training and test set are None')
         elif test_set is None:
             test_set = [i for i in range(self._Nrows)
-                           if i not in training_set]
+                        if i not in training_set]
         elif training_set is None:
             training_set = [i for i in range(self._Nrows)
                             if i not in test_set]

@@ -34,8 +34,8 @@ structure = Structure.from_atoms(supercell)
 
 # Extract and print the native clusters for the supercell.
 # Start native
-nativeclusters = clusterspace.get_native_clusters(structure)
+native_clusters = clusterspace.get_native_clusters(structure)
 print("Native cluster counts for:")
 print(structure)
-nativeclusters.print()
+native_clusters.print()
 # End native
