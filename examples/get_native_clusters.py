@@ -1,7 +1,8 @@
 '''
 This example demonstrates how to find the native clusters for a structure
 '''
-# Start import
+
+# Import modules
 import numpy as np
 from ase.build import bulk
 from icetdev import ClusterSpace, Structure
@@ -9,29 +10,21 @@ from icetdev import ClusterSpace, Structure
 
 # Create a prototype structure, decide which additional elements to populate
 # it with (Si, Ge) and set the cutoff for pairs (10.0 A)
-# Start setup
-conf = bulk("Si")
+conf = bulk('Si')
 cutoffs = [10.0]
-subelements = ["Si", "Ge"]
-# End setup
+subelements = ['Si', 'Ge']
 
-# Generate the cluster space.
-# Start clusterspace
-clusterspace = ClusterSpace(conf, cutoffs, subelements)
-# End clusterspace
+# Initiate the cluster space.
+cluster_space = ClusterSpace(conf, cutoffs, subelements)
 
 # Prepare 2x2x1 supercells, populate these, randomly, with Si and Ge atoms.
-# Start supercell
-supercell = bulk("Si").repeat([2, 2, 1])
+supercell = bulk('Si').repeat([2, 2, 1])
 for atom in supercell:
     atom.symbol = np.random.choice(subelements)
 structure = Structure.from_atoms(supercell)
-# End supercell
 
 # Extract and print the native clusters for the supercell.
-# Start native
-nativeclusters = clusterspace.get_native_clusters(structure)
-print("Native cluster counts for:")
+native_clusters = cluster_space.get_native_clusters(structure)
 print(structure)
-nativeclusters.print()
-# End native
+print('\nNative cluster counts:')
+native_clusters.print()

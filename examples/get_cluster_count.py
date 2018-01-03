@@ -18,25 +18,19 @@ atoms.pbc = [True, True, False]
 atoms.set_chemical_symbols(['Ti', 'W', 'W', 'Ti'])
 # End setup
 
-# Determine the orbitlist for the corresponding primitive structure for all
-# pair clusters withhin the cutoff distance (4 angstrom).
-# Start orbitlist
-cutoffs = [4]
+# Determine the orbit list for the corresponding primitive structure for all
+# pair clusters within the cutoff distance
+cutoffs = [4.0]
 prim_atoms = get_primitive_structure(atoms)
 prim_structure = Structure.from_atoms(prim_atoms)
 prim_orbitlist = create_orbit_list(prim_structure, cutoffs)
-# End orbitlist
 
-# Use the primitive orbitlist to count the number of clusters.
-# Start counting
-structure = Structure.from_atoms(atoms)
+# Use the primitive orbit list to count the number of clusters.
 cluster_counts = ClusterCounts()
+structure = Structure.from_atoms(atoms)
 cluster_counts.count_clusters(structure, prim_orbitlist)
-# End counting
 
 # Print all of the clusters that were found.
-# Start results
-print("number of atoms {0}".format(len(atoms)))
-print("Found {} clusters".format(len(cluster_counts)))
+print('Number of atoms {0}'.format(len(atoms)))
+print('Found {} clusters'.format(len(cluster_counts)))
 cluster_counts.print()
-# End results

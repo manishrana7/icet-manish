@@ -5,7 +5,7 @@
 Structure enumeration
 =====================
 
-.. automodule:: enumeration
+.. automodule:: icetdev.tools.structure_enumeration
    :members:
    :undoc-members:
    :inherited-members:
