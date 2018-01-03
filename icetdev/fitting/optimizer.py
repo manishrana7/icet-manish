@@ -165,12 +165,12 @@ class Optimizer(BaseOptimizer):
         dict
         '''
         info = BaseOptimizer.get_info(self)
-        info['rmse training set'] = self.rmse_training_set
-        info['rmse test set'] = self.rmse_test_set
-        info['training set size'] = self.training_set_size
-        info['test set size'] = self.test_set_size
-        info['training set'] = self.training_set
-        info['test set'] = self.test_set
+        info['rmse-training-set'] = self.rmse_training_set
+        info['rmse-test-set'] = self.rmse_test_set
+        info['training-set-size'] = self.training_set_size
+        info['test-set-size'] = self.test_set_size
+        info['training-set'] = self.training_set
+        info['test-set'] = self.test_set
         return info
 
     @property
