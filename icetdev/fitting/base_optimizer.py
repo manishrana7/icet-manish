@@ -48,7 +48,8 @@ class BaseOptimizer:
             raise ValueError('Invalid fit data, shape did not match')
 
         self._A, self._y = fit_data
-        self._Nrows = self._A.shape()[0]
+        self._Nrows = self._A.shape[0]
+        self._Ncols = self._A.shape[1]
         self._fit_method = fit_method
         self._seed = seed
         self._optimizer_function = fit_methods[self.fit_method]
@@ -121,12 +122,12 @@ class BaseOptimizer:
         info['parameters'] = self.parameters
         info['fit method'] = self.fit_method
         info['number of target values'] = self._Nrows
-        info['number of parameters'] = self._A.shape()[1]
+        info['number of parameters'] = self._Ncols
         return info
 
     def __str__(self):
         s = []
-        for key, value in self.get_info():
+        for key, value in self.get_info().items():
             if type(value) in [str, int, float]:
                 s.append('{:22} : {}'.format(key, value))
         return '\n'.join(s)
@@ -150,12 +151,12 @@ class BaseOptimizer:
     @property
     def number_of_target_values(self):
         ''' int : number of target values (=rows in `A` matrix) '''
-        return self._A.shape[0]
+        return self._Nrows
 
     @property
     def number_of_parameters(self):
         ''' int : number of parameters (=columns in `A` matrix) '''
-        return self._A.shape[1]
+        return self._Ncols
 
     @property
     def seed(self):

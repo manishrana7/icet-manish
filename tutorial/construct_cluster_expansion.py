@@ -1,12 +1,13 @@
+# import modules
+import matplotlib.pyplot as plt
+import numpy as np
+from ase.db import connect
+from ase.build import bulk
 from icetdev import (ClusterSpace,
                      StructureContainer,
                      Optimizer,
                      ClusterExpansion)
 from icetdev.enumeration import enumerate_structures
-from ase.db import connect
-from ase.build import bulk
-import matplotlib.pyplot as plt
-import numpy as np
 
 # step 1: Set up the basic structure and a cluster space
 prim = bulk('Au')
@@ -15,15 +16,15 @@ subelements = ['Ag', 'Au']
 cs = ClusterSpace(prim, cutoffs, subelements)
 print(cs)
 
-# step 2: Parse input structures and set up a structure container
+# step 2: Parse the input structures and set up a structure container
 db = connect('structures.db')
-# get reference energies for elements (input data)
+# get reference energies for the elements
 eref = {}
 for elem in subelements:
     for row in db.select('{}=1'.format(elem), natoms=1):
         eref[elem] = row.energy / row.natoms
         break
-# compile structures into structure container and add mixing energy
+# compile the structures into a structure container and add the mixing energies
 atoms_list = []
 properties = []
 for row in db.select():
@@ -54,28 +55,28 @@ for row in db.select():
     emix_ce = ce.predict(atoms)
     data.append([conc, emix, emix_ce])
 data = np.array(data).T
-# plot results
+# plot the results
 fig, ax = plt.subplots()
 ax.set_xlabel(r'Ag concentration')
 ax.set_ylabel(r'Mixing energy (meV/atom)')
 ax.set_xlim([0, 1])
 ax.scatter(data[0], 1e3 * data[1], marker='o')
 ax.scatter(data[0], 1e3 * data[2], marker='x')
-plt.savefig('mixing-energy-comparison.pdf', bbox_inches='tight')
+plt.savefig('mixing-energy-comparison.png', bbox_inches='tight')
 
-# step 5: Predict energies for a many structures
-# enumerate structures and compile predicted energies
+# step 5: Predict energies for, multiple, enumerated structures
+# enumerate the structures and compile the predicted energies
 data = []
-for atoms in enumerate_structures(prim, range(1, 16), subelements):
+for atoms in enumerate_structures(prim, range(1, 12), subelements):
     conc = float(atoms.get_chemical_symbols().count('Ag')) / len(atoms)
     emix = ce.predict(atoms)
     data.append([conc, emix])
 print('Predicted energies for {} structures'.format(len(data)))
 data = np.array(data).T
-# plot results
+# plot the results
 fig, ax = plt.subplots()
 ax.set_xlabel(r'Ag concentration')
 ax.set_ylabel(r'Mixing energy (meV/atom)')
 ax.set_xlim([0, 1])
 ax.scatter(data[0], 1e3 * data[1], marker='x')
-plt.savefig('mixing-energy-predicted.pdf', bbox_inches='tight')
+plt.savefig('mixing-energy-predicted.png', bbox_inches='tight')
