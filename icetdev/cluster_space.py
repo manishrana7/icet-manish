@@ -215,11 +215,11 @@ class ClusterSpace(_ClusterSpace):
             cluster = self.get_orbit(orbit_index).get_representative_cluster()
             multiplicity = len(self.get_orbit(
                                orbit_index).get_equivalent_sites())
-            record = OrderedDict({'index': index,
-                                  'order': cluster.order,
-                                  'size': cluster.geometrical_size,
-                                  'multiplicity': multiplicity,
-                                  'orbit index': orbit_index})
+            record = OrderedDict([('index', index),
+                                  ('order', cluster.order),
+                                  ('size', cluster.geometrical_size),
+                                  ('multiplicity', multiplicity),
+                                  ('orbit index', orbit_index)])
             record['MC vector'] = mc_vector
             data.append(record)
             index += 1
