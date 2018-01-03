@@ -4,7 +4,7 @@ from _icetdev import PermutationMap
 from .neighbor_list import get_neighbor_lists, NeighborList
 from .structure import Structure
 from ..tools.geometry import (get_primitive_structure,
-                              get_fractional_positions_from_neigborlist)
+                              get_fractional_positions_from_neighbor_list)
 
 
 def permutation_matrices_from_atoms(atoms, cutoffs,
@@ -55,7 +55,7 @@ def permutation_matrices_from_atoms(atoms, cutoffs,
         if verbosity >= 3:
             print('building permutation map {}/{}'.format(i,
                                                           len(neighbor_lists)))
-        frac_positions = get_fractional_positions_from_neigborlist(
+        frac_positions = get_fractional_positions_from_neighbor_list(
             prim_structure, neighbor_list)
         if verbosity >= 3:
             print('number of positions: {}'.format(len(frac_positions)))
@@ -114,7 +114,7 @@ def permutation_matrix_from_atoms(atoms, cutoff,
     neighbor_list.build(prim_structure)
 
     # get fractional positions for neighbor_list
-    frac_positions = get_fractional_positions_from_neigborlist(
+    frac_positions = get_fractional_positions_from_neighbor_list(
         prim_structure, neighbor_list)
     if verbosity >= 3:
         print('number of positions: {}'.format(len(frac_positions)))

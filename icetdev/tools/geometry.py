@@ -104,7 +104,7 @@ def get_primitive_structure(atoms):
     return atoms_prim
 
 
-def get_fractional_positions_from_neigborlist(structure, neighbor_list):
+def get_fractional_positions_from_neighbor_list(structure, neighbor_list):
     '''
     Returns the fractional positions in structure from the neighbors in the
     neighbor list.
