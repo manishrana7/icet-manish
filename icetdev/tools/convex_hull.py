@@ -73,9 +73,9 @@ class ConvexHull(object):
         self.structures = hull.vertices
 
         # Remove points that are above "pure element plane"
-        self.remove_points_above_tie_plane()
+        self._remove_points_above_tie_plane()
 
-    def remove_points_above_tie_plane(self, tol=1e-6):
+    def _remove_points_above_tie_plane(self, tol=1e-6):
         '''
         Remove all points on the convex hull that correspond to maximum rather
         than minimum energy.
