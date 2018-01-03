@@ -36,6 +36,13 @@ class EnsembleOptimizer(BaseOptimizer):
         if True sampling will be carried out with replacement
     seed : int
         seed for pseudo random number generator
+
+    Attributes
+    ----------
+    parameters : numpy.ndarray
+        average of each parameter over the ensemble
+    parameters_stddev : numpy.ndarray
+        standard deviation of each parameter
     '''
 
     def __init__(self, fit_data, fit_method='least-squares', ensemble_size=50,
@@ -115,24 +122,14 @@ class EnsembleOptimizer(BaseOptimizer):
             error_matrix[:, i] = np.dot(self._A, parameters) - self._y
         return error_matrix
 
-    def get_parameters_avg(self):
-        '''Get average of each parameter over the ensemble.
-
-        Returns
-        -------
-        numpy.ndarray
-            vector of average values
-        '''
+    @property
+    def parameters(self):
+        ''' numpy.ndarray : average of each parameter over the ensemble '''
         return np.average(self.parameters_set, axis=0)
 
-    def get_parameters_std(self):
-        '''Get standard deviation of each parameter over the ensemble.
-
-        Returns
-        -------
-        numpy.ndarray
-            vector of standard deviations
-        '''
+    @property
+    def parameters_stddev(self):
+        ''' numpy.ndarray : standard deviation of each parameter '''
         return np.std(self.parameters_set, axis=0)
 
     @property
