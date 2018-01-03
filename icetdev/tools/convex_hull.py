@@ -4,9 +4,26 @@ from scipy.interpolate import griddata
 import itertools
 
 
-class ConvexHull:
+class ConvexHull(object):
+    '''
+    Convex hull of concentration and energies (or other quantities).
 
-    def __init__(self, points, tol=1e-3):
+    Attributes
+    ----------
+    dimensions : int
+        Number of independent concentrations needed to specify a point in
+        concentration space (1 for binaries, 2 for ternaries etc)
+    concentrations : ndarray of floats, size (N, dimensions)
+        Concentration of structures on the convex hull.
+    energies : ndarray of floats, size N
+        Energy of structures on the convex hull.
+    structures : list of ints
+        Indices of structures that constitute the convex hull (indices are
+        defined by the order their concentrations and energies are feeded when
+        initializing the ConvexHull object).
+    '''
+
+    def __init__(self, points):
         """
         Construct convex hull for (free) energy of mixing,
         see http://docs.scipy.org/doc/scipy-dev/reference/\
@@ -14,20 +31,15 @@ class ConvexHull:
 
         Parameters
         ----------
-        points : 
-            concentrations and energies
-        retfunc : bool
-            if True the method returns a function handle otherwise a dictionary
-
-        Returns
-        -------
-        function handle
-            object that provides a linear interpolation of the convex hull
-        dict
-            convex hull (concentrations, energies)
+        points : list of tuples
+            Concentrations and energies as [((c1, c2), e), ...] where (c1, c2)
+            are independent concentrations needed to specify a point in
+            concentration space, and e is the corresponding energy. In a
+            binary system where only one concentration is needed, the format
+            [(c, e), ...] is fine.
         """
 
-        # prepare data in format suitable for ConvexHull
+        # Prepare data in format suitable for Scipy-ConvexHull
         if isinstance(points[0][0], tuple):
             points = np.array([np.array(point[0] + (point[1],))
                                for point in points])
@@ -36,10 +48,10 @@ class ConvexHull:
 
         self.dimensions = len(points[0]) - 1
 
-        # construct convex hull
+        # Construct convex hull
         hull = ConvexHullScipy(points)
 
-        # collect convex hull points
+        # Collect convex hull points in handy arrays
         concentrations = []
         energies = []
         for vertex in hull.vertices:
@@ -60,11 +72,9 @@ class ConvexHull:
 
         self.concentrations = concentrations
         self.energies = energies
-        print(self.energies)
 
         # Remove points that are above "pure element line"
         self.remove_points_above_pure_elements()
-        print(self.energies)
 
     def remove_points_above_pure_elements(self, tol=1e-6):
         '''
@@ -110,8 +120,8 @@ class ConvexHull:
             # If there are more vertices on the convex hull, we need to loop
             # over all combinations of N vertices.
             for plane in itertools.combinations(vertices,
-                                                   min(len(vertices),
-                                                       self.dimensions+1)):
+                                                min(len(vertices),
+                                                    self.dimensions + 1)):
                 # Calculate energy that would be gotten with pure elements
                 # with ascribed concentration.
                 energy_pure = griddata(self.concentrations[np.array(plane)],
@@ -133,7 +143,22 @@ class ConvexHull:
         self.energies = np.delete(self.energies, to_delete, 0)
 
     def get_convex_hull_at_concentrations(self, target_concentrations):
+        '''
+        Get energy of convex hull at specified concentrations.
 
+        Parameters
+        ----------
+        target_concentrations : ndarray of floats, shape (N, ndim)
+            Concentrations at N target points (ndim is the number of
+            independent concentrations needed to specify a point in
+            concentration space (2 for binaries, 3 for ternaries etc))
+
+        Returns
+        -------
+        ndarray of floats, size N
+            Energies at the specified target_concentrations. If any
+            concentration is outside the allowed range, NaN is returned.
+        '''
         if self.dimensions > 1:
             assert len(target_concentrations[0]) == self.dimensions
 
