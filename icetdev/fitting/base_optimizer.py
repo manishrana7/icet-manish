@@ -129,7 +129,7 @@ class BaseOptimizer:
         s = []
         for key, value in self.get_info().items():
             if type(value) in [str, int, float]:
-                s.append('{:22} : {}'.format(key, value))
+                s.append('{:25} : {}'.format(key, value))
         return '\n'.join(s)
 
     def __repr__(self):
