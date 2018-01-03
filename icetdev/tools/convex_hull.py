@@ -72,6 +72,7 @@ class ConvexHull(object):
 
         self.concentrations = concentrations
         self.energies = energies
+        self.structures = hull.vertices
 
         # Remove points that are above "pure element line"
         self.remove_points_above_pure_elements()
@@ -138,9 +139,9 @@ class ConvexHull(object):
                     break
 
         # Finally remove all points
-        print(to_delete)
         self.concentrations = np.delete(self.concentrations, to_delete, 0)
         self.energies = np.delete(self.energies, to_delete, 0)
+        self.structures = list(np.delete(self.structures, to_delete, 0))
 
     def get_convex_hull_at_concentrations(self, target_concentrations):
         '''
