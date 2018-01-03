@@ -26,7 +26,7 @@ class EnsembleOptimizer(BaseOptimizer):
     fit_method : str
         method to be used for training; possible choice are
         "least-squares", "lasso", "bayesian-ridge", "ardr"
-    n_splits : int
+    ensemble_size : int
         number of fits in the ensemble
     train_fraction : float
         fraction of input data (=rows) to be used for training
@@ -38,23 +38,24 @@ class EnsembleOptimizer(BaseOptimizer):
         seed for pseudo random number generator
     '''
 
-    def __init__(self, fit_data, fit_method='least-squares', n_splits=50,
+    def __init__(self, fit_data, fit_method='least-squares', ensemble_size=50,
                  train_fraction=0.7, test_fraction=None,
                  bootstrap=True, seed=42, **kwargs):
 
         BaseOptimizer.__init__(self, fit_data, fit_method, seed)
-        self._n_splits = n_splits
+        self._ensemble_size = ensemble_size
         self._training_set_size = int(np.round(train_fraction * self._Nrows))
         if test_fraction is not None:
-            self._testing_set_size = int(np.round(test_fraction * self._Nrows))
+            self._test_set_size = int(np.round(test_fraction * self._Nrows))
             assert (self._training_set_size +
-                    self._testing_set_size <= self._Nrows), \
-                'Size of training and testing sets exceeds available data'
+                    self._test_set_size <= self._Nrows), \
+                'Size of training and test sets exceeds available data'
         else:
-            self._testing_set_size = self._Nrows - self._training_set_size
+            self._test_set_size = self._Nrows - self._training_set_size
 
         self._bootstrap = bootstrap
         self._kwargs = kwargs
+        self._parameters_stddev = None
 
     def train(self):
         ''' Carry out ensemble training. '''
@@ -67,12 +68,12 @@ class EnsembleOptimizer(BaseOptimizer):
         np.random.seed(self.seed)
 
         parameters_list = []
-        rmse_training_set_list, rmse_testing_set_list = [], []
-        training_set_list, testing_set_list = [], []
-        for _ in range(self.n_splits):
-            # construct training and testing sets
+        rmse_training_set_list, rmse_test_set_list = [], []
+        training_set_list, test_set_list = [], []
+        for _ in range(self.ensemble_size):
+            # construct training and test sets
             rows = np.random.choice(
-                self._Nrows, self.training_set_size + self.testing_set_size,
+                self._Nrows, self.training_set_size + self.test_set_size,
                 replace=self.bootstrap)
             train_rows = np.random.choice(rows, self.training_set_size,
                                           replace=self.bootstrap)
@@ -87,15 +88,15 @@ class EnsembleOptimizer(BaseOptimizer):
             # collect results
             parameters_list.append(opt.parameters)
             rmse_training_set_list.append(opt.rmse_training_set)
-            rmse_testing_set_list.append(opt.rmse_testing_set)
+            rmse_test_set_list.append(opt.rmse_test_set)
             training_set_list.append(train_rows)
-            testing_set_list.append(test_rows)
+            test_set_list.append(test_rows)
 
         self._parameters_set = np.array(parameters_list)
         self._training_set_list = training_set_list
-        self._testing_set_list = testing_set_list
+        self._test_set_list = test_set_list
         self._average_rmse_training_set = np.average(rmse_training_set_list)
-        self._average_rmse_testing_set = np.average(rmse_testing_set_list)
+        self._average_rmse_test_set = np.average(rmse_test_set_list)
 
     def _construct_final_model(self):
         ''' Construct final model. '''
@@ -110,30 +111,20 @@ class EnsembleOptimizer(BaseOptimizer):
             matrix of fit errors where `N` is the number of target values and
             `M` is the number of fits (i.e., the size of the ensemble)
         '''
-        error_matrix = np.zeros((self._Nrows, self.n_splits))
+        error_matrix = np.zeros((self._Nrows, self.ensemble_size))
         for i, parameters in enumerate(self.parameters_set):
             error_matrix[:, i] = np.dot(self._A, parameters) - self._y
         return error_matrix
 
-    def get_parameters_avg(self):
-        '''Get average of each parameter over the ensemble.
-
-        Returns
-        -------
-        numpy.ndarray
-            vector of average values
-        '''
-        return np.average(self.parameters_set, axis=0)
-
-    def get_parameters_std(self):
-        '''Get standard deviation of each parameter over the ensemble.
-
-        Returns
-        -------
-        numpy.ndarray
-            vector of standard deviations
-        '''
-        return np.std(self.parameters_set, axis=0)
+    @property
+    def parameters_stddev(self):
+        ''' numpy.ndarray : standard deviation of each parameter '''
+        if self.fit_results['parameters'] is None:
+            return None
+        else:
+            if self._parameters_stddev is None:
+                self._parameters_stddev = np.std(self.parameters_set, axis=0)
+            return self._parameters_stddev
 
     @property
     def parameter_vectors(self):
@@ -143,7 +134,7 @@ class EnsembleOptimizer(BaseOptimizer):
     @property
     def ensemble_size(self):
         ''' int : number of rounds of training '''
-        return self._n_splits
+        return self._ensemble_size
 
     @property
     def rmse_training_set(self):
@@ -152,10 +143,10 @@ class EnsembleOptimizer(BaseOptimizer):
         return self._average_rmse_training_set
 
     @property
-    def rmse_testing_set(self):
-        ''' float : ensemble average of root mean squared error over testing
-        set '''
-        return self._average_rmse_testing_set
+    def rmse_test_set(self):
+        ''' float : ensemble average of root mean squared error over test set
+        '''
+        return self._average_rmse_test_set
 
     @property
     def training_set_size(self):
@@ -163,9 +154,9 @@ class EnsembleOptimizer(BaseOptimizer):
         return self._training_set_size
 
     @property
-    def testing_set_size(self):
-        ''' int : number of rows included in testing sets '''
-        return self._testing_set_size
+    def test_set_size(self):
+        ''' int : number of rows included in test sets '''
+        return self._test_set_size
 
     @property
     def fractional_training_set_size(self):
