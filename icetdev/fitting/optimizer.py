@@ -29,7 +29,7 @@ class Optimizer(BaseOptimizer):
         fraction of input data (=rows) to be used for testing
     training_set : tuple/list of ints
         indices of rows of `A`/`y` to be used for training
-    testing_set : tuple/list of ints
+    test_set : tuple/list of ints
         indices of rows of `A`/`y` to be used for testing
     seed : int
         seed for pseudo random number generator
@@ -38,28 +38,28 @@ class Optimizer(BaseOptimizer):
     ----------
     training_scatter_data : ScatterData object (namedtuple)
         target and predicted value for each row in the training set
-    testing_scatter_data : ScatterData object (namedtuple)
-        target and predicted value for each row in the testing set
+    test_scatter_data : ScatterData object (namedtuple)
+        target and predicted value for each row in the test set
     '''
 
     def __init__(self, fit_data, fit_method='least-squares',
                  train_fraction=0.75, test_fraction=None,
-                 training_set=None, testing_set=None, seed=42, **kwargs):
+                 training_set=None, test_set=None, seed=42, **kwargs):
 
         super().__init__(fit_data, fit_method, seed)
 
         self._seed = seed
         self._kwargs = kwargs
 
-        # setup training and testing sets
+        # setup training and test sets
         self._setup_rows(train_fraction, test_fraction,
-                         training_set, testing_set)
+                         training_set, test_set)
 
         # will be populate once running train
         self._rmse_training_set = None
-        self._rmse_testing_set = None
+        self._rmse_test_set = None
         self.training_scatter_data = None
-        self.testing_scatter_data = None
+        self.test_scatter_data = None
 
     def train(self):
         ''' Carry out training. '''
@@ -73,7 +73,7 @@ class Optimizer(BaseOptimizer):
         print('Fit Method {}, N_params {}'.format(self.fit_method,
                                                   self.number_of_parameters))
         print('Train size {}, Test size {} '
-              .format(self.training_set_size, self.testing_set_size))
+              .format(self.training_set_size, self.test_set_size))
 
         self._fit_results = self._optimizer_function(A_train, y_train,
                                                      **self._kwargs)
@@ -83,41 +83,41 @@ class Optimizer(BaseOptimizer):
         print('Train RMSE  {:5.5f}'.format(self.rmse_training_set))
 
         # perform validation
-        if self.testing_set is not None:
-            A_test = self._A[self.testing_set, :]
-            y_test = self._y[self.testing_set]
-            self._rmse_testing_set = self.compute_rmse(A_test, y_test)
-            self.testing_scatter_data = ScatterData(y_test,
+        if self.test_set is not None:
+            A_test = self._A[self.test_set, :]
+            y_test = self._y[self.test_set]
+            self._rmse_test_set = self.compute_rmse(A_test, y_test)
+            self.test_scatter_data = ScatterData(y_test,
                                                     self.predict(A_test))
-            print('Test  RMSE  {:5.5f}'.format(self.rmse_testing_set))
+            print('Test  RMSE  {:5.5f}'.format(self.rmse_test_set))
         else:
-            self._rmse_testing_set = None
-            self.testing_scatter_data = None
+            self._rmse_test_set = None
+            self.test_scatter_data = None
             print('Test  RMSE  NaN')
         print('{s:-^{n}}'.format(s='Done', n=45))
 
     def _setup_rows(self, train_fraction, test_fraction, training_set,
-                    testing_set):
+                    test_set):
         ''' Setup train and test rows depending on which arguments are
         specified and which are None.
 
-        If `training_set` and `testing_set` are `None` then `fractions` is
+        If `training_set` and `test_set` are `None` then `fractions` is
         used.
         '''
 
-        if training_set is None and testing_set is None:
+        if training_set is None and test_set is None:
             # get rows from fractions
-            training_set, testing_set = \
+            training_set, test_set = \
                 self._get_rows_via_fractions(train_fraction, test_fraction)
         else:  # get rows from specified rows
-            training_set, testing_set = \
-                self._get_rows_from_indices(training_set, testing_set)
+            training_set, test_set = \
+                self._get_rows_from_indices(training_set, test_set)
 
         if len(training_set) == 0:
             raise ValueError('No training rows was selected from fit_data')
 
         self._training_set = training_set
-        self._testing_set = testing_set
+        self._test_set = test_set
 
     def _get_rows_via_fractions(self, train_fraction, test_fraction):
         ''' Gets row via fractions. '''
@@ -129,33 +129,33 @@ class Optimizer(BaseOptimizer):
             raise ValueError('train rows is empty for these fractions')
         elif test_fraction is None and abs(train_fraction - 1.0) < 1e-10:
             training_set = np.arange(self._Nrows)
-            testing_set = None
-            return training_set, testing_set
+            test_set = None
+            return training_set, test_set
 
         # split
-        training_set, testing_set = \
+        training_set, test_set = \
             train_test_split(np.arange(self._Nrows),
                              train_size=train_fraction,
                              test_size=test_fraction,
                              random_state=self.seed)
-        if len(testing_set) == 0:
-            testing_set = None
+        if len(test_set) == 0:
+            test_set = None
         if len(training_set) == 0:
             raise ValueError('train rows is empty, too small train_fraction')
 
-        return training_set, testing_set
+        return training_set, test_set
 
-    def _get_rows_from_indices(self, training_set, testing_set):
+    def _get_rows_from_indices(self, training_set, test_set):
         ''' Gets row via indices '''
-        if training_set is None and testing_set is None:
+        if training_set is None and test_set is None:
             raise ValueError('Both training and test set are None')
-        elif testing_set is None:
-            testing_set = [i for i in range(self._Nrows)
+        elif test_set is None:
+            test_set = [i for i in range(self._Nrows)
                            if i not in training_set]
         elif training_set is None:
             training_set = [i for i in range(self._Nrows)
-                            if i not in testing_set]
-        return np.array(training_set), np.array(testing_set)
+                            if i not in test_set]
+        return np.array(training_set), np.array(test_set)
 
     def get_info(self):
         ''' Get comprehensive information concerning the optimization process.
@@ -166,11 +166,11 @@ class Optimizer(BaseOptimizer):
         '''
         info = BaseOptimizer.get_info(self)
         info['rmse training set'] = self.rmse_training_set
-        info['rmse testing set'] = self.rmse_testing_set
+        info['rmse test set'] = self.rmse_test_set
         info['training set size'] = self.training_set_size
-        info['testing set size'] = self.testing_set_size
+        info['test set size'] = self.test_set_size
         info['training set'] = self.training_set
-        info['testing set'] = self.testing_set
+        info['test set'] = self.test_set
         return info
 
     @property
@@ -179,9 +179,9 @@ class Optimizer(BaseOptimizer):
         return self._rmse_training_set
 
     @property
-    def rmse_testing_set(self):
-        ''' float : root mean squared error for testing set '''
-        return self._rmse_testing_set
+    def rmse_test_set(self):
+        ''' float : root mean squared error for test set '''
+        return self._rmse_test_set
 
     @property
     def training_set(self):
@@ -189,9 +189,9 @@ class Optimizer(BaseOptimizer):
         return self._training_set
 
     @property
-    def testing_set(self):
-        ''' list : indices of the rows included in the testing set '''
-        return self._testing_set
+    def test_set(self):
+        ''' list : indices of the rows included in the test set '''
+        return self._test_set
 
     @property
     def training_set_size(self):
@@ -201,8 +201,8 @@ class Optimizer(BaseOptimizer):
         return len(self.training_set)
 
     @property
-    def testing_set_size(self):
-        ''' int : number of rows included in testing set '''
-        if self.testing_set is None:
+    def test_set_size(self):
+        ''' int : number of rows included in test set '''
+        if self.test_set is None:
             return 0
-        return len(self.testing_set)
+        return len(self.test_set)

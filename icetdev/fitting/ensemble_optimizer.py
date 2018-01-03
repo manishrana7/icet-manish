@@ -46,12 +46,12 @@ class EnsembleOptimizer(BaseOptimizer):
         self._ensemble_size = ensemble_size
         self._training_set_size = int(np.round(train_fraction * self._Nrows))
         if test_fraction is not None:
-            self._testing_set_size = int(np.round(test_fraction * self._Nrows))
+            self._test_set_size = int(np.round(test_fraction * self._Nrows))
             assert (self._training_set_size +
-                    self._testing_set_size <= self._Nrows), \
-                'Size of training and testing sets exceeds available data'
+                    self._test_set_size <= self._Nrows), \
+                'Size of training and test sets exceeds available data'
         else:
-            self._testing_set_size = self._Nrows - self._training_set_size
+            self._test_set_size = self._Nrows - self._training_set_size
 
         self._bootstrap = bootstrap
         self._kwargs = kwargs
@@ -67,12 +67,12 @@ class EnsembleOptimizer(BaseOptimizer):
         np.random.seed(self.seed)
 
         parameters_list = []
-        rmse_training_set_list, rmse_testing_set_list = [], []
-        training_set_list, testing_set_list = [], []
+        rmse_training_set_list, rmse_test_set_list = [], []
+        training_set_list, test_set_list = [], []
         for _ in range(self.ensemble_size):
-            # construct training and testing sets
+            # construct training and test sets
             rows = np.random.choice(
-                self._Nrows, self.training_set_size + self.testing_set_size,
+                self._Nrows, self.training_set_size + self.test_set_size,
                 replace=self.bootstrap)
             train_rows = np.random.choice(rows, self.training_set_size,
                                           replace=self.bootstrap)
@@ -87,15 +87,15 @@ class EnsembleOptimizer(BaseOptimizer):
             # collect results
             parameters_list.append(opt.parameters)
             rmse_training_set_list.append(opt.rmse_training_set)
-            rmse_testing_set_list.append(opt.rmse_testing_set)
+            rmse_test_set_list.append(opt.rmse_test_set)
             training_set_list.append(train_rows)
-            testing_set_list.append(test_rows)
+            test_set_list.append(test_rows)
 
         self._parameters_set = np.array(parameters_list)
         self._training_set_list = training_set_list
-        self._testing_set_list = testing_set_list
+        self._test_set_list = test_set_list
         self._average_rmse_training_set = np.average(rmse_training_set_list)
-        self._average_rmse_testing_set = np.average(rmse_testing_set_list)
+        self._average_rmse_test_set = np.average(rmse_test_set_list)
 
     def _construct_final_model(self):
         ''' Construct final model. '''
@@ -152,10 +152,10 @@ class EnsembleOptimizer(BaseOptimizer):
         return self._average_rmse_training_set
 
     @property
-    def rmse_testing_set(self):
-        ''' float : ensemble average of root mean squared error over testing
-        set '''
-        return self._average_rmse_testing_set
+    def rmse_test_set(self):
+        ''' float : ensemble average of root mean squared error over test set
+        '''
+        return self._average_rmse_test_set
 
     @property
     def training_set_size(self):
@@ -163,9 +163,9 @@ class EnsembleOptimizer(BaseOptimizer):
         return self._training_set_size
 
     @property
-    def testing_set_size(self):
-        ''' int : number of rows included in testing sets '''
-        return self._testing_set_size
+    def test_set_size(self):
+        ''' int : number of rows included in test sets '''
+        return self._test_set_size
 
     @property
     def fractional_training_set_size(self):
