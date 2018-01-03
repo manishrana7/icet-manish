@@ -55,6 +55,7 @@ class EnsembleOptimizer(BaseOptimizer):
 
         self._bootstrap = bootstrap
         self._kwargs = kwargs
+        self._parameters_stddev = None
 
     def train(self):
         ''' Carry out ensemble training. '''
@@ -116,14 +117,14 @@ class EnsembleOptimizer(BaseOptimizer):
         return error_matrix
 
     @property
-    def parameters(self):
-        ''' numpy.ndarray : average of each parameter over the ensemble '''
-        return np.average(self.parameters_set, axis=0)
-
-    @property
     def parameters_stddev(self):
         ''' numpy.ndarray : standard deviation of each parameter '''
-        return np.std(self.parameters_set, axis=0)
+        if self.fit_results['parameters'] is None:
+            return None
+        else:
+            if self._parameters_stddev is None:
+                self._parameters_stddev = np.std(self.parameters_set, axis=0)
+            return self._parameters_stddev
 
     @property
     def parameter_vectors(self):
