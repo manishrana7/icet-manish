@@ -19,14 +19,14 @@ class ConvexHull(object):
         Energy of the structures on the convex hull.
     structures : list of ints
         Indices of structures that constitute the convex hull (indices are
-        defined by the order their concentrations and energies are feeded when
+        defined by the order their concentrations and energies are fed when
         initializing the ConvexHull object).
     '''
 
     def __init__(self, concentrations, energies):
         '''
         Construct convex hull for (free) energy of mixing. The core function
-        the Convex Hull calculator in scipy, see
+        the Convex Hull calculator in SciPy, see
          http://docs.scipy.org/doc/scipy-dev/reference/\
             generated/scipy.spatial.ConvexHull.html
 
@@ -40,7 +40,7 @@ class ConvexHull(object):
             Energy/energy of mixing for each structure.
         '''
 
-        # Prepare data in format suitable for Scipy-ConvexHull
+        # Prepare data in format suitable for SciPy-ConvexHull
         concentrations = np.array(concentrations)
         energies = np.array(energies)
         points = np.column_stack((concentrations, energies))
@@ -128,7 +128,7 @@ class ConvexHull(object):
                                        concentration,
                                        method='linear')
 
-                # Prepare to delete if the energy was lowered. griddata gives
+                # Prepare to delete if the energy was lowered. `griddata` gives
                 # NaN if the concentration is outside the triangle formed by
                 # the three vertices. The result of the below comparison is
                 # then False, which is what we want.
