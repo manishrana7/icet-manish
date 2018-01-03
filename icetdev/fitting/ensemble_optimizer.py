@@ -36,13 +36,6 @@ class EnsembleOptimizer(BaseOptimizer):
         if True sampling will be carried out with replacement
     seed : int
         seed for pseudo random number generator
-
-    Attributes
-    ----------
-    parameters : numpy.ndarray
-        average of each parameter over the ensemble
-    parameters_stddev : numpy.ndarray
-        standard deviation of each parameter
     '''
 
     def __init__(self, fit_data, fit_method='least-squares', ensemble_size=50,
