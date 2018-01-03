@@ -115,7 +115,7 @@ class ConvexHull(object):
                 continue
 
             # The energy obtained as a linear combination of concentrations on
-            # the convex hull is "z coordinate" of the position on a
+            # the convex hull is the "z coordinate" of the position on a
             # (hyper)plane in the (number of independent concentrations +
             # 1)-dimensional (N-D) space. This plane is spanned by N points.
             # If there are more vertices on the convex hull, we need to loop
@@ -149,14 +149,15 @@ class ConvexHull(object):
 
         Parameters
         ----------
-        target_concentrations : ndarray of floats, shape (N, ndim)
-            Concentrations at N target points (ndim is the number of
-            independent concentrations needed to specify a point in
-            concentration space (2 for binaries, 3 for ternaries etc))
+        target_concentrations : list of tuples
+            Concentrations at target points. If there is one independent
+            concentration, a list of floats is fine. Otherwise, the
+            concentrations are given as a list of tuples, such as [(0.1, 0.2),
+            (0.3, 0.1), ...]
 
         Returns
         -------
-        ndarray of floats, size N
+        ndarray of floats
             Energies at the specified target_concentrations. If any
             concentration is outside the allowed range, NaN is returned.
         '''
