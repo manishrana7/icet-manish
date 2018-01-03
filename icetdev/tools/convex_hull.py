@@ -43,7 +43,7 @@ class ConvexHull(object):
         # Prepare data in format suitable for Scipy-ConvexHull
         concentrations = np.array(concentrations)
         energies = np.array(energies)
-        points = np.column_stack(concentrations, energies)
+        points = np.column_stack((concentrations, energies))
         self.dimensions = len(points[0]) - 1
 
         # Construct convex hull
