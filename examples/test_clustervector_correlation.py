@@ -5,13 +5,9 @@ clustervectors and asserts that none of the columns are highly correlated
 
 # Start import
 import random
-
 import numpy as np
-
 from ase.db import connect
-
-from icetdev.cluster_space import ClusterSpace
-from icetdev.structure import Structure
+from icetdev import ClusterSpace, Structure
 # End import
 
 

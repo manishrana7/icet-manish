@@ -3,8 +3,8 @@ Optimizer
 '''
 import numpy as np
 from sklearn.model_selection import train_test_split
-from icetdev.fitting.tools import ScatterData
-from icetdev.fitting.base_optimizer import BaseOptimizer
+from .tools import ScatterData
+from .base_optimizer import BaseOptimizer
 
 
 class Optimizer(BaseOptimizer):

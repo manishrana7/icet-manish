@@ -1,97 +1,10 @@
-import numpy as np
-import spglib as spglib
+import spglib
 
-from ase import Atoms
 from _icetdev import PermutationMap
-from icetdev.neighbor_list import get_neighbor_lists, NeighborList
-from icetdev.lattice_site import LatticeSite
-from icetdev.structure import Structure
-from icetdev.tools.geometry import get_scaled_positions
-
-
-def __vacuum_on_non_pbc(atoms):
-    '''
-    Add vacuum in non-periodic directions.
-
-    Parameters
-    ----------
-    atoms : ASE Atoms object
-        input structure
-
-    Returns
-    -------
-    ASE Atoms object
-        output structure
-    '''
-
-    vacuum_axis = []
-    for i, pbc in enumerate(atoms.pbc):
-        if not pbc:
-            vacuum_axis.append(i)
-
-    if len(vacuum_axis) > 0:
-        atoms.center(30, axis=vacuum_axis)
-    atoms.wrap()
-
-    return atoms
-
-
-def __get_primitive_structure(atoms):
-    '''
-    Determines primitive structure using spglib.
-
-    Parameters
-    ----------
-    atoms : ASE Atoms object
-        input structure
-
-    Returns
-    -------
-    ASE Atoms object
-        output structure
-    '''
-
-    atoms = __vacuum_on_non_pbc(atoms)
-    lattice, scaled_positions, numbers = spglib.standardize_cell(
-        atoms, to_primitive=True, no_idealize=True)
-    scaled_positions = [np.round(pos, 12) for pos in scaled_positions]
-    atoms_prim = Atoms(scaled_positions=scaled_positions,
-                       numbers=numbers, cell=lattice, pbc=atoms.pbc)
-    atoms_prim.wrap()
-    return atoms_prim
-
-
-def vacuum_on_non_pbc(atoms):
-    '''
-    Returns atoms with non pbc after adding vacuum along non
-    periodic directions
-
-    '''
-    atoms = __vacuum_on_non_pbc(atoms)
-    return atoms
-
-
-def __get_fractional_positions_from_neigborlist(structure, neighbor_list):
-    '''
-    Returns the fractional positions in structure from the neighbors in the
-    neighbor list.
-    '''
-    neighbor_positions = []
-    fractional_positions = []
-    lattice_site = LatticeSite(0, [0, 0, 0])
-    for i in range(len(neighbor_list)):
-        lattice_site.index = i
-        position = structure.get_position(lattice_site)
-        neighbor_positions.append(position)
-        for neighbor in neighbor_list.get_neighbors(i):
-            position = structure.get_position(neighbor)
-            neighbor_positions.append(position)
-    if len(neighbor_positions) > 0:
-        fractional_positions = get_scaled_positions(
-            np.array(neighbor_positions),
-            structure.cell, wrap=False,
-            pbc=structure.pbc)
-    return fractional_positions
+from .neighbor_list import get_neighbor_lists, NeighborList
+from .structure import Structure
+from ..tools.geometry import (get_primitive_structure,
+                              get_fractional_positions_from_neigborlist)
 
 
 def permutation_matrices_from_atoms(atoms, cutoffs,
@@ -123,7 +36,7 @@ def permutation_matrices_from_atoms(atoms, cutoffs,
 
     atoms_prim = atoms
     if find_prim:
-        atoms_prim = __get_primitive_structure(atoms)
+        atoms_prim = get_primitive_structure(atoms)
 
     if verbosity >= 3:
         print('size of atoms_prim {}'.format(len(atoms_prim)))
@@ -142,7 +55,7 @@ def permutation_matrices_from_atoms(atoms, cutoffs,
         if verbosity >= 3:
             print('building permutation map {}/{}'.format(i,
                                                           len(neighbor_lists)))
-        frac_positions = __get_fractional_positions_from_neigborlist(
+        frac_positions = get_fractional_positions_from_neigborlist(
             prim_structure, neighbor_list)
         if verbosity >= 3:
             print('number of positions: {}'.format(len(frac_positions)))
@@ -184,7 +97,7 @@ def permutation_matrix_from_atoms(atoms, cutoff,
 
     atoms_prim = atoms
     if find_prim:
-        atoms_prim = __get_primitive_structure(atoms)
+        atoms_prim = get_primitive_structure(atoms)
 
     if verbosity >= 3:
         print('size of atoms_prim {}'.format(len(atoms_prim)))
@@ -201,7 +114,7 @@ def permutation_matrix_from_atoms(atoms, cutoff,
     neighbor_list.build(prim_structure)
 
     # get fractional positions for neighbor_list
-    frac_positions = __get_fractional_positions_from_neigborlist(
+    frac_positions = get_fractional_positions_from_neigborlist(
         prim_structure, neighbor_list)
     if verbosity >= 3:
         print('number of positions: {}'.format(len(frac_positions)))

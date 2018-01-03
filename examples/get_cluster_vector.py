@@ -3,9 +3,7 @@ This example demonstrates how to construct cluster vectors.
 '''
 # Start import
 from ase.build import bulk
-
-from icetdev.cluster_space import ClusterSpace
-
+from icetdev import ClusterSpace
 # End import
 
 # Create a prototype structure, decide which additional elements to populate

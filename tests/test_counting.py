@@ -1,11 +1,19 @@
-from icetdev import orbit_list
-from ase.db import connect
-from icetdev.neighbor_list import get_neighbor_lists
-from icetdev.orbit_list import create_orbit_list
-from icetdev.cluster_counts import ClusterCounts
-from icetdev import Structure
+'''
+This is not a well written test.
+
+Todo
+----
+* replace with proper unit test(s)
+'''
+
 import random
 import numpy as np
+
+from ase.db import connect
+from icetdev import Structure
+from icetdev.core.neighbor_list import get_neighbor_lists
+from icetdev.core.cluster_counts import ClusterCounts
+from icetdev.core import orbit_list
 
 
 def get_equivalent_clustermap_key(key1, clustermap_keys, tol=1e-3):
@@ -199,7 +207,8 @@ def test_no_symmetry_vs_symmetry_count(atoms_primitive, atoms_tag,
     cluster_map_no_symmetry = clusterCount_no_symmetry.get_cluster_counts()
 
     ''' Get orbit list symmetry case '''
-    orbit_list_symmetry = create_orbit_list(structure, cutoffs, verbosity=0)
+    orbit_list_symmetry = orbit_list.create_orbit_list(structure, cutoffs,
+                                                       verbosity=0)
     orbit_list_symmetry.sort()
 
     ''' Set up cluster_count and count '''

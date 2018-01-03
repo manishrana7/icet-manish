@@ -3,9 +3,9 @@ Test structure numeration by checking that it yields the correct
 number of structure.
 '''
 
-from icetdev.tools import enumerate_structures
 from ase.build import bulk
 from ase import Atom
+from icetdev.tools import enumerate_structures
 
 
 def count_structures(atoms, sizes, species, correct_count, tag):

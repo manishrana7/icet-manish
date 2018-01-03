@@ -1,8 +1,8 @@
-from icetdev import Structure
-from _icetdev import NeighborList
+import spglib as spg
 from ase.neighborlist import NeighborList as ASENeighborList
 from ase.db import connect
-import spglib as spg
+from icetdev import Structure
+from _icetdev import NeighborList
 
 '''
 Include some docstring here explaining the current test
@@ -10,6 +10,10 @@ Include some docstring here explaining the current test
 Raises
 ------
 AssertionError: if
+
+Todo
+----
+complete docstring
 '''
 
 
