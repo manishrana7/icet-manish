@@ -1,7 +1,7 @@
+import itertools
 import numpy as np
 from scipy.spatial import ConvexHull as ConvexHullScipy
 from scipy.interpolate import griddata
-import itertools
 
 
 class ConvexHull(object):
@@ -14,9 +14,9 @@ class ConvexHull(object):
         Number of independent concentrations needed to specify a point in
         concentration space (1 for binaries, 2 for ternaries etc)
     concentrations : ndarray of floats, size (N, dimensions)
-        Concentration of structures on the convex hull.
+        Concentration of the structures on the convex hull.
     energies : ndarray of floats, size N
-        Energy of structures on the convex hull.
+        Energy of the structures on the convex hull.
     structures : list of ints
         Indices of structures that constitute the convex hull (indices are
         defined by the order their concentrations and energies are feeded when
@@ -25,8 +25,9 @@ class ConvexHull(object):
 
     def __init__(self, points):
         """
-        Construct convex hull for (free) energy of mixing,
-        see http://docs.scipy.org/doc/scipy-dev/reference/\
+        Construct convex hull for (free) energy of mixing. The core function
+        the Convex Hull calculator in scipy, see
+         http://docs.scipy.org/doc/scipy-dev/reference/\
             generated/scipy.spatial.ConvexHull.html
 
         Parameters
@@ -74,10 +75,10 @@ class ConvexHull(object):
         self.energies = energies
         self.structures = hull.vertices
 
-        # Remove points that are above "pure element line"
-        self.remove_points_above_pure_elements()
+        # Remove points that are above "pure element plane"
+        self.remove_points_above_tie_plane()
 
-    def remove_points_above_pure_elements(self, tol=1e-6):
+    def remove_points_above_tie_plane(self, tol=1e-6):
         '''
         Remove all points on the convex hull that correspond to maximum rather
         than minimum energy.
@@ -143,7 +144,7 @@ class ConvexHull(object):
         self.energies = np.delete(self.energies, to_delete, 0)
         self.structures = list(np.delete(self.structures, to_delete, 0))
 
-    def get_convex_hull_at_concentrations(self, target_concentrations):
+    def get_energy_at_convex_hull(self, target_concentrations):
         '''
         Get energy of convex hull at specified concentrations.
 
@@ -165,5 +166,6 @@ class ConvexHull(object):
             assert len(target_concentrations[0]) == self.dimensions
 
         hull_energies = griddata(self.concentrations, self.energies,
-                                 target_concentrations, method='linear')
+                                 np.array(target_concentrations),
+                                 method='linear')
         return hull_energies
