@@ -30,20 +30,26 @@ class CrossValidationEstimator(BaseOptimizer):
     '''
 
     def __init__(self, fit_data, fit_method='least-squares',
-                 validation_method='k-fold', n_splits=10, seed=42, **kwargs):
+                 validation_method='k-fold', ensemble_size=10,
+                 seed=42, **kwargs):
 
         BaseOptimizer.__init__(self, fit_data, fit_method, seed)
 
         if validation_method not in validation_methods.keys():
-            raise ValueError('Validation method not available')
+            msg = ['Validation method not available']
+            msg += ['Please choose one of the following:']
+            for key in validation_methods:
+                msg += [' * ' + key]
+            raise ValueError('\n'.join(msg))
         self._validation_method = validation_method
-        self._n_splits = n_splits
+        self._ensemble_size = ensemble_size
 
         self._set_kwargs(kwargs)
 
         # data set splitting object
         self._splitter = validation_methods[validation_method](
-            n_splits=self.n_splits, random_state=seed, **self._split_kwargs)
+            ensemble_size=self.ensemble_size, random_state=seed,
+            **self._split_kwargs)
 
     def train(self):
         ''' Carry out cross-validation and final fit'''
@@ -100,7 +106,7 @@ class CrossValidationEstimator(BaseOptimizer):
         s = []
         s.append('Validation method: {}'.format(self.validation_method))
         s.append(super().__str__())
-        s.append('N_splits: {}'.format(self.n_splits))
+        s.append('Ensemble size: {}'.format(self.ensemble_size))
         return '\n'.join(s)
 
     @property
@@ -109,9 +115,9 @@ class CrossValidationEstimator(BaseOptimizer):
         return self._validation_method
 
     @property
-    def n_splits(self):
+    def ensemble_size(self):
         ''' str : number of splits (folds) for cross validation calculation '''
-        return self._n_splits
+        return self._ensemble_size
 
     @property
     def rmse_train_final(self):
