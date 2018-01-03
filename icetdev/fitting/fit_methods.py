@@ -123,7 +123,7 @@ def fit_lasso_optimize_alpha(X, y, alphas=None, fold=10, fit_intercept=False,
 
     # Alpha grid search
     lasso = Lasso(fit_intercept=fit_intercept, **kwargs)
-    kf = KFold(n_splits=fold, shuffle=False)
+    kf = KFold(ensemble_size=fold, shuffle=False)
 
     RMSE_path = []
     for i, alpha in enumerate(alphas):

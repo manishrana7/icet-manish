@@ -26,7 +26,7 @@ class EnsembleOptimizer(BaseOptimizer):
     fit_method : str
         method to be used for training; possible choice are
         "least-squares", "lasso", "bayesian-ridge", "ardr"
-    n_splits : int
+    ensemble_size : int
         number of fits in the ensemble
     train_fraction : float
         fraction of input data (=rows) to be used for training
@@ -38,12 +38,12 @@ class EnsembleOptimizer(BaseOptimizer):
         seed for pseudo random number generator
     '''
 
-    def __init__(self, fit_data, fit_method='least-squares', n_splits=50,
+    def __init__(self, fit_data, fit_method='least-squares', ensemble_size=50,
                  train_fraction=0.7, test_fraction=None,
                  bootstrap=True, seed=42, **kwargs):
 
         BaseOptimizer.__init__(self, fit_data, fit_method, seed)
-        self._n_splits = n_splits
+        self._ensemble_size = ensemble_size
         self._training_set_size = int(np.round(train_fraction * self._Nrows))
         if test_fraction is not None:
             self._testing_set_size = int(np.round(test_fraction * self._Nrows))
@@ -69,7 +69,7 @@ class EnsembleOptimizer(BaseOptimizer):
         parameters_list = []
         rmse_training_set_list, rmse_testing_set_list = [], []
         training_set_list, testing_set_list = [], []
-        for _ in range(self.n_splits):
+        for _ in range(self.ensemble_size):
             # construct training and testing sets
             rows = np.random.choice(
                 self._Nrows, self.training_set_size + self.testing_set_size,
@@ -110,7 +110,7 @@ class EnsembleOptimizer(BaseOptimizer):
             matrix of fit errors where `N` is the number of target values and
             `M` is the number of fits (i.e., the size of the ensemble)
         '''
-        error_matrix = np.zeros((self._Nrows, self.n_splits))
+        error_matrix = np.zeros((self._Nrows, self.ensemble_size))
         for i, parameters in enumerate(self.parameters_set):
             error_matrix[:, i] = np.dot(self._A, parameters) - self._y
         return error_matrix
@@ -143,7 +143,7 @@ class EnsembleOptimizer(BaseOptimizer):
     @property
     def ensemble_size(self):
         ''' int : number of rounds of training '''
-        return self._n_splits
+        return self._ensemble_size
 
     @property
     def rmse_training_set(self):
