@@ -15,7 +15,7 @@ from icetdev.structure import Structure
 
 
 # Function for generating random structures
-def generateRandomStructure(atoms_prim, subelements, repeat=8):
+def generate_random_structure(atoms_prim, subelements, repeat=8):
     """
     Generate a random structure with atoms_prim as a base
     and fill it randomly with elements in subelements
@@ -31,13 +31,13 @@ def generateRandomStructure(atoms_prim, subelements, repeat=8):
 
 
 # Function for generating cluster vectors
-def generateCVSet(n, atoms_prim, subelements, clusterspace, repeat=8):
+def generate_cv_set(n, atoms_prim, subelements, clusterspace, repeat=8):
     """
     Generate a set of clustervectors from a clusterspace
     """
     clustervectors = []
     for i in range(n):
-        conf = generateRandomStructure(atoms_prim, subelements, repeat)
+        conf = generate_random_structure(atoms_prim, subelements, repeat)
         conf = Structure().from_atoms(conf)
         cv = clusterspace.get_cluster_vector(conf)
         clustervectors.append(cv)
@@ -46,7 +46,7 @@ def generateCVSet(n, atoms_prim, subelements, clusterspace, repeat=8):
 
 
 # Function for calculating column correlations
-def getColumnCorrelation(i, j, cv_matrix):
+def get_column_correlation(i, j, cv_matrix):
     """
     Returns the correlation between column i and j
 
@@ -62,7 +62,7 @@ def getColumnCorrelation(i, j, cv_matrix):
 
 
 # Function for asserting that columns are not correlated
-def assertNoCorrelation(cvs, tol=0.99):
+def assert_no_correlation(cvs, tol=0.99):
     """
     Check that no column in cvs are above tolerance
     """
@@ -74,9 +74,10 @@ def assertNoCorrelation(cvs, tol=0.99):
         for j in range(len(cvs[0])):
             if j <= i:
                 continue
-            corr = getColumnCorrelation(i, j, cvs_matrix)
+            corr = get_column_correlation(i, j, cvs_matrix)
             assert corr < tol, "columns {} and {} were correletated with"\
                 " {}".format(i, j, corr)
+
 
 # Create a list of the subelements that shall be considered and set the
 # cutoff distance for singlets to 2.0 Å.
@@ -95,9 +96,9 @@ for row in db.select("id<=10"):
                                                                 atoms_id,
                                                                 cutoffs))
     atoms_row.wrap()  # Wrap all atoms into the unit cell
-    clusterspace = ClusterSpace(atoms_row, cutoffs, subelements)
+    cluster_space = ClusterSpace(atoms_row, cutoffs, subelements)
 
-    cvs = generateCVSet(20, atoms_row, subelements, clusterspace, repeat)
-    assertNoCorrelation(cvs)
+    cvs = generate_cv_set(20, atoms_row, subelements, cluster_space, repeat)
+    assert_no_correlation(cvs)
     print("size of atoms {}. len of cv {}".format(
         len(atoms_row.repeat(repeat)), len(cvs[0])))

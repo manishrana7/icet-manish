@@ -17,8 +17,8 @@ subelements = ['Re', 'Ti', 'W', 'Mo']
 cutoffs = [10.0, 7.0, 5.0]
 
 # Generate and print the cluster space.
-clusterspace = ClusterSpace(prototype, cutoffs, subelements)
-print(clusterspace)
+cluster_space = ClusterSpace(prototype, cutoffs, subelements)
+print(cluster_space)
 
 # Extract and print additional information regarding the singlets.
 print('\nSinglets:')

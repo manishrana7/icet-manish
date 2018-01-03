@@ -18,7 +18,7 @@ addition, one needs the methods :func:`get_singlet_info
 <icetdev.cluster_space.get_singlet_info>` and :func:`view_singlets
 <icetdev.cluster_space.view_singlets>` for extracting specific details
 regarding the singlets. Moreover, the `ASE <https://wiki.fysik.dtu.dk/ase>`_
-function :func:`ase.build.bulk` will be needed for construcring structures.
+function :func:`ase.build.bulk` will be needed for constructing structures.
 
 .. literalinclude:: ../../../../examples/get_cluster_space_info.py
    :start-after: # Import modules

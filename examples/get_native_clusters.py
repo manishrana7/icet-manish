@@ -17,7 +17,7 @@ cutoffs = [10.0]
 subelements = ["Si", "Ge"]
 
 # Initiate the cluster space.
-clusterspace = ClusterSpace(conf, cutoffs, subelements)
+cluster_space = ClusterSpace(conf, cutoffs, subelements)
 
 # Prepare 2x2x1 supercells, populate these, randomly, with Si and Ge atoms.
 supercell = bulk("Si").repeat([2, 2, 1])
@@ -26,7 +26,7 @@ for atom in supercell:
 structure = Structure.from_atoms(supercell)
 
 # Extract and print the native clusters for the supercell.
-nativeclusters = clusterspace.get_native_clusters(structure)
+native_clusters = cluster_space.get_native_clusters(structure)
 print(structure)
 print("\nNative cluster counts:")
-nativeclusters.print()
+native_clusters.print()

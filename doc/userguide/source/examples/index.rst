@@ -16,6 +16,6 @@ showcase different features and modes of usage.
    get_cluster_space_info.rst
    get_cluster_vector.rst
    get_native_clusters.rst
-   get_neighborlist.rst
-   get_permutationmap.rst
-   test_clustervector_correlation.rst
+   get_neighbor_list.rst
+   get_permutation_map.rst
+   test_cluster_vector_correlation.rst

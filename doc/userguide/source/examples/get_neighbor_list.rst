@@ -1,4 +1,4 @@
-.. _example_get_neighborlist:
+.. _example_get_neighbor_list:
 .. highlight:: python
 .. index::
    single: Tutorial; Neighbor list
@@ -18,7 +18,7 @@ well as for the :func:`get_neighbor_lists
 <https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.build.bulk` will be
 needed to generate the structures.
 
-.. literalinclude:: ../../../../examples/get_neighborlist.py
+.. literalinclude:: ../../../../examples/get_neighbor_list.py
    :start-after: # Import modules
    :end-before: # Generate an icet
 
@@ -28,7 +28,7 @@ Generate prototype Al supercell
 The next step is to build a prototype structure, in the form of a aluminum
 :math:`2\times2\times2` supercell.
 
-.. literalinclude:: ../../../../examples/get_neighborlist.py
+.. literalinclude:: ../../../../examples/get_neighbor_list.py
    :start-after: # Generate an icet
    :end-before: # Construct a list
 
@@ -43,7 +43,7 @@ above, and a :class:`list` of cutoffs as input arguments. One should note that
 the output from this functions is a :class:`list` that contains one
 :class:`NeighborList <icetdev.neighbor_list.NeighborList>` object per cutoff.
 
-.. literalinclude:: ../../../../examples/get_neighborlist.py
+.. literalinclude:: ../../../../examples/get_neighbor_list.py
    :start-after: # Construct a list
    :end-before: # Loop over all
 
@@ -62,7 +62,7 @@ offsets are attributes of the objects in the :class:`NeighborList
 it is calculated using the :meth:`NeighborList.get_distance` method, which
 takes the indices and offsets of the atom and the neighbor as input arguments.
 
-.. literalinclude:: ../../../../examples/get_neighborlist.py
+.. literalinclude:: ../../../../examples/get_neighbor_list.py
    :start-after: # Loop over all
 
 These lines should give the following (partial) output::
@@ -105,6 +105,6 @@ Source code
     .. container:: header
 
        The complete source code is available in
-       ``examples/get_neighborlist.py``
+       ``examples/get_neighbor_list.py``
 
-    .. literalinclude:: ../../../../examples/get_neighborlist.py
+    .. literalinclude:: ../../../../examples/get_neighbor_list.py

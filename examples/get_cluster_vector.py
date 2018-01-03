@@ -14,16 +14,16 @@ cutoffs = [5.0, 5.0, 5.0]
 subelements = ["Si", "Ge"]
 
 # Initiate and print the cluster space.
-clusterspace = ClusterSpace(conf, cutoffs, subelements)
-print(clusterspace)
+cluster_space = ClusterSpace(conf, cutoffs, subelements)
+print(cluster_space)
 
 # Generate and print the cluster vector for a pure Si 2x2x2 supercell.
-supercell = bulk("Si").repeat(2)
-cv = clusterspace.get_cluster_vector(supercell)
-print(cv)
+supercell_1 = bulk("Si").repeat(2)
+cluster_vector_1 = cluster_space.get_cluster_vector(supercell_1)
+print(cluster_vector_1)
 
 # Generate and print the cluster vector for a mixed Si-Ge 2x2x2 supercell
 supercell_2 = bulk("Si").repeat(2)
 supercell_2[0].symbol = "Ge"
-cv_2 = clusterspace.get_cluster_vector(supercell_2)
-print(cv_2)
+cluster_vector_2 = cluster_space.get_cluster_vector(supercell_2)
+print(cluster_vector_2)
