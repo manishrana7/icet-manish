@@ -6,7 +6,7 @@ from scipy.interpolate import griddata
 
 class ConvexHull(object):
     '''
-    Convex hull of concentration and energies (or other quantities).
+    Convex hull of concentration and energies.
 
     Attributes
     ----------
@@ -23,8 +23,8 @@ class ConvexHull(object):
         initializing the ConvexHull object).
     '''
 
-    def __init__(self, points):
-        """
+    def __init__(self, concentrations, energies):
+        '''
         Construct convex hull for (free) energy of mixing. The core function
         the Convex Hull calculator in scipy, see
          http://docs.scipy.org/doc/scipy-dev/reference/\
@@ -32,21 +32,18 @@ class ConvexHull(object):
 
         Parameters
         ----------
-        points : list of tuples
-            Concentrations and energies as [((c1, c2), e), ...] where (c1, c2)
-            are independent concentrations needed to specify a point in
-            concentration space, and e is the corresponding energy. In a
-            binary system where only one concentration is needed, the format
-            [(c, e), ...] is fine.
-        """
+        concentrations : list of lists of floats
+            Concentrations for each structure listed as [[c1, c2], [c1, c2],
+            ...]. For binaries, in which case there is only one independent
+            concentration, the format [c1, c2, c3, ...] works fine.
+        energies : list of floats
+            Energy/energy of mixing for each structure.
+        '''
 
         # Prepare data in format suitable for Scipy-ConvexHull
-        if isinstance(points[0][0], tuple):
-            points = np.array([np.array(point[0] + (point[1],))
-                               for point in points])
-        else:
-            points = np.array([np.array(point) for point in points])
-
+        concentrations = np.array(concentrations)
+        energies = np.array(energies)
+        points = np.column_stack(concentrations, energies)
         self.dimensions = len(points[0]) - 1
 
         # Construct convex hull
@@ -150,11 +147,11 @@ class ConvexHull(object):
 
         Parameters
         ----------
-        target_concentrations : list of tuples
+        target_concentrations : list of lists
             Concentrations at target points. If there is one independent
             concentration, a list of floats is fine. Otherwise, the
-            concentrations are given as a list of tuples, such as [(0.1, 0.2),
-            (0.3, 0.1), ...]
+            concentrations are given as a list of lists, such as [[0.1, 0.2],
+            [0.3, 0.1], ...]
 
         Returns
         -------
