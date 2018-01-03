@@ -98,22 +98,24 @@ class ConvexHull:
         # rather than minimize energy.
         to_delete = []
         for i, concentration in enumerate(self.concentrations):
-            # The points on the convex concentration should always be
+            # The points on the convex concentration hull should always be
             # included, so skip them.
             if i in vertices:
                 continue
 
-            # If there are 2 or 3 vertices on the convex concentration hull,
-            # this loop will simply yield the same array of vertices If there
-            # are more vertices, we need to check the mixed energy against all
-            # combinations of three "pure elements" (concentrations on the
-            # convex concentration hull).
-            for triangle in itertools.combinations(vertices,
-                                                   min(len(vertices), 3)):
+            # The energy obtained as a linear combination of concentrations on
+            # the convex hull is "z coordinate" of the position on a
+            # (hyper)plane in the (number of independent concentrations +
+            # 1)-dimensional (N-D) space. This plane is spanned by N points.
+            # If there are more vertices on the convex hull, we need to loop
+            # over all combinations of N vertices.
+            for plane in itertools.combinations(vertices,
+                                                   min(len(vertices),
+                                                       self.dimensions+1)):
                 # Calculate energy that would be gotten with pure elements
                 # with ascribed concentration.
-                energy_pure = griddata(self.concentrations[vertices],
-                                       self.energies[vertices],
+                energy_pure = griddata(self.concentrations[np.array(plane)],
+                                       self.energies[np.array(plane)],
                                        concentration,
                                        method='linear')
 
@@ -123,6 +125,7 @@ class ConvexHull:
                 # then False, which is what we want.
                 if energy_pure < self.energies[i] - tol:
                     to_delete.append(i)
+                    break
 
         # Finally remove all points
         print(to_delete)
