@@ -106,7 +106,7 @@ class CrossValidationEstimator(BaseOptimizer):
         s = []
         s.append('Validation method: {}'.format(self.validation_method))
         s.append(super().__str__())
-        s.append('N_splits: {}'.format(self.ensemble_size))
+        s.append('Ensemble size: {}'.format(self.ensemble_size))
         return '\n'.join(s)
 
     @property

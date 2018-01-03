@@ -120,9 +120,9 @@ class BaseOptimizer:
         '''
         info = dict()
         info['parameters'] = self.parameters
-        info['fit method'] = self.fit_method
-        info['number of target values'] = self._Nrows
-        info['number of parameters'] = self._Ncols
+        info['fit-method'] = self.fit_method
+        info['number-of-target-values'] = self._Nrows
+        info['number-of-parameters'] = self._Ncols
         return info
 
     def __str__(self):

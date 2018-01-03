@@ -148,7 +148,7 @@ class Optimizer(BaseOptimizer):
     def _get_rows_from_indices(self, training_set, testing_set):
         ''' Gets row via indices '''
         if training_set is None and testing_set is None:
-            raise ValueError('Both training_set and testing_set are None')
+            raise ValueError('Both training and test set are None')
         elif testing_set is None:
             testing_set = [i for i in range(self._Nrows)
                            if i not in training_set]
