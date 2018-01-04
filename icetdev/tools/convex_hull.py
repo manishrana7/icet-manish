@@ -1,6 +1,6 @@
 import itertools
 import numpy as np
-from scipy.spatial import ConvexHull as ConvexHullScipy
+from scipy.spatial import ConvexHull as ConvexHullSciPy
 from scipy.interpolate import griddata
 
 
@@ -98,7 +98,7 @@ class ConvexHull(object):
             vertices.append(np.argmax(self.concentrations))
             vertices = np.array(vertices)
         else:
-            concentration_hull = ConvexHullScipy(self.concentrations)
+            concentration_hull = ConvexHullSciPy(self.concentrations)
             vertices = concentration_hull.vertices
 
         # Remove all points of the convex energy hull that have an energy that
@@ -167,3 +167,53 @@ class ConvexHull(object):
                                  np.array(target_concentrations),
                                  method='linear')
         return hull_energies
+
+    def extract_structures_close(self, concentrations, energies,
+                                 energy_tolerance, structures=None):
+        '''
+
+        Extract structures that are sufficiently close in energy to the convex
+        hull.
+
+        Parameters
+        ----------
+        concentrations : list of lists
+            Concentrations of candidate structures. If there is one
+            independent concentration, a list of floats is fine. Otherwise,
+            the concentrations are given as a list of lists, such as `[[0.1,
+            0.2], [0.3, 0.1], ...]`
+        energies : list of floats
+            Energies of candidate structures.
+        energy_tolerance : float
+            Every structure that has an energy within `energy_tolerance` from
+            the convex hull at its concentration will be returned.
+        structures : list
+            List of candidate `ASE Atoms` or other objects corresponding to
+            the `concentrations` and `energies`. The same list will be
+            returned, but with the objects too far from the convex hull
+            removed. If `None`, a list of indices is returned instead.
+
+        Returns
+        -------
+        list
+            The members of structures whose energy is within energy_tolerance
+            from the convex hull. If `structures` is left empty, a list of
+            indices corresponding to the order in `concentrations`/`energies`
+            is returned instead.
+        '''
+        number_of_candidates = len(concentrations)
+        assert len(energies) == number_of_candidates
+        if structures is None:
+            structures = list(range(number_of_candidates))
+        assert len(structures) == number_of_candidates
+
+        # Calculate energy at convex hull for specified concentrations
+        hull_energies = self.get_energy_at_convex_hull(concentrations)
+
+        # Check which ones were close enough
+        close_to_hull_structures = []
+        for i in range(number_of_candidates):
+            if energies[i] <= hull_energies[i] + energy_tolerance:
+                close_to_hull_structures.append(structures[i])
+
+        return close_to_hull_structures
