@@ -23,9 +23,9 @@ def build_many_body_neighbor_list_cpp(structure, order, cutoff):
     neighbor_lists = []
 
     for co in cutoffs:
-        nl = NeighborList(co)           
+        nl = NeighborList(co)
         nl.build(structure)
-        neighbor_lists.append(nl)     
+        neighbor_lists.append(nl)
 
     mbnl = ManyBodyNeighborList()
     for i in range(len(structure)):
@@ -44,8 +44,8 @@ def build_many_body_neighbor_list_python(atoms, order, cutoff):
     cutoffs = (order - 1)*[cutoff]
     neighbor_lists = []
     for co in cutoffs:
-        ase_nl.build(structure)
-        neighbor_lists.append(ase_nl)     
+        ase_nl.update(structure)
+        neighbor_lists.append(ase_nl)
 
     bothways = False
     for i in range(len(atoms)):
