@@ -13,21 +13,22 @@ Todo
 '''
 
 import numpy as np
-from ..io.logging import icetdev_logger
+from ..io.logging import logger
 from .tools import compute_rmse
 try:
     from sklearn.linear_model import Lasso, BayesianRidge, ARDRegression
     from sklearn.model_selection import KFold
     # arrangement of logger assignments is owed to pep8 requirements
-    logger = icetdev_logger.getChild('fit_methods')
+    logger = logger.getChild('fit_methods')
 except Exception:
-    logger = icetdev_logger.getChild('fit_methods')
+    logger = logger.getChild('fit_methods')
     logger.warning('Failed to import scitkit-learn;'
                    ' several optimizers will fail')
 
 
 def fit_least_squares(X, y):
-    '''Return the least-squares solution `a` to the linear problem `Xa=y`.
+    '''
+    Return the least-squares solution `a` to the linear problem `Xa=y`.
 
     This function is a wrapper to the `linalg.lstsq` function in NumPy.
 
@@ -49,7 +50,8 @@ def fit_least_squares(X, y):
 
 
 def fit_lasso(X, y, alpha=None, fit_intercept=False, **kwargs):
-    '''Return the solution `a` to the linear problem `Xa=y` obtained by using
+    '''
+    Return the solution `a` to the linear problem `Xa=y` obtained by using
     the LASSO method as implemented in scitkit-learn.
 
     LASSO optimizes the following problem::
@@ -73,7 +75,7 @@ def fit_lasso(X, y, alpha=None, fit_intercept=False, **kwargs):
     Returns
     ----------
     results : dict
-        dict containing parameters
+        dictionary containing parameters
     '''
     if alpha is None:
         return fit_lasso_optimize_alpha(X, y, fit_intercept=fit_intercept,
@@ -88,7 +90,8 @@ def fit_lasso(X, y, alpha=None, fit_intercept=False, **kwargs):
 
 def fit_lasso_optimize_alpha(X, y, alphas=None, fold=10, fit_intercept=False,
                              verbose=False, **kwargs):
-    '''Return the solution `a` to the linear problem `Xa=y` obtained by using
+    '''
+    Return the solution `a` to the linear problem `Xa=y` obtained by using
     the LASSO method as implemented in scitkit-learn.
 
     The `alpha` parameter is optimized via grid search and the test score is
@@ -113,7 +116,7 @@ def fit_lasso_optimize_alpha(X, y, alphas=None, fold=10, fit_intercept=False,
     Returns
     ----------
     results : dict
-        dict containing parameters,
+        dictionary containing parameters,
         alpha-path (all tested alpha values),
         rmse-path (rmse for validation set for each alpha),
         alpha-optimal (the alpha value with lowest rmse validation)
@@ -124,7 +127,7 @@ def fit_lasso_optimize_alpha(X, y, alphas=None, fold=10, fit_intercept=False,
 
     # Alpha grid search
     lasso = Lasso(fit_intercept=fit_intercept, **kwargs)
-    kf = KFold(ensemble_size=fold, shuffle=False)
+    kf = KFold(n_splits=fold, shuffle=False)
 
     RMSE_path = []
     for i, alpha in enumerate(alphas):
@@ -157,7 +160,8 @@ def fit_lasso_optimize_alpha(X, y, alphas=None, fold=10, fit_intercept=False,
 
 
 def fit_bayesian_ridge(X, y, fit_intercept=False, **kwargs):
-    '''Return the solution `a` to the linear problem `Xa=y` obtained by using
+    '''
+    Return the solution `a` to the linear problem `Xa=y` obtained by using
     Bayesian ridge regression as implemented in scitkit-learn.
 
     Parameters
@@ -183,7 +187,8 @@ def fit_bayesian_ridge(X, y, fit_intercept=False, **kwargs):
 
 
 def fit_ardr(X, y, threshold_lambda=1e8, fit_intercept=False, **kwargs):
-    '''Return the solution `a` to the linear problem `Xa=y` obtained by using
+    '''
+    Return the solution `a` to the linear problem `Xa=y` obtained by using
     the automatic relevance determination regression (ARDR) method as
     implemented in scitkit-learn.
 
@@ -201,7 +206,7 @@ def fit_ardr(X, y, threshold_lambda=1e8, fit_intercept=False, **kwargs):
     Returns
     ----------
     results : dict
-        dict containing parameters, covariance matrix
+        dictionary containing parameters, covariance matrix
     '''
     ardr = ARDRegression(threshold_lambda=threshold_lambda,
                          fit_intercept=fit_intercept, **kwargs)

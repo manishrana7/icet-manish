@@ -11,16 +11,19 @@ class Optimizer(BaseOptimizer):
     '''
     Optimizer for single `Ax = y` fit.
 
+    One has to specify either `train_fraction`/`test_fraction` or
+    `training_set`/`test_set` If either `training_set` or `test_set` (or both)
+    is specified the fractions will be ignored.
 
     Parameters
     ----------
-    fit_data : tuple of (N, M) numpy.ndarray and (N) numpy.ndarray
+    fit_data : tuple of NumPy (N, M) array and NumPy (N) array
         the first element of the tuple represents the fit matrix `A`
         whereas the second element represents the vector of target
         values `y`; here `N` (=rows of `A`, elements of `y`) equals the number
         of target values and `M` (=columns of `A`) equals the number of
         parameters
-    fit_method : str
+    fit_method : string
         method to be used for training; possible choice are
         "least-squares", "lasso", "bayesian-ridge", "ardr"
     train_fraction : float
@@ -56,8 +59,8 @@ class Optimizer(BaseOptimizer):
                          training_set, test_set)
 
         # will be populate once running train
-        self._rmse_training_set = None
-        self._rmse_test_set = None
+        self._rmse_training = None
+        self._rmse_test = None
         self.training_scatter_data = None
         self.test_scatter_data = None
 
@@ -77,32 +80,33 @@ class Optimizer(BaseOptimizer):
 
         self._fit_results = self._optimizer_function(A_train, y_train,
                                                      **self._kwargs)
-        self._rmse_training_set = self.compute_rmse(A_train, y_train)
+        self._rmse_training = self.compute_rmse(A_train, y_train)
         self.training_scatter_data = ScatterData(y_train,
                                                  self.predict(A_train))
-        print('Train RMSE  {:5.5f}'.format(self.rmse_training_set))
+        print('Train RMSE  {:5.5f}'.format(self.rmse_training))
 
         # perform validation
         if self.test_set is not None:
             A_test = self._A[self.test_set, :]
             y_test = self._y[self.test_set]
-            self._rmse_test_set = self.compute_rmse(A_test, y_test)
+            self._rmse_test = self.compute_rmse(A_test, y_test)
             self.test_scatter_data = ScatterData(y_test,
                                                  self.predict(A_test))
-            print('Test  RMSE  {:5.5f}'.format(self.rmse_test_set))
+            print('Test  RMSE  {:5.5f}'.format(self.rmse_test))
         else:
-            self._rmse_test_set = None
+            self._rmse_test = None
             self.test_scatter_data = None
             print('Test  RMSE  NaN')
         print('{s:-^{n}}'.format(s='Done', n=45))
 
     def _setup_rows(self, train_fraction, test_fraction, training_set,
                     test_set):
-        ''' Setup train and test rows depending on which arguments are
-        specified and which are None.
+        '''
+        Set up training and test rows depending on which arguments are
+        specified.
 
-        If `training_set` and `test_set` are `None` then `fractions` is
-        used.
+        If `training_set` and `test_set` are `None` then `train_fraction` and
+        `test_fraction` are used.
         '''
 
         if training_set is None and test_set is None:
@@ -158,15 +162,16 @@ class Optimizer(BaseOptimizer):
         return np.array(training_set), np.array(test_set)
 
     def get_info(self):
-        ''' Get comprehensive information concerning the optimization process.
+        '''
+        Get comprehensive information concerning the optimization process.
 
         Returns
         -------
         dict
         '''
         info = BaseOptimizer.get_info(self)
-        info['rmse-training-set'] = self.rmse_training_set
-        info['rmse-test-set'] = self.rmse_test_set
+        info['rmse-training-set'] = self.rmse_training
+        info['rmse-test-set'] = self.rmse_test
         info['training-set-size'] = self.training_set_size
         info['test-set-size'] = self.test_set_size
         info['training-set'] = self.training_set
@@ -174,14 +179,14 @@ class Optimizer(BaseOptimizer):
         return info
 
     @property
-    def rmse_training_set(self):
+    def rmse_training(self):
         ''' float : root mean squared error for training set '''
-        return self._rmse_training_set
+        return self._rmse_training
 
     @property
-    def rmse_test_set(self):
+    def rmse_test(self):
         ''' float : root mean squared error for test set '''
-        return self._rmse_test_set
+        return self._rmse_test
 
     @property
     def training_set(self):
@@ -201,8 +206,22 @@ class Optimizer(BaseOptimizer):
         return len(self.training_set)
 
     @property
+    def train_fraction(self):
+        ''' float : fraction of rows included in training set '''
+        if self.training_set is None:
+            return 0.0
+        return float(self.training_set_size) / self._Nrows
+
+    @property
     def test_set_size(self):
         ''' int : number of rows included in test set '''
         if self.test_set is None:
             return 0
         return len(self.test_set)
+
+    @property
+    def test_fraction(self):
+        ''' float : fraction of rows included in test set '''
+        if self.test_set is None:
+            return 0.0
+        return float(self.test_set_size) / self._Nrows

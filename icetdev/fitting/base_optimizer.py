@@ -20,19 +20,20 @@ fit_methods = OrderedDict([
 
 
 class BaseOptimizer:
-    ''' BaseOptimizer class.
+    '''
+    BaseOptimizer class.
 
     Serves as base class for all Optimizers solving `Ax = y`.
 
     Parameters
     ----------
-    fit_data : tuple of (N, M) numpy.ndarray and (N) numpy.ndarray
+    fit_data : tuple of NumPy (N, M) array and NumPy (N) array
         the first element of the tuple represents the fit matrix `A`
         whereas the second element represents the vector of target
         values `y`; here `N` (=rows of `A`, elements of `y`) equals the number
         of target values and `M` (=columns of `A`) equals the number of
         parameters
-    fit_method : str
+    fit_method : string
         method to be used for training; possible choice are
         "least-squares", "lasso", "bayesian-ridge", "ardr"
     seed : int
@@ -40,6 +41,16 @@ class BaseOptimizer:
     '''
 
     def __init__(self, fit_data, fit_method, seed):
+        '''
+        Attributes
+        ----------
+        _A : NumPy (N, M) array
+            fit matrix
+        _y : NumPy (N) array
+            target values
+        _optimizer_function : function
+            optimizer function to be called when training
+        '''
 
         if fit_method not in fit_methods.keys():
             raise ValueError('Fit method not available')
@@ -56,17 +67,18 @@ class BaseOptimizer:
         self._fit_results = {'parameters': None}
 
     def compute_rmse(self, A, y):
-        ''' Compute the root mean square error using the `A`, `y`, and the
+        '''
+        Compute the root mean square error using the `A`, `y`, and the
         vector of fitted parameters `x` corresponding to `||Ax-y||_2`.
 
         Parameters
         ----------
-        A : (N, M) numpy.ndarray
+        A : NumPy (N, M) array
             fit matrix where `N` (=rows of `A`, elements of `y`) equals the
             number of target values and `M` (=columns of `A`) equals the number
             of parameters (=elements of `x`)
-        y : numpy.ndarray
-            `N`-dimensional vector of target values
+        y : NumPy (N) array
+            vector of target values
 
         Returns
         -------
@@ -76,37 +88,39 @@ class BaseOptimizer:
         return compute_rmse(A, self.parameters, y)
 
     def predict(self, A):
-        ''' Predict data given an input matrix `A`, i.e., `Ax`, where `x` is
+        '''
+        Predict data given an input matrix `A`, i.e., `Ax`, where `x` is
         the vector of the fitted parameters.
 
         Parameters
         ----------
-        A : (N, M) numpy.ndarray
+        A : NumPy (N, M) array
             fit matrix where `N` (=rows of `A`, elements of `y`) equals the
             number of target values and `M` (=columns of `A`) equals the number
             of parameters
 
         Returns
         -------
-        numpy.ndarray
-            `N`-dimensional vector of predicted values
+        NumPy (N) array
+            vector of predicted values
         '''
         return np.dot(A, self.parameters)
 
     def get_contributions(self, A):
-        ''' Compute the average contribution to the predicted values from each
+        '''
+        Compute the average contribution to the predicted values from each
         element of the parameter vector.
 
         Parameters
         ----------
-        A : (N, M) numpy.ndarray
+        A : NumPy (N, M) array
             fit matrix where `N` (=rows of `A`, elements of `y`) equals the
             number of target values and `M` (=columns of `A`) equals the number
             of parameters
 
         Returns
         -------
-        (N, M) numpy.ndarray
+        NumPy (N, M) array
             average contribution for each row of `A` from each parameter
         '''
         return np.mean(np.abs(np.multiply(A, self.parameters)), axis=0)
@@ -137,12 +151,12 @@ class BaseOptimizer:
 
     @property
     def fit_method(self):
-        ''' str : fit method '''
+        ''' string : fit method '''
         return self._fit_method
 
     @property
     def parameters(self):
-        ''' numpy.ndarray : copy of parameter vector '''
+        ''' NumPy array : copy of parameter vector '''
         if self.fit_results['parameters'] is None:
             return None
         else:
