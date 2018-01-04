@@ -2,25 +2,26 @@ from __future__ import print_function, division
 import numpy as np
 
 
-class many_body_neighbor_listTester():
+class TestManyBodyNeighborList():
 
     """
-    This is a python implementation of icet's  many-body neighbor list.
-    This is used both as a tester of the c++ version and also as a venue
-    to try out new functionalities.
+    This is a Python implementation of icet's many-body neighbor list.
+    This is used both as a tester of the C++ version and also for
+    trying out new functionalities.
 
-    Functionalities are similar to ASE neigbhorlist but is extended
+    Functionalities are similar to ASE's neigbhor list but are extended
     for more connections than for pairs.
 
-    Bothways = False will mean that if you collect all neighbors over all
-    indices then you will not have any duplicates. I.e. in total you will only
-    generate i,j,k and never i,k,j. To make sure of this the indices you
-    generate will always be sorted that is: i < j < k  etc
+    `bothways=False` means that when collecting all neighbors over
+    all indices there will not be any duplicates. In other words, in
+    total the algorithm will generate `i,j,k` but not `i,k,j`. To make
+    sure of this is the case the generated indices are sorted such
+    that `i < j < k`.
 
-    Bothways = True will mean that you will return every neighbor of an indice.
-    However, you will not return both i,j,k and i,k,j. Contrary to bothways =
-    False this is allowed: i>j, i>k etc.. (but always j < k)
-
+    `bothways=True` causes the algorithm to return every neighbor of
+    an index.  However, it will not return both `i,j,k` and
+    `i,k,j`. In contrast to `bothways=False` the following is allowed:
+    `i>j`, `i>k` etc.. (but always `j<k`).
     """
 
     def __init__(self):
@@ -28,25 +29,25 @@ class many_body_neighbor_listTester():
 
     def build(self, neighbor_lists, index, bothways=False):
         """
-        Will take the neighbor_list object (nl) and combine the neighbors
-        of index "index" up to order "order".
+        Will take the neighbor list object and combine the neighbors
+        of `index` up to `order`.
 
         Parameters
         ----------
-        neighbor_lists : list
-            ASE neighbor_lists
+        neighbor_lists : list of ASE NeighborList objects
+            ASE neighbor lists
         index : int
-            index to return neighbors from neighbor_list
+            index of site for which to return neighbors
         bothways : boolean
-            False will return all indices that are bigger than site "index"
-            True will return also return indices that are smaller.
+            `False` will return all indices that are bigger than `index`;
+            `True` will also return indices that are smaller.
         """
         if not isinstance(neighbor_lists, list):
             neighbor_lists = [neighbor_lists]
 
         if not neighbor_lists:
             raise RuntimeError(
-                'neighbor_lists empty in many_body_neighbor_listTester::build')
+                'neighbor_lists empty in TestManyBodyNeighborList::build')
 
         many_body_neighbor_indices = []
 
@@ -75,10 +76,9 @@ class many_body_neighbor_listTester():
                                 current_original_neighbors, bothways, order):
 
         """
-        For each j in ngb construct the intersect of ngb_j and ngb, call the
-        intersect ngb_ij. All neighbors in ngb_ij are then neighbors with i and
-        j What is saved then is (i,j) and ngb_ij up to the desired order
-        "order"
+        For each `j` in `ngb` construct the intersect of `ngb_j` and `ngb`, call the
+        intersect `ngb_ij`. All neighbors in `ngb_ij` are then neighbors of `i` and
+        `j` What is saved then is `(i,j)` and `ngb_ij` up to the desired `order`.
 
         Parameters
         ----------
@@ -96,15 +96,15 @@ class many_body_neighbor_listTester():
         """
         for j in ngb_i:
 
-            originalNeighborCopy = current_original_neighbors.copy()
+            original_neighbor_copy = current_original_neighbors.copy()
 
             # explain this line here
-            if (len(originalNeighborCopy) == 1 and
+            if (len(original_neighbor_copy) == 1 and
                 (not bothways and
-                 self.compare_neighbors(j, originalNeighborCopy[-1]))):
+                 self.compare_neighbors(j, original_neighbor_copy[-1]))):
                 continue
 
-            originalNeighborCopy.append(j)
+            original_neighbor_copy.append(j)
 
             ngb_j_offset = self.translate_all_ngb(
                 self.get_ngb_from_nl(nl, j[0]), j[1])
@@ -114,15 +114,15 @@ class many_body_neighbor_listTester():
 
             intersection_with_j = self.get_intersection(ngb_i, ngb_j_offset)
 
-            if len(originalNeighborCopy) + 1 < order:
+            if len(original_neighbor_copy) + 1 < order:
                 self.combine_to_higher_order(
                     nl, many_body_neighbor_indices, intersection_with_j,
-                    originalNeighborCopy, bothways, order)
+                    original_neighbor_copy, bothways, order)
 
             if (len(intersection_with_j) > 0 and
-                    len(originalNeighborCopy) == (order - 1)):
+                    len(original_neighbor_copy) == (order - 1)):
                 many_body_neighbor_indices.append(
-                    [originalNeighborCopy, intersection_with_j])
+                    [original_neighbor_copy, intersection_with_j])
 
     def add_singlet(self, index, mbn_indices):
         """
