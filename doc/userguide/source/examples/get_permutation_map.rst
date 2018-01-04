@@ -44,7 +44,7 @@ three elements, namely a :class:`PermutationMap
 <icetdev.neighbor_list.NeighborList>`.
 
 .. literalinclude:: ../../../../examples/get_permutation_map.py
-   :start-after: # (2.0 A).
+   :start-after: # Generate a permutation map
    :end-before: # Extract the permutated,
 
 Since the verbosity was set to :math:`\geq 3`, the following extra information

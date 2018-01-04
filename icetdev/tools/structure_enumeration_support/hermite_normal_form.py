@@ -1,8 +1,9 @@
-'''Handling of Hermite Normal Form matrices
+'''
+Handling of Hermite Normal Form matrices
 '''
 
 import numpy as np
-from icetdev.enumeration.smith_normal_form import SmithNormalForm
+from .smith_normal_form import SmithNormalForm
 
 
 class HermiteNormalForm(object):

@@ -8,8 +8,8 @@ structure up to a certain size.
 from ase import Atom
 from ase.build import bulk
 from ase.db import connect
-
-from icetdev.enumeration import enumerate_structures
+from icetdev.tools import enumerate_structures
+# End import
 
 # Generate all binary fcc structures with up to 6 atoms/cell
 # and save them in a database
@@ -18,7 +18,7 @@ db = connect('AuPd-fcc.db')
 for structure in enumerate_structures(atoms, range(1, 7), ['Pd', 'Au']):
     db.write(structure)
 
-# Enumerate all palladium hydride structures with up to 4 primtive
+# Enumerate all palladium hydride structures with up to 4 primitive
 # cells (= up to 4 Pd atoms and between 0 and 4 H atoms). We want to
 # specify that one site should always be Pd while the other can be
 # either a hydrogen or a vacancy (vanadium will serve as our "vacancy")

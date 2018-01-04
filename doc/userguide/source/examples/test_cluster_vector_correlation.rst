@@ -118,30 +118,30 @@ if correlations between the columns are smaller than the tolerance specified
 previously.
 
 .. literalinclude:: ../../../../examples/test_cluster_vector_correlation.py
-   :start-after: # pregenerated database.
+   :start-after: # previously generated database.
 
 The result of running the script should be the following::
 
-  Testing structure: PdH(id=1) with cutoffs [2.0]
-  size of atoms 1024. len of cv 6
-  Testing structure: PdV(id=2) with cutoffs [2.0]
-  size of atoms 1024. len of cv 6
-  Testing structure: Pd2VH(id=3) with cutoffs [2.0]
-  size of atoms 2048. len of cv 6
-  Testing structure: Pd2VH(id=4) with cutoffs [2.0]
-  size of atoms 2048. len of cv 6
-  Testing structure: Pd3VH2(id=5) with cutoffs [2.0]
-  size of atoms 3072. len of cv 6
-  Testing structure: Pd3V2H(id=6) with cutoffs [2.0]
-  size of atoms 3072. len of cv 6
-  Testing structure: Pd3VH2(id=7) with cutoffs [2.0]
-  size of atoms 3072. len of cv 6
-  Testing structure: Pd3V2H(id=8) with cutoffs [2.0]
-  size of atoms 3072. len of cv 6
-  Testing structure: Pd3VH2(id=9) with cutoffs [2.0]
-  size of atoms 3072. len of cv 6
-  Testing structure: Pd3V2H(id=10) with cutoffs [2.0]
-  size of atoms 3072. len of cv 6
+  Testing structure: PdH (id=1) with cutoffs [2.0]
+  Number of atoms: 1024    Length of cluster vector: 6
+  Testing structure: PdV (id=2) with cutoffs [2.0]
+  Number of atoms: 1024    Length of cluster vector: 6
+  Testing structure: Pd2VH (id=3) with cutoffs [2.0]
+  Number of atoms: 2048    Length of cluster vector: 6
+  Testing structure: Pd2VH (id=4) with cutoffs [2.0]
+  Number of atoms: 2048    Length of cluster vector: 6
+  Testing structure: Pd3VH2 (id=5) with cutoffs [2.0]
+  Number of atoms: 3072    Length of cluster vector: 6
+  Testing structure: Pd3V2H (id=6) with cutoffs [2.0]
+  Number of atoms: 3072    Length of cluster vector: 6
+  Testing structure: Pd3VH2 (id=7) with cutoffs [2.0]
+  Number of atoms: 3072    Length of cluster vector: 6
+  Testing structure: Pd3V2H (id=8) with cutoffs [2.0]
+  Number of atoms: 3072    Length of cluster vector: 6
+  Testing structure: Pd3VH2 (id=9) with cutoffs [2.0]
+  Number of atoms: 3072    Length of cluster vector: 6
+  Testing structure: Pd3V2H (id=10) with cutoffs [2.0]
+  Number of atoms: 3072    Length of cluster vector: 6
 
 Source code
 -----------

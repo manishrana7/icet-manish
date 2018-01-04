@@ -1,6 +1,6 @@
-from icetdev import Structure
-from icetdev.orbit_list import create_orbit_list
 from ase.build import bulk
+from icetdev import Structure
+from icetdev.core.orbit_list import create_orbit_list
 
 '''
 This test will construct two orbit lists each from the same atom structure but
@@ -9,7 +9,9 @@ orbit lists are the same from both orbit lists.
 
 Todo
 ----
-given that create_orbit_list get the primitive cell is this really a good test?
+* given that create_orbit_list gets the primitive cell is this really a good
+  test?
+* replace with proper unit test
 '''
 
 atoms1 = bulk('Al', 'bcc', a=1).repeat(3)

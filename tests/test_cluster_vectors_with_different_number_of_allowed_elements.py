@@ -5,9 +5,8 @@ of components on different sites.
 
 import numpy as np
 from ase.db import connect
-from icetdev import Structure, ClusterSpace
-from icetdev.cluster_space import get_singlet_info
-from icetdev import permutation_map
+from icetdev import Structure, ClusterSpace, get_singlet_info
+from icetdev.tools import get_primitive_structure
 
 
 def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
@@ -15,8 +14,7 @@ def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
     Test that int Mi, list Mi and dict Mi produces the same cluster vectors.
     '''
 
-    prim_size = len(
-        permutation_map.__get_primitive_structure(atoms.copy()))
+    prim_size = len(get_primitive_structure(atoms))
 
     Mi_int = allowed_sites
     Mi_list = [allowed_sites] * prim_size

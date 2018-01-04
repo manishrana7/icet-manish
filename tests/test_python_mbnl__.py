@@ -1,7 +1,7 @@
-from tests import many_body_neighbor_listTester
+import spglib as spg
 from ase.neighbor_list import NeighborList
 from ase.db import connect
-import spglib as spg
+from tests import many_body_neighbor_listTester
 
 '''
 Testing manybodyneighbor_list implemented in python (mblnl.tester) againts ASE

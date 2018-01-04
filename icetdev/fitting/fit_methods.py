@@ -1,4 +1,5 @@
-'''This module provides simplified interfaces for vaiours linear model
+'''
+This module provides simplified interfaces for vaiours linear model
 regression methods.
 
 More information about the sklearn regression can be found at
@@ -12,8 +13,8 @@ Todo
 '''
 
 import numpy as np
-from icetdev.io.logging import icetdev_logger
-from icetdev.fitting.tools import compute_rmse
+from ..io.logging import icetdev_logger
+from .tools import compute_rmse
 try:
     from sklearn.linear_model import Lasso, BayesianRidge, ARDRegression
     from sklearn.model_selection import KFold

@@ -1,6 +1,12 @@
-from icetdev.lattice_site import LatticeSite
+from icetdev.core.lattice_site import LatticeSite
 
-''' Test that lattice site is hashable '''
+'''
+Test that lattice site is hashable
+
+Todo
+----
+* replace with proper unit test
+'''
 
 latnbr = LatticeSite(1, [0., 0., 0.])
 latnbr_map = {}

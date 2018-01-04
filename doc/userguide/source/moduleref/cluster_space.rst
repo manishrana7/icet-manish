@@ -5,7 +5,7 @@
 ClusterSpace
 ============
 
-.. automodule:: cluster_space
+.. automodule:: icetdev.core.cluster_space
    :members:
    :undoc-members:
    :inherited-members:

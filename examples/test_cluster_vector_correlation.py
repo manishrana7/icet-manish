@@ -1,25 +1,22 @@
-"""
+'''
 This example demonstrates how to checks the column correlation for a set of
 clustervectors and asserts that none of the columns are highly correlated
-"""
+'''
 
 # Import modules
 import random
-
 import numpy as np
-
 from ase.db import connect
-
-from icetdev.cluster_space import ClusterSpace
-from icetdev.structure import Structure
+from icetdev import ClusterSpace, Structure
+# End import
 
 
 # Function for generating random structures
 def generate_random_structure(atoms_prim, subelements, repeat=8):
-    """
+    '''
     Generate a random structure with atoms_prim as a base
-    and fill it randomly with elements in subelements
-    """
+    and fill it randomly with symbols from subelements
+    '''
 
     atoms = atoms_prim.copy().repeat(repeat)
 
@@ -32,9 +29,9 @@ def generate_random_structure(atoms_prim, subelements, repeat=8):
 
 # Function for generating cluster vectors
 def generate_cv_set(n, atoms_prim, subelements, clusterspace, repeat=8):
-    """
-    Generate a set of clustervectors from a clusterspace
-    """
+    '''
+    Generate a set of cluster vectors from a cluster space
+    '''
     clustervectors = []
     for i in range(n):
         conf = generate_random_structure(atoms_prim, subelements, repeat)
@@ -47,11 +44,11 @@ def generate_cv_set(n, atoms_prim, subelements, clusterspace, repeat=8):
 
 # Function for calculating column correlations
 def get_column_correlation(i, j, cv_matrix):
-    """
+    '''
     Returns the correlation between column i and j
 
     cv_matrix: numpy matrix
-    """
+    '''
     col_i = cv_matrix[:, i]
     col_j = cv_matrix[:, j]
 
@@ -63,9 +60,9 @@ def get_column_correlation(i, j, cv_matrix):
 
 # Function for asserting that columns are not correlated
 def assert_no_correlation(cvs, tol=0.99):
-    """
+    '''
     Check that no column in cvs are above tolerance
-    """
+    '''
     cvs_matrix = np.array(cvs)
     for i in range(len(cvs[0])):
         # Do not loop over zerolet since this is always ones
@@ -75,30 +72,30 @@ def assert_no_correlation(cvs, tol=0.99):
             if j <= i:
                 continue
             corr = get_column_correlation(i, j, cvs_matrix)
-            assert corr < tol, "columns {} and {} were correletated with"\
-                " {}".format(i, j, corr)
+            assert corr < tol, 'columns {} and {} were correlated with'\
+                ' {}'.format(i, j, corr)
 
 
 # Create a list of the subelements that shall be considered and set the
 # cutoff distance for singlets to 2.0 Å.
-subelements = ["Pd", "H", "V"]
+subelements = ['Pd', 'H', 'V']
 cutoffs = [2.0]
 repeat = 8
 
 # Test the correlation between columns for a set of structures in a
-# pregenerated database.
-db = connect("PdHVac-fcc.db")
-for row in db.select("id<=10"):
+# previously generated database.
+db = connect('PdHVac-fcc.db')
+for row in db.select('id<=10'):
     atoms_row = row.toatoms()
     atoms_id = row.id
     atoms_form = row.formula
-    print("Testing structure: {}(id={}) with cutoffs {}".format(atoms_form,
-                                                                atoms_id,
-                                                                cutoffs))
+    print('Testing structure: {} (id={}) with cutoffs {}'.format(atoms_form,
+                                                                 atoms_id,
+                                                                 cutoffs))
     atoms_row.wrap()  # Wrap all atoms into the unit cell
     cluster_space = ClusterSpace(atoms_row, cutoffs, subelements)
 
     cvs = generate_cv_set(20, atoms_row, subelements, cluster_space, repeat)
     assert_no_correlation(cvs)
-    print("size of atoms {}. len of cv {}".format(
+    print('Number of atoms: {}    Length of cluster vector: {}'.format(
         len(atoms_row.repeat(repeat)), len(cvs[0])))

@@ -6,8 +6,8 @@ http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.BaggingRegress
 '''
 
 import numpy as np
-from icetdev.fitting.base_optimizer import BaseOptimizer
-from icetdev.fitting import Optimizer
+from .base_optimizer import BaseOptimizer
+from .optimizer import Optimizer
 
 
 class EnsembleOptimizer(BaseOptimizer):
