@@ -290,45 +290,6 @@ class ClusterSpace(_ClusterSpace):
         return self._cutoffs
 
 
-def _get_Mi_from_dict(Mi, structure):
-    '''
-    Mi maps orbit index to allowed components
-    this function will return a list, where
-    Mi_ret[i] will be the allowed components on site index i
-
-    Parameters
-    ----------
-    Mi : xx
-        xx
-    atoms : ASE Atoms object / icet Structure object (bi-optional)
-        atomic configuration
-
-    Returns
-    -------
-    list
-        xxx
-
-    Todo
-    ----
-    * rename function, remove `Mi`
-    * complete docstring
-    '''
-    cluster_data = get_singlet_info(structure)
-    Mi_ret = [-1] * len(structure)
-    for singlet in cluster_data:
-        for site in singlet['sites']:
-            Mi_ret[site[0].index] = Mi[singlet['orbit_index']]
-
-    for all_comp in Mi_ret:
-        if all_comp == -1:
-            s = ['The calculated Mi from dict did not cover all sites of'
-                 ' the input structure.']
-            s += ['Were all sites in primitive mapped?']
-            raise Exception('\n'.join(s))
-
-    return Mi_ret
-
-
 def get_singlet_info(atoms, return_cluster_space=False):
     '''
     Retrieve information concerning the singlets in the input structure.
