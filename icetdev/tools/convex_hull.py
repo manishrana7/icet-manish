@@ -48,7 +48,7 @@ class ConvexHull(object):
         self.dimensions = len(points[0]) - 1
 
         # Construct convex hull
-        hull = ConvexHullScipy(points)
+        hull = ConvexHullSciPy(points)
 
         # Collect convex hull points in handy arrays
         concentrations = []
