@@ -17,13 +17,13 @@ class EnsembleOptimizer(BaseOptimizer):
 
     Parameters
     ----------
-    fit_data : tuple of (N, M) numpy.ndarray and (N) numpy.ndarray
+    fit_data : tuple of (N, M) NumPy array and (N) NumPy array
         the first element of the tuple represents the fit matrix `A`
         whereas the second element represents the vector of target
         values `y`; here `N` (=rows of `A`, elements of `y`) equals the number
         of target values and `M` (=columns of `A`) equals the number of
         parameters
-    fit_method : str
+    fit_method : string
         method to be used for training; possible choice are
         "least-squares", "lasso", "bayesian-ridge", "ardr"
     ensemble_size : int
@@ -58,72 +58,79 @@ class EnsembleOptimizer(BaseOptimizer):
         self._parameters_stddev = None
 
     def train(self):
-        ''' Carry out ensemble training. '''
+        '''
+        Carry out ensemble training and construct the final model by averaging
+        over all models in the ensemble.
+        '''
         self._run_ensemble()
         self._construct_final_model()
 
     def _run_ensemble(self):
-        ''' Carry out training. '''
+        ''' Construct an ensemble of models. '''
 
         np.random.seed(self.seed)
 
         parameters_list = []
-        rmse_training_set_list, rmse_test_set_list = [], []
+        rmse_training_list, rmse_test_list = [], []
         training_set_list, test_set_list = [], []
         for _ in range(self.ensemble_size):
             # construct training and test sets
             rows = np.random.choice(
                 self._Nrows, self.training_set_size + self.test_set_size,
                 replace=self.bootstrap)
-            train_rows = np.random.choice(rows, self.training_set_size,
-                                          replace=self.bootstrap)
-            test_rows = np.setdiff1d(rows, range(self._Nrows))
+            training_set = np.random.choice(rows, self.training_set_size,
+                                            replace=self.bootstrap)
+            test_set = np.setdiff1d(rows, range(self._Nrows))
 
             # train
             opt = Optimizer((self._A, self._y), self.fit_method,
-                            train_rows=train_rows, test_rows=test_rows,
+                            training_set=training_set, test_set=test_set,
                             **self._kwargs)
             opt.train()
 
             # collect results
             parameters_list.append(opt.parameters)
-            rmse_training_set_list.append(opt.rmse_training_set)
-            rmse_test_set_list.append(opt.rmse_test_set)
-            training_set_list.append(train_rows)
-            test_set_list.append(test_rows)
+            rmse_training_list.append(opt.rmse_training)
+            rmse_test_list.append(opt.rmse_test)
+            training_set_list.append(training_set)
+            test_set_list.append(test_set)
 
         self._parameters_set = np.array(parameters_list)
         self._training_set_list = training_set_list
         self._test_set_list = test_set_list
-        self._average_rmse_training_set = np.average(rmse_training_set_list)
-        self._average_rmse_test_set = np.average(rmse_test_set_list)
+        self._average_rmse_training = np.average(rmse_training_list)
+        self._average_rmse_test = np.average(rmse_test_list)
 
     def _construct_final_model(self):
-        ''' Construct final model. '''
-        self._fit_results['parameters'] = np.mean(self.parameters_set, axis=0)
+        '''
+        Construct final model by averaging over all models in the ensemble.
+        '''
+        self._fit_results['parameters'] = np.mean(self.parameter_vectors,
+                                                  axis=0)
 
     def get_errors(self):
         ''' Get the errors for each fit and each target value.
 
         Returns
         -------
-        (N,M) numpy.ndarray
+        NumPy (N,M) array
             matrix of fit errors where `N` is the number of target values and
             `M` is the number of fits (i.e., the size of the ensemble)
         '''
         error_matrix = np.zeros((self._Nrows, self.ensemble_size))
-        for i, parameters in enumerate(self.parameters_set):
+        for i, parameters in enumerate(self.parameter_vectors):
             error_matrix[:, i] = np.dot(self._A, parameters) - self._y
         return error_matrix
 
     @property
     def parameters_stddev(self):
-        ''' numpy.ndarray : standard deviation of each parameter '''
+        ''' NumPy array : standard deviation for each parameter '''
         if self.fit_results['parameters'] is None:
             return None
         else:
             if self._parameters_stddev is None:
-                self._parameters_stddev = np.std(self.parameters_set, axis=0)
+                self._parameters_stddev = np.std(self.parameter_vectors,
+                                                 axis=0)
             return self._parameters_stddev
 
     @property
@@ -133,20 +140,22 @@ class EnsembleOptimizer(BaseOptimizer):
 
     @property
     def ensemble_size(self):
-        ''' int : number of rounds of training '''
+        ''' int : number of training rounds '''
         return self._ensemble_size
 
     @property
-    def rmse_training_set(self):
-        ''' float : ensemble average of root mean squared error over training
-        set '''
-        return self._average_rmse_training_set
+    def rmse_training(self):
+        '''
+        float : ensemble average of root mean squared error over training sets
+        '''
+        return self._average_rmse_training
 
     @property
-    def rmse_test_set(self):
-        ''' float : ensemble average of root mean squared error over test set
+    def rmse_test(self):
         '''
-        return self._average_rmse_test_set
+        float : ensemble average of root mean squared error over test sets
+        '''
+        return self._average_rmse_test
 
     @property
     def training_set_size(self):
@@ -167,5 +176,5 @@ class EnsembleOptimizer(BaseOptimizer):
 
     @property
     def bootstrap(self):
-        ''' bool : True if sampling is carried out with replacement '''
+        ''' boolean : True if sampling is carried out with replacement '''
         return self._bootstrap

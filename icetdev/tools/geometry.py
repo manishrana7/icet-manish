@@ -2,15 +2,15 @@ import numpy as np
 from ase import Atoms
 import spglib
 
-from ..core.lattice_site import LatticeSite
+from icetdev.core.lattice_site import LatticeSite
 
 
 def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
     '''Get positions in reduced (scaled) coordinates.
 
     If wrap is True, positions outside the unit cell will be wrapped into
-    the cell in those directions with periodic boundary conditions
-    so that the scaled coordinates are between zero and one.
+    the cell in the directions with periodic boundary conditions
+    such that the scaled coordinates are between zero and one.
     '''
 
     fractional = np.linalg.solve(cell.T, positions.T).T
