@@ -241,11 +241,11 @@ of the following diagram:
 Extract structures of special interest
 --------------------------------------
 
-Now that the energy has been repidly computed for thousand of structures, it
-is interesting to identify the ground state structures. Since even small
-errors in the cluster expansion can cause the energetic ordering of the
-structures to change, it is advisable to pick out structures that are
-energetically sufficiently close to the convex hull. This can be done with
+Now that the energy has been computed for thousands of structures, it is
+interesting to identify the ground state structures. Since even small errors
+in the cluster expansion can cause the energetic ordering of the structures to
+change, it is advisable to pick out structures that are energetically close to
+the convex hull. This can be done with
 :func:`ConvexHull.extract_structures_close <tools.convex_hull.ConvexHull.
 get_structures_close>`.
 
