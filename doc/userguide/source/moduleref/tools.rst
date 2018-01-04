@@ -8,7 +8,7 @@ Tools
 ConvexHull
 -----------------------
 
-.. automodule:: tools.convex_hull
+.. automodule:: icetdev.tools.convex_hull
    :members:
    :undoc-members:
    :inherited-members:

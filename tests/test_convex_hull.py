@@ -38,6 +38,24 @@ class TestConvexHull(unittest.TestCase):
         convex_hull_energies = self.ch.get_energy_at_convex_hull([0.2, 0.7])
         self.assertTrue(np.allclose(convex_hull_energies, np.array([-5, 0])))
 
+    def test_extract_low_energy_structures(self):
+        '''
+        Test extracting of structures that are sufficiently close to convex
+        hull.
+        '''
+        from ase.build import bulk
+        atoms_1 = bulk('Au')
+        atoms_2 = bulk('Pd')
+        structures = [atoms_1, atoms_2]
+        concentrations = [0.3, 0.7]
+        energies = [-7.0, 0.1]
+        energy_tolerance = 0.3
+        extracted = self.ch.extract_low_energy_structures(concentrations,
+                                                          energies,
+                                                          energy_tolerance,
+                                                          structures)
+        self.assertEqual(len(extracted), 1)
+
 
 class TestConvexHullTernary(unittest.TestCase):
     '''
@@ -73,6 +91,20 @@ class TestConvexHullTernary(unittest.TestCase):
             [[0.0, 0.0], [0.15, 0.15]])
         self.assertTrue(np.allclose(convex_hull_energies,
                                     np.array([0.0, -3.5])))
+
+    def test_extract_low_energy_structures(self):
+        '''
+        Test extracting of structures that are sufficiently close to convex
+        hull.
+        '''
+        concentrations = [[0.0, 0.0], [0.15, 0.15]]
+        energies = [0.5, -3.3]
+        energy_tolerance = 0.4
+        extracted = self.ch.extract_low_energy_structures(concentrations,
+                                                          energies,
+                                                          energy_tolerance)
+        self.assertEqual(len(extracted), 1)
+        self.assertEqual(extracted[0], 1)
 
 
 def suite():

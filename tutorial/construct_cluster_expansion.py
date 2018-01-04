@@ -68,10 +68,12 @@ plt.savefig('mixing-energy-comparison.png', bbox_inches='tight')
 # step 5: Predict energies for, multiple, enumerated structures
 # enumerate the structures and compile the predicted energies
 data = []
+structures = []
 for atoms in enumerate_structures(prim, range(1, 12), subelements):
     conc = float(atoms.get_chemical_symbols().count('Ag')) / len(atoms)
     emix = ce.predict(atoms)
     data.append([conc, emix])
+    structures.append(atoms)
 print('Predicted energies for {} structures'.format(len(data)))
 data = np.array(data).T
 # construct convex hull
@@ -84,3 +86,7 @@ ax.set_xlim([0, 1])
 ax.scatter(data[0], 1e3 * data[1], marker='x')
 ax.plot(hull.concentrations, 1e3 * hull.energies, '-o', color='green')
 plt.savefig('mixing-energy-predicted.png', bbox_inches='tight')
+
+# step 6: Extract candidate ground state structures
+ground_state_candidates = hull.extract_low_energy_structures(data[0], data[1],
+                                                             0.0005, structures)
