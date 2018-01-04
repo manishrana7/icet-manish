@@ -13,10 +13,10 @@ from tests.test_manybody_neighborlist import manybody_neighborlistTester
 
 def benchmark_cpp_nl(structure, cutoff):
     """
-    Finds all the neighboring indices up to "order" within the cutoffs using the c++ 
+    Finds all the neighboring indices up to "order" within the cutoffs using the c++
     implemented neighborlist
     """
-    
+
     nl = Neighborlist(cutoff)
     nl.build(structure)
 
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     t = time.process_time()
     benchmark_python_nl(atoms,  cutoff)
     py_elapsed_time = time.process_time() - t
-    print("Time taken for ASE neigborlist with cutoff = {}, len(atoms) = {}".format(
+    print("Time taken for ASE neighborlist with cutoff = {}, len(atoms) = {}".format(
         cutoff, len(atoms)))
     print("{} s".format(py_elapsed_time))
     print("cpp speedup: {}".format(py_elapsed_time / cpp_elapsed_time))

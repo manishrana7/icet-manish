@@ -1,8 +1,8 @@
-from _icetdev import ManyBodyNeighborList
-from icetdev.lattice_site import LatticeSite
-from icetdev.neighbor_list import get_neighbor_lists
-from icetdev.structure import Structure
 from ase import Atoms
+from _icetdev import ManyBodyNeighborList
+from .lattice_site import LatticeSite
+from .neighbor_list import get_neighbor_lists
+from .structure import Structure
 
 
 def get_all_lattice_neighbors(atoms, neighbor_lists=None, cutoffs=None):
