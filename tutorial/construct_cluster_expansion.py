@@ -88,5 +88,5 @@ ax.plot(hull.concentrations, 1e3 * hull.energies, '-o', color='green')
 plt.savefig('mixing-energy-predicted.png', bbox_inches='tight')
 
 # step 6: Extract candidate ground state structures
-ground_state_candidates = hull.extract_structures_close(data[0], data[1],
-                                                        0.0005, structures)
+ground_state_candidates = hull.extract_low_energy_structures(data[0], data[1],
+                                                             0.0005, structures)

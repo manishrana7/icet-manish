@@ -247,7 +247,7 @@ in the cluster expansion can cause the energetic ordering of the structures to
 change, it is advisable to pick out structures that are energetically close to
 the convex hull. This can be done with
 :func:`ConvexHull.extract_structures_close <tools.convex_hull.ConvexHull.
-get_structures_close>`.
+get_low_energy_structures>`.
 
 .. literalinclude:: ../../../../tutorial/construct_cluster_expansion.py
    :start-after: # step 6

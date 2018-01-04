@@ -168,8 +168,8 @@ class ConvexHull(object):
                                  method='linear')
         return hull_energies
 
-    def extract_structures_close(self, concentrations, energies,
-                                 energy_tolerance, structures=None):
+    def extract_low_energy_structures(self, concentrations, energies,
+                                      energy_tolerance, structures=None):
         '''
 
         Extract structures that are sufficiently close in energy to the convex
@@ -196,7 +196,7 @@ class ConvexHull(object):
         Returns
         -------
         list
-            The members of structures whose energy is within energy_tolerance
+            The members of structures whose energy is within `energy_tolerance`
             from the convex hull. If `structures` is left empty, a list of
             indices corresponding to the order in `concentrations`/`energies`
             is returned instead.
