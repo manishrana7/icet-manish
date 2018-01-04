@@ -1,5 +1,6 @@
 from ase import Atoms
 import numpy as np
+from collections import OrderedDict
 
 from _icetdev import ClusterSpace as _ClusterSpace
 from .structure import Structure
@@ -8,51 +9,59 @@ from ..tools.geometry import add_vacuum_in_non_pbc
 
 
 class ClusterSpace(_ClusterSpace):
+    '''
+    This class provides functionality for generating and maintaining cluster
+    spaces.
+
+    Parameters
+    ----------
+    atoms : ASE Atoms object / icet Structure object (bi-optional)
+        atomic configuration
+    cutoffs : list of floats
+        cutoff radii per order that define the cluster space
+    chemical_symbols : list of strings
+        list of chemical symbols, each of which must map to an element of
+        the periodic table
+    Mi : list / dictionary / int
+        * if a list is provided, it must contain as many elements as there
+          are sites and each element represents the number of allowed
+          components on the respective site
+        * if a dictionary is provided the key represent the site index and
+          the value the number of allowed components
+        * if a single `int` is provided each site the number of allowed
+          components will be set to `Mi` for sites in the structure
+    verbosity : int
+        verbosity level
+    '''
 
     def __init__(self, atoms, cutoffs, chemical_symbols,
                  Mi=None, verbosity=0):
-        '''
-        Prepare a cluster space.
-
-        Parameters
-        ----------
-        atoms : ASE Atoms object / icet Structure object (bi-optional)
-            atomic configuration
-        cutoffs : list of floats
-            cutoff radii per order that define the cluster space
-        chemical_symbols : list of strings
-            list of chemical symbols, each of which must map to an element of
-            the periodic table
-        verbosity : int
-            verbosity level
-
-        Todo
-        ----
-        * document `Mi`
-        '''
 
         # deal with different types of structure objects
         if isinstance(atoms, Atoms):
-            structure = Structure.from_atoms(atoms)
+            self._structure = Structure.from_atoms(atoms)
         elif isinstance(atoms, Structure):
-            structure = atoms
+            self._structure = atoms
         else:
             msg = 'Unknown structure format'
             msg += ' {} (ClusterSpace)'.format(type(atoms))
             raise Exception(msg)
+        self._cutoffs = cutoffs
 
         # set up orbit list
-        orbit_list = create_orbit_list(structure, cutoffs, verbosity=verbosity)
+        orbit_list = create_orbit_list(self._structure, self._cutoffs,
+                                       verbosity=verbosity)
         orbit_list.sort()
         if Mi is None:
             Mi = len(chemical_symbols)
         if isinstance(Mi, dict):
-            Mi = _get_Mi_from_dict(Mi, orbit_list.get_primitive_structure())
+            Mi = self._get_Mi_from_dict(Mi,
+                                        orbit_list.get_primitive_structure())
         if not isinstance(Mi, list):
-            if not isinstance(Mi, int):
-                raise Exception('Mi has wrong type (ClusterSpace)')
-            else:
+            if isinstance(Mi, int):
                 Mi = [Mi] * len(orbit_list.get_primitive_structure())
+            else:
+                raise Exception('Mi has wrong type (ClusterSpace)')
         msg = ['len(Mi) does not equal len(primitive_structure);']
         msg += ['{} != {}'.format(len(Mi),
                                   len(orbit_list.get_primitive_structure()))]
@@ -61,21 +70,56 @@ class ClusterSpace(_ClusterSpace):
 
         # call (base) C++ constructor
         _ClusterSpace.__init__(self, Mi, chemical_symbols, orbit_list)
-        self.cutoffs = cutoffs
 
-    def __repr__(self, print_threshold=50, parameters=None):
+    @staticmethod
+    def _get_Mi_from_dict(Mi, structure):
         '''
-        String representation of the cluster space that ptovides an overview of
-        the cluster space in terms of the orbits (order, radius, multiplicity
-        etc) including optionally the associated parameters (i.e., effective
-        cluster interactions=ECIs).
+        Mi maps the orbit index to the number of allowed components. This
+        function maps a dictionary onto the list format that is used
+        internatlly for representing Mi.
+
+        Parameters
+        ----------
+        Mi : dictionary
+            each site in the structure should be represented by one entry in
+            this dictionary, where the key is the site index and the value is
+            the number of components that are allowed on the repsective site
+        atoms : ASE Atoms object / icet Structure object (bi-optional)
+            atomic configuration
+
+        Returns
+        -------
+        list
+            number of species that are allowed on each site
+
+        Todo
+        ----
+        * rename function
+        '''
+        cluster_data = get_singlet_info(structure)
+        Mi_ret = [-1] * len(structure)
+        for singlet in cluster_data:
+            for site in singlet['sites']:
+                if singlet['orbit index'] not in Mi:
+                    raise Exception('Mi for site {} missing from dictionary'
+                                    ''.format(singlet['orbit index']))
+                Mi_ret[site[0].index] = Mi[singlet['orbit index']]
+
+        return Mi_ret
+
+    def _get_string_representation(self, print_threshold=None,
+                                   print_minimum=10):
+        '''
+        String representation of the cluster space that provides an overview of
+        the orbits (order, radius, multiplicity etc) that constitute the space.
 
         Parameters
         ----------
         print_threshold : int
             if the number of orbits exceeds this number print dots
-        parameters : list
-            parameters (ECIs) to be printed along side orbit information
+        print_minimum : int
+            number of lines printed from the top and the bottom of the orbit
+            list if `print_threshold` is exceeded
 
         Returns
         -------
@@ -83,95 +127,120 @@ class ClusterSpace(_ClusterSpace):
             string representation of the cluster space.
         '''
 
-        def repr_cluster(index, cluster, multiplicity=0,
-                         orbit_index=0, mc_vector=[0] * 5, param=None):
-            from collections import OrderedDict
-            fields = OrderedDict([
-                ('order',   '{:2}'.format(cluster.order)),
-                ('radius',  '{:8.4f}'.format(cluster.geometrical_size)),
-                ('multiplicity', '{:4}'.format(multiplicity)),
-                ('index',     '{:4}'.format(index)),
-                ('orbit',     '{:4}'.format(orbit_index))])
-            if param is not None:
-                fields['ECI'] = '{:13.6e}'.format(param)
-            fields['MC vector'] = '{:}'.format(mc_vector)
+        def repr_orbit(orbit, header=False):
+            formats = {'order': '{:2}',
+                       'size': '{:8.4f}',
+                       'multiplicity': '{:4}',
+                       'index': '{:4}',
+                       'orbit index': '{:4}',
+                       'MC vector': '{:}'}
             s = []
-            for name, value in fields.items():
-                n = max(len(name), len(value))
-                if index < 0:
+            for name, value in orbit.items():
+                str_repr = formats[name].format(value)
+                n = max(len(name), len(str_repr))
+                if header:
                     s += ['{s:^{n}}'.format(s=name, n=n)]
                 else:
-                    s += ['{s:^{n}}'.format(s=value, n=n)]
+                    s += ['{s:^{n}}'.format(s=str_repr, n=n)]
             return ' | '.join(s)
 
-        if parameters is not None:
-            if len(parameters) - 1 != len(self):
-                raise Exception('Length of parameter vector incompatible'
-                                ' with cluster space size')
-            param = -1.0
-        else:
-            param = None
-
         # basic information
-        cluster = self.get_orbit(0).get_representative_cluster()
-        n = len(repr_cluster(-1, cluster, param=param))
+        # (use largest orbit to obtain maximum line length)
+        prototype_orbit = self.get_orbit_list_info()[-1]
+        n = len(repr_orbit(prototype_orbit))
         s = []
         s += ['{s:-^{n}}'.format(s=' Cluster Space ', n=n)]
         s += [' subelements: {}'.format(' '.join(self.get_atomic_numbers()))]
         s += [' cutoffs: {}'.format(' '.join(['{}'.format(co)
-                                              for co in self.cutoffs]))]
+                                              for co in self._cutoffs]))]
         s += [' number of orbits: {}'.format(len(self))]
-        if parameters is not None:
-            s += [' ECI zerolet: {:13.6e}'.format(parameters[0])]
 
         # table header
         horizontal_line = '{s:-^{n}}'.format(s='', n=n)
         s += [horizontal_line]
-        s += [repr_cluster(-1, cluster, param=param)]
+        s += [repr_orbit(prototype_orbit, header=True)]
         s += [horizontal_line]
 
         # table body
         index = 0
-        while index < len(self):
+        orbit_list_info = self.get_orbit_list_info()
+        while index < len(orbit_list_info):
             if (print_threshold is not None and
                     len(self) > print_threshold and
-                    index > 10 and
-                    index < len(self) - 10):
-                index = len(self) - 10
+                    index >= print_minimum and
+                    index <= len(self) - print_minimum):
+                index = len(self) - print_minimum
                 s += [' ...']
+            s += [repr_orbit(orbit_list_info[index]).rstrip()]
+            index += 1
+        s += [horizontal_line]
 
+        return '\n'.join(s)
+
+    def __repr__(self):
+        ''' String representation. '''
+        return self._get_string_representation(print_threshold=50)
+
+    def print_overview(self, print_threshold=None, print_minimum=10):
+        '''
+        Print an overview of the cluster space in terms of the orbits (order,
+        radius, multiplicity etc).
+
+        Parameters
+        ----------
+        print_threshold : int
+            if the number of orbits exceeds this number print dots
+        print_minimum : int
+            number of lines printed from the top and the bottom of the orbit
+            list if `print_threshold` is exceeded
+        '''
+        print(self._get_string_representation(print_threshold=print_threshold,
+                                              print_minimum=print_minimum))
+
+    def get_orbit_list_info(self):
+        '''
+        Return list of orbits that provides information concerning their order,
+        radius, multiplicity etc).
+
+        Returns
+        -------
+        list of dictionaries
+            information about the orbits that constitute the cluster space.
+        '''
+        data = []
+        index = 0
+        while index < len(self):
             cluster_space_info = self.get_cluster_space_info(index)
             orbit_index = cluster_space_info[0]
             mc_vector = cluster_space_info[1]
             cluster = self.get_orbit(orbit_index).get_representative_cluster()
             multiplicity = len(self.get_orbit(
                                orbit_index).get_equivalent_sites())
-            if parameters is not None:
-                param = parameters[index+1]
-            s += [repr_cluster(index, cluster, multiplicity,
-                               orbit_index, mc_vector, param)]
-
+            record = OrderedDict([('index', index),
+                                  ('order', cluster.order),
+                                  ('size', cluster.geometrical_size),
+                                  ('multiplicity', multiplicity),
+                                  ('orbit index', orbit_index)])
+            record['MC vector'] = mc_vector
+            data.append(record)
             index += 1
+        return data
 
-        s += [horizontal_line]
-
-        return '\n'.join(s)
-
-    def print_overview(self, print_threshold=None, parameters=None):
+    def get_number_of_orbits_by_order(self):
         '''
-        Print an overview of the cluster space in terms of the orbits (order,
-        radius, multiplicity etc) including optionally the associated
-        parameters (i.e., effective cluster interactions=ECIs).
+        Return the number of orbits by order.
 
-        Parameters
-        ----------
-        print_threshold : int
-            if the number of orbits exceeds this number print dots
-        parameters : list
-            parameters (ECIs) to be printed along side orbit information
+        Returns
+        -------
+        dictionary (ordered)
+            the key represents the order, the value represents the number of
+            orbits
         '''
-        print(self.__repr__(print_threshold=print_threshold,
-                            parameters=parameters))
+        count_orbits = {}
+        for orbit in self.get_orbit_list_info():
+            k = orbit['order']
+            count_orbits[k] = count_orbits.get(k, 0) + 1
+        return OrderedDict(sorted(count_orbits.items()))
 
     def get_cluster_vector(self, atoms):
         '''
@@ -207,44 +276,18 @@ class ClusterSpace(_ClusterSpace):
             structure = Structure.from_atoms(atoms)
         return _ClusterSpace.get_cluster_vector(self, structure)
 
+    @property
+    def structure(self):
+        '''
+        icet Structure object : structure used for initializing the cluster
+        space
+        '''
+        return self._structure
 
-def _get_Mi_from_dict(Mi, structure):
-    '''
-    Mi maps orbit index to allowed components
-    this function will return a list, where
-    Mi_ret[i] will be the allowed components on site index i
-
-    Parameters
-    ----------
-    Mi : xx
-        xx
-    atoms : ASE Atoms object / icet Structure object (bi-optional)
-        atomic configuration
-
-    Returns
-    -------
-    list
-        xxx
-
-    Todo
-    ----
-    * rename function, remove `Mi`
-    * complete docstring
-    '''
-    cluster_data = get_singlet_info(structure)
-    Mi_ret = [-1] * len(structure)
-    for singlet in cluster_data:
-        for site in singlet['sites']:
-            Mi_ret[site[0].index] = Mi[singlet['orbit_index']]
-
-    for all_comp in Mi_ret:
-        if all_comp == -1:
-            s = ['The calculated Mi from dict did not cover all sites of'
-                 ' the input structure.']
-            s += ['Were all sites in primitive mapped?']
-            raise Exception('\n'.join(s))
-
-    return Mi_ret
+    @property
+    def cutoffs(self):
+        ''' list : cutoffs used for initializing the cluster space '''
+        return self._cutoffs
 
 
 def get_singlet_info(atoms, return_cluster_space=False):
@@ -279,13 +322,14 @@ def get_singlet_info(atoms, return_cluster_space=False):
         orbit_index = cluster_space_info[0]
         cluster = cs.get_orbit(orbit_index).get_representative_cluster()
         multiplicity = len(cs.get_orbit(orbit_index).get_equivalent_sites())
-        assert len(cluster) == 1, 'Cluster space contains not only singlets'
+        assert len(cluster) == 1, \
+            'Cluster space contains higher-order terms (beyond singlets)'
 
         singlet = {}
-        singlet['orbit_index'] = orbit_index
+        singlet['orbit index'] = orbit_index
         singlet['sites'] = cs.get_orbit(orbit_index).get_equivalent_sites()
         singlet['multiplicity'] = multiplicity
-        singlet['representative_site'] = cs.get_orbit(
+        singlet['representative site'] = cs.get_orbit(
             orbit_index).get_representative_sites()
         singlet_data.append(singlet)
 
@@ -319,11 +363,11 @@ def get_singlet_configuration(atoms, to_primitive=False):
                                                    return_cluster_space=True)
 
     if to_primitive:
-        singlet_configuration = \
-            cluster_space.get_primitive_structure().to_atoms()
+        singlet_configuration \
+            = cluster_space.get_primitive_structure().to_atoms()
         for singlet in cluster_data:
             for site in singlet['sites']:
-                element = chemical_symbols[singlet['orbit_index'] + 1]
+                element = chemical_symbols[singlet['orbit index'] + 1]
                 atom_index = site[0].index
                 singlet_configuration[atom_index].symbol = element
     else:
@@ -334,9 +378,9 @@ def get_singlet_configuration(atoms, to_primitive=False):
             = orbit_list.get_supercell_orbit_list(singlet_configuration)
         for singlet in cluster_data:
             for site in singlet['sites']:
-                element = chemical_symbols[singlet['orbit_index'] + 1]
+                element = chemical_symbols[singlet['orbit index'] + 1]
                 sites = orbit_list_supercell.get_orbit(
-                    singlet['orbit_index']).get_equivalent_sites()
+                    singlet['orbit index']).get_equivalent_sites()
                 for lattice_site in sites:
                     k = lattice_site[0].index
                     singlet_configuration[k].symbol = element
