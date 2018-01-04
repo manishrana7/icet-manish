@@ -59,3 +59,11 @@ Geometry
    :members:
    :undoc-members:
    :inherited-members:
+
+BaseOptimizer
+-------------
+
+.. automodule:: icetdev.fitting.base_optimizer
+   :members:
+   :undoc-members:
+   :inherited-members:

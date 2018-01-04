@@ -16,10 +16,11 @@ ScatterData = namedtuple('ScatterData', ['target', 'predicted'])
 
 
 def compute_rmse(A, x, y_target):
-    ''' Computes root mean squared error for a linear model.
+    '''
+    Computes root mean squared error for a linear model.
 
-    Computes error between y_predicted and y_target, where
-    `f_predicted = dot(A, ax)`.
+    Computes error between `y_predicted` and `y_target`, where
+    `f_predicted = A.x`.
 
     A : NumPy array
         fit matrix
@@ -43,10 +44,11 @@ def compute_rmse(A, x, y_target):
 
 
 def compute_mae(A, x, y_target):
-    ''' Computes mean absolute error for a linear model.
+    '''
+    Computes mean absolute error for a linear model.
 
     Computes error between `y_predicted` and `y_target`, where
-    `y_predicted = dot(A, ax)`.
+    `y_predicted = A.x`.
 
     Parameters
     ----------
@@ -72,7 +74,8 @@ def compute_mae(A, x, y_target):
 
 
 def compute_correlation_matrix(A):
-    ''' Computes correlation matrix for rows in input matrix.
+    '''
+    Computes correlation matrix for rows in input matrix.
 
     Naive implementation.
 
