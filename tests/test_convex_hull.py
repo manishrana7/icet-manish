@@ -25,7 +25,7 @@ class TestConvexHull(unittest.TestCase):
     def test_init(self):
         '''
         Testing that the setup
-        (initialization) of tested class work
+        (initialization) of tested class works.
         '''
         self.assertEqual(self.ch.dimensions, 1)
         self.assertTrue(np.allclose(self.ch.energies,
@@ -59,7 +59,7 @@ class TestConvexHullTernary(unittest.TestCase):
     def test_init(self):
         '''
         Testing that the setup
-        (initialization) of tested class work
+        (initialization) of tested class works.
         '''
         self.assertEqual(self.ch.dimensions, 2)
         self.assertTrue(np.allclose(self.ch.energies,
