@@ -253,8 +253,8 @@ get_low_energy_structures>`.
    :start-after: # step 6
 
 All structures that are within 0.5 meV/atom from the convex hull are now
-available and can, for example, be fed into another cluster expansion as their
-energy has been calculated.
+available and can, for example, be fed into another cluster expansion once
+their energy has been calculated using the reference method of choice.
 
 Source code
 -----------
