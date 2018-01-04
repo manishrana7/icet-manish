@@ -1,10 +1,11 @@
 import numpy as np
 import time
+
 from _icetdev import OrbitList
-from icetdev.neighbor_list import get_neighbor_lists
-from icetdev.permutation_map import permutation_matrix_from_atoms
-from icetdev.local_orbit_list_generator import LocalOrbitListGenerator
-from icetdev.structure import Structure
+from .neighbor_list import get_neighbor_lists
+from .permutation_map import permutation_matrix_from_atoms
+from .local_orbit_list_generator import LocalOrbitListGenerator
+from .structure import Structure
 
 
 def __fractional_to_cartesian(fractional_coordinates, cell):

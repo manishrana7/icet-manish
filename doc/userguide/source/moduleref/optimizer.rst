@@ -5,7 +5,7 @@
 Optimizer
 =========
 
-.. automodule:: fitting
+.. automodule:: icetdev.fitting
    :members:
    :undoc-members:
    :inherited-members:

@@ -357,7 +357,7 @@ class FitStructure:
 
     @property
     def cluster_vector(self):
-        '''NumPy array : the fit cluster vector'''
+        '''NumPy array : the cluster vector'''
         return self._cluster_vector
 
     @property
@@ -377,11 +377,13 @@ class FitStructure:
 
     def set_cluster_vector(self, cv):
         '''
-        Set the cluster vectors to structure.
+        Set the cluster vectors of the structure.
+
+        ***Expert function: Use with caution***
 
         Parameters
         ----------
-        cv : list of float
+        cv : list of floats
             cluster vector
 
         '''

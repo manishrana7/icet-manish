@@ -1,8 +1,8 @@
-from icetdev import Structure
-from _icetdev import NeighborList
+import spglib as spg
 from ase.neighborlist import NeighborList as ASENeighborList
 from ase.db import connect
-import spglib as spg
+from icetdev import Structure
+from _icetdev import NeighborList
 
 '''
 Include some docstring here explaining the current test
@@ -10,6 +10,10 @@ Include some docstring here explaining the current test
 Raises
 ------
 AssertionError: if
+
+Todo
+----
+complete docstring
 '''
 
 
@@ -43,14 +47,14 @@ for row in db.select('natoms>1'):
     msg = ' '.join(msg)
     assert len(indices) == len(ase_indices), msg
 
-    msg = ['Testing size of neighbor_list indices']
+    msg = ['Testing size of neighbor list indices']
     msg += ['failed for {}'.format(row.tag)]
     msg += ['{} != {} '.format(len(offsets), len(ase_offsets))]
     msg = ' '.join(msg)
     assert len(offsets) == len(ase_offsets), msg
 
     for i, offset in zip(indices, offsets):
-        msg = 'Testing offsets in neigborlist failed for {}'.format(row.tag)
+        msg = 'Testing offsets in neighbor list failed for {}'.format(row.tag)
         assert offset in ase_offsets, msg
 
         equiv_indices = [x for x, ase_offset in enumerate(ase_offsets)

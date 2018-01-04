@@ -1,14 +1,12 @@
 '''
 This example demonstrates how to find the native clusters for a structure
 '''
+
 # Import modules
 import numpy as np
-
 from ase.build import bulk
-
-from icetdev.cluster_space import ClusterSpace
-from icetdev.structure import Structure
-
+from icetdev import ClusterSpace, Structure
+# End import
 
 # Create a prototype structure, decide which additional elements to populate
 # it with (Si, Ge) and set the cutoff for pairs (10.0 A)

@@ -1,5 +1,5 @@
 from _icetdev import NeighborList
-from icetdev.structure import Structure
+from .structure import Structure
 from ase import Atoms
 
 

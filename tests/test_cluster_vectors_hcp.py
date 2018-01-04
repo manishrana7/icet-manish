@@ -3,10 +3,9 @@ This script checks the computation of cluster vectors for three HCP-based
 structures.
 """
 
-from icetdev import Structure, ClusterSpace
-from icetdev.cluster_space import get_singlet_info
-from ase.build import bulk, make_supercell
 import numpy as np
+from ase.build import bulk, make_supercell
+from icetdev import Structure, ClusterSpace, get_singlet_info
 
 cutoffs = [8.0, 7.0]
 subelements = ['Re', 'Ti']

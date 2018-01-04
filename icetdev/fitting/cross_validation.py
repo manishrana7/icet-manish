@@ -4,9 +4,9 @@ Optimizer with cross validation score
 
 import numpy as np
 from sklearn.model_selection import KFold, ShuffleSplit
-from icetdev.fitting.base_optimizer import BaseOptimizer
-from icetdev.fitting import Optimizer
-from icetdev.fitting.tools import ScatterData
+from .optimizer import Optimizer
+from .base_optimizer import BaseOptimizer
+from .tools import ScatterData
 
 
 validation_methods = {

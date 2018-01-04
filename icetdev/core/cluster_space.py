@@ -1,9 +1,10 @@
-from _icetdev import ClusterSpace as _ClusterSpace
-from icetdev import Structure
-from icetdev.orbit_list import create_orbit_list
-from icetdev.permutation_map import vacuum_on_non_pbc
 from ase import Atoms
 import numpy as np
+
+from _icetdev import ClusterSpace as _ClusterSpace
+from .structure import Structure
+from .orbit_list import create_orbit_list
+from ..tools.geometry import add_vacuum_in_non_pbc
 
 
 class ClusterSpace(_ClusterSpace):
@@ -46,7 +47,7 @@ class ClusterSpace(_ClusterSpace):
         if Mi is None:
             Mi = len(chemical_symbols)
         if isinstance(Mi, dict):
-            Mi = get_Mi_from_dict(Mi, orbit_list.get_primitive_structure())
+            Mi = _get_Mi_from_dict(Mi, orbit_list.get_primitive_structure())
         if not isinstance(Mi, list):
             if not isinstance(Mi, int):
                 raise Exception('Mi has wrong type (ClusterSpace)')
@@ -198,13 +199,52 @@ class ClusterSpace(_ClusterSpace):
         # if pbc is not true one needs to massage the structure a bit
         if not np.array(structure.get_pbc()).all():
             atoms = structure.to_atoms()
-            vacuum_on_non_pbc(atoms)
+            add_vacuum_in_non_pbc(atoms)
             structure = Structure.from_atoms(atoms)
         else:
             atoms = structure.to_atoms()
             atoms.wrap()
             structure = Structure.from_atoms(atoms)
         return _ClusterSpace.get_cluster_vector(self, structure)
+
+
+def _get_Mi_from_dict(Mi, structure):
+    '''
+    Mi maps orbit index to allowed components
+    this function will return a list, where
+    Mi_ret[i] will be the allowed components on site index i
+
+    Parameters
+    ----------
+    Mi : xx
+        xx
+    atoms : ASE Atoms object / icet Structure object (bi-optional)
+        atomic configuration
+
+    Returns
+    -------
+    list
+        xxx
+
+    Todo
+    ----
+    * rename function, remove `Mi`
+    * complete docstring
+    '''
+    cluster_data = get_singlet_info(structure)
+    Mi_ret = [-1] * len(structure)
+    for singlet in cluster_data:
+        for site in singlet['sites']:
+            Mi_ret[site[0].index] = Mi[singlet['orbit_index']]
+
+    for all_comp in Mi_ret:
+        if all_comp == -1:
+            s = ['The calculated Mi from dict did not cover all sites of'
+                 ' the input structure.']
+            s += ['Were all sites in primitive mapped?']
+            raise Exception('\n'.join(s))
+
+    return Mi_ret
 
 
 def get_singlet_info(atoms, return_cluster_space=False):
@@ -288,7 +328,7 @@ def get_singlet_configuration(atoms, to_primitive=False):
                 singlet_configuration[atom_index].symbol = element
     else:
         singlet_configuration = atoms.copy()
-        singlet_configuration = vacuum_on_non_pbc(singlet_configuration)
+        singlet_configuration = add_vacuum_in_non_pbc(singlet_configuration)
         orbit_list = cluster_space.get_orbit_list()
         orbit_list_supercell \
             = orbit_list.get_supercell_orbit_list(singlet_configuration)
@@ -320,42 +360,3 @@ def view_singlets(atoms, to_primitive=False):
     singlet_configuration = get_singlet_configuration(
         atoms, to_primitive=to_primitive)
     view(singlet_configuration)
-
-
-def get_Mi_from_dict(Mi, structure):
-    '''
-    Mi maps orbit index to allowed components
-    this function will return a list, where
-    Mi_ret[i] will be the allowed components on site index i
-
-    Parameters
-    ----------
-    Mi : xx
-        xx
-    atoms : ASE Atoms object / icet Structure object (bi-optional)
-        atomic configuration
-
-    Returns
-    -------
-    list
-        xxx
-
-    Todo
-    ----
-    * rename function, remove `Mi`
-    * complete docstring
-    '''
-    cluster_data = get_singlet_info(structure)
-    Mi_ret = [-1] * len(structure)
-    for singlet in cluster_data:
-        for site in singlet['sites']:
-            Mi_ret[site[0].index] = Mi[singlet['orbit_index']]
-
-    for all_comp in Mi_ret:
-        if all_comp == -1:
-            s = ['The calculated Mi from dict did not cover all sites of'
-                 ' the input structure.']
-            s += ['Were all sites in primitive mapped?']
-            raise Exception('\n'.join(s))
-
-    return Mi_ret

@@ -8,14 +8,14 @@ Core components
 LocalOrbitListGenerator
 -----------------------
 
-.. automodule:: local_orbit_list_generator
+.. automodule:: icetdev.core.local_orbit_list_generator
    :members:
    :undoc-members:
 
 NeighborList
 ------------
 
-.. automodule:: neighbor_list
+.. automodule:: icetdev.core.neighbor_list
    :members:
    :undoc-members:
    :inherited-members:
@@ -23,7 +23,7 @@ NeighborList
 ManyBodyNeighborList
 --------------------
 
-.. automodule:: many_body_neighbor_list
+.. automodule:: icetdev.core.many_body_neighbor_list
    :members:
    :undoc-members:
    :inherited-members:
@@ -31,7 +31,7 @@ ManyBodyNeighborList
 Orbit
 -----
 
-.. automodule:: orbit
+.. automodule:: icetdev.core.orbit
    :members:
    :undoc-members:
    :inherited-members:
@@ -39,7 +39,7 @@ Orbit
 OrbitList
 ---------
 
-.. automodule:: orbit_list
+.. automodule:: icetdev.core.orbit_list
    :members:
    :undoc-members:
    :inherited-members:
@@ -47,7 +47,7 @@ OrbitList
 PermutationMap
 --------------
 
-.. automodule:: permutation_map
+.. automodule:: icetdev.core.permutation_map
    :members:
    :undoc-members:
    :inherited-members:
@@ -55,7 +55,7 @@ PermutationMap
 Geometry
 --------
 
-.. automodule:: tools.geometry
+.. automodule:: icetdev.tools.geometry
    :members:
    :undoc-members:
    :inherited-members:

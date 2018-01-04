@@ -1,5 +1,5 @@
 from _icetdev import ClusterCounts
-from icetdev.local_orbit_list_generator import LocalOrbitListGenerator
+from .local_orbit_list_generator import LocalOrbitListGenerator
 
 
 def __count_clusters(self, structure, prim_orbit_list,

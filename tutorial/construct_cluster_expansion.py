@@ -7,8 +7,8 @@ from icetdev import (ClusterSpace,
                      StructureContainer,
                      Optimizer,
                      ClusterExpansion)
-from icetdev.enumeration import enumerate_structures
-from icetdev.tools import ConvexHull
+from icetdev.tools import (ConvexHull,
+                           enumerate_structures)
 
 # step 1: Set up the basic structure and a cluster space
 prim = bulk('Au')

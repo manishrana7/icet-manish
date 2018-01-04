@@ -24,8 +24,8 @@ created, using the former. Also, the `ASE <https://wiki.fysik.dtu.dk/ase>`_
 function :func:`ase.build.bulk` is needed to generate the prototype structure.
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
-   :start-after: # Import modules
-   :end-before: # Create a titanium,
+   :start-after: # Start import
+   :end-before: # End import
 
 Generate a prototype Ti supercell
 ---------------------------------
@@ -35,8 +35,8 @@ The next step is to build a prototype supercell, in the form of a
 tungsten atoms. Moreover, the cutoff for pairs is set to 4 Å.
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
-   :start-after: # sites with W atoms.
-   :end-before: # Create the orbit
+   :start-after: # Start setup
+   :end-before: # End setup
 
 Create a primitive orbit list
 -----------------------------
@@ -52,7 +52,7 @@ obtained is provided as input to :func:`create_orbit_list
 cutoff distances for the clusters.
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
-   :start-after: # Create the orbit
+   :start-after: # Determine the orbit list
    :end-before: # Use the primitive
 
 

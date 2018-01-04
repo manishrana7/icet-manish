@@ -3,11 +3,11 @@ This script checks that all atom objects in the database can have
 its cluster vector computed
 '''
 
-from icetdev import Structure, ClusterSpace
-from icetdev import permutation_map
 import numpy as np
 import random
 from ase.db import connect
+from icetdev import Structure, ClusterSpace
+from icetdev.tools.geometry import add_vacuum_in_non_pbc
 
 
 def generate_mixed_structure(atoms_prim, subelements):
@@ -83,6 +83,6 @@ for row in db.select():
         print(' structure: {}'.format(row.tag))
         cluster_space = ClusterSpace(atoms_row, cutoffs, subelements)
         if not atoms_row.get_pbc().all():
-            permutation_map.__vacuum_on_non_pbc(atoms_row)
+            add_vacuum_in_non_pbc(atoms_row)
         cvs = generate_cluster_vector_set(5, atoms_row,
                                           subelements, cluster_space)

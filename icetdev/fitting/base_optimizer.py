@@ -4,11 +4,11 @@ BaseOptimizer serves as base for all optimizers in HiPhive
 
 import numpy as np
 from collections import OrderedDict
-from icetdev.fitting.tools import compute_rmse
-from icetdev.fitting.fit_methods import (fit_least_squares,
-                                         fit_lasso,
-                                         fit_bayesian_ridge,
-                                         fit_ardr)
+from .tools import compute_rmse
+from .fit_methods import (fit_least_squares,
+                          fit_lasso,
+                          fit_bayesian_ridge,
+                          fit_ardr)
 
 
 fit_methods = OrderedDict([
