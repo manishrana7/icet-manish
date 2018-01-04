@@ -13,10 +13,10 @@ class ConvexHull(object):
     dimensions : int
         Number of independent concentrations needed to specify a point in
         concentration space (1 for binaries, 2 for ternaries etc)
-    concentrations : ndarray of floats, size (N, dimensions)
-        Concentration of the structures on the convex hull.
-    energies : ndarray of floats, size N
-        Energy of the structures on the convex hull.
+    concentrations : NumPy array (N, dimensions)
+        Concentration of the N structures on the convex hull.
+    energies : NumPy array
+        Energy of the N structures on the convex hull.
     structures : list of ints
         Indices of structures that constitute the convex hull (indices are
         defined by the order their concentrations and energies are fed when
@@ -40,6 +40,7 @@ class ConvexHull(object):
             Energy/energy of mixing for each structure.
         '''
 
+        assert len(concentrations) == len(energies)
         # Prepare data in format suitable for SciPy-ConvexHull
         concentrations = np.array(concentrations)
         energies = np.array(energies)
@@ -155,7 +156,7 @@ class ConvexHull(object):
 
         Returns
         -------
-        ndarray of floats
+        NumPy array
             Energies at the specified target_concentrations. If any
             concentration is outside the allowed range, NaN is returned.
         '''
