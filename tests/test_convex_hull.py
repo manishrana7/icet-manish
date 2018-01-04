@@ -5,52 +5,82 @@ import unittest
 from icetdev.tools import ConvexHull
 import numpy as np
 
-concentrations_1 = [0.0, 1.0, 0.4, 0.6]
-energies_1 = [0.0, 10.0, -10.0, 20.0]
-
-concentrations_2 = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.1, 0.1], [0.3, 0.3]]
-energies_2 = [0.0, 10.0, -10.0, 3.0, -7.0]
-
 
 class TestConvexHull(unittest.TestCase):
     '''
     Container for tests of the class functionality
     '''
 
+    def __init__(self, *args, **kwargs):
+        super(TestConvexHull, self).__init__(*args, **kwargs)
+        self.concentrations = [0.0, 1.0, 0.4, 0.6]
+        self.energies = [0.0, 10.0, -10.0, 20.0]
+
     def setUp(self):
         '''
         Instantiate class before each test.
         '''
-        self.ch = ConvexHull(concentrations_1, energies_1)
+        self.ch = ConvexHull(self.concentrations, self.energies)
 
     def test_init(self):
         '''
         Testing that the setup
         (initialization) of tested class work
         '''
-        ch = ConvexHull(concentrations_1, energies_1)
-        self.assertEqual(ch.dimensions, 1)
-        self.assertTrue(np.allclose(ch.energies,
+        self.assertEqual(self.ch.dimensions, 1)
+        self.assertTrue(np.allclose(self.ch.energies,
                                     np.array([0.0, -10.0, 10.0])))
-
-        ch = ConvexHull(concentrations_2, energies_2)
-        self.assertEqual(ch.dimensions, 2)
-        self.assertTrue(np.allclose(ch.energies,
-                                    np.array([0.0, 10.0, -10.0, -7.0])))
 
     def test_get_energy_at_convex_hull(self):
         '''
         Testing energy at convex hull retrieval functionality.
         '''
         convex_hull_energies = self.ch.get_energy_at_convex_hull([0.2, 0.7])
+        self.assertTrue(np.allclose(convex_hull_energies, np.array([-5, 0])))
+
+
+class TestConvexHullTernary(unittest.TestCase):
+    '''
+    Container for tests of the class functionality
+    '''
+
+    def __init__(self, *args, **kwargs):
+        super(TestConvexHullTernary, self).__init__(*args, **kwargs)
+        self.concentrations = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0],
+                               [0.1, 0.1], [0.3, 0.3]]
+        self.energies = [0.0, 10.0, -10.0, 3.0, -7.0]
+
+    def setUp(self):
+        '''
+        Instantiate class before each test.
+        '''
+        self.ch = ConvexHull(self.concentrations, self.energies)
+
+    def test_init(self):
+        '''
+        Testing that the setup
+        (initialization) of tested class work
+        '''
+        self.assertEqual(self.ch.dimensions, 2)
+        self.assertTrue(np.allclose(self.ch.energies,
+                                    np.array([0.0, 10.0, -10.0, -7.0])))
+
+    def test_get_energy_at_convex_hull(self):
+        '''
+        Testing energy at convex hull retrieval functionality.
+        '''
+        convex_hull_energies = self.ch.get_energy_at_convex_hull(
+            [[0.0, 0.0], [0.15, 0.15]])
         self.assertTrue(np.allclose(convex_hull_energies,
-                                    np.array([-5.0, 0.0])))
+                                    np.array([0.0, -3.5])))
 
 
 def suite():
+    test_classes_to_run = [TestConvexHull, TestConvexHullTernary]
     suites_list = []
-    suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestConvexHull)
-    suites_list.append(suite)
+    for test_class in test_classes_to_run:
+        suite = unittest.defaultTestLoader.loadTestsFromTestCase(test_class)
+        suites_list.append(suite)
     test_suite = unittest.TestSuite(suites_list)
     return test_suite
 
