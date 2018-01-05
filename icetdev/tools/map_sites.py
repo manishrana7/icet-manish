@@ -63,14 +63,13 @@ def map_structure_to_reference(input_structure,
 
     Example
     -------
-    The following code snippet illustrates the general usage. To this end, it
-    first creates a primitive FCC cell, which is latter used as reference
-    structure.  To emulate a relaxed structure obtained from, e.g., a density
-    functional theory calculation, the code then creates a 4x4x4 conventional
-    FCC supercell, which is populated with two different atom types, has
-    distorted cell vectors, and random displacements to the atoms. Finally,
-    the present function is used to map the structure back the ideal
-    lattice::
+    The following code snippet illustrates the general usage. It first creates
+    a primitive FCC cell, which is latter used as reference structure. To
+    emulate a relaxed structure obtained from, e.g., a density functional
+    theory calculation, the code then creates a 4x4x4 conventional FCC
+    supercell, which is populated with two different atom types, has distorted
+    cell vectors, and random displacements to the atoms. Finally, the present
+    function is used to map the structure back the ideal lattice::
 
         from ase.build import bulk
         reference = bulk('Au', a=4.09)
