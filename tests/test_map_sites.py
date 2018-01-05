@@ -95,6 +95,7 @@ class TestMapSites(unittest.TestCase):
                                        inert_species=['Au', 'Pd'],
                                        verbose=True)
         self.assertEqual(mapped.get_chemical_formula(), 'H6Au4Pd4V2')
+        self.assertTrue(r_av < r_max)
 
 
 def suite():
