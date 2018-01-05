@@ -89,9 +89,9 @@ def map_structure_to_reference(input_structure,
     scaled_cell = _get_scaled_cell(input_structure, reference_structure,
                                    vacancy_type=vacancy_type,
                                    inert_species=inert_species)
-    P, P_nonideal = _get_transformation_matrix(scaled_cell,
-                                               reference_structure.cell,
-                                               tolerance_cell=tolerance_cell)
+    P = _get_transformation_matrix(scaled_cell,
+                                   reference_structure.cell,
+                                   tolerance_cell=tolerance_cell)
     scaled_structure, ideal_supercell = \
         _rescale_structures(input_structure,
                             reference_structure,
@@ -109,8 +109,6 @@ def map_structure_to_reference(input_structure,
               '{}'.format(reference_structure.cell))
         print('Input cell metric:\n'
               '{}\n'.format(input_structure.cell))
-        print('Non-ideal transformation matrix connecting reference structure'
-              ' and idealized input structure:\n {}'.format(P_nonideal))
         print('Transformation matrix connecting reference structure'
               ' and idealized input structure:\n {}'.format(P))
         print('Determinant of tranformation matrix:'
@@ -293,8 +291,6 @@ def _get_transformation_matrix(input_cell, reference_cell, tolerance_cell=0.05):
     -------
     NumPy array (3, 3)
         Transformation matrix P of integers.
-    NumPy array (3, 3)
-        Transformation matrix before rounded.
     '''
     P = np.dot(input_cell, np.linalg.inv(reference_cell))
 
@@ -313,13 +309,19 @@ def _get_transformation_matrix(input_cell, reference_cell, tolerance_cell=0.05):
         raise Exception(s)
 
     # reduce the (real) transformation matrix to the nearest integer one
-    P_ideal = np.around(P)
-    return P_ideal, P
+    P = np.around(P)
+    return P
 
 
 def _rescale_structures(input_structure, reference_structure, P,
                         vacancy_type=None, tolerance_positions=0.01):
     '''
+    Rescale `input_structure` with `P` so that it matches
+    `reference_structure`, and make a supercell of `reference_structure` using
+    `P`
+    
+    Parameters
+    ----------
     input_structure : ASE Atoms object
         relaxed input structure
     reference_structure : ASE Atoms object
@@ -333,6 +335,14 @@ def _rescale_structures(input_structure, reference_structure, P,
     tolerance_positions : float
         tolerance factor applied when scanning for overlapping positions in
         Angstrom (forwarded to `ase.build.cut`).
+
+    Returns
+    -------
+    ASE Atoms object
+        Scaled version of `input_structure`
+    ASE Atoms object
+        Supercell of `reference_structure` matching cell metric of
+        `scaled_structure`
     '''
     scaled_structure = input_structure.copy()
     scaled_structure.set_cell(np.dot(P, reference_structure.cell),
