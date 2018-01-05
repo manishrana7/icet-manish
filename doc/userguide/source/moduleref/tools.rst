@@ -12,3 +12,10 @@ ConvexHull
    :members:
    :undoc-members:
    :inherited-members:
+
+map_structure_to_reference
+-----------------------
+.. automodule:: icetdev.tools.map_sites
+   :members:
+   :undoc-members:
+   :inherited-members:
