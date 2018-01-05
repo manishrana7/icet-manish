@@ -90,8 +90,9 @@ def map_structure_to_reference(input_structure,
     scaled_cell = _get_scaled_cell(input_structure, reference_structure,
                                    vacancy_type=vacancy_type,
                                    inert_species=inert_species)
-    P = _get_transformation_matrix(scaled_cell, reference_structure.cell,
-                                   tolerance_cell=tolerance_cell)
+    P, P_nonideal = _get_transformation_matrix(scaled_cell,
+                                               reference_structure.cell,
+                                               tolerance_cell=tolerance_cell)
     scaled_structure, ideal_supercell = \
         _rescale_structures(input_structure,
                             reference_structure,
@@ -109,6 +110,8 @@ def map_structure_to_reference(input_structure,
               '{}'.format(reference_structure.cell))
         print('Input cell metric:\n'
               '{}\n'.format(input_structure.cell))
+        print('Non-ideal transformation matrix connecting reference structure'
+              ' and idealized input structure:\n {}'.format(P_nonideal))
         print('Transformation matrix connecting reference structure'
               ' and idealized input structure:\n {}'.format(P))
         print('Determinant of tranformation matrix:'
@@ -233,10 +236,18 @@ def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
 
     Parameters
     ----------
-
+    input_structure : ASE Atoms object
+        relaxed input structure
+    reference_structure : ASE Atoms object
+        reference structure, which can but need not represent the primitive
+        cell
+    vacancy_type : str
+        If not None, the cell is scaled if and only if `inert_species` is not
+        None.
+    inert_species : list of str
+        List of chemical symbols (e.g., `['Au', 'Pd']`) that are never
+        substituted for a vacancy. Needless if `vacancy_type` is `None`.
     '''
-    # rescale cell metric of input structure to match volume
-    # per atom of reference structure
     modcell = input_structure.get_cell()
     if vacancy_type is None:
         # Without scale factor we can just rescale with number of atoms
@@ -264,11 +275,28 @@ def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
     return modcell
 
 
-def _get_transformation_matrix(input_cell, reference_cell, tolerance_cell):
+def _get_transformation_matrix(input_cell, reference_cell, tolerance_cell=0.05):
+    '''
+    Obtain the (in general non-integer) transformation matrix connecting the
+    input structure to the reference structure L = L_p.P --> P = L_p^-1.L
 
-    # obtain the (in general non-integer) transformation matrix
-    # connecting the input structure to the reference structure
-    # L = L_p.P --> P = L_p^-1.L
+    Parameters
+    ----------
+    input_cell : NumPy array (3, 3)
+        Cell metric of input structure (possibly scaled)
+    reference_cell : NumPy array (3, 3)
+        Cell metric of reference structure
+    tolerance_cell : float
+        Tolerance for how much the elements of P are allowed to deviate from
+        nearest integer before they are rounded.
+
+    Returns
+    -------
+    NumPy array (3, 3)
+        Transformation matrix P of integers.
+    NumPy array (3, 3)
+        Transformation matrix before rounded.
+    '''
     P = np.dot(input_cell, np.linalg.inv(reference_cell))
 
     # assert that the transformation matrix does not deviate too
@@ -281,17 +309,32 @@ def _get_transformation_matrix(input_cell, reference_cell, tolerance_cell):
         s += 'P:\n {}\n'.format(P)
         s += 'P_round:\n {}\n'.format(np.around(P))
         s += 'Deviation: {}\n'.format(np.linalg.norm(P - np.around(P)) / 9)
-        s += 'You can try raising `tolerance_cell`.'
+        s += 'If there are vacancies, you can try specifying `inert_species`.'
+        s += ' Else, you can try raising `tolerance_cell`.'
         raise Exception(s)
 
     # reduce the (real) transformation matrix to the nearest integer one
-    P = np.around(P)
-    return P
+    P_ideal = np.around(P)
+    return P_ideal, P
 
 
 def _rescale_structures(input_structure, reference_structure, P,
                         vacancy_type=None, tolerance_positions=0.01):
-    # scale input structure to idealized cell metric
+    '''
+    input_structure : ASE Atoms object
+        relaxed input structure
+    reference_structure : ASE Atoms object
+        reference structure, which can but need not represent the primitive
+        cell
+    P : NumPy array (3, 3)
+        Transformation matrix of integers.
+    vacancy_type : str
+        If None, an additional check will be done that the number of atoms
+        match.
+    tolerance_positions : float
+        tolerance factor applied when scanning for overlapping positions in
+        Angstrom (forwarded to `ase.build.cut`).
+    '''
     scaled_structure = input_structure.copy()
     scaled_structure.set_cell(np.dot(P, reference_structure.cell),
                               scale_atoms=True)
