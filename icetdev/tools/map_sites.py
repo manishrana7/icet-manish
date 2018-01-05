@@ -78,101 +78,40 @@ def map_structure_to_reference(input_structure,
         mapped_atoms = map_structure_to_reference(atoms, reference, 1.0)
 
     '''
-
-    np.set_printoptions(suppress=True, precision=6)
-
     if np.any(input_structure.pbc != reference_structure.pbc):
         s = '''The periodic boundary conditions differ
         between input and reference structure'''
         raise Exception(s)
 
-    # The input structure is scaled in order to match the lattice
-    # structure of the reference structure. The reference
-    # structure can be a primitive cell, in which case the input
-    # structure would usually be a supercell thereof. This
-    # requires some special care here.
-    atvol_in = input_structure.get_volume() / len(input_structure)
-    atvol_ref = reference_structure.get_volume() / len(reference_structure)
-    scale = atvol_in / atvol_ref
+    # Scale input cell and construct supercell of the reference structure
+    scaled_cell = _get_scaled_cell(input_structure, reference_structure,
+                                   vacancy_type=vacancy_type)
+    P = _get_transformation_matrix(scaled_cell, reference_structure.cell,
+                                   tolerance_cell=tolerance_cell)
+    scaled_structure, ideal_supercell = \
+        _rescale_structures(input_structure,
+                            reference_structure,
+                            P,
+                            tolerance_positions=tolerance_positions)
+
     if verbose:
-        print('Volume per atom ratio of input structure and reference'
-              ' structure: {}'.format(scale))
+        np.set_printoptions(suppress=True, precision=6)
         print('Number of atoms in reference structure:'
               ' {}'.format(len(reference_structure)))
         print('Number of atoms in input structure:'
-              ' {}'.format(len(input_structure)))
+              ' {}\n'.format(len(input_structure)))
         print('Reference cell metric:\n'
               '{}'.format(reference_structure.cell))
         print('Input cell metric:\n'
-              '{}'.format(input_structure.cell))
-        print('Reference cell volume per atom:\n'
-              ' {}'.format(atvol_ref))
-        print('Input cell volume per atom:\n'
-              '{}'.format(atvol_in))
-
-    # rescale cell metric of input structure to match volume
-    # per atom of reference structure
-    modcell = input_structure.get_cell()
-    if vacancy_type is None:
-        modcell *= (1.0 / scale) ** (1.0 / 3.0)
-        if verbose:
-            print('Modified input cell metric:\n'
-                  ' {}'.format(modcell))
-            atvol_mod = np.linalg.det(modcell) / len(input_structure)
-            print('Modified input cell volume per atom :'
-                  ' {}'.format(atvol_mod))
-
-    # obtain the (in general non-integer) transformation matrix
-    # connecting the input structure to the reference structure
-    # L = L_p.P --> P = L_p^-1.L
-    P = np.dot(modcell, np.linalg.inv(reference_structure.cell))
-    if verbose:
-        print('P:\n {}'.format(P))
-        print('P_round:\n {}'.format(np.around(P)))
-        dP = np.linalg.det(np.around(P))
-        print('det(P_round):\n {}'.format(dP))
-    # assert that the transformation matrix does not deviate too
-    # strongly from the nearest integer matrix
-    if np.linalg.norm(P - np.around(P)) / 9 > tolerance_cell:
-        s = 'Failed to map structure to reference'
-        s += 'structure (tolerance_cell exceeded).\n'
-        s += 'reference:\n {}\n'.format(reference_structure.cell)
-        s += 'input:\n {}\n'.format(input_structure.cell)
-        s += 'modcell:\n {}\n'.format(modcell)
-        s += 'P:\n {}\n'.format(P)
-        s += 'P_round:\n {}\n'.format(np.around(P))
-        s += 'Deviation: {}\n'.format(np.linalg.norm(P - np.around(P)) / 9)
-        s += 'You can try raising `tolerance_cell`.'
-        raise Exception(s)
-    # reduce the (real) transformation matrix to the nearest integer one
-    P = np.around(P)
-    if verbose:
+              '{}\n'.format(input_structure.cell))
         print('Transformation matrix connecting reference structure'
               ' and idealized input structure:\n {}'.format(P))
-    # scale input structure to idealized cell metric
-    scaled_structure = input_structure.copy()
-    scaled_structure.set_cell(np.dot(P, reference_structure.cell),
-                                  scale_atoms=True)
-    # generate supercell of (presumably primitive) reference structure
-    ideal_supercell = cut(reference_structure,
-                          P[0], P[1], P[2],
-                          tolerance=tolerance_positions)
-    if verbose:
-        print('ideal_supercell:\n{}'.format(ideal_supercell.cell))
-    if (len(ideal_supercell) != len(scaled_structure) and
-            vacancy_type is None):
-        s = 'Number of atoms in ideal supercell does not'
-        s += ' match input structure.\n'
-        s += 'ideal: {}\n'.format(len(ideal_supercell))
-        s += 'input: {}'.format(len(scaled_structure))
-        raise Exception(s)
-    if verbose:
-        print('Cell metric of input structure:\n'
-              '{}'.format(input_structure.cell))
-        print('Cell metric of rescaled input structure:\n'
-              '{}'.format(scaled_structure.cell))
+        print('Determinant of tranformation matrix:'
+              ' {:.3f}\n'.format(np.linalg.det(P)))
         print('Cell metric of ideal supercell:\n'
               '{}'.format(ideal_supercell.cell))
+        print('Cell metric of rescaled input structure:\n'
+              '{}\n'.format(scaled_structure.cell))
 
     # map atoms in input structure to closest site in ideal
     # supercell
@@ -227,6 +166,24 @@ def map_structure_to_reference(input_structure,
 
     dr_avg = dr_sum / len(ideal_supercell)
     dr_sdv = np.sqrt(dr_sumsq / len(ideal_supercell) - dr_avg ** 2)
+
+    # Check that not more than one atom was assigned to the same site
+    for k in set(mapped):
+        if k >= 0 and mapped.count(k) > 1:
+            s = 'Site {} has been assigned more than once.'.format(k)
+            raise Exception(s)
+
+    # Check that the chemical composition of input and ideal supercell matches
+    for element in set(input_structure.get_chemical_symbols()):
+        n1 = input_structure.get_chemical_symbols().count(element)
+        n2 = ideal_supercell.get_chemical_symbols().count(element)
+        if n1 != n2:
+            s = '''Number of atoms of type {} differs between
+            input structure ({}) and ideal
+            supercell ({}).\n'''.format(element, n1, n2)
+            print(s)
+            raise Exception(s)
+
     if verbose:
         print('Maximum, average and standard deviation of atomic'
               ' displacements: {} {} {}'.format(dr_max, dr_avg, dr_sdv))
@@ -244,6 +201,7 @@ def map_structure_to_reference(input_structure,
             print(' {:12.6f} {:12.6f} {:12.6f}'.format(*scaled_atom.position),
                   end='')
             print('')
+        print('')
 
         print('{:52} {}'.format('Ideal supercell:',
                                 'Scaled structure:'))
@@ -258,19 +216,77 @@ def map_structure_to_reference(input_structure,
                 print('    --> {:.4}'.format(dr), end='')
             print('')
 
-    for k in set(mapped):
-        if k >= 0 and mapped.count(k) > 1:
-            s = 'Site {} has been assigned more than once.'.format(k)
-            raise Exception(s)
-
-    for element in set(input_structure.get_chemical_symbols()):
-        n1 = input_structure.get_chemical_symbols().count(element)
-        n2 = ideal_supercell.get_chemical_symbols().count(element)
-        if n1 != n2:
-            s = """Number of atoms of type {} differs between
-            input structure ({}) and ideal
-            supercell ({}).\n""".format(element, n1, n2)
-            print(s)
-            raise Exception(s)
-
     return ideal_supercell, dr_max, dr_avg
+
+
+def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None):
+    '''
+    The input structure needs to be scaled in order to match the lattice
+    structure of the reference structure. The reference structure can be a
+    primitive cell, in which case the input structure would usually be a
+    supercell thereof. Also, we need an ideal supercell that matches the input
+    structure.
+
+    Parameters
+    ----------
+
+    '''
+    # rescale cell metric of input structure to match volume
+    # per atom of reference structure
+    modcell = input_structure.get_cell()
+    if vacancy_type is None:
+        atvol_in = input_structure.get_volume() / len(input_structure)
+        atvol_ref = reference_structure.get_volume() / len(reference_structure)
+        scale = atvol_in / atvol_ref
+        modcell *= (1.0 / scale) ** (1.0 / 3.0)
+    return modcell
+
+
+def _get_transformation_matrix(input_cell, reference_cell, tolerance_cell):
+
+    # obtain the (in general non-integer) transformation matrix
+    # connecting the input structure to the reference structure
+    # L = L_p.P --> P = L_p^-1.L
+    P = np.dot(input_cell, np.linalg.inv(reference_cell))
+
+    # assert that the transformation matrix does not deviate too
+    # strongly from the nearest integer matrix
+    if np.linalg.norm(P - np.around(P)) / 9 > tolerance_cell:
+        s = 'Failed to map structure to reference'
+        s += 'structure (tolerance_cell exceeded).\n'
+        s += 'reference:\n {}\n'.format(reference_cell)
+        s += 'modcell:\n {}\n'.format(modcell)
+        s += 'P:\n {}\n'.format(P)
+        s += 'P_round:\n {}\n'.format(np.around(P))
+        s += 'Deviation: {}\n'.format(np.linalg.norm(P - np.around(P)) / 9)
+        s += 'You can try raising `tolerance_cell`.'
+        raise Exception(s)
+
+    # reduce the (real) transformation matrix to the nearest integer one
+    P = np.around(P)
+    return P
+
+
+def _rescale_structures(input_structure, reference_structure, P,
+                        tolerance_positions=0.01):
+    # scale input structure to idealized cell metric
+    scaled_structure = input_structure.copy()
+    scaled_structure.set_cell(np.dot(P, reference_structure.cell),
+                              scale_atoms=True)
+
+    # generate supercell of (presumably primitive) reference structure
+    ideal_supercell = cut(reference_structure,
+                          P[0], P[1], P[2],
+                          tolerance=tolerance_positions)
+    assert(len(ideal_supercell) ==
+           int(np.round(len(reference_structure) * np.linalg.det(P))))
+
+    if (len(ideal_supercell) != len(scaled_structure) and
+            vacancy_type is None):
+        s = 'Number of atoms in ideal supercell does not'
+        s += ' match input structure.\n'
+        s += 'ideal: {}\n'.format(len(ideal_supercell))
+        s += 'input: {}'.format(len(scaled_structure))
+        raise Exception(s)
+
+    return scaled_structure, ideal_supercell
