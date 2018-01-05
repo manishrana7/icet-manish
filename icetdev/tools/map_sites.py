@@ -1,4 +1,3 @@
-from __future__ import print_function, division
 from ase.build import cut
 import numpy as np
 
@@ -10,7 +9,8 @@ def map_configuration_to_reference(input_configuration,
                                    tolerance_cell=0.05,
                                    tolerance_positions=0.01,
                                    verbose=False):
-    '''Map a relaxed configuration onto a reference configuration.
+    '''
+    Map a relaxed configuration onto a reference configuration.
 
     Parameters
     ----------
@@ -60,24 +60,22 @@ def map_configuration_to_reference(input_configuration,
 
     Example
     -------
-    The following code snippet illustrates the general usage. To this
-    end, it first creates a primitive FCC cell, which is latter used
-    as reference structure.  To emulate a relaxed structure obtained
-    from e.g., a density functional theory calculation, the code then
-    creates a 4x4x4 conventional FCC supercell, which is populated
-    with two different atom types, has distorted cell vectors, and
-    random displacements to the atoms. Finally, the present function
-    is used to map the configuration back the ideal lattice::
+    The following code snippet illustrates the general usage. To this end, it
+    first creates a primitive FCC cell, which is latter used as reference
+    structure.  To emulate a relaxed structure obtained from, e.g., a density
+    functional theory calculation, the code then creates a 4x4x4 conventional
+    FCC supercell, which is populated with two different atom types, has
+    distorted cell vectors, and random displacements to the atoms. Finally,
+    the present function is used to map the configuration back the ideal
+    lattice::
 
         from ase.build import bulk
-        reference = bulk('Au', alat=4.09)
-        configuration = bulk('Au', cubic=True, alat=4.09).repeat(4)
-        configuration.set_chemical_symbols(10 * ['Ag'] +
-                                           (len(atoms) - 10) * ['Au'])
-        configuration.set_cell(atoms.cell * 1.02, scale_atoms=True)
-        configuration.rattle(0.1)
-        mapped_atoms = map_configuration_to_reference(configuration,
-                                                      reference, 1.0)
+        reference = bulk('Au', a=4.09)
+        atoms = bulk('Au', cubic=True, a=4.09).repeat(4)
+        atoms.set_chemical_symbols(10 * ['Ag'] + (len(atoms) - 10) * ['Au'])
+        atoms.set_cell(atoms.cell * 1.02, scale_atoms=True)
+        atoms.rattle(0.1)
+        mapped_atoms = map_configuration_to_reference(atoms, reference, 1.0)
 
     '''
 
@@ -159,7 +157,8 @@ def map_configuration_to_reference(input_configuration,
     ideal_supercell = cut(reference_structure,
                           P[0], P[1], P[2],
                           tolerance=tolerance_positions)
-    print('ideal_supercell:\n{}'.format(ideal_supercell.cell))
+    if verbose:
+        print('ideal_supercell:\n{}'.format(ideal_supercell.cell))
     if (len(ideal_supercell) != len(scaled_configuration) and
             vacancy_type is None):
         s = 'Number of atoms in ideal supercell does not'
