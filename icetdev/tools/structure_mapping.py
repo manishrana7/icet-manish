@@ -93,13 +93,12 @@ def map_structure_to_reference(input_structure,
                             P,
                             tolerance_positions=tolerance_positions)
 
-    if (len(ideal_supercell) != len(scaled_structure) and
-            vacancy_type is None):
-        s = 'Number of atoms in ideal supercell does not'
-        s += ' match input structure.\n'
-        s += 'ideal: {}\n'.format(len(ideal_supercell))
-        s += 'input: {}'.format(len(scaled_structure))
-        raise Exception(s)
+    assert len(ideal_supercell) == len(scaled_structure) or \
+        vacancy_type is not None, \
+        ('Number of atoms in ideal supercell does not match '
+         'input structure.\n'
+         'ideal: {}\ninput: {}'.format(len(ideal_supercell),
+                                       len(scaled_structure)))
 
     if verbose:
         np.set_printoptions(suppress=True, precision=6)
@@ -140,12 +139,11 @@ def map_structure_to_reference(input_structure,
                                               mic=True)
             del ideal_supercell[-1]
             if dr < tolerance_mapping:
-                if mapped[ideal_site.index] >= 0:
-                    s = 'More than one atom from the relaxed'
-                    s += ' (and rescaled) structure have been'
-                    s += ' mapped onto the same ideal site.\n'
-                    s += ' Try reducing `tolerance_mapping`.'
-                    raise Exception(s)
+                assert mapped[ideal_site.index] < 0, \
+                    ('More than one atom from the relaxed'
+                     ' (and rescaled) structure have been'
+                     ' mapped onto the same ideal site.\n'
+                     ' Try reducing `tolerance_mapping`.')
                 mapped[ideal_site.index] = atom.index
                 drs[ideal_site.index] = dr
                 ideal_site.symbol = atom.symbol
@@ -154,20 +152,12 @@ def map_structure_to_reference(input_structure,
                 dr_sumsq += dr * dr
                 break
         else:
-            if vacancy_type is not None:
-                try:
-                    ideal_site.symbol = vacancy_type
-                except:
-                    s = 'Failed to assign "{}" as vacancy type.\n'
-                    s += 'Check whether `vacancy_type` represents a'
-                    s += ' valid element symbol.'.format(vacancy_type)
-                    raise Exception(s)
-            else:
-                s = 'Failed to assign an atom from the relaxed (and'
-                s += ' rescaled) structure to the ideal lattice.'
-                s += ' Try increasing `tolerance_mapping`.\n'
-                s += ' {}'.format(ideal_site)
-                raise Exception(s)
+            assert vacancy_type is not None, \
+                ('Failed to assign an atom from the relaxed (and'
+                 ' rescaled) structure to the ideal lattice.'
+                 ' Try increasing `tolerance_mapping`.\n'
+                 ' {}'.format(ideal_site))
+            ideal_site.symbol = vacancy_type
 
     dr_avg = dr_sum / len(ideal_supercell)
     dr_sdv = np.sqrt(dr_sumsq / len(ideal_supercell) - dr_avg ** 2)
@@ -298,17 +288,16 @@ def _get_transformation_matrix(input_cell, reference_cell, tolerance_cell=0.05):
 
     # assert that the transformation matrix does not deviate too
     # strongly from the nearest integer matrix
-    if np.linalg.norm(P - np.around(P)) / 9 > tolerance_cell:
-        s = 'Failed to map structure to reference'
-        s += 'structure (tolerance_cell exceeded).\n'
-        s += 'reference:\n {}\n'.format(reference_cell)
-        s += 'input:\n {}\n'.format(input_cell)
-        s += 'P:\n {}\n'.format(P)
-        s += 'P_round:\n {}\n'.format(np.around(P))
-        s += 'Deviation: {}\n'.format(np.linalg.norm(P - np.around(P)) / 9)
-        s += 'If there are vacancies, you can try specifying `inert_species`.'
-        s += ' Else, you can try raising `tolerance_cell`.'
-        raise Exception(s)
+    assert np.linalg.norm(P - np.around(P)) / 9 < tolerance_cell, \
+        ('Failed to map structure to reference' +
+        'structure (tolerance_cell exceeded).\n' +
+        'reference:\n {}\n'.format(reference_cell) +
+        'input:\n {}\n'.format(input_cell) +
+        'P:\n {}\n'.format(P) +
+        'P_round:\n {}\n'.format(np.around(P)) +
+        'Deviation: {}\n'.format(np.linalg.norm(P - np.around(P)) / 9) +
+        'If there are vacancies, you can try specifying `inert_species`.' +
+        ' Else, you can try raising `tolerance_cell`.')
 
     # reduce the (real) transformation matrix to the nearest integer one
     P = np.around(P)
@@ -321,7 +310,7 @@ def _rescale_structures(input_structure, reference_structure, P,
     Rescale `input_structure` with `P` so that it matches
     `reference_structure`, and make a supercell of `reference_structure` using
     `P`
-    
+
     Parameters
     ----------
     input_structure : ASE Atoms object
