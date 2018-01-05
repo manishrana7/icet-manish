@@ -22,21 +22,16 @@ def map_structure_to_reference(input_structure,
         cell
     tolerance_mapping : float
         maximum allowed displacement for mapping an atom in the relaxed (but
-        rescaled) structure to the reference supercell
-
-        *Note*: A reasonable choice is up to 20-30% of the first
-        nearest neighbor distance (`r1`). A value above 50% of `r1`
-        will most likely lead to atoms being multiply assigned, which
-        will raise an exception.
+        rescaled) structure to the reference supercell *Note*: A reasonable
+        choice is up to 20-30% of the first nearest neighbor distance (`r1`).
+        A value above 50% of `r1` will most likely lead to atoms being
+        multiply assigned, which will raise an exception.
     vacancy_type : str
         If this parameter is set to a non-zero string unassigned sites in the
-        reference structure will be assigned to this type.
-
-        *Note 1*: By default (``None``) the method will print an error
-        message and raise an exception if there are *any* unassigned
-        sites in the reference structure.
-
-        *Note 2*: `vacancy_type` must be a valid element type as
+        reference structure will be assigned to this type. *Note 1*: By
+        default (``None``) the method will print an error message and raise an
+        exception if there are *any* unassigned sites in the reference
+        structure. *Note 2*: `vacancy_type` must be a valid element type as
         enforced by the ASE Atoms class.
     inert_species : list of str
         List of chemical symbols (e.g., `['Au', 'Pd']`) that are never
