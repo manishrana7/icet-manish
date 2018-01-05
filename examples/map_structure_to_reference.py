@@ -6,6 +6,7 @@ been scaled and/or the atoms displaced onto an ideal (primitive) structure
 # Import modules
 from icetdev.tools import map_structure_to_reference
 from ase.build import bulk
+from ase import Atom
 # End import
 
 # Begin by creating a reference structure, in this case fcc Au.
@@ -32,7 +33,6 @@ print('Average displacement: {:.3f} Angstrom'.format(r_av))
 
 # Map a structure that contains vacancies, in this case Pd-Au-H-Vac, in which
 # Pd and Au share one sublattice and Pd and H another.
-from ase import Atom
 reference = bulk('Au', a=4.00)
 reference.append(Atom(('H'), (2.0, 2.0, 2.0)))
 
