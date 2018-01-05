@@ -96,8 +96,15 @@ def map_structure_to_reference(input_structure,
         _rescale_structures(input_structure,
                             reference_structure,
                             P,
-                            vacancy_type=vacancy_type,
                             tolerance_positions=tolerance_positions)
+
+    if (len(ideal_supercell) != len(scaled_structure) and
+            vacancy_type is None):
+        s = 'Number of atoms in ideal supercell does not'
+        s += ' match input structure.\n'
+        s += 'ideal: {}\n'.format(len(ideal_supercell))
+        s += 'input: {}'.format(len(scaled_structure))
+        raise Exception(s)
 
     if verbose:
         np.set_printoptions(suppress=True, precision=6)
@@ -314,7 +321,7 @@ def _get_transformation_matrix(input_cell, reference_cell, tolerance_cell=0.05):
 
 
 def _rescale_structures(input_structure, reference_structure, P,
-                        vacancy_type=None, tolerance_positions=0.01):
+                        tolerance_positions=0.01):
     '''
     Rescale `input_structure` with `P` so that it matches
     `reference_structure`, and make a supercell of `reference_structure` using
@@ -329,9 +336,6 @@ def _rescale_structures(input_structure, reference_structure, P,
         cell
     P : NumPy array (3, 3)
         Transformation matrix of integers.
-    vacancy_type : str
-        If None, an additional check will be done that the number of atoms
-        match.
     tolerance_positions : float
         tolerance factor applied when scanning for overlapping positions in
         Angstrom (forwarded to `ase.build.cut`).
@@ -354,13 +358,5 @@ def _rescale_structures(input_structure, reference_structure, P,
                           tolerance=tolerance_positions)
     assert(len(ideal_supercell) ==
            int(np.round(len(reference_structure) * np.linalg.det(P))))
-
-    if (len(ideal_supercell) != len(scaled_structure) and
-            vacancy_type is None):
-        s = 'Number of atoms in ideal supercell does not'
-        s += ' match input structure.\n'
-        s += 'ideal: {}\n'.format(len(ideal_supercell))
-        s += 'input: {}'.format(len(scaled_structure))
-        raise Exception(s)
 
     return scaled_structure, ideal_supercell
