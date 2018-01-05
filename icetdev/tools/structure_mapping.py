@@ -264,7 +264,8 @@ def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
     return modcell
 
 
-def _get_transformation_matrix(input_cell, reference_cell, tolerance_cell=0.05):
+def _get_transformation_matrix(input_cell, reference_cell,
+                               tolerance_cell=0.05):
     '''
     Obtain the (in general non-integer) transformation matrix connecting the
     input structure to the reference structure L = L_p.P --> P = L_p^-1.L
@@ -290,14 +291,14 @@ def _get_transformation_matrix(input_cell, reference_cell, tolerance_cell=0.05):
     # strongly from the nearest integer matrix
     assert np.linalg.norm(P - np.around(P)) / 9 < tolerance_cell, \
         ('Failed to map structure to reference' +
-        'structure (tolerance_cell exceeded).\n' +
-        'reference:\n {}\n'.format(reference_cell) +
-        'input:\n {}\n'.format(input_cell) +
-        'P:\n {}\n'.format(P) +
-        'P_round:\n {}\n'.format(np.around(P)) +
-        'Deviation: {}\n'.format(np.linalg.norm(P - np.around(P)) / 9) +
-        'If there are vacancies, you can try specifying `inert_species`.' +
-        ' Else, you can try raising `tolerance_cell`.')
+         'structure (tolerance_cell exceeded).\n' +
+         'reference:\n {}\n'.format(reference_cell) +
+         'input:\n {}\n'.format(input_cell) +
+         'P:\n {}\n'.format(P) +
+         'P_round:\n {}\n'.format(np.around(P)) +
+         'Deviation: {}\n'.format(np.linalg.norm(P - np.around(P)) / 9) +
+         'If there are vacancies, you can try specifying `inert_species`.' +
+         ' Else, you can try raising `tolerance_cell`.')
 
     # reduce the (real) transformation matrix to the nearest integer one
     P = np.around(P)
