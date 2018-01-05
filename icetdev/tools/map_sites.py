@@ -6,6 +6,7 @@ def map_structure_to_reference(input_structure,
                                reference_structure,
                                tolerance_mapping,
                                vacancy_type=None,
+                               inert_species=None,
                                tolerance_cell=0.05,
                                tolerance_positions=0.01,
                                verbose=False):
@@ -27,7 +28,6 @@ def map_structure_to_reference(input_structure,
         nearest neighbor distance (`r1`). A value above 50% of `r1`
         will most likely lead to atoms being multiply assigned, which
         will raise an exception.
-    
     vacancy_type : str
         If this parameter is set to a non-zero string unassigned sites in the
         reference structure will be assigned to this type.
@@ -38,6 +38,11 @@ def map_structure_to_reference(input_structure,
 
         *Note 2*: `vacancy_type` must be a valid element type as
         enforced by the ASE Atoms class.
+    inert_species : list of str
+        List of chemical symbols (e.g., `['Au', 'Pd']`) that are never
+        substituted for a vacancy. Used to make an initial rescale of the cell
+        and thus increases the probability for a successful mapping. Need not
+        be specified if `vacancy_type` is None.
     tolerance_cell : float
         tolerance factor applied when computing permutation matrix to generate
         supercell (h = P h_p)
@@ -51,7 +56,7 @@ def map_structure_to_reference(input_structure,
     -------
     ASE Atoms, float, float
         - the ideal supercell most closely matching the input structure
-        - the largets deviation of any input coordinate from its ideal 
+        - the largets deviation of any input coordinate from its ideal
           coordinate
         - the average deviation of the input coordinates from the ideal
           coordinates
@@ -83,13 +88,15 @@ def map_structure_to_reference(input_structure,
 
     # Scale input cell and construct supercell of the reference structure
     scaled_cell = _get_scaled_cell(input_structure, reference_structure,
-                                   vacancy_type=vacancy_type)
+                                   vacancy_type=vacancy_type,
+                                   inert_species=inert_species)
     P = _get_transformation_matrix(scaled_cell, reference_structure.cell,
                                    tolerance_cell=tolerance_cell)
     scaled_structure, ideal_supercell = \
         _rescale_structures(input_structure,
                             reference_structure,
                             P,
+                            vacancy_type=vacancy_type,
                             tolerance_positions=tolerance_positions)
 
     if verbose:
@@ -120,14 +127,6 @@ def map_structure_to_reference(input_structure,
     # distances between ideal and input sites
     drs = [None] * len(ideal_supercell)
     for ideal_site in ideal_supercell:
-        if vacancy_type is not None:
-            try:
-                ideal_site.symbol = vacancy_type
-            except:
-                s = 'Failed to assign "{}" as vacancy type.\n'
-                s += 'Check whether `vacancy_type` represents a'
-                s += ' valid element symbol.'.format(vacancy_type)
-                raise Exception(s)
         for atom in scaled_structure:
             # in order to compute the distance the current atom from
             # the input structure is temporarily added to the
@@ -154,12 +153,19 @@ def map_structure_to_reference(input_structure,
                 break
         else:
             if vacancy_type is not None:
-                continue
-            s = 'Failed to assign an atom from the relaxed (and'
-            s += ' rescaled) structure to the ideal lattice.'
-            s += ' Try increasing `tolerance_mapping`.\n'
-            s += ' {}'.format(ideal_site)
-            raise Exception(s)
+                try:
+                    ideal_site.symbol = vacancy_type
+                except:
+                    s = 'Failed to assign "{}" as vacancy type.\n'
+                    s += 'Check whether `vacancy_type` represents a'
+                    s += ' valid element symbol.'.format(vacancy_type)
+                    raise Exception(s)
+            else:
+                s = 'Failed to assign an atom from the relaxed (and'
+                s += ' rescaled) structure to the ideal lattice.'
+                s += ' Try increasing `tolerance_mapping`.\n'
+                s += ' {}'.format(ideal_site)
+                raise Exception(s)
 
     dr_avg = dr_sum / len(ideal_supercell)
     dr_sdv = np.sqrt(dr_sumsq / len(ideal_supercell) - dr_avg ** 2)
@@ -216,7 +222,8 @@ def map_structure_to_reference(input_structure,
     return ideal_supercell, dr_max, dr_avg
 
 
-def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None):
+def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
+                     inert_species=None):
     '''
     The input structure needs to be scaled in order to match the lattice
     structure of the reference structure. The reference structure can be a
@@ -232,10 +239,28 @@ def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None):
     # per atom of reference structure
     modcell = input_structure.get_cell()
     if vacancy_type is None:
+        # Without scale factor we can just rescale with number of atoms
         atvol_in = input_structure.get_volume() / len(input_structure)
         atvol_ref = reference_structure.get_volume() / len(reference_structure)
         scale = atvol_in / atvol_ref
-        modcell *= (1.0 / scale) ** (1.0 / 3.0)
+    if vacancy_type is not None:
+        if inert_species is None:
+            scale = 1.0
+        else:
+            # We can not use the number of atoms since there may be vacancies
+            # in the input_structure. Instead we count the species that we
+            # know should always be present.
+            n_in = 0
+            n_ref = 0
+            symbols_in = input_structure.get_chemical_symbols()
+            symbols_ref = reference_structure.get_chemical_symbols()
+            for species in inert_species:
+                n_in += symbols_in.count(species)
+                n_ref += symbols_ref.count(species)
+            atvol_in = input_structure.get_volume() / n_in
+            atvol_ref = reference_structure.get_volume() / n_ref
+            scale = atvol_in / atvol_ref
+    modcell *= (1.0 / scale) ** (1.0 / 3.0)
     return modcell
 
 
@@ -252,7 +277,7 @@ def _get_transformation_matrix(input_cell, reference_cell, tolerance_cell):
         s = 'Failed to map structure to reference'
         s += 'structure (tolerance_cell exceeded).\n'
         s += 'reference:\n {}\n'.format(reference_cell)
-        s += 'modcell:\n {}\n'.format(modcell)
+        s += 'input:\n {}\n'.format(input_cell)
         s += 'P:\n {}\n'.format(P)
         s += 'P_round:\n {}\n'.format(np.around(P))
         s += 'Deviation: {}\n'.format(np.linalg.norm(P - np.around(P)) / 9)
@@ -265,7 +290,7 @@ def _get_transformation_matrix(input_cell, reference_cell, tolerance_cell):
 
 
 def _rescale_structures(input_structure, reference_structure, P,
-                        tolerance_positions=0.01):
+                        vacancy_type=None, tolerance_positions=0.01):
     # scale input structure to idealized cell metric
     scaled_structure = input_structure.copy()
     scaled_structure.set_cell(np.dot(P, reference_structure.cell),
