@@ -2,7 +2,7 @@ from .convex_hull import ConvexHull
 from .structure_enumeration import (enumerate_structures,
                                     get_symmetry_operations)
 from .geometry import get_primitive_structure
-from .map_sitse import map_structure_to_reference
+from .map_sites import map_structure_to_reference
 
 __all__ = ['ConvexHull',
            'enumerate_structures',
