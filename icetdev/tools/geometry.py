@@ -1,6 +1,9 @@
 import numpy as np
 from icetdev.lattice_site import LatticeSite
+from icetdev import Structure
 import math
+
+from collections import namedtuple
 
 
 def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
@@ -38,7 +41,7 @@ def find_lattice_site_from_position_python(structure, position):
 
     remainder = np.dot(fractional - unit_cell_offset, structure.cell)
     try:
-        index = structure.find_index_of_position(remainder)
+        index = structure.find_index_of_position(remainder, 1e-3)
     except:
         print("error did not find index with pos: {}".format(remainder))
         print("position in structure are:")
@@ -73,7 +76,7 @@ def find_lattice_site_from_position_python(structure, position):
 
 def required_offsets_to_map_supercell(supercell, atoms_prim):
     '''
-    Calculates the minimum number of offsets 
+    Calculates the minimum number of offsets
     of atoms prim needed to completely cover the atoms object
 
     Parameters
@@ -86,7 +89,7 @@ def required_offsets_to_map_supercell(supercell, atoms_prim):
     Returns
     ------
     required_offsets: List of lists
-        A minimum set of offsets of the primitive 
+        A minimum set of offsets of the primitive
         needed to cover the supercell
     '''
     # Get fractional coordinates of supercell positions given in primitive cell
@@ -96,7 +99,7 @@ def required_offsets_to_map_supercell(supercell, atoms_prim):
     offsets = []
 
     for pos in fractional_positions:
-        offset = tuple(np.floor(pos).astype(int))
+        offset = tuple(np.floor(np.round(pos, decimals=5)).astype(int))
         offsets.append(offset)
 
     required_offsets = list(set(offsets))
@@ -163,7 +166,6 @@ def get_permutation_matrix(input_configuration,
     '''
 
     input_cell = input_configuration.cell
-    reference_cell = reference_structure.cell
 
     # obtain the (in general non-integer) transformation matrix
     # connecting the input configuration to the reference structure
@@ -192,7 +194,7 @@ def get_permutation_matrix(input_configuration,
 def get_smart_offsets(atoms, atoms_prim):
     '''
      Returns the maps (note plural) that maps each basis atom to the supercell once and only once
-     Each basis will get its own offset. 
+     Each basis will get its own offset.
 
     Parameters
     ----------
@@ -203,13 +205,9 @@ def get_smart_offsets(atoms, atoms_prim):
 
     Returns
     ------
-    smart_offsets: List of list
-        each inner list contains a subset of the mapping
-        needed to map the entire supercell from the primitive cell.
+    smart_offsets: List of named tuple
+        each named tuple is one prmi
 
-    Raises
-        Exception 
-            if the algorithm doesn't find any mapping to the supercelll
     '''
 
     smart_offsets = []
@@ -225,61 +223,154 @@ def get_smart_offsets(atoms, atoms_prim):
     # Check if easy solution is possibly
     if len(unique_offsets) == expected_number_of_mappings:
         for offset in unique_offsets:
-            smart_offsets.append( [offset] * size_of_primitive )
-        return smart_offsets               
-    
+            smart_offsets.append([offset] * size_of_primitive)
+        return smart_offsets
+
     # Sanity checks
     if len(unique_offsets) * size_of_primitive < size_of_supercell:
         raise Exception("Undefined behaviour in function get_smart_offsets")
 
 
-    mapped_supercell_atoms = []
-    
     # Initialize map
     supercell_maps = {}
-    for i,p in enumerate(atoms.positions):
+    for i, p in enumerate(atoms.positions):
         supercell_maps[i] = []
 
+    """
+    supercell[i] = offset means that supercell atom `i` was mapped by some primitive atom
+    when the primitive is transleted by offset
 
+    """
+
+    offset_mapping_list = []
+    primitive_map = {}
+    for i in range(len(atoms_prim)):
+        primitive_map[i] = []
     for offset in unique_offsets:
         positions = get_offset_positions(atoms_prim, offset)
-        for pos in positions:
-            matched_indices = get_indices_with_zero_component(atoms.positions - pos)
+        for prim_index, pos in enumerate(positions):
+
+            # Difference between the offset of the primitive position and supercell positions
+            pos_diff = np.floor(np.round(atoms.positions - pos, decimals=7))
+            matched_indices = get_indices_with_zero_component(pos_diff)
             for i in matched_indices:
-                supercell_maps[i].append(offset)
-                
+                mapped_entry = [prim_index, i, offset]
+                offset_mapping_list.append(mapped_entry)
+                supercell_maps[i].append([offset, prim_index])
+                primitive_map[prim_index].append([offset, i])
 
-    for key in supercell_maps.keys():
-        print(key, end= ': ')
-        for offsets in supercell_maps[key]:
-            print(offsets, end=', ')
-        print()            
-    return smart_offsets 
+    OffsetMap = namedtuple("OffsetMap", "prim_indices, super_indices, offsets")
 
+    OneOffsetMat = namedtuple(
+        "OneOffsetMat", "prim_index, super_index, offset")
+
+
+    """
+    Construct smart offsets so that
+    1: the list of offset are have a size of len(supercell)/len(primitive)
+    2: The different offsets will translate the primitive so that
+       each interatomic distance will be kept (under the supercells cell)
+    3: each offset in the list of offset will map to an atom in the supercell which
+       correspond to a lattice site that has the same index is the translated atom
+
+    Construct all interatomic distances of the primitive cell.
+
+    When constructing the elements in list of offsets, check that the interatomic distances are kept
+
+    """
+    number_of_offsets = len(atoms) // len(atoms_prim)
+    list_of_offset = []
+    list_of_tuple_offset = []
+    print("number of offsets", number_of_offsets)
+    for kk in range(number_of_offsets):
+        current_offsets = []
+        currentOffsetsTuple = OffsetMap([], [], [])
+
+        for offset_index in reversed(offset_mapping_list):
+            next_offset = OneOffsetMat(
+                offset_index[0], offset_index[1], offset_index[2])
+
+            if is_compatible_new_offset(currentOffsetsTuple, next_offset, atoms, atoms_prim):
+                currentOffsetsTuple.prim_indices.append(offset_index[0])
+                currentOffsetsTuple.super_indices.append(offset_index[1])
+                currentOffsetsTuple.offsets.append(offset_index[2])
+                offset_mapping_list.pop(
+                    offset_mapping_list.index(offset_index))
+
+            if len(currentOffsetsTuple.super_indices) == len(atoms_prim):
+                break
+        assert len(currentOffsetsTuple.prim_indices) == len(atoms_prim)
+        current_offsets = []
+        for i, j, offset in zip(currentOffsetsTuple.prim_indices, currentOffsetsTuple.super_indices, currentOffsetsTuple.offsets):
+            current_offsets.append([i, j, offset])
+        list_of_tuple_offset.append(currentOffsetsTuple)
+        list_of_offset.append(current_offsets)
+    return(list_of_tuple_offset)
+
+
+def is_compatible_new_offset(current_offsets, next_offsets, atoms, atoms_prim, tol=1e-5):
+    """
+    Tests if next offsets are compatible to be added to current offsets
+    """
+    if len(current_offsets) == 0:
+        return True
+    # See that this primitive index has not been mapped in current
+    if next_offsets.prim_index in current_offsets.prim_indices:
+        return False
+    # See that this supercell index has not been mapped in current
+    if next_offsets.super_index in current_offsets.super_indices:
+        return False
+
+    for i, j in zip(current_offsets.prim_indices, current_offsets.super_indices):
+        dist_prim = atoms_prim.get_distance(
+            i, next_offsets.prim_index, mic=True)
+        dist_super = atoms.get_distance(j, next_offsets.super_index, mic=True)
+        if np.abs(dist_prim - dist_super) > tol:
+            return False
+    return True
+
+
+def get_unitcell_offsets_from_positions(positions, cell):
+    """
+    Return the unitcell that the positions resides in.
+
+    Parameters
+    ----------
+    positions : list/array of xyz positions
+
+    cell : numpy 3x3 array
+        the unitcell to relate the positions to
+    """
+    fractional_positions = get_scaled_positions(positions, cell, wrap=False)
+    unit_cells = []
+    for frac_pos in fractional_positions:
+        offset = tuple(np.floor(np.round(frac_pos, decimals=5)))
+        unit_cells.append(offset)
+    return unit_cells
 
 
 def get_indices_with_zero_component(array, tolerance=1e-4):
-    """ 
+    """
     Returns the indices of the array where the component is zero within a tolerance
     """
     indices = []
-    for i,a in enumerate(array):
+    for i, a in enumerate(array):
         if np.linalg.norm(a) < tolerance:
             indices.append(i)
-    return indices            
-
+    return indices
 
 
 def get_offset_positions(atoms, offset):
-    ''' 
+    '''
     Get the offset positions
-    
+
     parameters
     ---------
     atoms : ASE Atoms object
         atoms object from which the positions are to be taken
         and the offsets should be related to its unitcell
-    offset: list of int 
+    offset: list of int
         Offsets of the unitcell vectors in [O_x, O_y, O_z]
      '''
-    return atoms.positions + np.dot(offset, atoms.cell)
+
+    return np.array(atoms.positions + np.dot(offset, atoms.cell))
