@@ -3,13 +3,13 @@
 import unittest
 
 from icetdev.tools import map_structure_to_reference
-from icetdev.tools.map_sites import (_get_scaled_cell,
-                                     _get_transformation_matrix,
-                                     _rescale_structures)
+from icetdev.tools.structure_mapping import (_get_scaled_cell,
+                                             _get_transformation_matrix,
+                                             _rescale_structures)
 import numpy as np
 
 
-class TestMapSites(unittest.TestCase):
+class TestStructureMapping(unittest.TestCase):
     '''
     Container for tests of the class functionality
     '''
@@ -32,7 +32,7 @@ class TestMapSites(unittest.TestCase):
         atoms.set_cell(atoms.cell * 1.01, scale_atoms=True)
         self.atoms = atoms
 
-        super(TestMapSites, self).__init__(*args, **kwargs)
+        super(TestStructureMapping, self).__init__(*args, **kwargs)
 
     def test_get_scaled_cell(self):
         '''
@@ -99,7 +99,7 @@ class TestMapSites(unittest.TestCase):
 
 
 def suite():
-    test_classes_to_run = [TestMapSites]
+    test_classes_to_run = [TestStructureMapping]
     suites_list = []
     for test_class in test_classes_to_run:
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(test_class)
