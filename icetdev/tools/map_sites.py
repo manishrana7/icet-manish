@@ -17,20 +17,20 @@ def map_structure_to_reference(input_structure,
     input_structure :  ASE Atoms object
         relaxed input structure
     reference_structure : ASE Atoms object
-        reference structure, which can but need not represent the
-        primitive cell
+        reference structure, which can but need not represent the primitive
+        cell
     tolerance_mapping : float
-        maximum allowed displacement for mapping an atom in the
-        relaxed (but rescaled) structure to the reference
-        supercell
+        maximum allowed displacement for mapping an atom in the relaxed (but
+        rescaled) structure to the reference supercell
 
         *Note*: A reasonable choice is up to 20-30% of the first
         nearest neighbor distance (`r1`). A value above 50% of `r1`
         will most likely lead to atoms being multiply assigned, which
         will raise an exception.
+    
     vacancy_type : str
-        If this parameter is set to a non-zero string unassigned sites
-        in the reference structure will be assigned to this type.
+        If this parameter is set to a non-zero string unassigned sites in the
+        reference structure will be assigned to this type.
 
         *Note 1*: By default (``None``) the method will print an error
         message and raise an exception if there are *any* unassigned
@@ -39,24 +39,22 @@ def map_structure_to_reference(input_structure,
         *Note 2*: `vacancy_type` must be a valid element type as
         enforced by the ASE Atoms class.
     tolerance_cell : float
-        tolerance factor applied when computing permutation matrix to
-        generate supercell (h = P h_p)
+        tolerance factor applied when computing permutation matrix to generate
+        supercell (h = P h_p)
     tolerance_positions : float
-        tolerance factor applied when scanning for overlapping
-        positions in Angstrom (forwarded to `ase.build.cut`)
+        tolerance factor applied when scanning for overlapping positions in
+        Angstrom (forwarded to `ase.build.cut`)
     verbose : bool
         turn on verbose output
 
     Returns
     -------
     ASE Atoms, float, float
-
-        - the ideal supercell most closely matching the input
-          structure
-        - the largets deviation of any input coordinate from its
-          ideal coordinate
-        - the average deviation of the input coordinates from the
-          ideal coordinates
+        - the ideal supercell most closely matching the input structure
+        - the largets deviation of any input coordinate from its ideal 
+          coordinate
+        - the average deviation of the input coordinates from the ideal
+          coordinates
 
     Example
     -------
@@ -113,8 +111,7 @@ def map_structure_to_reference(input_structure,
         print('Cell metric of rescaled input structure:\n'
               '{}\n'.format(scaled_structure.cell))
 
-    # map atoms in input structure to closest site in ideal
-    # supercell
+    # map atoms in input structure to closest site in ideal supercell
     dr_max = 0.0
     dr_sum = 0.0
     dr_sumsq = 0.0
