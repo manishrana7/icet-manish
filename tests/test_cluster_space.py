@@ -193,7 +193,7 @@ class TestClusterSpace(unittest.TestCase):
  total number of orbits: 4
  number of orbits by order: 1= 1  2= 1  3= 1  4= 1
 --------------------------------------------------------------------
-index | order |   size   | multiplicity | orbit index |  MC vector  
+index | order |   size   | multiplicity | orbit index |  MC vector
 --------------------------------------------------------------------
    0  |   1   |   0.0000 |        1     |       0     |    [0]
    1  |   2   |   1.4460 |        6     |       1     |  [0, 0]
