@@ -14,6 +14,4 @@ User interface
    structure_container
    optimizer
    cluster_expansion
-   enumeration
-   core
    tools

@@ -3,11 +3,12 @@
    single: Function reference; C++ components
    single: Class reference; C++ components
 
-C++ components
-**************
+Core components
+***************
 
 .. toctree::
    :maxdepth: 2
 
-   _icetdev
+   python_interface_via_pybind
+   additional_python_components
    cpp_classes

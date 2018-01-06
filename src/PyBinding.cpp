@@ -50,15 +50,27 @@ PYBIND11_MODULE(_icetdev, m)
            :members:
            :undoc-members:
 
-        Structure
-        ---------
-        .. autoclass:: Structure
-           :members:
-           :undoc-members:
-
         LatticeSite
         -----------
         .. autoclass:: LatticeSite
+           :members:
+           :undoc-members:
+
+        LocalOrbitListGenerator
+        -----------------------
+        .. autoclass:: LocalOrbitListGenerator
+           :members:
+           :undoc-members:
+
+        ManyBodyNeighborList
+        --------------------
+        .. autoclass:: ManyBodyNeighborList
+           :members:
+           :undoc-members:
+
+        NeighborList
+        ------------
+        .. autoclass:: NeighborList
            :members:
            :undoc-members:
 
@@ -74,27 +86,15 @@ PYBIND11_MODULE(_icetdev, m)
            :members:
            :undoc-members:
 
-        LocalOrbitListGenerator
-        -----------------------
-        .. autoclass:: LocalOrbitListGenerator
-           :members:
-           :undoc-members:
-
-        NeighborList
-        ------------
-        .. autoclass:: NeighborList
-           :members:
-           :undoc-members:
-
-        ManyBodyNeighborList
-        --------------------
-        .. autoclass:: ManyBodyNeighborList
-           :members:
-           :undoc-members:
-
         PermutationMap
         --------------
         .. autoclass:: PermutationMap
+           :members:
+           :undoc-members:
+
+        Structure
+        ---------
+        .. autoclass:: Structure
            :members:
            :undoc-members:
     )pbdoc";

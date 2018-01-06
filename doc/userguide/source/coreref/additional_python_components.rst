@@ -1,9 +1,25 @@
 .. index::
-   single: Function reference; core components
-   single: Class reference; core components
+   single: Function reference; Python core components
+   single: Class reference; Python core components
 
-Core components
-===============
+Additional Python components
+============================
+
+BaseOptimizer
+-------------
+
+.. automodule:: icetdev.fitting.base_optimizer
+   :members:
+   :undoc-members:
+   :inherited-members:
+
+Geometry
+--------
+
+.. automodule:: icetdev.tools.geometry
+   :members:
+   :undoc-members:
+   :inherited-members:
 
 LocalOrbitListGenerator
 -----------------------
@@ -12,18 +28,18 @@ LocalOrbitListGenerator
    :members:
    :undoc-members:
 
-NeighborList
-------------
-
-.. automodule:: icetdev.core.neighbor_list
-   :members:
-   :undoc-members:
-   :inherited-members:
-
 ManyBodyNeighborList
 --------------------
 
 .. automodule:: icetdev.core.many_body_neighbor_list
+   :members:
+   :undoc-members:
+   :inherited-members:
+
+NeighborList
+------------
+
+.. automodule:: icetdev.core.neighbor_list
    :members:
    :undoc-members:
    :inherited-members:
@@ -52,18 +68,10 @@ PermutationMap
    :undoc-members:
    :inherited-members:
 
-Geometry
---------
+Structure
+---------
 
-.. automodule:: icetdev.tools.geometry
-   :members:
-   :undoc-members:
-   :inherited-members:
-
-BaseOptimizer
--------------
-
-.. automodule:: icetdev.fitting.base_optimizer
+.. automodule:: icetdev.core.structure
    :members:
    :undoc-members:
    :inherited-members:

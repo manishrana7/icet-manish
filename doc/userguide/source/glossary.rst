@@ -18,13 +18,14 @@ Glossary
    	underlying reference calculations from e.g., :term:`DFT`.
 
    CV
-        :ref:`Cross validation (CV) <cross-validation>` is employed to
-        evaluated the transferability and accuracy of a :term:`CE`.
+        `Cross validation (CV) <https://en.wikipedia.org/wiki/Cross-validation_(statistics)>`_
+	is employed to evaluated the transferability and accuracy of :term:`CEs`.
 
    CS
-        The :ref:`compressive sensing (CS) <compressive-sensing>`
-        technique, which is also known as compressive sampling, is a
-        very efficient method for construction :term:`CEs`.
+        `Compressive sensing (CS) <https://en.wikipedia.org/wiki/Compressed_sensing>`_,
+        also known as compressive sampling, is a
+        very efficient method for construction sparse models [CanWak08]_
+	including :term:`CEs` [NelOzoRee13]_.
 
    DFT
         The construction of a :term:`CE` requires reference data from
@@ -50,13 +51,10 @@ Glossary
         <https://en.wikipedia.org/wiki/Lasso_(statistics)>`_.
 
    LOOCV
-        The :ref:`leave one out cross validation (LOOCV) score
-        <cross-validation>` is a widely adopted measure to quantify
-        the basic performance of a :term:`CE`; additional validation
-        steps are, however, necessary in order to obtain a truthful
-        quantification of the performance of a :term:`CE`.
+        The leave one out cross validation (LOOCV) score
+        is one of the most commonly adopted measures for quantifying
+        the basic performance of a :term:`CE`.
 
    MC
-        :ref:`Monte Carlo (MC) simulations <monte-carlo-simulations>`
-        are an effective method for sampling a multi-dimensional
-        space.
+        Monte Carlo (MC) simulations are an effective method for
+	sampling a multi-dimensional space.

@@ -5,7 +5,7 @@
 ClusterExpansion
 ================
 
-.. automodule:: core.cluster_expansion
+.. automodule:: icetdev.core.cluster_expansion
    :members:
    :undoc-members:
    :inherited-members:

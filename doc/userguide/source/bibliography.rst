@@ -17,12 +17,6 @@ Bibliography
    | Signal Processing Magazine, IEEE **25**, 201 (2008)
    | `doi: 10.1109/MSP.2007.914731 <http://dx.doi.org/10.1109/MSP.2007.914731>`_
 
-.. [HalYinZha08]
-   | Elaine T. Hale, Wotao Yin, and Yin Zhang
-   | *Fixed-Point Continuation for :math:`\ell_1`-Minimization: Methodology and Convergence*
-   | SIAM J. Optim. **19**, 1107 (2008)
-   | `doi: 10.1137/070698920 <http://dx.doi.org/10.1137/070698920>`_
-
 .. [HarFor08]
    | G. L. W. Hart and R. W. Forcade
    | *Algorithm for generating derivative structures*

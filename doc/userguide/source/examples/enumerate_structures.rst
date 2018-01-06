@@ -7,15 +7,16 @@ Structure enumeration
 =====================
 
 The purpose of this example is to demonstrate how to enumerate structures. In
-the present context, this structural enumeration means *the generation of all
+the present context, this structural enumeration means the generation of all
 inequivalent structures derived from a primitive structure up to a certain
-size*.
+size.
 
 Import modules
 --------------
 
-The :func:`enumerate_structures <icetdev.enumeration.enumerate_structures>`
-function needs to be imported together with some additional functions from `ASE
+The :func:`enumerate_structures
+<icetdev.tools.structure_enumeration.enumerate_structures>` function needs to
+be imported together with some additional functions from `ASE
 <https://wiki.fysik.dtu.dk/ase>`_.
 
 .. literalinclude:: ../../../../examples/enumerate_structures.py

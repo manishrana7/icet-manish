@@ -13,12 +13,13 @@ Import modules
 --------------
 
 In the present case it is necessary to import two :program:`icet` classes,
-namely :class:`ClusterSpace <icetdev.cluster_space.ClusterSpace>` and
-:class:`Structure <icetdev.structure.Structure>`. The corresponding objects are
-used to store information regarding a specific cluster space and structure,
-respectively. Additionally, the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function
-:func:`ase.db.connect` will be used to extract structures from a previously
-prepared database.
+namely :class:`ClusterSpace <icetdev.core.cluster_space.ClusterSpace>` and
+:class:`Structure <icetdev.core.structure.Structure>`. The corresponding
+objects are used to store information regarding a specific cluster space and
+structure, respectively. Additionally, the `ASE
+<https://wiki.fysik.dtu.dk/ase>`_ function
+`ase.db.connect <https://wiki.fysik.dtu.dk/ase/ase/db/db.html#ase.db.core.connect>`_
+will be used to extract structures from a previously prepared database.
 
 .. literalinclude:: ../../../../examples/test_cluster_vector_correlation.py
    :start-after: # Import modules
@@ -33,7 +34,7 @@ that will be called in the loop over strucures described in the last section.
 The first function, :func:`generate_random_structure`, takes an :class:`ASE
 Atoms` object, ``atoms_prim``, creates a supercell with the dimensions
 specified by ``repeat`` and populates it randomly with species from the
-``subelements`` :class:`list`. In the end, the corresponding
+``subelements`` list. In the end, the corresponding
 :class:`ASE Atoms` object is returned.
 
 .. literalinclude:: ../../../../examples/test_cluster_vector_correlation.py
@@ -46,15 +47,15 @@ Function: Generate CV set
 The second function, :func:`generate_cv_set`, generates cluster vectors for ``n``
 supercells, which have been constructed from the :class:`ASE Atoms` object,
 ``atoms_prim`` and randomly populated with the elements in the ``subelements``
-:class:`list`, based on the :class:`ClusterSpace
-<icetdev.cluster_space.ClusterSpace>` object ``cluster_space``. Specifically,
+list, based on the :class:`ClusterSpace
+<icetdev.core.cluster_space.ClusterSpace>` object ``cluster_space``. Specifically,
 this is achieved by first calling the :func:`generate_random_structure` function,
 defined in the previous section, with the :class:`ASE Atoms` object,
-``atoms_prim``, the ``subelements`` :class:`list` and size of the supercell,
+``atoms_prim``, the ``subelements`` list and size of the supercell,
 ``repeat``, as input arguments. The resulting configuration is subsequently
-converted to a :class:`Structure <icetdev.structure.Structure>` object, using
+converted to a :class:`Structure <icetdev.core.structure.Structure>` object, using
 the :meth:`Structure.from_atoms` method. This structure is, thereafter,
-provided as an input argument to the :func:`ClusterSpace.get_cluster_vector`
+provided as an input argument to the :func:`get_cluster_vector <icetdev.core.cluster_space.ClusterSpace.get_cluster_vector>`
 method to extract the cluster vectors.
 
 .. literalinclude:: ../../../../examples/test_cluster_vector_correlation.py
@@ -106,13 +107,13 @@ correlations for the first ten structures in the database ``PdHVac-fcc.db``,
 which should already have been created using the script
 ``enumerate_structures.py``. At each step of the loop, some basic information
 regarding the structure is first extracted and printed. Thereafter, a
-:class:`ClusterSpace <icetdev.cluster_space.ClusterSpace>` object,
+:class:`ClusterSpace <icetdev.core.cluster_space.ClusterSpace>` object,
 ``cluster_space``, is initiated using the :class:`ASE Atoms` object
-``atoms_row`` as well as the ``cutoffs`` :class:`list` and the ``subelements``
-:class:`list`, specified in the previous section, as input arguments.
+``atoms_row`` as well as the ``cutoffs`` list and the ``subelements``
+list, specified in the previous section, as input arguments.
 Subsequently the previously defined function is called with ``n=20`` and
 ``atoms_row``, ``subelements`` and ``cluster_space`` as additional input
-arguments. The :class:`list` of cluster vectors thus obtained is then fed into
+arguments. The list of cluster vectors thus obtained is then fed into
 the :func:`assert_no_correlation` function, that was described earlier, to check
 if correlations between the columns are smaller than the tolerance specified
 previously.

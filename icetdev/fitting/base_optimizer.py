@@ -1,5 +1,5 @@
 '''
-BaseOptimizer serves as base for all optimizers in HiPhive
+BaseOptimizer serves as base for all optimizers.
 '''
 
 import numpy as np
