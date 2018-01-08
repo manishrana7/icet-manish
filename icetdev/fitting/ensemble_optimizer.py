@@ -86,7 +86,7 @@ class EnsembleOptimizer(BaseOptimizer):
             opt = Optimizer((self._A, self._y), self.fit_method,
                             training_set=training_set, test_set=test_set,
                             **self._kwargs)
-            opt.train()
+            opt.train(verbose=False)
 
             # collect results
             parameters_list.append(opt.parameters)

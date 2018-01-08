@@ -64,40 +64,44 @@ class Optimizer(BaseOptimizer):
         self.training_scatter_data = None
         self.test_scatter_data = None
 
-    def train(self):
+    def train(self, verbose=True):
         ''' Carry out training. '''
-        print('{s:-^{n}}'.format(s='Training', n=45))
 
         # select training data
         A_train = self._A[self.training_set, :]
         y_train = self._y[self.training_set]
 
-        # perform training
-        print('Fit Method {}, N_params {}'.format(self.fit_method,
-                                                  self.number_of_parameters))
-        print('Train size {}, Test size {} '
-              .format(self.training_set_size, self.test_set_size))
+        output = ['{s:-^{n}}'.format(s='Training', n=45)]
+        output.append('Fit Method {}, N_params {}'.format(
+            self.fit_method, self.number_of_parameters))
+        output.append('Train size {}, Test size {} '
+                      .format(self.training_set_size, self.test_set_size))
+        if verbose:
+            print('\n'.join(output))
 
+        # perform training
         self._fit_results = self._optimizer_function(A_train, y_train,
                                                      **self._kwargs)
         self._rmse_training = self.compute_rmse(A_train, y_train)
         self.training_scatter_data = ScatterData(y_train,
                                                  self.predict(A_train))
-        print('Train RMSE  {:5.5f}'.format(self.rmse_training))
 
         # perform validation
+        output = ['Train RMSE  {:5.5f}'.format(self.rmse_training)]
         if self.test_set is not None:
             A_test = self._A[self.test_set, :]
             y_test = self._y[self.test_set]
             self._rmse_test = self.compute_rmse(A_test, y_test)
             self.test_scatter_data = ScatterData(y_test,
                                                  self.predict(A_test))
-            print('Test  RMSE  {:5.5f}'.format(self.rmse_test))
+            output.append('Test  RMSE  {:5.5f}'.format(self.rmse_test))
         else:
             self._rmse_test = None
             self.test_scatter_data = None
-            print('Test  RMSE  NaN')
-        print('{s:-^{n}}'.format(s='Done', n=45))
+            output.append('Test  RMSE  NaN')
+        output.append('{s:-^{n}}'.format(s='Done', n=45))
+        if verbose:
+            print('\n'.join(output))
 
     def _setup_rows(self, train_fraction, test_fraction, training_set,
                     test_set):
