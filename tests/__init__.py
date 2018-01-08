@@ -4,8 +4,8 @@ import unittest
 from glob import glob
 import test_structure_container as TestStructureContainer
 import test_cluster_space as TestClusterSpace
-import test_convex_hull as TestConvexHull
-import test_structure_mapping as TestStructureMapping
+import tools.convex_hull as TestConvexHull
+import tools.structure_mapping as TestStructureMapping
 
 
 class ScriptTestCase(unittest.TestCase):
