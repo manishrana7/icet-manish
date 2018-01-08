@@ -46,7 +46,6 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
                 clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                 multiplicity += elementsCountPair.second;
             }
-            std::cout<< "order "<< mcVector.size()<<" multiplicity "<<multiplicity<<std::endl;
             clusterVectorElement /= ((double)multiplicity);
             clusterVector.push_back(clusterVectorElement);
         }
