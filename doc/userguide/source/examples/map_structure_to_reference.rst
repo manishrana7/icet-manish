@@ -1,10 +1,11 @@
 .. _example_map_structure_to_reference:
 .. highlight:: python
 .. index::
-   single: Tutorial; Structure mapping
+   single: Examples; Structure mapping
+   single: Examples; Mapping structures
 
-Structure mapping
-=================
+Mapping structures
+==================
 
 A cluster vector calculation requires all atoms to reside on a fixed
 lattice. Properties of interest, on the other hand, are typically

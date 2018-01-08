@@ -1,7 +1,7 @@
 .. _example_get_cluster_count:
 .. highlight:: python
 .. index::
-   single: Tutorial; Cluster counts
+   single: Examples; Cluster counts
 
 Cluster counts
 ===============

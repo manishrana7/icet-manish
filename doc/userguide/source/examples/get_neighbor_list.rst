@@ -1,7 +1,7 @@
 .. _example_get_neighbor_list:
 .. highlight:: python
 .. index::
-   single: Tutorial; Neighbor list
+   single: Examples; Neighbor list
 
 Neighbor list
 =============
