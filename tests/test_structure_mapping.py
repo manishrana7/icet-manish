@@ -93,7 +93,7 @@ class TestStructureMapping(unittest.TestCase):
                                        0.7,
                                        vacancy_type='V',
                                        inert_species=['Au', 'Pd'],
-                                       verbose=True)
+                                       verbose=False)
         self.assertEqual(mapped.get_chemical_formula(), 'H6Au4Pd4V2')
         self.assertTrue(r_av < r_max)
 
