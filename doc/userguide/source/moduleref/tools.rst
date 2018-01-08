@@ -9,7 +9,7 @@ Tools
    single: Function reference; Convex hull
    single: Class reference; Convex hull
 
-ConvexHull
+Convex hull construction
 ----------
 
 .. automodule:: icetdev.tools.convex_hull
@@ -20,7 +20,7 @@ ConvexHull
 .. index::
    single: Function reference; Structure mapping
 
-map_structure_to_reference
+Structure mapping
 --------------------------
 
 .. automodule:: icetdev.tools.structure_mapping
