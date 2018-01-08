@@ -77,12 +77,12 @@ rattle = [[-0.2056,  0.177, -0.586],
 atoms.positions = atoms.positions + rattle
 
 # Do the mapping
-mapped_structure, r_max, r_av = map_structure_to_reference(atoms, reference,
-                                                           tolerance_mapping=0.9,
-                                                           vacancy_type='O',
-                                                           inert_species=[
-                                                               'Y', 'Al'],
-                                                           verbose=True)
+mapped_structure, r_max, r_av = \
+    map_structure_to_reference(atoms, reference,
+                               tolerance_mapping=0.9,
+                               vacancy_type='O',
+                               inert_species=['Y', 'Al'],
+                               verbose=True)
 
 # Calculate cluster vector and compare to expected value
 cv = np.array(cs.get_cluster_vector(mapped_structure))
