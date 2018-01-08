@@ -177,6 +177,8 @@ class ConvexHull(object):
                                           np.array(target_concentrations),
                                           method='linear')
             except QhullError:
+                # If the points lie on a line, the convex hull will fail, but
+                # we do not need to care about these "planes" anyway
                 continue
             hull_candidate_energies.append(plane_energies)
 
