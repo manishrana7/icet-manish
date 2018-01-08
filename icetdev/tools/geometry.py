@@ -8,7 +8,6 @@ import math
 
 from collections import namedtuple
 
-
 def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
     '''Get positions in reduced (scaled) coordinates.
 
@@ -293,11 +292,6 @@ def get_smart_offsets(atoms, atoms_prim):
     if len(unique_offsets) * size_of_primitive < size_of_supercell:
         raise Exception("Undefined behaviour in function get_smart_offsets")
 
-    # Initialize map
-    supercell_maps = {}
-    for i, p in enumerate(atoms.positions):
-        supercell_maps[i] = []
-
     """
     supercell[i] = offset means that supercell atom `i` was mapped by some primitive atom
     when the primitive is transleted by offset
@@ -305,22 +299,18 @@ def get_smart_offsets(atoms, atoms_prim):
     """
 
     offset_mapping_list = []
-    primitive_map = {}
-    for i in range(len(atoms_prim)):
-        primitive_map[i] = []
+
     for offset in unique_offsets:
         positions = get_offset_positions(atoms_prim, offset)
         for prim_index, pos in enumerate(positions):
-
             # Difference between the offset of the primitive position and supercell positions
             pos_diff = np.floor(np.round(atoms.positions - pos, decimals=7))
             matched_indices = get_indices_with_zero_component(pos_diff)
             for i in matched_indices:
                 mapped_entry = [prim_index, i, offset]
                 offset_mapping_list.append(mapped_entry)
-                supercell_maps[i].append([offset, prim_index])
-                primitive_map[prim_index].append([offset, i])
 
+    # Define some convenient named tuples
     OffsetMap = namedtuple("OffsetMap", "prim_indices, super_indices, offsets")
 
     OneOffsetMat = namedtuple(
@@ -340,7 +330,7 @@ def get_smart_offsets(atoms, atoms_prim):
 
     """
     number_of_offsets = len(atoms) // len(atoms_prim)
-    list_of_offset = []
+
     list_of_tuple_offset = []
     print("number of offsets", number_of_offsets)
     for kk in range(number_of_offsets):
@@ -351,7 +341,8 @@ def get_smart_offsets(atoms, atoms_prim):
             next_offset = OneOffsetMat(
                 offset_index[0], offset_index[1], offset_index[2])
 
-            if is_compatible_new_offset(currentOffsetsTuple, next_offset, atoms, atoms_prim):
+            if is_compatible_new_offset(currentOffsetsTuple, next_offset,
+                                        atoms, atoms_prim):
                 currentOffsetsTuple.prim_indices.append(offset_index[0])
                 currentOffsetsTuple.super_indices.append(offset_index[1])
                 currentOffsetsTuple.offsets.append(offset_index[2])
@@ -362,10 +353,12 @@ def get_smart_offsets(atoms, atoms_prim):
                 break
         assert len(currentOffsetsTuple.prim_indices) == len(atoms_prim)
         current_offsets = []
-        for i, j, offset in zip(currentOffsetsTuple.prim_indices, currentOffsetsTuple.super_indices, currentOffsetsTuple.offsets):
+        for i, j, offset in zip(currentOffsetsTuple.prim_indices,
+                                currentOffsetsTuple.super_indices,
+                                currentOffsetsTuple.offsets):
             current_offsets.append([i, j, offset])
         list_of_tuple_offset.append(currentOffsetsTuple)
-        list_of_offset.append(current_offsets)
+
     return(list_of_tuple_offset)
 
 
