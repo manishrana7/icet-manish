@@ -1,7 +1,7 @@
 .. _example_get_cluster_vector:
 .. highlight:: python
 .. index::
-   single: Tutorial; Cluster vectors
+   single: Examples; Cluster vectors
 
 Cluster vectors
 ===============

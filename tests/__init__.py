@@ -4,7 +4,8 @@ import unittest
 from glob import glob
 import test_structure_container as TestStructureContainer
 import test_cluster_space as TestClusterSpace
-import test_convex_hull as TestConvexHull
+import tools.convex_hull as TestConvexHull
+import tools.structure_mapping as TestStructureMapping
 
 
 class ScriptTestCase(unittest.TestCase):
@@ -67,8 +68,10 @@ def run_test(verbosity=2, files=None):
             testSuite.addTest(TestStructureContainer.suite())
         elif os.path.basename(test) == 'test_cluster_space.py':
             testSuite.addTest(TestClusterSpace.suite())
-        elif os.path.basename(test) == 'test_convex_hull.py':
+        elif os.path.basename(test) == 'tools/convex_hull.py':
             testSuite.addTest(TestConvexHull.suite())
+        elif os.path.basename(test) == 'tools/structure_mapping.py':
+            testSuite.addTest(TestStructureMapping.suite())
         else:
             testSuite.addTest(ScriptTestCase(filename=os.path.abspath(test)))
 

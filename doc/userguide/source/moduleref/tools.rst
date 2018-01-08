@@ -9,13 +9,25 @@ Tools
    single: Function reference; Convex hull
    single: Class reference; Convex hull
 
-ConvexHull
-----------
+Convex hull construction
+------------------------
 
 .. automodule:: icetdev.tools.convex_hull
    :members:
    :undoc-members:
    :inherited-members:
+
+.. index::
+   single: Function reference; Structure mapping
+
+Mapping structures
+------------------
+
+.. automodule:: icetdev.tools.structure_mapping
+   :members:
+   :undoc-members:
+   :inherited-members:
+
 
 .. index::
    single: Function reference; Structure enumeration

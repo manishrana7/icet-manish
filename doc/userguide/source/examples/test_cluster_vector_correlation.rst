@@ -1,7 +1,7 @@
 .. _example_test_cluster_vector_correlation:
 .. highlight:: python
 .. index::
-   single: Tutorial; Cluster vector correlations
+   single: Examples; Cluster vector correlations
 
 Cluster vector correlations
 ===========================

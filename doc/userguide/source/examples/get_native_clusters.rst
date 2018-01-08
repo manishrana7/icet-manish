@@ -1,7 +1,7 @@
 .. _example_get_native_clusters:
 .. highlight:: python
 .. index::
-   single: Tutorial; Native clusters
+   single: Examples; Native clusters
 
 Native clusters
 ===============

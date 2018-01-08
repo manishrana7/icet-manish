@@ -1,7 +1,7 @@
 .. _example_get_permutation_map:
 .. highlight:: python
 .. index::
-   single: Tutorial; Permutation map
+   single: Examples; Permutation map
 
 Permutation map
 ===============
