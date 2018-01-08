@@ -28,7 +28,24 @@ class TestStructureMapping(unittest.TestCase):
                 atoms[i].symbol = 'Pd'
             elif atoms[i].symbol == 'H':
                 del atoms[i]
-        atoms.rattle(0.1)
+
+        # Displace the atoms somewhat
+        rattle = [[0.147, -0.037, -0.01],
+                  [-0.089,  0.084, -0.063],
+                  [0.256, -0.037,  0.097],
+                  [-0.048,  0.005, -0.093],
+                  [-0.159, -0.194, -0.03],
+                  [0.004, -0.041, -0.003],
+                  [-0.015, -0.014, -0.007],
+                  [-0.023,  0.094, -0.024],
+                  [-0.01,  0.075, -0.075],
+                  [0.029, -0.024,  0.079],
+                  [0.105,  0.172, -0.147],
+                  [-0.082,  0.073,  0.015],
+                  [-0.062, -0.066,  0.023],
+                  [0.081,  0.078, -0.014]]
+
+        atoms.positions = atoms.positions + rattle
         atoms.set_cell(atoms.cell * 1.01, scale_atoms=True)
         self.atoms = atoms
 
