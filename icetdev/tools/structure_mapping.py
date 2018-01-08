@@ -336,6 +336,9 @@ def _rescale_structures(input_structure, reference_structure, P,
                           P[0], P[1], P[2],
                           tolerance=tolerance_positions)
     assert(len(ideal_supercell) ==
-           int(np.round(len(reference_structure) * np.linalg.det(P))))
+           int(np.round(len(reference_structure) * np.linalg.det(P)))), \
+        ('Supercell construction of reference structure failed'
+         ' (number of atoms do not match).\n'
+         'Permutation matrix used:\n{}'.format(P))
 
     return scaled_structure, ideal_supercell
