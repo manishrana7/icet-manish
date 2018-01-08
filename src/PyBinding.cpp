@@ -572,5 +572,5 @@ py::class_<ClusterSpace>(m, "ClusterSpace",py::dynamic_attr())
     auto tools = m.def_submodule("tools");
     tools.def("get_unit_cell_permutation", &icet::getUnitcellPermutation, py::arg("input_cell"),py::arg("reference_cell"),  py::arg("tolerance_cell") = 0.05);
     tools.def("get_unit_cell_sub_permutations", &icet::getUnitcellSubPermutations);
-
+    
 }

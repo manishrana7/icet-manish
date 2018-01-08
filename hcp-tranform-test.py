@@ -1,12 +1,11 @@
 import numpy as np
 from ase.db import connect
 from ase.build import bulk, cut
-from icetdev.cluster_space import ClusterSpace
+from icetdev import ClusterSpace
 from ase.visualize import view
 from ase.io import write
 from spglib import get_spacegroup
 from spglib import niggli_reduce
-from icetdev.permutation_map import __get_primitive_structure
 from icetdev.tools.geometry import transform_cell_to_cell, required_offsets_to_map_supercell, get_smart_offsets
 
 

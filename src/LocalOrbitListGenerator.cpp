@@ -3,17 +3,11 @@
 LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &primitiveOrbitList, const Structure &superCell) : _orbit_list(primitiveOrbitList), _supercell(superCell)
 {
     mapSitesAndFindCellOffsets();
-    findPermutationMatrices();
 }
 
 
 
 
-void LocalOrbitlistGenerator::findPermutationMatrices()
-{
-    Matrix3i permutationMatrix = icet::getUnitcellPermutation(_supercell.getCell(), _orbitlist.getPrimitiveStructure().getCell());
-    _subPermutationMatrices = icet::getUnitcellSubPermutations(permutationMatrix);
-}
 /**
     Maps supercell positions to reference to the primitive cell and find unique primitive cell offsets
     Will loop through all sites in supercell and map them to the primitive structures cell

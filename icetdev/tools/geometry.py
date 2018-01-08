@@ -3,7 +3,7 @@ from ase import Atoms
 import spglib
 
 from icetdev.core.lattice_site import LatticeSite
-from icetdev import Structure
+from ..core.structure import Structure
 import math
 
 from collections import namedtuple
@@ -210,12 +210,6 @@ def transform_cell_to_cell(atoms, atoms_template, tolerance=1e-3):
                 atom.symbol = atoms[j].symbol
 
     return atoms_new
-
-
-<< << << < 1c0f42508bd7362df7e598120a7d00c215181349
-== == == =
-
->>>>>> > DEV  # 55: staking out the bug fix in python
 
 
 def get_permutation_matrix(input_configuration,
