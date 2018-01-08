@@ -9,7 +9,6 @@ from ase import Atom
 from ase.build import bulk
 from ase.db import connect
 from icetdev.tools import enumerate_structures
-# End import
 
 # Generate all binary fcc structures with up to 6 atoms/cell
 # and save them in a database

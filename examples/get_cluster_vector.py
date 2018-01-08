@@ -5,7 +5,6 @@ This example demonstrates how to construct cluster vectors.
 # Import modules
 from ase.build import bulk
 from icetdev import ClusterSpace
-# End import
 
 # Create a prototype structure, decide which additional elements to populate
 # it with (Si, Ge) and set the cutoffs for pairs (5.0 Å), triplets (5.0 Å)

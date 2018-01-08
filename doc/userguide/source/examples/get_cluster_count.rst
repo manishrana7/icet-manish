@@ -6,19 +6,18 @@
 Cluster counts
 ===============
 
-The purpose of this example is to demonstrate how to carry ou a cluster count
+The purpose of this example is to demonstrate how to carry out a cluster count
 analysis.
 
 Import modules
 --------------
 
 First, one needs to import the classes :class:`ClusterCounts
-<icetdev.cluster_counts.ClusterCounts>` and :class:`Structure
-<icetdev.structure.Structure>`, which are used for storing information
-regarding cluster counts and structures, respectively, in addition to the
-functions :func:`create_orbit_list <icetdev.orbit_list.create_orbit_list>` and
-:func:`__get_primitive_structure
-<icetdev.permutation_map.__get_primitive_structure>`. In particular, the latter
+<_icetdev.ClusterCounts>` and :class:`Structure <_icetdev.Structure>`, which
+are used for storing information regarding cluster counts and structures,
+respectively, in addition to the functions :func:`create_orbit_list
+<icetdev.core.orbit_list.create_orbit_list>` and :func:`get_primitive_structure
+<icetdev.tools.geometry.get_primitive_structure>`. In particular, the latter
 will be used to generate a primitive structure, for which an orbit list will be
 created, using the former. Also, the `ASE <https://wiki.fysik.dtu.dk/ase>`_
 function :func:`ase.build.bulk` is needed to generate the prototype structure.
@@ -44,12 +43,12 @@ Create a primitive orbit list
 As will be seen later, the orbit list corresponding to the primitive structure
 of the :class:`ASE Atoms` object defined earlier is required for calculating
 the cluster counts. More precisely, this is achieved by first calling the
-:func:`__get_primitive_structure
-<icetdev.permutation_map.__get_primitive_structure>` followed by the
-:meth:`Structure.from_atoms` method. Thereafter, the primitive structure thus
-obtained is provided as input to :func:`create_orbit_list
-<icetdev.orbit_list.create_orbit_list>`, together with the :class:`list` of
-cutoff distances for the clusters.
+:func:`get_primitive_structure <icetdev.tools.geometry.get_primitive_structure>`
+followed by the :meth:`Structure.from_atoms
+<icetdev.core.structure.Structure.from_atoms>` method. Thereafter, the
+primitive structure thus obtained is provided as input to
+:func:`create_orbit_list <icetdev.core.orbit_list.create_orbit_list>`, together
+with the list of cutoff distances for the clusters.
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
    :start-after: # Determine the orbit list
@@ -59,13 +58,15 @@ cutoff distances for the clusters.
 Count the clusters
 ------------------
 
-To count the number of clusters a :class:`ClusterSpace <icetdev.ClusterSpace>`
-object is initiated first. Thereafter, a :class:`Structure
-<icetdev.structure.Structure>` is generated from the supercell that was
-generated above with help of the :meth:`Structure.from_atoms` method. To
-calculate the number of clusters, this structure together with the primitive
-orbit list that was created in the previous section are given as input
-arguments to the :meth:`ClusterSpace.count_clusters` method.
+To count the number of clusters a :class:`ClusterSpace
+<icetdev.core.cluster_space.ClusterSpace>` object is initiated first.
+Thereafter, a :class:`Structure <_icetdev.Structure>` is generated from the
+supercell that was generated above with help of the :meth:`Structure.from_atoms
+<icetdev.core.structure.Structure.from_atoms>` method. To calculate the number
+of clusters, this structure together with the primitive orbit list that was
+created in the previous section are given as input arguments to the
+:meth:`ClusterCounts.count_clusters <_icetdev.ClusterCounts.count_orbit_list>`
+method.
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
    :start-after: # Use the primitive
@@ -75,7 +76,7 @@ Print the cluster counts
 ------------------------
 
 Finally, the cluster counts that were calculated by the previous code block are
-printed using the :meth:`ClusterSpace.print` method.
+printed using the :meth:`print` method.
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
    :start-after: # Print all of

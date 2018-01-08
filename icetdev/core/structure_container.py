@@ -12,7 +12,7 @@ class StructureContainer(object):
         '''
         Initializes a StructureContainer object
 
-        This class serves as a container for ase-atoms objects, their fit
+        This class serves as a container for structure objects, their fit
         properties and their cluster vectors.
 
         Attributes:
@@ -333,19 +333,20 @@ class StructureContainer(object):
 
 class FitStructure:
     '''
-    This class holds a supercell along its property as well as
-    the fit cluster vector.
+    This class holds a supercell along with its properties and cluster
+    vector.
 
     Attributes
     ----------
     atoms : ASE Atoms object
         supercell structure
-    user_tag : str
+    user_tag : string
         custom user tag
     cvs : list of floats
         calculated cluster vector for actual structure
-    properties : dict
+    properties : dictionary
         the properties dictionary
+
     '''
 
     def __init__(self, atoms, user_tag, cv=None, properties=None):
@@ -367,7 +368,7 @@ class FitStructure:
 
     @property
     def user_tag(self):
-        '''str : structure label'''
+        '''string : structure label'''
         return str(self._user_tag)
 
     @property
@@ -385,7 +386,6 @@ class FitStructure:
         ----------
         cv : list of floats
             cluster vector
-
         '''
         if cv is not None:
             self._cluster_vector = cv
@@ -397,8 +397,8 @@ class FitStructure:
         Set the properties to structure.
 
         Parameters
-        __________
-        properties: dict
+        ----------
+        properties : dict
             the properties dictionary
 
         '''

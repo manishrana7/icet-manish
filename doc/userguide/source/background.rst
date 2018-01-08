@@ -21,10 +21,10 @@ written as a vector :math:`\boldsymbol{\sigma}`, whose elements can assume
 where :math:`M=2m` (for even :math:`M`) or :math:`M=2m+1` (for odd :math:`M`)
 [SanDucGra84]_. One now seeks to represent a property :math:`Q` of the system,
 such as the total energy, as a function of :math:`\boldsymbol{\sigma}`, i.e.
-:math:`Q = f(\boldsymbol{\sigma})`. To this end, one can construct :ref:`a
-complete orthonormal basis of cluster functions <cluster-functions>`
-:math:`\Gamma_{\alpha}(\boldsymbol{\sigma})` [SanDucGra84]_, which allows one
-to express :math:`Q` in the form [Wal09]_
+:math:`Q = f(\boldsymbol{\sigma})`. To this end, one can construct a
+complete orthonormal basis of cluster functions
+:math:`\Gamma_{\alpha}(\boldsymbol{\sigma})` [SanDucGra84]_ [San10]_, which
+allows one to express :math:`Q` in the form [Wal09]_
 
 .. math::
 
@@ -83,5 +83,4 @@ training set and cluster function basis is then obtained by minimizing the
 Common algorithms [Wal09]_ then proceed by generating a series of :term:`CEs`
 corresponding to different basis set choices, i.e. different values of
 :math:`n_{\boldsymbol{J}}`. By comparing the performance of each :term:`CE` by
-means of its :ref:`cross validation (CV) score <cross-validation>` the best
-performing :term:`CE` is selected.
+means of a cross validation (CV) score the best performing :term:`CE` is selected.

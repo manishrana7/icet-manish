@@ -8,7 +8,6 @@ import random
 import numpy as np
 from ase.db import connect
 from icetdev import ClusterSpace, Structure
-# End import
 
 
 # Function for generating random structures

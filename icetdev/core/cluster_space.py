@@ -151,9 +151,12 @@ class ClusterSpace(_ClusterSpace):
         s = []
         s += ['{s:-^{n}}'.format(s=' Cluster Space ', n=n)]
         s += [' subelements: {}'.format(' '.join(self.get_atomic_numbers()))]
-        s += [' cutoffs: {}'.format(' '.join(['{}'.format(co)
+        s += [' cutoffs: {}'.format(' '.join(['{:.4f}'.format(co)
                                               for co in self._cutoffs]))]
-        s += [' number of orbits: {}'.format(len(self))]
+        s += [' total number of orbits: {}'.format(len(self))]
+        t = ['{}= {}'.format(k, c)
+             for k, c in self.get_number_of_orbits_by_order().items()]
+        s += [' number of orbits by order: {}'.format('  '.join(t))]
 
         # table header
         horizontal_line = '{s:-^{n}}'.format(s='', n=n)

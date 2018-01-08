@@ -189,8 +189,9 @@ class TestClusterSpace(unittest.TestCase):
         target = '''
 -------------------------- Cluster Space ---------------------------
  subelements: Ag Au
- cutoffs: 4.0 4.0 4.0
- number of orbits: 4
+ cutoffs: 4.0000 4.0000 4.0000
+ total number of orbits: 4
+ number of orbits by order: 1= 1  2= 1  3= 1  4= 1
 --------------------------------------------------------------------
 index | order |   size   | multiplicity | orbit index |  MC vector
 --------------------------------------------------------------------
@@ -212,8 +213,9 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         target = '''
 -------------------------- Cluster Space ---------------------------
  subelements: Ag Au
- cutoffs: 4.0 4.0 4.0
- number of orbits: 4
+ cutoffs: 4.0000 4.0000 4.0000
+ total number of orbits: 4
+ number of orbits by order: 1= 1  2= 1  3= 1  4= 1
 --------------------------------------------------------------------
 index | order |   size   | multiplicity | orbit index |  MC vector
 --------------------------------------------------------------------

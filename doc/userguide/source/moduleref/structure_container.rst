@@ -5,7 +5,7 @@
 StructureContainer
 ==================
 
-.. automodule:: core.structure_container
+.. automodule:: icetdev.core.structure_container
    :members:
    :undoc-members:
    :inherited-members:

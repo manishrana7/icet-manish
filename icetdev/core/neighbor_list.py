@@ -5,18 +5,18 @@ from ase import Atoms
 
 def get_neighbor_lists(atoms, cutoffs=None):
     '''
-    Return list of icet neigbhorlists from a configuration and cutoffs
+    Returns list of icet neighbor lists from a configuration and cutoffs.
 
     Parameters
     ----------
-    atoms : ASE Atomss object / icet Structure object (bi-optional)
+    atoms : ASE Atoms object / icet Structure object (bi-optional)
         atomic configuration
     cutoffs:
         positive floats indicating the cutoffs for the various clusters
 
     Returns
     -------
-    list of neighbor_lists
+    list of NeighborList objects
     '''
 
     # deal with different types of structure objects

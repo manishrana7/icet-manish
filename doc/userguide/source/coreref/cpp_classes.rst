@@ -1,5 +1,5 @@
-Classes and functions
-=====================
+C++ classes and functions
+=========================
 
 .. toctree::
   :maxdepth: 2

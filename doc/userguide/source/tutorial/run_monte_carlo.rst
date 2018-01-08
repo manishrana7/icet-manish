@@ -14,32 +14,7 @@ Monte Carlo simulations
 
 (Please fill in)
 
-.. literalinclude:: ../../../../tutorial/run_monte_carlo.py
-   :start-after: # step 1
-   :end-before: # step 2
-
-(etc)
-
-(Step 2)
-------------------------
-
-(Please fill in)
-
-.. literalinclude:: ../../../../tutorial/run_monte_carlo.py
-   :start-after: # step 2
-   :end-before: # step 3
-
-(etc)
-
-
 Source code
 -----------
 
-.. container:: toggle
-
-    .. container:: header
-
-       The complete source code is available in
-       ``tutorial/run_monte_carlo.py``
-
-    .. literalinclude:: ../../../../tutorial/run_monte_carlo.py
+(Please fill in)

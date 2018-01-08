@@ -11,8 +11,8 @@ logger.setLevel(logging.INFO)
 # If you know what you are doing you may set this to True
 logger.propagate = False
 
-# The HiPhive logger will collect events from childs and the default behaviour
-# is to print it directly to stdout
+# The logger will collect events from children and the default
+# behaviour is to print it directly to stdout
 ch = logging.StreamHandler(sys.stdout)
 logger.addHandler(ch)
 
