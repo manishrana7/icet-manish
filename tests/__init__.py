@@ -68,9 +68,9 @@ def run_test(verbosity=2, files=None):
             testSuite.addTest(TestStructureContainer.suite())
         elif os.path.basename(test) == 'test_cluster_space.py':
             testSuite.addTest(TestClusterSpace.suite())
-        elif os.path.basename(test) == 'tools/convex_hull.py':
+        elif os.path.basename(test) == 'convex_hull.py':
             testSuite.addTest(TestConvexHull.suite())
-        elif os.path.basename(test) == 'tools/structure_mapping.py':
+        elif os.path.basename(test) == 'structure_mapping.py':
             testSuite.addTest(TestStructureMapping.suite())
         else:
             testSuite.addTest(ScriptTestCase(filename=os.path.abspath(test)))
