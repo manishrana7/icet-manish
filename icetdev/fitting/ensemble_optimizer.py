@@ -80,7 +80,7 @@ class EnsembleOptimizer(BaseOptimizer):
                 replace=self.bootstrap)
             training_set = np.random.choice(rows, self.training_set_size,
                                             replace=self.bootstrap)
-            test_set = np.setdiff1d(rows, range(self._Nrows))
+            test_set = np.setdiff1d(rows, training_set)
 
             # train
             opt = Optimizer((self._A, self._y), self.fit_method,
