@@ -57,15 +57,17 @@ Structures with vacancies
 -------------------------
 
 The function has to be informed if the structure to be mapped contains
-vacancies. Two additional keywords should be given, (1) `vacancy_type`, the
-chemical symbol that signifies vacancies, and (2) `inert_species`, a list of
-elements that are never substituted for a vacancy. The latter can be omitted,
-but the mapping is then more likely to fail, at least if the cell has been
-relaxed a lot.
+vacancies. Two additional keywords should be given, (1) ``vacancy_type``, the
+chemical symbol that signifies vacancies in the reference structure, and (2)
+``inert_species``, a list of elements that are never substituted for a
+vacancy. The latter allows the code to rescale the volume of the cell and can
+be omitted, but the mapping is then more likely to fail.
 
-In the below example, a Au-Pd-H-vacancy system is created. Vanadium (`'V'`)
-will signify vacancies. Further, it is only the hydrogen that may be changed
-for a vacancy, so we can set `inert_species = ['Au', 'Pd']`.
+In the below example, a Au-Pd-H-vacancy system is created. In this example,
+vanadium (``'V'``) signifies vacancies. The system of choice conists of two
+sublattices, one with Au and Pd and the other with H and vacancies. Since Au
+and Pd belong to a sublattice in which we do not allow vacancies, we may set
+``inert_species = ['Au', 'Pd']``.
 
 .. literalinclude:: ../../../../examples/map_structure_to_reference.py
    :start-after: # Pd and Au share
