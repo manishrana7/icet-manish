@@ -80,4 +80,4 @@ Source code
        The complete source code is available in
        ``examples/map_structure_to_reference.py``
 
-.. literalinclude:: ../../../../examples/map_structure_to_reference.py
+    .. literalinclude:: ../../../../examples/map_structure_to_reference.py
