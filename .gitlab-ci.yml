@@ -34,13 +34,13 @@ tests:
       - coverage/
 
 
-pyflakes_pep8:
+style_check:
   stage: test
   tags:
     - linux
   script:
     - cd tests/
-    - python3 check_pep8_pyflakes__.py
+    - python3 check_flake8__.py
   allow_failure: true
 
 
