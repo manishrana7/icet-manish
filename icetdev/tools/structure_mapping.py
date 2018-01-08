@@ -25,14 +25,13 @@ def map_structure_to_reference(input_structure,
         rescaled) structure to the reference supercell *Note*: A reasonable
         choice is up to 20-30% of the first nearest neighbor distance (`r1`).
         A value above 50% of `r1` will most likely lead to atoms being
-        multiply assigned, which will raise an exception.
+        multiply assigned, whereby the mapping fails.
     vacancy_type : str
         If this parameter is set to a non-zero string unassigned sites in the
         reference structure will be assigned to this type. *Note 1*: By
-        default (``None``) the method will print an error message and raise an
-        exception if there are *any* unassigned sites in the reference
-        structure. *Note 2*: `vacancy_type` must be a valid element type as
-        enforced by the ASE Atoms class.
+        default (``None``) the method will fail if there are *any* unassigned
+        sites in the reference structure. *Note 2*: `vacancy_type` must be a
+        valid element type as enforced by the ASE Atoms class.
     inert_species : list of str
         List of chemical symbols (e.g., `['Au', 'Pd']`) that are never
         substituted for a vacancy. Used to make an initial rescale of the cell
@@ -75,10 +74,9 @@ def map_structure_to_reference(input_structure,
         mapped_atoms = map_structure_to_reference(atoms, reference, 1.0)
 
     '''
-    if np.any(input_structure.pbc != reference_structure.pbc):
-        s = '''The periodic boundary conditions differ
-        between input and reference structure'''
-        raise Exception(s)
+    assert np.all(input_structure.pbc == reference_structure.pbc), \
+        ('The periodic boundary conditions differ'
+         ' between input and reference structure')
 
     # Scale input cell and construct supercell of the reference structure
     scaled_cell = _get_scaled_cell(input_structure, reference_structure,
@@ -164,20 +162,16 @@ def map_structure_to_reference(input_structure,
 
     # Check that not more than one atom was assigned to the same site
     for k in set(mapped):
-        if k >= 0 and mapped.count(k) > 1:
-            s = 'Site {} has been assigned more than once.'.format(k)
-            raise Exception(s)
+        assert k < 0 or mapped.count(k) <= 1, \
+            ('Site {} has been assigned more than once.'.format(k))
 
     # Check that the chemical composition of input and ideal supercell matches
     for element in set(input_structure.get_chemical_symbols()):
         n1 = input_structure.get_chemical_symbols().count(element)
         n2 = ideal_supercell.get_chemical_symbols().count(element)
-        if n1 != n2:
-            s = '''Number of atoms of type {} differs between
-            input structure ({}) and ideal
-            supercell ({}).\n'''.format(element, n1, n2)
-            print(s)
-            raise Exception(s)
+        assert n1 == n2, ('Number of atoms of type {} differs between'
+                          ' input structure({}) and ideal'
+                          ' supercell ({}).\n'.format(element, n1, n2))
 
     if verbose:
         print('Maximum, average and standard deviation of atomic'
@@ -224,17 +218,17 @@ def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
     structure.
 
     Parameters
-    ----------
-    input_structure : ASE Atoms object
+    - ---------
+    input_structure: ASE Atoms object
         relaxed input structure
-    reference_structure : ASE Atoms object
+    reference_structure: ASE Atoms object
         reference structure, which can but need not represent the primitive
         cell
-    vacancy_type : str
+    vacancy_type: str
         If not None, the cell is scaled if and only if `inert_species` is not
         None.
-    inert_species : list of str
-        List of chemical symbols (e.g., `['Au', 'Pd']`) that are never
+    inert_species: list of str
+        List of chemical symbols(e.g., `['Au', 'Pd']`) that are never
         substituted for a vacancy. Needless if `vacancy_type` is `None`.
     '''
     modcell = input_structure.get_cell()
@@ -267,22 +261,22 @@ def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
 def _get_transformation_matrix(input_cell, reference_cell,
                                tolerance_cell=0.05):
     '''
-    Obtain the (in general non-integer) transformation matrix connecting the
-    input structure to the reference structure L = L_p.P --> P = L_p^-1.L
+    Obtain the(in general non - integer) transformation matrix connecting the
+    input structure to the reference structure L=L_p.P - -> P=L_p ^ -1.L
 
     Parameters
-    ----------
-    input_cell : NumPy array (3, 3)
-        Cell metric of input structure (possibly scaled)
-    reference_cell : NumPy array (3, 3)
+    - ---------
+    input_cell: NumPy array(3, 3)
+        Cell metric of input structure(possibly scaled)
+    reference_cell: NumPy array(3, 3)
         Cell metric of reference structure
-    tolerance_cell : float
+    tolerance_cell: float
         Tolerance for how much the elements of P are allowed to deviate from
         nearest integer before they are rounded.
 
     Returns
-    -------
-    NumPy array (3, 3)
+    - ------
+    NumPy array(3, 3)
         Transformation matrix P of integers.
     '''
     P = np.dot(input_cell, np.linalg.inv(reference_cell))
@@ -313,20 +307,20 @@ def _rescale_structures(input_structure, reference_structure, P,
     `P`
 
     Parameters
-    ----------
-    input_structure : ASE Atoms object
+    - ---------
+    input_structure: ASE Atoms object
         relaxed input structure
-    reference_structure : ASE Atoms object
+    reference_structure: ASE Atoms object
         reference structure, which can but need not represent the primitive
         cell
-    P : NumPy array (3, 3)
+    P: NumPy array(3, 3)
         Transformation matrix of integers.
-    tolerance_positions : float
+    tolerance_positions: float
         tolerance factor applied when scanning for overlapping positions in
-        Angstrom (forwarded to `ase.build.cut`).
+        Angstrom(forwarded to `ase.build.cut`).
 
     Returns
-    -------
+    - ------
     ASE Atoms object
         Scaled version of `input_structure`
     ASE Atoms object
