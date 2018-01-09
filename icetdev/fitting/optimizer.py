@@ -82,7 +82,8 @@ class Optimizer(BaseOptimizer):
         # perform training
         self._fit_results = self._optimizer_function(A_train, y_train,
                                                      **self._kwargs)
-        self._rmse_training = self.compute_rmse(A_train, y_train)
+        self._fit_results['rmse_training'] = self.compute_rmse(
+            A_train, y_train)
         self.training_scatter_data = ScatterData(y_train,
                                                  self.predict(A_train))
 
@@ -91,7 +92,7 @@ class Optimizer(BaseOptimizer):
         if self.test_set is not None:
             A_test = self._A[self.test_set, :]
             y_test = self._y[self.test_set]
-            self._rmse_test = self.compute_rmse(A_test, y_test)
+            self._fit_results['rmse_test'] = self.compute_rmse(A_test, y_test)
             self.test_scatter_data = ScatterData(y_test,
                                                  self.predict(A_test))
             output.append('Test  RMSE  {:5.5f}'.format(self.rmse_test))
@@ -174,23 +175,23 @@ class Optimizer(BaseOptimizer):
         dict
         '''
         info = BaseOptimizer.get_info(self)
-        info['rmse-training-set'] = self.rmse_training
-        info['rmse-test-set'] = self.rmse_test
-        info['training-set-size'] = self.training_size
-        info['test-set-size'] = self.test_size
-        info['training-set'] = self.training_set
-        info['test-set'] = self.test_set
+        info['rmse_training_set'] = self.rmse_training
+        info['rmse_test_set'] = self.rmse_test
+        info['training_set_size'] = self.training_size
+        info['training_set'] = self.training_set
+        info['test_set_size'] = self.test_size
+        info['test_set'] = self.test_set
         return info
 
     @property
     def rmse_training(self):
         ''' float : root mean squared error for training set '''
-        return self._rmse_training
+        return self.fit_results['rmse_training']
 
     @property
     def rmse_test(self):
         ''' float : root mean squared error for test set '''
-        return self._rmse_test
+        return self.fit_results['rmse_test']
 
     @property
     def training_set(self):
