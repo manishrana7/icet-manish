@@ -96,8 +96,8 @@ class CrossValidationEstimator(BaseOptimizer):
             valid_target.extend(opt.test_scatter_data.target)
             valid_predicted.extend(opt.test_scatter_data.predicted)
 
-        self._rmse_train_splits = np.array(rmse_train_splits)
-        self._rmse_valid_splits = np.array(rmse_valid_splits)
+        self.fit_results['rmse_train_splits'] = np.array(rmse_train_splits)
+        self.fit_results['rmse_valid_splits'] = np.array(rmse_valid_splits)
         self.validation_scatter_data = ScatterData(
             target=np.array(valid_target), predicted=np.array(valid_predicted))
 

@@ -175,8 +175,8 @@ class Optimizer(BaseOptimizer):
         dict
         '''
         info = BaseOptimizer.get_info(self)
-        info['rmse_training_set'] = self.rmse_training
-        info['rmse_test_set'] = self.rmse_test
+
+        # Add class specific data
         info['training_set_size'] = self.training_size
         info['training_set'] = self.training_set
         info['test_set_size'] = self.test_size
