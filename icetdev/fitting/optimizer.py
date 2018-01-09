@@ -26,10 +26,14 @@ class Optimizer(BaseOptimizer):
     fit_method : string
         method to be used for training; possible choice are
         "least-squares", "lasso", "bayesian-ridge", "ardr"
-    training_size : float
-        fraction of input data (=rows) to be used for training
-    test_size : float
-        fraction of input data (=rows) to be used for testing
+    training_size : float or int
+        If float represents the fraction of `fit_data` (rows) to be used for
+        training. If int, represents the absolute number of rows to be used for
+        training.
+    test_size : float or int
+        If float represents the fraction of `fit_data` (rows) to be used for
+        testing. If int, represents the absolute number of rows to be used for
+        testing.
     training_set : tuple/list of ints
         indices of rows of `A`/`y` to be used for training
     test_set : tuple/list of ints
@@ -213,7 +217,7 @@ class Optimizer(BaseOptimizer):
     @property
     def training_fraction(self):
         ''' float : fraction of rows included in training set '''
-        return float(self.training_size) / self._Nrows
+        return self.training_size / self._Nrows
 
     @property
     def test_size(self):
@@ -227,4 +231,4 @@ class Optimizer(BaseOptimizer):
         ''' float : fraction of rows included in test set '''
         if self.test_set is None:
             return 0.0
-        return float(self.test_size) / self._Nrows
+        return self.test_size / self._Nrows
