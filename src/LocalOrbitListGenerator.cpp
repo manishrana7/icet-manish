@@ -3,6 +3,7 @@
 LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &primitiveOrbitList, const Structure &superCell) : _orbit_list(primitiveOrbitList), _supercell(superCell)
 {
     mapSitesAndFindCellOffsets();
+    generateSmartOffsets();
 }
 
 
@@ -25,9 +26,6 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
         Vector3d position_i = _supercell.getPositions().row(i);
 
         LatticeSite primitive_site = _orbit_list.getPrimitiveStructure().findLatticeSiteByPosition(position_i);
-        // LatticeSite super_site = _supercell.findLatticeSiteByPosition(position_i);
-
-        // _primToSupercellMap[primitive_site] = super_site;
         uniqueCellOffsets.insert(primitive_site.unitcellOffset());
     }
 
@@ -36,6 +34,22 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
     _uniquePrimcellOffsets.assign(uniqueCellOffsets.begin(), uniqueCellOffsets.end());
 
     std::sort(_uniquePrimcellOffsets.begin(), _uniquePrimcellOffsets.end(), Vector3dCompare());
+}
+
+
+void LocalOrbitListGenerator::generateSmartOffsets()
+{
+    int expected_number_of_mappings = _supercell.size() / _orbit_list.getPrimitiveStructure().size();
+    // Check that primitive size is a multiple of supercell size
+    if( fabs(expected_number_of_mappings -_supercell.size() / _orbit_list.getPrimitiveStructure().size() )> 0.01)
+    {
+        std::string errorMessage = "Can not translage cell with ";
+        errorMessage += std::to_string(_orbit_list.getPrimitiveStructure().size()) + " ";
+        errorMessage += "to a super cell with ";
+        errorMessage += std::to_string(_supercell.size()) + " atoms";
+        throw std::runtime_error(errorMessage);
+    }
+
 }
 
 ///generate and returns the local orbit list with the input index

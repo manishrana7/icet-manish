@@ -83,6 +83,8 @@ class LocalOrbitListGenerator
     /// Find the sub permutation matrices that maps the basis atoms onto the supercell
     void findPermutationMatrices();
 
+    /// Generate smart offsets @ TODO change name
+    void generateSmartOffsets();
 
     ///Primitive orbit list
     OrbitList _orbit_list;
