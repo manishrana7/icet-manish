@@ -107,6 +107,7 @@ class EnsembleOptimizer(BaseOptimizer):
         '''
         self._fit_results['parameters'] = np.mean(self.parameter_vectors,
                                                   axis=0)
+        self._parameters_stddev = np.std(self.parameter_vectors, axis=0)
 
     def get_errors(self):
         ''' Get the errors for each fit and each target value.
@@ -125,13 +126,7 @@ class EnsembleOptimizer(BaseOptimizer):
     @property
     def parameters_stddev(self):
         ''' NumPy array : standard deviation for each parameter '''
-        if self.fit_results['parameters'] is None:
-            return None
-        else:
-            if self._parameters_stddev is None:
-                self._parameters_stddev = np.std(self.parameter_vectors,
-                                                 axis=0)
-            return self._parameters_stddev
+        return self._parameters_stddev
 
     @property
     def parameter_vectors(self):

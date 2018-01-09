@@ -136,8 +136,7 @@ class BaseOptimizer:
         info['fit-method'] = self.fit_method
         info['number-of-target-values'] = self.number_of_target_values
         info['number-of-parameters'] = self.number_of_parameters
-        for key, value in self.fit_results.items():
-            info[key] = value
+        info['parameters'] = self.parameters
         return info
 
     def __str__(self):

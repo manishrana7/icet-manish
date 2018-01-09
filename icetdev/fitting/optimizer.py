@@ -82,17 +82,17 @@ class Optimizer(BaseOptimizer):
         # perform training
         self._fit_results = self._optimizer_function(A_train, y_train,
                                                      **self._kwargs)
-        self._fit_results['rmse_training'] = self.compute_rmse(
+        self._rmse_training = self.compute_rmse(
             A_train, y_train)
         self.training_scatter_data = ScatterData(y_train,
                                                  self.predict(A_train))
 
-        # perform validation
         output = ['Train RMSE  {:5.5f}'.format(self.rmse_training)]
+        # perform validation
         if self.test_set is not None:
             A_test = self._A[self.test_set, :]
             y_test = self._y[self.test_set]
-            self._fit_results['rmse_test'] = self.compute_rmse(A_test, y_test)
+            self._rmse_test = self.compute_rmse(A_test, y_test)
             self.test_scatter_data = ScatterData(y_test,
                                                  self.predict(A_test))
             output.append('Test  RMSE  {:5.5f}'.format(self.rmse_test))
@@ -177,6 +177,8 @@ class Optimizer(BaseOptimizer):
         info = BaseOptimizer.get_info(self)
 
         # Add class specific data
+        info['rmse_training'] = self.rmse_training
+        info['rmse_test'] = self.rmse_test
         info['training_set_size'] = self.training_size
         info['training_set'] = self.training_set
         info['test_set_size'] = self.test_size
@@ -186,12 +188,12 @@ class Optimizer(BaseOptimizer):
     @property
     def rmse_training(self):
         ''' float : root mean squared error for training set '''
-        return self.fit_results['rmse_training']
+        return self._rmse_training
 
     @property
     def rmse_test(self):
         ''' float : root mean squared error for test set '''
-        return self.fit_results['rmse_test']
+        return self._rmse_test
 
     @property
     def training_set(self):
