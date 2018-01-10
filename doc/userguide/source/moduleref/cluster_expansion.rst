@@ -2,10 +2,10 @@
    single: Function reference; ClusterExpansion
    single: Class reference; ClusterExpansion
 
-ClusterExpansion
-================
+Cluster expansions
+==================
 
-.. automodule:: icetdev.core.cluster_expansion
+.. autoclass:: icetdev.ClusterExpansion
    :members:
    :undoc-members:
    :inherited-members:

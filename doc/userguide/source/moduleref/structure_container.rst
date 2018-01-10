@@ -1,11 +1,16 @@
 .. index::
-   single: Function reference; StructureContainer
-   single: Class reference; StructureContainer
+   single: Function reference; Structure container
+   single: Class reference; Structure container
 
-StructureContainer
-==================
+Structures
+==========
 
-.. automodule:: icetdev.core.structure_container
+.. autoclass:: icetdev.StructureContainer
+   :members:
+   :undoc-members:
+   :inherited-members:
+
+.. autoclass:: icetdev.Structure
    :members:
    :undoc-members:
    :inherited-members:
