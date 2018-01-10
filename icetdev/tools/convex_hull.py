@@ -1,6 +1,7 @@
 import itertools
 import numpy as np
 from scipy.spatial import ConvexHull as ConvexHullSciPy
+from scipy.spatial.qhull import QhullError
 from scipy.interpolate import griddata
 
 
@@ -163,9 +164,26 @@ class ConvexHull(object):
         if self.dimensions > 1:
             assert len(target_concentrations[0]) == self.dimensions
 
-        hull_energies = griddata(self.concentrations, self.energies,
-                                 np.array(target_concentrations),
-                                 method='linear')
+        # Loop over all complexes of N+1 points to make sure that the lowest
+        # energy plane is used in the end. This is needed in two dimensions
+        # but in higher.
+        hull_candidate_energies = []
+        for plane in itertools.combinations(range(len(self.energies)),
+                                            min(len(self.energies),
+                                                self.dimensions + 1)):
+            try:
+                plane_energies = griddata(self.concentrations[list(plane)],
+                                          self.energies[list(plane)],
+                                          np.array(target_concentrations),
+                                          method='linear')
+            except QhullError:
+                # If the points lie on a line, the convex hull will fail, but
+                # we do not need to care about these "planes" anyway
+                continue
+            hull_candidate_energies.append(plane_energies)
+
+        # Pick out the lowest energies found
+        hull_energies = np.nanmin(hull_candidate_energies, axis=0)
         return hull_energies
 
     def extract_low_energy_structures(self, concentrations, energies,

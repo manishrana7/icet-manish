@@ -1,7 +1,7 @@
 .. _example_get_cluster_space_info:
 .. highlight:: python
 .. index::
-   single: Tutorial; Cluster space information
+   single: Examples; Cluster space information
 
 Cluster space information
 =========================
