@@ -36,6 +36,7 @@ etc...
 
 class LocalOrbitListGenerator
 {
+    public:
     /// This collects the information that primtiveIndex is mapped to superIndex via the offset
     struct Prim2SuperMap
     {
@@ -63,9 +64,30 @@ class LocalOrbitListGenerator
             Prim2SuperMap p2sm = Prim2SuperMap(primitiveIndices[index], superIndices[index], offsets[index]);
             return p2sm;
         }
+        size_t size() const
+        {
+            return primitiveIndices.size();
+        }
+        void push_back(const Prim2SuperMap p2sm)
+        {
+            primitiveIndices.push_back(p2sm.primitiveIndex);
+            superIndices.push_back(p2sm.superIndex);
+            offsets.push_back(p2sm.offset);
+        }
+        bool isPrimitiveIndexInside(int index)
+        {
+            auto find = std::find(primitiveIndices.begin(), primitiveIndices.end(), index);
+            return find != primitiveIndices.end();
+        }
+        bool isSuperIndexInside(int index)
+        {
+            auto find = std::find(superIndices.begin(), superIndices.end(), index);
+            return find != superIndices.end();
+        }
+
     };
 
-  public:
+  
     LocalOrbitListGenerator(const OrbitList &, const Structure &);
 
     ///generate and returns the local orbit list with the input index
@@ -134,5 +156,9 @@ class LocalOrbitListGenerator
 
     /// Find the indices of the supercell that are within 1e-3 of the position argument
     std::vector<int> findMatchingSupercellPositions(const Vector3d &position) const;
+
+    /// Test if next mapping is compatible to be added to curentMappings
+    bool isCompatibleNewMapping(LocalOrbitListGenerator::Prim2SuperMappings currentMappings, LocalOrbitListGenerator::Prim2SuperMap mapping) const;
+
 
 };

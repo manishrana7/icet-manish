@@ -55,21 +55,32 @@ void LocalOrbitListGenerator::generateSmartOffsets()
     // Get all the mappings that matches a supercell position by offsetting each primitive atom by the unique offsets
     std::vector<LocalOrbitListGenerator::Prim2SuperMap> allIndividualMappings = getIndividualMappings();
 
-    if(allIndividualMappings.size() != _supercell.size())
+    if (allIndividualMappings.size() != _supercell.size())
     {
         throw std::runtime_error("The number individual mappings were not correct for this supercell");
     }
 
     // Create the smart offsets
-    for(int i=0; i < expected_number_of_mappings; i++)
+    std::vector<Prim2SuperMappings> smartOffsets; 
+    for (int i = 0; i < expected_number_of_mappings; i++)
     {
         Prim2SuperMappings currentMappings = Prim2SuperMappings();
-        for(const auto &mapping : allIndividualMappings)
+        for (int i = allIndividualMappings.size()-1; i >=0; i--)
         {
-            // if (isCompatibleNewMapping(currentMappings, mapping))
-            // {
+            if (isCompatibleNewMapping(currentMappings, allIndividualMappings[i]))
+            {
+                currentMappings.push_back(allIndividualMappings[i]);
+                allIndividualMappings.erase(allIndividualMappings.begin()+i);
+            }
+        }        
+        smartOffsets.push_back(currentMappings);
+    }
 
-            // }
+    for(const auto mapping : smartOffsets)
+    {
+        if( mapping.size() != _orbit_list.getPrimitiveStructure().size())
+        {
+            throw std::runtime_error("The different set of mappings were the wrong size ");
         }
     }
 }
@@ -120,9 +131,9 @@ std::vector<LocalOrbitListGenerator::Prim2SuperMap> LocalOrbitListGenerator::get
         {
             std::vector<int> matchedIndices = findMatchingSupercellPositions(positions[i]);
 
-            for(const auto superIndex : matchedIndices)
+            for (const auto superIndex : matchedIndices)
             {
-                Prim2SuperMap   p2sm = Prim2SuperMap(i, superIndex, offset);
+                Prim2SuperMap p2sm = Prim2SuperMap(i, superIndex, offset);
                 individualMappings.push_back(p2sm);
             }
         }
@@ -137,11 +148,44 @@ std::vector<int> LocalOrbitListGenerator::findMatchingSupercellPositions(const V
     for (int i = 0; i < _supercell.getPositions().rows(); i++)
     {
         if ((position.transpose() - _supercell.getPositions().row(i)).norm() < 1e-3)
-            {
-                matchedIndices.push_back(i);
-            }
+        {
+            matchedIndices.push_back(i);
+        }
     }
     return matchedIndices;
+}
+
+/// Test if next mapping is compatible to be added to curentMappings
+bool LocalOrbitListGenerator::isCompatibleNewMapping(LocalOrbitListGenerator::Prim2SuperMappings currentMappings, LocalOrbitListGenerator::Prim2SuperMap mapping) const
+{
+    if (currentMappings.primitiveIndices.size() == 0)
+    {
+        return true;
+    }
+    if (currentMappings.isPrimitiveIndexInside(mapping.primitiveIndex))
+    {
+        return false;
+    }
+    if (currentMappings.isSuperIndexInside(mapping.superIndex))
+    {
+        return false;
+    }
+
+    for (int i = 0; i < currentMappings.primitiveIndices.size(); i++)
+    {
+        int primitiveIndex = currentMappings.primitiveIndices[i];
+        int superIndex = currentMappings.superIndices[i];
+        Vector3d zeroOffset = {0., 0., 0.};
+        double distPrim = _orbit_list.getPrimitiveStructure().getDistance(primitiveIndex,
+                                                                           mapping.primitiveIndex,
+                                                                           zeroOffset, zeroOffset);
+        double distSuper = _supercell.getDistance(superIndex,mapping.superIndex, zeroOffset, zeroOffset);
+        if (fabs(distPrim - distSuper) > 1e-4)
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 //clears the unordered_map and the vector
