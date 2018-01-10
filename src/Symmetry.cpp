@@ -1,5 +1,4 @@
 #include "Symmetry.hpp"
-
 namespace icet
 {
 
@@ -105,4 +104,21 @@ std::vector<Eigen::Matrix3i> getUnitcellSubPermutations(Eigen::Matrix3i &permuta
 
     return subPermutationMatrices;
 }
+
+/// Creates a vector of positions by offsetting the structure's positions by an offset
+std::vector<Eigen::Vector3d> getOffsetPositions(const Structure &structure, const Eigen::Vector3d &offset)
+{
+    std::vector<Eigen::Vector3d> positions;
+    positions.reserve(structure.size());
+    for(int i=0; i<structure.size(); i++)
+    {
+        LatticeSite latticeSite = LatticeSite(i, offset);
+        Eigen::Vector3d position = structure.getPosition(latticeSite);
+        positions.push_back(position);
+    }
+    return positions;
+
+}
+
+
 }

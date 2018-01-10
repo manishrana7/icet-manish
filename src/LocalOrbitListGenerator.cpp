@@ -6,9 +6,6 @@ LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &primitiveOrbit
     generateSmartOffsets();
 }
 
-
-
-
 /**
     Maps supercell positions to reference to the primitive cell and find unique primitive cell offsets
     Will loop through all sites in supercell and map them to the primitive structures cell
@@ -36,12 +33,11 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
     std::sort(_uniquePrimcellOffsets.begin(), _uniquePrimcellOffsets.end(), Vector3dCompare());
 }
 
-
 void LocalOrbitListGenerator::generateSmartOffsets()
 {
     int expected_number_of_mappings = _supercell.size() / _orbit_list.getPrimitiveStructure().size();
     // Check that primitive size is a multiple of supercell size
-    if( fabs(expected_number_of_mappings -_supercell.size() / _orbit_list.getPrimitiveStructure().size() )> 0.01)
+    if (fabs(expected_number_of_mappings - _supercell.size() / _orbit_list.getPrimitiveStructure().size()) > 0.01)
     {
         std::string errorMessage = "Can not translage cell with ";
         errorMessage += std::to_string(_orbit_list.getPrimitiveStructure().size()) + " ";
@@ -50,6 +46,32 @@ void LocalOrbitListGenerator::generateSmartOffsets()
         throw std::runtime_error(errorMessage);
     }
 
+    // Check if easy solution exists
+    if (_uniquePrimcellOffsets.size() == expected_number_of_mappings)
+    {
+        /// Translate the normal way
+    }
+
+    // Get all the mappings that matches a supercell position by offsetting each primitive atom by the unique offsets
+    std::vector<LocalOrbitListGenerator::Prim2SuperMap> allIndividualMappings = getIndividualMappings();
+
+    if(allIndividualMappings.size() != _supercell.size())
+    {
+        throw std::runtime_error("The number individual mappings were not correct for this supercell");
+    }
+
+    // Create the smart offsets
+    for(int i=0; i < expected_number_of_mappings; i++)
+    {
+        Prim2SuperMappings currentMappings = Prim2SuperMappings();
+        for(const auto &mapping : allIndividualMappings)
+        {
+            // if (isCompatibleNewMapping(currentMappings, mapping))
+            // {
+
+            // }
+        }
+    }
 }
 
 ///generate and returns the local orbit list with the input index
@@ -76,20 +98,51 @@ OrbitList LocalOrbitListGenerator::generateLocalOrbitList(const Vector3d &primOf
     return _orbit_list.getLocalOrbitList(_supercell, primOffset, _primToSupercellMap);
 }
 
-
 /// Generate the complete orbit list (the sum of all local orbit lists)
 OrbitList LocalOrbitListGenerator::generateFullOrbitList()
 {
     OrbitList orbitList = OrbitList();
-    for(int i = 0; i < getUniqueOffsetsCount(); i++)
+    for (int i = 0; i < getUniqueOffsetsCount(); i++)
     {
         orbitList += generateLocalOrbitList(i);
     }
     return orbitList;
-
-
 }
 
+/// Get the vector of all the individual primtive  to super via offset
+std::vector<LocalOrbitListGenerator::Prim2SuperMap> LocalOrbitListGenerator::getIndividualMappings() const
+{
+    std::vector<LocalOrbitListGenerator::Prim2SuperMap> individualMappings;
+    for (const auto &offset : _uniquePrimcellOffsets)
+    {
+        std::vector<Vector3d> positions = icet::getOffsetPositions(_orbit_list.getPrimitiveStructure(), offset);
+        for (int i = 0; i < positions.size(); i++)
+        {
+            std::vector<int> matchedIndices = findMatchingSupercellPositions(positions[i]);
+
+            for(const auto superIndex : matchedIndices)
+            {
+                Prim2SuperMap   p2sm = Prim2SuperMap(i, superIndex, offset);
+                individualMappings.push_back(p2sm);
+            }
+        }
+    }
+    return individualMappings;
+}
+
+/// Find the indices of the supercell that are within 1e-3 of the position argument
+std::vector<int> LocalOrbitListGenerator::findMatchingSupercellPositions(const Vector3d &position) const
+{
+    std::vector<int> matchedIndices;
+    for (int i = 0; i < _supercell.getPositions().rows(); i++)
+    {
+        if ((position.transpose() - _supercell.getPositions().row(i)).norm() < 1e-3)
+            {
+                matchedIndices.push_back(i);
+            }
+    }
+    return matchedIndices;
+}
 
 //clears the unordered_map and the vector
 void LocalOrbitListGenerator::clear()

@@ -36,14 +36,43 @@ etc...
 
 class LocalOrbitListGenerator
 {
+    /// This collects the information that primtiveIndex is mapped to superIndex via the offset
+    struct Prim2SuperMap
+    {
+        Prim2SuperMap(int index, int superIndex, Vector3d offset) : primitiveIndex(index), superIndex(superIndex), offset(offset)
+        {
+        }
+        int primitiveIndex;
+        int superIndex;
+        Vector3d offset;
+    };
+
+    /// This contains one set of mappings that take the entire primitive to one part of the supercell
+    struct Prim2SuperMappings
+    {
+        std::vector<int> primitiveIndices;
+        std::vector<int> superIndices;
+        std::vector<Vector3d> offsets;
+
+        Prim2SuperMap getMap(int index)
+        {
+            if (index >= primitiveIndices.size())
+            {
+                throw std::out_of_range("Index out of range in Prim2SuperMap getMap(int index)");
+            }
+            Prim2SuperMap p2sm = Prim2SuperMap(primitiveIndices[index], superIndices[index], offsets[index]);
+            return p2sm;
+        }
+    };
+
   public:
     LocalOrbitListGenerator(const OrbitList &, const Structure &);
 
     ///generate and returns the local orbit list with the input index
-    OrbitList generateLocalOrbitList(const unsigned int ) ;
+    OrbitList generateLocalOrbitList(const unsigned int);
 
     ///generate and returns the local orbit list with the input offset (require that the offset is in uniquecell offset?)
-    OrbitList generateLocalOrbitList(const Vector3d & ) ;
+    OrbitList generateLocalOrbitList(const Vector3d &);
 
     /// Generate the full orbit list from this structure
     OrbitList generateFullOrbitList();
@@ -69,11 +98,8 @@ class LocalOrbitListGenerator
         return _uniquePrimcellOffsets;
     }
 
-
-
   private:
-
-   /**
+    /**
     Maps supercell positions to reference to the primitive cell and find unique primitive cell offsets
     Will loop through all sites in supercell and map them to the primitive structures cell
     and find the unique primitive cell offsets
@@ -95,9 +121,18 @@ class LocalOrbitListGenerator
     ///this maps a latticeNeighbor from the primitive and get the equivalent in supercell
     std::unordered_map<LatticeSite, LatticeSite> _primToSupercellMap;
 
+
+
     ///The unique offsets of the primitive cell required to "cover" the supercell
     std::vector<Vector3d> _uniquePrimcellOffsets;
 
     /// The sub permutation matrices that will together map the basis atoms unto the supercell.
     std::vector<Matrix3i> _subPermutationMatrices;
+
+    /// Get the vector of all the individual primtive  to super via offset
+    std::vector<Prim2SuperMap> getIndividualMappings() const;
+
+    /// Find the indices of the supercell that are within 1e-3 of the position argument
+    std::vector<int> findMatchingSupercellPositions(const Vector3d &position) const;
+
 };

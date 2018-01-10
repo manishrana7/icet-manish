@@ -5,7 +5,7 @@
 #include <Eigen/Dense>
 #include <vector>
 #include "LatticeSite.hpp"
-
+#include "Structure.hpp"
 namespace icet
 {
 
@@ -85,5 +85,7 @@ bool next_cartesian_product(const std::vector<std::vector<int>> &items, std::vec
 Eigen::Matrix3i getUnitcellPermutation(const Eigen::Matrix3d &inputCell, const Eigen::Matrix3d &referenceCell, double tolerance_cell=0.05);
 
 std::vector<Eigen::Matrix3i> getUnitcellSubPermutations(Eigen::Matrix3i &);
+
+std::vector<Eigen::Vector3d> getOffsetPositions(const Structure&, const Eigen::Vector3d&);
 
 }
