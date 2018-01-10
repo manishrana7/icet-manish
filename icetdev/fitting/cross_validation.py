@@ -125,12 +125,24 @@ class CrossValidationEstimator(BaseOptimizer):
                 else:
                     self._fit_kwargs[key] = val
 
-    def __str__(self):
-        s = []
-        s.append('Validation method: {}'.format(self.validation_method))
-        s.append(super().__str__())
-        s.append('Number of splits {}'.format(self.number_of_splits))
-        return '\n'.join(s)
+    def get_info(self):
+        '''
+        Get comprehensive information concerning the optimization process.
+
+        Returns
+        -------
+        dict
+        '''
+        info = BaseOptimizer.get_info(self)
+
+        # Add class specific data
+        info['validation_method'] = self.validation_method
+        info['number_of_splits'] = self.number_of_splits
+        info['rmse_training'] = self.rmse_training
+        info['rmse_training_splits'] = self.rmse_training_splits
+        info['rmse_validation'] = self.rmse_validation
+        info['rmse_validation_splits'] = self.rmse_validation_splits
+        return info
 
     @property
     def validation_method(self):

@@ -136,13 +136,14 @@ class BaseOptimizer:
         info['fit-method'] = self.fit_method
         info['number-of-target-values'] = self.number_of_target_values
         info['number-of-parameters'] = self.number_of_parameters
-        info['parameters'] = self.parameters
+        for key, val in self.fit_results.items():
+            info[key] = val
         return info
 
     def __str__(self):
         s = []
         for key, value in self.get_info().items():
-            if type(value) in [str, int, float]:
+            if isinstance(value, (str, int, float)):
                 s.append('{:25} : {}'.format(key, value))
         return '\n'.join(s)
 

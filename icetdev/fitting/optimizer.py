@@ -68,20 +68,12 @@ class Optimizer(BaseOptimizer):
         self.training_scatter_data = None
         self.test_scatter_data = None
 
-    def train(self, verbose=True):
+    def train(self):
         ''' Carry out training. '''
 
         # select training data
         A_train = self._A[self.training_set, :]
         y_train = self._y[self.training_set]
-
-        output = ['{s:-^{n}}'.format(s='Training', n=45)]
-        output.append('Fit Method {}, N_params {}'.format(
-            self.fit_method, self.number_of_parameters))
-        output.append('Train size {}, Test size {} '
-                      .format(self.training_size, self.test_size))
-        if verbose:
-            print('\n'.join(output))
 
         # perform training
         self._fit_results = self._optimizer_function(A_train, y_train,
@@ -91,7 +83,6 @@ class Optimizer(BaseOptimizer):
         self.training_scatter_data = ScatterData(y_train,
                                                  self.predict(A_train))
 
-        output = ['Train RMSE  {:5.5f}'.format(self.rmse_training)]
         # perform validation
         if self.test_set is not None:
             A_test = self._A[self.test_set, :]
@@ -99,14 +90,9 @@ class Optimizer(BaseOptimizer):
             self._rmse_test = self.compute_rmse(A_test, y_test)
             self.test_scatter_data = ScatterData(y_test,
                                                  self.predict(A_test))
-            output.append('Test  RMSE  {:5.5f}'.format(self.rmse_test))
         else:
             self._rmse_test = None
             self.test_scatter_data = None
-            output.append('Test  RMSE  NaN')
-        output.append('{s:-^{n}}'.format(s='Done', n=45))
-        if verbose:
-            print('\n'.join(output))
 
     def _setup_rows(self, training_size, test_size, training_set,
                     test_set):
@@ -183,9 +169,9 @@ class Optimizer(BaseOptimizer):
         # Add class specific data
         info['rmse_training'] = self.rmse_training
         info['rmse_test'] = self.rmse_test
-        info['training_set_size'] = self.training_size
+        info['training_size'] = self.training_size
         info['training_set'] = self.training_set
-        info['test_set_size'] = self.test_size
+        info['test_size'] = self.test_size
         info['test_set'] = self.test_set
         return info
 

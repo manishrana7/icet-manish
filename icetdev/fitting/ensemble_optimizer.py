@@ -76,13 +76,13 @@ class EnsembleOptimizer(BaseOptimizer):
                 np.arange(self.number_of_target_values), self.training_size,
                 replace=self.bootstrap)
             test_set = np.setdiff1d(
-                training_set, range(self.number_of_target_values))
+                range(self.number_of_target_values), training_set)
 
             # train
-            opt = Optimizer((self._A, self._y), self.fit_method,
-                            training_set=training_set, test_set=test_set,
-                            **self._kwargs)
-            opt.train(verbose=False)
+            opt = Optimizer(
+                (self._A, self._y), self.fit_method, training_set=training_set,
+                test_set=test_set, **self._kwargs)
+            opt.train()
             optimizers.append(opt)
 
         # collect data from each fit
@@ -115,6 +115,27 @@ class EnsembleOptimizer(BaseOptimizer):
         for i, parameters in enumerate(self.parameter_vectors):
             error_matrix[:, i] = np.dot(self._A, parameters) - self._y
         return error_matrix
+
+    def get_info(self):
+        '''
+        Get comprehensive information concerning the optimization process.
+
+        Returns
+        -------
+        dict
+        '''
+        info = BaseOptimizer.get_info(self)
+
+        # Add class specific data
+        info['parameters_stddev'] = self.parameters_stddev
+        info['ensemble_size'] = self.ensemble_size
+        info['rmse_training'] = self.rmse_training
+        info['rmse_training_ensemble'] = self.rmse_training_ensemble
+        info['rmse_test'] = self.rmse_test
+        info['rmse_test_ensemble'] = self.rmse_test_ensemble
+        info['training_size'] = self.training_size
+        info['bootstrap'] = self.bootstrap
+        return info
 
     @property
     def parameters_stddev(self):
