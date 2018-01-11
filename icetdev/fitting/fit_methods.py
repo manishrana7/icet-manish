@@ -145,7 +145,8 @@ def fit_lasso_optimize_alpha(X, y, alphas=None, fold=10, fit_intercept=False,
     alpha_min = alphas[np.argmin(RMSE_path)]
 
     if np.argmin(RMSE_path) == 0 or np.argmin(RMSE_path) == len(alphas)-1:
-        logger.warning('alpha_min {} at edge of grid search'.format(alpha_min))
+        logger.warning(
+            'alpha_min={} found at edge of grid search'.format(alpha_min))
 
     # Make final fit
     lasso.alpha = alpha_min
