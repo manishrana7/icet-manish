@@ -137,10 +137,13 @@ class BaseOptimizer:
         return info
 
     def __str__(self):
+        width = 60
         s = []
+        s.append(self.__class__.__name__.center(width, '-'))
         for key, value in self.summary.items():
             if isinstance(value, (str, int, float)):
                 s.append('{:25} : {}'.format(key, value))
+        s.append(''.center(width, '-'))
         return '\n'.join(s)
 
     def __repr__(self):
