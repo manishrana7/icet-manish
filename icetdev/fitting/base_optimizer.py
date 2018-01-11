@@ -132,9 +132,7 @@ class BaseOptimizer:
         info['fit-method'] = self.fit_method
         info['number-of-target-values'] = self.number_of_target_values
         info['number-of-parameters'] = self.number_of_parameters
-        for key, val in self._fit_results.items():
-            info[key] = val
-        return info
+        return {**info, **self._fit_results}
 
     def __str__(self):
         width = 60
