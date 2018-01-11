@@ -125,25 +125,23 @@ class BaseOptimizer:
         '''
         return np.mean(np.abs(np.multiply(A, self.parameters)), axis=0)
 
-    def get_info(self):
-        ''' Get comprehensive information concerning the optimization process.
-
-        Returns
-        -------
-        dict
-        '''
+    @property
+    def summary(self):
+        ''' dict : Comprehensive information about the optimizer '''
         info = dict()
-        info['parameters'] = self.parameters
         info['fit-method'] = self.fit_method
         info['number-of-target-values'] = self.number_of_target_values
         info['number-of-parameters'] = self.number_of_parameters
-        return info
+        return {**info, **self._fit_results}
 
     def __str__(self):
+        width = 60
         s = []
-        for key, value in self.get_info().items():
-            if type(value) in [str, int, float]:
+        s.append(self.__class__.__name__.center(width, '-'))
+        for key, value in self.summary.items():
+            if isinstance(value, (str, int, float)):
                 s.append('{:25} : {}'.format(key, value))
+        s.append(''.center(width, '-'))
         return '\n'.join(s)
 
     def __repr__(self):
@@ -157,10 +155,10 @@ class BaseOptimizer:
     @property
     def parameters(self):
         ''' NumPy array : copy of parameter vector '''
-        if self.fit_results['parameters'] is None:
+        if self._fit_results['parameters'] is None:
             return None
         else:
-            return self.fit_results['parameters'].copy()
+            return self._fit_results['parameters'].copy()
 
     @property
     def number_of_target_values(self):
@@ -176,8 +174,3 @@ class BaseOptimizer:
     def seed(self):
         ''' int : seed used to initialize pseudo random number of generator '''
         return self._seed
-
-    @property
-    def fit_results(self):
-        ''' dict : results obtained during training '''
-        return self._fit_results

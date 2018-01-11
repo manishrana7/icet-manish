@@ -11,6 +11,6 @@ y = np.dot(A, x_true) + np.random.normal(0.0, 0.2, N)
 
 # test all fit_methods
 for fit_method in available_fit_methods:
-    opt = Optimizer((A, y), fit_method=fit_method, train_fraction=0.8)
+    opt = Optimizer((A, y), fit_method=fit_method, training_size=0.8)
     opt.train()
     assert (np.linalg.norm(x_true - opt.parameters)) < 0.2, fit_method
