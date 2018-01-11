@@ -116,15 +116,10 @@ class EnsembleOptimizer(BaseOptimizer):
             error_matrix[:, i] = np.dot(self._A, parameters) - self._y
         return error_matrix
 
-    def get_info(self):
-        '''
-        Get comprehensive information concerning the optimization process.
-
-        Returns
-        -------
-        dict
-        '''
-        info = BaseOptimizer.get_info(self)
+    @property
+    def summary(self):
+        ''' dict : Comprehensive information about the optimizer '''
+        info = super().get_info
 
         # Add class specific data
         info['parameters_stddev'] = self.parameters_stddev

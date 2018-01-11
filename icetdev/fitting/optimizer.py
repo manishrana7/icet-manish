@@ -156,15 +156,10 @@ class Optimizer(BaseOptimizer):
                             if i not in test_set]
         return np.array(training_set), np.array(test_set)
 
-    def get_info(self):
-        '''
-        Get comprehensive information concerning the optimization process.
-
-        Returns
-        -------
-        dict
-        '''
-        info = BaseOptimizer.get_info(self)
+    @property
+    def summary(self):
+        ''' dict : Comprehensive information about the optimizer '''
+        info = super().get_info
 
         # Add class specific data
         info['rmse_training'] = self.rmse_training

@@ -125,13 +125,9 @@ class BaseOptimizer:
         '''
         return np.mean(np.abs(np.multiply(A, self.parameters)), axis=0)
 
-    def get_info(self):
-        ''' Get comprehensive information concerning the optimization process.
-
-        Returns
-        -------
-        dict
-        '''
+    @property
+    def summary(self):
+        ''' dict : Comprehensive information about the optimizer '''
         info = dict()
         info['fit-method'] = self.fit_method
         info['number-of-target-values'] = self.number_of_target_values
@@ -142,7 +138,7 @@ class BaseOptimizer:
 
     def __str__(self):
         s = []
-        for key, value in self.get_info().items():
+        for key, value in self.summary.items():
             if isinstance(value, (str, int, float)):
                 s.append('{:25} : {}'.format(key, value))
         return '\n'.join(s)

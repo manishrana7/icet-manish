@@ -125,15 +125,10 @@ class CrossValidationEstimator(BaseOptimizer):
                 else:
                     self._fit_kwargs[key] = val
 
-    def get_info(self):
-        '''
-        Get comprehensive information concerning the optimization process.
-
-        Returns
-        -------
-        dict
-        '''
-        info = BaseOptimizer.get_info(self)
+    @property
+    def summary(self):
+        ''' dict : Comprehensive information about the optimizer '''
+        info = super().get_info
 
         # Add class specific data
         info['validation_method'] = self.validation_method
