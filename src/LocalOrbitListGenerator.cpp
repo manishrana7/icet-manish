@@ -36,6 +36,9 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
 void LocalOrbitListGenerator::generateSmartOffsets()
 {
     int expected_number_of_mappings = _supercell.size() / _orbit_list.getPrimitiveStructure().size();
+    std::cout<<"supercell size "<<_supercell.size()<<std::endl;
+    std::cout<<"primitive size "<< _orbit_list.getPrimitiveStructure().size()<<std::endl;
+    std::cout<<"Expected number of mappings "<<expected_number_of_mappings<<std::endl;
     // Check that primitive size is a multiple of supercell size
     if (fabs(expected_number_of_mappings - _supercell.size() / _orbit_list.getPrimitiveStructure().size()) > 0.01)
     {
@@ -62,25 +65,42 @@ void LocalOrbitListGenerator::generateSmartOffsets()
 
     // Create the smart offsets
     std::vector<Prim2SuperMappings> smartOffsets; 
-    for (int i = 0; i < expected_number_of_mappings; i++)
+    for (int j = 0; j < expected_number_of_mappings; j++)
     {
+        std::cout<<"j: "<<j<<" expected_number_of_mappings:"<<expected_number_of_mappings<<std::endl;
         Prim2SuperMappings currentMappings = Prim2SuperMappings();
         for (int i = allIndividualMappings.size()-1; i >=0; i--)
         {
+            std::cout<<"i: "<< i <<" allIndividualMappings.size():"<<allIndividualMappings.size()<<std::endl;
             if (isCompatibleNewMapping(currentMappings, allIndividualMappings[i]))
             {
                 currentMappings.push_back(allIndividualMappings[i]);
                 allIndividualMappings.erase(allIndividualMappings.begin()+i);
             }
-        }        
-        smartOffsets.push_back(currentMappings);
+            if(currentMappings.size() == expected_number_of_mappings)
+            {
+                break;
+            }
+        }
+        if(currentMappings.size() != 0)
+        {
+            smartOffsets.push_back(currentMappings);
+        }
     }
-
+    
+    std::cout<<" "<<std::endl;
+    for(int i=0; i < smartOffsets.size(); i++)
+    {
+        std::cout<<smartOffsets[i].size()<<" ("<<_orbit_list.getPrimitiveStructure().size()<<")"<< " ("<<i<<" /"<<smartOffsets.size()<<")"<<std::endl;
+    }
     for(const auto mapping : smartOffsets)
     {
         if( mapping.size() != _orbit_list.getPrimitiveStructure().size())
         {
-            throw std::runtime_error("The different set of mappings were the wrong size ");
+            std::string errorMessage = "The different set of mappings were the wrong size ";
+            errorMessage += std::to_string(_orbit_list.getPrimitiveStructure().size()) + " != ";
+            errorMessage += std::to_string(mapping.size());
+            throw std::runtime_error(errorMessage);
         }
     }
 }
@@ -171,16 +191,34 @@ bool LocalOrbitListGenerator::isCompatibleNewMapping(LocalOrbitListGenerator::Pr
         return false;
     }
 
-    for (int i = 0; i < currentMappings.primitiveIndices.size(); i++)
+
+    /**
+     *  Check that the distance between each primitve index to the candiate
+     *  primitive index is the same as the
+     * 
+     * 
+     */
+    for(int i = 0; i < currentMappings.primitiveIndices.size(); i++)
     {
         int primitiveIndex = currentMappings.primitiveIndices[i];
+        Vector3d offset = currentMappings.offsets[i];
+
         int superIndex = currentMappings.superIndices[i];
         Vector3d zeroOffset = {0., 0., 0.};
+
+        double distNoOffset = _orbit_list.getPrimitiveStructure().getDistance(primitiveIndex,
+                                                                           mapping.primitiveIndex,
+                                                                           zeroOffset, zeroOffset);
+        // auto superLatticeSite = _supercell.findLatticeSiteByPosition(pos1);
+        // auto superLatticeSiteTrial = _supercell.findLatticeSiteByPosition(pos2);
+        double distOffset = _orbit_list.getPrimitiveStructure().getDistance(primitiveIndex,
+                                                                           mapping.primitiveIndex,
+                                                                           offset, mapping.offset);
         double distPrim = _orbit_list.getPrimitiveStructure().getDistance(primitiveIndex,
                                                                            mapping.primitiveIndex,
                                                                            zeroOffset, zeroOffset);
         double distSuper = _supercell.getDistance(superIndex,mapping.superIndex, zeroOffset, zeroOffset);
-        if (fabs(distPrim - distSuper) > 1e-4)
+        if (fabs(distNoOffset - distSuper) > 1e-2)
         {
             return false;
         }
