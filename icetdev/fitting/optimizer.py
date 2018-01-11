@@ -159,7 +159,7 @@ class Optimizer(BaseOptimizer):
     @property
     def summary(self):
         ''' dict : Comprehensive information about the optimizer '''
-        info = super().get_info
+        info = super().summary
 
         # Add class specific data
         info['rmse_training'] = self.rmse_training

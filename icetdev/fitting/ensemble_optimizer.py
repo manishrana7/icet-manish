@@ -119,7 +119,7 @@ class EnsembleOptimizer(BaseOptimizer):
     @property
     def summary(self):
         ''' dict : Comprehensive information about the optimizer '''
-        info = super().get_info
+        info = super().summary
 
         # Add class specific data
         info['parameters_stddev'] = self.parameters_stddev

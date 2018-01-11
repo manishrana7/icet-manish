@@ -128,7 +128,7 @@ class CrossValidationEstimator(BaseOptimizer):
     @property
     def summary(self):
         ''' dict : Comprehensive information about the optimizer '''
-        info = super().get_info
+        info = super().summary
 
         # Add class specific data
         info['validation_method'] = self.validation_method
