@@ -132,7 +132,7 @@ class BaseOptimizer:
         info['fit-method'] = self.fit_method
         info['number-of-target-values'] = self.number_of_target_values
         info['number-of-parameters'] = self.number_of_parameters
-        for key, val in self.fit_results.items():
+        for key, val in self._fit_results.items():
             info[key] = val
         return info
 
@@ -157,10 +157,10 @@ class BaseOptimizer:
     @property
     def parameters(self):
         ''' NumPy array : copy of parameter vector '''
-        if self.fit_results['parameters'] is None:
+        if self._fit_results['parameters'] is None:
             return None
         else:
-            return self.fit_results['parameters'].copy()
+            return self._fit_results['parameters'].copy()
 
     @property
     def number_of_target_values(self):
@@ -176,8 +176,3 @@ class BaseOptimizer:
     def seed(self):
         ''' int : seed used to initialize pseudo random number of generator '''
         return self._seed
-
-    @property
-    def fit_results(self):
-        ''' dict : results obtained during training '''
-        return self._fit_results
