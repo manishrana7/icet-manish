@@ -1,5 +1,5 @@
 [![pipeline status](https://gitlab.com/materials-modeling/icet/badges/master/pipeline.svg)](https://gitlab.com/materials-modeling/icet/commits/master)
-[![coverage report](https://gitlab.com/materials-modeling/icet/badges/master/coverage.svg)](https://materials-modeling.gitlab.io/icet/.test/coverage/)
+[![coverage report](https://gitlab.com/materials-modeling/icet/badges/master/coverage.svg)](https://icet.materialsmodeling.org/coverage/)
 
 
 # icet &mdash; The Pythonic approach to cluster expansions
@@ -13,4 +13,4 @@ written in C++ providing performance while maintaining portability.
 
 A detailed description of the features of `icet` along with background
 information and tutorials can be found in the
-[user guide](https://materials-modeling.gitlab.io/icet/.test/userguide/index.html).
+[user guide](https://icet.materialsmodeling.org/userguide/index.html).
