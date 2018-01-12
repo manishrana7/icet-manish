@@ -273,7 +273,8 @@ index | order |   size   | multiplicity | orbit index |  MC vector
             self.assertAlmostEqual(retval, target, places=9)
         # use icet Structure
         for atoms, target in zip(self.structure_list, target_cluster_vectors):
-            retval = list(self.cs.get_cluster_vector(Structure.from_atoms(atoms)))
+            retval = list(self.cs.get_cluster_vector(
+                Structure.from_atoms(atoms)))
             self.assertAlmostEqual(retval, target, places=9)
         # check that other types fail
         with self.assertRaises(Exception) as context:
@@ -390,7 +391,8 @@ class TestClusterSpaceSurface(unittest.TestCase):
             self.assertAlmostEqual(retval, target, places=9)
         # use icet Structure
         for atoms, target in zip(self.structure_list, target_cluster_vectors):
-            retval = list(self.cs.get_cluster_vector(Structure.from_atoms(atoms)))
+            retval = list(self.cs.get_cluster_vector(
+                Structure.from_atoms(atoms)))
             self.assertAlmostEqual(retval, target, places=9)
         # check that other types fail
         with self.assertRaises(Exception) as context:
