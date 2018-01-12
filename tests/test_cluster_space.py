@@ -151,7 +151,7 @@ class TestClusterSpace(unittest.TestCase):
         '''
         Testing len functionality
         '''
-        number_orbits = self.cs.__len__() 
+        number_orbits = self.cs.__len__()
         self.assertEqual(number_orbits, len(self.cs.get_orbit_list()) + 1)
 
     def test_get_orbit_list_info(self):
@@ -402,7 +402,7 @@ class TestClusterSpaceSurface(unittest.TestCase):
         Testing get_number_of_orbits_by_order functionality
         '''
         retval = self.cs.get_number_of_orbits_by_order()
-        target = OrderedDict([(0,1),(1, 3), (2, 5), (3, 10), (4, 4)])
+        target = OrderedDict([(0, 1), (1, 3), (2, 5), (3, 10), (4, 4)])
         self.assertEqual(target, retval)
 
     def test_get_Mi_from_dict(self):

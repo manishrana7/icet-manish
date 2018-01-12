@@ -212,10 +212,10 @@ class ClusterSpace(_ClusterSpace):
         '''
         data = []
         zerolet = OrderedDict([('index', 0),
-                      ('order', 0),
-                      ('size', 0),
-                      ('multiplicity',1),
-                      ('orbit index', -1)])
+                               ('order', 0),
+                               ('size', 0),
+                               ('multiplicity', 1),
+                               ('orbit index', -1)])
 
         data.append(zerolet)
         index = 1
