@@ -10,10 +10,10 @@ from .fitting import (Optimizer,
                       CrossValidationEstimator)
 
 '''
-The main icet module.
+icet module.
 '''
 
-__description__ = 'The Pythonic approach to cluster expansions'
+__description__ = 'A Pythonic approach to cluster expansions'
 __authors__ = ['Mattias Ångqvist',
                'William Armando Muñoz',
                'Thomas Holm Rod',
@@ -34,5 +34,7 @@ __all__ = ['ClusterSpace',
            'CrossValidationEstimator',
            'get_singlet_info',
            'view_singlets']
+__maintainer__ = 'The icet developers team'
+__email__ = 'icet@materialsmodeling.org'
 __status__ = 'alpha-version'
-__url__ = 'http://www.icet.org/'
+__url__ = 'http://icet.materialsmodeling.org/'
