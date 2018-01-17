@@ -1,13 +1,11 @@
 import numpy as np
 from ase import Atoms
-from ase.build import niggli_reduce
 import spglib
 
-from ..core.structure import Structure
-import math
 from icet.core.lattice_site import LatticeSite
 
 from collections import namedtuple
+
 
 def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
     '''Get positions in reduced (scaled) coordinates.
@@ -82,6 +80,7 @@ def add_vacuum_in_non_pbc(atoms):
 
     return atoms
 
+
 def icet_wrap(atoms, tol=1e-5):
     """
     Wraps an atoms object. Will favor positions with
@@ -97,12 +96,11 @@ def icet_wrap(atoms, tol=1e-5):
                 if abs(coordinate) < tol:
                     # print("set to zero:",i,x)
                     positions[i][x] = 0.0
-                
-    atoms.set_positions(positions)     
 
-        
+    atoms.set_positions(positions)
+
     frac_positions = atoms.get_scaled_positions(wrap=False)
-    
+
     for i, frac_pos in enumerate(frac_positions):
         # print(i, frac_pos)
         for x, frac_coordinate in enumerate(frac_pos):
@@ -110,11 +108,11 @@ def icet_wrap(atoms, tol=1e-5):
                 if abs(frac_coordinate) < tol:
                     # print("set to zero:",i,x)
                     frac_positions[i][x] = 0.0
-                if abs(frac_coordinate -1 ) < tol:
+                if abs(frac_coordinate - 1) < tol:
                     # print("set to zero:",i,x)
-                    frac_positions[i][x] = 0.0                    
-                
-    atoms.set_scaled_positions(frac_positions)               
+                    frac_positions[i][x] = 0.0
+
+    atoms.set_scaled_positions(frac_positions)
 
 
 def get_primitive_structure(atoms, no_idealize=True):
@@ -132,9 +130,9 @@ def get_primitive_structure(atoms, no_idealize=True):
         output structure
     '''
     atoms_with_vacuum = add_vacuum_in_non_pbc(atoms)
-    
+
     lattice, scaled_positions, numbers = spglib.standardize_cell(
-        atoms_with_vacuum, to_primitive=True, no_idealize=no_idealize,symprec=1e-6)
+        atoms_with_vacuum, to_primitive=True, no_idealize=no_idealize)
     scaled_positions = [np.round(pos, 12) for pos in scaled_positions]
     atoms_prim = Atoms(scaled_positions=scaled_positions,
                        numbers=numbers, cell=lattice, pbc=atoms.pbc)
@@ -201,61 +199,13 @@ def required_offsets_to_map_supercell(supercell, atoms_prim):
     return required_offsets
 
 
-def transform_cell_to_cell(atoms, atoms_template, tolerance=1e-3):
-    '''
-    Transform atoms_transform to look like a simple repeat of
-    atoms_template.
-    '''
-
-    atoms = atoms.copy()
-    atoms_template = atoms_template.copy()
-    cell_transform = atoms.cell
-    cell_template = atoms_template.cell
-    atoms.wrap()
-    atoms_template.wrap()
-
-    # get fractional coordinates of supercell positions relative primitive cell
-    fractional_positions = get_scaled_positions(
-        atoms.positions, atoms_template.cell, wrap=False)
-
-    # print(atoms.positions)
-
-    offsets = []
-
-    for pos in fractional_positions:
-        offset = tuple(np.floor(pos).astype(int))
-        offsets.append(offset)
-
-    unique_offsets = list(set(offsets))
-    max_offset = list(max(unique_offsets))
-    for i in range(3):
-        if max_offset[i] < 0:
-            max_offset[i] = 0
-        max_offset[i] += 1
-    print(max_offset)
-
-    atoms_new = atoms_template.copy().repeat(max_offset)
-
-    scaled_positions = atoms_new.get_scaled_positions()
-
-    print(atoms_new.cell)
-    supercell_fractional = get_scaled_positions(
-        atoms.positions,  atoms_new.cell, wrap=True)
-
-    for i, atom in enumerate(atoms_new):
-        for j in range(len(supercell_fractional)):
-            if np.linalg.norm(scaled_positions[i] - supercell_fractional[j]) < tolerance:
-                atom.symbol = atoms[j].symbol
-
-    return atoms_new
-
-
 def get_permutation_matrix(input_configuration,
                            reference_structure,
                            tolerance_cell=0.05,
                            ):
     '''
-    Computes and returns the permutation matrix that takes the reference cell to the input cell,
+    Computes and returns the permutation
+    matrix that takes the reference cell to the input cell,
     i.e. permutation_matrix * reference_cell = input_cell
     '''
 
@@ -287,7 +237,9 @@ def get_permutation_matrix(input_configuration,
 
 def get_smart_offsets(atoms, atoms_prim):
     '''
-     Returns the maps (note plural) that maps each basis atom to the supercell once and only once
+     Returns the maps (note plural) that
+     maps each basis atom to the supercell
+     once and only once.
      Each basis will get its own offset.
 
     Parameters
@@ -309,8 +261,10 @@ def get_smart_offsets(atoms, atoms_prim):
     size_of_primitive = len(atoms_prim)
     size_of_supercell = len(atoms)
     expected_number_of_mappings = size_of_supercell // size_of_primitive
+    # "Can not translate cell with {} atoms to a
+    # supercell with {} atoms".format(size_of_primitive, size_of_supercell)
     assert np.abs(expected_number_of_mappings - size_of_supercell /
-                  size_of_primitive) < 0.01, "Can not translate cell with {} atoms to a supercell with {} atoms".format(size_of_primitive, size_of_supercell)
+                  size_of_primitive) < 0.01
 
     unique_offsets = required_offsets_to_map_supercell(atoms, atoms_prim)
 
@@ -325,9 +279,9 @@ def get_smart_offsets(atoms, atoms_prim):
         raise Exception("Undefined behaviour in function get_smart_offsets")
 
     """
-    supercell[i] = offset means that supercell atom `i` was mapped by some primitive atom
+    supercell[i] = offset means that
+    supercell atom `i` was mapped by some primitive atom
     when the primitive is transleted by offset
-
     """
 
     offset_mapping_list = []
@@ -335,7 +289,8 @@ def get_smart_offsets(atoms, atoms_prim):
     for offset in unique_offsets:
         positions = get_offset_positions(atoms_prim, offset)
         for prim_index, pos in enumerate(positions):
-            # Difference between the offset of the primitive position and supercell positions
+            # Difference between the offset of the
+            # primitive position and supercell positions
             pos_diff = np.floor(np.round(atoms.positions - pos, decimals=7))
             matched_indices = get_indices_with_zero_component(pos_diff)
             for i in matched_indices:
@@ -350,15 +305,19 @@ def get_smart_offsets(atoms, atoms_prim):
 
     """
     Construct smart offsets so that
-    1: the list of offset are have a size of len(supercell)/len(primitive)
+    1: the list of offset are have a size of
+     len(supercell)/len(primitive)
     2: The different offsets will translate the primitive so that
        each interatomic distance will be kept (under the supercells cell)
-    3: each offset in the list of offset will map to an atom in the supercell which
-       correspond to a lattice site that has the same index is the translated atom
+    3: each offset in the list of offset will map to an
+     atom in the supercell which
+       correspond to a lattice site that has the same index
+       is the translated atom
 
     Construct all interatomic distances of the primitive cell.
 
-    When constructing the elements in list of offsets, check that the interatomic distances are kept
+    When constructing the elements in list of offsets,
+    check that the interatomic distances are kept
 
     """
     number_of_offsets = len(atoms) // len(atoms_prim)
@@ -394,7 +353,8 @@ def get_smart_offsets(atoms, atoms_prim):
     return(list_of_tuple_offset)
 
 
-def is_compatible_new_offset(current_offsets, next_offsets, atoms, atoms_prim, tol=1e-5):
+def is_compatible_new_offset(current_offsets,
+                             next_offsets, atoms, atoms_prim, tol=1e-5):
     """
     Tests if next offsets are compatible to be added to current offsets
     """
@@ -407,7 +367,8 @@ def is_compatible_new_offset(current_offsets, next_offsets, atoms, atoms_prim, t
     if next_offsets.super_index in current_offsets.super_indices:
         return False
 
-    for i, j in zip(current_offsets.prim_indices, current_offsets.super_indices):
+    for i, j in zip(current_offsets.prim_indices,
+                    current_offsets.super_indices):
         dist_prim = atoms_prim.get_distance(
             i, next_offsets.prim_index, mic=True)
         dist_super = atoms.get_distance(j, next_offsets.super_index, mic=True)
@@ -437,7 +398,8 @@ def get_unitcell_offsets_from_positions(positions, cell):
 
 def get_indices_with_zero_component(array, tolerance=1e-4):
     """
-    Returns the indices of the array where the component is zero within a tolerance
+    Returns the indices of the array where the
+    component is zero within a tolerance.
     """
     indices = []
     for i, a in enumerate(array):

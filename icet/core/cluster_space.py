@@ -1,11 +1,13 @@
-from ase import Atoms
-import numpy as np
 from collections import OrderedDict
 
+import numpy as np
 from _icet import ClusterSpace as _ClusterSpace
-from .structure import Structure
-from .orbit_list import create_orbit_list
+from ase import Atoms
+from icet.tools.geometry import get_primitive_structure
+
 from ..tools.geometry import add_vacuum_in_non_pbc
+from .orbit_list import create_orbit_list
+from .structure import Structure
 
 
 class ClusterSpace(_ClusterSpace):
@@ -274,24 +276,14 @@ class ClusterSpace(_ClusterSpace):
             msg = 'Unknown structure format'
             msg += ' {} (ClusterSpace.get_cluster_vector)'.format(type(atoms))
             raise Exception(msg)
-        from ase.build import niggli_reduce
-        from icet.tools.geometry import get_primitive_structure,icet_wrap
         # if pbc is not true one needs to massage the structure a bit
         if not np.array(structure.get_pbc()).all():
-            atoms = structure.to_atoms()            
+            atoms = structure.to_atoms()
             add_vacuum_in_non_pbc(atoms)
             structure = Structure.from_atoms(atoms)
         else:
             atoms = structure.to_atoms()
-            # if np.linalg.det(atoms.cell) < 0:
-            #     niggli_reduce(atoms)    
-            # atoms.wrap()
-            # icet_wrap(atoms)
-            # niggli_reduce(atoms)
             atoms = get_primitive_structure(atoms)
-            # niggli_reduce(atoms)
-            # atoms.wrap()  
-            # icet_wrap(atoms)
             structure = Structure.from_atoms(atoms)
         return _ClusterSpace.get_cluster_vector(self, structure)
 
