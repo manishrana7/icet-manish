@@ -25,6 +25,7 @@ class ManyBodyNeighborList(object):
 
     def __init__(self):
         pass
+
     def build(self, neighbor_lists, index, bothways=False):
         """
         Will take the neighbor list object and combine the neighbors
@@ -70,13 +71,17 @@ class ManyBodyNeighborList(object):
 
         return many_body_neighbor_indices
 
-    def combine_to_higher_order(self, nl, many_body_neighbor_indices, neighbor_i,
-                                current_original_neighbors, bothways, order):
-
+    def combine_to_higher_order(self, nl, many_body_neighbor_indices,
+                                neighbor_i, current_original_neighbors,
+                                bothways, order):
         """
-        For each `j` in `neighbor` construct the intersect of `neighbor_j` and `neighbor`, call the
-        intersect `neighbor_ij`. All neighbors in `neighbor_ij` are then neighbors of `i` and
-        `j` What is saved then is `(i,j)` and `neighbor_ij` up to the desired `order`.
+        For each `j` in `neighbor` construct
+        the intersect of `neighbor_j` and `neighbor`,
+        call the intersect `neighbor_ij`. All
+        neighbors in `neighbor_ij` are then
+        neighbors of `i` and `j` What is saved
+        then is `(i,j)` and `neighbor_ij` up
+        to the desired `order`.
 
         Parameters
         ----------
@@ -108,9 +113,11 @@ class ManyBodyNeighborList(object):
                 self.get_neighbor_from_nl(nl, j[0]), j[1])
 
             if not bothways:
-                neighbor_j_offset = self.filter_neighbor_from_smaller(neighbor_j_offset, j)
+                neighbor_j_offset = self.filter_neighbor_from_smaller(
+                    neighbor_j_offset, j)
 
-            intersection_with_j = self.get_intersection(neighbor_i, neighbor_j_offset)
+            intersection_with_j = self.get_intersection(
+                neighbor_i, neighbor_j_offset)
 
             if len(original_neighbor_copy) + 1 < order:
                 self.combine_to_higher_order(
@@ -144,8 +151,8 @@ class ManyBodyNeighborList(object):
 
     def get_intersection(self, neighbor_i, neighbor_j):
         """
-        Return intersection of neighbor_i with neighbor_j using the is_j_in_neighbor bool
-        method.
+        Return intersection of neighbor_i with neighbor_j
+        using the is_j_in_neighbor bool method.
         """
         neighbor_ij = []
         for j in neighbor_i:
@@ -174,7 +181,8 @@ class ManyBodyNeighborList(object):
 
     def translate_all_neighbor(self, neighbor, offset):
         """
-        Make a copy of neighbor and returns neighbor but with all offset "offseted" an
+        Make a copy of neighbor and returns neighbor
+        but with all offset "offseted" an
         addition offset
         """
         neighbor_i_offset = neighbor.copy()
