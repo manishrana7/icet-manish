@@ -21,11 +21,10 @@ class TestManyBodyNeighborList(unittest.TestCase):
         self.mbnl = ManyBodyNeighborList()
         self.neighbor_lists = []
         for co in self.cutoffs:
-            ase_nl = NeighborList(len(self.atoms)*[co/2], skin=1e-8,
-                             bothways=True, self_interaction=False)
+            ase_nl = NeighborList(len(self.atoms) * [co / 2], skin=1e-8,
+                                  bothways=True, self_interaction=False)
             ase_nl.update(self.atoms)
             self.neighbor_lists.append(ase_nl)
-
 
     def test_build(self):
         """
@@ -40,12 +39,26 @@ class TestManyBodyNeighborList(unittest.TestCase):
         assert that each index in the atoms object
         have the same number of neighbors
         """
-        
+
         mbnl_size = len(self.mbnl.build(self.neighbor_lists, 0, bothways=True))
         for index in range(len(self.atoms)):
-            self.assertEqual(mbnl_size,len(self.mbnl.build(self.neighbor_lists, index, bothways=True)))
+            self.assertEqual(mbnl_size, len(self.mbnl.build(
+                self.neighbor_lists, index, bothways=True)))
 
+    def test_bothways_false(self):
+        """
+        Build the mbnl with bothways = False and
+        assert that mbnl built on the first 
+        index in the atoms object do not
+        have the same number of neighbors as 
+        the other atoms.
+        """
 
+        mbnl_size = len(self.mbnl.build(
+            self.neighbor_lists, 0, bothways=False))
+        for index in range(1, len(self.atoms)):
+            self.assertNotEqual(mbnl_size, len(self.mbnl.build(
+                self.neighbor_lists, index, bothways=False)))
 
 
 if __name__ == '__main__':
