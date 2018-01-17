@@ -58,32 +58,32 @@ class ManyBodyNeighborList(object):
         for k in range(2, len(neighbor_lists) + 2):
 
             """ Get neighbors of index in icet format """
-            ngb = self.get_ngb_from_nl(neighbor_lists[k - 2], index)
+            neighbor = self.get_neighbor_from_nl(neighbor_lists[k - 2], index)
 
             zero_vector = np.array([0., 0., 0., ])
 
             current_original_neighbors = [[index, zero_vector]]
 
             self.combine_to_higher_order(
-                neighbor_lists[k - 2], many_body_neighbor_indices, ngb,
+                neighbor_lists[k - 2], many_body_neighbor_indices, neighbor,
                 current_original_neighbors, bothways, k)
 
         return many_body_neighbor_indices
 
-    def combine_to_higher_order(self, nl, many_body_neighbor_indices, ngb_i,
+    def combine_to_higher_order(self, nl, many_body_neighbor_indices, neighbor_i,
                                 current_original_neighbors, bothways, order):
 
         """
-        For each `j` in `ngb` construct the intersect of `ngb_j` and `ngb`, call the
-        intersect `ngb_ij`. All neighbors in `ngb_ij` are then neighbors of `i` and
-        `j` What is saved then is `(i,j)` and `ngb_ij` up to the desired `order`.
+        For each `j` in `neighbor` construct the intersect of `neighbor_j` and `neighbor`, call the
+        intersect `neighbor_ij`. All neighbors in `neighbor_ij` are then neighbors of `i` and
+        `j` What is saved then is `(i,j)` and `neighbor_ij` up to the desired `order`.
 
         Parameters
         ----------
         nl : ASE neighbor_list object
         many_body_neighbor_indices: list
             neighbor_lists, each inner list is made up.
-        ngb_i : list
+        neighbor_i : list
             neighbors of a chosen index in the icet format [[index,offset]]
         current_original_neighbors :
         bothways : boolean
@@ -92,7 +92,7 @@ class ManyBodyNeighborList(object):
         order : int
             highest order for many-body neighbor indices.
         """
-        for j in ngb_i:
+        for j in neighbor_i:
 
             original_neighbor_copy = current_original_neighbors.copy()
 
@@ -104,13 +104,13 @@ class ManyBodyNeighborList(object):
 
             original_neighbor_copy.append(j)
 
-            ngb_j_offset = self.translate_all_ngb(
-                self.get_ngb_from_nl(nl, j[0]), j[1])
+            neighbor_j_offset = self.translate_all_neighbor(
+                self.get_neighbor_from_nl(nl, j[0]), j[1])
 
             if not bothways:
-                ngb_j_offset = self.filter_ngb_from_smaller(ngb_j_offset, j)
+                neighbor_j_offset = self.filter_neighbor_from_smaller(neighbor_j_offset, j)
 
-            intersection_with_j = self.get_intersection(ngb_i, ngb_j_offset)
+            intersection_with_j = self.get_intersection(neighbor_i, neighbor_j_offset)
 
             if len(original_neighbor_copy) + 1 < order:
                 self.combine_to_higher_order(
@@ -135,52 +135,52 @@ class ManyBodyNeighborList(object):
         """
         offset = [0., 0., 0.]
         first_site = [index, offset]
-        ngb = self.get_ngb_from_nl(neigbhorlist, index)
+        neighbor = self.get_neighbor_from_nl(neigbhorlist, index)
         if not bothways:
-            ngb = self.filter_ngb_from_smaller(ngb, first_site)
-        if len(ngb) == 0:
+            neighbor = self.filter_neighbor_from_smaller(neighbor, first_site)
+        if len(neighbor) == 0:
             return
-        mbn_indices.append([first_site, ngb])
+        mbn_indices.append([first_site, neighbor])
 
-    def get_intersection(self, ngb_i, ngb_j):
+    def get_intersection(self, neighbor_i, neighbor_j):
         """
-        Return intersection of ngb_i with ngb_j using the is_j_in_ngb bool
+        Return intersection of neighbor_i with neighbor_j using the is_j_in_neighbor bool
         method.
         """
-        ngb_ij = []
-        for j in ngb_i:
-            if self.is_j_in_ngb(j, ngb_j):
-                ngb_ij.append(j)
-        return ngb_ij
+        neighbor_ij = []
+        for j in neighbor_i:
+            if self.is_j_in_neighbor(j, neighbor_j):
+                neighbor_ij.append(j)
+        return neighbor_ij
 
-    def is_j_in_ngb(self, j, ngb):
+    def is_j_in_neighbor(self, j, neighbor):
         """
-        Returns true if there is an index in ngb that is equal to j
+        Returns true if there is an index in neighbor that is equal to j
         """
-        for k in ngb:
+        for k in neighbor:
             if k[0] == j[0] and (k[1] == j[1]).all():
                 return True
         return False
 
-    def filter_ngb_from_smaller(self, ngb_i, j):
+    def filter_neighbor_from_smaller(self, neighbor_i, j):
         """
-        Returns all k in ngb_i that are bigger than j
+        Returns all k in neighbor_i that are bigger than j
         """
-        ngb_j_filtered = []
-        for k in ngb_i:
+        neighbor_j_filtered = []
+        for k in neighbor_i:
             if self.compare_neighbors(j, k):
-                ngb_j_filtered.append(k)
-        return ngb_j_filtered
+                neighbor_j_filtered.append(k)
+        return neighbor_j_filtered
 
-    def translate_all_ngb(self, ngb, offset):
+    def translate_all_neighbor(self, neighbor, offset):
         """
-        Make a copy of ngb and returns ngb but with all offset "offseted" an
+        Make a copy of neighbor and returns neighbor but with all offset "offseted" an
         addition offset
         """
-        ngb_i_offset = ngb.copy()
-        for j in ngb_i_offset:
+        neighbor_i_offset = neighbor.copy()
+        for j in neighbor_i_offset:
             j[1] += offset
-        return ngb_i_offset
+        return neighbor_i_offset
 
     def compare_arrays(self, arr1, arr2):
         """
@@ -196,24 +196,24 @@ class ManyBodyNeighborList(object):
                 return False
         return False
 
-    def compare_neighbors(self, ngb_1, ngb_2):
+    def compare_neighbors(self, neighbor_1, neighbor_2):
         """
         Compare two neighbors as defined in this class
-        Returns True if ngb_1 < ngb_2
+        Returns True if neighbor_1 < neighbor_2
         Returns False otherwise
         """
-        if ngb_1[0] < ngb_2[0]:
+        if neighbor_1[0] < neighbor_2[0]:
             return True
-        if ngb_1[0] > ngb_2[0]:
+        if neighbor_1[0] > neighbor_2[0]:
             return False
-        return self.compare_arrays(ngb_1[1], ngb_2[1])
+        return self.compare_arrays(neighbor_1[1], neighbor_2[1])
 
-    def get_ngb_from_nl(self, ase_nl, index):
+    def get_neighbor_from_nl(self, ase_nl, index):
         """
         Get the neighbors of index in the format used in icet
         """
         indices, offsets = ase_nl.get_neighbors(index)
-        ngb = []
+        neighbor = []
         for ind, offs in zip(indices.copy(), offsets.copy()):
-            ngb.append([ind, offs])
-        return ngb
+            neighbor.append([ind, offs])
+        return neighbor
