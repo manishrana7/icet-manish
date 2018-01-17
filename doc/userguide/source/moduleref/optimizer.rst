@@ -2,10 +2,20 @@
    single: Function reference; optimizer
    single: Class reference; optimizer
 
-Optimizer
-=========
+Optimizers
+==========
 
-.. automodule:: icetdev.fitting
+.. autoclass:: icet.Optimizer
+   :members:
+   :undoc-members:
+   :inherited-members:
+
+.. autoclass:: icet.EnsembleOptimizer
+   :members:
+   :undoc-members:
+   :inherited-members:
+
+.. autoclass:: icet.CrossValidationEstimator
    :members:
    :undoc-members:
    :inherited-members:

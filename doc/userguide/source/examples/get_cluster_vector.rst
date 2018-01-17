@@ -1,7 +1,7 @@
 .. _example_get_cluster_vector:
 .. highlight:: python
 .. index::
-   single: Tutorial; Cluster vectors
+   single: Examples; Cluster vectors
 
 Cluster vectors
 ===============
@@ -12,7 +12,7 @@ Import modules
 --------------
 
 First, one needs to import the class :class:`ClusterSpace
-<icetdev.core.cluster_space.ClusterSpace>` class, which is used to store
+<icet.core.cluster_space.ClusterSpace>` class, which is used to store
 information regarding a given cluster space. Additionally, the `ASE
 <https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.build.bulk` will be
 needed to generate the structures.
@@ -37,7 +37,7 @@ Initiate the cluster space
 --------------------------
 
 The cluster space is created by initiating a :class:`ClusterSpace
-<icetdev.core.cluster_space.ClusterSpace>` object and providing the prototype
+<icet.core.cluster_space.ClusterSpace>` object and providing the prototype
 structure, cutoffs and list elements defined previously as arguments. Next, the
 :meth:`print` method is used to print all relevant information regarding the
 cluster space in tabular format.
@@ -51,15 +51,16 @@ Specifically, the final call should produce the following (partial) output::
   ------------------------- Cluster Space -------------------------
   subelements: Si Ge
   cutoffs: 5.0 5.0 5.0
-  number of orbits: 21
+  number of orbits: 22
   -----------------------------------------------------------------
   order |  radius  | multiplicity | index | orbit |    MC vector
   -----------------------------------------------------------------
-    1   |   0.0000 |        2     |    0  |    0  |    [0]
-    2   |   1.1756 |        4     |    1  |    1  |  [0, 0]
-    2   |   1.9198 |       12     |    2  |    2  |  [0, 0]
+    0   |   0.0000 |        1     |    0  |   -1  
+    1   |   0.0000 |        2     |    1  |    0  |    [0]
+    2   |   1.1756 |        4     |    2  |    1  |  [0, 0]
+    2   |   1.9198 |       12     |    3  |    2  |  [0, 0]
   ...
-    4   |   2.5525 |        8     |   20  |   20  | [0, 0, 0, 0]
+    4   |   2.5525 |        8     |   21  |   20  | [0, 0, 0, 0]
   -----------------------------------------------------------------
 
 
@@ -69,8 +70,8 @@ Cluster vectors for Si supercells
 After building a new structure in the form of a :math:`2\times2\times2`
 supercell, the cluster vectors are constructed using the
 :meth:`ClusterSpace.get_cluster_vector
-<icetdev.core.cluster_space.ClusterSpace.get_cluster_vector>` method for the
-instance of the :class:`ClusterSpace <icetdev.core.cluster_space.ClusterSpace>`
+<icet.core.cluster_space.ClusterSpace.get_cluster_vector>` method for the
+instance of the :class:`ClusterSpace <icet.core.cluster_space.ClusterSpace>`
 class that was initiated in the previous section. The cluster vectors are
 printed, as a sequence of tables, with help of the :meth:`print` method.
 
@@ -94,6 +95,10 @@ substituting one of the Si atoms in the supercell with Ge.
 In this case the output should be::
 
   [1.0, -0.875, 0.75, 0.75, 0.75, -0.625, -0.625, -0.625, -0.625, -0.625, -0.625, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+
+Notice that the first element is always 1.0. This is true for all 
+cluster vectors constructed in icet. This orbit is called a zerolet
+and it is useful when fitting a cluster expansion among other things.
 
 Source code
 -----------

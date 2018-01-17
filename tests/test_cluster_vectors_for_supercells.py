@@ -4,8 +4,8 @@ from ase.build import niggli_reduce
 
 import itertools
 
-from icetdev import ClusterSpace
-from icetdev.tools.geometry import get_primitive_structure
+from icet import ClusterSpace
+from icet.tools.geometry import get_primitive_structure
 import unittest
 
 import numpy as np

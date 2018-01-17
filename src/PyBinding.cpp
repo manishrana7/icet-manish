@@ -17,7 +17,7 @@
 #include <Eigen/Dense>
 #include <pybind11/operators.h>
 
-PYBIND11_MODULE(_icetdev, m)
+PYBIND11_MODULE(_icet, m)
 {
 
     m.doc() = R"pbdoc(
@@ -30,7 +30,7 @@ PYBIND11_MODULE(_icetdev, m)
         .. toctree::
            :maxdepth: 2
 
-        .. currentmodule:: _icetdev
+        .. currentmodule:: _icet
 
         Cluster
         -------
@@ -556,7 +556,10 @@ py::class_<LocalOrbitListGenerator>(m, "LocalOrbitListGenerator")
 
 py::class_<ClusterSpace>(m, "ClusterSpace",py::dynamic_attr())
     .def(py::init<std::vector<int>, std::vector<std::string>, const OrbitList &>())
-    .def("get_cluster_vector",&ClusterSpace::generateClusterVector)
+    .def("get_cluster_vector", [](const ClusterSpace &ClusterSpace, const Structure &structure) {
+        auto cv = ClusterSpace.generateClusterVector(structure);
+        return py::array(cv.size(), cv.data());    
+    })
     .def("get_orbit_list",&ClusterSpace::getOrbitList)
     .def("get_orbit", &ClusterSpace::getOrbit)
     .def("get_cluster_product", &ClusterSpace::getClusterProduct)
