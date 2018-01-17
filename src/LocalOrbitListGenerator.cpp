@@ -2,8 +2,10 @@
 
 LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &primitiveOrbitList, const Structure &superCell) : _orbit_list(primitiveOrbitList), _supercell(superCell)
 {
+    _positionClosestToOrigin = getClosestToOrigin();
     mapSitesAndFindCellOffsets();
-    generateSmartOffsets();
+    
+    // generateSmartOffsets();
 }
 
 /**
@@ -23,7 +25,12 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
         Vector3d position_i = _supercell.getPositions().row(i);
 
         LatticeSite primitive_site = _orbit_list.getPrimitiveStructure().findLatticeSiteByPosition(position_i);
-        uniqueCellOffsets.insert(primitive_site.unitcellOffset());
+        Vector3d primitive_position = _orbit_list.getPrimitiveStructure().getPositions().row(primitive_site.index());
+        // Basically only append offsets to indices that correspond to the atom in the origin
+        if( (primitive_position - _positionClosestToOrigin).norm() < 1e-5)
+        {
+            uniqueCellOffsets.insert(primitive_site.unitcellOffset());
+        }
     }
 
     _uniquePrimcellOffsets.clear();
@@ -33,12 +40,14 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
     std::sort(_uniquePrimcellOffsets.begin(), _uniquePrimcellOffsets.end(), Vector3dCompare());
 }
 
+
+
 void LocalOrbitListGenerator::generateSmartOffsets()
 {
     int expected_number_of_mappings = _supercell.size() / _orbit_list.getPrimitiveStructure().size();
-    std::cout<<"supercell size "<<_supercell.size()<<std::endl;
-    std::cout<<"primitive size "<< _orbit_list.getPrimitiveStructure().size()<<std::endl;
-    std::cout<<"Expected number of mappings "<<expected_number_of_mappings<<std::endl;
+    // std::cout<<"supercell size "<<_supercell.size()<<std::endl;
+    // std::cout<<"primitive size "<< _orbit_list.getPrimitiveStructure().size()<<std::endl;
+    // std::cout<<"Expected number of mappings "<<expected_number_of_mappings<<std::endl;
     // Check that primitive size is a multiple of supercell size
     if (fabs(expected_number_of_mappings - _supercell.size() / _orbit_list.getPrimitiveStructure().size()) > 0.01)
     {
@@ -67,11 +76,11 @@ void LocalOrbitListGenerator::generateSmartOffsets()
     std::vector<Prim2SuperMappings> smartOffsets; 
     for (int j = 0; j < expected_number_of_mappings; j++)
     {
-        std::cout<<"j: "<<j<<" expected_number_of_mappings:"<<expected_number_of_mappings<<std::endl;
+        // std::cout<<"j: "<<j<<" expected_number_of_mappings:"<<expected_number_of_mappings<<std::endl;
         Prim2SuperMappings currentMappings = Prim2SuperMappings();
         for (int i = allIndividualMappings.size()-1; i >=0; i--)
         {
-            std::cout<<"i: "<< i <<" allIndividualMappings.size():"<<allIndividualMappings.size()<<std::endl;
+            // std::cout<<"i: "<< i <<" allIndividualMappings.size():"<<allIndividualMappings.size()<<std::endl;
             if (isCompatibleNewMapping(currentMappings, allIndividualMappings[i]))
             {
                 currentMappings.push_back(allIndividualMappings[i]);

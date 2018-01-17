@@ -27,7 +27,6 @@ def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
     cluster_space_int = ClusterSpace(atoms, cutoffs, subelements,  Mi=Mi_int)
     cluster_space_list = ClusterSpace(atoms, cutoffs, subelements, Mi=Mi_list)
     cluster_space_dict = ClusterSpace(atoms, cutoffs, subelements, Mi=Mi_dict)
-
     atoms_prim = cluster_space_int.get_primitive_structure().to_atoms()
 
     # create and populate a supercell and get cluster vector
@@ -39,8 +38,7 @@ def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
     for at in conf:
         at.symbol = np.random.choice(subelements)
 
-    conf = Structure.from_atoms(conf)
-
+    
     cv_int = cluster_space_int.get_cluster_vector(conf)
     cv_list = cluster_space_list.get_cluster_vector(conf)
     cv_dict = cluster_space_dict.get_cluster_vector(conf)
@@ -61,9 +59,7 @@ for row in db.select():
     atoms_tag = row.tag
     cutoffs = [1.4] * 3
     if len(atoms_row) == 0:
-        continue
-    if atoms_row.get_pbc().all():
-        atoms_row.wrap()
+        continue    
     atoms_row.set_chemical_symbols(len(atoms_row) * [atoms_row[0].symbol])
     for allowed_sites in range(2, 4):
         test_mi_int_list_and_dict(atoms_row, subelements,

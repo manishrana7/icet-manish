@@ -25,6 +25,15 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
         clusterCounts.countOrbitList(structure, local_orbit_list, orderIntact);
     }
 
+    if ( uniqueOffsets != structure2.size() / _primitive_structure.size())
+    {   
+        std::string errorMessage = "The number of unique offsets do not match supercell.size() / primitive.size()";
+        errorMessage += " {" + std::to_string(uniqueOffsets)+ "}";
+        errorMessage += " != ";
+        errorMessage += " {" + std::to_string( structure2.size() / _primitive_structure.size())+ "}";
+        throw std::runtime_error(errorMessage);
+    }
+
     const auto clusterMap = clusterCounts.getClusterCounts();
     std::vector<double> clusterVector;
     clusterVector.push_back(1);
@@ -47,6 +56,7 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
                 multiplicity += elementsCountPair.second;
             }
             clusterVectorElement /= ((double)multiplicity);
+            // std::cout<<"Multiplicity: "<<multiplicity<<std::endl;
             clusterVector.push_back(clusterVectorElement);
         }
     }

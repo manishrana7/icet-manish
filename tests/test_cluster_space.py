@@ -29,6 +29,7 @@ from icetdev.core.structure import Structure
 from icetdev.core.lattice_site import LatticeSite
 from collections import OrderedDict
 
+import numpy as np
 
 def strip_surrounding_spaces(input_string):
     '''
@@ -355,7 +356,7 @@ class TestClusterSpaceSurface(unittest.TestCase):
         '''
         Testing get_cluster_vector functionality
         '''
-        target_cluster_vectors = [
+        target_cluster_vectors = np.array([
             [1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0,
              -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0],
             [1.0, -0.3333333333333333, -1.0, -1.0, -0.1111111111111111,
@@ -369,7 +370,7 @@ class TestClusterSpaceSurface(unittest.TestCase):
              0.3333333333333333, 0.3333333333333333, -1.0, -1.0,
              -0.1111111111111111, -0.1111111111111111, 0.1111111111111111,
              -0.4444444444444444, 0.3333333333333333, -0.3333333333333333,
-             0.3333333333333333, -0.3333333333333333]]
+             0.3333333333333333, -0.3333333333333333]])
         s = ['Error in test setup;']
         s += ['number of cluster vectors ({})'.format(
             len(target_cluster_vectors))]
@@ -381,11 +382,13 @@ class TestClusterSpaceSurface(unittest.TestCase):
         # use ASE Atoms
         for atoms, target in zip(self.structure_list, target_cluster_vectors):
             retval = self.cs.get_cluster_vector(atoms)
-            self.assertAlmostEqual(retval, target, places=9)
+            # self.assertAlmostEqual(retval, target, places=9)
+            self.assertAlmostEqual(np.linalg.norm(retval - target), 0.0)
         # use icet Structure
         for atoms, target in zip(self.structure_list, target_cluster_vectors):
             retval = self.cs.get_cluster_vector(Structure.from_atoms(atoms))
-            self.assertAlmostEqual(retval, target, places=9)
+            # self.assertAlmostEqual(retval, target, places=9)
+            self.assertAlmostEqual(np.linalg.norm(retval - target), 0.0)
         # check that other types fail
         with self.assertRaises(Exception) as context:
             retval = self.cs.get_cluster_vector('something')

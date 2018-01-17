@@ -13,7 +13,6 @@ subelements = ['Re', 'Ti']
 print('')
 prototype = bulk('Re')
 cs = ClusterSpace(prototype, cutoffs, subelements)
-
 # testing info functionality
 try:
     print(cs)
@@ -26,8 +25,7 @@ except:  # NOQA
 
 # structure #1
 print(' structure #1')
-conf = Structure.from_atoms(prototype)
-cv = cs.get_cluster_vector(conf)
+cv = cs.get_cluster_vector(prototype.copy())
 cv_target = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                       1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                       1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
@@ -47,7 +45,6 @@ conf = make_supercell(prototype, [[2, 0, 1],
                                   [0, 1, 2]])
 conf[0].symbol = 'Ti'
 conf[1].symbol = 'Ti'
-conf = Structure.from_atoms(conf)
 cv = cs.get_cluster_vector(conf)
 cv_target = np.array([1.0, 0.6666666666666666, 0.3888888888888889,
                       0.5555555555555556, 0.1111111111111111, 0.0,
@@ -97,7 +94,6 @@ conf = make_supercell(prototype, [[1,  0, 1],
 conf[0].symbol = 'Ti'
 conf[1].symbol = 'Ti'
 conf[2].symbol = 'Ti'
-conf = Structure.from_atoms(conf)
 cv = cs.get_cluster_vector(conf)
 cv_target = np.array([1.0, 0.14285714285714285, -0.5238095238095238,
                       0.5714285714285714, -0.5238095238095238,

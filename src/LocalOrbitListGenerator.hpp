@@ -143,8 +143,26 @@ class LocalOrbitListGenerator
     ///this maps a latticeNeighbor from the primitive and get the equivalent in supercell
     std::unordered_map<LatticeSite, LatticeSite> _primToSupercellMap;
 
+    /// Find the position of the atom that is closest to the origin.
+    /// This position is used to extracting unit cell offsets later on
+    Vector3d getClosestToOrigin() const
+    {
+       Vector3d closestToOrigin;
+       double distanceToOrigin = 1e6;
+       for(int i=0; i < _orbit_list.getPrimitiveStructure().size(); i++)
+       {
+           Vector3d position_i = _orbit_list.getPrimitiveStructure().getPositions().row(i);
+        if( (position_i.norm()) < distanceToOrigin)
+        {
+            distanceToOrigin = position_i.norm();
+            closestToOrigin = position_i;
+        }
+       }
+       return closestToOrigin;
+    }
 
-
+    ///
+    Vector3d _positionClosestToOrigin;
     ///The unique offsets of the primitive cell required to "cover" the supercell
     std::vector<Vector3d> _uniquePrimcellOffsets;
 

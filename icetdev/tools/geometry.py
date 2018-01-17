@@ -1,5 +1,6 @@
 import numpy as np
 from ase import Atoms
+from ase.build import niggli_reduce
 import spglib
 
 from icetdev.core.lattice_site import LatticeSite
@@ -77,12 +78,46 @@ def add_vacuum_in_non_pbc(atoms):
 
     if len(vacuum_axis) > 0:
         atoms.center(30, axis=vacuum_axis)
-    atoms.wrap()
+        atoms.wrap()
 
     return atoms
 
+def icet_wrap(atoms, tol=1e-5):
+    """
+    Wraps an atoms object. Will favor positions with
+    fractional coordinates that are closer to (0,0,0)
+    """
+    # print(atoms.cell)
+    positions = atoms.positions
+    # print(atoms.positions)
+    for i, pos in enumerate(positions):
+        # print(i,pos)
+        for x, coordinate in enumerate(pos):
+            if atoms.pbc[x]:
+                if abs(coordinate) < tol:
+                    # print("set to zero:",i,x)
+                    positions[i][x] = 0.0
+                
+    atoms.set_positions(positions)     
 
-def get_primitive_structure(atoms):
+        
+    frac_positions = atoms.get_scaled_positions(wrap=False)
+    
+    for i, frac_pos in enumerate(frac_positions):
+        # print(i, frac_pos)
+        for x, frac_coordinate in enumerate(frac_pos):
+            if atoms.pbc[x]:
+                if abs(frac_coordinate) < tol:
+                    # print("set to zero:",i,x)
+                    frac_positions[i][x] = 0.0
+                if abs(frac_coordinate -1 ) < tol:
+                    # print("set to zero:",i,x)
+                    frac_positions[i][x] = 0.0                    
+                
+    atoms.set_scaled_positions(frac_positions)               
+
+
+def get_primitive_structure(atoms, no_idealize=True):
     '''
     Determines primitive structure using spglib.
 
@@ -96,14 +131,17 @@ def get_primitive_structure(atoms):
     ASE Atoms object
         output structure
     '''
-
     atoms_with_vacuum = add_vacuum_in_non_pbc(atoms)
+    
     lattice, scaled_positions, numbers = spglib.standardize_cell(
-        atoms_with_vacuum, to_primitive=True, no_idealize=True)
+        atoms_with_vacuum, to_primitive=True, no_idealize=no_idealize,symprec=1e-6)
     scaled_positions = [np.round(pos, 12) for pos in scaled_positions]
     atoms_prim = Atoms(scaled_positions=scaled_positions,
                        numbers=numbers, cell=lattice, pbc=atoms.pbc)
     atoms_prim.wrap()
+    # icet_wrap(atoms_prim)
+    # print(atoms_prim.positions)
+    # exit(1)
     return atoms_prim
 
 
