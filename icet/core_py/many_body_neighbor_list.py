@@ -1,8 +1,7 @@
-from __future__ import print_function, division
 import numpy as np
 
 
-class TestManyBodyNeighborList():
+class ManyBodyNeighborList(object):
 
     """
     This is a Python implementation of icet's many-body neighbor list.
@@ -25,8 +24,7 @@ class TestManyBodyNeighborList():
     """
 
     def __init__(self):
-        self.initiated = True
-
+        pass
     def build(self, neighbor_lists, index, bothways=False):
         """
         Will take the neighbor list object and combine the neighbors
