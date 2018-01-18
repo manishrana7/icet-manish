@@ -54,21 +54,22 @@ pages:
     - tests
   script:
     # homepage
-    - wget https://github.com/jasonlong/cayman-theme/archive/master.zip
-    - unzip master.zip
-    - mv cayman-theme-master public/
-    - cp doc/homepage/index.html public/
+    - mkdir public
+    #- wget https://github.com/jasonlong/cayman-theme/archive/master.zip
+    #- unzip master.zip
+    #- mv cayman-theme-master public/
+    #- cp doc/homepage/index.html public/
     - cp doc/homepage/robots.txt public/
-    # doxygen
+    # C++ documentation (doxygen)
     - cd doc/apidoc/
     - doxygen Doxyfile
     - cd ../..
-    # sphinx
+    - mv doc/apidoc/html/ public/apidoc/
+    # user guide (sphinx)
     - pip3 install breathe
     - export PYTHONPATH=$PWD:$PWD/build/src/:$PYTHONPATH
-    - sphinx-build doc/userguide/source/ public/userguide/
-    # consolidate
-    - mv doc/apidoc/html/ public/apidoc/
+    - sphinx-build doc/userguide/source/ public/
+    # coverage report
     - mv coverage/ public/
     # letsencrypt setup
     - fname=`awk '{split($0, s, "."); print s[1]}' doc/homepage/letsencrypt-setup.html`
