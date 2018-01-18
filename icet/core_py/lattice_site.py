@@ -2,6 +2,7 @@ from functools import total_ordering
 
 import numpy as np
 
+
 @total_ordering
 class LatticeSite(object):
     """
@@ -71,9 +72,10 @@ class LatticeSite(object):
         """
         if self.index != other.index:
             return self.index < other.index
-        for unitcell_offset, unitcell_offset_other in zip(self.unitcell_offset, other.unitcell_offset):
-            if unitcell_offset != unitcell_offset_other:
-                return unitcell_offset < unitcell_offset_other
+        for offset, offset_other in zip(self.unitcell_offset,
+                                        other.unitcell_offset):
+            if offset != offset_other:
+                return offset < offset_other
         return False
 
     def __hash__(self):
@@ -87,6 +89,5 @@ class LatticeSite(object):
         """
         Return  index and unitcell_offset in str format
         """
-  
+
         return '{} : {}'.format(self.index, self.unitcell_offset)
-  
