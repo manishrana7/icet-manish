@@ -1,3 +1,6 @@
+from functools import total_ordering
+
+@total_ordering
 class LatticeSite(object):
     """
     Representation of a lattice site.
@@ -63,9 +66,9 @@ class LatticeSite(object):
         """
         if self.index != other.index:
             return self.index < other.index
-        for i in range(3):
-            if self.offset[i] != other.offset[i]:
-                return self.offset[i] < other.offset[i]
+        for offset, offset_other in zip(self.offset, other.offset):
+            if  offset != offset_other:
+                return offset < offset_other
         return False
 
     def __hash__(self):
@@ -74,3 +77,11 @@ class LatticeSite(object):
         """
         return hash((self.index, self.offset[0],
                      self.offset[1], self.offset[2]))
+
+    def __str__(self):
+        """
+        Return  index and offset in str format
+        """
+        nice_str = str(self.index) + " "
+        nice_str += str(self.offset)
+        return nice_str
