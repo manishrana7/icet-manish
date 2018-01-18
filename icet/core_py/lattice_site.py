@@ -83,6 +83,11 @@ class LatticeSite(object):
         """
         Return  index and offset in str format
         """
-        nice_str = str(self.index) + " "
-        nice_str += str(self.offset)
+        nice_str = str(self.index) + " : "
+        nice_str +="[ "
+        
+        nice_str += str(self.offset[0]) + ".  "
+        nice_str += str(self.offset[1]) + ".  "
+        nice_str += str(self.offset[2]) + "."
+        nice_str +="]"
         return nice_str
