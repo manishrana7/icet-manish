@@ -1,4 +1,4 @@
-:program:`icet` — the Pythonic approach to cluster expansions
+:program:`icet` — A Pythonic approach to cluster expansions
 *************************************************************
 
 :program:`icet` is a Python environment for the construction and sampling of
