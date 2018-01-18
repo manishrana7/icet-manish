@@ -29,7 +29,7 @@ team can also be reached by email via icet@materialsmodeling.org.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
    overview
    background
