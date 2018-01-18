@@ -1,5 +1,6 @@
 from functools import total_ordering
 
+
 @total_ordering
 class LatticeSite(object):
     """
@@ -67,7 +68,7 @@ class LatticeSite(object):
         if self.index != other.index:
             return self.index < other.index
         for offset, offset_other in zip(self.offset, other.offset):
-            if  offset != offset_other:
+            if offset != offset_other:
                 return offset < offset_other
         return False
 
