@@ -2,8 +2,10 @@ import unittest
 
 from ase.build import bulk
 from ase.neighborlist import NeighborList
-
+# from icet.core.neighbor_list import NeighborList as NeighborList_cpp
 from icet.core_py.many_body_neighbor_list import ManyBodyNeighborList
+from icet.core.many_body_neighbor_list import \
+    ManyBodyNeighborList as ManyBodyNeighborList_cpp
 
 
 class TestManyBodyNeighborList(unittest.TestCase):
@@ -16,9 +18,10 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def setUp(self):
         """
-        Setup before each test.        
+        Setup before each test.
         """
         self.mbnl = ManyBodyNeighborList()
+        self.mbnl_cpp = ManyBodyNeighborList_cpp()
         self.neighbor_lists = []
         for co in self.cutoffs:
             ase_nl = NeighborList(len(self.atoms) * [co / 2], skin=1e-8,
@@ -48,9 +51,9 @@ class TestManyBodyNeighborList(unittest.TestCase):
     def test_bothways_false(self):
         """
         Build the mbnl with bothways = False and
-        assert that mbnl built on the first 
+        assert that mbnl built on the first
         index in the atoms object do not
-        have the same number of neighbors as 
+        have the same number of neighbors as
         the other atoms.
         """
 
@@ -69,6 +72,7 @@ class BruteForceMBNL(object):
     """
     def __init__():
         pass
+
     def build(self, neighbor_lists, index, bothways=False):
         """
         Will do something like this:

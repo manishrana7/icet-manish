@@ -1,6 +1,7 @@
 import numpy as np
 
-
+from icet.core_py.lattice_site import LatticeSite
+import copy
 class ManyBodyNeighborList(object):
 
     """
@@ -63,7 +64,7 @@ class ManyBodyNeighborList(object):
 
             zero_vector = np.array([0., 0., 0., ])
 
-            current_original_neighbors = [[index, zero_vector]]
+            current_original_neighbors = [LatticeSite(index, zero_vector)]
 
             self.combine_to_higher_order(
                 neighbor_lists[k - 2], many_body_neighbor_indices, neighbor,
@@ -99,18 +100,18 @@ class ManyBodyNeighborList(object):
         """
         for j in neighbor_i:
 
-            original_neighbor_copy = current_original_neighbors.copy()
+            original_neighbor_copy = copy.deepcopy( current_original_neighbors )
 
             # explain this line here
             if (len(original_neighbor_copy) == 1 and
                 (not bothways and
-                 self.compare_neighbors(j, original_neighbor_copy[-1]))):
+                 j < original_neighbor_copy[-1])):
                 continue
 
             original_neighbor_copy.append(j)
 
             neighbor_j_offset = self.translate_all_neighbor(
-                self.get_neighbor_from_nl(nl, j[0]), j[1])
+                self.get_neighbor_from_nl(nl, j.index), j.unitcell_offset)
 
             if not bothways:
                 neighbor_j_offset = self.filter_neighbor_from_smaller(
@@ -133,15 +134,15 @@ class ManyBodyNeighborList(object):
         """
         Add singlet to many-body neighbor indices
         """
-        offset = [0., 0., 0.]
-        mbn_indices.append([index, offset])
+        offset = [0., 0., 0.]        
+        mbn_indices.append(LatticeSite(index, offset))
 
     def add_pairs(self, index, neigbhorlist, mbn_indices, bothways):
         """
         Add pairs from neigbhorlist to many-body neighbor indices
         """
         offset = [0., 0., 0.]
-        first_site = [index, offset]
+        first_site = LatticeSite(index, offset)
         neighbor = self.get_neighbor_from_nl(neigbhorlist, index)
         if not bothways:
             neighbor = self.filter_neighbor_from_smaller(neighbor, first_site)
@@ -164,8 +165,10 @@ class ManyBodyNeighborList(object):
         """
         Returns true if there is an index in neighbor that is equal to j
         """
+        return j in neighbor
+            
         for k in neighbor:
-            if k[0] == j[0] and (k[1] == j[1]).all():
+            if k == j:
                 return True
         return False
 
@@ -175,7 +178,7 @@ class ManyBodyNeighborList(object):
         """
         neighbor_j_filtered = []
         for k in neighbor_i:
-            if self.compare_neighbors(j, k):
+             if j <  k:
                 neighbor_j_filtered.append(k)
         return neighbor_j_filtered
 
@@ -187,7 +190,7 @@ class ManyBodyNeighborList(object):
         """
         neighbor_i_offset = neighbor.copy()
         for j in neighbor_i_offset:
-            j[1] += offset
+            j.unitcell_offset += offset
         return neighbor_i_offset
 
     def compare_arrays(self, arr1, arr2):
@@ -204,17 +207,6 @@ class ManyBodyNeighborList(object):
                 return False
         return False
 
-    def compare_neighbors(self, neighbor_1, neighbor_2):
-        """
-        Compare two neighbors as defined in this class
-        Returns True if neighbor_1 < neighbor_2
-        Returns False otherwise
-        """
-        if neighbor_1[0] < neighbor_2[0]:
-            return True
-        if neighbor_1[0] > neighbor_2[0]:
-            return False
-        return self.compare_arrays(neighbor_1[1], neighbor_2[1])
 
     def get_neighbor_from_nl(self, ase_nl, index):
         """
@@ -223,5 +215,5 @@ class ManyBodyNeighborList(object):
         indices, offsets = ase_nl.get_neighbors(index)
         neighbor = []
         for ind, offs in zip(indices.copy(), offsets.copy()):
-            neighbor.append([ind, offs])
+            neighbor.append(LatticeSite(ind, offs))
         return neighbor
