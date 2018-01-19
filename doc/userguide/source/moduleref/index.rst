@@ -8,7 +8,7 @@ User interface
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
    cluster_space
    structure_container
