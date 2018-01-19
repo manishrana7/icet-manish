@@ -40,8 +40,12 @@ class TestLatticeSite(unittest.TestCase):
         """
         Test index property.
         """
+
         self.assertIsInstance(self.lattice_sites[0].index, int)
         self.assertIsInstance(self.lattice_sites_cpp[0].index, int)
+
+        self.assertEqual(self.lattice_sites[0].index, 0)
+        self.assertEqual(self.lattice_sites_cpp[0].index, 0)
 
     def test_offset_property(self):
         """
@@ -53,7 +57,12 @@ class TestLatticeSite(unittest.TestCase):
         self.assertIsInstance(
             self.lattice_sites[0].unitcell_offset, type(np.array([0])))
 
-    def test_printing(self):
+        self.assertEqual(
+            list(self.lattice_sites[0].unitcell_offset), [0., 0., 0.])
+        self.assertEqual(
+            list(self.lattice_sites_cpp[0].unitcell_offset), [0., 0., 0.])
+
+    def test_str(self):
         """
         Test printing a LatticeSite.
         """
@@ -101,6 +110,17 @@ class TestLatticeSite(unittest.TestCase):
 
         self.assertEqual(lattice_site, lattice_site_other)
         self.assertEqual(lattice_site, lattice_site_cpp)
+
+        self.assertNotEqual(lattice_site, self.lattice_sites[0])
+        self.assertNotEqual(lattice_site_cpp, self.lattice_sites[0])
+
+        self.assertNotEqual(lattice_site, self.lattice_sites_cpp[0])
+        self.assertNotEqual(lattice_site_cpp, self.lattice_sites_cpp[0])
+
+        self.assertNotEqual(
+            self.lattice_sites_cpp[1], self.lattice_sites_cpp[0])
+        self.assertNotEqual(self.lattice_sites[1], self.lattice_sites[0])
+        self.assertNotEqual(self.lattice_sites_cpp[1], self.lattice_sites[0])
 
     def test_hash(self):
         """
