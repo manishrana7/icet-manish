@@ -20,7 +20,7 @@ class LatticeSite(object):
         ----------
         index : int
             Refers to an index in a lattice
-        unitcell_offset : list of ints with length 3
+        unitcell_offset : ndarray with shape (3,)
             Refers to an unitcell_offset of the unit
             cell vectors.
 
