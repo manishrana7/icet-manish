@@ -10,6 +10,13 @@ from icet.core.many_body_neighbor_list import (
 
 
 class TestManyBodyNeighborList(unittest.TestCase):
+    """
+        TODO
+        ----
+        * compare each latticesite or list of lattice site in each test
+          since right now you might not test true equivalence between versions.
+    """
+
     def __init__(self, *args, **kwargs):
         super(TestManyBodyNeighborList, self).__init__(*args, **kwargs)
 
@@ -54,6 +61,8 @@ class TestManyBodyNeighborList(unittest.TestCase):
         Build the mbnl with bothways = True and
         assert that each index in the atoms object
         have the same number of neighbors
+
+
         """
 
         mbnl_size = len(self.mbnl.build(self.neighbor_lists, 0, bothways=True))
