@@ -41,7 +41,7 @@ class LatticeSite(object):
     @property
     def unitcell_offset(self):
         """
-        The index refers to an index in a lattice.
+        Returns the unitcell offset with type ndarray with shape (3,).
         """
         return self._unitcell_offset
 
