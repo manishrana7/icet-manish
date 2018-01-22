@@ -159,11 +159,9 @@ class ManyBodyNeighborList(object):
         Return intersection of neighbor_i with neighbor_j
         using the is_j_in_neighbor bool method.
         """
-        neighbor_ij = []
-        for j in neighbor_i:
-            if self.is_j_in_neighbor(j, neighbor_j):
-                neighbor_ij.append(j)
-        return neighbor_ij
+        set_i = set(neighbor_i)
+        set_j = set(neighbor_j)
+        return set_i.intersection(set_j)
 
     def is_j_in_neighbor(self, j, neighbor):
         """
