@@ -3,15 +3,8 @@ from ase.build import bulk
 import ase.neighborlist as asenl
 from icet import Structure
 from icet.core.neighbor_list import NeighborList
+from icet.core_py.many_body_neighbor_list import ManyBodyNeighborList as TestManyBodyNeighborList
 from icet.core.many_body_neighbor_list import ManyBodyNeighborList
-from test_many_body_neighbor_list import TestManyBodyNeighborList
-
-
-'''
-Todo
-----
-The Python/ASE implementation here is buggy and cannot work.
-'''
 
 
 def build_many_body_neighbor_list_cpp(structure, order, cutoff):
