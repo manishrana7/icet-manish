@@ -4,6 +4,7 @@ from ase.build import bulk
 from ase.neighborlist import NeighborList
 from icet.core.neighbor_list import NeighborList as NeighborList_cpp
 from icet.core_py.many_body_neighbor_list import ManyBodyNeighborList
+from icet.core_py.lattice_site import LatticeSite
 from icet import Structure
 from icet.core.many_body_neighbor_list import (
     ManyBodyNeighborList as ManyBodyNeighborList_cpp)
@@ -105,6 +106,80 @@ class TestManyBodyNeighborList(unittest.TestCase):
             for lat_site_cpp, lat_site in zip(mbnl_py, mbnl_cpp):
                 self.assertEqual(lat_site_cpp[0], lat_site[0])
                 self.assertEqual(lat_site_cpp[1], lat_site[1])
+
+    def test_intersection(self):
+        """
+        Test intersection functionality.
+        """
+        lattice_sites = []
+        lattice_sites.append(LatticeSite(0, [0, 0, 0]))
+        lattice_sites.append(LatticeSite(0, [1, 0, 0]))
+        lattice_sites.append(LatticeSite(1, [0, 0, 0]))
+        lattice_sites.append(LatticeSite(3, [0, 0, 0]))
+
+        lattice_sites2 = []
+        lattice_sites2.append(LatticeSite(0, [0, 0, 0]))
+        lattice_sites2.append(LatticeSite(0, [1, 0, 0]))
+
+        intersection = self.mbnl.get_intersection(
+            lattice_sites, lattice_sites2)
+
+        self.assertEqual(sorted(intersection), [LatticeSite(
+            0, [0, 0, 0]), LatticeSite(0, [1, 0, 0])])
+
+    def test_translate_all(self):
+        """
+        Tests translating a list of lattice sites with an
+        offset
+        """
+        lattice_sites = []
+        lattice_sites.append(LatticeSite(0, [0, 0, 0]))
+        lattice_sites.append(LatticeSite(0, [1, 0, 0]))
+        lattice_sites.append(LatticeSite(1, [0, 0, 0]))
+        lattice_sites.append(LatticeSite(3, [0, 0, 0]))
+
+        lattice_sites_offset = []
+        lattice_sites.append(LatticeSite(0, [1, 2, 3]))
+        lattice_sites.append(LatticeSite(0, [2, 2, 3]))
+        lattice_sites.append(LatticeSite(1, [1, 2, 3]))
+        lattice_sites.append(LatticeSite(3, [1, 2, 3]))
+
+        mbnl_offsets = self.mbnl.translate_all_neighbor(
+            lattice_sites_offset, [1, 2, 3])
+        self.assertEqual(mbnl_offsets, lattice_sites_offset)
+
+    def test_filter_from_smaller(self):
+        """
+        Test filter neighbor from smaller in mbnl.
+        """
+        lattice_sites = []
+        lattice_sites.append(LatticeSite(0, [0, 0, 0]))
+        lattice_sites.append(LatticeSite(0, [1, 0, 0]))
+        lattice_sites.append(LatticeSite(1, [0, 0, 0]))
+        lattice_sites.append(LatticeSite(3, [-1, 0, 0]))
+        # Filter only the first
+        filtered_sites = self.mbnl.filter_neighbor_from_smaller(
+            lattice_sites, LatticeSite(0, [0, 0, 0]))
+        self.assertEqual(len(filtered_sites), 3)
+
+        # Filter everything
+        filtered_sites = self.mbnl.filter_neighbor_from_smaller(
+            lattice_sites, LatticeSite(5, [0, 0, 0]))
+        self.assertEqual(len(filtered_sites), 0)
+        # Filter nothing
+        filtered_sites = self.mbnl.filter_neighbor_from_smaller(
+            lattice_sites, LatticeSite(-1, [10, 10, 10]))
+        self.assertEqual(len(filtered_sites), 4)
+
+    def test_get_neighbor_from_nl(self):
+        """
+        Test getting lattice sites from ASE nl
+        """
+        ase_nl = self.neighbor_lists[0]
+        index = 0
+        sites_from_nl = self.mbnl.get_neighbor_from_nl(ase_nl, index)
+        self.assertEqual(len(sites_from_nl),
+                         len(ase_nl.get_neighbors(index)[0]))
 
 
 class BruteForceMBNL(object):
