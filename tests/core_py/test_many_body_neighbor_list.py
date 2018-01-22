@@ -62,8 +62,6 @@ class TestManyBodyNeighborList(unittest.TestCase):
         Build the mbnl with bothways = True and
         assert that each index in the atoms object
         have the same number of neighbors
-
-
         """
 
         mbnl_size = len(self.mbnl.build(self.neighbor_lists, 0, bothways=True))
@@ -180,27 +178,6 @@ class TestManyBodyNeighborList(unittest.TestCase):
         sites_from_nl = self.mbnl.get_neighbor_from_nl(ase_nl, index)
         self.assertEqual(len(sites_from_nl),
                          len(ase_nl.get_neighbors(index)[0]))
-
-
-class BruteForceMBNL(object):
-    """
-    Builds an mbnl object from brute force.
-    This is used to validate the more clever implemented
-    mbnl.
-    """
-    def __init__():
-        pass
-
-    def build(self, neighbor_lists, index, bothways=False):
-        """
-        Will do something like this:
-        mbnl = []
-        for i in atoms:
-            for j in neighbors[i]:
-                for k in neighbors[j]:
-                    if k in neigbhors[i]:
-                    mbnl.append(i,j,k)
-        """
 
 
 if __name__ == '__main__':
