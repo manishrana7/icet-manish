@@ -163,17 +163,6 @@ class ManyBodyNeighborList(object):
         set_j = set(neighbor_j)
         return set_i.intersection(set_j)
 
-    def is_j_in_neighbor(self, j, neighbor):
-        """
-        Returns true if there is an index in neighbor that is equal to j
-        """
-        return j in neighbor
-
-        for k in neighbor:
-            if k == j:
-                return True
-        return False
-
     def filter_neighbor_from_smaller(self, neighbor_i, j):
         """
         Returns all k in neighbor_i that are bigger than j
@@ -194,20 +183,6 @@ class ManyBodyNeighborList(object):
         for j in neighbor_i_offset:
             j.unitcell_offset += offset
         return neighbor_i_offset
-
-    def compare_arrays(self, arr1, arr2):
-        """
-        Compares two arrays.
-        Compares element by element in order.
-        Returns true if arr1 < arr2
-        """
-        assert len(arr1) == len(arr2)
-        for i in range(len(arr1)):
-            if arr1[i] < arr2[i]:
-                return True
-            if arr1[i] > arr2[i]:
-                return False
-        return False
 
     def get_neighbor_from_nl(self, ase_nl, index):
         """
