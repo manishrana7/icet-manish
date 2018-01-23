@@ -9,5 +9,6 @@ class OrbitList(object):
         Sort the list of orbits.
         """
         pass
+
     def get_primitive_structure(self):
         pass
