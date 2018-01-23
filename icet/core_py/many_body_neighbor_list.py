@@ -31,8 +31,10 @@ class ManyBodyNeighborList(object):
 
     def build(self, neighbor_lists, index, bothways=False):
         """
-        Will take the neighbor list object and combine the neighbors
-        of `index` up to `order`.
+        Will take the take each neighor_list, neighbor_list[i],
+        in neighbor lists and combine the neighbors of `index` up
+        to to order i + 2. Here order is the same as number of
+        lattice sites that are grouped together to form a cluster.
 
         Parameters
         ----------
@@ -165,7 +167,10 @@ class ManyBodyNeighborList(object):
 
     def filter_neighbor_from_smaller(self, neighbor_i, j):
         """
-        Returns all k in neighbor_i that are bigger than j
+        Returns all k in neighbor_i that are bigger than j.
+        Comparison is done by the built in sorting methods
+        in LatticeSite, i.e. first compare indices then lexicographically
+        the unitcell offset.
         """
         neighbor_j_filtered = []
         for k in neighbor_i:
