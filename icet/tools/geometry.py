@@ -125,3 +125,42 @@ def get_fractional_positions_from_neighbor_list(structure, neighbor_list):
             structure.cell, wrap=False,
             pbc=structure.pbc)
     return fractional_positions
+
+
+def get_fractional_positions_from_ase_neighbor_list(atoms, neighbor_list):
+    '''
+    Returns the fractional positions in structure from the neighbors in the
+    neighbor list.
+    '''
+    neighbor_positions = []
+    fractional_positions = []
+    lattice_site = LatticeSite(0, [0, 0, 0])
+
+    for i in range(len(atoms)):
+        lattice_site.index = i
+        position = get_position_from_lattice_site(atoms, lattice_site)
+        neighbor_positions.append(position)
+        indices, offsets = neighbor_list.get_neighbors(i)
+        for index, offset in zip(indices, offsets):
+            lattice_site = LatticeSite(index, offset)
+            position = get_position_from_lattice_site(atoms, lattice_site)
+            neighbor_positions.append(position)
+    if len(neighbor_positions) > 0:
+        fractional_positions = get_scaled_positions(
+            np.array(neighbor_positions),
+            atoms.cell, wrap=False,
+            pbc=atoms.pbc)
+    return fractional_positions
+
+
+def get_position_from_lattice_site(atoms, lattice_site):
+    """
+    Gets the corresponding position from the lattice site.
+
+    Parameters
+    ---------
+    atoms : ASE atoms object
+    lattice_site : icet LatticeSite object
+    """
+    return atoms[lattice_site.index].position + \
+        np.dot(lattice_site.unitcell_offset, atoms.cell)
