@@ -105,7 +105,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
                 self.assertEqual(lat_site_cpp[0], lat_site[0])
                 self.assertEqual(lat_site_cpp[1], lat_site[1])
 
-    def test_intersection(self):
+    def test_get_intersection(self):
         """
         Test intersection functionality.
         """
@@ -125,7 +125,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
         self.assertEqual(sorted(intersection), [LatticeSite(
             0, [0, 0, 0]), LatticeSite(0, [1, 0, 0])])
 
-    def test_translate_all(self):
+    def test_translate_all_neighbor(self):
         """
         Tests translating a list of lattice sites with an
         offset
@@ -146,7 +146,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
             lattice_sites_offset, [1, 2, 3])
         self.assertEqual(mbnl_offsets, lattice_sites_offset)
 
-    def test_filter_from_smaller(self):
+    def test_neighbor_from_smaller(self):
         """
         Test filter neighbor from smaller in mbnl.
         """
@@ -178,6 +178,54 @@ class TestManyBodyNeighborList(unittest.TestCase):
         sites_from_nl = self.mbnl.get_neighbor_from_nl(ase_nl, index)
         self.assertEqual(len(sites_from_nl),
                          len(ase_nl.get_neighbors(index)[0]))
+
+    def test_add_singlet(self):
+        """
+        Test adding a singlet
+        """
+        mbn_indices = []
+        index = 13
+        target = [tuple(([LatticeSite(index, [0., 0., 0.])], []))]
+        self.mbnl.add_singlet(index, mbn_indices)
+        self.assertEqual(mbn_indices, target)
+
+    def test_add_pairs(self):
+        """
+        Test adding pairs.
+        """
+        mbn_indices = []
+        index = 0
+        target = []
+        neighbors = self.mbnl.get_neighbor_from_nl(
+            self.neighbor_lists[0], index)
+        target = [
+            tuple(([LatticeSite(index, [0., 0., 0.])], sorted(neighbors)))]
+        self.mbnl.add_pairs(
+            index, self.neighbor_lists[0], mbn_indices, bothways=False)
+        self.assertEqual(mbn_indices, target)
+
+    def test_cmp_list_of_lattice_sites(self):
+        """
+        Test the comparer of list of lattice site.
+        """
+        indices = range(10)
+        offsets = [[x, y, z]
+                   for x, y, z in zip(range(10), range(10), range(10))]
+        sites = []
+        for index, offset in zip(indices, offsets):
+            sites.append(LatticeSite(index, offset))
+        sites = [sites, []]
+        indices = range(5)
+        offsets = [[x, y, z] for x, y, z in zip(range(5), range(5), range(5))]
+        sites2 = []
+        for index, offset in zip(indices, offsets):
+            sites2.append(LatticeSite(index, offset))
+        sites2 = [sites2, []]
+        # Test that a smaller list is considered smaller
+        self.assertTrue(self.mbnl.cmp_list_of_lattice_sites(sites2, sites))
+
+        # Test that equality is not less than
+        self.assertFalse(self.mbnl.cmp_list_of_lattice_sites(sites, sites))
 
 
 if __name__ == '__main__':
