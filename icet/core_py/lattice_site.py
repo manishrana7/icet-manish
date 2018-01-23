@@ -45,6 +45,10 @@ class LatticeSite(object):
         """
         return self._unitcell_offset
 
+    @unitcell_offset.setter
+    def unitcell_offset(self, offset):
+        self._unitcell_offset = offset
+
     def __eq__(self, other):
         """
         Test equality of this and another LatticeSite
@@ -86,6 +90,13 @@ class LatticeSite(object):
                      self.unitcell_offset[1], self.unitcell_offset[2]))
 
     def __str__(self):
+        """
+        Return  index and unitcell_offset in str format
+        """
+
+        return '{} : {}'.format(self.index, self.unitcell_offset)
+
+    def __repr__(self):
         """
         Return  index and unitcell_offset in str format
         """
