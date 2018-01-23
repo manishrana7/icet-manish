@@ -189,6 +189,10 @@ class TestClusterSpace(unittest.TestCase):
         self.assertEqual(len(self.cs.structure),
                          len(self.atoms_prim))
 
+    def test_chemical_symbols(self):
+        ''' Testing chemical symbols property '''
+        self.assertEqual(self.cs.chemical_symbols, self.subelements)
+
 
 class TestClusterSpaceSurface(unittest.TestCase):
     '''

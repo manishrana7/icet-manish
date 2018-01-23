@@ -33,6 +33,7 @@ class ClusterSpace(object):
 
         self._structure = atoms
         self._cutoffs = cutoffs
+        self._chemical_symbols = chemical_symbols
 
         # set up orbit list
         orbit_list = OrbitList(self._structure, self._cutoffs,
@@ -245,6 +246,11 @@ class ClusterSpace(object):
     def cutoffs(self):
         ''' list : cutoffs used for initializing the cluster space '''
         return self._cutoffs
+
+    @property
+    def chemical_symbols(self):
+        ''' list of sub elements considered in the cluster space '''
+        return self._chemical_symbols
 
     def get_orbit(self, index):
         pass
