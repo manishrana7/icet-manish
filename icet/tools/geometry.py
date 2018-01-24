@@ -168,4 +168,53 @@ def get_position_from_lattice_site(atoms, lattice_site):
     lattice_site : icet LatticeSite object
     """
     return atoms[lattice_site.index].position + \
-        np.dot(lattice_site.unitcell_offset, atoms.cell)
+        np.dot(lattice_site.unitcell_offset, atoms.get_cell())
+
+
+def find_lattice_site_by_position(atoms, position):
+    """
+    Tries to construct a lattice site equivalent from
+    position in reference to the atoms object.
+
+    atoms : ASE Atoms object
+    position : x,y,z coordinate
+    """
+
+    fractional = np.linalg.solve(atoms.cell.T, np.array(position).T).T
+
+    unit_cell_offset = [int(round(x)) for x in fractional]
+
+    residual = np.dot(fractional - unit_cell_offset, atoms.cell)
+    try:
+        index = find_index_of_position(atoms, residual)
+    except Exception:
+        msg = ['error did not find index with pos: {}'.format(residual)]
+        msg += ['position in structure are:']
+        msg += ['\n' + str(atoms.positions)]
+        raise Exception(' '.join(msg))
+
+    latNbr = LatticeSite(index, unit_cell_offset)
+    return latNbr
+
+def find_index_of_position(atoms, position, tol):
+    """
+    Tries to find the atom index that correspond to `position`
+
+    parameters
+    ----------
+    atoms : ASE Atoms object
+    position : x,y,z coordinate
+    tol : float 
+        allowed distance tolerance between
+        position and the matched position
+    """
+
+    index_min = np.abs(atoms.get_positions() - position).argmin()
+    if np.linalg.norm( atoms[index_min].position - position) < tol:
+        return index_min
+    else:
+        msg = ['error did not find index with pos: {}'.format(position)]
+        msg += ['position in structure are:']
+        msg += ['\n' + str(atoms.positions)]
+        raise Exception(' '.join(msg))
+
