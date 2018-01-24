@@ -1,7 +1,9 @@
-import spglib
-from icet.tools.geometry import get_primitive_structure
-from icet.tools.geometry import get_fractional_positions_from_ase_neighbor_list
+import numpy as np
 from ase.neighborlist import NeighborList
+
+import spglib
+from icet.tools.geometry import (get_fractional_positions_from_ase_neighbor_list,
+                                 get_primitive_structure)
 
 
 class PermutationMatrix(object):
@@ -45,8 +47,19 @@ class PermutationMatrix(object):
         # get fractional positions for neighbor_list
         frac_positions = get_fractional_positions_from_ase_neighbor_list(
             self.primitive_structure, neighbor_list)
-        print(frac_positions)
+        
         if self.verbosity >= 3:
             print('number of positions: {}'.format(len(frac_positions)))
 
-        frac_positions.sort()
+        
+
+        permutation_matrix = []
+        for frac_pos in frac_positions:
+            permutation_row = [frac_pos]
+            # permutation_row = []
+            for rotation, translation in zip(self.rotations, self.translations):
+                permutated_position = translation + np.dot(frac_pos, rotation)
+                permutation_row.append(permutated_position)
+            permutation_matrix.append(permutation_row)
+        
+        self.permutation_matrix = permutation_matrix
