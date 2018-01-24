@@ -26,6 +26,16 @@ class ClusterSpace(object):
           components will be set to `Mi` for sites in the structure
     verbosity : int
         verbosity level
+
+    TODO
+    ----
+    * Add a method to retrieve a cluster vector
+    * When orbitlist is complete:
+        * Store OrbitList as a property/attribute
+        * Add all the print orbit stuff
+        * Fix Mi (allowed components on each site)
+        * Write all empty methods that currently are
+          only implemented with `pass`
     '''
 
     def __init__(self, atoms, cutoffs, chemical_symbols,

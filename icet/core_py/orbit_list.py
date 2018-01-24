@@ -11,4 +11,8 @@ class OrbitList(object):
         pass
 
     def get_primitive_structure(self):
+        """
+        Returns the primitive structure to which the
+        lattice sites in the orbits are referenced to.
+        """
         pass
