@@ -7,6 +7,8 @@ from icet.core.orbit_list import __get_lattice_site_permutation_matrix\
 
 import unittest
 
+import numpy as np
+
 
 class TestPermutationMatrix(unittest.TestCase):
     '''
@@ -49,13 +51,36 @@ class TestPermutationMatrix(unittest.TestCase):
         """
 
         matrix_py = self.pm.pm_lattice_sites
-        matrix_cpp = self.pm_lattice_sites_cpp
+        matrix_cpp = sorted(self.pm_lattice_sites_cpp)
         col1_py = [row[0] for row in matrix_py]
         col1_cpp = [row[0] for row in matrix_cpp]
-        for lattice_site_py, lattice_site_cpp in zip(sorted(col1_py),
-                                                     sorted(col1_cpp)):
+        for lattice_site_py, lattice_site_cpp in zip((col1_py),
+                                                     (col1_cpp)):
             self.assertEqual(lattice_site_py, lattice_site_cpp)
-        self.assertListEqual(sorted(col1_py), sorted(col1_cpp))
+        self.assertListEqual((col1_py), (col1_cpp))
+
+    def test_all_matrix_elements_equal(self):
+        """
+        Test that all elemetns of both Lattice site permutation
+        matrices are identical.
+        """
+        pm_cpp = sorted(self.pm_lattice_sites_cpp)
+        for row_py, row_cpp in zip(self.pm.pm_lattice_sites, pm_cpp):
+            self.assertEqual(len(row_py), len(row_cpp))
+            for element_py, element_cpp in zip(row_py, row_cpp):
+                self.assertEqual(element_py, element_cpp)
+
+    def test_primitive_structure(self):
+        """
+        Test primitive structure property by comparing to
+        the other versions primitive structure.        
+        """
+        for position_py, position_cpp in zip(self.pm.primitive_structure.positions, self.prim_structure_cpp.positions):
+            self.assertAlmostEqual(np.linalg.norm(
+                position_cpp - position_py), 0)
+
+        self.assertEqual(self.pm.primitive_structure.cell.all(),
+                         self.prim_structure_cpp.cell.all())
 
 
 if __name__ == '__main__':

@@ -91,3 +91,10 @@ class LatticeSite(object):
         """
 
         return '{} : {}'.format(self.index, self.unitcell_offset)
+
+    def __repr__(self):
+        """
+        Return  index and unitcell_offset in str format
+        """
+
+        return self.__str__()

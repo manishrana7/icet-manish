@@ -43,6 +43,8 @@ class PermutationMatrix(object):
         self.build()
         self.build_lattice_site_permutation_matrix()
         self.prune_permutation_matrix()
+        self.sort()
+
 
     def build(self):
         """
@@ -57,17 +59,17 @@ class PermutationMatrix(object):
         # get fractional positions for neighbor_list
         frac_positions = get_fractional_positions_from_ase_neighbor_list(
             self.primitive_structure, neighbor_list)
-
+        frac_positions.sort()
         if self.verbosity >= 3:
             print('number of positions: {}'.format(len(frac_positions)))
 
         permutation_matrix = []
         for frac_pos in frac_positions:
-            permutation_row = [frac_pos]
-            # permutation_row = []
+            # permutation_row = [frac_pos]
+            permutation_row = []
             for rotation, translation in zip(
                     self.rotations, self.translations):
-                permutated_position = translation + np.dot(frac_pos, rotation)
+                permutated_position = translation + np.dot(frac_pos, rotation.T)
                 permutation_row.append(permutated_position)
             permutation_matrix.append(permutation_row)
 
@@ -118,3 +120,10 @@ class PermutationMatrix(object):
                         msg = ['Removing duplicate in permutation matrix']
                         msg += ['i: {} j: {}'.format(i, j)]
                         print(' '.join(msg))
+
+
+    def sort(self):
+        """
+        Sorts the Lattice Site permutation matrix.
+        """
+        self.pm_lattice_sites.sort()
