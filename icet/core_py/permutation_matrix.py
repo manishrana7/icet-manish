@@ -57,7 +57,7 @@ class PermutationMatrix(object):
 
     def build(self):
         """
-        Builds the permutation matrix
+        Builds the permutation matrix.
         """
         # Create neighbor_lists from the different cutoffs
         neighbor_list = NeighborList(len(
@@ -93,6 +93,8 @@ class PermutationMatrix(object):
         It will loop through all positions, pos_ij in the matrix,
         convert to lattice sites and construct the matrix,
         lattice_site_ij
+
+        This is a helper method for the build method.
         """
         pm_lattice_sites = []
         for row in self.permutaded_matrix_frac:
@@ -119,7 +121,8 @@ class PermutationMatrix(object):
 
     def _prune_permutation_matrix(self):
         """
-        Prunes columns in the permutation matrix
+        Prunes columns in the permutation matrix.
+        This is a helper method for the build method.
         """
         for i in range(len(self.pm_lattice_sites)):
             for j in reversed(range(len(self.pm_lattice_sites))):
@@ -135,5 +138,6 @@ class PermutationMatrix(object):
     def _sort(self):
         """
         Sorts the Lattice Site permutation matrix.
+        This is a helper method for the build method.
         """
         self.pm_lattice_sites.sort()
