@@ -4,7 +4,7 @@
 import unittest
 
 from icet.core_py.orbit_list import OrbitList
-
+from icet.core_py.permutation_matrix import PermutationMatrix
 
 class TestOrbitList(unittest.TestCase):
     '''
@@ -44,6 +44,11 @@ class TestOrbitList(unittest.TestCase):
         '''
         self.orbit_list.get_primitive_structure()
 
-
+    def test_property_permutation_matrix(self):
+        '''
+        Test the permutation matrix property.
+        '''
+        self.assertIsInstance(self.orbit_list.permutation_matrix, PermutationMatrix)
+        self.assertEqual(self.orbit_list.permutation_matrix.cutoff, max(self.cutoffs) )
 if __name__ == '__main__':
     unittest.main()
