@@ -3,6 +3,7 @@ from ase.neighborlist import NeighborList
 
 import spglib
 from icet.tools.geometry import (get_fractional_positions_from_ase_neighbor_list,
+                                 find_lattice_site_by_position,
                                  get_primitive_structure,
                                  fractional_to_cartesian)
 
@@ -55,11 +56,9 @@ class PermutationMatrix(object):
         # get fractional positions for neighbor_list
         frac_positions = get_fractional_positions_from_ase_neighbor_list(
             self.primitive_structure, neighbor_list)
-        
+
         if self.verbosity >= 3:
             print('number of positions: {}'.format(len(frac_positions)))
-
-        
 
         permutation_matrix = []
         for frac_pos in frac_positions:
@@ -69,9 +68,8 @@ class PermutationMatrix(object):
                 permutated_position = translation + np.dot(frac_pos, rotation)
                 permutation_row.append(permutated_position)
             permutation_matrix.append(permutation_row)
-        
-        self.permutaded_matrix_frac = permutation_matrix
 
+        self.permutaded_matrix_frac = permutation_matrix
 
     def build_lattice_site_permutation_matrix(self):
         """
@@ -82,7 +80,24 @@ class PermutationMatrix(object):
         lattice_site_ij
         """
         pm_lattice_sites = []
-        for row in self.permutaded_matrix_frac:        
+        for row in self.permutaded_matrix_frac:
             positions = fractional_to_cartesian(self.primitive_structure, row)
+            sites = []
+            if np.all(self.primitive_structure.pbc):
+                sites = [find_lattice_site_by_position(
+                    self.primitive_structure, position) for position in positions]
+            else:
+                for position in positions:
+                    try:
+                        lattice_site = find_lattice_site_by_position(
+                            self.primitive_structure, position)
+                    except:
+                        pass
+            if len(sites) > 0:
+                pm_lattice_sites.append(sites)
+            else:
+                raise Exception("Lattice sites are empty")
+
+
+        self.pm_lattice_sites = pm_lattice_sites
             
-    

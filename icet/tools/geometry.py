@@ -191,13 +191,8 @@ def find_lattice_site_by_position(atoms, position, tol=1e-4):
     unit_cell_offset = [np.floor(round(x)) for x in fractional]
 
     residual = np.dot(fractional - unit_cell_offset, atoms.cell)
-    try:
-        index = find_index_of_position(atoms, residual, tol)
-    except Exception:
-        msg = ['error did not find index with pos: {}'.format(residual)]
-        msg += ['position in structure are:']
-        msg += ['\n' + str(atoms.positions)]
-        raise Exception(' '.join(msg))
+
+    index = find_index_of_position(atoms, residual, tol)
 
     latNbr = LatticeSite(index, unit_cell_offset)
     return latNbr
@@ -216,13 +211,19 @@ def find_index_of_position(atoms, position, tol):
         position and the matched position
     """
 
-    index_min = np.abs(atoms.get_positions() - position).argmin()
-    if np.linalg.norm(atoms[index_min].position - position) < tol:
+    index_min = np.linalg.norm(atoms.get_positions() - position).argmin()    
+    if index_min >= 0 and index_min < len(atoms) and np.linalg.norm(atoms[index_min].position - position) < tol:
         return index_min
     else:
-        msg = ['error did not find index with pos: {}'.format(position)]
+        # print(np.abs(atoms.get_positions() - position))
+        # print(np.abs(atoms.get_positions() - position).argmin())
+        
+        msg = ['error did not find index with pos:\n {}\n'.format(position)]
+        msg += [' minimum index found: {}.\n'.format(index_min)]
         msg += ['position in structure are:']
         msg += ['\n' + str(atoms.positions)]
+        msg += ['tolerance: {}, this difference: {}'.format(
+            tol, np.linalg.norm(atoms[index_min].position - position))]
         raise Exception(' '.join(msg))
 
 
