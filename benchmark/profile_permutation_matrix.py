@@ -49,6 +49,7 @@ if __name__ == "__main__":
 
     cutoff = 15
     python_time = init_permutation_matrix_python(atoms, cutoff)
+
     cpp_time = init_permutation_matrix_cpp(atoms, cutoff)
     print("Time to initialize pm in pure python with cutoff: {}, {}s ".format(
         cutoff, python_time))
