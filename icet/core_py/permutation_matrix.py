@@ -60,7 +60,7 @@ class PermutationMatrix(object):
         frac_positions = get_fractional_positions_from_ase_neighbor_list(
             self.primitive_structure, neighbor_list)
 
-        frac_positions.sort()
+        # frac_positions.sort()
         if self.verbosity >= 3:
             print('number of positions: {}'.format(len(frac_positions)))
 
