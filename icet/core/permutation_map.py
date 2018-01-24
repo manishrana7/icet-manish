@@ -58,6 +58,7 @@ def permutation_matrix_from_atoms(atoms, cutoff,
     # get fractional positions for neighbor_list
     frac_positions = get_fractional_positions_from_neighbor_list(
         prim_structure, neighbor_list)
+    frac_positions.sort()
     if verbosity >= 3:
         print('number of positions: {}'.format(len(frac_positions)))
     if len(frac_positions) > 0:

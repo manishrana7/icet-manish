@@ -19,7 +19,7 @@ class PermutationMatrix(object):
        having unique lattice sites in column 1
     '''
 
-    def __init__(self, atoms, cutoff, find_prim=True, verbosity=4):
+    def __init__(self, atoms, cutoff, find_prim=True, verbosity=0):
         atoms = atoms.copy()
         self.cutoff = cutoff
         self.verbosity = verbosity
@@ -59,6 +59,7 @@ class PermutationMatrix(object):
         # get fractional positions for neighbor_list
         frac_positions = get_fractional_positions_from_ase_neighbor_list(
             self.primitive_structure, neighbor_list)
+
         frac_positions.sort()
         if self.verbosity >= 3:
             print('number of positions: {}'.format(len(frac_positions)))
