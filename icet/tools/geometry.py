@@ -171,7 +171,7 @@ def get_position_from_lattice_site(atoms, lattice_site):
         np.dot(lattice_site.unitcell_offset, atoms.get_cell())
 
 
-def find_lattice_site_by_position(atoms, position):
+def find_lattice_site_by_position(atoms, position, tol=1e-4):
     """
     Tries to construct a lattice site equivalent from
     position in reference to the atoms object.
@@ -180,13 +180,19 @@ def find_lattice_site_by_position(atoms, position):
     position : x,y,z coordinate
     """
 
-    fractional = np.linalg.solve(atoms.cell.T, np.array(position).T).T
+    # First try simple solution
+    try:
+        index = find_index_of_position(atoms, position, tol)
+        return LatticeSite(index, [0, 0, 0])
+    except:
+        pass
 
-    unit_cell_offset = [int(round(x)) for x in fractional]
+    fractional = np.linalg.solve(atoms.cell.T, np.array(position).T).T
+    unit_cell_offset = [np.floor(round(x)) for x in fractional]
 
     residual = np.dot(fractional - unit_cell_offset, atoms.cell)
     try:
-        index = find_index_of_position(atoms, residual)
+        index = find_index_of_position(atoms, residual, tol)
     except Exception:
         msg = ['error did not find index with pos: {}'.format(residual)]
         msg += ['position in structure are:']
@@ -195,6 +201,7 @@ def find_lattice_site_by_position(atoms, position):
 
     latNbr = LatticeSite(index, unit_cell_offset)
     return latNbr
+
 
 def find_index_of_position(atoms, position, tol):
     """
@@ -210,7 +217,7 @@ def find_index_of_position(atoms, position, tol):
     """
 
     index_min = np.abs(atoms.get_positions() - position).argmin()
-    if np.linalg.norm( atoms[index_min].position - position) < tol:
+    if np.linalg.norm(atoms[index_min].position - position) < tol:
         return index_min
     else:
         msg = ['error did not find index with pos: {}'.format(position)]
@@ -218,3 +225,9 @@ def find_index_of_position(atoms, position, tol):
         msg += ['\n' + str(atoms.positions)]
         raise Exception(' '.join(msg))
 
+
+def fractional_to_cartesian(atoms, frac_positions):
+    """
+    Turns fractional positions into cartesian positions.
+    """
+    return np.dot(frac_positions, atoms.cell)

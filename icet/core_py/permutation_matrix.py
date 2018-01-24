@@ -3,12 +3,18 @@ from ase.neighborlist import NeighborList
 
 import spglib
 from icet.tools.geometry import (get_fractional_positions_from_ase_neighbor_list,
-                                 get_primitive_structure)
+                                 get_primitive_structure,
+                                 fractional_to_cartesian)
 
 
 class PermutationMatrix(object):
     '''
     Permutation matrix object
+
+    1: get frac position version of PM
+    2: construct the lattice site version
+    3: prune the lattice site version by only
+       having unique lattice sites in column 1
     '''
 
     def __init__(self, atoms, cutoff, find_prim=True, verbosity=0):
@@ -33,6 +39,8 @@ class PermutationMatrix(object):
         self.translations = symmetry['translations']
         self.rotations = symmetry['rotations']
         self.build()
+        self.build_lattice_site_permutation_matrix()
+        # self.prune_permutation_matrix()
 
     def build(self):
         """
@@ -62,4 +70,19 @@ class PermutationMatrix(object):
                 permutation_row.append(permutated_position)
             permutation_matrix.append(permutation_row)
         
-        self.permutation_matrix = permutation_matrix
+        self.permutaded_matrix_frac = permutation_matrix
+
+
+    def build_lattice_site_permutation_matrix(self):
+        """
+        Builds the lattice site version of permutation matrix.
+
+        It will loop through all positions, pos_ij in the matrix,
+        convert to lattice sites and construct the matrix,
+        lattice_site_ij
+        """
+        pm_lattice_sites = []
+        for row in self.permutaded_matrix_frac:        
+            positions = fractional_to_cartesian(self.primitive_structure, row)
+            
+    
