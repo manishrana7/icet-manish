@@ -73,9 +73,11 @@ class TestPermutationMatrix(unittest.TestCase):
     def test_primitive_structure(self):
         """
         Test primitive structure property by comparing to
-        the other versions primitive structure.        
+        the other versions primitive structure.
         """
-        for position_py, position_cpp in zip(self.pm.primitive_structure.positions, self.prim_structure_cpp.positions):
+        for position_py, position_cpp in zip(
+                self.pm.primitive_structure.positions,
+                self.prim_structure_cpp.positions):
             self.assertAlmostEqual(np.linalg.norm(
                 position_cpp - position_py), 0)
 

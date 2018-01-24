@@ -45,7 +45,6 @@ class PermutationMatrix(object):
         self.prune_permutation_matrix()
         self.sort()
 
-
     def build(self):
         """
         Builds the permutation matrix
@@ -70,7 +69,8 @@ class PermutationMatrix(object):
             permutation_row = []
             for rotation, translation in zip(
                     self.rotations, self.translations):
-                permutated_position = translation + np.dot(frac_pos, rotation.T)
+                permutated_position = translation + \
+                    np.dot(frac_pos, rotation.T)
                 permutation_row.append(permutated_position)
             permutation_matrix.append(permutation_row)
 
@@ -98,7 +98,7 @@ class PermutationMatrix(object):
                         lattice_site = find_lattice_site_by_position(
                             self.primitive_structure, position)
                         sites.append(lattice_site)
-                    except: # NOQA
+                    except:  # NOQA
                         pass
             if len(sites) > 0:
                 pm_lattice_sites.append(sites)
@@ -121,7 +121,6 @@ class PermutationMatrix(object):
                         msg = ['Removing duplicate in permutation matrix']
                         msg += ['i: {} j: {}'.format(i, j)]
                         print(' '.join(msg))
-
 
     def sort(self):
         """

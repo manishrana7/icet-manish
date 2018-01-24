@@ -217,7 +217,7 @@ def find_index_of_position(atoms, position, tol):
             np.linalg.norm(atoms[index_min].position - position) < tol:
         return index_min
     else:
-        msg = 'Did not find index from position'        
+        msg = 'Did not find index from position'
         raise Exception(msg)
 
 
