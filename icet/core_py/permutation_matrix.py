@@ -50,12 +50,12 @@ class PermutationMatrix(object):
         symmetry = spglib.get_symmetry(self.primitive_structure)
         self.translations = symmetry['translations']
         self.rotations = symmetry['rotations']
-        self.build()
+        self._build()
         self._build_lattice_site_permutation_matrix()
         self._prune_permutation_matrix()
         self._sort()
 
-    def build(self):
+    def _build(self):
         """
         Builds the permutation matrix.
         """
