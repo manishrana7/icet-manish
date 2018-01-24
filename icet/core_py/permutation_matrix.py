@@ -11,12 +11,22 @@ from icet.tools.geometry import (
 
 class PermutationMatrix(object):
     '''
-    Permutation matrix object
+    Permutation matrix object.
 
-    1: get frac position version of PM
-    2: construct the lattice site version
-    3: prune the lattice site version by only
-       having unique lattice sites in column 1
+    parameters
+    ----------
+    atoms : ASE Atoms object
+    cutoff : float
+        this sets the radius for the the sites
+        to include in the permutation matrix.
+    find_prim : bool (default True)
+        if True the incoming atoms object will
+        be used to construct a primitive structure
+        via spglib. This primitive structure will
+        then be used to construct the neighbor list,
+        be what the lattice sites refer to etc.
+    verbosity : int
+        sets the verbosity of this class
     '''
 
     def __init__(self, atoms, cutoff, find_prim=True, verbosity=0):
