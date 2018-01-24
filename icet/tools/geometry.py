@@ -184,7 +184,7 @@ def find_lattice_site_by_position(atoms, position, tol=1e-4):
     # First try simple solution
     try:
         index = find_index_of_position(atoms, position, tol)
-        return LatticeSite_py(index, [0, 0, 0])
+        return LatticeSite_py(index, np.array((0, 0, 0)))
     except:  # NOQA
         pass
 
@@ -217,16 +217,8 @@ def find_index_of_position(atoms, position, tol):
             np.linalg.norm(atoms[index_min].position - position) < tol:
         return index_min
     else:
-        # print(np.abs(atoms.get_positions() - position))
-        # print(np.abs(atoms.get_positions() - position).argmin())
-
-        msg = ['error did not find index with pos:\n {}\n'.format(position)]
-        msg += [' minimum index found: {}.\n'.format(index_min)]
-        msg += ['position in structure are:']
-        msg += ['\n' + str(atoms.positions)]
-        msg += ['tolerance: {}, this difference: {}'.format(
-            tol, np.linalg.norm(atoms[index_min].position - position))]
-        raise Exception(' '.join(msg))
+        msg = 'Did not find index from position'        
+        raise Exception(msg)
 
 
 def fractional_to_cartesian(atoms, frac_positions):
