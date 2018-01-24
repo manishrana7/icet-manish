@@ -131,6 +131,11 @@ def get_fractional_positions_from_ase_neighbor_list(atoms, neighbor_list):
     '''
     Returns the fractional positions in structure from the neighbors in the
     neighbor list.
+
+    parameters
+    ----------
+    atoms : ASE Atoms object
+    neighbor_list : ASE NeighborList object
     '''
     neighbor_positions = []
     fractional_positions = []
