@@ -51,9 +51,9 @@ class PermutationMatrix(object):
         self.translations = symmetry['translations']
         self.rotations = symmetry['rotations']
         self.build()
-        self.build_lattice_site_permutation_matrix()
-        self.prune_permutation_matrix()
-        self.sort()
+        self._build_lattice_site_permutation_matrix()
+        self._prune_permutation_matrix()
+        self._sort()
 
     def build(self):
         """
@@ -86,7 +86,7 @@ class PermutationMatrix(object):
 
         self.permutaded_matrix_frac = permutation_matrix
 
-    def build_lattice_site_permutation_matrix(self):
+    def _build_lattice_site_permutation_matrix(self):
         """
         Builds the lattice site version of permutation matrix.
 
@@ -117,7 +117,7 @@ class PermutationMatrix(object):
 
         self.pm_lattice_sites = pm_lattice_sites
 
-    def prune_permutation_matrix(self):
+    def _prune_permutation_matrix(self):
         """
         Prunes columns in the permutation matrix
         """
@@ -132,7 +132,7 @@ class PermutationMatrix(object):
                         msg += ['i: {} j: {}'.format(i, j)]
                         print(' '.join(msg))
 
-    def sort(self):
+    def _sort(self):
         """
         Sorts the Lattice Site permutation matrix.
         """
