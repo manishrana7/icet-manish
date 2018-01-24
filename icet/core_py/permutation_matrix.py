@@ -2,10 +2,11 @@ import numpy as np
 from ase.neighborlist import NeighborList
 
 import spglib
-from icet.tools.geometry import (get_fractional_positions_from_ase_neighbor_list,
-                                 find_lattice_site_by_position,
-                                 get_primitive_structure,
-                                 fractional_to_cartesian)
+from icet.tools.geometry import (
+    get_fractional_positions_from_ase_neighbor_list,
+    find_lattice_site_by_position,
+    get_primitive_structure,
+    fractional_to_cartesian)
 
 
 class PermutationMatrix(object):
@@ -18,7 +19,7 @@ class PermutationMatrix(object):
        having unique lattice sites in column 1
     '''
 
-    def __init__(self, atoms, cutoff, find_prim=True, verbosity=0):
+    def __init__(self, atoms, cutoff, find_prim=True, verbosity=4):
         atoms = atoms.copy()
         self.cutoff = cutoff
         self.verbosity = verbosity
@@ -41,7 +42,7 @@ class PermutationMatrix(object):
         self.rotations = symmetry['rotations']
         self.build()
         self.build_lattice_site_permutation_matrix()
-        # self.prune_permutation_matrix()
+        self.prune_permutation_matrix()
 
     def build(self):
         """
@@ -64,7 +65,8 @@ class PermutationMatrix(object):
         for frac_pos in frac_positions:
             permutation_row = [frac_pos]
             # permutation_row = []
-            for rotation, translation in zip(self.rotations, self.translations):
+            for rotation, translation in zip(
+                    self.rotations, self.translations):
                 permutated_position = translation + np.dot(frac_pos, rotation)
                 permutation_row.append(permutated_position)
             permutation_matrix.append(permutation_row)
@@ -85,19 +87,34 @@ class PermutationMatrix(object):
             sites = []
             if np.all(self.primitive_structure.pbc):
                 sites = [find_lattice_site_by_position(
-                    self.primitive_structure, position) for position in positions]
+                    self.primitive_structure, position)
+                    for position in positions]
             else:
                 for position in positions:
                     try:
                         lattice_site = find_lattice_site_by_position(
                             self.primitive_structure, position)
-                    except:
+                        sites.append(lattice_site)
+                    except: # NOQA
                         pass
             if len(sites) > 0:
                 pm_lattice_sites.append(sites)
             else:
                 raise Exception("Lattice sites are empty")
 
-
         self.pm_lattice_sites = pm_lattice_sites
-            
+
+    def prune_permutation_matrix(self):
+        """
+        Prunes columns in the permutation matrix
+        """
+        for i in range(len(self.pm_lattice_sites)):
+            for j in reversed(range(len(self.pm_lattice_sites))):
+                if j <= i:
+                    continue
+                if self.pm_lattice_sites[i][0] == self.pm_lattice_sites[j][0]:
+                    self.pm_lattice_sites.pop(j)
+                    if self.verbosity > 2:
+                        msg = ['Removing duplicate in permutation matrix']
+                        msg += ['i: {} j: {}'.format(i, j)]
+                        print(' '.join(msg))

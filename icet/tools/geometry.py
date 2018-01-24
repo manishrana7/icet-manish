@@ -3,6 +3,7 @@ from ase import Atoms
 import spglib
 
 from icet.core.lattice_site import LatticeSite
+from icet.core_py.lattice_site import LatticeSite as LatticeSite_py
 
 
 def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
@@ -183,8 +184,8 @@ def find_lattice_site_by_position(atoms, position, tol=1e-4):
     # First try simple solution
     try:
         index = find_index_of_position(atoms, position, tol)
-        return LatticeSite(index, [0, 0, 0])
-    except:
+        return LatticeSite_py(index, [0, 0, 0])
+    except:  # NOQA
         pass
 
     fractional = np.linalg.solve(atoms.cell.T, np.array(position).T).T
@@ -194,7 +195,7 @@ def find_lattice_site_by_position(atoms, position, tol=1e-4):
 
     index = find_index_of_position(atoms, residual, tol)
 
-    latNbr = LatticeSite(index, unit_cell_offset)
+    latNbr = LatticeSite_py(index, unit_cell_offset)
     return latNbr
 
 
@@ -206,18 +207,19 @@ def find_index_of_position(atoms, position, tol):
     ----------
     atoms : ASE Atoms object
     position : x,y,z coordinate
-    tol : float 
+    tol : float
         allowed distance tolerance between
         position and the matched position
     """
 
-    index_min = np.linalg.norm(atoms.get_positions() - position).argmin()    
-    if index_min >= 0 and index_min < len(atoms) and np.linalg.norm(atoms[index_min].position - position) < tol:
+    index_min = np.linalg.norm(atoms.get_positions() - position).argmin()
+    if index_min >= 0 and index_min < len(atoms) and \
+            np.linalg.norm(atoms[index_min].position - position) < tol:
         return index_min
     else:
         # print(np.abs(atoms.get_positions() - position))
         # print(np.abs(atoms.get_positions() - position).argmin())
-        
+
         msg = ['error did not find index with pos:\n {}\n'.format(position)]
         msg += [' minimum index found: {}.\n'.format(index_min)]
         msg += ['position in structure are:']
