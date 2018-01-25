@@ -1,3 +1,14 @@
+Some notes about the benchmark folder:
+* Files beginning with benchmark will print out timings of different functions  
+  and if possible compare C++ and python versions  
+* Files beginning with profile are similar to the benchmark scripts but are  
+  designed to be profiled. As such they only use either the C++ or Python version.  
+
+When making changes to core classes run the benchmark scripts before and after the  
+change to make sure nothing gets broken in terms of performance.  
+If something gets broken then use the profile scripts to pin point the problem.  
+
+
 Read about basic profiling here:
 * https://docs.python.org/3/library/profile.html#introduction-to-the-profilers
 
