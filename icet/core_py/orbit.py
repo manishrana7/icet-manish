@@ -110,4 +110,10 @@ class Orbit(object):
         The orbits will be marked as the same
         if all the equivalent_sites are identical.
         """
-        pass
+        return self.equivalent_sites == other.equivalent_sites
+    def __lt__(self, other):
+        """
+        less than operator for sorting in containers.
+        """
+        if self.order != other.order:
+            return self.order < other.order
