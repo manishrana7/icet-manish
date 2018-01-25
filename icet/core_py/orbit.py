@@ -15,8 +15,7 @@ class Orbit(object):
         * Add equivalent sites
 
         * getPermutatedEquivalentSites
-        * getSitesWithPermutation
-        * sort
+        * getSitesWithPermutation        
         * __eq__
         * __lt__
         * __hash__ ?
@@ -103,3 +102,12 @@ class Orbit(object):
         Sort the equivalent sites list.
         """
         self._equivalent_sites.sort()
+
+
+    def __eq__(self, other):
+        """
+        Test equivalence between two orbits.
+        The orbits will be marked as the same
+        if all the equivalent_sites are identical.
+        """
+        pass
