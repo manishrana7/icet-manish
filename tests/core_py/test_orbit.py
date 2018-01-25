@@ -14,7 +14,6 @@ class TestOrbit(unittest.TestCase):
     '''
 
     def __init__(self, *args, **kwargs):
-        from ase.build import bulk
         super(TestOrbit, self).__init__(*args, **kwargs)
 
         self.lattice_sites = []

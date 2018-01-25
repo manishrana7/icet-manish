@@ -14,9 +14,9 @@ class Orbit(object):
     * Add functions
         * Add equivalent sites
         * __len__
-        * geometrical_size()        
+        * geometrical_size()
         * getPermutatedEquivalentSites
-        * getSitesWithPermutation        
+        * getSitesWithPermutation
         * sort
         * __eq__
         * __lt__
@@ -24,8 +24,8 @@ class Orbit(object):
         * orbit + offset
         * orbit + orbit
         * get_mc_vectors
-    * properties       
-       * order       
+    * properties
+       * order
     """
 
     def __init__(self):
@@ -35,7 +35,7 @@ class Orbit(object):
     @property
     def equivalent_sites(self):
         """
-        List of equivalent Lattice Site's        
+        List of equivalent Lattice Sites
         """
         return self._equivalent_sites
 
@@ -62,7 +62,7 @@ class Orbit(object):
         used to represent and distinguish
         between orbits.
         """
-        if len(self.equivalent_sites)>0:
+        if len(self.equivalent_sites) > 0:
             return self.equivalent_sites[0]
         else:
             raise IndexError('Equivalent sites is empty')
@@ -74,6 +74,6 @@ class Orbit(object):
         The order is the same as the number
         of bodies in the representative cluster
         or the number of lattice sites per element
-        in equivalent_sites.        
+        in equivalent_sites.
         """
         return len(self.representative_sites)
