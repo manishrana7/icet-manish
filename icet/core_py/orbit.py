@@ -117,3 +117,5 @@ class Orbit(object):
         """
         if self.order != other.order:
             return self.order < other.order
+
+        if np.abs( self.geometrical_size - other.geometrical_size )
