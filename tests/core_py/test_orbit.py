@@ -23,7 +23,7 @@ class TestOrbit(unittest.TestCase):
         cartesian_product_lists = [[0., 1.], [0., 1.], [0., 1.]]
         for element in itertools.product(*cartesian_product_lists):
             unitcell_offsets.append(list(element))
-        self.lattice_sites = [LatticeSite(index, unitcell_offset)
+        self.lattice_sites = [[LatticeSite(index, unitcell_offset)]
                               for index, unitcell_offset in
                               zip(indices, unitcell_offsets)]
 
@@ -69,6 +69,17 @@ class TestOrbit(unittest.TestCase):
         self.orbit.equivalent_sites = self.lattice_sites
         self.assertEqual(self.orbit.representative_sites,
                          self.lattice_sites[0])
+
+    def test_property_order(self):
+        """
+        Test getting the order from an orbit.
+        """
+        with self.assertRaises(IndexError):
+            self.orbit.order
+
+        self.orbit.equivalent_sites = self.lattice_sites
+        self.assertEqual(self.orbit.order,
+                         len(self.lattice_sites[0]))
 
 
 if __name__ == '__main__':

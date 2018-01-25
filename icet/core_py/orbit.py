@@ -24,8 +24,7 @@ class Orbit(object):
         * orbit + offset
         * orbit + orbit
         * get_mc_vectors
-    * properties               
-       * Representative sites
+    * properties       
        * order       
     """
 
@@ -68,3 +67,13 @@ class Orbit(object):
         else:
             raise IndexError('Equivalent sites is empty')
 
+    @property
+    def order(self):
+        """
+        Returns the order of the orbit.
+        The order is the same as the number
+        of bodies in the representative cluster
+        or the number of lattice sites per element
+        in equivalent_sites.        
+        """
+        return len(self.representative_sites)
