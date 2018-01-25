@@ -88,6 +88,22 @@ class TestOrbit(unittest.TestCase):
         self.orbit.equivalent_sites = self.lattice_sites
         self.assertEqual(len(self.orbit), len(self.lattice_sites))
 
+    def test_property_geometrical_size(self):
+        """
+        Test the property geometrical size.
+        """
+        self.orbit.geometrical_size
+
+    def test_sort(self):
+        """
+        Test the sort functionality.
+        """
+        self.orbit.equivalent_sites = sorted(self.lattice_sites,
+                                             reverse=True)
+        self.orbit.sort()
+        self.assertEqual(self.orbit.equivalent_sites,
+                         sorted(self.lattice_sites))
+
 
 if __name__ == '__main__':
     unittest.main()

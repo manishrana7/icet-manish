@@ -13,8 +13,7 @@ class Orbit(object):
     * write constructor
     * Add functions
         * Add equivalent sites
-        * __len__
-        * geometrical_size()
+
         * getPermutatedEquivalentSites
         * getSitesWithPermutation
         * sort
@@ -25,6 +24,10 @@ class Orbit(object):
         * orbit + orbit
         * get_mc_vectors
     * properties
+
+    Blocked TODO's by Cluster class:
+    * geometrical_size()
+    * representative_cluster
     """
 
     def __init__(self):
@@ -83,3 +86,20 @@ class Orbit(object):
         number of equivalent sites.
         """
         return len(self.equivalent_sites)
+
+    @property
+    def geometrical_size(self):
+        """
+        Returns the geometrical size of the
+        representative cluster.
+        TODO
+        ----
+        * Implement this when cluster is available.
+        """
+        pass
+
+    def sort(self):
+        """
+        Sort the equivalent sites list.
+        """
+        self._equivalent_sites.sort()
