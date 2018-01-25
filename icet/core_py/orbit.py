@@ -24,8 +24,7 @@ class Orbit(object):
         * orbit + offset
         * orbit + orbit
         * get_mc_vectors
-    * properties        
-       * representative cluster
+    * properties               
        * Representative sites
        * order       
     """
@@ -53,4 +52,19 @@ class Orbit(object):
         version of what this orbit is.
         """
         return self._representative_cluster
-        
+
+    @property
+    def representative_sites(self):
+        """
+        The representative sites
+        is a list of lattice sites
+        that are uniquely picked out
+        for this orbit which can be
+        used to represent and distinguish
+        between orbits.
+        """
+        if len(self.equivalent_sites)>0:
+            return self.equivalent_sites[0]
+        else:
+            raise IndexError('Equivalent sites is empty')
+

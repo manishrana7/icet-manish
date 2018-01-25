@@ -59,5 +59,17 @@ class TestOrbit(unittest.TestCase):
         """
         self.orbit.representative_cluster
 
+    def test_property_representative_sites(self):
+        """
+        Test getting the representative sites.
+        """
+        with self.assertRaises(IndexError):
+            self.orbit.representative_sites
+
+        self.orbit.equivalent_sites = self.lattice_sites
+        self.assertEqual(self.orbit.representative_sites,
+                         self.lattice_sites[0])
+
+
 if __name__ == '__main__':
     unittest.main()
