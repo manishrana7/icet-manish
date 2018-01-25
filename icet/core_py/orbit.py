@@ -25,7 +25,6 @@ class Orbit(object):
         * orbit + orbit
         * get_mc_vectors
     * properties
-       * order
     """
 
     def __init__(self):
@@ -77,3 +76,10 @@ class Orbit(object):
         in equivalent_sites.
         """
         return len(self.representative_sites)
+
+    def __len__(self):
+        """
+        Lenght of orbit is defined as the
+        number of equivalent sites.
+        """
+        return len(self.equivalent_sites)

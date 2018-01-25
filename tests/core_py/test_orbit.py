@@ -80,6 +80,14 @@ class TestOrbit(unittest.TestCase):
         self.assertEqual(self.orbit.order,
                          len(self.lattice_sites[0]))
 
+    def test_len(self):
+        """
+        Test len of orbit.
+        """
+        self.assertEqual(len(self.orbit), 0)
+        self.orbit.equivalent_sites = self.lattice_sites
+        self.assertEqual(len(self.orbit), len(self.lattice_sites))
+
 
 if __name__ == '__main__':
     unittest.main()
