@@ -42,8 +42,7 @@ def run_test(verbosity=2, files=None):
     '''
 
     test_dir = os.path.dirname(os.path.realpath(__file__))
-    testSuite = unittest.TestSuite()
-
+    testSuite = unittest.TestLoader().discover('tests/core_py/')
     if files:
         files = [os.path.join(test_dir, f) for f in files]
     else:
