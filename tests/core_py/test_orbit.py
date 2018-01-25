@@ -6,6 +6,7 @@ import unittest
 from icet.core_py.orbit import Orbit
 from icet.core_py.lattice_site import LatticeSite
 import itertools
+import numpy as np
 
 
 class TestOrbit(unittest.TestCase):
@@ -103,6 +104,40 @@ class TestOrbit(unittest.TestCase):
         self.orbit.sort()
         self.assertEqual(self.orbit.equivalent_sites,
                          sorted(self.lattice_sites))
+
+    def test_eq(self):
+        """
+        Test equality functionality.
+        """
+        self.assertEqual(self.orbit, self.orbit)
+
+    def test_lt(self):
+        """
+        Test less than functionality.
+        """
+        self.orbit.equivalent_sites = self.lattice_sites
+        self.assertFalse(self.orbit < self.orbit)
+
+    def test_add(self):
+        """
+        Test add operator.
+        """
+        added_offset = np.array((1., 1., 1.))
+        self.orbit.equivalent_sites = self.lattice_sites
+        orbit = self.orbit + added_offset
+        self.assertNotEqual(orbit, self.orbit)
+        for sites, sites_with_offset in zip(self.orbit.equivalent_sites,
+                                            orbit.equivalent_sites):
+            for site, site_with_offset in zip(sites, sites_with_offset):
+                self.assertEqual(site.index, site_with_offset.index)
+                self.assertListEqual(list(site.unitcell_offset),
+                                     list(site_with_offset.unitcell_offset -
+                                          added_offset))
+
+        with self.assertRaises(TypeError):
+            orbit + [1, 1, 1]
+        with self.assertRaises(TypeError):
+            orbit + np.array([1, 1, 1, 1])
 
 
 if __name__ == '__main__':

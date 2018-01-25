@@ -1,3 +1,5 @@
+import numpy as np
+import copy
 
 
 class Orbit(object):
@@ -12,18 +14,15 @@ class Orbit(object):
     ----
     * write constructor
     * Add functions
-        * Add equivalent sites
-
         * getPermutatedEquivalentSites
-        * getSitesWithPermutation        
-        * __eq__
-        * __lt__
-        * __hash__ ?
+        * getSitesWithPermutation
+
         * orbit + offset
         * orbit + orbit
         * get_mc_vectors
     * properties
 
+    * think about adding __hash__ ?
     Blocked TODO's by Cluster class:
     * geometrical_size()
     * representative_cluster
@@ -32,6 +31,7 @@ class Orbit(object):
     def __init__(self):
         self._equivalent_sites = []
         self._representative_cluster = None
+        self.geometrical_size_tolerance = 1e-5
 
     @property
     def equivalent_sites(self):
@@ -95,14 +95,13 @@ class Orbit(object):
         ----
         * Implement this when cluster is available.
         """
-        pass
+        return -1
 
     def sort(self):
         """
         Sort the equivalent sites list.
         """
         self._equivalent_sites.sort()
-
 
     def __eq__(self, other):
         """
@@ -111,11 +110,40 @@ class Orbit(object):
         if all the equivalent_sites are identical.
         """
         return self.equivalent_sites == other.equivalent_sites
+
     def __lt__(self, other):
         """
         less than operator for sorting in containers.
+        It will compare properties in this order:
+        * order
+        * geometrical size
+        * len(equivalent_sites)
+        * finally the equivalent sites in lexicographical order
         """
         if self.order != other.order:
             return self.order < other.order
 
-        if np.abs( self.geometrical_size - other.geometrical_size )
+        if np.abs(self.geometrical_size -
+                  other.geometrical_size) > self.geometrical_size_tolerance:
+            return self.geometrical_size < other.geometrical_size
+
+        if len(self) != len(other):
+            return len(self) < len(other.orbit)
+
+        return self.equivalent_sites < other.equivalent_sites
+
+    def __add__(self, other):
+        """
+        Define the add operator.
+        Allowed values:
+        * type ndarray with shape(3,)
+        """
+        if not isinstance(other, type(np.array([1, 1, 1]))) or len(other) != 3:
+            raise TypeError("Adding orbit with {}".format(other))
+
+        orbit = Orbit()
+        orbit.equivalent_sites = copy.deepcopy(self.equivalent_sites)
+        for sites in orbit.equivalent_sites:
+            for site in sites:
+                site.unitcell_offset += other
+        return orbit
