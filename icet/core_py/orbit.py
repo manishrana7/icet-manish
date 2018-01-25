@@ -31,4 +31,17 @@ class Orbit(object):
        * order       
     """
     def __init__(self):
-        pass
+        self._equivalent_sites = []
+        self._representative_cluster = None
+
+    @property
+    def equivalent_sites(self):
+        """
+        List of equivalent Lattice Site's        
+        """
+        return self._equivalent_sites
+
+    @equivalent_sites.setter
+    def equivalent_sites(self, sites):
+        self._equivalent_sites = sites
+
