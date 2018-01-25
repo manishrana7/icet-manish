@@ -16,13 +16,11 @@ class Orbit(object):
     * Add functions
         * getPermutatedEquivalentSites
         * getSitesWithPermutation
-
-        * orbit + offset
-        * orbit + orbit
         * get_mc_vectors
     * properties
 
     * think about adding __hash__ ?
+    * think about overloading orbit + orbit
     Blocked TODO's by Cluster class:
     * geometrical_size()
     * representative_cluster
@@ -32,6 +30,7 @@ class Orbit(object):
         self._equivalent_sites = []
         self._representative_cluster = None
         self.geometrical_size_tolerance = 1e-5
+        self._equivalent_permutations = []
 
     @property
     def equivalent_sites(self):
@@ -147,3 +146,28 @@ class Orbit(object):
             for site in sites:
                 site.unitcell_offset += other
         return orbit
+
+    @property
+    def equivalent_permutations(self):
+        """
+        Get the list of equivalent permutations
+        for this orbit.
+
+        Explanation
+        -------
+        If this orbit is a triplet
+        and the permutation [0,2,1]
+        exists this means that
+        The lattice sites [s1, s2, s3]
+        are equivalent to [s1, s3, s2]
+        This will have the effect that
+        for a ternary CE the cluster
+        functions (0,1,0) will not
+        be considered since it is
+        equivalent to (0,0,1).
+        """
+        return self._equivalent_permutations
+
+    @equivalent_permutations.setter
+    def equivalent_permutations(self, permutations):
+        self._equivalent_permutations = permutations
