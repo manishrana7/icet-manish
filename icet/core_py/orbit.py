@@ -24,12 +24,12 @@ class Orbit(object):
         * orbit + offset
         * orbit + orbit
         * get_mc_vectors
-    * properties 
-       * Equivalent sites + setter
+    * properties        
        * representative cluster
        * Representative sites
        * order       
     """
+
     def __init__(self):
         self._equivalent_sites = []
         self._representative_cluster = None
@@ -45,3 +45,12 @@ class Orbit(object):
     def equivalent_sites(self, sites):
         self._equivalent_sites = sites
 
+    @property
+    def representative_cluster(self):
+        """
+        The representative cluster
+        represents the geometrical
+        version of what this orbit is.
+        """
+        return self._representative_cluster
+        

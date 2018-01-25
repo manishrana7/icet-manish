@@ -50,6 +50,14 @@ class TestOrbit(unittest.TestCase):
         self.orbit.equivalent_sites = self.lattice_sites
         self.assertEqual(self.orbit.equivalent_sites, self.lattice_sites)
 
+    def test_property_representative_cluster(self):
+        """
+        Test getting the representative Cluster
+        TODO
+        ----
+        * implement this more thoroughly when cluster is added
+        """
+        self.orbit.representative_cluster
 
 if __name__ == '__main__':
     unittest.main()
