@@ -1,5 +1,7 @@
 import numpy as np
 import copy
+import itertools
+from icet.tools.geometry import get_permutation
 
 
 class Orbit(object):
@@ -14,8 +16,6 @@ class Orbit(object):
     ----
     * write constructor
     * Add functions
-        * getPermutatedEquivalentSites
-        * getSitesWithPermutation
         * get_mc_vectors
     * properties
 
@@ -220,5 +220,66 @@ class Orbit(object):
         Return the permutated to representative
         sites of equivalent_sites[index].
         """
-        return [self.equivalent_sites[
-            index][s] for s in self.permutations_to_representative[index]]
+        return get_permutation(self.equivalent_sites[index],
+                               self.permutations_to_representative[index])
+
+    def get_mc_vectors(self, allowed_components):
+        """
+        Return the mc vectors for this orbit given the allowed components.
+        The mc vectors are returned as a list of tuples
+
+        parameters
+       ----------
+        allowed_components : list of int
+           The allowed components for the lattice sites,
+           allowed_components[i] correspond to the lattice site
+           self.representative_sites[i].
+
+
+        """
+
+        assert len(allowed_components) == self.order
+
+        all_possible_mc_vectors = \
+            self.get_all_possible_mc_vector_permutations(allowed_components)
+
+        all_possible_mc_vectors.sort()
+        mc_vectors = []
+        for mc_vector in all_possible_mc_vectors:
+            permutated_mc_vector = []
+            for allowed_permutation in self.allowed_permutations:
+                permutated_mc_vector.append(
+                    tuple(get_permutation(mc_vector, allowed_permutation))
+                )
+            # If this mc vector or any of its allowed permutations
+            # exist in mc_vectors append this to the mc vectors
+            if set(permutated_mc_vector).isdisjoint(mc_vectors):
+                mc_vectors.append(mc_vector)
+        return mc_vectors
+
+    def get_all_possible_mc_vector_permutations(self, allowed_components):
+        """
+       Similar to get all permutations but
+       needs to be filtered through the
+       number of allowed elements.
+
+       parameters
+       ----------
+       allowed_components : list of int
+           The allowed components for the lattice sites,
+           allowed_components[i] correspond to the lattice site
+           self.representative_sites[i].
+
+        returns all_mc_vectors : list of tuples of int
+        """
+
+        cartesian_lists = []
+        for ac in allowed_components:
+            cartesian_lists.append(
+                [i for i in range(ac - 1)]
+            )
+
+        all_mc_vectors = []
+        for element in itertools.product(*cartesian_lists):
+            all_mc_vectors.append(tuple(element))
+        return all_mc_vectors
