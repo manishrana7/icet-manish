@@ -13,12 +13,7 @@ class Orbit(object):
     Can be compared to other orbits.
 
     TODO
-    ----
-    * write constructor
-    * Add functions
-        * get_mc_vectors
-    * properties
-
+    ----    
     * think about adding __hash__ ?
     * think about overloading orbit + orbit
     Blocked TODO's by Cluster class:
