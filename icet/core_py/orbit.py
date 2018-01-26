@@ -13,7 +13,7 @@ class Orbit(object):
     Can be compared to other orbits.
 
     TODO
-    ----    
+    ----
     * think about adding __hash__ ?
     * think about overloading orbit + orbit
     Blocked TODO's by Cluster class:
