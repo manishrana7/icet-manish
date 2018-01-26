@@ -22,7 +22,7 @@ class Orbit(object):
     * think about adding __hash__ ?
     * think about overloading orbit + orbit
     Blocked TODO's by Cluster class:
-    * geometrical_size()
+    * geometrical_size() (returns -1 now so we can test it)
     * representative_cluster
     """
 
@@ -206,3 +206,19 @@ class Orbit(object):
     @allowed_permutations.setter
     def allowed_permutations(self, permutations):
         self._allowed_permutations = permutations
+
+    @property
+    def permutated_sites(self):
+        """
+        Get the equivalent sites but permutated
+        to representative site.
+        """
+        return [self.get_permutated_sites(index) for index in range(len(self))]
+
+    def get_permutated_sites(self, index):
+        """
+        Return the permutated to representative
+        sites of equivalent_sites[index].
+        """
+        return [self.equivalent_sites[
+            index][s] for s in self.permutations_to_representative[index]]

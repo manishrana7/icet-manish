@@ -23,7 +23,8 @@ class TestOrbit(unittest.TestCase):
         cartesian_product_lists = [[0., 1.], [0., 1.], [0., 1.]]
         for element in itertools.product(*cartesian_product_lists):
             unitcell_offsets.append(list(element))
-        self.lattice_sites = [[LatticeSite(index, unitcell_offset)]
+        self.lattice_sites = [[LatticeSite(index, unitcell_offset),
+                               LatticeSite(index + 1, unitcell_offset)]
                               for index, unitcell_offset in
                               zip(indices, unitcell_offsets)]
 
@@ -141,7 +142,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_property_permutations_to_representative(self):
         """
-        Test the equivalent permutations property.
+        Test the permutations to representative property.
         """
         self.assertEqual(self.orbit.permutations_to_representative, [])
         self.orbit.permutations_to_representative = [[1, 2, 3]]
@@ -150,11 +151,35 @@ class TestOrbit(unittest.TestCase):
 
     def test_property_allowed_permutations(self):
         """
-        Test the equivalent permutations property.
+        Test the allowed permutations property.
         """
         self.assertEqual(self.orbit.allowed_permutations, [])
         self.orbit.allowed_permutations = [[1, 2, 3]]
         self.assertListEqual(self.orbit.allowed_permutations, [[1, 2, 3]])
+
+    def test_property_permutated_sites(self):
+        """
+        Test the permutated sites property.
+        """
+        self.orbit.equivalent_sites = self.lattice_sites
+        # Raises IndexError when permutations to primitive is not set
+        with self.assertRaises(IndexError):
+            self.orbit.permutated_sites
+
+        # Provide the identity permutation
+        self.orbit.permutations_to_representative = [
+            [i for i in range(self.orbit.order)]] * len(self.orbit)
+
+        self.assertEqual(self.orbit.permutated_sites,
+                         self.orbit.equivalent_sites)
+
+        # Provide a completely reversed permutation, [i,j,k] ->[k,j,i]
+        self.orbit.permutations_to_representative = [
+            [i for i in reversed(range(self.orbit.order))]] * len(self.orbit)
+
+        for perm_sites, sites in zip(self.orbit.permutated_sites,
+                                     self.orbit.equivalent_sites):
+            self.assertEqual(perm_sites, list(reversed(sites)))
 
 
 if __name__ == '__main__':
