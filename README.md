@@ -13,6 +13,6 @@ maintaining portability.
 
 A detailed description of the features of `icet` along with background
 information and tutorials can be found in the [user
-guide](https://icet.materialsmodeling.org/userguide/index.html).
+guide](https://icet.materialsmodeling.org/index.html).
 There is also a detailed [documentation of the C++
 interface](http://icet.materialsmodeling.org/apidoc/index.html).
