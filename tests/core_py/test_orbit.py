@@ -5,6 +5,10 @@ import unittest
 
 from icet.core_py.orbit import Orbit
 from icet.core_py.lattice_site import LatticeSite
+from icet.core.lattice_site import LatticeSite as LatticeSite_cpp
+from icet.core.cluster import Cluster
+from icet.core.orbit import Orbit as Orbit_cpp
+from ase.build import bulk
 import itertools
 import numpy as np
 
@@ -34,12 +38,39 @@ class TestOrbit(unittest.TestCase):
                                             index + 3, unitcell_offset)]
                                        for index, unitcell_offset in
                                        zip(indices, unitcell_offsets)]
+        self.lattice_sites_pairs_cpp = [[LatticeSite_cpp(index,
+                                                         unitcell_offset),
+                                         LatticeSite_cpp(index + 1,
+                                                         unitcell_offset)]
+                                        for index, unitcell_offset in
+                                        zip(indices, unitcell_offsets)]
+
+        self.lattice_sites_triplets_cpp = [[LatticeSite_cpp(index,
+                                                            unitcell_offset),
+                                            LatticeSite_cpp(
+                                            index + 1, unitcell_offset),
+                                            LatticeSite_cpp(
+                                            index + 3, unitcell_offset)]
+                                           for index, unitcell_offset in
+                                           zip(indices, unitcell_offsets)]
 
     def setUp(self):
         '''
         Instantiate class before each test.
         '''
         self.orbit = Orbit()
+        atoms = bulk("Al")
+        lattice_site_for_cluster = [
+            LatticeSite(0, [i, 0, 0]) for i in range(3)]
+
+        self.pair_cluster = Cluster.from_python(
+            atoms, [lattice_site_for_cluster[0],
+                    lattice_site_for_cluster[1]], True)
+        self.triplet_cluster = Cluster.from_python(
+            atoms, lattice_site_for_cluster, True)
+
+        self.orbit_pair_cpp = Orbit_cpp(self.pair_cluster)
+        self.orbit_triplet_cpp = Orbit_cpp(self.triplet_cluster)
 
     def test_init(self):
         '''
@@ -50,13 +81,31 @@ class TestOrbit(unittest.TestCase):
         orbit = Orbit()
         self.assertIsInstance(orbit, Orbit)
 
+        orbit = Orbit_cpp(self.pair_cluster)
+        self.assertIsInstance(orbit, Orbit_cpp)
+
+        orbit = Orbit_cpp(self.triplet_cluster)
+        self.assertIsInstance(orbit, Orbit_cpp)
+
     def test_property_equivalent_sites(self):
         '''
         Testing get_orbit_list_info functionality
         '''
+
+        # test Python version
         self.assertEqual(self.orbit.equivalent_sites, [])
         self.orbit.equivalent_sites = self.lattice_sites_pairs
         self.assertEqual(self.orbit.equivalent_sites, self.lattice_sites_pairs)
+
+        # Test C++ version
+        self.orbit_pair_cpp.add_equivalent_sites(self.lattice_sites_pairs_cpp)
+        self.assertEqual(self.orbit_pair_cpp.get_equivalent_sites(),
+                         self.lattice_sites_pairs_cpp)
+
+        # Test C++ and Python together
+        self.assertEqual(
+            self.orbit_pair_cpp.get_equivalent_sites(),
+            self.orbit.equivalent_sites)
 
     def test_property_representative_cluster(self):
         """
@@ -66,6 +115,8 @@ class TestOrbit(unittest.TestCase):
         * implement this more thoroughly when cluster is added
         """
         self.orbit.representative_cluster
+        self.orbit_pair_cpp.get_representative_cluster()
+        self.orbit_triplet_cpp.get_representative_cluster()
 
     def test_property_representative_sites(self):
         """
@@ -73,10 +124,21 @@ class TestOrbit(unittest.TestCase):
         """
         with self.assertRaises(IndexError):
             self.orbit.representative_sites
+            self.orbit_pair_cpp.get_representative_sites()
 
+        # Test Python version
         self.orbit.equivalent_sites = self.lattice_sites_pairs
         self.assertEqual(self.orbit.representative_sites,
                          self.lattice_sites_pairs[0])
+
+        # Test C++ version
+        self.orbit_pair_cpp.add_equivalent_sites(self.lattice_sites_pairs_cpp)
+        self.assertEqual(self.orbit_pair_cpp.get_representative_sites(),
+                         self.lattice_sites_pairs_cpp[0])
+
+        # Test C++ and Python together
+        self.assertEqual(self.orbit_pair_cpp.get_representative_sites(),
+                         self.orbit.representative_sites)
 
     def test_property_order(self):
         """

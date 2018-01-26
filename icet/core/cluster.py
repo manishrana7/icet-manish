@@ -4,7 +4,7 @@ from icet.core.lattice_site import LatticeSite
 __all__ = ['Cluster']
 
 
-def _cluster_from_python(atoms, lattice_sites, sort=False, clusterIndex=-1):
+def _from_python(atoms, lattice_sites, sort=False, clusterIndex=-1):
     """
     Construct a cluster from atoms and python lattice sites
     """
@@ -17,4 +17,4 @@ def _cluster_from_python(atoms, lattice_sites, sort=False, clusterIndex=-1):
     return Cluster(structure, lattice_sites_cpp, sort, clusterIndex)
 
 
-Cluster.cluster_from_python = _cluster_from_python
+Cluster.from_python = _from_python
