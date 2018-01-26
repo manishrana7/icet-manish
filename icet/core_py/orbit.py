@@ -30,7 +30,8 @@ class Orbit(object):
         self._equivalent_sites = []
         self._representative_cluster = None
         self.geometrical_size_tolerance = 1e-5
-        self._equivalent_permutations = []
+        self._allowed_permutations = []
+        self._permutations_to_representative = []
 
     @property
     def equivalent_sites(self):
@@ -148,7 +149,36 @@ class Orbit(object):
         return orbit
 
     @property
-    def equivalent_permutations(self):
+    def permutations_to_representative(self):
+        """
+        Get the list of permutations.
+        Where permutations_to_representative[i]
+        takes self.equivalent_sites[i] to
+        the same order as self.representative_sites.
+
+        Explanation
+        -------
+        This can be used if you for example want to
+        count elements and are interested in difference
+        between ABB, BAB, BBA and so on. If you count the
+        lattice sites that are permutated according to
+        these permutations then you will get the correct
+        counts.
+
+        NOTE
+        ----
+        * This is called _equivalentSitesPermutations
+          in C++
+
+        """
+        return self._permutations_to_representative
+
+    @permutations_to_representative.setter
+    def permutations_to_representative(self, permutations):
+        self._permutations_to_representative = permutations
+
+    @property
+    def allowed_permutations(self):
         """
         Get the list of equivalent permutations
         for this orbit.
@@ -165,9 +195,14 @@ class Orbit(object):
         functions (0,1,0) will not
         be considered since it is
         equivalent to (0,0,1).
-        """
-        return self._equivalent_permutations
 
-    @equivalent_permutations.setter
-    def equivalent_permutations(self, permutations):
-        self._equivalent_permutations = permutations
+        NOTE
+        ----
+        * This is called _allowedSitesPermutations
+          in C++
+        """
+        return self._allowed_permutations
+
+    @allowed_permutations.setter
+    def allowed_permutations(self, permutations):
+        self._allowed_permutations = permutations

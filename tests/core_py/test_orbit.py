@@ -139,13 +139,22 @@ class TestOrbit(unittest.TestCase):
         with self.assertRaises(TypeError):
             orbit + np.array([1, 1, 1, 1])
 
-    def test_property_equivalent_permutations(self):
+    def test_property_permutations_to_representative(self):
         """
         Test the equivalent permutations property.
         """
-        self.assertEqual(self.orbit.equivalent_permutations, [])
-        self.orbit.equivalent_permutations = [[1, 2, 3]]
-        self.assertListEqual(self.orbit.equivalent_permutations, [[1, 2, 3]])
+        self.assertEqual(self.orbit.permutations_to_representative, [])
+        self.orbit.permutations_to_representative = [[1, 2, 3]]
+        self.assertListEqual(
+            self.orbit.permutations_to_representative, [[1, 2, 3]])
+
+    def test_property_allowed_permutations(self):
+        """
+        Test the equivalent permutations property.
+        """
+        self.assertEqual(self.orbit.allowed_permutations, [])
+        self.orbit.allowed_permutations = [[1, 2, 3]]
+        self.assertListEqual(self.orbit.allowed_permutations, [[1, 2, 3]])
 
 
 if __name__ == '__main__':
