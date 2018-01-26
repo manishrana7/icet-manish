@@ -191,6 +191,12 @@ class Orbit
             _allowedSitesPermutations = permutations;
         }
 
+        /// Get the allowed sites permutations
+        std::unordered_set<std::vector<int>, VectorHash> getAllowedSitesPermutations( ) const
+        {
+            return _allowedSitesPermutations;
+        }
+
         ///Return the representative sites of this orbit (if any equivalentSites permutations exists it is to these sites they refer to)
         std::vector<LatticeSite> getRepresentativeSites() const
         {

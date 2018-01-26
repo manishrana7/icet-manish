@@ -303,7 +303,8 @@ class TestOrbit(unittest.TestCase):
         self.orbit.permutations_to_representative = [[1, 2, 3]]
         self.assertListEqual(
             self.orbit.permutations_to_representative, [[1, 2, 3]])
-
+        # Test C++
+        # This functionality is not exposed to python
     def test_property_allowed_permutations(self):
         """
         Test the allowed permutations property.
@@ -311,7 +312,8 @@ class TestOrbit(unittest.TestCase):
         self.assertEqual(self.orbit.allowed_permutations, [])
         self.orbit.allowed_permutations = [[1, 2, 3]]
         self.assertListEqual(self.orbit.allowed_permutations, [[1, 2, 3]])
-
+        # Test C++
+        # This functionality is not exposed to python
     def test_property_permutated_sites(self):
         """
         Test the permutated sites property.
