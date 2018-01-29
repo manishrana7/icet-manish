@@ -53,7 +53,7 @@ class PermutationMatrix(object):
         self._build()
         self._build_lattice_site_permutation_matrix()
         self._prune_permutation_matrix()
-        self._sort()
+        self.pm_lattice_sites.sort()
 
     def _build(self):
         """
@@ -135,10 +135,3 @@ class PermutationMatrix(object):
                         msg = ['Removing duplicate in permutation matrix']
                         msg += ['i: {} j: {}'.format(i, j)]
                         print(' '.join(msg))
-
-    def _sort(self):
-        """
-        Sorts the Lattice Site permutation matrix.
-        This is a helper method to initialize permutation matrix.
-        """
-        self.pm_lattice_sites.sort()
