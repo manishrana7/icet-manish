@@ -12,6 +12,28 @@ from icet.tools.geometry import (
 class PermutationMatrix(object):
     '''
     Permutation matrix object.
+    This object can build and store a permutaion matrix
+    in a couple of different formats. The most important is
+    the Lattice Site format. 
+
+    The permutation matrix is built up by taking all unique
+    fractional positions for the basis atoms and all positions
+    of their respective neighbors. Only neigbhors within the
+    cutoff will be considered.
+    Next the matrix will be built up column by column by
+    taking the fractional position and applying one of the
+    allowed crystal symmetry operations for the system.
+    The rows of final matrix will then all consist of
+    equivalent points in the lattice.
+    One can then use this matrix to consider rows of this
+    matrix:
+    >>> row1, row2 = pm.pm_lattice_sites[i],pm.pm_lattice_sites[j]
+    then for each column ,`k`you can create equivalent pairs:
+    >>> equivalent_pairs = []
+    >>> for site1, site2 in zip(row1, row2):
+    >>>     equivalent_sites.append([site1,site])
+    This grouping together of equivalent sites is what
+    makes up an orbit.
 
     parameters
     ----------
