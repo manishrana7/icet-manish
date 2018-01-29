@@ -54,6 +54,11 @@ class TestPermutationMatrix(unittest.TestCase):
         matrix_cpp = sorted(self.pm_lattice_sites_cpp)
         col1_py = [row[0] for row in matrix_py]
         col1_cpp = [row[0] for row in matrix_cpp]
+
+        # check that there are no duplicates
+        self.assertEqual(len(col1_py), len(set(col1_py)))
+        self.assertEqual(len(col1_cpp), len(set(col1_cpp)))
+
         for lattice_site_py, lattice_site_cpp in zip((col1_py),
                                                      (col1_cpp)):
             self.assertEqual(lattice_site_py, lattice_site_cpp)
@@ -61,7 +66,7 @@ class TestPermutationMatrix(unittest.TestCase):
 
     def test_all_matrix_elements_equal(self):
         """
-        Test that all elemetns of both Lattice site permutation
+        Test that all elements of both Lattice site permutation
         matrices are identical.
         """
         pm_cpp = sorted(self.pm_lattice_sites_cpp)
@@ -69,6 +74,30 @@ class TestPermutationMatrix(unittest.TestCase):
             self.assertEqual(len(row_py), len(row_cpp))
             for element_py, element_cpp in zip(row_py, row_cpp):
                 self.assertEqual(element_py, element_cpp)
+
+    def test_equal_dist_for_same_row(self):
+        """
+        Test that distance between site_ij and site_ik
+        are the same for all j,k.
+
+        This is only done for the python version
+        since the C++ version is tested to be equivalent
+        """
+
+        for i in range(len(self.pm.pm_lattice_sites)):
+            for j in range(i + 1, len(self.pm.pm_lattice_sites)):
+                dist_last = -1
+                for k in range(len(self.pm.pm_lattice_sites[i])):
+                    site_1 = self.pm.pm_lattice_sites[i][k]
+                    site_2 = self.pm.pm_lattice_sites[j][k]
+                    pos1 = self.atoms[site_1.index].position +\
+                        np.dot(site_1.unitcell_offset, self.atoms.cell)
+                    pos2 = self.atoms[site_2.index].position +\
+                        np.dot(site_2.unitcell_offset, self.atoms.cell)
+                    dist_first = np.linalg.norm(pos1 - pos2)
+                    if dist_last != -1:
+                        self.assertAlmostEqual(dist_first, dist_last, places=8)
+                    dist_last = dist_first
 
     def test_primitive_structure(self):
         """
