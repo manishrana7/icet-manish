@@ -508,6 +508,15 @@ PYBIND11_MODULE(_icet, m)
 
     py::class_<Orbit>(m, "Orbit")
         .def(py::init<const Cluster &>())
+
+        /* 
+        @TODO Remove the usage of these functions
+            in favor of the property versions.
+
+            It should mostly be used in clusterspace.
+            ------------ START removal -----------------------
+        */
+
         .def("add_equivalent_sites",
              (void (Orbit::*)(const std::vector<LatticeSite> &, bool)) & Orbit::addEquivalentSites,
              py::arg("lattice_neighbors"),
@@ -516,21 +525,103 @@ PYBIND11_MODULE(_icet, m)
              (void (Orbit::*)(const std::vector<std::vector<LatticeSite>> &, bool)) & Orbit::addEquivalentSites,
              py::arg("lattice_neighbors"),
              py::arg("sort") = false)
-        .def("get_representative_cluster", &Orbit::getRepresentativeCluster)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
         .def("get_representative_sites", &Orbit::getRepresentativeSites)
         .def("get_equivalent_sites_permutations", &Orbit::getEquivalentSitesPermutations)
-        .def_property("permutations_to_representative", &Orbit::getEquivalentSitesPermutations,&Orbit::setEquivalentSitesPermutations)
-        .def_property_readonly("order", [](const Orbit &orbit) { return orbit.getRepresentativeCluster().order(); })
-        .def_property_readonly("geometrical_size", [](const Orbit &orbit) { return orbit.getRepresentativeCluster().geometricalSize(); })
-        .def_property_readonly("permutated_sites", &Orbit::getPermutatedEquivalentSites)
-        .def_property_readonly("representative_sites",&Orbit::getRepresentativeSites)
-        .def_property("equivalent_sites",&Orbit::getEquivalentSites, &Orbit::setEquivalentSites)
-        .def("get_sites_with_permutation", &Orbit::getSitesWithPermutation)
-        .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
-        .def("get_mc_vectors", &Orbit::getMCVectors)
-        .def("sort", &Orbit::sortOrbit)
-        .def("get_all_possible_mc_vector_permutations", &Orbit::getAllPossibleMCVectorPermutations)
+             
+        .def("get_representative_cluster", &Orbit::getRepresentativeCluster,
+        R"pbdoc(
+        The representative cluster
+        represents the geometrical
+        version of what this orbit is.
+        )pbdoc")
+        /*
+        ------------ END removal -----------------------
+        */
+        .def_property_readonly("representative_cluster", &Orbit::getRepresentativeCluster,
+        R"pbdoc(
+        The representative cluster
+        represents the geometrical
+        version of what this orbit is.
+        )pbdoc")
+        .def_property("permutations_to_representative", &Orbit::getEquivalentSitesPermutations,&Orbit::setEquivalentSitesPermutations,
+               R"pbdoc(
+        Get the list of permutations.
+        Where permutations_to_representative[i]
+        takes self.equivalent_sites[i] to
+        the same order as self.representative_sites.
+
+        Explanation
+        -------
+        This can be used if you for example want to
+        count elements and are interested in difference
+        between ABB, BAB, BBA and so on. If you count the
+        lattice sites that are permutated according to
+        these permutations then you will get the correct
+       counts. )pbdoc")
+        .def_property_readonly("order", [](const Orbit &orbit) { return orbit.getRepresentativeCluster().order(); },
+        R"pbdoc(
+        Returns the order of the orbit.
+        The order is the same as the number
+        of bodies in the representative cluster
+        or the number of lattice sites per element
+        in equivalent_sites.
+        )pbdoc")
+        .def_property_readonly("geometrical_size", [](const Orbit &orbit) { return orbit.getRepresentativeCluster().geometricalSize(); },
+        R"pbdoc(        Returns the geometrical size of the
+        representative cluster.
+        )pbdoc")
+        .def_property_readonly("permutated_sites", &Orbit::getPermutatedEquivalentSites,
+        R"pbdoc(Get the equivalent sites but permutated
+        to representative site.)pbdoc")
+        .def_property_readonly("representative_sites",&Orbit::getRepresentativeSites,        
+        R"pbdoc(
+        The representative sites
+        is a list of lattice sites
+        that are uniquely picked out
+        for this orbit which can be
+        used to represent and distinguish
+        between orbits.
+        )pbdoc")
+        .def_property("equivalent_sites",&Orbit::getEquivalentSites, &Orbit::setEquivalentSites,
+        R"pbdoc(
+        List of equivalent Lattice Sites
+        )pbdoc")
+        .def("get_sites_with_permutation", &Orbit::getSitesWithPermutation,
+        R"pbdoc(Return the permutated to representative
+        sites of equivalent_sites[index].)pbdoc")
+        // .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
+        .def("get_mc_vectors", &Orbit::getMCVectors,
+                R"pbdoc(
+        Return the mc vectors for this orbit given the allowed components.
+        The mc vectors are returned as a list of tuples
+
+        parameters
+       ----------
+        allowed_components : list of int
+           The allowed components for the lattice sites,
+           allowed_components[i] correspond to the number
+           of allowed compoments at lattice site
+           orbit.representative_sites[i].)pbdoc")
+        .def("sort", &Orbit::sortOrbit,
+        R"pbdoc(
+        Sort the equivalent sites list.
+        )pbdoc")
+        .def("get_all_possible_mc_vector_permutations", &Orbit::getAllPossibleMCVectorPermutations,
+        R"pbdoc(
+        Similar to get all permutations but
+       needs to be filtered through the
+       number of allowed elements.
+
+       parameters
+       ----------
+       allowed_components : list of int
+           The allowed components for the lattice sites,
+           allowed_components[i] correspond to the lattice site
+           self.representative_sites[i].
+
+        returns all_mc_vectors : list of tuples of int
+        )pbdoc")
         .def_property("allowed_permutations", [](const Orbit &orbit) {
              auto permutationSet = orbit.getAllowedSitesPermutations(); 
              std::vector<std::vector<int>> vectorPermutations;
@@ -542,8 +633,38 @@ PYBIND11_MODULE(_icet, m)
                 
                 std::unordered_set<std::vector<int>, VectorHash> setPermutations;
                 setPermutations.insert(permutations.begin(),permutations.end());
-                 orbit.setAllowedSitesPermutations(setPermutations); })
-        .def_property("permutations_to_representative", &Orbit::getEquivalentSitesPermutations, &Orbit::setEquivalentSitesPermutations)
+                 orbit.setAllowedSitesPermutations(setPermutations); },
+        R"pbdoc(Get the list of equivalent permutations
+        for this orbit.
+
+        Explanation
+        -------
+        If this orbit is a triplet
+        and the permutation [0,2,1]
+        exists this means that
+        The lattice sites [s1, s2, s3]
+        are equivalent to [s1, s3, s2]
+        This will have the effect that
+        for a ternary CE the cluster
+        functions (0,1,0) will not
+        be considered since it is
+        equivalent to (0,0,1).)pbdoc")
+        .def_property("permutations_to_representative", &Orbit::getEquivalentSitesPermutations, &Orbit::setEquivalentSitesPermutations,
+        R"pbdoc(
+        Get the list of permutations.
+        Where permutations_to_representative[i]
+        takes self.equivalent_sites[i] to
+        the same order as self.representative_sites.
+
+        Explanation
+        -------
+        This can be used if you for example want to
+        count elements and are interested in difference
+        between ABB, BAB, BBA and so on. If you count the
+        lattice sites that are permutated according to
+        these permutations then you will get the correct
+        counts.
+        )pbdoc")
         .def("__len__", &Orbit::size)
 
         .def(py::self < py::self)
