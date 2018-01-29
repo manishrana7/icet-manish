@@ -520,13 +520,32 @@ PYBIND11_MODULE(_icet, m)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
         .def("get_representative_sites", &Orbit::getRepresentativeSites)
         .def("get_equivalent_sites_permutations", &Orbit::getEquivalentSitesPermutations)
+        .def_property("permutations_to_representative", &Orbit::getEquivalentSitesPermutations,&Orbit::setEquivalentSitesPermutations)
+        .def_property_readonly("order", [](const Orbit &orbit) { return orbit.getRepresentativeCluster().order(); })
+        .def_property_readonly("geometrical_size", [](const Orbit &orbit) { return orbit.getRepresentativeCluster().geometricalSize(); })
+        .def_property_readonly("permutated_sites", &Orbit::getPermutatedEquivalentSites)
+        .def_property_readonly("representative_sites",&Orbit::getRepresentativeSites)
+        .def_property("equivalent_sites",&Orbit::getEquivalentSites, &Orbit::setEquivalentSites)
         .def("get_sites_with_permutation", &Orbit::getSitesWithPermutation)
-        .def("__len__", &Orbit::size)
         .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
-        .def("get_MC_vectors", &Orbit::getMCVectors)
+        .def("get_mc_vectors", &Orbit::getMCVectors)
         .def("sort", &Orbit::sortOrbit)
         .def("get_all_possible_mc_vector_permutations", &Orbit::getAllPossibleMCVectorPermutations)
-        .def_property("allowed_permutations", &Orbit::getAllowedSitesPermutations, &Orbit::setAllowedSitesPermutations)
+        .def_property("allowed_permutations", [](const Orbit &orbit) {
+             auto permutationSet = orbit.getAllowedSitesPermutations(); 
+             std::vector<std::vector<int>> vectorPermutations;
+            for(auto vector : permutationSet)
+            {
+                vectorPermutations.push_back(vector);
+            }
+             return vectorPermutations; }, [](Orbit &orbit, const std::vector<std::vector<int>> &permutations) {
+                
+                std::unordered_set<std::vector<int>, VectorHash> setPermutations;
+                setPermutations.insert(permutations.begin(),permutations.end());
+                 orbit.setAllowedSitesPermutations(setPermutations); })
+        .def_property("permutations_to_representative", &Orbit::getEquivalentSitesPermutations, &Orbit::setEquivalentSitesPermutations)
+        .def("__len__", &Orbit::size)
+
         .def(py::self < py::self)
         .def(py::self == py::self)
         .def(py::self + Eigen::Vector3d());
