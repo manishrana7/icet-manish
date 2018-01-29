@@ -10,6 +10,16 @@ import numpy as np
 
 
 def init_cpp_orbit(number_of_sites):
+    """
+    Return a pair and triplet C++ orbit
+    with a size equal to number_of_sites
+
+    paramaters
+    ----------
+    number_of_sites : int
+        The number of equivalent sites is in the orbit
+    """
+
     indices = [i for i in range(number_of_sites)]
     unitcell_offsets = []
     cartesian_product_lists = [[i for i in range(
@@ -52,6 +62,15 @@ def init_cpp_orbit(number_of_sites):
 
 
 def init_python_orbit(number_of_sites):
+    """
+    Return a pair and triplet python orbit
+    with a size equal to number_of_sites
+
+    paramaters
+    ----------
+    number_of_sites : int
+        The number of equivalent sites is in the orbit
+    """
     indices = [i for i in range(number_of_sites)]
     unitcell_offsets = []
     cartesian_product_lists = [[i for i in range(
