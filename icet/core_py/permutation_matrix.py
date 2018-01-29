@@ -14,7 +14,7 @@ class PermutationMatrix(object):
     Permutation matrix object.
     This object can build and store a permutaion matrix
     in a couple of different formats. The most important is
-    the Lattice Site format. 
+    the Lattice Site format.
 
     The permutation matrix is built up by taking all unique
     fractional positions for the basis atoms and all positions
