@@ -1,3 +1,5 @@
+from icet.core_py.permutation_matrix import PermutationMatrix
+
 
 class OrbitList(object):
     """
@@ -7,6 +9,19 @@ class OrbitList(object):
     that at least one site is in the primitive cell of the
     primitive structure.
 
+    parameters
+    ----------
+    atoms : ASE Atoms object
+            This atoms object will be used
+            to construct a primitive structure
+            on which all the lattice sites in the orbits
+            are based on.
+    cutoffs : list of float
+              cutoffs[i] is the cutoff for
+              orbits with order i+2.
+    verbosity : int
+                Set the verbosity for OrbitList and
+                all the methods it calls.
     TODO
     ----
     * Write the constructor that should create
@@ -21,8 +36,11 @@ class OrbitList(object):
 
     """
 
-    def __init__(self, atoms, cutoffs, verbosity=False):
-        pass
+    def __init__(self, atoms, cutoffs, verbosity=False):        
+        self.permutation_matrix = PermutationMatrix(atoms,max(cutoffs))
+        self._primitive_structure = self.permutation_matrix.get_primitive_structure()
+        self._orbits = []
+        
 
     def sort(self):
         """
@@ -30,9 +48,10 @@ class OrbitList(object):
         """
         pass
 
-    def get_primitive_structure(self):
+    @property
+    def primitive_structure(self):
         """
         Returns the primitive structure to which the
         lattice sites in the orbits are referenced to.
         """
-        pass
+        return self._primitive_structure().copy()
