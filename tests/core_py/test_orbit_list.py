@@ -6,6 +6,7 @@ import unittest
 from icet.core_py.orbit_list import OrbitList
 from iet.core_py.lattice_site import LatticeSite
 
+
 class TestOrbitList(unittest.TestCase):
     '''
     Container for tests of the class functionality
@@ -73,17 +74,50 @@ class TestOrbitList(unittest.TestCase):
         Test the get row method.
         """
         pass
+
     def test_get_indices(self):
         """
         Test the get indices method
         """
         pass
+
     def test_get_all_translated_sites(self):
         """
         Test teh get all translated sites functionality.
         """
-        sites = [LatticeSite(0,[0,0,0])]
-        self.assertEqual(self.orbit_list.test_get_all_translated_sites(sites), [])
+        sites = [LatticeSite(0, [0, 0, 0])]
+        target = []
+        self.assertEqual(
+            self.orbit_list.test_get_all_translated_sites(sites), target)
+
+        # Does it break when the offset is floats?
+        sites = [LatticeSite(0, [0.0, 0.0, 0.0])]
+        target = []
+        self.assertEqual(
+            self.orbit_list.test_get_all_translated_sites(sites), target)
+
+        sites = [LatticeSite(0, [1.0, 0.0, 0.0])]
+        target = [[LatticeSite(0, [0.0, 0.0, 0.0])]]
+        self.assertEqual(
+            self.orbit_list.test_get_all_translated_sites(sites), target)
+
+        sites = [LatticeSite(0, [1.0, 0.0, 0.0]),
+                 LatticeSite(0, [0.0, 0.0, 0.0])]
+        target = [[LatticeSite(0, [0.0, 0.0, 0.0]),
+                   LatticeSite(0, [-1, 0.0, 0.0])]]
+        self.assertEqual(
+            self.orbit_list.test_get_all_translated_sites(sites), target)
+
+        sites = [LatticeSite(0, [1.0, 2.0, -1.0]),
+                 LatticeSite(2, [2.0, 0.0, 0.0])]
+
+        target = [[LatticeSite(0, [0.0, 0.0, 0.0]),
+                   LatticeSite(2, [1.0, -2.0, 1.0])],
+                  [LatticeSite(0, [-1.0, 2.0, -1.0]),
+                   LatticeSite(2, [0.0, 0.0, 0.0])]]
+        self.assertEqual(
+            self.orbit_list.test_get_all_translated_sites(sites), target)
+
 
 if __name__ == '__main__':
     unittest.main()
