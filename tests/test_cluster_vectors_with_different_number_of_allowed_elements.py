@@ -38,7 +38,6 @@ def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
     for at in conf:
         at.symbol = np.random.choice(subelements)
 
-    
     cv_int = cluster_space_int.get_cluster_vector(conf)
     cv_list = cluster_space_list.get_cluster_vector(conf)
     cv_dict = cluster_space_dict.get_cluster_vector(conf)
@@ -59,7 +58,7 @@ for row in db.select():
     atoms_tag = row.tag
     cutoffs = [1.4] * 3
     if len(atoms_row) == 0:
-        continue    
+        continue
     atoms_row.set_chemical_symbols(len(atoms_row) * [atoms_row[0].symbol])
     for allowed_sites in range(2, 4):
         test_mi_int_list_and_dict(atoms_row, subelements,
