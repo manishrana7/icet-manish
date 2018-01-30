@@ -4,7 +4,7 @@
 import unittest
 
 from icet.core_py.orbit_list import OrbitList
-
+from iet.core_py.lattice_site import LatticeSite
 
 class TestOrbitList(unittest.TestCase):
     '''
@@ -37,13 +37,53 @@ class TestOrbitList(unittest.TestCase):
         Testing len functionality
         '''
         self.orbit_list.sort()
+        for i in range(len(self.orbit_list) - 1):
+            self.assertLess(
+                self.orbit_list.orbits[i], self.orbit_list.orbits[i + 1])
 
-    def test_get_primitive_structure(self):
+    def test_property_primitive_structure(self):
         '''
         Testing get_orbit_list_info functionality
         '''
-        self.orbit_list.get_primitive_structure()
+        self.orbit_list.primitive_structure
+        self.assertEqual(self.orbit_list.primitive_structure,
+                         self.permutation_matrix.primitive_structure)
 
+    def test_property_orbit(self):
+        """
+        Test orbit property.
+        """
+        self.orbit_list.property
+        self.assertEqual(len(self.orbit_list), len(self.orbit_list.property))
+
+    def test_is_new_orbit(self):
+        """
+        Test is new orbit method
+        """
+        pass
+
+    def test_make_orbit(self):
+        """
+        Test make a new orbit.
+        """
+        pass
+
+    def test_get_rows(self):
+        """
+        Test the get row method.
+        """
+        pass
+    def test_get_indices(self):
+        """
+        Test the get indices method
+        """
+        pass
+    def test_get_all_translated_sites(self):
+        """
+        Test teh get all translated sites functionality.
+        """
+        sites = [LatticeSite(0,[0,0,0])]
+        self.assertEqual(self.orbit_list.test_get_all_translated_sites(sites), [])
 
 if __name__ == '__main__':
     unittest.main()

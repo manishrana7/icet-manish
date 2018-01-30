@@ -73,6 +73,12 @@ class OrbitList(object):
         Return icet PermutationMatrix object.
         """
         return self._permutation_matrix
+    @property
+    def orbits(self):
+        """
+        Return the internal list of orbits
+        """
+        return self._orbits
 
     def is_new_orbit(self, sites):
         """
@@ -132,25 +138,25 @@ class OrbitList(object):
         """
         return [self.column1.index(site) for site in sites]
 
-    def get_all_translated_sites(self, sites)
-    """
-    Construct a list of lists of sites. 
-    Will for each site that has
-    a unitcell offset !=[0,0,0] translate all sites so
-    *that* site is in [0,0,0] and the others sides just
-    go along for the ride.
+    def get_all_translated_sites(self, sites):
+        """
+        Construct a list of lists of sites. 
+        Will for each site that has
+        a unitcell offset !=[0,0,0] translate all sites so
+        *that* site is in [0,0,0] and the others sides just
+        go along for the ride.
 
-    The resulted list are all equivalent sites that
-    the permutation matrix doesn't really catch on.
+        The resulted list are all equivalent sites that
+        the permutation matrix doesn't really catch on.
 
-    parameters
-    ----------
-    sites : list of icet Lattice Sites object
-    """
-    translated_sites = []
-    for site in sites:
-        if site.unitcell_offset != [0, 0, 0]:
-            translated_sites.append(
-                [ls + site.unitcell_offset for ls in sites])
+        parameters
+        ----------
+        sites : list of icet Lattice Sites object
+        """
+        translated_sites = []
+        for site in sites:
+            if site.unitcell_offset != [0, 0, 0]:
+                translated_sites.append(
+                    [ls + site.unitcell_offset for ls in sites])
 
-    return translated_sites
+        return translated_sites
