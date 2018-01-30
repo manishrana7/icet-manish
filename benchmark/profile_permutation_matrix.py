@@ -11,7 +11,7 @@ from icet.core.orbit_list import __get_lattice_site_permutation_matrix\
 
 def init_permutation_matrix_python(atoms, cutoff):
     """
-    Initialize a permutation matrix.
+    Initialize the Python version of permutation matrix.
     atoms : ASE Atoms object
     cutofff : float
         defines the neighbor cutoff that will be used
@@ -25,7 +25,7 @@ def init_permutation_matrix_python(atoms, cutoff):
 
 def init_permutation_matrix_cpp(atoms, cutoff):
     """
-    Initialize a permutation matrix.
+    Initialize the C++ version of permutation matrix.
     atoms : ASE Atoms object
     cutofff : float
         defines the neighbor cutoff that will be used

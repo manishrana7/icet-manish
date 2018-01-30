@@ -25,7 +25,7 @@ def setup_cluster_space_py(atoms, cutoffs, elements):
 
 def setup_cluster_space_cpp(atoms, cutoffs, elements):
     """
-    Initialize the python version of the cluster space object.
+    Initialize the C++ version of the cluster space object.
 
     parameters
     ----------
