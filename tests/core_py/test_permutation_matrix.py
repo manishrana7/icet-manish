@@ -46,6 +46,7 @@ class TestPermutationMatrix(unittest.TestCase):
         pm_cpp, prim_structure_cpp, _ = permutation_matrix_from_atoms(
             self.atoms, self.cutoff)
         self.assertIsInstance(pm, PermutationMatrix)
+        self.assertIsInstance(pm_prim_false, PermutationMatrix)
         self.assertIsInstance(pm_cpp, PermutationMatrix_cpp)
 
     def test_equal_first_column(self):

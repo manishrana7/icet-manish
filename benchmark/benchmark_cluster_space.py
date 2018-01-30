@@ -14,11 +14,11 @@ def setup_cluster_space_py(atoms, cutoffs, elements):
     ----------
     atoms : Ase Atoms object
     cutoffs : list of floats
-    elements : list of str        
+    elements : list of str
     """
 
     t = time.process_time()
-    cs = ClusterSpace_py(atoms, cutoffs, elements)
+    cs = ClusterSpace_py(atoms, cutoffs, elements)  # noqa
     elapsed_time = time.process_time() - t
     return elapsed_time
 
@@ -31,11 +31,11 @@ def setup_cluster_space_cpp(atoms, cutoffs, elements):
     ----------
     atoms : Ase Atoms object
     cutoffs : list of floats
-    elements : list of str        
+    elements : list of str
     """
 
     t = time.process_time()
-    cs = ClusterSpace_cpp(atoms, cutoffs, elements)
+    cs = ClusterSpace_cpp(atoms, cutoffs, elements)  # noqa
     elapsed_time = time.process_time() - t
     return elapsed_time
 
@@ -49,8 +49,10 @@ if __name__ == "__main__":
     python_time = setup_cluster_space_py(atoms, cutoff, elements)
 
     cpp_time = setup_cluster_space_cpp(atoms, cutoff, elements)
-    print("Time to initialize ClusterSpace in pure python with cutoff: {}, {}s ".format(
-        cutoff, python_time))
-    print("Time to initialize ClusterSpace in C++/python with cutoff: {}, {}s ".format(
-        cutoff, cpp_time))
+    print("Time to initialize ClusterSpace in pure "
+          "python with cutoff: {}, {}s ".format(
+              cutoff, python_time))
+    print("Time to initialize ClusterSpace"
+          " in C++/python with cutoff: {}, {}s ".format(
+              cutoff, cpp_time))
     print("Speed up in C++ {}".format(python_time / cpp_time))
