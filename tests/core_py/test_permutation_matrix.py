@@ -42,7 +42,7 @@ class TestPermutationMatrix(unittest.TestCase):
         pm = PermutationMatrix(self.atoms, self.cutoff, verbosity=10)
         # Test pm with find_prim = False
         pm_prim_false = PermutationMatrix(self.atoms, self.cutoff,
-                               find_prim=False, verbosity=10)
+                                          find_prim=False, verbosity=10)
         pm_cpp, prim_structure_cpp, _ = permutation_matrix_from_atoms(
             self.atoms, self.cutoff)
         self.assertIsInstance(pm, PermutationMatrix)
@@ -58,6 +58,9 @@ class TestPermutationMatrix(unittest.TestCase):
         col1_py = [row[0] for row in matrix_py]
         col1_cpp = [row[0] for row in matrix_cpp]
 
+        # Test length of column 1
+        self.assertEqual(len(col1_py), 43)
+
         # check that there are no duplicates
         self.assertEqual(len(col1_py), len(set(col1_py)))
         self.assertEqual(len(col1_cpp), len(set(col1_cpp)))
@@ -66,6 +69,20 @@ class TestPermutationMatrix(unittest.TestCase):
                                                      (col1_cpp)):
             self.assertEqual(lattice_site_py, lattice_site_cpp)
         self.assertListEqual((col1_py), (col1_cpp))
+
+    def test_equal_rows(self):
+        """
+        Test row lengths
+        """
+        matrix_py = self.pm.pm_lattice_sites
+        matrix_cpp = sorted(self.pm_lattice_sites_cpp)
+
+        self.assertEqual(len(matrix_py[0]), 48)
+        self.assertEqual(len(matrix_cpp[0]), 48)
+
+        for i in range(len(matrix_py)):
+            self.assertEqual(len(matrix_py[i]), 48)
+            self.assertEqual(len(matrix_cpp[i]), 48)
 
     def test_all_matrix_elements_equal(self):
         """
