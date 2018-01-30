@@ -2,6 +2,7 @@ import numpy as np
 
 from icet.core_py.lattice_site import LatticeSite
 import copy
+from ase.neighborlist import NeighborList
 
 
 class ManyBodyNeighborList(object):
@@ -24,12 +25,29 @@ class ManyBodyNeighborList(object):
     an index.  However, it will not return both `i,j,k` and
     `i,k,j`. In contrast to `bothways=False` the following is allowed:
     `i>j`, `i>k` etc.. (but always `j<k`).
+
+    Parameters
+    ----------
+    atoms : ASE Atoms object
+            This atoms object will be used
+            to construct a primitive structure
+            on which all the lattice sites in the orbits
+            are based on.
+    cutoffs : list of float
+              cutoffs[i] is the cutoff for
+              orbits with order i+2.
+
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, atoms, cutoffs):
+        self.neighbor_lists = []
+        for co in cutoffs:
+            ase_nl = NeighborList(len(atoms) * [co / 2], skin=1e-8,
+                                  bothways=True, self_interaction=False)
+            ase_nl.update(atoms)
+            self.neighbor_lists.append(ase_nl)
 
-    def build(self, neighbor_lists, index, bothways=False):
+    def build(self, index, bothways=False):
         """
         Will take the take each neighor_list, neighbor_list[i],
         in neighbor lists and combine the neighbors of `index` up
@@ -38,40 +56,32 @@ class ManyBodyNeighborList(object):
 
         Parameters
         ----------
-        neighbor_lists : list of ASE NeighborList objects
-            ASE neighbor lists
         index : int
             index of site for which to return neighbors
         bothways : boolean
             `False` will return all indices that are bigger than `index`;
             `True` will also return indices that are smaller.
         """
-        if not isinstance(neighbor_lists, list):
-            neighbor_lists = [neighbor_lists]
-
-        if not neighbor_lists:
-            raise RuntimeError(
-                'neighbor_lists empty in TestManyBodyNeighborList::build')
 
         many_body_neighbor_indices = []
 
         self.add_singlet(index, many_body_neighbor_indices)
 
-        self.add_pairs(index, neighbor_lists[0],
+        self.add_pairs(index, self.neighbor_lists[0],
                        many_body_neighbor_indices, bothways)
 
         """ Add neighbors of higher order (k>=2) """
-        for k in range(2, len(neighbor_lists) + 2):
+        for k in range(2, len(self.neighbor_lists) + 2):
 
             """ Get neighbors of index in icet format """
-            neighbor = self.get_neighbor_from_nl(neighbor_lists[k - 2], index)
+            neighbor = self.get_neighbor_from_nl(self.neighbor_lists[k - 2], index)
 
             zero_vector = np.array([0., 0., 0., ])
 
             current_original_neighbors = [LatticeSite(index, zero_vector)]
 
             self.combine_to_higher_order(
-                neighbor_lists[k - 2], many_body_neighbor_indices, neighbor,
+                self.neighbor_lists[k - 2], many_body_neighbor_indices, neighbor,
                 current_original_neighbors, bothways, k)
 
         return sorted(many_body_neighbor_indices,

@@ -39,8 +39,11 @@ class OrbitList(object):
     def __init__(self, atoms, cutoffs, verbosity=False):        
         self.permutation_matrix = PermutationMatrix(atoms,max(cutoffs))
         self._primitive_structure = self.permutation_matrix.get_primitive_structure()
+        
+
         self._orbits = []
         
+
 
     def sort(self):
         """

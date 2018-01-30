@@ -29,19 +29,17 @@ class TestManyBodyNeighborList(unittest.TestCase):
         """
         Setup before each test.
         """
-        self.mbnl = ManyBodyNeighborList()
+        self.mbnl = ManyBodyNeighborList(self.atoms, self.cutoffs)
         self.mbnl_cpp = ManyBodyNeighborList_cpp()
         self.neighbor_lists = []
         self.neighbor_lists_cpp = []
         for co in self.cutoffs:
-            ase_nl = NeighborList(len(self.atoms) * [co / 2], skin=1e-8,
-                                  bothways=True, self_interaction=False)
-
-            ase_nl.update(self.atoms)
-
             structure = Structure.from_atoms(self.atoms)
             nl = NeighborList_cpp(co)
             nl.build(structure)
+            ase_nl = NeighborList(len(self.atoms) * [co / 2], skin=1e-8,
+                                  bothways=True, self_interaction=False)
+            ase_nl.update(self.atoms)
 
             self.neighbor_lists.append(ase_nl)
             self.neighbor_lists_cpp.append(nl)
@@ -51,8 +49,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
         Test that a simple build works
         """
         for index in range(len(self.atoms)):
-            mbnl_py = self.mbnl.build(
-                self.neighbor_lists, index, bothways=False)
+            mbnl_py = self.mbnl.build(index, bothways=False)
             mbnl_cpp = self.mbnl_cpp.build(
                 self.neighbor_lists_cpp, index, False)
             self.assertEqual(len(mbnl_py), len(mbnl_cpp))
@@ -64,13 +61,13 @@ class TestManyBodyNeighborList(unittest.TestCase):
         have the same number of neighbors
         """
 
-        mbnl_size = len(self.mbnl.build(self.neighbor_lists, 0, bothways=True))
+        mbnl_size = len(self.mbnl.build(0, bothways=True))
         mbnl_size_cpp = len(self.mbnl_cpp.build(
             self.neighbor_lists_cpp, 0, True))
 
         for index in range(len(self.atoms)):
             self.assertEqual(mbnl_size, len(self.mbnl.build(
-                self.neighbor_lists, index, bothways=True)))
+                index, bothways=True)))
             self.assertEqual(mbnl_size_cpp, len(self.mbnl_cpp.build(
                 self.neighbor_lists_cpp, index,
                 True)))
@@ -84,12 +81,12 @@ class TestManyBodyNeighborList(unittest.TestCase):
         the other atoms.
         """
         mbnl_size = len(self.mbnl.build(
-            self.neighbor_lists, 0, bothways=False))
+            0, bothways=False))
         mbnl_size_cpp = len(self.mbnl_cpp.build(
             self.neighbor_lists_cpp, 0, False))
         for index in range(1, len(self.atoms)):
             self.assertNotEqual(mbnl_size, len(self.mbnl.build(
-                                self.neighbor_lists, index,
+                                index,
                                 bothways=False)))
             self.assertNotEqual(mbnl_size_cpp, len(self.mbnl_cpp.build(
                                 self.neighbor_lists_cpp, index,
@@ -98,7 +95,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
         # compare to cpp
         for index in range(len(self.atoms)):
             mbnl_py = self.mbnl.build(
-                self.neighbor_lists, index, bothways=False)
+                index, bothways=False)
             mbnl_cpp = self.mbnl_cpp.build(
                 self.neighbor_lists_cpp, index, False)
             for lat_site_cpp, lat_site in zip(mbnl_py, mbnl_cpp):
