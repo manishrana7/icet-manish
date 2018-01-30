@@ -39,7 +39,10 @@ class TestPermutationMatrix(unittest.TestCase):
         Test the initializer.
         """
 
-        pm = PermutationMatrix(self.atoms, self.cutoff,verbosity=10)
+        pm = PermutationMatrix(self.atoms, self.cutoff, verbosity=10)
+        # Test pm with find_prim = False
+        pm_prim_false = PermutationMatrix(self.atoms, self.cutoff,
+                               find_prim=False, verbosity=10)
         pm_cpp, prim_structure_cpp, _ = permutation_matrix_from_atoms(
             self.atoms, self.cutoff)
         self.assertIsInstance(pm, PermutationMatrix)
