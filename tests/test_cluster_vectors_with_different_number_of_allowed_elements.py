@@ -5,7 +5,7 @@ of components on different sites.
 
 import numpy as np
 from ase.db import connect
-from icet import Structure, ClusterSpace, get_singlet_info
+from icet import ClusterSpace, get_singlet_info
 from icet.tools import get_primitive_structure
 
 
