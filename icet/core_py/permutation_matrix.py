@@ -31,7 +31,7 @@ class PermutationMatrix(object):
     then for each column ,`k`you can create equivalent pairs:
     >>> equivalent_pairs = []
     >>> for site1, site2 in zip(row1, row2):
-    >>>     equivalent_sites.append([site1,site])
+    >>>     equivalent_sites.append([site1,site2])
     This grouping together of equivalent sites is what
     makes up an orbit.
 
