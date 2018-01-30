@@ -31,6 +31,7 @@ from collections import OrderedDict
 
 import numpy as np
 
+
 def strip_surrounding_spaces(input_string):
     '''
     Helper function that removes both leading and trailing spaces from a
@@ -366,72 +367,70 @@ class TestClusterSpaceSurface(unittest.TestCase):
         target_cluster_vectors = np.array([
             [1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0,
              -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0],
-            [1.0, -0.3333333333333333, -1.0, -1.0, -0.1111111111111111,
-             0.5555555555555556, 1.0, 1.0, 1.0, 0.3333333333333333,
-             0.3333333333333333, -1.0, -1.0, -1.0, -1.0, 0.1111111111111111,
-             -0.5555555555555556, -1.0, -1.0, -0.3333333333333333,
-             0.6666666666666666, 1.0, 1.0],
-            [1.0, -0.3333333333333333, -0.3333333333333333, -1.0,
-             -0.1111111111111111, 0.3333333333333333, -0.1111111111111111,
-             0.4444444444444444, 1.0, 0.3333333333333333, 0.3333333333333333,
-             0.3333333333333333, 0.3333333333333333, -1.0, -1.0,
-             -0.1111111111111111, -0.1111111111111111, 0.1111111111111111,
-             -0.4444444444444444, 0.3333333333333333, -0.3333333333333333,
-             0.3333333333333333, -0.3333333333333333]])
-        s = ['Error in test setup;']
+            [1., -0.5, -1., -1.,  0.,  0.5,  1.,  1.,  1.,  0.5,  0.5,
+             -1., -1., -1., -1.,  0., -0.5, -1., -1., -0.5,  0.5,  1.,
+             1.],
+            [1., -0.5, -0.5,
+             -1.,  0.,  0.3333333333,
+             0.,  0.5,  1.,
+             0.5,  0.5,  0.5,
+             0.5, -1., -1.,
+             -0.1666666667, -0.1666666667,  0.,
+             -0.5,  0.,  0.,
+             0.5, -0.5]])
+        s=['Error in test setup;']
         s += ['number of cluster vectors ({})'.format(
             len(target_cluster_vectors))]
         s += ['does not match']
         s += ['number of structures ({})'.format(len(self.structure_list))]
-        info = ' '.join(s)
+        info=' '.join(s)
         self.assertEqual(len(target_cluster_vectors), len(self.structure_list),
-                         msg=info)
+                         msg = info)
         # use ASE Atoms
         for atoms, target in zip(self.structure_list, target_cluster_vectors):
-            retval = list(self.cs.get_cluster_vector(atoms))
-            self.assertAlmostEqual(retval, target, places=9)
+            retval=self.cs.get_cluster_vector(atoms)
+            self.assertAlmostEqualList(retval, target, places = 9)
         # use icet Structure
         for atoms, target in zip(self.structure_list, target_cluster_vectors):
-            retval = list(self.cs.get_cluster_vector(
-                Structure.from_atoms(atoms)))
-            self.assertAlmostEqual(retval, target, places=9)
+            retval=self.cs.get_cluster_vector(Structure.from_atoms(atoms))
+            self.assertAlmostEqualList(retval, target, places = 9)
         # check that other types fail
         with self.assertRaises(Exception) as context:
-            retval = self.cs.get_cluster_vector('something')
+            retval=self.cs.get_cluster_vector('something')
         self.assertTrue('Unknown structure format' in str(context.exception))
 
     def test_get_number_of_orbits_by_order(self):
         '''
         Testing get_number_of_orbits_by_order functionality
         '''
-        retval = self.cs.get_number_of_orbits_by_order()
-        target = OrderedDict([(0, 1), (1, 3), (2, 5), (3, 10), (4, 4)])
+        retval=self.cs.get_number_of_orbits_by_order()
+        target=OrderedDict([(0, 1), (1, 3), (2, 5), (3, 10), (4, 4)])
         self.assertEqual(target, retval)
 
     def test_get_Mi_from_dict(self):
         '''
         Testing _get_Mi_from_dict functionality
         '''
-        d = {}
+        d={}
         for k in range(len(self.atoms_prim)):
-            d[k] = len(self.subelements)
-        d[1] = 1
-        Mi = ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
+            d[k]=len(self.subelements)
+        d[1]=1
+        Mi=ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
         self.assertEqual(Mi, [2, 1, 2])
         # check that function fails if dictionary is incomplete
         del d[0]
         with self.assertRaises(Exception) as context:
-            Mi = ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
+            Mi=ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
         self.assertTrue('missing from dictionary' in str(context.exception))
 
 
 def suite():
-    test_classes_to_run = [TestClusterSpace, TestClusterSpaceSurface]
-    suites_list = []
+    test_classes_to_run=[TestClusterSpace, TestClusterSpaceSurface]
+    suites_list=[]
     for test_class in test_classes_to_run:
-        suite = unittest.defaultTestLoader.loadTestsFromTestCase(test_class)
+        suite=unittest.defaultTestLoader.loadTestsFromTestCase(test_class)
         suites_list.append(suite)
-    test_suite = unittest.TestSuite(suites_list)
+    test_suite=unittest.TestSuite(suites_list)
     return test_suite
 
 
