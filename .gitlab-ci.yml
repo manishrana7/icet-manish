@@ -71,6 +71,7 @@ pages:
     # user guide (sphinx)
     - pip3 install breathe
     - export PYTHONPATH=$PWD:$PWD/build/src/:$PYTHONPATH
+    - python3 -m pip install cloud_sptheme
     - sphinx-build doc/userguide/source/ public/
   artifacts:
     expire_in: 30 days
