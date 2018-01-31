@@ -14,13 +14,14 @@ Parameters
 ----------
 test_directories : list of str
     names of directories to be tested; paths have to be provided relative to
-    the HiPhive root directory
+    the icet root directory
 '''
 
 # General settings
 path = os.path.abspath(__file__)
 rootdir = os.path.abspath(os.path.dirname(path) + '/..')
-test_directories = ['icet', 'tests', 'doc', 'examples']
+test_directories = ['icet', 'tests', 'benchmark',
+                    'tutorial', 'doc', 'examples']
 
 # Prepend directory names with <rootdir>
 directories = []
@@ -34,7 +35,7 @@ print('Testing the following directories:')
 for dir in directories:
     print('  {}'.format(dir))
 try:
-    output = subprocess.check_output(['flake8'] + directories)
+    output = subprocess.check_output('python3 -m flake8'.split() + directories)
 except subprocess.CalledProcessError as ex:
     output = ex.output.decode()
 

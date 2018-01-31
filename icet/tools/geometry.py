@@ -226,3 +226,8 @@ def fractional_to_cartesian(atoms, frac_positions):
     Turns fractional positions into cartesian positions.
     """
     return np.dot(frac_positions, atoms.cell)
+def get_permutation(container, permutation):
+    """
+    Return the permutated version of container.
+    """
+    return [container[s] for s in permutation]

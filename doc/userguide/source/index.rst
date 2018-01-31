@@ -6,7 +6,7 @@
   </p>
 
 :program:`icet` — A Pythonic approach to cluster expansions
-*************************************************************
+***********************************************************
 
 :program:`icet` is a Python environment for the construction and sampling of
 alloy cluster expansions. It features a Python interface that enables seamless

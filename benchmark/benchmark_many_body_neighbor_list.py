@@ -73,8 +73,6 @@ if __name__ == "__main__":
                                                         order, cutoff)
     elapsed_time_python = time.process_time() - t
     print('Timing Python (ASE): {:.6f} s'.format(elapsed_time_python))
-    print('C++ speedup: {:.3f}'.format(
-        elapsed_time_python / elapsed_time_cpp))
-    print(
-        'C++ speedup (only mbnl build): {:.3f}'.format(
-            mbnl_time_py / mbnl_time_cpp))
+    print('C++ speedup: {:.3f}'.format(elapsed_time_python / elapsed_time_cpp))
+    print('C++ speedup (only mbnl build): {:.3f}'.format
+          (mbnl_time_py / mbnl_time_cpp))
