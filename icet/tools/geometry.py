@@ -165,6 +165,8 @@ def get_permutation_matrix(input_configuration,
     # reduce the (real) transformation matrix to the nearest integer one
     P = np.around(P)
     return P
+
+
 def get_fractional_positions_from_ase_neighbor_list(atoms, neighbor_list):
     '''
     Returns the fractional positions in structure from the neighbors in the
