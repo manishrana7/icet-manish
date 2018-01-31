@@ -16,6 +16,12 @@ import numpy as np
 class TestOrbit(unittest.TestCase):
     '''
     Container for tests of the class functionality
+
+    TODO
+    ---
+    *   revise test test_property_geometrical_size when
+        cluster is in orbit and the geometrical size can
+        be retrieved from the orbit.
     '''
 
     def __init__(self, *args, **kwargs):
