@@ -195,7 +195,7 @@ class TestOrbit(unittest.TestCase):
         Test the sort functionality.
 
         The test will set the equivalent sites
-        as the the reversed sorted list of lattice sites.        
+        as the the reversed sorted list of lattice sites.
         Then it will call the orbit.sort(), i.e. the function
         we are testing and then assert that the property
         equivalent sites are equivalent to the sorted list of
@@ -276,6 +276,17 @@ class TestOrbit(unittest.TestCase):
     def test_add(self):
         """
         Test add operator.
+
+        This test the orbit_offset = orbit + offset
+        functionality.
+
+        It will test this by creating
+        orbit = self.orbit_pair + added_offset
+        and then loop through the equivalent sites
+        to see that all lattice sites offset have been
+        this added_offset added to it.
+        There are also some assertions that you can not add
+        a list or something that is not a three long list
         """
         # Test python
         added_offset = np.array((1., 1., 1.))
