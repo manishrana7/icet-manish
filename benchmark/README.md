@@ -111,7 +111,33 @@ Running
 ```
  python3 -m cProfile -s cumtime benchmark/profile_orbit.py
  ```
- will result in something like this.
+ will result in something like this:
 
+ ```
+          18279299 function calls (16467651 primitive calls) in 29.205 seconds
 
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+    738/1    0.054    0.000   29.207   29.207 {built-in method builtins.exec}
+        1    0.000    0.000   29.207   29.207 profile_orbit.py:1(<module>)
+        1    0.078    0.078   24.173   24.173 benchmark_orbit.py:98(time_orbit_translating)
+     1000    0.636    0.001   24.095    0.024 orbit.py:130(__add__)
+1701000/1000    8.138    0.000   23.171    0.023 copy.py:137(deepcopy)
+101000/1000    0.710    0.000   23.158    0.023 copy.py:214(_deepcopy_list)
+   200000    2.077    0.000   17.394    0.000 copy.py:269(_reconstruct)
+   200000    1.262    0.000    8.114    0.000 copy.py:239(_deepcopy_dict)
+        1    0.044    0.044    3.553    3.553 benchmark_orbit.py:116(time_orbit_sites_permutations)
+     5000    0.023    0.000    3.509    0.001 orbit.py:205(permutated_sites)
+     5000    0.390    0.000    3.456    0.001 orbit.py:211(<listcomp>)
+   500000    1.380    0.000    3.066    0.000 orbit.py:213(get_permutated_sites)
+   200000    0.873    0.000    2.564    0.000 copy.py:222(_deepcopy_tuple)
+   701000    1.441    0.000    2.221    0.000 copy.py:253(_keep_alive)
+  3603912    2.184    0.000    2.184    0.000 {method 'get' of 'dict' objects}
+       23    0.001    0.000    2.097    0.091 __init__.py:1(<module>)
+  3104339    1.660    0.000    1.660    0.000 {built-in method builtins.id}
+   200000    0.365    0.000    1.584    0.000 copy.py:223(<listcomp>)
+   ```
+showing that deepcopy and _reconstruct is what is so slow with the
+constructing a translated orbit.
 
