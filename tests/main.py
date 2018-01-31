@@ -51,7 +51,7 @@ def find_script_tests(suite, script_dir):
 
 if __name__ == "__main__":
 
-    import generate_structures_for_testing
+    import generate_structures_for_testing  # noqa
 
     set_config(level=40)
 
