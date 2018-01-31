@@ -53,3 +53,50 @@ Timing for offset lookup: 109.375000 micro sec
    198000    0.604    0.000    1.039    0.000 lattice_site.py:63(__lt__)
 2937/1955    0.007    0.000    0.866    0.000 <frozen importlib._bootstrap>:996(_handle_fromlist)
 ```
+
+
+Benchmarks
+==========
+
+Orbit
+-----
+This benchmark typical orbit operations that are done
+in `icet`. 
+Orbit translating is for creating
+a new orbit where all lattice sites have had their
+unitcell offsets translated. This is useful to get all
+lattice sites of a supercell if your orbit is for the
+primitive cell.
+
+orbit permutation is a property that returns
+the permutated equivalent sites so that they
+are in an identical order to the representative sites.
+This is useful when counting element combinations on
+an orbit. E.g, if we are interested in how many ABB elements
+there are compared to BAB then we would need the permutated
+sites.
+
+A typical output from benchmark/benchmark_orbit.py is
+
+```
+Time for python pair orbit translating: 0.00318750s
+Time for C++ pair orbit translating: 0.00001563s
+Cpp speedup 204.000
+
+Time for python pair orbit translating: 0.00484375s
+Time for C++ pair orbit translating: 0.00000000s
+Cpp speedup inf
+
+Time for python pair orbit permutation: 0.00010312s
+Time for C++ pair orbit permutation: 0.00014062s
+Cpp speedup 0.733
+
+Time for python triplet orbit permutation:
+     0.00010938s
+Time for C++ triplet orbit permutation: 0.00021875s
+Cpp speedup 0.500
+```
+This test was run on a Intel(R) Core(TM) i7-6500U CPU @ 2.50GHz
+
+
+
