@@ -291,8 +291,11 @@ class TestOrbit(unittest.TestCase):
         # Test python
         added_offset = np.array((1., 1., 1.))
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
+        # create a new orbit with offseted equivalent lattice sites
         orbit = self.orbit_pair + added_offset
         self.assertNotEqual(orbit, self.orbit_pair)
+
+        # Loop through sites check index is same and offset has been added
         for sites, sites_with_offset in zip(self.orbit_pair.equivalent_sites,
                                             orbit.equivalent_sites):
             for site, site_with_offset in zip(sites, sites_with_offset):
@@ -301,6 +304,7 @@ class TestOrbit(unittest.TestCase):
                                      list(site_with_offset.unitcell_offset -
                                           added_offset))
 
+        # offset as list or array not of size 3 is not allowed
         with self.assertRaises(TypeError):
             orbit + [1, 1, 1]
         with self.assertRaises(TypeError):
@@ -310,8 +314,12 @@ class TestOrbit(unittest.TestCase):
         added_offset = np.array((1., 1., 1.))
         self.orbit_pair_cpp.equivalent_sites =\
             self.lattice_sites_pairs_cpp
+
+        # create a new orbit with offseted equivalent lattice sites
         orbit_cpp = self.orbit_pair_cpp + added_offset
         self.assertNotEqual(orbit_cpp, self.orbit_pair_cpp)
+
+        # Loop through sites check index is same and offset has been added
         for sites, sites_with_offset in zip(
                 self.orbit_pair_cpp.equivalent_sites,
                 orbit_cpp.equivalent_sites):
@@ -321,6 +329,7 @@ class TestOrbit(unittest.TestCase):
                                      list(site_with_offset.unitcell_offset -
                                           added_offset))
 
+        # list is allowed for C++ but only lenght 3
         with self.assertRaises(TypeError):
             orbit_cpp + np.array([1, 1, 1, 1])
 
