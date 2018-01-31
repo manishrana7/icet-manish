@@ -172,6 +172,7 @@ def get_position_from_lattice_site(atoms, lattice_site):
         np.dot(lattice_site.unitcell_offset, atoms.get_cell())
 
 
+
 def find_lattice_site_by_position(atoms, position, tol=1e-4):
     """
     Tries to construct a lattice site equivalent from
@@ -181,44 +182,18 @@ def find_lattice_site_by_position(atoms, position, tol=1e-4):
     position : x,y,z coordinate
     """
 
-    # First try simple solution
-    try:
-        index = find_index_of_position(atoms, position, tol)
-        return LatticeSite_py(index, np.array((0, 0, 0)))
-    except:  # NOQA
-        pass
+    for i, atom in enumerate(atoms):
+        pos = position - atom.position
+        # Direct match
+        if np.linalg.norm(pos) < tol:
+            return LatticeSite_py(i, np.array((0, 0, 0)))
 
-    fractional = np.linalg.solve(atoms.cell.T, np.array(position).T).T
-    unit_cell_offset = [np.floor(round(x)) for x in fractional]
-
-    residual = np.dot(fractional - unit_cell_offset, atoms.cell)
-
-    index = find_index_of_position(atoms, residual, tol)
-
-    latNbr = LatticeSite_py(index, unit_cell_offset)
-    return latNbr
-
-
-def find_index_of_position(atoms, position, tol):
-    """
-    Tries to find the atom index that correspond to `position`
-
-    parameters
-    ----------
-    atoms : ASE Atoms object
-    position : x,y,z coordinate
-    tol : float
-        allowed distance tolerance between
-        position and the matched position
-    """
-
-    index_min = np.linalg.norm(atoms.get_positions() - position).argmin()
-    if index_min >= 0 and index_min < len(atoms) and \
-            np.linalg.norm(atoms[index_min].position - position) < tol:
-        return index_min
-    else:
-        msg = 'Did not find index from position'
-        raise Exception(msg)
+        fractional = np.linalg.solve(atoms.cell.T, np.array(pos).T).T
+        unit_cell_offset = [np.floor(round(x)) for x in fractional]
+        residual = np.dot(fractional - unit_cell_offset, atoms.cell)
+        if np.linalg.norm(residual) < tol:
+            latNbr = LatticeSite_py(i, unit_cell_offset)
+            return latNbr
 
 
 def fractional_to_cartesian(atoms, frac_positions):
@@ -226,8 +201,13 @@ def fractional_to_cartesian(atoms, frac_positions):
     Turns fractional positions into cartesian positions.
     """
     return np.dot(frac_positions, atoms.cell)
+
 def get_permutation(container, permutation):
     """
     Return the permutated version of container.
     """
+    if len(permutation) != len(container):
+        raise Exception
+    if len(set(permutation)) != len(permutation):
+        raise Exception
     return [container[s] for s in permutation]
