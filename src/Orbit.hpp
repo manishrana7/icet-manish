@@ -98,8 +98,8 @@ class Orbit
         }
         if (index >= _equivalentSitesPermutations.size())
         {
-            std::cout<<" size of orbit that failed "<<_equivalentSites[0].size()<<std::endl;
-            std::string errMSG = "Index out of range for _equivalentSitesPermutations in function Orbit::getSitesWithPermutation index: " + std::to_string(index) + " >= "  + std::to_string( _equivalentSitesPermutations.size());
+            std::string errMSG = " size of orbit that failed " + std::to_string(_equivalentSites[0].size()) + "\n";
+            errMSG += "Index out of range for _equivalentSitesPermutations in function Orbit::getSitesWithPermutation index: " + std::to_string(index) + " >= "  + std::to_string( _equivalentSitesPermutations.size());
             throw std::out_of_range(errMSG);
         }
 
@@ -189,6 +189,12 @@ class Orbit
         void setAllowedSitesPermutations(std::unordered_set<std::vector<int>, VectorHash> & permutations)
         {
             _allowedSitesPermutations = permutations;
+        }
+
+        /// Get the allowed sites permutations
+        std::unordered_set<std::vector<int>, VectorHash> getAllowedSitesPermutations( ) const
+        {
+            return _allowedSitesPermutations;
         }
 
         ///Return the representative sites of this orbit (if any equivalentSites permutations exists it is to these sites they refer to)

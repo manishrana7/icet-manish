@@ -164,3 +164,9 @@ def get_permutation_matrix(input_configuration,
     # reduce the (real) transformation matrix to the nearest integer one
     P = np.around(P)
     return P
+
+def get_permutation(container, permutation):
+    """
+    Return the permutated version of container.
+    """
+    return [container[s] for s in permutation]
