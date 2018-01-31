@@ -1,3 +1,5 @@
+from icet.core_py.permutation_matrix import PermutationMatrix
+
 
 class OrbitList(object):
     """
@@ -22,7 +24,8 @@ class OrbitList(object):
     """
 
     def __init__(self, atoms, cutoffs, verbosity=False):
-        pass
+
+        self._permutation_matrix = PermutationMatrix(atoms, max(cutoffs))
 
     def sort(self):
         """
@@ -36,3 +39,10 @@ class OrbitList(object):
         lattice sites in the orbits are referenced to.
         """
         pass
+
+    @property
+    def permutation_matrix(self):
+        """
+        Returns the core_py permutation matrix object.
+        """
+        return self._permutation_matrix
