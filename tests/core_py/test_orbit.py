@@ -151,11 +151,16 @@ class TestOrbit(unittest.TestCase):
 
         # Test python
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
+        self.orbit_triplet.equivalent_sites = self.lattice_sites_triplets
         self.assertEqual(self.orbit_pair.order,
-                         len(self.lattice_sites_pairs[0]))
+                         2)
+        self.assertEqual(self.orbit_triplet.order,
+                         3)
         # Test C++
         self.assertEqual(
             self.orbit_pair_cpp.order, 2)
+        self.assertEqual(
+            self.orbit_triplet_cpp.order, 3)
 
     def test_len(self):
         """
