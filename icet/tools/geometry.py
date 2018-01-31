@@ -165,6 +165,7 @@ def get_permutation_matrix(input_configuration,
     P = np.around(P)
     return P
 
+
 def get_permutation(container, permutation):
     """
     Return the permutated version of container.
