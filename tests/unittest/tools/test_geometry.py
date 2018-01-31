@@ -1,17 +1,11 @@
 
 
-import itertools
 import random
 import unittest
 
-import numpy as np
-from ase import Atoms
 from ase.build import bulk
 from ase.neighborlist import NeighborList
-from numpy import testing
 
-import spglib
-from icet.core.lattice_site import LatticeSite
 from icet.core_py.lattice_site import LatticeSite as LatticeSite_py
 from icet.tools.geometry import get_fractional_positions_from_ase_neighbor_list
 from icet.tools.geometry import find_lattice_site_by_position
@@ -22,7 +16,7 @@ from icet.tools.geometry import get_permutation
 
 class TestGeometry(unittest.TestCase):
     '''
-    Container for tests to the geometry module.    
+    Container for tests to the geometry module.
     '''
 
     def __init__(self, *args, **kwargs):
@@ -67,7 +61,7 @@ class TestGeometry(unittest.TestCase):
             self.assertListEqual(list(pos1), pos2)
 
     def test_find_lattice_site_by_position_simple(self):
-        """        
+        """
         Tests finding lattice site by position, simple version using
         only one atom cell.
 
@@ -93,9 +87,9 @@ class TestGeometry(unittest.TestCase):
             self.assertEqual(site, found_site)
 
     def test_find_lattice_site_by_position_medium(self):
-        """        
-        Tests finding lattice site by position, medium version tests against hcp and
-        user more than one atom in the basis
+        """
+        Tests finding lattice site by position, medium version
+        tests against hcp and user more than one atom in the basis
         1. Create a bunch of lattice sites all with index 0 and
         integer unitcell offsets
         2. convert these to x,y,z positions. Nothing strange so far
@@ -121,7 +115,7 @@ class TestGeometry(unittest.TestCase):
             self.assertEqual(site, found_site)
 
     def test_find_lattice_site_by_position_hard(self):
-        """        
+        """
         Tests finding lattice site by position, hard version tests against hcp,
         many atoms in the basis AND pbc = [True, True, False] !
         1. Create a bunch of lattice sites all with index 0 and

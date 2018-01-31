@@ -172,7 +172,6 @@ def get_position_from_lattice_site(atoms, lattice_site):
         np.dot(lattice_site.unitcell_offset, atoms.get_cell())
 
 
-
 def find_lattice_site_by_position(atoms, position, tol=1e-4):
     """
     Tries to construct a lattice site equivalent from
@@ -201,6 +200,7 @@ def fractional_to_cartesian(atoms, frac_positions):
     Turns fractional positions into cartesian positions.
     """
     return np.dot(frac_positions, atoms.cell)
+
 
 def get_permutation(container, permutation):
     """
