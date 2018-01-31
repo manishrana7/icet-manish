@@ -193,6 +193,13 @@ class TestOrbit(unittest.TestCase):
     def test_sort(self):
         """
         Test the sort functionality.
+
+        The test will set the equivalent sites
+        as the the reversed sorted list of lattice sites.        
+        Then it will call the orbit.sort(), i.e. the function
+        we are testing and then assert that the property
+        equivalent sites are equivalent to the sorted list of
+        lattice sites.
         """
 
         # Test python
