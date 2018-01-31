@@ -3,6 +3,7 @@ from ase import Atoms
 import spglib
 
 from icet.core.lattice_site import LatticeSite
+from icet.core_py.lattice_site import LatticeSite as LatticeSite_py
 
 
 def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
@@ -127,8 +128,86 @@ def get_fractional_positions_from_neighbor_list(structure, neighbor_list):
     return fractional_positions
 
 
+def get_fractional_positions_from_ase_neighbor_list(atoms, neighbor_list):
+    '''
+    Returns the fractional positions in structure from the neighbors in the
+    neighbor list.
+
+    parameters
+    ----------
+    atoms : ASE Atoms object
+    neighbor_list : ASE NeighborList object
+    '''
+    neighbor_positions = []
+    fractional_positions = []
+    lattice_site = LatticeSite(0, [0, 0, 0])
+
+    for i in range(len(atoms)):
+        lattice_site.index = i
+        position = get_position_from_lattice_site(atoms, lattice_site)
+        neighbor_positions.append(position)
+        indices, offsets = neighbor_list.get_neighbors(i)
+        for index, offset in zip(indices, offsets):
+            lattice_site = LatticeSite(index, offset)
+            position = get_position_from_lattice_site(atoms, lattice_site)
+            neighbor_positions.append(position)
+    if len(neighbor_positions) > 0:
+        fractional_positions = get_scaled_positions(
+            np.array(neighbor_positions),
+            atoms.cell, wrap=False,
+            pbc=atoms.pbc)
+    return fractional_positions
+
+
+def get_position_from_lattice_site(atoms, lattice_site):
+    """
+    Gets the corresponding position from the lattice site.
+
+    Parameters
+    ---------
+    atoms : ASE atoms object
+    lattice_site : icet LatticeSite object
+    """
+    return atoms[lattice_site.index].position + \
+        np.dot(lattice_site.unitcell_offset, atoms.get_cell())
+
+
+def find_lattice_site_by_position(atoms, position, tol=1e-4):
+    """
+    Tries to construct a lattice site equivalent from
+    position in reference to the atoms object.
+
+    atoms : ASE Atoms object
+    position : x,y,z coordinate
+    """
+
+    for i, atom in enumerate(atoms):
+        pos = position - atom.position
+        # Direct match
+        if np.linalg.norm(pos) < tol:
+            return LatticeSite_py(i, np.array((0, 0, 0)))
+
+        fractional = np.linalg.solve(atoms.cell.T, np.array(pos).T).T
+        unit_cell_offset = [np.floor(round(x)) for x in fractional]
+        residual = np.dot(fractional - unit_cell_offset, atoms.cell)
+        if np.linalg.norm(residual) < tol:
+            latNbr = LatticeSite_py(i, unit_cell_offset)
+            return latNbr
+
+
+def fractional_to_cartesian(atoms, frac_positions):
+    """
+    Turns fractional positions into cartesian positions.
+    """
+    return np.dot(frac_positions, atoms.cell)
+
+
 def get_permutation(container, permutation):
     """
     Return the permutated version of container.
     """
+    if len(permutation) != len(container):
+        raise Exception
+    if len(set(permutation)) != len(permutation):
+        raise Exception
     return [container[s] for s in permutation]
