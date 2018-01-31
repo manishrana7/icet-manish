@@ -56,7 +56,6 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
                 multiplicity += elementsCountPair.second;
             }
             clusterVectorElement /= ((double)multiplicity);
-            // std::cout<<"Multiplicity: "<<multiplicity<<std::endl;
             clusterVector.push_back(clusterVectorElement);
         }
     }

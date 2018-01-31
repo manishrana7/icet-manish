@@ -36,58 +36,7 @@ etc...
 
 class LocalOrbitListGenerator
 {
-    public:
-    /// This collects the information that primtiveIndex is mapped to superIndex via the offset
-    struct Prim2SuperMap
-    {
-        Prim2SuperMap(int index, int superIndex, Vector3d offset) : primitiveIndex(index), superIndex(superIndex), offset(offset)
-        {
-        }
-        int primitiveIndex;
-        int superIndex;
-        Vector3d offset;
-    };
-
-    /// This contains one set of mappings that take the entire primitive to one part of the supercell
-    struct Prim2SuperMappings
-    {
-        std::vector<int> primitiveIndices;
-        std::vector<int> superIndices;
-        std::vector<Vector3d> offsets;
-
-        Prim2SuperMap getMap(int index)
-        {
-            if (index >= primitiveIndices.size())
-            {
-                throw std::out_of_range("Index out of range in Prim2SuperMap getMap(int index)");
-            }
-            Prim2SuperMap p2sm = Prim2SuperMap(primitiveIndices[index], superIndices[index], offsets[index]);
-            return p2sm;
-        }
-        size_t size() const
-        {
-            return primitiveIndices.size();
-        }
-        void push_back(const Prim2SuperMap p2sm)
-        {
-            primitiveIndices.push_back(p2sm.primitiveIndex);
-            superIndices.push_back(p2sm.superIndex);
-            offsets.push_back(p2sm.offset);
-        }
-        bool isPrimitiveIndexInside(int index)
-        {
-            auto find = std::find(primitiveIndices.begin(), primitiveIndices.end(), index);
-            return find != primitiveIndices.end();
-        }
-        bool isSuperIndexInside(int index)
-        {
-            auto find = std::find(superIndices.begin(), superIndices.end(), index);
-            return find != superIndices.end();
-        }
-
-    };
-
-  
+  public:
     LocalOrbitListGenerator(const OrbitList &, const Structure &);
 
     ///generate and returns the local orbit list with the input index
@@ -128,12 +77,6 @@ class LocalOrbitListGenerator
     */
     void mapSitesAndFindCellOffsets();
 
-    /// Find the sub permutation matrices that maps the basis atoms onto the supercell
-    void findPermutationMatrices();
-
-    /// Generate smart offsets @ TODO change name
-    void generateSmartOffsets();
-
     ///Primitive orbit list
     OrbitList _orbit_list;
 
@@ -147,18 +90,18 @@ class LocalOrbitListGenerator
     /// This position is used to extracting unit cell offsets later on
     Vector3d getClosestToOrigin() const
     {
-       Vector3d closestToOrigin;
-       double distanceToOrigin = 1e6;
-       for(int i=0; i < _orbit_list.getPrimitiveStructure().size(); i++)
-       {
-           Vector3d position_i = _orbit_list.getPrimitiveStructure().getPositions().row(i);
-        if( (position_i.norm()) < distanceToOrigin)
+        Vector3d closestToOrigin;
+        double distanceToOrigin = 1e6;
+        for (int i = 0; i < _orbit_list.getPrimitiveStructure().size(); i++)
         {
-            distanceToOrigin = position_i.norm();
-            closestToOrigin = position_i;
+            Vector3d position_i = _orbit_list.getPrimitiveStructure().getPositions().row(i);
+            if ((position_i.norm()) < distanceToOrigin)
+            {
+                distanceToOrigin = position_i.norm();
+                closestToOrigin = position_i;
+            }
         }
-       }
-       return closestToOrigin;
+        return closestToOrigin;
     }
 
     ///
@@ -169,14 +112,6 @@ class LocalOrbitListGenerator
     /// The sub permutation matrices that will together map the basis atoms unto the supercell.
     std::vector<Matrix3i> _subPermutationMatrices;
 
-    /// Get the vector of all the individual primtive  to super via offset
-    std::vector<Prim2SuperMap> getIndividualMappings() const;
-
     /// Find the indices of the supercell that are within 1e-3 of the position argument
     std::vector<int> findMatchingSupercellPositions(const Vector3d &position) const;
-
-    /// Test if next mapping is compatible to be added to curentMappings
-    bool isCompatibleNewMapping(LocalOrbitListGenerator::Prim2SuperMappings currentMappings, LocalOrbitListGenerator::Prim2SuperMap mapping) const;
-
-
 };
