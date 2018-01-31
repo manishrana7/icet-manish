@@ -125,3 +125,10 @@ def get_fractional_positions_from_neighbor_list(structure, neighbor_list):
             structure.cell, wrap=False,
             pbc=structure.pbc)
     return fractional_positions
+
+
+def get_permutation(container, permutation):
+    """
+    Return the permutated version of container.
+    """
+    return [container[s] for s in permutation]
