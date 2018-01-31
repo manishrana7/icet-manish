@@ -100,3 +100,18 @@ This test was run on a Intel(R) Core(TM) i7-6500U CPU @ 2.50GHz
 
 
 
+
+Profile
+======
+
+Orbit
+-----
+
+Running
+```
+ python3 -m cProfile -s cumtime benchmark/profile_orbit.py
+ ```
+ will result in something like this.
+
+
+
