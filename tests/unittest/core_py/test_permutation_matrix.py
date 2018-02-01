@@ -4,6 +4,7 @@ import numpy as np
 from ase.build import bulk
 
 from icet.core_py.permutation_matrix import PermutationMatrix
+from icet.core_py.lattice_site import LatticeSite
 #from icet.core.orbit_list import __get_lattice_site_permutation_matrix\
 #    as get_lattice_site_permutation_matrix
 
@@ -58,7 +59,9 @@ class TestPermutationMatrix(unittest.TestCase):
 
     def test_lattice_sites_element(self):
         """ Test that first element in the permutation matrix is correct"""
-        self.assertEqual(1, self.lattice_sites[0][0])
+        site = self.lattice_sites[0][0]
+        self.assertTrue(isinstance(site, LatticeSite))
+
 
     def test_lattice_sites_all_rows(self):
         """
@@ -68,10 +71,6 @@ class TestPermutationMatrix(unittest.TestCase):
         diff_lens = [row for row in self.lattice_sites if len(row) != n]
         self.assertEqual(diff_lens, [])
 
-    def test_lattice_sites_element_by_printing(self):
-        print('\n\n***************\n')
-        print(self.lattice_sites[0])
-        print('\n\n***************\n')
 
 
 if __name__ == '__main__':
