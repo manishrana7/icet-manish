@@ -172,9 +172,17 @@ int Structure::findSiteByPosition(const Vector3d &position) const
 */
 LatticeSite Structure::findLatticeSiteByPosition(const Vector3d &position) const
 {
+    // int simpleSolutionIndex = findSiteByPosition(position);
+    // if (simpleSolutionIndex != -1)
+    // {
+    //     Vector3d zeroOffset = {0, 0, 0};
+    //     LatticeSite latSite = LatticeSite(simpleSolutionIndex, zeroOffset);
+    //     return latSite;
+    // }
     Vector3d fractional = _cell.transpose().partialPivLu().solve(position);
+
     Vector3d unitcellOffset;
-    for (int i = 0; i < 3 ; i++)
+    for (int i = 0; i < 3; i++)
     {
         if (hasPBC(i))
         {
@@ -183,15 +191,40 @@ LatticeSite Structure::findLatticeSiteByPosition(const Vector3d &position) const
             {
                 unitcellOffset[i] = int(round(fractional[i]));
             }
-        } else {
+        }
+        else
+        {
             unitcellOffset[i] = 0.0;
         }
     }
     Vector3d remainder = (fractional - unitcellOffset).transpose() * _cell;
-
     auto index = findSiteByPosition(remainder);
     if (index == -1)
     {
+
+        // std::cout << "cell" << std::endl;
+        // std::cout << _cell << std::endl;
+        // std::cout << "fractional\n" << fractional << std::endl;
+        // std::cout << "position\n" << position << std::endl;
+
+        // std::cout << "Positions" << std::endl;
+        // for (int i = 0; i < size(); i++)
+        // {
+        //     Vector3d pos = _positions.row(i);
+        //     std::cout << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
+        // }
+        // for (int i = 0; i < 3; i++)
+        // {
+        //     if (hasPBC(i))
+        //     {
+        //         // unitcellOffset[i] = floor(roundFloat((double)fractional[i]));
+        //         std::cout << "unitcellOffset[i]"
+        //           << " " << unitcellOffset[i] << " " << roundFloat((double)fractional[i]) << std::endl;
+        //     }
+        // }
+        // std::cout << "remainder" << std::endl;
+        // std::cout << remainder << std::endl;
+
         std::string errorMessage = "Failed to find site by position (findLatticeSiteByPosition)";
         throw std::runtime_error(errorMessage);
     }

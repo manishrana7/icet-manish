@@ -75,12 +75,12 @@ def add_vacuum_in_non_pbc(atoms):
 
     if len(vacuum_axis) > 0:
         atoms.center(30, axis=vacuum_axis)
-    atoms.wrap()
+        atoms.wrap()
 
     return atoms
 
 
-def get_primitive_structure(atoms):
+def get_primitive_structure(atoms, no_idealize=True):
     '''
     Determines primitive structure using spglib.
 
@@ -94,14 +94,17 @@ def get_primitive_structure(atoms):
     ASE Atoms object
         output structure
     '''
-
     atoms_with_vacuum = add_vacuum_in_non_pbc(atoms)
+
     lattice, scaled_positions, numbers = spglib.standardize_cell(
-        atoms_with_vacuum, to_primitive=True, no_idealize=True)
+        atoms_with_vacuum, to_primitive=True, no_idealize=no_idealize)
     scaled_positions = [np.round(pos, 12) for pos in scaled_positions]
     atoms_prim = Atoms(scaled_positions=scaled_positions,
                        numbers=numbers, cell=lattice, pbc=atoms.pbc)
     atoms_prim.wrap()
+    # icet_wrap(atoms_prim)
+    # print(atoms_prim.positions)
+    # exit(1)
     return atoms_prim
 
 
@@ -126,6 +129,42 @@ def get_fractional_positions_from_neighbor_list(structure, neighbor_list):
             structure.cell, wrap=False,
             pbc=structure.pbc)
     return fractional_positions
+
+
+def get_permutation_matrix(input_configuration,
+                           reference_structure,
+                           tolerance_cell=0.05,
+                           ):
+    '''
+    Computes and returns the permutation
+    matrix that takes the reference cell to the input cell,
+    i.e. permutation_matrix * reference_cell = input_cell
+    '''
+
+    input_cell = input_configuration.cell
+
+    # obtain the (in general non-integer) transformation matrix
+    # connecting the input configuration to the reference structure
+    # L = L_p.P --> P = L_p^-1.L
+    P = np.dot(input_cell, np.linalg.inv(reference_structure.cell))
+
+    # assert that the transformation matrix does not deviate too
+    # strongly from the nearest integer matrix
+    if np.linalg.norm(P - np.around(P)) / 9 > tolerance_cell:
+        s = 'Failed to map configuration to reference'
+        s += 'structure (tolerance_cell exceeded).\n'
+        s += 'reference:\n {}\n'.format(reference_structure.cell)
+        s += 'input:\n {}\n'.format(input_configuration.cell)
+        s += 'input_cell:\n {}\n'.format(input_cell)
+        s += 'P:\n {}\n'.format(P)
+        s += 'P_round:\n {}\n'.format(np.around(P))
+        s += 'Deviation: {}\n'.format(np.linalg.norm(P - np.around(P)) / 9)
+        s += 'You can try raising `tolerance_cell`.'
+        raise Exception(s)
+
+    # reduce the (real) transformation matrix to the nearest integer one
+    P = np.around(P)
+    return P
 
 
 def get_fractional_positions_from_ase_neighbor_list(atoms, neighbor_list):
