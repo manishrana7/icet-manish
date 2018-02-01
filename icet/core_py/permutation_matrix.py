@@ -154,6 +154,4 @@ class PermutationMatrix(object):
                 if self.pm_lattice_sites[i][0] == self.pm_lattice_sites[j][0]:
                     self.pm_lattice_sites.pop(j)
                     if self.verbosity > 2:
-                        msg = ['Removing duplicate in permutation matrix']
-                        msg += ['i: {} j: {}'.format(i, j)]
-                        print(' '.join(msg))
+                        print('Removing duplicate in permutationmatrix; i: {},j: {}'.format(i,j))
