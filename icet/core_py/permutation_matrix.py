@@ -148,7 +148,6 @@ class PermutationMatrix(object):
 
         self.pm_lattice_sites = pm_lattice_sites
 
-    _prune_permutation_matrix = _prune_permutation_matrixA
 
     def _prune_permutation_matrixA(self):
         """
@@ -174,9 +173,8 @@ class PermutationMatrix(object):
 
         This is a helper method to initialize permutation matrix.
         """
-        n_lattice_sites = len(self.pm_lattice_sites)
-        for i in range(n_lattice_sites):
-            for j in range(n_lattice_sites - 1, i, -1):
+        for i in range(len(self.pm_lattice_sites)):
+            for j in range(len(self.pm_lattice_sites) - 1, i, -1):
                 if self.pm_lattice_sites[i][0] == self.pm_lattice_sites[j][0]:
                     self.pm_lattice_sites.pop(j)
                     if self.verbosity > 2:
@@ -190,8 +188,8 @@ class PermutationMatrix(object):
 
         This is a helper method to initialize permutation matrix.
         """
-        for i, site_i in enumerate(pm_lattice_sites):
-            for site_j in pm_lattice_sites[:,i,-1]
+        for i, site_i in enumerate(self.pm_lattice_sites):
+            for site_j in self.pm_lattice_sites[:i:-1]:
                 if site_i[0] == site_j[0]:
                     self.pm_lattice_sites.remove(site_j)
                     if self.verbosity > 2:
@@ -208,9 +206,12 @@ class PermutationMatrix(object):
         old_sites = self.pm_lattice_sites[:]
         site_i = old_sites.pop()
         new_sites = [site_i]
-        while old_sites:
+        while True:
             old_sites = [site_j for site_j in old_sites if site_j[0] != site_i[0]]  # only keep sites <> site_i
-            site_i = old_sites.pop()
+            try:
+                site_i = old_sites.pop()
+            except IndexError:
+                break
             new_sites.append(site_i)
         self.pm_lattice_sites = new_sites
 
@@ -226,3 +227,20 @@ class PermutationMatrix(object):
         # that self.pm_lattice_sites[i] can be compared with self.pm_lattice_sites[j]
         self.pm_lattice_sites = list(set(self.pm_lattice_sites))
 
+    def _prune_permutation_matrixF(self):
+        """
+        Removes redundant column originating from two different symmetry operations transforming
+        a basis atom to the same lattice site.
+
+        This is a helper method to initialize permutation matrix.
+        """
+        for i in range(len(self.pm_lattice_sites)):
+            for j in range(len(self.pm_lattice_sites) - 1, i, -1):
+                if self.pm_lattice_sites[i][0] in self.pm_lattice_sites[j]:
+                    self.pm_lattice_sites.pop(j)
+                    if self.verbosity > 2:
+                        print('Removing duplicate in permutation matrix; i: {},j: {}'.format(i,j))
+
+
+
+    _prune_permutation_matrix = _prune_permutation_matrixA
