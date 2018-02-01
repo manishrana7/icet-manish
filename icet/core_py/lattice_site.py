@@ -49,7 +49,7 @@ class LatticeSite(object):
     def unitcell_offset(self, offset):
         self._unitcell_offset = offset
 
-    def __eq__(self, other):
+    def _eq__(self, other):
         """
         Test equality of this and another LatticeSite
 
@@ -59,6 +59,7 @@ class LatticeSite(object):
         """
         if self.index != other.index:
             return False
+        #return np.array_equal(self.unitcell_offset, other.unitcell_offset)
         for i in range(3):
             if self.unitcell_offset[i] != other.unitcell_offset[i]:
                 return False
@@ -102,3 +103,11 @@ class LatticeSite(object):
         """
 
         return self.__str__()
+
+
+    def to_list(self):
+        return [self.index, self.unitcell_offset[0], self.unitcell_offset[1], self.unitcell_offset[2]]
+
+
+    def from_list(self, lst):
+        return LatticeSite(lst[0], tuple(lst[1:]))
