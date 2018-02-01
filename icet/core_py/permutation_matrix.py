@@ -242,5 +242,10 @@ class PermutationMatrix(object):
                         print('Removing duplicate in permutation matrix; i: {},j: {}'.format(i,j))
 
 
+    def _prune_permutation_matrixG(self):
+        permutation_array = np.array([row[0].to_list() for row in self.pm_lattice_sites])
+        unique_array, indexes = np.unique(permutation_array, axis=0, return_index=True)
+        self.pm_lattice_sites = [self.pm_lattice_sites[k] for k in indexes]
+
 
     _prune_permutation_matrix = _prune_permutation_matrixA
