@@ -244,3 +244,20 @@ class ManyBodyNeighborList(object):
             def __ne__(self, other):
                 return mycmp(self.obj, other.obj)
         return K
+
+
+    def unzip(self, compressed_sites):
+        """
+        Return a list of list of lattice sites
+        from the compresed sites.
+
+        parameters
+        ----------
+        compressed_sites : tuple of list of lattice sites
+        """
+        unzipped_sites = []
+        # return  [ [compressed_sites[0] + site] for site in compressed_sites[1]]
+
+        for site in compressed_sites[1]:
+            unzipped_sites.append((compressed_sites[0],site ))
+        return unzipped_sites

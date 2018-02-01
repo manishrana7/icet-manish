@@ -1,3 +1,5 @@
+import numpy as np
+
 from icet.core_py.permutation_matrix import PermutationMatrix
 from icet.core_py.orbit import Orbit
 from icet.core_py.many_body_neighbor_list import ManyBodyNeighborList
@@ -42,7 +44,7 @@ class OrbitList(object):
     def __init__(self, atoms, cutoffs, verbosity=False):
         self._permutation_matrix = PermutationMatrix(atoms, max(cutoffs))
         self._column1 = self.permutation_matrix.column1
-        self._primitive_structure = self.permutation_matrix.get_primitive_structure()
+        self._primitive_structure = self.permutation_matrix.primitive_structure
         mbnl = ManyBodyNeighborList(self.primitive_structure, cutoffs)
 
         self._orbits = []
@@ -65,7 +67,7 @@ class OrbitList(object):
         Returns the primitive structure to which the
         lattice sites in the orbits are referenced to.
         """
-        return self._primitive_structure().copy()
+        return self._primitive_structure.copy()
 
     @property
     def permutation_matrix(self):
@@ -153,11 +155,12 @@ class OrbitList(object):
         ----------
         sites : list of icet Lattice Sites object
         """
+        
         translated_sites = []
         for site in sites:
-            if site.unitcell_offset != [0, 0, 0]:
+            if not np.allclose(site.unitcell_offset,np.array([0., 0., 0.])):
                 translated_sites.append(
-                    [ls + site.unitcell_offset for ls in sites])
+                    [ls - site.unitcell_offset for ls in sites])
 
         return translated_sites
     @property
@@ -166,3 +169,10 @@ class OrbitList(object):
         Returns the core_py permutation matrix object.
         """
         return self._permutation_matrix
+
+
+    def __len__(self):
+        """
+        Lenght of an orbit list is number of orbits in orbit list.
+        """
+        return len(self._orbits)

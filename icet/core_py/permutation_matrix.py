@@ -157,3 +157,11 @@ class PermutationMatrix(object):
                         msg = ['Removing duplicate in permutation matrix']
                         msg += ['i: {} j: {}'.format(i, j)]
                         print(' '.join(msg))
+
+
+    @property
+    def column1(self):
+        """
+        Returns column 1 of the lattice site permutation matrix.
+        """
+        return [row[0] for row in self.pm_lattice_sites]

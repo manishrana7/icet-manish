@@ -102,3 +102,27 @@ class LatticeSite(object):
         """
 
         return self.__str__()
+
+
+    def __add__(self, other):
+        """
+        Define the add operator.
+        Allowed values:
+        * type ndarray with shape(3,)
+        """
+        if not isinstance(other, type(np.array([1, 1, 1]))) or len(other) != 3:
+            raise TypeError("Adding orbit with {}".format(other))
+        site = LatticeSite(self.index, self.unitcell_offset + other)
+        return site
+        
+    def __sub__(self, other):
+        """
+        Define the subtract operator.
+        Allowed values:
+        * type ndarray with shape(3,)
+        """
+        if not isinstance(other, type(np.array([1, 1, 1]))) or len(other) != 3:
+            raise TypeError("Adding orbit with {}".format(other))
+        site = LatticeSite(self.index, self.unitcell_offset - other)
+        return site
+        

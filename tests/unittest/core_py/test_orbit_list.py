@@ -49,14 +49,14 @@ class TestOrbitList(unittest.TestCase):
         '''
         self.orbit_list.primitive_structure
         self.assertEqual(self.orbit_list.primitive_structure,
-                         self.permutation_matrix.primitive_structure)
+                         self.orbit_list.permutation_matrix.primitive_structure)
 
     def test_property_orbit(self):
         """
         Test orbit property.
         """
-        self.orbit_list.property
-        self.assertEqual(len(self.orbit_list), len(self.orbit_list.property))
+        self.orbit_list.orbits
+        self.assertEqual(len(self.orbit_list), len(self.orbit_list.orbits))
 
     def test_is_new_orbit(self):
         """
@@ -87,27 +87,27 @@ class TestOrbitList(unittest.TestCase):
         Test teh get all translated sites functionality.
         """
         sites = [LatticeSite(0, [0, 0, 0])]
-        target = []
-        self.assertEqual(
-            self.orbit_list.test_get_all_translated_sites(sites), target)
+        target = []        
+        self.assertListEqual(
+            self.orbit_list.get_all_translated_sites(sites), target)
 
         # Does it break when the offset is floats?
         sites = [LatticeSite(0, [0.0, 0.0, 0.0])]
         target = []
-        self.assertEqual(
-            self.orbit_list.test_get_all_translated_sites(sites), target)
+        self.assertListEqual(
+            self.orbit_list.get_all_translated_sites(sites), target)
 
         sites = [LatticeSite(0, [1.0, 0.0, 0.0])]
         target = [[LatticeSite(0, [0.0, 0.0, 0.0])]]
-        self.assertEqual(
-            self.orbit_list.test_get_all_translated_sites(sites), target)
+        self.assertListEqual(
+            self.orbit_list.get_all_translated_sites(sites), target)
 
         sites = [LatticeSite(0, [1.0, 0.0, 0.0]),
                  LatticeSite(0, [0.0, 0.0, 0.0])]
         target = [[LatticeSite(0, [0.0, 0.0, 0.0]),
                    LatticeSite(0, [-1, 0.0, 0.0])]]
-        self.assertEqual(
-            self.orbit_list.test_get_all_translated_sites(sites), target)
+        self.assertListEqual(
+            self.orbit_list.get_all_translated_sites(sites), target)
 
         sites = [LatticeSite(0, [1.0, 2.0, -1.0]),
                  LatticeSite(2, [2.0, 0.0, 0.0])]
@@ -116,8 +116,8 @@ class TestOrbitList(unittest.TestCase):
                    LatticeSite(2, [1.0, -2.0, 1.0])],
                   [LatticeSite(0, [-1.0, 2.0, -1.0]),
                    LatticeSite(2, [0.0, 0.0, 0.0])]]
-        self.assertEqual(
-            self.orbit_list.test_get_all_translated_sites(sites), target)
+        self.assertListEqual(
+            self.orbit_list.get_all_translated_sites(sites), target)
 
     def test_property_permutation_matrix(self):
         '''
