@@ -225,5 +225,49 @@ class TestManyBodyNeighborList(unittest.TestCase):
         self.assertFalse(self.mbnl.cmp_list_of_lattice_sites(sites, sites))
 
 
+    def test_unzip(self):
+        """
+        Test the unzip functionality.
+        """
+        ls = LatticeSite(0,[1,2,3])
+        sites = [[ls,ls],[ls]]
+        unzipped_sites = self.mbnl.unzip(sites)
+        target = [[ls,ls,ls]]
+        self.assertEqual(len(unzipped_sites), 1)
+        self.assertListEqual(target, unzipped_sites)
+        
+
+        sites = [[ls,ls],[ls,ls]]
+        unzipped_sites = self.mbnl.unzip(sites)
+        target = [[ls,ls,ls],[ls,ls,ls]]
+        self.assertEqual(len(unzipped_sites), 2)
+        self.assertListEqual(target, unzipped_sites)
+        
+        ls2 = LatticeSite(1,[3,2,1])
+        sites = [[ls,ls2],[ls,ls,ls2,ls]]
+        unzipped_sites = self.mbnl.unzip(sites)
+        target =[
+            [ls,ls2,ls],
+            [ls,ls2,ls],
+            [ls,ls2,ls2],
+            [ls,ls2,ls]]
+        self.assertListEqual(target, unzipped_sites)
+
+        sites = [[ls],[]]
+        unzipped_sites = self.mbnl.unzip(sites)
+        target = [[ls]]
+        self.assertEqual(len(unzipped_sites), 1)
+        self.assertListEqual(target, unzipped_sites)
+
+
+        for index in range(len(self.atoms)):
+            mbnl_py = self.mbnl.build(index, bothways=False)
+            for compressed_sites in mbnl_py:
+               for unzipped in self.mbnl.unzip(compressed_sites):
+                    if len(compressed_sites[1]) == 0:
+                        self.assertEqual(len(unzipped),len(compressed_sites[0]))
+                    else:
+                        self.assertEqual(len(unzipped),len(compressed_sites[0])+1)
+
 if __name__ == '__main__':
     unittest.main()
