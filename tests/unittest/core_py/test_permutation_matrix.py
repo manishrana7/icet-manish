@@ -18,22 +18,60 @@ class TestPermutationMatrix(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestPermutationMatrix, self).__init__(*args, **kwargs)
         self.atoms = bulk("Al")
-        self.cutoff = 5.0
-
-    def test__init__(self, is_forced_to_fail=True):
-        """
-        Test that we can instantiate the PermutationMatrix
-        """
-        pm = PermutationMatrix(self.atoms, self.cutoff)
+        self.cutoff = 3.0
 
 
-    def test_shape_of_pm_lattice_sites(self):
-        """
-        Test that the 'pm_lattice_sites' attribute to PermutationMatrix has the right shape and dimensions
-        """
-        pm = PermutationMatrix(self.atoms, self.cutoff)
-        lattice_sites = pm.pm_lattice_sites
+    def setUp(self):
+        self.pm = PermutationMatrix(self.atoms, self.cutoff)
+        self.lattice_sites = self.pm.pm_lattice_sites
 
+
+    def test_type_of_pm_lattice_sites(self):
+        """
+        Test that the permutation matrix is a list
+        """
+        self.assertTrue(isinstance(self.lattice_sites, list))
+        self.assertEqual(self.lattice_sites.__class__.__name__, 'list')
+
+
+    def test_len_of_pm_lattice_sites(self):
+        """
+        Test that the permutation matrix has the correct length
+        """
+        self.assertEqual(13, len(self.lattice_sites))
+
+
+    def test_type_of_pm_lattice_sites_row(self):
+        """
+        Test that a is of type list
+        """
+        self.assertTrue(isinstance(self.lattice_sites[0], list))
+        self.assertEqual(self.lattice_sites[0].__class__.__name__, 'list')
+
+
+    def test_len_of_pm_lattice_sites_row(self):
+        """
+        Test that a row has the correct length
+        """
+        self.assertEqual(48, len(self.lattice_sites[0]))
+
+
+    def test_lattice_sites_element(self):
+        """ Test that first element in the permutation matrix is correct"""
+        self.assertEqual(1, self.lattice_sites[0][0])
+
+    def test_lattice_sites_all_rows(self):
+        """
+        Test that all rows have the same length
+        """
+        n = len(self.lattice_sites[0])
+        diff_lens = [row for row in self.lattice_sites if len(row) != n]
+        self.assertEqual(diff_lens, [])
+
+    def test_lattice_sites_element_by_printing(self):
+        print('\n\n***************\n')
+        print(self.lattice_sites[0])
+        print('\n\n***************\n')
 
 
 if __name__ == '__main__':
