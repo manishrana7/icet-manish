@@ -179,7 +179,7 @@ def get_fractional_positions_from_ase_neighbor_list(atoms, neighbor_list):
     '''
     neighbor_positions = []
     fractional_positions = []
-    lattice_site = LatticeSite(0, [0, 0, 0])
+    lattice_site = LatticeSite_py(0, [0, 0, 0])
 
     for i in range(len(atoms)):
         lattice_site.index = i
@@ -187,7 +187,7 @@ def get_fractional_positions_from_ase_neighbor_list(atoms, neighbor_list):
         neighbor_positions.append(position)
         indices, offsets = neighbor_list.get_neighbors(i)
         for index, offset in zip(indices, offsets):
-            lattice_site = LatticeSite(index, offset)
+            lattice_site = LatticeSite_py(index, offset)
             position = get_position_from_lattice_site(atoms, lattice_site)
             neighbor_positions.append(position)
     if len(neighbor_positions) > 0:
