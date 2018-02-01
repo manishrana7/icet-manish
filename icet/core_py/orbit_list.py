@@ -53,10 +53,9 @@ class OrbitList(object):
             mb_neigbhors_index = mbnl.build(index)
             for compressed_sites in mb_neigbhors_index:
                 for sites in mbnl.unzip(compressed_sites):
-                    if self.is_new_orbit(sites):
-                        pass
-                    #     orbit = self.make_orbit(sites)
-                    #     self._orbits.append(orbit)
+                    if self.is_new_orbit(sites):                        
+                        orbit = self.make_orbit(sites)
+                        self._orbits.append(orbit)
 
     def sort(self):
         """
@@ -125,7 +124,7 @@ class OrbitList(object):
         # TODO check sorted rows?
         rows = self.get_rows(sites)
 
-        # for eq_sites in zip(rows):
+        # for eq_sites in zip(rows):    
         #     translated_eq_sites = self.get_all_translated_sites(eq_sites)
         #     sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
         #     if not self.is_rows_taken(sites_indices_match[0][0]):
@@ -145,7 +144,7 @@ class OrbitList(object):
         """
         row_indices = self.get_row_indices(sites)
 
-        return [self.permutation_matrix.pm_lattice_site[index] for index in row_indices]
+        return [self.permutation_matrix.pm_lattice_sites[index] for index in row_indices]
 
     def get_row_indices(self, sites):
         """
