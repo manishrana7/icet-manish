@@ -4,6 +4,7 @@
 #include <string>
 #include "PeriodicTable.hpp"
 #include "LatticeSite.hpp"
+#include "Structure.hpp"
 
 using namespace Eigen;
 

@@ -655,7 +655,7 @@ PYBIND11_MODULE(_icet, m)
         Where permutations_to_representative[i]
         takes self.equivalent_sites[i] to
         the same order as self.representative_sites.
-
+    
         Explanation
         -------
         This can be used if you for example want to

@@ -2,7 +2,10 @@
 
 LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &primitiveOrbitList, const Structure &superCell) : _orbit_list(primitiveOrbitList), _supercell(superCell)
 {
+    _positionClosestToOrigin = getClosestToOrigin();
     mapSitesAndFindCellOffsets();
+
+    // generateSmartOffsets();
 }
 
 /**
@@ -22,10 +25,12 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
         Vector3d position_i = _supercell.getPositions().row(i);
 
         LatticeSite primitive_site = _orbit_list.getPrimitiveStructure().findLatticeSiteByPosition(position_i);
-        // LatticeSite super_site = _supercell.findLatticeSiteByPosition(position_i);
-
-        // _primToSupercellMap[primitive_site] = super_site;
-        uniqueCellOffsets.insert(primitive_site.unitcellOffset());
+        Vector3d primitive_position = _orbit_list.getPrimitiveStructure().getPositions().row(primitive_site.index());
+        // Basically only append offsets to indices that correspond to the atom in the origin
+        if ((primitive_position - _positionClosestToOrigin).norm() < 1e-5)
+        {
+            uniqueCellOffsets.insert(primitive_site.unitcellOffset());
+        }
     }
 
     _uniquePrimcellOffsets.clear();
@@ -59,20 +64,31 @@ OrbitList LocalOrbitListGenerator::generateLocalOrbitList(const Vector3d &primOf
     return _orbit_list.getLocalOrbitList(_supercell, primOffset, _primToSupercellMap);
 }
 
-
 /// Generate the complete orbit list (the sum of all local orbit lists)
 OrbitList LocalOrbitListGenerator::generateFullOrbitList()
 {
     OrbitList orbitList = OrbitList();
-    for(int i = 0; i < getUniqueOffsetsCount(); i++)
+    for (int i = 0; i < getUniqueOffsetsCount(); i++)
     {
         orbitList += generateLocalOrbitList(i);
     }
     return orbitList;
-
-
 }
 
+
+/// Find the indices of the supercell that are within 1e-3 of the position argument
+std::vector<int> LocalOrbitListGenerator::findMatchingSupercellPositions(const Vector3d &position) const
+{
+    std::vector<int> matchedIndices;
+    for (int i = 0; i < _supercell.getPositions().rows(); i++)
+    {
+        if ((position.transpose() - _supercell.getPositions().row(i)).norm() < 1e-3)
+        {
+            matchedIndices.push_back(i);
+        }
+    }
+    return matchedIndices;
+}
 
 //clears the unordered_map and the vector
 void LocalOrbitListGenerator::clear()

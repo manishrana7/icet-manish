@@ -39,13 +39,11 @@ class LocalOrbitListGenerator
   public:
     LocalOrbitListGenerator(const OrbitList &, const Structure &);
 
-
-
     ///generate and returns the local orbit list with the input index
-    OrbitList generateLocalOrbitList(const unsigned int ) ;
+    OrbitList generateLocalOrbitList(const unsigned int);
 
     ///generate and returns the local orbit list with the input offset (require that the offset is in uniquecell offset?)
-    OrbitList generateLocalOrbitList(const Vector3d & ) ;
+    OrbitList generateLocalOrbitList(const Vector3d &);
 
     /// Generate the full orbit list from this structure
     OrbitList generateFullOrbitList();
@@ -71,17 +69,13 @@ class LocalOrbitListGenerator
         return _uniquePrimcellOffsets;
     }
 
-
-
   private:
-
-   /**
+    /**
     Maps supercell positions to reference to the primitive cell and find unique primitive cell offsets
     Will loop through all sites in supercell and map them to the primitive structures cell
     and find the unique primitive cell offsets
     */
     void mapSitesAndFindCellOffsets();
-
 
     ///Primitive orbit list
     OrbitList _orbit_list;
@@ -92,6 +86,32 @@ class LocalOrbitListGenerator
     ///this maps a latticeNeighbor from the primitive and get the equivalent in supercell
     std::unordered_map<LatticeSite, LatticeSite> _primToSupercellMap;
 
+    /// Find the position of the atom that is closest to the origin.
+    /// This position is used to extracting unit cell offsets later on
+    Vector3d getClosestToOrigin() const
+    {
+        Vector3d closestToOrigin;
+        double distanceToOrigin = 1e6;
+        for (int i = 0; i < _orbit_list.getPrimitiveStructure().size(); i++)
+        {
+            Vector3d position_i = _orbit_list.getPrimitiveStructure().getPositions().row(i);
+            if ((position_i.norm()) < distanceToOrigin)
+            {
+                distanceToOrigin = position_i.norm();
+                closestToOrigin = position_i;
+            }
+        }
+        return closestToOrigin;
+    }
+
+    ///
+    Vector3d _positionClosestToOrigin;
     ///The unique offsets of the primitive cell required to "cover" the supercell
     std::vector<Vector3d> _uniquePrimcellOffsets;
+
+    /// The sub permutation matrices that will together map the basis atoms unto the supercell.
+    std::vector<Matrix3i> _subPermutationMatrices;
+
+    /// Find the indices of the supercell that are within 1e-3 of the position argument
+    std::vector<int> findMatchingSupercellPositions(const Vector3d &position) const;
 };

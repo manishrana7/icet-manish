@@ -29,6 +29,8 @@ from icet.core.structure import Structure
 from icet.core.lattice_site import LatticeSite
 from collections import OrderedDict
 
+import numpy as np
+
 
 def strip_surrounding_spaces(input_string):
     '''
@@ -362,21 +364,20 @@ class TestClusterSpaceSurface(unittest.TestCase):
         '''
         Testing get_cluster_vector functionality
         '''
-        target_cluster_vectors = [
+        target_cluster_vectors = np.array([
             [1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0,
              -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0],
-            [1.0, -0.3333333333333333, -1.0, -1.0, -0.1111111111111111,
-             0.5555555555555556, 1.0, 1.0, 1.0, 0.3333333333333333,
-             0.3333333333333333, -1.0, -1.0, -1.0, -1.0, 0.1111111111111111,
-             -0.5555555555555556, -1.0, -1.0, -0.3333333333333333,
-             0.6666666666666666, 1.0, 1.0],
-            [1.0, -0.3333333333333333, -0.3333333333333333, -1.0,
-             -0.1111111111111111, 0.3333333333333333, -0.1111111111111111,
-             0.4444444444444444, 1.0, 0.3333333333333333, 0.3333333333333333,
-             0.3333333333333333, 0.3333333333333333, -1.0, -1.0,
-             -0.1111111111111111, -0.1111111111111111, 0.1111111111111111,
-             -0.4444444444444444, 0.3333333333333333, -0.3333333333333333,
-             0.3333333333333333, -0.3333333333333333]]
+            [1., -0.5, -1., -1.,  0.,  0.5,  1.,  1.,  1.,  0.5,  0.5,
+             -1., -1., -1., -1.,  0., -0.5, -1., -1., -0.5,  0.5,  1.,
+             1.],
+            [1., -0.5, -0.5,
+             -1.,  0.,  0.3333333333,
+             0.,  0.5,  1.,
+             0.5,  0.5,  0.5,
+             0.5, -1., -1.,
+             -0.1666666667, -0.1666666667,  0.,
+             -0.5,  0.,  0.,
+             0.5, -0.5]])
         s = ['Error in test setup;']
         s += ['number of cluster vectors ({})'.format(
             len(target_cluster_vectors))]
@@ -387,13 +388,12 @@ class TestClusterSpaceSurface(unittest.TestCase):
                          msg=info)
         # use ASE Atoms
         for atoms, target in zip(self.structure_list, target_cluster_vectors):
-            retval = list(self.cs.get_cluster_vector(atoms))
-            self.assertAlmostEqual(retval, target, places=9)
+            retval = self.cs.get_cluster_vector(atoms)
+            self.assertAlmostEqualList(retval, target, places=9)
         # use icet Structure
         for atoms, target in zip(self.structure_list, target_cluster_vectors):
-            retval = list(self.cs.get_cluster_vector(
-                Structure.from_atoms(atoms)))
-            self.assertAlmostEqual(retval, target, places=9)
+            retval = self.cs.get_cluster_vector(Structure.from_atoms(atoms))
+            self.assertAlmostEqualList(retval, target, places=9)
         # check that other types fail
         with self.assertRaises(Exception) as context:
             retval = self.cs.get_cluster_vector('something')
