@@ -152,7 +152,9 @@ class PermutationMatrix(object):
 
     def _prune_permutation_matrixA(self):
         """
-        Prunes columns in the permutation matrix.
+        Removes redundant column originating from two different symmetry operations transforming
+        a basis atom to the same lattice site.
+
         This is a helper method to initialize permutation matrix.
         """
         for i in range(len(self.pm_lattice_sites)):
@@ -167,7 +169,9 @@ class PermutationMatrix(object):
 
     def _prune_permutation_matrixB(self):
         """
-        Prunes columns in the permutation matrix.
+        Removes redundant column originating from two different symmetry operations transforming
+        a basis atom to the same lattice site.
+
         This is a helper method to initialize permutation matrix.
         """
         n_lattice_sites = len(self.pm_lattice_sites)
@@ -181,7 +185,9 @@ class PermutationMatrix(object):
 
     def _prune_permutation_matrixC(self):
         """
-        Prunes columns in the permutation matrix.
+        Removes redundant column originating from two different symmetry operations transforming
+        a basis atom to the same lattice site.
+
         This is a helper method to initialize permutation matrix.
         """
         for i, site_i in enumerate(pm_lattice_sites):
@@ -194,7 +200,9 @@ class PermutationMatrix(object):
 
     def _prune_permutation_matrixD(self):
         """
-        Prunes columns in the permutation matrix.
+        Removes redundant column originating from two different symmetry operations transforming
+        a basis atom to the same lattice site.
+
         This is a helper method to initialize permutation matrix.
         """
         old_sites = self.pm_lattice_sites[:]
