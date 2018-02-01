@@ -75,6 +75,7 @@ class OrbitList(object):
         Return icet PermutationMatrix object.
         """
         return self._permutation_matrix
+
     @property
     def orbits(self):
         """
@@ -114,6 +115,9 @@ class OrbitList(object):
 
         for eq_sites in zip(rows):
             translated_eq_sites = self.get_all_translated_sites(eq_sites)
+            # Get matches in pm
+
+        return orbit
 
     def get_rows(self, sites):
         """
@@ -155,14 +159,15 @@ class OrbitList(object):
         ----------
         sites : list of icet Lattice Sites object
         """
-        
+
         translated_sites = []
         for site in sites:
-            if not np.allclose(site.unitcell_offset,np.array([0., 0., 0.])):
+            if not np.allclose(site.unitcell_offset, np.array([0., 0., 0.])):
                 translated_sites.append(
                     [ls - site.unitcell_offset for ls in sites])
 
         return translated_sites
+
     @property
     def permutation_matrix(self):
         """
@@ -170,9 +175,46 @@ class OrbitList(object):
         """
         return self._permutation_matrix
 
-
     def __len__(self):
         """
         Lenght of an orbit list is number of orbits in orbit list.
         """
         return len(self._orbits)
+
+    def get_matches_in_pm(self, list_of_sites):
+        """
+        Returns a list of tuple of lattice sites and
+        matched rows in pm of those that has a
+        match in column 1.
+
+        Parameters
+        ----------
+        list_of_sites : list of list of LatticeSite
+
+        Return
+        ------
+        matched_sites : the elements in sites that had
+        a match in column 1
+        """
+        matched_sites = []
+        for sites in list_of_sites:
+            try:
+                rows = self.get_matches_in_pm(sites)
+                matched_sites.append(tuple(sites, rows))
+            except Exception:
+                continue
+
+        if len(matched_sites) > 0:
+            return matched_sites
+        else:
+            raise RuntimeError("Did not find any of the"
+                               " translated sites in col1"
+                               " of permutation matrix in"
+                               " function getFirstMatchInPM"
+                               " in orbit list")
+
+    def __str__(self):
+        nice_str = ''
+        for orbit in self.orbits:
+            nice_str += str(orbit) + '\n'
+        return nice_str
