@@ -5,6 +5,7 @@ import unittest
 
 from icet.core_py.orbit_list import OrbitList
 from iet.core_py.lattice_site import LatticeSite
+from icet.core_py.permutation_matrix import PermutationMatrix
 
 
 class TestOrbitList(unittest.TestCase):
@@ -117,6 +118,15 @@ class TestOrbitList(unittest.TestCase):
                    LatticeSite(2, [0.0, 0.0, 0.0])]]
         self.assertEqual(
             self.orbit_list.test_get_all_translated_sites(sites), target)
+
+    def test_property_permutation_matrix(self):
+        '''
+        Test the permutation matrix property.
+        '''
+        self.assertIsInstance(
+            self.orbit_list.permutation_matrix, PermutationMatrix)
+        self.assertEqual(
+            self.orbit_list.permutation_matrix.cutoff, max(self.cutoffs))
 
 
 if __name__ == '__main__':

@@ -101,4 +101,4 @@ class LatticeSite(object):
         Return  index and unitcell_offset in str format
         """
 
-        return '{} : {}'.format(self.index, self.unitcell_offset)
+        return self.__str__()

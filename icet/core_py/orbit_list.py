@@ -160,3 +160,9 @@ class OrbitList(object):
                     [ls + site.unitcell_offset for ls in sites])
 
         return translated_sites
+    @property
+    def permutation_matrix(self):
+        """
+        Returns the core_py permutation matrix object.
+        """
+        return self._permutation_matrix
