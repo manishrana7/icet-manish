@@ -43,17 +43,20 @@ class OrbitList(object):
 
     def __init__(self, atoms, cutoffs, verbosity=False):
         self._permutation_matrix = PermutationMatrix(atoms, max(cutoffs))
-        self._column1 = self.permutation_matrix.column1
+        self.column1 = self.permutation_matrix.column1
+
         self._primitive_structure = self.permutation_matrix.primitive_structure
         mbnl = ManyBodyNeighborList(self.primitive_structure, cutoffs)
-
+        self.taken_rows = []
         self._orbits = []
         for index in range(len(self.primitive_structure)):
             mb_neigbhors_index = mbnl.build(index)
-            for sites in mbnl.unzip(mb_neigbhors_index):
-                if self.is_new_orbit(sites):
-                    orbit = self.make_orbit(sites)
-                    self._orbits.append(orbit)
+            for compressed_sites in mb_neigbhors_index:
+                for sites in mbnl.unzip(compressed_sites):
+                    if self.is_new_orbit(sites):
+                        pass
+                    #     orbit = self.make_orbit(sites)
+                    #     self._orbits.append(orbit)
 
     def sort(self):
         """
@@ -88,7 +91,16 @@ class OrbitList(object):
         Checks if this sites has been added into
         an orbit allready.
         """
-        pass
+        if len(sites) == 0:
+            raise RuntimeError("sites is empty in is new orbit")
+        translated_eq_sites = self.get_all_translated_sites(sites)
+        if len(translated_eq_sites ) == 0:
+            raise RuntimeError("translated_eq_sites is empty in is new orbit")
+
+        sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
+        if not self.is_rows_taken(sites_indices_match[0][0]):
+            return True
+        return False
 
     def make_orbit(self, sites):
         """
@@ -113,9 +125,10 @@ class OrbitList(object):
         # TODO check sorted rows?
         rows = self.get_rows(sites)
 
-        for eq_sites in zip(rows):
-            translated_eq_sites = self.get_all_translated_sites(eq_sites)
-            # Get matches in pm
+        # for eq_sites in zip(rows):
+        #     translated_eq_sites = self.get_all_translated_sites(eq_sites)
+        #     sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
+        #     if not self.is_rows_taken(sites_indices_match[0][0]):
 
         return orbit
 
@@ -142,7 +155,18 @@ class OrbitList(object):
         TODO : think if this should be sorted
         TODO : Should this be a tuple for easier hashing?
         """
-        return [self.column1.index(site) for site in sites]
+        indices = [None] * len(sites)
+        
+        for i, col_site in enumerate(self.column1):
+            for j, site in enumerate(sites):
+                if site == col_site:
+                    indices[j] = i
+
+        for index in indices:
+            if index == None:
+                raise RuntimeError("index not found for sites")
+        return indices
+        # return [self.column1.index(site) for site in sites]
 
     def get_all_translated_sites(self, sites):
         """
@@ -166,6 +190,8 @@ class OrbitList(object):
                 translated_sites.append(
                     [ls - site.unitcell_offset for ls in sites])
 
+        if len(translated_sites) == 0:
+            return [sites]
         return translated_sites
 
     @property
@@ -196,25 +222,44 @@ class OrbitList(object):
         matched_sites : the elements in sites that had
         a match in column 1
         """
+        if len(list_of_sites) ==0:
+            raise RuntimeError("List of sites empty")
         matched_sites = []
         for sites in list_of_sites:
             try:
-                rows = self.get_matches_in_pm(sites)
-                matched_sites.append(tuple(sites, rows))
-            except Exception:
+                rows = self.get_row_indices(sites)
+                matched_sites.append(tuple((sites, rows)))
+            except Exception as e:
                 continue
 
         if len(matched_sites) > 0:
             return matched_sites
         else:
-            raise RuntimeError("Did not find any of the"
-                               " translated sites in col1"
-                               " of permutation matrix in"
-                               " function getFirstMatchInPM"
-                               " in orbit list")
+            raise RuntimeError("Did not find any of the")
+                            #    " translated sites in col1"
+                            #    " of permutation matrix in"
+                            #    " function get_matches_in_pm"
+                            #    " in orbit list")
 
     def __str__(self):
         nice_str = ''
         for orbit in self.orbits:
             nice_str += str(orbit) + '\n'
         return nice_str
+
+    def is_rows_taken(self, rows):
+        """
+        Checks if these particual rows in the
+        permutation matrix has been used for
+        constructing an orbit.
+
+        parameters
+        ---------
+        rows : list of ints
+            Refers to row indices of
+            the permutation matrix
+        """
+        return False
+        if rows in self.taken_rows:
+            return True
+        return False

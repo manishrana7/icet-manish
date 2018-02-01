@@ -258,6 +258,9 @@ class ManyBodyNeighborList(object):
         unzipped_sites = []
         # return  [ [compressed_sites[0] + site] for site in compressed_sites[1]]
 
-        for site in compressed_sites[1]:
-            unzipped_sites.append((compressed_sites[0],site ))
-        return unzipped_sites
+        if len(compressed_sites[1])==0:
+            return [compressed_sites[0]]
+        else:
+            for site in compressed_sites[1]:
+                unzipped_sites.append(list(compressed_sites[0]) + [site] )
+            return unzipped_sites

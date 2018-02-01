@@ -87,13 +87,13 @@ class TestOrbitList(unittest.TestCase):
         Test teh get all translated sites functionality.
         """
         sites = [LatticeSite(0, [0, 0, 0])]
-        target = []        
+        target = [[LatticeSite(0, [0, 0, 0])]]
         self.assertListEqual(
             self.orbit_list.get_all_translated_sites(sites), target)
 
         # Does it break when the offset is floats?
         sites = [LatticeSite(0, [0.0, 0.0, 0.0])]
-        target = []
+        target = [[LatticeSite(0, [0.0, 0.0, 0.0])]]
         self.assertListEqual(
             self.orbit_list.get_all_translated_sites(sites), target)
 

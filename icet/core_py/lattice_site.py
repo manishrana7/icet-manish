@@ -27,10 +27,9 @@ class LatticeSite(object):
         """
         self._index = index
         if isinstance(unitcell_offset, list):
-            self._unitcell_offset = np.array(unitcell_offset)
+            self._unitcell_offset = np.array((unitcell_offset))
         else:
             self._unitcell_offset = unitcell_offset
-
     @property
     def index(self):
         """

@@ -179,15 +179,15 @@ def get_fractional_positions_from_ase_neighbor_list(atoms, neighbor_list):
     '''
     neighbor_positions = []
     fractional_positions = []
-    lattice_site = LatticeSite(0, [0, 0, 0])
-
+    lattice_site = LatticeSite_py(0, [0., 0., 0.])
+    
     for i in range(len(atoms)):
-        lattice_site.index = i
+        lattice_site = LatticeSite_py(i, [0., 0., 0.])
         position = get_position_from_lattice_site(atoms, lattice_site)
         neighbor_positions.append(position)
         indices, offsets = neighbor_list.get_neighbors(i)
         for index, offset in zip(indices, offsets):
-            lattice_site = LatticeSite(index, offset)
+            lattice_site = LatticeSite_py(index, offset)
             position = get_position_from_lattice_site(atoms, lattice_site)
             neighbor_positions.append(position)
     if len(neighbor_positions) > 0:
@@ -224,7 +224,7 @@ def find_lattice_site_by_position(atoms, position, tol=1e-4):
         pos = position - atom.position
         # Direct match
         if np.linalg.norm(pos) < tol:
-            return LatticeSite_py(i, np.array((0, 0, 0)))
+            return LatticeSite_py(i, np.array((0., 0., 0.)))
 
         fractional = np.linalg.solve(atoms.cell.T, np.array(pos).T).T
         unit_cell_offset = [np.floor(round(x)) for x in fractional]

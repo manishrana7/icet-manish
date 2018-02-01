@@ -18,7 +18,7 @@ class TestPermutationMatrix(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestPermutationMatrix, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al")
+        self.atoms = bulk("Al").repeat(2)
         self.cutoff = 5.0
 
     def setUp(self):
