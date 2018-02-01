@@ -49,6 +49,12 @@ class PermutationMatrix(object):
         be what the lattice sites refer to etc.
     verbosity : int
         sets the verbosity of this class
+
+
+    attributes
+    ----------
+    pm_lattice_sites : A list of lists of instances of LatticeSite
+
     '''
 
     def __init__(self, atoms, cutoff, find_prim=True, verbosity=0):
