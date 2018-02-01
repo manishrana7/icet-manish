@@ -4,7 +4,7 @@
 import unittest
 
 from icet.core_py.orbit_list import OrbitList
-from iet.core_py.lattice_site import LatticeSite
+from icet.core_py.lattice_site import LatticeSite
 from icet.core_py.permutation_matrix import PermutationMatrix
 
 
