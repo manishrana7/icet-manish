@@ -123,7 +123,7 @@ class Orbit(object):
             return self.geometrical_size < other.geometrical_size
 
         if len(self) != len(other):
-            return len(self) < len(other.orbit)
+            return len(self) < len(other)
 
         return self.equivalent_sites < other.equivalent_sites
 

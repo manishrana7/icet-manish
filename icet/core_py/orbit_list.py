@@ -55,6 +55,7 @@ class OrbitList(object):
             mb_neigbhors_index = mbnl.build(index)
             for compressed_sites in mb_neigbhors_index:
                 for sites in mbnl.unzip(compressed_sites):
+                    sites.sort()
                     if self.is_new_orbit(sites):
                         orbit = self.make_orbit(sites)
                         self._orbits.append(orbit)
@@ -99,9 +100,13 @@ class OrbitList(object):
             raise RuntimeError("translated_eq_sites is empty in is new orbit")
 
         sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
-        if not self.is_rows_taken(sites_indices_match[0][1]):
-            return True
-        return False
+        for site_index in sites_indices_match:
+            if self.is_rows_taken(site_index[1]):
+                return False
+        return True
+        # if not self.is_rows_taken(sites_indices_match[0][1]):
+        #     return True
+        # return False
 
     def make_orbit(self, sites):
         """
@@ -143,10 +148,19 @@ class OrbitList(object):
             
             translated_eq_sites = self.get_all_translated_sites(eq_sites)
             sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
-            if not self.is_rows_taken(sites_indices_match[0][1]):
+            new_sites = True
+            for site_index in sites_indices_match:
+                if self.is_rows_taken(site_index[1]):
+                    new_sites = False
+                    break
+            if new_sites:
                 orbit.equivalent_sites.append(eq_sites)                
                 for site_index in sites_indices_match:
                     self.take_row(site_index[1])
+            # if not self.is_rows_taken(sites_indices_match[0][1]):
+            #     orbit.equivalent_sites.append(eq_sites)                
+            #     for site_index in sites_indices_match:
+            #         self.take_row(site_index[1])
 
         return orbit
 

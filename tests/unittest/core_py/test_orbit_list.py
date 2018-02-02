@@ -6,8 +6,10 @@ import unittest
 from icet.core_py.orbit_list import OrbitList
 from icet.core_py.lattice_site import LatticeSite
 from icet.core_py.permutation_matrix import PermutationMatrix
+# from icet.core.orbit_list import create_orbit_list
 
-
+# from icet import Structure
+from icet import ClusterSpace
 class TestOrbitList(unittest.TestCase):
     '''
     Container for tests of the class functionality
@@ -16,7 +18,7 @@ class TestOrbitList(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         from ase.build import bulk
         super(TestOrbitList, self).__init__(*args, **kwargs)
-        self.cutoffs = [4.0] * 3
+        self.cutoffs = [0, 5]
         self.atoms = bulk('Ag', a=4.09)
 
     def setUp(self):
@@ -24,6 +26,9 @@ class TestOrbitList(unittest.TestCase):
         Instantiate class before each test.
         '''
         self.orbit_list = OrbitList(self.atoms, self.cutoffs)
+        # self._structure = Structure.from_atoms(self.atoms)
+
+        self.cluster_space_cpp = ClusterSpace(self.atoms, self.cutoffs,["Al","H"])
 
     def test_init(self):
         '''
@@ -130,6 +135,20 @@ class TestOrbitList(unittest.TestCase):
 
     def test_str(self):
         print(self.orbit_list)
-
+        print(self.cluster_space_cpp)
+        for orbit in self.orbit_list.orbits:
+            for sites in orbit.equivalent_sites:
+                for site in sites:
+                    print(site, end= ' ')
+                print()                    
+            print("----")
+        print("C++ version")
+        for orbit in self.cluster_space_cpp.get_orbit_list().get_orbit_list():
+            for sites in orbit.equivalent_sites:
+                for site in sites:
+                    print(site, end= ' ')
+                print()                    
+            print("----")
+            
 if __name__ == '__main__':
     unittest.main()
