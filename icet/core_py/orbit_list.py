@@ -47,6 +47,7 @@ class OrbitList(object):
         self._permutation_matrix = PermutationMatrix(atoms, max(cutoffs))
         self.column1 = self.permutation_matrix.column1
 
+        assert len(set(self.column1)) == len(self.column1)
         self._primitive_structure = self.permutation_matrix.primitive_structure
         mbnl = ManyBodyNeighborList(self.primitive_structure, cutoffs)
         self.taken_rows = set()
@@ -59,7 +60,7 @@ class OrbitList(object):
                     if self.is_new_orbit(sites):
                         orbit = self.make_orbit(sites)
                         self._orbits.append(orbit)
-
+        self.sort()
     def sort(self):
         """
         Sort the list of orbits.
@@ -154,9 +155,9 @@ class OrbitList(object):
                     new_sites = False
                     break
             if new_sites:
-                orbit.equivalent_sites.append(eq_sites)                
-                for site_index in sites_indices_match:
-                    self.take_row(site_index[1])
+                orbit.equivalent_sites.append(sites_indices_match[0][0])                
+            for site_index in sites_indices_match:
+                self.take_row(site_index[1])
             # if not self.is_rows_taken(sites_indices_match[0][1]):
             #     orbit.equivalent_sites.append(eq_sites)                
             #     for site_index in sites_indices_match:
@@ -216,14 +217,14 @@ class OrbitList(object):
         sites : list of icet Lattice Sites object
         """
 
-        translated_sites = []
+        translated_sites = [sites]
         for site in sites:
             if not np.allclose(site.unitcell_offset, np.array([0., 0., 0.])):
                 translated_sites.append(
                     [ls - site.unitcell_offset for ls in sites])
 
-        if len(translated_sites) == 0:
-            return [sites]
+        # if len(translated_sites) == 0:
+        #     return [sites]
         return translated_sites
 
     @property

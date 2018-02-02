@@ -18,7 +18,7 @@ class TestOrbitList(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         from ase.build import bulk
         super(TestOrbitList, self).__init__(*args, **kwargs)
-        self.cutoffs = [0, 5]
+        self.cutoffs = [4.2]
         self.atoms = bulk('Ag', a=4.09)
 
     def setUp(self):
@@ -103,13 +103,15 @@ class TestOrbitList(unittest.TestCase):
             self.orbit_list.get_all_translated_sites(sites), target)
 
         sites = [LatticeSite(0, [1.0, 0.0, 0.0])]
-        target = [[LatticeSite(0, [0.0, 0.0, 0.0])]]
+        target = [[LatticeSite(0, [1.0, 0.0, 0.0])], [LatticeSite(0, [0.0, 0.0, 0.0])]]
         self.assertListEqual(
             self.orbit_list.get_all_translated_sites(sites), target)
 
         sites = [LatticeSite(0, [1.0, 0.0, 0.0]),
                  LatticeSite(0, [0.0, 0.0, 0.0])]
-        target = [[LatticeSite(0, [0.0, 0.0, 0.0]),
+        target = [[LatticeSite(0, [1.0, 0.0, 0.0]),
+                 LatticeSite(0, [0.0, 0.0, 0.0])],
+                 [LatticeSite(0, [0.0, 0.0, 0.0]),
                    LatticeSite(0, [-1, 0.0, 0.0])]]
         self.assertListEqual(
             self.orbit_list.get_all_translated_sites(sites), target)
@@ -117,7 +119,8 @@ class TestOrbitList(unittest.TestCase):
         sites = [LatticeSite(0, [1.0, 2.0, -1.0]),
                  LatticeSite(2, [2.0, 0.0, 0.0])]
 
-        target = [[LatticeSite(0, [0.0, 0.0, 0.0]),
+        target = [sites,
+                [LatticeSite(0, [0.0, 0.0, 0.0]),
                    LatticeSite(2, [1.0, -2.0, 1.0])],
                   [LatticeSite(0, [-1.0, 2.0, -1.0]),
                    LatticeSite(2, [0.0, 0.0, 0.0])]]
@@ -135,17 +138,17 @@ class TestOrbitList(unittest.TestCase):
 
     def test_str(self):
         print(self.orbit_list)
-        print(self.cluster_space_cpp)
+        print(self.cluster_space_cpp)        
         for orbit in self.orbit_list.orbits:
-            for sites in orbit.equivalent_sites:
-                for site in sites:
+            for sites in sorted(orbit.equivalent_sites):
+                for site in sorted(sites):
                     print(site, end= ' ')
                 print()                    
             print("----")
         print("C++ version")
         for orbit in self.cluster_space_cpp.get_orbit_list().get_orbit_list():
-            for sites in orbit.equivalent_sites:
-                for site in sites:
+            for sites in sorted(orbit.equivalent_sites):
+                for site in sorted(sites):
                     print(site, end= ' ')
                 print()                    
             print("----")
