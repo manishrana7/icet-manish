@@ -6,11 +6,20 @@ import timeit
 from ase.build import bulk
 
 from icet.core_py.permutation_matrix import PermutationMatrix
-from icet.core_py.lattice_site import LatticeSite
+#from icet.core_py.lattice_site import LatticeSite
+
+from icet.core_py.lattice_site import LatticeSiteLean as LatticeSite
+
 #from icet.core.orbit_list import __get_lattice_site_permutation_matrix\
 #    as get_lattice_site_permutation_matrix
 
 
+lean_flag = True
+
+if lean_flag:
+    from icet.core_py.lattice_site import LatticeSiteLean as LatticeSite
+else:
+    from icet.core_py.lattice_site import LatticeSite
 
 
 class TestPermutationMatrix(unittest.TestCase):
@@ -99,7 +108,7 @@ class TestPermutationMatrix(unittest.TestCase):
 
         # Create list to be used for benchmark
         n_elements = 20000
-        long_list = n_elements * ([inner_list3] + [inner_list4] + [inner_list5])
+        long_list = n_elements * ([20*inner_list3] + [20*inner_list4] + [20*inner_list5])
         random.shuffle(long_list)
 
 
@@ -124,7 +133,10 @@ class TestPermutationMatrix(unittest.TestCase):
         # convert long_list to numpy array
 
         # shape = (n_rows, n_sites_per_row, 4)
-        long_array1 = np.array([[site.to_list() for site in row] for row in test_list])
+        try:
+            long_array1 = np.array([[site.as_list for site in row] for row in test_list])
+        except:
+            long_array1 = np.array(test_list)
 
         # shape = (n_sites_per_rowm n_rows, 4)
         row_length = len(test_list[0])
@@ -132,16 +144,13 @@ class TestPermutationMatrix(unittest.TestCase):
         long_array2 = np.zeros( (row_length, col_length, 4), 'i')
         for i in range(len(test_list[0])):
             for j in range(len(test_list)):
-                kk = test_list[j][i].to_list()
+                try:
+                    kk = test_list[j][i].as_list
+                except AttributeError:
+                    kk = test_list[j][i]
                 for k in range(4):
                     long_array2[i, j, k] = kk[k]
 
-
-        #print("SHAPE1 {}".format(long_array1.shape))
-        #print("ROW \n{}".format(long_array1[0]))
-        #print("SITE \n{}".format(long_array1[0][0]))
-        #print("SITE \n{}".format(long_array1[0,0]))
-        #print("SHAPE2 {}".format(long_array2.shape))
 
         parms = locals()
         parms.update(globals())
@@ -162,17 +171,16 @@ class TestPermutationMatrix(unittest.TestCase):
 
         # Note that comparison only happens between the first element (element 0) of the inner loop
         # thus inner_lista = (0, 10) together with inner_list1 will only result in one of the lists
-        # remaining because the first element is 'a' in both cases
-        inner_lista = [0, 10]
-        #assertExpectedOutcome([inner_list1, inner_lista], [inner_list1])  # rather than [inner_list2, inner_lista]
+        # remaining because the first element is 0 in both cases
 
+        lean_flag = hasattr(inner_list3[0], 'as_list')
 
     def test__prune_permutation_matrices(self):
-        for lett in ['A', 'B', 'D', 'F', 'G']:  # C is too slow, E fails
+        for lett in ['A', 'B', 'D', 'F', 'G', 'H']:  # C is too slow, E fails
             prune_method = '_prune_permutation_matrix' + lett
-
-            with self.subTest(prune_method=prune_method):
-                self._test__prune_permutation_matrix(prune_method=prune_method)
+            if not lean_flag or lett != 'G':
+                with self.subTest(prune_method=prune_method):
+                    self._test__prune_permutation_matrix(prune_method=prune_method)
 
 
 if __name__ == '__main__':
