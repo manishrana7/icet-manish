@@ -128,6 +128,8 @@ class TestOrbitList(unittest.TestCase):
         self.assertEqual(
             self.orbit_list.permutation_matrix.cutoff, max(self.cutoffs))
 
+    def test_str(self):
+        print(self.orbit_list)
 
 if __name__ == '__main__':
     unittest.main()
