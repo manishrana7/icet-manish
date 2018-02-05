@@ -45,9 +45,15 @@ class OrbitList(object):
     def __init__(self, atoms, cutoffs, verbosity=False):
         self._permutation_matrix = PermutationMatrix(atoms, max(cutoffs))
         for i, row in enumerate(self.permutation_matrix.pm_lattice_sites):
-            for j,site in enumerate(row):
+            for j, site in enumerate(row):
                 if not isinstance(site, LatticeSite):
-                    raise TypeError("Type {} is not type LatticeSite in row {}, col {} permutation matrix with len {} ".format(type(site),i,j,len(self.permutation_matrix.pm_lattice_sites)))
+                    raise TypeError(
+                        "Type {} is not type "
+                        "LatticeSite in row {},"
+                        " col {} permutation"
+                        " matrix with len {} ".format(
+                            type(site), i, j,
+                            len(self.permutation_matrix.pm_lattice_sites)))
 
         self.column1 = self.permutation_matrix.column1
 
@@ -63,7 +69,11 @@ class OrbitList(object):
                 for sites in mbnl.unzip(compressed_sites):
                     for site in sites:
                         if not isinstance(site, LatticeSite):
-                            raise TypeError("Type {} is not type LatticeSite in main mbnl loop in orbit list".format(type(site)))
+                            raise TypeError(
+                                "Type {} is not type"
+                                " LatticeSite in main"
+                                " mbnl loop in orbit"
+                                " list".format(type(site)))
 
                     sites.sort()
                     if self.is_new_orbit(sites):
@@ -80,8 +90,9 @@ class OrbitList(object):
     @property
     def primitive_structure(self):
         """
-        Returns the primitive structure to which the
-        lattice sites in the orbits are referenced to.
+        Returns the primitive structure to
+        which the lattice sites in the
+        orbits are referenced to.
         """
         return self._primitive_structure.copy()
 
@@ -157,21 +168,10 @@ class OrbitList(object):
         for i in range(len(sites)):
             assert len(rows[i]) == len(rows[0])
 
-        for row in rows:
-            for site in row:
-                if not isinstance(site, LatticeSite):
-                    raise TypeError("Type {} is not type LatticeSite in row of rows".format(type(site)))
-        for site in sites:
-            if not isinstance(site, LatticeSite):
-                raise TypeError("Type {} is not type LatticeSite in main make orbit".format(type(site)))
-
         for i in range(len(rows[0])):
             eq_sites = [row[i] for row in rows]
             assert len(eq_sites) == len(sites), "{} != {}".format(
                 len(eq_sites), len(sites))
-            for site in eq_sites:
-                if not isinstance(site, LatticeSite):
-                    raise TypeError("Type {} is not type LatticeSite in eq_sites: make orbit".format(type(site)))
 
             translated_eq_sites = self.get_all_translated_sites(eq_sites)
             sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
@@ -247,7 +247,9 @@ class OrbitList(object):
 
         for site in sites:
             if not isinstance(site, LatticeSite):
-                raise TypeError("Type {} is not type LatticeSite in get_all_translated_sites".format(type(site)))
+                raise TypeError(
+                    "Type {} is not type LatticeSite"
+                    " in get_all_translated_sites".format(type(site)))
 
         translated_sites = [sites]
         for site in sites:

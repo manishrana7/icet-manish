@@ -232,7 +232,7 @@ def find_lattice_site_by_position(atoms, position, tol=1e-4):
         if np.linalg.norm(residual) < tol:
             latNbr = LatticeSite_py(i, unit_cell_offset)
             return latNbr
-    
+
     # found nothing, raise error
     raise RuntimeError("Did not find site in find_lattice_site_by_position")
 

@@ -82,41 +82,47 @@ class TestOrbitList(unittest.TestCase):
     def test_make_orbit(self):
         """
         Test make a new orbit.
-        Test that creating a new orbit from the orbits representative site
+        Test that creating a new orbit from
+        the orbits representative site
         gives back the same orbit.
         """
         # Need to reset taken rows for making a new orbit
         self.orbit_list.taken_rows = set()
 
         for orbit in self.orbit_list.orbits:
-            self.assertEqual(orbit,
-                             self.orbit_list.make_orbit(orbit.representative_sites))
+            self.assertEqual(
+                orbit,
+                self.orbit_list.make_orbit(
+                    orbit.representative_sites))
 
     def test_get_rows(self):
         """
         Test the get row method.
         """
-        indices = [0,1]
+        indices = [0, 1]
         sites = []
         for index in indices:
-            sites.append(self.orbit_list.permutation_matrix.pm_lattice_sites[index][0])
+            sites.append(
+                self.orbit_list.permutation_matrix.pm_lattice_sites[index][0])
 
         rows = self.orbit_list.get_rows(sites)
-        self.assertEqual(rows[0], self.orbit_list.permutation_matrix.pm_lattice_sites[0])
-        self.assertEqual(rows[1], self.orbit_list.permutation_matrix.pm_lattice_sites[1])
+        self.assertEqual(
+            rows[0], self.orbit_list.permutation_matrix.pm_lattice_sites[0])
+        self.assertEqual(
+            rows[1], self.orbit_list.permutation_matrix.pm_lattice_sites[1])
 
     def test_get_indices(self):
         """
         Test the get indices method
         """
-        indices_target = (0,1)
+        indices_target = (0, 1)
         sites = []
         for index in indices_target:
-            sites.append(self.orbit_list.permutation_matrix.pm_lattice_sites[index][0])
+            sites.append(
+                self.orbit_list.permutation_matrix.pm_lattice_sites[index][0])
 
         retval = self.orbit_list.get_row_indices(sites)
         self.assertEqual(indices_target, retval)
-
 
     def test_get_all_translated_sites(self):
         """
@@ -220,7 +226,6 @@ class TestOrbitList(unittest.TestCase):
         atoms.pbc = False
 
         orbit_list = OrbitList(atoms, [0])
-        cluster_space = ClusterSpace(atoms, [0], ["Al", "W"])
         self.assertEqual(len(orbit_list), 4)
 
         # Size 3 also has 4 unique sites
@@ -228,7 +233,6 @@ class TestOrbitList(unittest.TestCase):
         atoms.pbc = False
 
         orbit_list = OrbitList(atoms, [0])
-        cluster_space = ClusterSpace(atoms, [0], ["Al", "W"])
         self.assertEqual(len(orbit_list), 4)
 
         # Test partial pbc:
@@ -240,7 +244,6 @@ class TestOrbitList(unittest.TestCase):
         atoms.pbc = [True, True, False]
 
         orbit_list = OrbitList(atoms, [0])
-        cluster_space = ClusterSpace(atoms, [0], ["Al", "W"])
         self.assertEqual(len(orbit_list), 2)
 
         # Pbc in only one direction, so we effectively have
@@ -250,7 +253,6 @@ class TestOrbitList(unittest.TestCase):
         atoms.pbc = [True, False, False]
 
         orbit_list = OrbitList(atoms, [0])
-        cluster_space = ClusterSpace(atoms, [0], ["Al", "W"])
         self.assertEqual(len(orbit_list), 3)
 
         # Increasing size to 5 will give
@@ -261,7 +263,6 @@ class TestOrbitList(unittest.TestCase):
         atoms.pbc = [True, False, False]
 
         orbit_list = OrbitList(atoms, [0])
-        cluster_space = ClusterSpace(atoms, [0], ["Al", "W"])
         self.assertEqual(len(orbit_list), 6)
 
         # Test pbc = True
@@ -269,7 +270,6 @@ class TestOrbitList(unittest.TestCase):
         atoms.pbc = True
 
         orbit_list = OrbitList(atoms, [0])
-        cluster_space = ClusterSpace(atoms, [0], ["Al", "W"])
         self.assertEqual(len(orbit_list), 1)
 
 
