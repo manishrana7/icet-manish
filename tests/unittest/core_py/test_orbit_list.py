@@ -272,6 +272,82 @@ class TestOrbitList(unittest.TestCase):
         orbit_list = OrbitList(atoms, [0])
         self.assertEqual(len(orbit_list), 1)
 
+    def test_pairs_fcc(self):
+        """
+        Test orbitlist with only pairs and singlets
+        for a fcc system.
+        """
+        # Should get one singlet and one pair
+        atoms = bulk("Al", 'fcc', a=3.0)
+        cutoff = [2.5]
+
+        orbit_list = OrbitList(atoms, cutoff)
+        self.assertEqual(len(orbit_list), 2)
+
+        # Multiplicity of pair should be 6
+        orbit_pair = orbit_list.orbits[1]
+        self.assertEqual(len(orbit_pair), 6)
+
+        cutoff = [3.1]
+
+        # should get another pair at cutoff 3
+        # so three orbits with cutoff 3.1
+        orbit_list = OrbitList(atoms, cutoff)
+        self.assertEqual(len(orbit_list), 3)
+
+        # Multiplicity of second pair should be 3
+        # testing against orbit 1 again since when
+        # Sorted it sorts by len( equivalent sites)
+        orbit_pair = orbit_list.orbits[1]
+        self.assertEqual(len(orbit_pair), 3)
+
+    def test_pairs_bcc(self):
+        """
+        Test orbitlist with only pairs and singlets
+        for a bcc system.
+        """
+        # Should get one singlet and one pair
+        atoms = bulk("Al", 'bcc', a=3.0)
+        cutoff = [2.7]
+        orbit_list = OrbitList(atoms, cutoff)
+        self.assertEqual(len(orbit_list), 2)
+        # Multiplicity of pair should be 6
+        orbit_pair = orbit_list.orbits[1]
+        self.assertEqual(len(orbit_pair), 4)
+
+        #  should get another pair at cutoff 3
+        # so three orbits with cutoff 3.1
+        cutoff = [3.1]
+        orbit_list = OrbitList(atoms, cutoff)
+        self.assertEqual(len(orbit_list), 3)
+
+        # Multiplicity of second pair should be 3
+        # testing against orbit 1 again since
+        # sorted it sorts by len( equivalent sites)
+        orbit_pair1 = orbit_list.orbits[1]
+        orbit_pair2 = orbit_list.orbits[2]
+        self.assertEqual(len(orbit_pair1), 3)
+        self.assertEqual(len(orbit_pair2), 4)
+
+    def test_pairs_hcp(self):
+        """
+        Test orbitlist with only pairs and singlets
+        for a bcc system.
+        """
+
+        atoms = bulk("Al", 'hcp', a=3.0, c=2.5)
+        cutoff = [0]
+        orbit_list = OrbitList(atoms, cutoff)
+        # hcp has one singlet
+        self.assertEqual(len(orbit_list), 1)
+
+        # Gets two pairs
+        #  TODO think if this is correct.
+        atoms = bulk("Al", 'hcp', a=3.0)
+        cutoff = [3.1]
+        orbit_list = OrbitList(atoms, cutoff)
+        self.assertEqual(len(orbit_list), 3)
+
 
 if __name__ == '__main__':
     unittest.main()
