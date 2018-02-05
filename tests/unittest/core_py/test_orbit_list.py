@@ -78,25 +78,45 @@ class TestOrbitList(unittest.TestCase):
         for orbit in self.orbit_list.orbits:
             for sites in orbit.equivalent_sites:
                 self.assertFalse(self.orbit_list.is_new_orbit(sites))
-        
 
     def test_make_orbit(self):
         """
         Test make a new orbit.
+        Test that creating a new orbit from the orbits representative site
+        gives back the same orbit.
         """
-        pass
+        # Need to reset taken rows for making a new orbit
+        self.orbit_list.taken_rows = set()
+
+        for orbit in self.orbit_list.orbits:
+            self.assertEqual(orbit,
+                             self.orbit_list.make_orbit(orbit.representative_sites))
 
     def test_get_rows(self):
         """
         Test the get row method.
         """
-        pass
+        indices = [0,1]
+        sites = []
+        for index in indices:
+            sites.append(self.orbit_list.permutation_matrix.pm_lattice_sites[index][0])
+
+        rows = self.orbit_list.get_rows(sites)
+        self.assertEqual(rows[0], self.orbit_list.permutation_matrix.pm_lattice_sites[0])
+        self.assertEqual(rows[1], self.orbit_list.permutation_matrix.pm_lattice_sites[1])
 
     def test_get_indices(self):
         """
         Test the get indices method
         """
-        pass
+        indices_target = (0,1)
+        sites = []
+        for index in indices_target:
+            sites.append(self.orbit_list.permutation_matrix.pm_lattice_sites[index][0])
+
+        retval = self.orbit_list.get_row_indices(sites)
+        self.assertEqual(indices_target, retval)
+
 
     def test_get_all_translated_sites(self):
         """
