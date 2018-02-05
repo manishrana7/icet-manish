@@ -1,6 +1,6 @@
 import numpy as np
 from ase.neighborlist import NeighborList
-
+from icet.core_py.lattice_site import LatticeSite
 import spglib
 from icet.tools.geometry import (
     get_fractional_positions_from_ase_neighbor_list,
@@ -132,9 +132,10 @@ class PermutationMatrix(object):
                     try:
                         lattice_site = find_lattice_site_by_position(
                             self.primitive_structure, position)
-                        sites.append(lattice_site)
-                    except:  # NOQA
-                        pass
+                        if isinstance(lattice_site, LatticeSite):
+                            sites.append(lattice_site)
+                    except Exception as e:  # NOQA
+                        print("Skipping exception {}".format(e))
             if len(sites) > 0:
                 pm_lattice_sites.append(sites)
             else:

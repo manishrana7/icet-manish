@@ -44,9 +44,16 @@ class OrbitList(object):
 
     def __init__(self, atoms, cutoffs, verbosity=False):
         self._permutation_matrix = PermutationMatrix(atoms, max(cutoffs))
+        for i, row in enumerate(self.permutation_matrix.pm_lattice_sites):
+            for j,site in enumerate(row):
+                if not isinstance(site, LatticeSite):
+                    raise TypeError("Type {} is not type LatticeSite in row {}, col {} permutation matrix with len {} ".format(type(site),i,j,len(self.permutation_matrix.pm_lattice_sites)))
+
         self.column1 = self.permutation_matrix.column1
 
         assert len(set(self.column1)) == len(self.column1)
+        print("column1 length ",len(self.column1), atoms.pbc)
+        print(self.column1)
         self._primitive_structure = self.permutation_matrix.primitive_structure
         mbnl = ManyBodyNeighborList(self.primitive_structure, cutoffs)
         self.taken_rows = set()
@@ -55,6 +62,10 @@ class OrbitList(object):
             mb_neigbhors_index = mbnl.build(index)
             for compressed_sites in mb_neigbhors_index:
                 for sites in mbnl.unzip(compressed_sites):
+                    for site in sites:
+                        if not isinstance(site, LatticeSite):
+                            raise TypeError("Type {} is not type LatticeSite in main mbnl loop in orbit list".format(type(site)))
+
                     sites.sort()
                     if self.is_new_orbit(sites):
                         orbit = self.make_orbit(sites)
@@ -99,8 +110,13 @@ class OrbitList(object):
         translated_eq_sites = self.get_all_translated_sites(sites)
         if len(translated_eq_sites) == 0:
             raise RuntimeError("translated_eq_sites is empty in is new orbit")
-
-        sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
+        try:
+            sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
+        except RuntimeError as e:
+            if False and "Did not find any of the " in str(e):
+                return False
+            else:
+                raise RuntimeError(e)
         for site_index in sites_indices_match:
             if self.is_rows_taken(site_index[1]):
                 return False
@@ -142,10 +158,21 @@ class OrbitList(object):
         for i in range(len(sites)):
             assert len(rows[i]) == len(rows[0])
 
+        for row in rows:
+            for site in row:
+                if not isinstance(site, LatticeSite):
+                    raise TypeError("Type {} is not type LatticeSite in row of rows".format(type(site)))
+        for site in sites:
+            if not isinstance(site, LatticeSite):
+                raise TypeError("Type {} is not type LatticeSite in main make orbit".format(type(site)))
+
         for i in range(len(rows[0])):
             eq_sites = [row[i] for row in rows]
             assert len(eq_sites) == len(sites), "{} != {}".format(
                 len(eq_sites), len(sites))
+            for site in eq_sites:
+                if not isinstance(site, LatticeSite):
+                    raise TypeError("Type {} is not type LatticeSite in eq_sites: make orbit".format(type(site)))
 
             translated_eq_sites = self.get_all_translated_sites(eq_sites)
             sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
@@ -198,6 +225,7 @@ class OrbitList(object):
 
         for index in indices:
             if index is None:
+                print(sites)
                 raise RuntimeError("index not found for sites")
         # TODO check if this should be done elsewhere
         return tuple(sorted(indices))
@@ -218,6 +246,10 @@ class OrbitList(object):
         ----------
         sites : list of icet Lattice Sites object
         """
+
+        for site in sites:
+            if not isinstance(site, LatticeSite):
+                raise TypeError("Type {} is not type LatticeSite in get_all_translated_sites".format(type(site)))
 
         translated_sites = [sites]
         for site in sites:
@@ -256,7 +288,7 @@ class OrbitList(object):
                 rows = self.get_row_indices(sites)
                 matched_sites.append(tuple((sites, rows)))
             except RuntimeError as e:
-                if "index not found for sites" in e:
+                if "index not found for sites" in str(e):
                     continue
                 else:
                     raise RuntimeError(e)
@@ -266,7 +298,7 @@ class OrbitList(object):
             raise RuntimeError("Did not find any of the "
                                "translated sites in col1 "
                                "of permutation matrix in "
-                               "function get_matches_in_pm"
+                               "function get_matches_in_pm "
                                "in orbit list")
 
     def __str__(self):

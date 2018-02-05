@@ -7,7 +7,7 @@ from icet.core_py.orbit_list import OrbitList
 from icet.core_py.lattice_site import LatticeSite
 from icet.core_py.permutation_matrix import PermutationMatrix
 # from icet.core.orbit_list import create_orbit_list
-
+from ase.build import bulk
 # from icet import Structure
 from icet import ClusterSpace
 
@@ -17,16 +17,16 @@ class TestOrbitList(unittest.TestCase):
     Container for tests of the class functionality
     '''
 
-    def __init__(self, *args, **kwargs):
-        from ase.build import bulk
+    def __init__(self, *args, **kwargs):        
         super(TestOrbitList, self).__init__(*args, **kwargs)
         self.cutoffs = [4.2]
-        self.atoms = bulk('Ag', a=4.09)
+        self.atoms = bulk('Ag', a=4.09)        
 
     def setUp(self):
         '''
         Instantiate class before each test.
         '''
+        print("pbc in setUp ",self.atoms.pbc)
         self.orbit_list = OrbitList(self.atoms, self.cutoffs)
         # self._structure = Structure.from_atoms(self.atoms)
 
@@ -170,6 +170,33 @@ class TestOrbitList(unittest.TestCase):
                 print()
             print("----")
 
+
+    def test_singlets_particle(self):
+        """
+        Test that a particle get correct number of singlets.
+        """
+        #  One corner site,X,
+        #  one next to the corner along the side, O,
+        #  one site on the surface, K,
+        #  and one of the center 2x2x2 sites J
+        #  and in the darkness to bind them all 
+        #
+        #    from the side:
+        #    X O O X
+        #    H K K H
+        #    H K K H
+        #    X O O X 
+        #
+        #  below the K sites are another J site in the 2x2x2 positions
+        #
+        atoms = bulk("Al",'sc', a=1).repeat([4,4,4])
+        atoms.pbc = False
+
+        orbit_list = OrbitList(atoms,[0])
+        cluster_space = ClusterSpace(atoms,[0],["Al","W"])
+        print(cluster_space)
+        self.assertEqual(len(orbit_list), 4)
+        
 
 if __name__ == '__main__':
     unittest.main()
