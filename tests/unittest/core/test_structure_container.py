@@ -134,26 +134,29 @@ class TestStructureContainer(unittest.TestCase):
         atoms = self.structure_list[0]
         properties = self.properties_list[0]
         tag = "struct5"
-        # attach calculator
+        self.sc.add_structure(atoms, tag, properties)
+        self.assertEqual(self.sc.__len__(), len(self.structure_list)+1)
+        # implicit properties in attached calculator
         calc = EMT()
         atoms.set_calculator(calc)
         atoms.get_potential_energy()
         self.sc.add_structure(atoms)
-        self.assertEqual(self.sc.__len__(), len(self.structure_list)+1)
-        self.sc.add_structure(atoms, tag, properties)
         self.assertEqual(self.sc.__len__(), len(self.structure_list)+2)
 
     def test_get_fit_data(self):
         '''
         Testing get_fit_data functionality
         '''
+        import numpy as np
         cluster_vectors, properties = self.sc.get_fit_data()
-        # test cluster_vectors
+        # testing outputs have ndarray type
+        self.assertIsInstance(cluster_vectors, np.ndarray)
+        self.assertIsInstance(properties, np.ndarray)
+        # testing values of cluster_vectors and properties
         for atoms, cv in zip(self.structure_list, cluster_vectors):
             retval = list(cv)
             target = list(self.cs.get_cluster_vector(atoms))
             self.assertAlmostEqual(retval, target, places=9)
-        # test properties
         for target, retval in zip(self.properties_list, properties):
             self.assertEqual(retval, target['energy'])
         # passing a list of indexes
@@ -162,9 +165,9 @@ class TestStructureContainer(unittest.TestCase):
         atoms = self.structure_list[0]
         target = list(self.cs.get_cluster_vector(atoms))
         self.assertAlmostEqual(retval, target, places=9)
-        retval_prop = properties[0]
-        target_prop = self.properties_list[0]
-        self.assertEqual(retval_prop, target_prop['energy'])
+        retval2 = properties[0]
+        target2 = self.properties_list[0]
+        self.assertEqual(retval2, target2['energy'])
 
     def test_repr(self):
         '''
