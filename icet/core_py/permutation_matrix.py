@@ -158,7 +158,6 @@ class PermutationMatrix(object):
                         msg += ['i: {} j: {}'.format(i, j)]
                         print(' '.join(msg))
 
-
     @property
     def column1(self):
         """

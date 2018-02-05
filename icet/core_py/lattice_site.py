@@ -30,6 +30,7 @@ class LatticeSite(object):
             self._unitcell_offset = np.array((unitcell_offset))
         else:
             self._unitcell_offset = unitcell_offset
+
     @property
     def index(self):
         """
@@ -102,7 +103,6 @@ class LatticeSite(object):
 
         return self.__str__()
 
-
     def __add__(self, other):
         """
         Define the add operator.
@@ -113,7 +113,7 @@ class LatticeSite(object):
             raise TypeError("Adding orbit with {}".format(other))
         site = LatticeSite(self.index, self.unitcell_offset + other)
         return site
-        
+
     def __sub__(self, other):
         """
         Define the subtract operator.
@@ -124,4 +124,3 @@ class LatticeSite(object):
             raise TypeError("Adding orbit with {}".format(other))
         site = LatticeSite(self.index, self.unitcell_offset - other)
         return site
-        

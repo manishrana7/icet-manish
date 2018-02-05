@@ -74,14 +74,16 @@ class ManyBodyNeighborList(object):
         for k in range(2, len(self.neighbor_lists) + 2):
 
             """ Get neighbors of index in icet format """
-            neighbor = self.get_neighbor_from_nl(self.neighbor_lists[k - 2], index)
+            neighbor = self.get_neighbor_from_nl(
+                self.neighbor_lists[k - 2], index)
 
             zero_vector = np.array([0., 0., 0., ])
 
             current_original_neighbors = [LatticeSite(index, zero_vector)]
 
             self.combine_to_higher_order(
-                self.neighbor_lists[k - 2], many_body_neighbor_indices, neighbor,
+                self.neighbor_lists[k -
+                                    2], many_body_neighbor_indices, neighbor,
                 current_original_neighbors, bothways, k)
 
         return sorted(many_body_neighbor_indices,
@@ -245,7 +247,6 @@ class ManyBodyNeighborList(object):
                 return mycmp(self.obj, other.obj)
         return K
 
-
     def unzip(self, compressed_sites):
         """
         Return a list of list of lattice sites
@@ -256,11 +257,12 @@ class ManyBodyNeighborList(object):
         compressed_sites : tuple of list of lattice sites
         """
         unzipped_sites = []
-        # return  [ [compressed_sites[0] + site] for site in compressed_sites[1]]
+        # return  [ [compressed_sites[0] + site]
+        #  for site in compressed_sites[1]]
 
-        if len(compressed_sites[1])==0:
+        if len(compressed_sites[1]) == 0:
             return [compressed_sites[0]]
         else:
             for site in compressed_sites[1]:
-                unzipped_sites.append(list(compressed_sites[0]) + [site] )
+                unzipped_sites.append(list(compressed_sites[0]) + [site])
             return unzipped_sites

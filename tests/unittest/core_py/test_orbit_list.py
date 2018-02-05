@@ -10,6 +10,8 @@ from icet.core_py.permutation_matrix import PermutationMatrix
 
 # from icet import Structure
 from icet import ClusterSpace
+
+
 class TestOrbitList(unittest.TestCase):
     '''
     Container for tests of the class functionality
@@ -28,7 +30,8 @@ class TestOrbitList(unittest.TestCase):
         self.orbit_list = OrbitList(self.atoms, self.cutoffs)
         # self._structure = Structure.from_atoms(self.atoms)
 
-        self.cluster_space_cpp = ClusterSpace(self.atoms, self.cutoffs,["Al","H"])
+        self.cluster_space_cpp = ClusterSpace(
+            self.atoms, self.cutoffs, ["Al", "H"])
 
     def test_init(self):
         '''
@@ -53,8 +56,9 @@ class TestOrbitList(unittest.TestCase):
         Testing get_orbit_list_info functionality
         '''
         self.orbit_list.primitive_structure
-        self.assertEqual(self.orbit_list.primitive_structure,
-                         self.orbit_list.permutation_matrix.primitive_structure)
+        self.assertEqual(
+            self.orbit_list.primitive_structure,
+            self.orbit_list.permutation_matrix.primitive_structure)
 
     def test_property_orbit(self):
         """
@@ -103,15 +107,16 @@ class TestOrbitList(unittest.TestCase):
             self.orbit_list.get_all_translated_sites(sites), target)
 
         sites = [LatticeSite(0, [1.0, 0.0, 0.0])]
-        target = [[LatticeSite(0, [1.0, 0.0, 0.0])], [LatticeSite(0, [0.0, 0.0, 0.0])]]
+        target = [[LatticeSite(0, [1.0, 0.0, 0.0])], [
+            LatticeSite(0, [0.0, 0.0, 0.0])]]
         self.assertListEqual(
             self.orbit_list.get_all_translated_sites(sites), target)
 
         sites = [LatticeSite(0, [1.0, 0.0, 0.0]),
                  LatticeSite(0, [0.0, 0.0, 0.0])]
         target = [[LatticeSite(0, [1.0, 0.0, 0.0]),
-                 LatticeSite(0, [0.0, 0.0, 0.0])],
-                 [LatticeSite(0, [0.0, 0.0, 0.0]),
+                   LatticeSite(0, [0.0, 0.0, 0.0])],
+                  [LatticeSite(0, [0.0, 0.0, 0.0]),
                    LatticeSite(0, [-1, 0.0, 0.0])]]
         self.assertListEqual(
             self.orbit_list.get_all_translated_sites(sites), target)
@@ -120,12 +125,24 @@ class TestOrbitList(unittest.TestCase):
                  LatticeSite(2, [2.0, 0.0, 0.0])]
 
         target = [sites,
-                [LatticeSite(0, [0.0, 0.0, 0.0]),
+                  [LatticeSite(0, [0.0, 0.0, 0.0]),
                    LatticeSite(2, [1.0, -2.0, 1.0])],
                   [LatticeSite(0, [-1.0, 2.0, -1.0]),
                    LatticeSite(2, [0.0, 0.0, 0.0])]]
         self.assertListEqual(
             self.orbit_list.get_all_translated_sites(sites), target)
+
+    def test_no_duplicates_in_orbit(self):
+        """
+        Test that there are no duplicate sites in orbits
+        equivalent sites.
+        """
+        for orbit in self.orbit_list.orbits:
+            for i, site_i in enumerate(orbit.equivalent_sites):
+                for j, site_j in enumerate(orbit.equivalent_sites):
+                    if j <= i:
+                        continue
+                    self.assertNotEqual(sorted(site_i), sorted(site_j))
 
     def test_property_permutation_matrix(self):
         '''
@@ -138,20 +155,21 @@ class TestOrbitList(unittest.TestCase):
 
     def test_str(self):
         print(self.orbit_list)
-        print(self.cluster_space_cpp)        
+        print(self.cluster_space_cpp)
         for orbit in self.orbit_list.orbits:
             for sites in sorted(orbit.equivalent_sites):
                 for site in sorted(sites):
-                    print(site, end= ' ')
-                print()                    
+                    print(site, end=' ')
+                print()
             print("----")
         print("C++ version")
         for orbit in self.cluster_space_cpp.get_orbit_list().get_orbit_list():
             for sites in sorted(orbit.equivalent_sites):
                 for site in sorted(sites):
-                    print(site, end= ' ')
-                print()                    
+                    print(site, end=' ')
+                print()
             print("----")
-            
+
+
 if __name__ == '__main__':
     unittest.main()

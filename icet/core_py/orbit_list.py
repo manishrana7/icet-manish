@@ -6,7 +6,6 @@ from icet.core_py.many_body_neighbor_list import ManyBodyNeighborList
 from icet.core_py.lattice_site import LatticeSite
 
 
-
 class OrbitList(object):
     """
     The orbit list object has an internal list of orbits.
@@ -61,6 +60,7 @@ class OrbitList(object):
                         orbit = self.make_orbit(sites)
                         self._orbits.append(orbit)
         self.sort()
+
     def sort(self):
         """
         Sort the list of orbits.
@@ -146,7 +146,7 @@ class OrbitList(object):
             eq_sites = [row[i] for row in rows]
             assert len(eq_sites) == len(sites), "{} != {}".format(
                 len(eq_sites), len(sites))
-            
+
             translated_eq_sites = self.get_all_translated_sites(eq_sites)
             sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
             new_sites = True
@@ -155,11 +155,11 @@ class OrbitList(object):
                     new_sites = False
                     break
             if new_sites:
-                orbit.equivalent_sites.append(sites_indices_match[0][0])                
+                orbit.equivalent_sites.append(sites_indices_match[0][0])
             for site_index in sites_indices_match:
                 self.take_row(site_index[1])
             # if not self.is_rows_taken(sites_indices_match[0][1]):
-            #     orbit.equivalent_sites.append(eq_sites)                
+            #     orbit.equivalent_sites.append(eq_sites)
             #     for site_index in sites_indices_match:
             #         self.take_row(site_index[1])
 
@@ -173,12 +173,13 @@ class OrbitList(object):
         Parameters
         ----------
 
-        sites : list of icet Lattice Site objects        
+        sites : list of icet Lattice Site objects
 
         """
         row_indices = self.get_row_indices(sites)
 
-        return [self.permutation_matrix.pm_lattice_sites[index] for index in row_indices]
+        return [self.permutation_matrix.pm_lattice_sites[index]
+                for index in row_indices]
 
     def get_row_indices(self, sites):
         """
@@ -196,14 +197,15 @@ class OrbitList(object):
                     indices[j] = i
 
         for index in indices:
-            if index == None:
+            if index is None:
                 raise RuntimeError("index not found for sites")
-        return tuple(sorted(indices))  # TODO check if this should be done elsewhere
+        # TODO check if this should be done elsewhere
+        return tuple(sorted(indices))
         # return [self.column1.index(site) for site in sites]
 
     def get_all_translated_sites(self, sites):
         """
-        Construct a list of lists of sites. 
+        Construct a list of lists of sites.
         Will for each site that has
         a unitcell offset !=[0,0,0] translate all sites so
         *that* site is in [0,0,0] and the others sides just
@@ -223,16 +225,7 @@ class OrbitList(object):
                 translated_sites.append(
                     [ls - site.unitcell_offset for ls in sites])
 
-        # if len(translated_sites) == 0:
-        #     return [sites]
         return translated_sites
-
-    @property
-    def permutation_matrix(self):
-        """
-        Returns the core_py permutation matrix object.
-        """
-        return self._permutation_matrix
 
     def __len__(self):
         """
@@ -279,7 +272,7 @@ class OrbitList(object):
     def __str__(self):
         nice_str = ''
         for i, orbit in enumerate(self.orbits):
-            nice_str += "orbit {} - Multiplicity {} '\n'".format(i,len(orbit))
+            nice_str += "orbit {} - Multiplicity {} '\n'".format(i, len(orbit))
         return nice_str
 
     def is_rows_taken(self, rows):
@@ -293,7 +286,7 @@ class OrbitList(object):
         rows : list of ints
             Refers to row indices of
             the permutation matrix
-        """        
+        """
         if rows in self.taken_rows:
             return True
         return False
@@ -303,6 +296,6 @@ class OrbitList(object):
         Add this row to the list of taken rows
         in the permtuation matrix.
 
-        row : list (tuple) of int        
+        row : list (tuple) of int
         """
         self.taken_rows.add(row)
