@@ -52,8 +52,7 @@ class OrbitList(object):
         self.column1 = self.permutation_matrix.column1
 
         assert len(set(self.column1)) == len(self.column1)
-        print("column1 length ",len(self.column1), atoms.pbc)
-        print(self.column1)
+
         self._primitive_structure = self.permutation_matrix.primitive_structure
         mbnl = ManyBodyNeighborList(self.primitive_structure, cutoffs)
         self.taken_rows = set()
@@ -225,7 +224,6 @@ class OrbitList(object):
 
         for index in indices:
             if index is None:
-                print(sites)
                 raise RuntimeError("index not found for sites")
         # TODO check if this should be done elsewhere
         return tuple(sorted(indices))
