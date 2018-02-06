@@ -434,7 +434,7 @@ std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromRow(const std:
 }
 
 /**
-This will take the latticeneigbhors, and for each site outside the unitcell will translate it inside the unitcell
+This will take the latticeneighbors, and for each site outside the unitcell will translate it inside the unitcell
 and translate the other sites with the same translation.
 
 This translation will give rise to equivalent sites that sometimes are not found by using the set of crystal symmetries given
