@@ -6,10 +6,10 @@ import time
 
 def time_orbit_list(atoms, cutoffs):
     """
-    Return timing on creating orbitlist    
+    Return timing on creating orbitlist
     """
     t = time.process_time()
-    orbit = OrbitList(atoms, cutoffs)
+    orbit = OrbitList(atoms, cutoffs)  # noqa
     elapsed_time = time.process_time() - t
 
     return elapsed_time
