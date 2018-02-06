@@ -18,10 +18,7 @@ class Orbit(object):
     TODO
     ----
     * think about adding __hash__ ?
-    * think about overloading orbit + orbit
-    Blocked TODO's by Cluster class:
-    * geometrical_size() (returns -1 now so we can test it)
-    * representative_cluster
+    * think about overloading orbit + orbit    
     """
 
     def __init__(self, cluster):
@@ -99,8 +96,10 @@ class Orbit(object):
     def sort(self):
         """
         Sort the equivalent sites list.
-        """
+        """        
         self._equivalent_sites.sort()
+        
+        
 
     def __eq__(self, other):
         """

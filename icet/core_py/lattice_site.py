@@ -127,7 +127,7 @@ class LatticeSite(object):
 
 
 
-def cmp_list_of_lattice_sites(first, second):
+def cmp_mbnl_lattice_site_list(first, second):
     """
     Comparer for list of lattice sites.
     First compare len of lists then do the normal,
@@ -137,6 +137,22 @@ def cmp_list_of_lattice_sites(first, second):
         return len(first[0]) < len(second[0])
     else:
         return first < second
+
+def cmp_list_of_lattice_sites(first, second):
+    """
+    Comparer for list of lattice sites.
+    First compare len of lists then do the normal,
+    lexicographical comparing.
+    """
+    if len(first) != len(second):
+        return len(first) < len(second)
+    else:
+        for site1, site2 in zip(first, second):
+            if site1 != site2:
+                return site1 < site2
+    return False
+
+
 
 def cmp_to_key(mycmp):
     'Convert a cmp= function into a key= function'

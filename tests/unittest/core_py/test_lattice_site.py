@@ -1,6 +1,6 @@
 from icet.core.lattice_site import LatticeSite as LatticeSite_cpp
 from icet.core_py.lattice_site import LatticeSite as LatticeSite
-from icet.core_py.lattice_site import cmp_list_of_lattice_sites
+from icet.core_py.lattice_site import cmp_mbnl_lattice_site_list, cmp_list_of_lattice_sites
 
 import numpy as np
 
@@ -169,7 +169,7 @@ class TestLatticeSite(unittest.TestCase):
         lattice_site2.unitcell_offset -= [1, 1, -3]
         self.assertEqual(lattice_site, lattice_site2)
 
-    def test_cmp_list_of_lattice_sites(self):
+    def test_cmp_mbnl_lattice_site_list(self):
         """
         Test the comparer of list of lattice site.
         """
@@ -186,6 +186,29 @@ class TestLatticeSite(unittest.TestCase):
         for index, offset in zip(indices, offsets):
             sites2.append(LatticeSite(index, offset))
         sites2 = [sites2, []]
+        # Test that a smaller list is considered smaller
+        self.assertTrue(cmp_mbnl_lattice_site_list(sites2, sites))
+
+        # Test that equality is not less than
+        self.assertFalse(cmp_mbnl_lattice_site_list(sites, sites))
+
+    def test_cmp_lattice_site_list(self):
+        """
+        Test the comparer of list of lattice site.
+        """
+        indices = range(10)
+        offsets = [[x, y, z]
+                   for x, y, z in zip(range(10), range(10), range(10))]
+        sites = []
+        for index, offset in zip(indices, offsets):
+            sites.append(LatticeSite(index+1, offset))
+        sites = [sites] 
+        indices = range(10)
+        offsets = [[x, y, z] for x, y, z in zip(range(5), range(5), range(5))]
+        sites2 = []
+        for index, offset in zip(indices, offsets):
+            sites2.append(LatticeSite(index, offset))
+        sites2 = [sites2]
         # Test that a smaller list is considered smaller
         self.assertTrue(cmp_list_of_lattice_sites(sites2, sites))
 

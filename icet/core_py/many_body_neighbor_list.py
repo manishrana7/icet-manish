@@ -3,7 +3,7 @@ import numpy as np
 from icet.core_py.lattice_site import LatticeSite
 import copy
 from ase.neighborlist import NeighborList
-from icet.core_py.lattice_site import cmp_list_of_lattice_sites, cmp_to_key
+from icet.core_py.lattice_site import cmp_mbnl_lattice_site_list, cmp_to_key
 
 class ManyBodyNeighborList(object):
 
@@ -87,7 +87,7 @@ class ManyBodyNeighborList(object):
                 current_original_neighbors, bothways, k)
 
         return sorted(many_body_neighbor_indices,
-                      key=cmp_to_key(cmp_list_of_lattice_sites))
+                      key=cmp_to_key(cmp_mbnl_lattice_site_list))
 
     def combine_to_higher_order(self, nl, many_body_neighbor_indices,
                                 neighbor_i, current_original_neighbors,

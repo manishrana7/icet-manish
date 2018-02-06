@@ -41,6 +41,12 @@ class TestOrbitList(unittest.TestCase):
         orbit_list = OrbitList(self.atoms, self.cutoffs)
         self.assertIsInstance(orbit_list, OrbitList)
 
+    def test_len(self):
+        """
+        Test that length is equal to number of orbits.
+        """
+        self.assertEqual(len(self.orbit_list), len(self.orbit_list.orbits))
+
     def test_sort(self):
         '''
         Testing len functionality
@@ -87,13 +93,12 @@ class TestOrbitList(unittest.TestCase):
         gives back the same orbit.
         """
         # Need to reset taken rows for making a new orbit
+        
         self.orbit_list.taken_rows = set()
+        for orbit in self.orbit_list.orbits:            
+            eq_orbit = self.orbit_list.make_orbit(orbit.representative_sites)
+            self.assertEqual(len(orbit), len(eq_orbit))
 
-        for orbit in self.orbit_list.orbits:
-            self.assertEqual(
-                orbit,
-                self.orbit_list.make_orbit(
-                    orbit.representative_sites))
 
     def test_get_rows(self):
         """
@@ -191,15 +196,15 @@ class TestOrbitList(unittest.TestCase):
         print(self.cluster_space_cpp)
 
         for orbit in self.orbit_list.orbits:
-            for sites in sorted(orbit.equivalent_sites):
-                for site in sorted(sites):
+            for sites in orbit.equivalent_sites:
+                for site in sites:
                     print(site, end=' ')
                 print()
             print("----")
         print("C++ version")
         for orbit in self.cluster_space_cpp.get_orbit_list().get_orbit_list():
-            for sites in sorted(orbit.equivalent_sites):
-                for site in sorted(sites):
+            for sites in orbit.equivalent_sites:
+                for site in sites:
                     print(site, end=' ')
                 print()
             print("----")
@@ -295,7 +300,7 @@ class TestOrbitList(unittest.TestCase):
         orbit_list = OrbitList(atoms, cutoff)
         self.assertEqual(len(orbit_list), 3)
 
-        # Multiplicity of second pair should be 3                
+        # Multiplicity of second pair should be 3
         orbit_pair = orbit_list.orbits[2]
         self.assertEqual(len(orbit_pair), 3)
 
@@ -319,7 +324,7 @@ class TestOrbitList(unittest.TestCase):
         orbit_list = OrbitList(atoms, cutoff)
         self.assertEqual(len(orbit_list), 3)
 
-        # Multiplicity of second pair should be 3                
+        # Multiplicity of second pair should be 3
         orbit_pair1 = orbit_list.orbits[1]
         orbit_pair2 = orbit_list.orbits[2]
         self.assertEqual(len(orbit_pair1), 4)
@@ -343,6 +348,31 @@ class TestOrbitList(unittest.TestCase):
         cutoff = [3.1]
         orbit_list = OrbitList(atoms, cutoff)
         self.assertEqual(len(orbit_list), 3)
+
+    def test_rows_taken(self):
+        """
+        This will test both method is_taken_rows
+        and take_row
+        """
+        # clear taken rows
+        self.orbit_list.taken_rows = set()
+        row_indices = tuple([0, 1, 2])
+        self.assertFalse(self.orbit_list.is_rows_taken(row_indices))
+
+        # take rows
+        self.orbit_list.take_row(row_indices)
+        self.assertTrue(self.orbit_list.is_rows_taken(row_indices))
+
+    def test_get_matches_in_pm(self):
+        """
+        Test function get_matches_in_pm
+        """
+
+        indices = [0, 5, 2]
+        sites = [[self.orbit_list.column1[i] for i in indices]]
+
+        match = self.orbit_list.get_matches_in_pm(sites)
+        self.assertEqual(match[0][1], tuple(sorted(indices)))
 
 
 if __name__ == '__main__':

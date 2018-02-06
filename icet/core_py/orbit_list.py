@@ -6,6 +6,7 @@ from icet.core_py.many_body_neighbor_list import ManyBodyNeighborList
 from icet.core_py.lattice_site import LatticeSite
 from icet.core.cluster import Cluster
 
+from operator import itemgetter
 class OrbitList(object):
     """
     The orbit list object has an internal list of orbits.
@@ -66,15 +67,7 @@ class OrbitList(object):
         for index in range(len(self.primitive_structure)):
             mb_neigbhors_index = mbnl.build(index)
             for compressed_sites in mb_neigbhors_index:
-                for sites in mbnl.unzip(compressed_sites):
-                    for site in sites:
-                        if not isinstance(site, LatticeSite):
-                            raise TypeError(
-                                "Type {} is not type"
-                                " LatticeSite in main"
-                                " mbnl loop in orbit"
-                                " list".format(type(site)))
-
+                for sites in mbnl.unzip(compressed_sites):                    
                     sites.sort()
                     if self.is_new_orbit(sites):
                         orbit = self.make_orbit(sites)
@@ -117,6 +110,7 @@ class OrbitList(object):
         """
         if len(sites) == 0:
             raise RuntimeError("sites is empty in is new orbit")
+
         translated_eq_sites = self.get_all_translated_sites(sites)
         if len(translated_eq_sites) == 0:
             raise RuntimeError("translated_eq_sites is empty in is new orbit")
@@ -131,9 +125,6 @@ class OrbitList(object):
             if self.is_rows_taken(site_index[1]):
                 return False
         return True
-        # if not self.is_rows_taken(sites_indices_match[0][1]):
-        #     return True
-        # return False
 
     def make_orbit(self, sites):
         """
@@ -149,9 +140,6 @@ class OrbitList(object):
         sites : list of icet Lattice Site objects
 
         returns orbit : icet Orbit object
-
-        TODO:
-        * add cluster (geometrical version) to the orbit
         """
         
 
@@ -172,8 +160,6 @@ class OrbitList(object):
         orbit = Orbit(cluster)
         for i in range(len(rows[0])):
             eq_sites = [row[i] for row in rows]
-            assert len(eq_sites) == len(sites), "{} != {}".format(
-                len(eq_sites), len(sites))
 
             translated_eq_sites = self.get_all_translated_sites(eq_sites)
             sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
@@ -183,14 +169,11 @@ class OrbitList(object):
                     new_sites = False
                     break
             if new_sites:
-                orbit.equivalent_sites.append(sites_indices_match[0][0])
+                orbit.equivalent_sites.append(eq_sites)
             for site_index in sites_indices_match:
                 self.take_row(site_index[1])
-            # if not self.is_rows_taken(sites_indices_match[0][1]):
-            #     orbit.equivalent_sites.append(eq_sites)
-            #     for site_index in sites_indices_match:
-            #         self.take_row(site_index[1])
 
+        orbit.sort()
         return orbit
 
     def get_rows(self, sites):
@@ -295,7 +278,7 @@ class OrbitList(object):
                 else:
                     raise RuntimeError(e)
         if len(matched_sites) > 0:
-            return matched_sites
+            return sorted(matched_sites)
         else:
             raise RuntimeError("Did not find any of the "
                                "translated sites in col1 "
@@ -309,6 +292,7 @@ class OrbitList(object):
             nice_str += "orbit {} - Multiplicity {} '\n'".format(i, len(orbit))
         return nice_str
 
+
     def is_rows_taken(self, rows):
         """
         Checks if these particual rows in the
@@ -317,7 +301,7 @@ class OrbitList(object):
 
         parameters
         ---------
-        rows : list of ints
+        rows : tuple of ints
             Refers to row indices of
             the permutation matrix
         """
