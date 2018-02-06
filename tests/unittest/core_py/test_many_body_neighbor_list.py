@@ -201,29 +201,6 @@ class TestManyBodyNeighborList(unittest.TestCase):
             index, self.neighbor_lists[0], mbn_indices, bothways=False)
         self.assertEqual(mbn_indices, target)
 
-    def test_cmp_list_of_lattice_sites(self):
-        """
-        Test the comparer of list of lattice site.
-        """
-        indices = range(10)
-        offsets = [[x, y, z]
-                   for x, y, z in zip(range(10), range(10), range(10))]
-        sites = []
-        for index, offset in zip(indices, offsets):
-            sites.append(LatticeSite(index, offset))
-        sites = [sites, []]
-        indices = range(5)
-        offsets = [[x, y, z] for x, y, z in zip(range(5), range(5), range(5))]
-        sites2 = []
-        for index, offset in zip(indices, offsets):
-            sites2.append(LatticeSite(index, offset))
-        sites2 = [sites2, []]
-        # Test that a smaller list is considered smaller
-        self.assertTrue(self.mbnl.cmp_list_of_lattice_sites(sites2, sites))
-
-        # Test that equality is not less than
-        self.assertFalse(self.mbnl.cmp_list_of_lattice_sites(sites, sites))
-
     def test_unzip(self):
         """
         Test the unzip functionality.

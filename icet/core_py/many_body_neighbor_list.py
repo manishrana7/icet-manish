@@ -3,7 +3,7 @@ import numpy as np
 from icet.core_py.lattice_site import LatticeSite
 import copy
 from ase.neighborlist import NeighborList
-
+from icet.core_py.lattice_site import cmp_list_of_lattice_sites, cmp_to_key
 
 class ManyBodyNeighborList(object):
 
@@ -87,7 +87,7 @@ class ManyBodyNeighborList(object):
                 current_original_neighbors, bothways, k)
 
         return sorted(many_body_neighbor_indices,
-                      key=self.cmp_to_key(self.cmp_list_of_lattice_sites))
+                      key=cmp_to_key(cmp_list_of_lattice_sites))
 
     def combine_to_higher_order(self, nl, many_body_neighbor_indices,
                                 neighbor_i, current_original_neighbors,
@@ -210,42 +210,6 @@ class ManyBodyNeighborList(object):
         for ind, offs in zip(indices.copy(), offsets.copy()):
             neighbor.append(LatticeSite(ind, offs))
         return neighbor
-
-    def cmp_list_of_lattice_sites(self, first, second):
-        """
-        Comparer for list of lattice sites.
-        First compare len of lists then do the normal,
-        lexicographical comparing.
-        """
-        if len(first[0]) != len(second[0]):
-            return len(first[0]) < len(second[0])
-        else:
-            return first < second
-
-    def cmp_to_key(self, mycmp):
-        'Convert a cmp= function into a key= function'
-        class K:
-            def __init__(self, obj, *args):
-                self.obj = obj
-
-            def __lt__(self, other):
-                return mycmp(self.obj, other.obj)
-
-            def __gt__(self, other):
-                return mycmp(self.obj, other.obj)
-
-            def __eq__(self, other):
-                return mycmp(self.obj, other.obj)
-
-            def __le__(self, other):
-                return mycmp(self.obj, other.obj)
-
-            def __ge__(self, other):
-                return mycmp(self.obj, other.obj)
-
-            def __ne__(self, other):
-                return mycmp(self.obj, other.obj)
-        return K
 
     def unzip(self, compressed_sites):
         """
