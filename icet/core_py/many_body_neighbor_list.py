@@ -5,6 +5,7 @@ import copy
 from ase.neighborlist import NeighborList
 from icet.core_py.lattice_site import cmp_mbnl_lattice_site_list, cmp_to_key
 
+
 class ManyBodyNeighborList(object):
 
     """

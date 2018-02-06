@@ -6,7 +6,7 @@ from icet.core_py.many_body_neighbor_list import ManyBodyNeighborList
 from icet.core_py.lattice_site import LatticeSite
 from icet.core.cluster import Cluster
 
-from operator import itemgetter
+
 class OrbitList(object):
     """
     The orbit list object has an internal list of orbits.
@@ -67,7 +67,7 @@ class OrbitList(object):
         for index in range(len(self.primitive_structure)):
             mb_neigbhors_index = mbnl.build(index)
             for compressed_sites in mb_neigbhors_index:
-                for sites in mbnl.unzip(compressed_sites):                    
+                for sites in mbnl.unzip(compressed_sites):
                     sites.sort()
                     if self.is_new_orbit(sites):
                         orbit = self.make_orbit(sites)
@@ -141,7 +141,6 @@ class OrbitList(object):
 
         returns orbit : icet Orbit object
         """
-        
 
         # TODO check sorted rows?
         rows = self.get_rows(sites)
@@ -291,7 +290,6 @@ class OrbitList(object):
         for i, orbit in enumerate(self.orbits):
             nice_str += "orbit {} - Multiplicity {} '\n'".format(i, len(orbit))
         return nice_str
-
 
     def is_rows_taken(self, rows):
         """

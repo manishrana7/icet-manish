@@ -1,6 +1,7 @@
 from icet.core.lattice_site import LatticeSite as LatticeSite_cpp
 from icet.core_py.lattice_site import LatticeSite as LatticeSite
-from icet.core_py.lattice_site import cmp_mbnl_lattice_site_list, cmp_list_of_lattice_sites
+from icet.core_py.lattice_site import (cmp_mbnl_lattice_site_list,
+                                       cmp_list_of_lattice_sites)
 
 import numpy as np
 
@@ -201,8 +202,8 @@ class TestLatticeSite(unittest.TestCase):
                    for x, y, z in zip(range(10), range(10), range(10))]
         sites = []
         for index, offset in zip(indices, offsets):
-            sites.append(LatticeSite(index+1, offset))
-        sites = [sites] 
+            sites.append(LatticeSite(index + 1, offset))
+        sites = [sites]
         indices = range(10)
         offsets = [[x, y, z] for x, y, z in zip(range(5), range(5), range(5))]
         sites2 = []

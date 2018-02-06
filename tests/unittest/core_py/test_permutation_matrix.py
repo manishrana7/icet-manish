@@ -138,15 +138,11 @@ class TestPermutationMatrix(unittest.TestCase):
         """
         Test the colum1 property of permutation matrix.
         """
-        
+
         matrix = self.pm.pm_lattice_sites
         for col1, row in zip(self.pm.column1, matrix):
             self.assertEqual(col1, row[0])
 
 
-
-
 if __name__ == '__main__':
     unittest.main()
-    
-

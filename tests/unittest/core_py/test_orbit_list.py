@@ -93,12 +93,11 @@ class TestOrbitList(unittest.TestCase):
         gives back the same orbit.
         """
         # Need to reset taken rows for making a new orbit
-        
+
         self.orbit_list.taken_rows = set()
-        for orbit in self.orbit_list.orbits:            
+        for orbit in self.orbit_list.orbits:
             eq_orbit = self.orbit_list.make_orbit(orbit.representative_sites)
             self.assertEqual(len(orbit), len(eq_orbit))
-
 
     def test_get_rows(self):
         """

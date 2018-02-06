@@ -76,8 +76,6 @@ class TestOrbit(unittest.TestCase):
 
         self.orbit_pair = Orbit(self.pair_cluster)
         self.orbit_triplet = Orbit(self.triplet_cluster)
-        
-
 
         self.orbit_pair_cpp = Orbit_cpp(self.pair_cluster)
         self.orbit_triplet_cpp = Orbit_cpp(self.triplet_cluster)
@@ -251,6 +249,7 @@ class TestOrbit(unittest.TestCase):
                             self.orbit_triplet_cpp)
 
         self.assertEqual(self.orbit_pair, self.orbit_pair_cpp)
+
     def test_lt(self):
         """
         Test less than functionality.

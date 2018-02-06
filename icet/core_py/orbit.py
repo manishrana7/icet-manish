@@ -11,14 +11,14 @@ class Orbit(object):
     contains a list of equivalent list of LatticeSites
     contains a sorted Cluster for representation
     Can be compared to other orbits.
-    
+
     parameters
     ----------
     cluster : icet cluster object
     TODO
     ----
     * think about adding __hash__ ?
-    * think about overloading orbit + orbit    
+    * think about overloading orbit + orbit
     """
 
     def __init__(self, cluster):
@@ -96,10 +96,8 @@ class Orbit(object):
     def sort(self):
         """
         Sort the equivalent sites list.
-        """        
+        """
         self._equivalent_sites.sort()
-        
-        
 
     def __eq__(self, other):
         """
