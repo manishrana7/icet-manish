@@ -3,6 +3,7 @@ from icet.core_py.orbit_list import OrbitList
 from ase.build import bulk
 import time
 
+
 def time_orbit_list(atoms, cutoffs):
     """
     Return timing on creating orbitlist    
@@ -12,8 +13,6 @@ def time_orbit_list(atoms, cutoffs):
     elapsed_time = time.process_time() - t
 
     return elapsed_time
-
-
 
 
 if __name__ == "__main__":
