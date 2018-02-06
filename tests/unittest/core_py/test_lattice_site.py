@@ -155,6 +155,21 @@ class TestLatticeSite(unittest.TestCase):
         lattice_site2.unitcell_offset += [1, 1, -3]
         self.assertEqual(lattice_site, lattice_site2)
 
+    def test_sub_property(self):
+        """
+        Tests changing the property.
+        """
+        lattice_site = LatticeSite_cpp(0, [0, 0, 0])
+        lattice_site2 = LatticeSite_cpp(0, [1, 1, -3])
+        lattice_site2.unitcell_offset -= [1, 1, -3]
+        self.assertEqual(lattice_site, lattice_site2)
+
+        lattice_site = LatticeSite(0, [0, 0, 0])
+        lattice_site2 = LatticeSite(0, [1, 1, -3])
+        lattice_site2.unitcell_offset -= [1, 1, -3]
+        self.assertEqual(lattice_site, lattice_site2)
+
+
 
 if __name__ == '__main__':
     unittest.main()
