@@ -134,6 +134,19 @@ class TestPermutationMatrix(unittest.TestCase):
         self.assertEqual(self.pm.primitive_structure.cell.all(),
                          self.prim_structure_cpp.cell.all())
 
+    def test_property_column1(self):
+        """
+        Test the colum1 property of permutation matrix.
+        """
+        
+        matrix = self.pm.pm_lattice_sites
+        for col1, row in zip(self.pm.column1, matrix):
+            self.assertEqual(col1, row[0])
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
+    
+
