@@ -45,6 +45,8 @@ class OrbitList(object):
 
     def __init__(self, atoms, cutoffs, verbosity=False):
         self._permutation_matrix = PermutationMatrix(atoms, max(cutoffs))
+        
+
         for i, row in enumerate(self.permutation_matrix.pm_lattice_sites):
             for j, site in enumerate(row):
                 if not isinstance(site, LatticeSite):
@@ -57,7 +59,9 @@ class OrbitList(object):
                             len(self.permutation_matrix.pm_lattice_sites)))
 
         self.column1 = self.permutation_matrix.column1
-
+        self.column1_dict = {}
+        for i, lattice_site in enumerate(self.column1):
+            self.column1_dict[lattice_site] = i
         assert len(set(self.column1)) == len(self.column1)
 
         self._primitive_structure = self.permutation_matrix.primitive_structure
@@ -199,16 +203,26 @@ class OrbitList(object):
         TODO : think if this should be sorted
         TODO : Should this be a tuple for easier hashing? Yes!
         """
-        indices = [None] * len(sites)
+        indices = [] #[None] * len(sites)
 
-        for i, col_site in enumerate(self.column1):
-            for j, site in enumerate(sites):
-                if site == col_site:
-                    indices[j] = i
+        # for site in sites:
+        try:
+            # indices = [self.column1.index(site) for site in sites]
+            indices = [self.column1_dict[site] for site in sites]
+            # indices.append(index)
+        except KeyError:
+            raise RuntimeError("index not found for sites")
+            
 
-        for index in indices:
-            if index is None:
-                raise RuntimeError("index not found for sites")
+
+        # for i, col_site in enumerate(self.column1):
+        #     for j, site in enumerate(sites):
+        #         if site == col_site:
+        #             indices[j] = i
+
+        # for index in indices:
+        #     if index is None:
+        #         raise RuntimeError("index not found for sites")
         # TODO check if this should be done elsewhere
         return tuple(sorted(indices))
         # return [self.column1.index(site) for site in sites]
