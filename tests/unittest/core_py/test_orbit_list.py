@@ -295,10 +295,8 @@ class TestOrbitList(unittest.TestCase):
         orbit_list = OrbitList(atoms, cutoff)
         self.assertEqual(len(orbit_list), 3)
 
-        # Multiplicity of second pair should be 3
-        # testing against orbit 1 again since when
-        # Sorted it sorts by len( equivalent sites)
-        orbit_pair = orbit_list.orbits[1]
+        # Multiplicity of second pair should be 3                
+        orbit_pair = orbit_list.orbits[2]
         self.assertEqual(len(orbit_pair), 3)
 
     def test_pairs_bcc(self):
@@ -321,13 +319,11 @@ class TestOrbitList(unittest.TestCase):
         orbit_list = OrbitList(atoms, cutoff)
         self.assertEqual(len(orbit_list), 3)
 
-        # Multiplicity of second pair should be 3
-        # testing against orbit 1 again since
-        # sorted it sorts by len( equivalent sites)
+        # Multiplicity of second pair should be 3                
         orbit_pair1 = orbit_list.orbits[1]
         orbit_pair2 = orbit_list.orbits[2]
-        self.assertEqual(len(orbit_pair1), 3)
-        self.assertEqual(len(orbit_pair2), 4)
+        self.assertEqual(len(orbit_pair1), 4)
+        self.assertEqual(len(orbit_pair2), 3)
 
     def test_pairs_hcp(self):
         """

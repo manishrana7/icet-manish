@@ -4,7 +4,7 @@ from icet.core_py.permutation_matrix import PermutationMatrix
 from icet.core_py.orbit import Orbit
 from icet.core_py.many_body_neighbor_list import ManyBodyNeighborList
 from icet.core_py.lattice_site import LatticeSite
-
+from icet.core.cluster import Cluster
 
 class OrbitList(object):
     """
@@ -153,7 +153,7 @@ class OrbitList(object):
         TODO:
         * add cluster (geometrical version) to the orbit
         """
-        orbit = Orbit()
+        
 
         # TODO check sorted rows?
         rows = self.get_rows(sites)
@@ -168,6 +168,8 @@ class OrbitList(object):
         for i in range(len(sites)):
             assert len(rows[i]) == len(rows[0])
 
+        cluster = Cluster.from_python(self.primitive_structure, sites)
+        orbit = Orbit(cluster)
         for i in range(len(rows[0])):
             eq_sites = [row[i] for row in rows]
             assert len(eq_sites) == len(sites), "{} != {}".format(
