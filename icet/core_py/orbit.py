@@ -11,7 +11,10 @@ class Orbit(object):
     contains a list of equivalent list of LatticeSites
     contains a sorted Cluster for representation
     Can be compared to other orbits.
-
+    
+    parameters
+    ----------
+    cluster : icet cluster object
     TODO
     ----
     * think about adding __hash__ ?
@@ -21,12 +24,13 @@ class Orbit(object):
     * representative_cluster
     """
 
-    def __init__(self):
+    def __init__(self, cluster):
         self._equivalent_sites = []
         self._representative_cluster = None
         self.geometrical_size_tolerance = 1e-5
         self._allowed_permutations = []
         self._permutations_to_representative = []
+        self._representative_cluster = cluster
 
     @property
     def equivalent_sites(self):
@@ -90,7 +94,7 @@ class Orbit(object):
         ----
         * Implement this when cluster is available.
         """
-        return -1
+        return self.representative_cluster.geometrical_size
 
     def sort(self):
         """
@@ -136,7 +140,7 @@ class Orbit(object):
         if not isinstance(other, type(np.array([1, 1, 1]))) or len(other) != 3:
             raise TypeError("Adding orbit with {}".format(other))
 
-        orbit = Orbit()
+        orbit = Orbit(self.representative_cluster)
         orbit.equivalent_sites = copy.deepcopy(self.equivalent_sites)
         for sites in orbit.equivalent_sites:
             for site in sites:

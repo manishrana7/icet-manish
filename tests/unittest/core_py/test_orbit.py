@@ -64,8 +64,6 @@ class TestOrbit(unittest.TestCase):
         '''
         Instantiate class before each test.
         '''
-        self.orbit_pair = Orbit()
-        self.orbit_triplet = Orbit()
         atoms = bulk("Al")
         lattice_site_for_cluster = [
             LatticeSite(0, [i, 0, 0]) for i in range(3)]
@@ -76,6 +74,11 @@ class TestOrbit(unittest.TestCase):
         self.triplet_cluster = Cluster.from_python(
             atoms, lattice_site_for_cluster, True)
 
+        self.orbit_pair = Orbit(self.pair_cluster)
+        self.orbit_triplet = Orbit(self.triplet_cluster)
+        
+
+
         self.orbit_pair_cpp = Orbit_cpp(self.pair_cluster)
         self.orbit_triplet_cpp = Orbit_cpp(self.triplet_cluster)
 
@@ -85,7 +88,7 @@ class TestOrbit(unittest.TestCase):
         (initialization) of tested class work
         '''
         # initialize from ASE Atoms
-        orbit = Orbit()
+        orbit = Orbit(self.pair_cluster)
         self.assertIsInstance(orbit, Orbit)
 
         orbit = Orbit_cpp(self.pair_cluster)
@@ -247,8 +250,7 @@ class TestOrbit(unittest.TestCase):
         self.assertNotEqual(self.orbit_pair_cpp,
                             self.orbit_triplet_cpp)
 
-        # Sadly this doesn't work right now
-        # self.assertEqual(self.orbit_pair, self.orbit_pair_cpp)
+        self.assertEqual(self.orbit_pair, self.orbit_pair_cpp)
     def test_lt(self):
         """
         Test less than functionality.
