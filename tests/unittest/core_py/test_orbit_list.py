@@ -362,6 +362,22 @@ class TestOrbitList(unittest.TestCase):
         self.orbit_list.take_row(row_indices)
         self.assertTrue(self.orbit_list.is_rows_taken(row_indices))
 
+    def test_higher_order_orbits(self):
+        """
+        Try to construct higher order orbit list
+        """
+        atoms = bulk("Al", 'hcp', a=3.0)
+        cutoff = [5] * 3
+        orbit_list = OrbitList(atoms, cutoff)
+        
+        atoms = bulk("Al", 'fcc', a=3.0)
+        cutoff = [5] * 3
+        orbit_list = OrbitList(atoms, cutoff)
+
+        atoms = bulk("Al", 'bcc', a=3.0)
+        cutoff = [5] * 3
+        orbit_list = OrbitList(atoms, cutoff)
+
     def test_get_matches_in_pm(self):
         """
         Test function get_matches_in_pm
