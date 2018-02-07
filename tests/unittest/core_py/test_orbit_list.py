@@ -371,7 +371,7 @@ class TestOrbitList(unittest.TestCase):
         sites = [[self.orbit_list.column1[i] for i in indices]]
 
         match = self.orbit_list.get_matches_in_pm(sites)
-        self.assertEqual(match[0][1], tuple(sorted(indices)))
+        self.assertEqual(match[0][1], tuple(indices))
 
 
 if __name__ == '__main__':

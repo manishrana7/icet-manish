@@ -5,6 +5,9 @@ from icet.core_py.orbit import Orbit
 from icet.core_py.many_body_neighbor_list import ManyBodyNeighborList
 from icet.core_py.lattice_site import LatticeSite
 from icet.core.cluster import Cluster
+from icet.tools.geometry import find_permutation, get_permutation
+
+from itertools import permutations
 
 
 class OrbitList(object):
@@ -76,6 +79,8 @@ class OrbitList(object):
                         orbit = self.make_orbit(sites)
                         self._orbits.append(orbit)
         self.sort()
+
+        self.find_permutations_to_representative()
 
     def sort(self):
         """
@@ -207,7 +212,7 @@ class OrbitList(object):
             raise RuntimeError("index not found for sites")
 
         # TODO check if this should be done elsewhere
-        return tuple(sorted(indices))
+        return tuple(indices)
 
     def get_all_translated_sites(self, sites):
         """
@@ -299,7 +304,7 @@ class OrbitList(object):
             Refers to row indices of
             the permutation matrix
         """
-        if rows in self.taken_rows:
+        if tuple(sorted(rows)) in self.taken_rows:
             return True
         return False
 
@@ -310,4 +315,125 @@ class OrbitList(object):
 
         row : list (tuple) of int
         """
-        self.taken_rows.add(row)
+        self.taken_rows.add(tuple(sorted(row)))
+
+    def find_permutations_to_representative(self):
+        """
+        Finds the permutations to representative sites
+        for each orbit.
+
+        For each orbit:
+
+        1. Take representative sites
+        2. Find the rows these sites belong to (also find the unit cell offsets equivalent sites??)
+        3. Get all columns for these rows, i.e the sites that are directly equivalent, call these p_equal.
+        4. Construct all possible permutations for the representative sites, call these p_all
+        5. Construct the intersect of p_equal and p_all, call this p_allowed_permutations.
+        6. Get the indice version of p_allowed_permutations and these are then the allowed permutations for this orbit.
+        7. take the sites in the orbit:
+            site exist in p_all?:
+                those sites are then related to representative_sites through the permutation
+            else:
+                loop over permutations of the sites:
+                    does the permutation exist in p_all?:
+                        that permutation is then related to rep_sites through that permutation
+                    else:
+                        continue
+
+
+
+        """
+        for orbit in self.orbits:
+            # step one  Take representative sites
+            eq_sites = orbit.representative_sites
+            # get all translated variations of eq sites
+            translated_eq_sites = self.get_all_translated_sites(eq_sites)
+
+            # Step 3: get all rows for all the translated sites
+            all_translated_p_equal = []
+            for sites in translated_eq_sites:
+                rows = self.get_rows(sites)
+                for i in range(len(rows[0])):
+                    row_sites = [row[i] for row in rows]
+                    all_translated_p_equal.append(tuple(row_sites))
+
+            all_translated_p_equal.sort()  # check what this does
+            # Step four: Construct all possible permutations
+            #  for the representative sites
+
+            p_all_with_translated_equivalent = []
+            all_possible_permutations = list(
+                permutations(range(len(eq_sites)), len(eq_sites)))
+
+            for sites in translated_eq_sites:
+                for permutation in all_possible_permutations:
+                    p_all_with_translated_equivalent.append(
+                        tuple(get_permutation(sites, permutation)))
+
+            p_all_with_translated_equivalent.sort()
+            # Step five:  Construct the intersect of p_equal and p_all
+
+            p_allowed_permutations = set(all_translated_p_equal).intersection(
+                set(p_all_with_translated_equivalent))
+
+            # Step six: Get the indice version of p_allowed_permutations
+            allowed_permutations = set()
+            for sites in p_allowed_permutations:
+                failed_loops = 0
+                for translated_rep_sites in translated_eq_sites:
+                    try:
+                        perm = find_permutation(translated_rep_sites, sites)
+                        allowed_permutations.add(tuple(perm))
+                    except Exception as e:
+                        # print(e)
+                        failed_loops += 1
+                        # print("Caught exception {}".format(str(e)))
+                        if failed_loops == len(translated_eq_sites):
+                            raise Exception(
+                                " did not find any integer permutation from allowed permutation to any translated representative site ")
+
+            # step 7
+            p_equal_set = set()
+            [p_equal_set.add(sites) for sites in all_translated_p_equal]
+            site_permutations = []
+
+            for sites in orbit.equivalent_sites:
+
+                if tuple(sites) not in p_equal_set:
+                    #  Did not find the orbit.eq_sites in p_equal
+                    #  meaning that this eq site does not have an
+                    #  allowed permutation
+
+                    translated_sites = self.get_all_translated_sites(sites)
+                    all_permutation_of_sites = []
+                    for permutation in all_possible_permutations:
+                        all_permutation_of_sites.append(
+                            tuple((get_permutation(sites, permutation), sites)))
+
+                    for perm_sites in all_permutation_of_sites:
+                        if perm_sites[0] in p_equal_set:
+                            # one perm is one of the equivalent sites.
+                            #  This means that eqOrbitSites is
+                            #  associated to p_equal
+                            permutation = find_permutation(
+                                perm_sites[0], perm_sites[1])
+                            site_permutations.append(permutation)
+                            break
+
+                        if perm_sites == all_permutation_of_sites[-1]:
+                            # reached end without break so throw error
+                            raise RuntimeError(
+                                "did not find a permutation of the orbit sites to the permutations of the representative sites")
+
+                else:
+                    # Direct match. Score!
+                    permutation_to_eq_sites = find_permutation(
+                        sites, sites)  # identical permutation
+                    site_permutations.append(permutation_to_eq_sites)
+
+            if len(site_permutations) != len(orbit):
+                raise RuntimeError("each set of site did not get a permutations {} != {}".format(
+                    len(site_permutations), len(orbit)))
+
+            orbit.permutations_to_representative = site_permutations
+            orbit.allowed_permutations = allowed_permutations
