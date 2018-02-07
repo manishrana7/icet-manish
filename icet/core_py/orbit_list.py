@@ -32,19 +32,6 @@ class OrbitList(object):
     verbosity : int
                 Set the verbosity for OrbitList and
                 all the methods it calls.
-    TODO
-    ----
-    * Write the constructor that should create
-      a ManyBodyNeighborList (MBNL) object and a permutation matrix (PM).
-      From these two the sites in the MBNL should find rows in the PM.
-      The group of sites made by extracting the columns of the rows make
-      up one orbit.
-    * The orbit list should be able to sort the orbits to make sure each
-      orbit index is the same each time it is constructed with the same
-      lattice and cutoffs.
-    * Look at the C++ class and mimic useful functionality from there.
-
-    * Add cluster to a newly created orbit
     """
 
     def __init__(self, atoms, cutoffs, verbosity=False):
