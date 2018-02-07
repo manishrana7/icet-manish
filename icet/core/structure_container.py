@@ -45,7 +45,7 @@ class StructureContainer(object):
                 list_of_properties = [None] * len(list_of_atoms)
 
             # transform list to tuple
-            if isinstance(list_of_atoms[0], Atoms):
+            if not isinstance(list_of_atoms[0], tuple):
                 list_of_atoms = [(atoms, None) for atoms in list_of_atoms]
 
             self._structure_list = []
@@ -54,8 +54,10 @@ class StructureContainer(object):
                 try:
                     self.add_structure(atoms=atoms, user_tag=user_tag,
                                        properties=properties)
-                except ValueError:
-                    print('Skipping list_of_atoms object')
+                except AssertionError:
+                    raise
+        else:
+            raise Exception('list of atoms required for initialization')
 
     def __len__(self):
         return len(self._structure_list)
@@ -123,9 +125,6 @@ class StructureContainer(object):
                     s += ['{s:^{n}}'.format(s=value, n=n)]
             return ' | '.join(s)
 
-        if len(self._structure_list) == 0:
-            return 'empty structure container'
-
         # basic information
         # (use last structure in list to obtain maximum line length)
         dummy = self._structure_list[-1]
@@ -147,7 +146,7 @@ class StructureContainer(object):
                     len(self) > print_threshold and
                     index >= print_minimum and
                     index <= len(self) - print_minimum):
-                index = len(self) - 10
+                index = len(self) - print_minimum
                 s += [' ...']
             s += [repr_structure(self._structure_list[index], index=index)]
             index += 1
@@ -239,7 +238,6 @@ class StructureContainer(object):
         -------
         NumPy array, NumPy array
             cluster vectors and target properties for desired structures
-
         '''
         if structure_indices is None:
             cv_list = [s.cluster_vector
@@ -272,7 +270,6 @@ class StructureContainer(object):
         properties: list of dict
             list of properties
         '''
-
         if structure_indices is None:
             msg = 'len of properties does not equal len of fit structures'
             assert len(properties) == len(self), msg
@@ -315,7 +312,6 @@ class StructureContainer(object):
         structure_indices: list of integers
             list of structure indices. By default (``None``) the
             method will return all structures listed in the container
-
         '''
         if structure_indices is None:
             s_list = [s.atoms for s in self._structure_list]
@@ -345,7 +341,7 @@ class FitStructure:
         supercell structure
     user_tag : string
         custom user tag
-    cvs : list of floats
+    cvs : NumPy array
         calculated cluster vector for actual structure
     properties : dictionary
         the properties dictionary
@@ -387,7 +383,7 @@ class FitStructure:
 
         Parameters
         ----------
-        cv : list of floats
+        cv : NumPy array
             cluster vector
         '''
         if cv is not None:
