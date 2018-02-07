@@ -8,7 +8,7 @@ from icet.core.cluster import Cluster
 from icet.tools.geometry import find_permutation, get_permutation
 
 from itertools import permutations
-
+import copy
 
 class OrbitList(object):
     """
@@ -176,7 +176,7 @@ class OrbitList(object):
                     new_sites = False
                     break
             if new_sites:
-                orbit.equivalent_sites.append(eq_sites)
+                orbit.equivalent_sites.append(copy.deepcopy(eq_sites))
             for site_index in sites_indices_match:
                 self.take_row(site_index[1])
 
@@ -341,9 +341,6 @@ class OrbitList(object):
                         that permutation is then related to rep_sites through that permutation
                     else:
                         continue
-
-
-
         """
         for orbit in self.orbits:
             # step one  Take representative sites
@@ -387,7 +384,7 @@ class OrbitList(object):
                         perm = find_permutation(translated_rep_sites, sites)
                         allowed_permutations.add(tuple(perm))
                     except Exception as e:
-                        
+
                         failed_loops += 1
                         # print("Caught exception {}".format(str(e)))
                         if failed_loops == len(translated_eq_sites):
@@ -423,7 +420,7 @@ class OrbitList(object):
                             site_permutations.append(permutation)
                             break
 
-                        if i == len(all_permutation_of_sites) -1:
+                        if i == len(all_permutation_of_sites) - 1:
                             # reached end without break so throw error
                             raise RuntimeError(
                                 "did not find a permutation of the orbit sites to the permutations of the representative sites")
