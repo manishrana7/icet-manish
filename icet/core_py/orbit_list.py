@@ -10,6 +10,7 @@ from icet.tools.geometry import find_permutation, get_permutation
 from itertools import permutations
 import copy
 
+
 class OrbitList(object):
     """
     The orbit list object has an internal list of orbits.
@@ -327,18 +328,25 @@ class OrbitList(object):
         For each orbit:
 
         1. Take representative sites
-        2. Find the rows these sites belong to (also find the unit cell offsets equivalent sites??)
-        3. Get all columns for these rows, i.e the sites that are directly equivalent, call these p_equal.
-        4. Construct all possible permutations for the representative sites, call these p_all
-        5. Construct the intersect of p_equal and p_all, call this p_allowed_permutations.
-        6. Get the indice version of p_allowed_permutations and these are then the allowed permutations for this orbit.
+        2. Find the rows these sites belong to
+           (also find the unit cell offsets equivalent sites??)
+        3. Get all columns for these rows, i.e the sites that
+           are directly equivalent, call these p_equal.
+        4. Construct all possible permutations for the
+           representative sites, call these p_all
+        5. Construct the intersect of p_equal and
+           p_all, call this p_allowed_permutations.
+        6. Get the indice version of p_allowed_permutations
+           and these are then the allowed permutations for this orbit.
         7. take the sites in the orbit:
             site exist in p_all?:
-                those sites are then related to representative_sites through the permutation
+                those sites are then related to
+                representative_sites through the permutation
             else:
                 loop over permutations of the sites:
                     does the permutation exist in p_all?:
-                        that permutation is then related to rep_sites through that permutation
+                        that permutation is then related
+                        to rep_sites through that permutation
                     else:
                         continue
         """
@@ -389,7 +397,9 @@ class OrbitList(object):
                         # print("Caught exception {}".format(str(e)))
                         if failed_loops == len(translated_eq_sites):
                             raise Exception(
-                                " did not find any integer permutation from allowed permutation to any translated representative site ")
+                                " did not find any integer permutation"
+                                " from allowed permutation to any"
+                                " translated representative site ")
 
             # step 7
             p_equal_set = set()
@@ -408,7 +418,9 @@ class OrbitList(object):
                     for trans_sites in translated_sites:
                         for permutation in all_possible_permutations:
                             all_permutation_of_sites.append(
-                                tuple((get_permutation(trans_sites, permutation), trans_sites)))
+                                tuple((get_permutation(trans_sites,
+                                                       permutation),
+                                       trans_sites)))
 
                     for i, perm_sites in enumerate(all_permutation_of_sites):
                         if tuple(perm_sites[0]) in p_equal_set:
@@ -423,7 +435,9 @@ class OrbitList(object):
                         if i == len(all_permutation_of_sites) - 1:
                             # reached end without break so throw error
                             raise RuntimeError(
-                                "did not find a permutation of the orbit sites to the permutations of the representative sites")
+                                "did not find a permutation of the"
+                                " orbit sites to the permutations"
+                                " of the representative sites")
 
                 else:
                     # Direct match. Score!
@@ -432,8 +446,9 @@ class OrbitList(object):
                     site_permutations.append(permutation_to_eq_sites)
 
             if len(site_permutations) != len(orbit):
-                raise RuntimeError("each set of site did not get a permutations {} != {}".format(
-                    len(site_permutations), len(orbit)))
+                raise RuntimeError("each set of site did not"
+                                   " get a permutations {} != {}".format(
+                                       len(site_permutations), len(orbit)))
 
             orbit.permutations_to_representative = site_permutations
             orbit.allowed_permutations = allowed_permutations

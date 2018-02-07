@@ -369,14 +369,14 @@ class TestOrbitList(unittest.TestCase):
         atoms = bulk("Al", 'hcp', a=3.0)
         cutoff = [5] * 3
         orbit_list = OrbitList(atoms, cutoff)
-        
+
         atoms = bulk("Al", 'fcc', a=3.0)
         cutoff = [5] * 3
         orbit_list = OrbitList(atoms, cutoff)
 
         atoms = bulk("Al", 'bcc', a=3.0)
         cutoff = [5] * 3
-        orbit_list = OrbitList(atoms, cutoff)
+        orbit_list = OrbitList(atoms, cutoff) # noqa
 
     def test_get_matches_in_pm(self):
         """
@@ -389,13 +389,13 @@ class TestOrbitList(unittest.TestCase):
         match = self.orbit_list.get_matches_in_pm(sites)
         self.assertEqual(match[0][1], tuple(indices))
 
-
     def test_property_permutations_to_representative(self):
         """
         Test permutations to representative.
         """
         for orbit in self.orbit_list.orbits:
-            self.assertEqual(len(orbit.permutations_to_representative), len(orbit))
+            self.assertEqual(
+                len(orbit.permutations_to_representative), len(orbit))
             for perm in orbit.permutations_to_representative:
                 self.assertEqual(len(set(perm)), len(perm))
 
@@ -406,7 +406,6 @@ class TestOrbitList(unittest.TestCase):
         for orbit in self.orbit_list.orbits:
             for perm in orbit.allowed_permutations:
                 self.assertEqual(len(set(perm)), len(perm))
-       
 
 
 if __name__ == '__main__':
