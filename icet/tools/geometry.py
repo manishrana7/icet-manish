@@ -249,7 +249,31 @@ def get_permutation(container, permutation):
     Return the permutated version of container.
     """
     if len(permutation) != len(container):
-        raise Exception
+        raise RuntimeError("Containter and permutation not of same size {} != {}".format(
+            len(container), len(permutation)))
     if len(set(permutation)) != len(permutation):
         raise Exception
     return [container[s] for s in permutation]
+
+
+def find_permutation(target, permutated):
+    """
+    Returns the permutation vector that takes
+    permutated to target
+
+    parameters
+    ----------
+    target : some container
+        container should allow .index and the
+    containers elements should contain objects
+    with __eq__ method
+    permutated : some container
+        container should allow .index and the
+    containers elements should contain objects
+    with __eq__ method
+    """
+    permutation = []
+    for element in target:
+        index = permutated.index(element)
+        permutation.append(index)
+    return permutation
