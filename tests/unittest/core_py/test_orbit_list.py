@@ -390,5 +390,24 @@ class TestOrbitList(unittest.TestCase):
         self.assertEqual(match[0][1], tuple(indices))
 
 
+    def test_property_permutations_to_representative(self):
+        """
+        Test permutations to representative.
+        """
+        for orbit in self.orbit_list.orbits:
+            self.assertEqual(len(orbit.permutations_to_representative), len(orbit))
+            for perm in orbit.permutations_to_representative:
+                self.assertEqual(len(set(perm)), len(perm))
+
+    def test_property_allowed_permutations(self):
+        """
+        Test property allowed permutations
+        """
+        for orbit in self.orbit_list.orbits:
+            for perm in orbit.allowed_permutations:
+                self.assertEqual(len(set(perm)), len(perm))
+       
+
+
 if __name__ == '__main__':
     unittest.main()
