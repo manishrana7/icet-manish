@@ -62,13 +62,13 @@ void ClusterCounts::count(const Structure &structure, const std::vector<std::vec
     }
 }
 
+
 ///Count cluster only through this function
 void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> &elements)
 {
-    std::vector<int> sortedElements = elements;
-    std::sort(sortedElements.begin(), sortedElements.end());
-    _clusterCounts[cluster][sortedElements] += 1;
+    _clusterCounts[cluster][elements] += 1;
 }
+
 
 /**
     Count the clusters of the sites in each orbit of the orbit list
