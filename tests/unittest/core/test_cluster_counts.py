@@ -68,7 +68,8 @@ class TestClusterCounts(unittest.TestCase):
         '''
         Test clusters counts
         '''
-        for i, val in enumerate(self.cluster_map.values()):
+        for i, key in enumerate(sorted(self.cluster_map.keys())):
+            val = self.cluster_map[key]
             for count in val.values():
                 self.assertEqual(count, self.multiplicity[i])
 
