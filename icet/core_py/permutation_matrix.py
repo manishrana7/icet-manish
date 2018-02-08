@@ -148,29 +148,11 @@ class PermutationMatrix(object):
 
         self.pm_lattice_sites = pm_lattice_sites
 
-
-    def _prune_permutation_matrixA(self):
+    def _prune_permutation_matrix(self):
         """
-        Removes redundant column originating from two different symmetry operations transforming
-        a basis atom to the same lattice site.
-
-        This is a helper method to initialize permutation matrix.
-        """
-        for i in range(len(self.pm_lattice_sites)):
-            for j in reversed(range(len(self.pm_lattice_sites))):
-                if j <= i:
-                    continue
-                if self.pm_lattice_sites[i][0] == self.pm_lattice_sites[j][0]:
-                    self.pm_lattice_sites.pop(j)
-                    if self.verbosity > 2:
-                        print('Removing duplicate in permutation matrix; i: {},j: {}'.format(i,j))
-
-
-    def _prune_permutation_matrixB(self):
-        """
-        Removes redundant column originating from two different symmetry operations transforming
-        a basis atom to the same lattice site.
-
+        Removes redundant rows by checking for duplicate
+        lattice sites in column 1
+        
         This is a helper method to initialize permutation matrix.
         """
         for i in range(len(self.pm_lattice_sites)):
@@ -180,89 +162,3 @@ class PermutationMatrix(object):
                     if self.verbosity > 2:
                         print('Removing duplicate in permutation matrix; i: {},j: {}'.format(i,j))
 
-
-    def _prune_permutation_matrixC(self):
-        """
-        Removes redundant column originating from two different symmetry operations transforming
-        a basis atom to the same lattice site.
-
-        This is a helper method to initialize permutation matrix.
-        """
-        for i, site_i in enumerate(self.pm_lattice_sites):
-            for site_j in self.pm_lattice_sites[:i:-1]:
-                if site_i[0] == site_j[0]:
-                    self.pm_lattice_sites.remove(site_j)
-                    if self.verbosity > 2:
-                        print('Removing duplicate in permutation matrix; i: {},j: {}'.format(i,j))
-
-
-    def _prune_permutation_matrixD(self):
-        """
-        Removes redundant column originating from two different symmetry operations transforming
-        a basis atom to the same lattice site.
-
-        This is a helper method to initialize permutation matrix.
-        """
-        old_sites = self.pm_lattice_sites[:]
-        site_i = old_sites.pop()
-        new_sites = [site_i]
-        while True:
-            old_sites = [site_j for site_j in old_sites if site_j[0] != site_i[0]]  # only keep sites <> site_i
-            try:
-                site_i = old_sites.pop()
-            except IndexError:
-                break
-            new_sites.append(site_i)
-        self.pm_lattice_sites = new_sites
-
-
-    def _prune_permutation_matrixE(self):
-        """
-        Removes redundant column originating from two different symmetry operations transforming
-        a basis atom to the same lattice site.
-
-        This is a helper method to initialize permutation matrix.
-        """
-        # set methods leaves only the unique members of a list. For this to work it may require
-        # that self.pm_lattice_sites[i] can be compared with self.pm_lattice_sites[j]
-        self.pm_lattice_sites = list(set(self.pm_lattice_sites))
-
-    def _prune_permutation_matrixF(self):
-        """
-        Removes redundant column originating from two different symmetry operations transforming
-        a basis atom to the same lattice site.
-
-        This is a helper method to initialize permutation matrix.
-        """
-        for i in range(len(self.pm_lattice_sites)):
-            for j in range(len(self.pm_lattice_sites) - 1, i, -1):
-                if self.pm_lattice_sites[i][0] in self.pm_lattice_sites[j]:
-                    self.pm_lattice_sites.pop(j)
-                    if self.verbosity > 2:
-                        print('Removing duplicate in permutation matrix; i: {},j: {}'.format(i,j))
-
-
-    def _prune_permutation_matrixG(self):
-        permutation_array = np.array([row[0] for row in self.pm_lattice_sites])
-        unique_array, indexes = np.unique(permutation_array, axis=0, return_index=True)
-        self.pm_lattice_sites = [self.pm_lattice_sites[k] for k in indexes]
-
-
-    def _prune_permutation_matrixH(self):
-        """
-        Removes redundant column originating from two different symmetry operations transforming
-        a basis atom to the same lattice site.
-
-        This is a helper method to initialize permutation matrix.
-        """
-        for i in range(len(self.pm_lattice_sites)):
-            for j in range(len(self.pm_lattice_sites) - 1, i, -1):
-                if self.pm_lattice_sites[i][0] == self.pm_lattice_sites[j][0]:
-                    self.pm_lattice_sites.pop(j)
-                    if self.verbosity > 2:
-                        print('Removing duplicate in permutation matrix; i: {},j: {}'.format(i,j))
-
-
-
-
-    _prune_permutation_matrix = _prune_permutation_matrixA
