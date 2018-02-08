@@ -68,8 +68,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
     bool orderIntact = true; // count the clusters in the orbit with the same orientation as the prototype cluster
     LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(_primitive_orbit_list, structure);
     size_t uniqueOffsets = localOrbitListGenerator.getUniqueOffsetsCount();
-    ClusterCounts clusterCounts = ClusterCounts();
-
+    ClusterCounts clusterCounts = ClusterCounts();    
     int tags = 0;
     for (int i = 0; i < uniqueOffsets; i++)
     {
@@ -100,7 +99,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                     {
                         elements[i] = structure.getAtomicNumber(sites[i].index());
                     }
-                    clusterCounts.countCluster(repr_cluster, elements);
+                    clusterCounts.countCluster(repr_cluster, elements,orderIntact);
                 }
                 else
                 {
@@ -109,7 +108,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                     {
                         elements[i] = structure.getAtomicNumber(sites[i].index());
                     }
-                    clusterCounts.countCluster(repr_cluster, elements);
+                    clusterCounts.countCluster(repr_cluster, elements,orderIntact);
                 }
             }
         }
