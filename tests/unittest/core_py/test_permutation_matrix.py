@@ -6,15 +6,15 @@ import timeit
 from ase.build import bulk
 
 from icet.core_py.permutation_matrix import PermutationMatrix
-#from icet.core_py.lattice_site import LatticeSite
+from icet.core_py.lattice_site import LatticeSite
 
-from icet.core_py.lattice_site import LatticeSiteLean as LatticeSite
+# from icet.core_py.lattice_site import LatticeSiteLean as LatticeSite
 
 #from icet.core.orbit_list import __get_lattice_site_permutation_matrix\
 #    as get_lattice_site_permutation_matrix
 
 
-lean_flag = True
+lean_flag = False
 
 if lean_flag:
     from icet.core_py.lattice_site import LatticeSiteLean as LatticeSite

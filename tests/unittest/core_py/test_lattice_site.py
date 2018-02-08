@@ -95,7 +95,7 @@ class TestLatticeSite(unittest.TestCase):
         self.assertLess(self.lattice_sites[0], self.lattice_sites[1])
         self.assertLess(self.lattice_sites_cpp[0], self.lattice_sites_cpp[1])
         self.assertLess(self.lattice_sites[0], self.lattice_sites_cpp[1])
-        self.assertLess(self.lattice_sites_cpp[0], self.lattice_sites[1])
+        self.assertLess(self.lattice_sites[0], self.lattice_sites_cpp[1])
 
     def test_eq(self):
         """

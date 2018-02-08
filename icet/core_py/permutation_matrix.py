@@ -243,7 +243,7 @@ class PermutationMatrix(object):
 
 
     def _prune_permutation_matrixG(self):
-        permutation_array = np.array([row[0].as_list for row in self.pm_lattice_sites])
+        permutation_array = np.array([row[0] for row in self.pm_lattice_sites])
         unique_array, indexes = np.unique(permutation_array, axis=0, return_index=True)
         self.pm_lattice_sites = [self.pm_lattice_sites[k] for k in indexes]
 
@@ -257,7 +257,7 @@ class PermutationMatrix(object):
         """
         for i in range(len(self.pm_lattice_sites)):
             for j in range(len(self.pm_lattice_sites) - 1, i, -1):
-                if self.pm_lattice_sites[i][0].as_list == self.pm_lattice_sites[j][0].as_list:
+                if self.pm_lattice_sites[i][0] == self.pm_lattice_sites[j][0]:
                     self.pm_lattice_sites.pop(j)
                     if self.verbosity > 2:
                         print('Removing duplicate in permutation matrix; i: {},j: {}'.format(i,j))

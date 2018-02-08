@@ -1,7 +1,7 @@
 from functools import total_ordering
 
 import numpy as np
-
+from icet.core.lattice_site import LatticeSite as LatticeSite_cpp
 
 @total_ordering
 class LatticeSite(object):
@@ -27,6 +27,7 @@ class LatticeSite(object):
         """
         self._index = index
         self.unitcell_offset = unitcell_offset
+        self.as_list = [self.index, self.unitcell_offset[0], self.unitcell_offset[1], self.unitcell_offset[2]]
 
     @property
     def index(self):
@@ -59,7 +60,18 @@ class LatticeSite(object):
         It will return True/False at first difference it spots.
         If no difference is found the two objects are equal.
         """
-        return self.as_list == other.as_list
+        if isinstance(other, LatticeSite_cpp):
+            if self.index != other.index:
+                return False
+            for offset, offset_other in zip(self.unitcell_offset,
+                                            other.unitcell_offset):
+                if offset != offset_other:
+                    return False
+            return True
+        elif isinstance(other, LatticeSiteLean):
+            return self.as_list == other.lst
+        else:
+            return self.as_list == other.as_list
 
 
     def __lt__(self, other):
@@ -100,30 +112,30 @@ class LatticeSite(object):
 
         return self.__str__()
 
-
+@total_ordering
 class LatticeSiteLean(list):
 
     def __init__(self, index, unitcell_offset):
         lst = [index] + list(unitcell_offset)
         super(LatticeSiteLean, self).__init__(lst)
 
-        @property
-        def index(self):
-            """
-            The index refers to an index in a lattice.
-            """
-            return self[0]
+    @property
+    def index(self):
+        """
+        The index refers to an index in a lattice.
+        """
+        return self[0]
 
-        @property
-        def unitcell_offset(self):
-            """
-            Returns the unitcell offset with type ndarray with shape (3,).
-            """
-            return np.array(self[1:], 'i')  # integer array
+    @property
+    def unitcell_offset(self):
+        """
+        Returns the unitcell offset with type ndarray with shape (3,).
+        """
+        return np.array(self[1:])  # integer array
 
-        @unitcell_offset.setter
-        def unitcell_offset(self, offset):
-            self.__init__(self.index, offset)
+    @unitcell_offset.setter
+    def unitcell_offset(self, offset):
+        self.__init__(self.index, offset)
 
 
     def __str__(self):
@@ -132,6 +144,46 @@ class LatticeSiteLean(list):
         """
         return '{} : {}'.format(self.index, self.unitcell_offset)
 
+    def __eq__(self, other):
+        """
+        Test equality of this and another LatticeSite
+
+        Will first test index, then unitcell_offset element by element.
+        It will return True/False at first difference it spots.
+        If no difference is found the two objects are equal.
+        """
+        if isinstance(other, LatticeSite_cpp) or isinstance(other, LatticeSite_old):
+            if self.index != other.index:
+                return False
+            for offset, offset_other in zip(self.unitcell_offset,
+                                            other.unitcell_offset):
+                if offset != offset_other:
+                    return False
+            return True        
+        else:
+            return self[:] == other[:]
+
+
+    def __lt__(self, other):
+        """
+        Test equality of this and another LatticeSite
+
+        Will first test index, then unitcell_offset element by element.
+        It will return True/False at first difference it spots.
+        If no difference is found the two objects are equal.
+        """
+        if isinstance(other, LatticeSite_cpp) or isinstance(other, LatticeSite_old):
+            if self.index != other.index:
+                self.index < other.index
+            for offset, offset_other in zip(self.unitcell_offset,
+                                            other.unitcell_offset):
+                if offset != offset_other:
+                    return offset < offset_other
+            return False        
+        else:
+            return self[:] < other[:]
+
+
 
     def __repr__(self):
         """
@@ -139,3 +191,10 @@ class LatticeSiteLean(list):
         """
 
         return self.__str__()
+
+    def __hash__(self):
+        """
+        Generate a hash based on index and unitcell_offset.
+        """
+        return hash((self.index, self.unitcell_offset[0],
+                     self.unitcell_offset[1], self.unitcell_offset[2]))
