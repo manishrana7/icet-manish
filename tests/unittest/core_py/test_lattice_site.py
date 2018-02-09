@@ -9,11 +9,11 @@ import unittest
 
 
 class TestLatticeSite(unittest.TestCase):
-    '''
+    """
     Container for tests of the class functionality.
     This also tests that python LatticeSite behaves the same
     as the C++ LatticeSite.
-    '''
+    """
 
     def __init__(self, *args, **kwargs):
         super(TestLatticeSite, self).__init__(*args, **kwargs)
@@ -25,9 +25,9 @@ class TestLatticeSite(unittest.TestCase):
             self.unitcell_offsets.append(list(element))
 
     def setUp(self):
-        '''
+        """
         Setup.
-        '''
+        """
         self.lattice_sites = []
         self.lattice_sites_cpp = []
         for index, unitcell_offset in zip(self.indices, self.unitcell_offsets):
@@ -37,16 +37,16 @@ class TestLatticeSite(unittest.TestCase):
             self.lattice_sites_cpp.append(lattice_site_cpp)
 
     def test_index_property(self):
-        '''
+        """
         Test index property.
-        '''
+        """
         self.assertIsInstance(self.lattice_sites[0].index, int)
         self.assertEqual(self.lattice_sites[0].index, 0)
 
     def test_offset_property(self):
-        '''
+        """
         Test unitcell_offset property.
-        '''
+        """
         self.assertIsInstance(
             self.lattice_sites[0].unitcell_offset,
             type(self.lattice_sites_cpp[0].unitcell_offset))
@@ -57,9 +57,9 @@ class TestLatticeSite(unittest.TestCase):
             list(self.lattice_sites[0].unitcell_offset), [0., 0., 0.])
 
     def test_str(self):
-        '''
+        """
         Test printing a LatticeSite.
-        '''
+        """
         print(self.lattice_sites[0])
 
         self.assertEqual(self.lattice_sites[0].__str__(
@@ -68,9 +68,9 @@ class TestLatticeSite(unittest.TestCase):
         ), self.lattice_sites_cpp[-1].__str__())
 
     def test_sorting(self):
-        '''
+        """
         Test sorting the lattice sites.
-        '''
+        """
         self.lattice_sites.sort()
         self.assertEqual(self.lattice_sites[0].index, 0.)
         self.assertEqual(
@@ -82,17 +82,17 @@ class TestLatticeSite(unittest.TestCase):
             list(self.lattice_sites[0].unitcell_offset), [1., 1., 1.])
 
     def test_lt(self):
-        '''
+        """
         Test less than operator.
-        '''
+        """
         self.assertLess(self.lattice_sites[0], self.lattice_sites[1])
         self.assertLess(self.lattice_sites[0], self.lattice_sites_cpp[1])
         self.assertLess(self.lattice_sites_cpp[0], self.lattice_sites[1])
 
     def test_eq(self):
-        '''
+        """
         Test eq operator.
-        '''
+        """
         index = 152453453
         unitcell_offset = [-234234., 32423423., 235567567.]
 
@@ -115,9 +115,9 @@ class TestLatticeSite(unittest.TestCase):
         self.assertNotEqual(self.lattice_sites_cpp[1], self.lattice_sites[0])
 
     def test_hash(self):
-        '''
+        """
         Test hash function.
-        '''
+        """
         index = 152453453
         unitcell_offset = [-234234., 32423423., 235567567.]
 
@@ -128,9 +128,9 @@ class TestLatticeSite(unittest.TestCase):
                          lattice_site_other.__hash__())
 
     def test_add_property(self):
-        '''
+        """
         Tests changing the property.
-        '''
+        """
         lattice_site = LatticeSite(0, [0, 0, 0])
         lattice_site2 = LatticeSite(0, [-1, -1, 3])
         lattice_site2.unitcell_offset += [1, 1, -3]
