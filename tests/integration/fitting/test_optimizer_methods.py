@@ -1,3 +1,7 @@
+'''
+Make sure all available fit methods run via the Optimizer without issues and
+gives somewhat reasonable fits
+'''
 import numpy as np
 from icet.fitting import Optimizer, available_fit_methods
 

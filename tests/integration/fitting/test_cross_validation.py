@@ -1,3 +1,8 @@
+'''
+Test that CrossValidationEstimator gives correct rmse_validation_splits using
+k-fold validation. Also asserts that the correct data is stored into
+cve.valdidation_sactter_data
+'''
 import numpy as np
 from icet.fitting import CrossValidationEstimator
 from sklearn.model_selection import KFold
@@ -14,6 +19,7 @@ y = np.dot(A, x_true) + np.random.normal(0.0, 0.2, N)
 cve = CrossValidationEstimator((A, y),
                                validation_method='k-fold',
                                number_of_splits=10)
+cve.validate()
 cve.train()
 
 # Manual k-fold
@@ -23,13 +29,13 @@ target, predicted = [], []
 for train_rows, test_rows in kf.split(A):
     A_train, y_train = A[train_rows, :], y[train_rows]
     A_test, y_test = A[test_rows, :], y[test_rows]
-    parameters = np.linalg.lstsq(A_train, y_train)[0]
+    parameters = np.linalg.lstsq(A_train, y_train, rcond=-1)[0]
     cv_folds.append(np.sqrt(np.mean((np.dot(A_test, parameters) - y_test)**2)))
     target.extend(y_test)
     predicted.extend(np.dot(A_test, parameters))
 
 cv_folds = np.array(cv_folds)
-final_parameters = np.linalg.lstsq(A, y)[0]
+final_parameters = np.linalg.lstsq(A, y, rcond=-1)[0]
 
 # assert results is the same
 assert np.allclose(cve.rmse_validation_splits, cv_folds)

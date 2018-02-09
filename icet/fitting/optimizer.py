@@ -168,6 +168,11 @@ class Optimizer(BaseOptimizer):
         info['training_set'] = self.training_set
         info['test_size'] = self.test_size
         info['test_set'] = self.test_set
+        info['training_scatter_data'] = self.training_scatter_data
+        info['test_scatter_data'] = self.test_scatter_data
+
+        # add kwargs used for fitting
+        info = {**info, **self._kwargs}
         return info
 
     @property

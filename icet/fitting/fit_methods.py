@@ -1,23 +1,27 @@
 '''
-This module provides simplified interfaces for vaiours linear model
-regression methods.
+scikit-learn is an excellent library for training linear models and provides a
+large number of useful tools.
 
-More information about the sklearn regression can be found at
+This module provides simplified interfaces for vaiours linear model regression
+methods. These methods are set up in a way that work out of the box for typical
+problems in cluster expansion and force constant potential construction. This
+includes slight adjustments scitkit-learn default values.
+
+If you would like more flexibility or extended functionality or ability to
+fine-tune parameters that are not included in this interface, it is of course
+possible to use scikit-learn directly.
+More information about the sklearn linear models can be found at
 http://scikit-learn.org/stable/modules/linear_model.html
 
-
-Todo
-----
-* add HuberRegression robust vs outliers
-* add ElasticNet
 '''
 
 import numpy as np
 from ..io.logging import logger
-from .tools import compute_rmse
 try:
-    from sklearn.linear_model import Lasso, BayesianRidge, ARDRegression
-    from sklearn.model_selection import KFold
+    from sklearn.linear_model import (Lasso,
+                                      LassoCV,
+                                      BayesianRidge,
+                                      ARDRegression)
     # arrangement of logger assignments is owed to pep8 requirements
     logger = logger.getChild('fit_methods')
 except Exception:
@@ -44,12 +48,13 @@ def fit_least_squares(X, y):
     results : dict
         dict containing parameters
     '''
-    results = {}
-    results['parameters'] = np.linalg.lstsq(X, y)[0]
+    results = dict()
+    results['parameters'] = np.linalg.lstsq(X, y, rcond=-1)[0]
     return results
 
 
-def fit_lasso(X, y, alpha=None, fit_intercept=False, **kwargs):
+def fit_lasso(X, y, alpha=None, fit_intercept=False, max_iter=5000, tol=1e-5,
+              **kwargs):
     '''
     Return the solution `a` to the linear problem `Xa=y` obtained by using
     the LASSO method as implemented in scitkit-learn.
@@ -78,24 +83,22 @@ def fit_lasso(X, y, alpha=None, fit_intercept=False, **kwargs):
         dictionary containing parameters
     '''
     if alpha is None:
-        return fit_lasso_optimize_alpha(X, y, fit_intercept=fit_intercept,
-                                        **kwargs)
+        return fit_lassoCV(X, y, fit_intercept=fit_intercept,
+                           max_iter=max_iter, tol=tol, **kwargs)
     else:
-        lasso = Lasso(alpha=alpha, fit_intercept=fit_intercept, **kwargs)
+        lasso = Lasso(alpha=alpha, fit_intercept=fit_intercept,
+                      max_iter=max_iter, tol=tol**kwargs)
         lasso.fit(X, y)
-        results = {}
+        results = dict()
         results['parameters'] = lasso.coef_
         return results
 
 
-def fit_lasso_optimize_alpha(X, y, alphas=None, fold=10, fit_intercept=False,
-                             verbose=False, **kwargs):
+def fit_lassoCV(X, y, alphas=None, fit_intercept=False, cv=10, max_iter=5000,
+                tol=1e-5, **kwargs):
     '''
     Return the solution `a` to the linear problem `Xa=y` obtained by using
-    the LASSO method as implemented in scitkit-learn.
-
-    The `alpha` parameter is optimized via grid search and the test score is
-    computed using k-fold validation.
+    the LassoCV method as implemented in scitkit-learn.
 
     Parameters
     -----------
@@ -103,61 +106,34 @@ def fit_lasso_optimize_alpha(X, y, alphas=None, fold=10, fit_intercept=False,
         fit matrix
     y : array
         target array
-    alphas : array
-        alpha values to evaluate
-    fold : int
-        Number of times to fold dataset when computing test score
+    alphas : list / array
+        list of alpha values to be evaluated during regularization path
     fit_intercept : bool
         center data or not, forwarded to sklearn
-    verbose : boolean
-        if True additional information concerning the optimization process will
-        be logged
+    cv : int
+        how many folds to carry out in cross-validation
 
     Returns
-    ----------
+    -------
     results : dict
         dictionary containing parameters,
-        alpha-path (all tested alpha values),
-        rmse-path (rmse for validation set for each alpha),
-        alpha-optimal (the alpha value with lowest rmse validation)
+        alpha_path (all tested alpha values),
+        mse_path (mse for validation set for each alpha),
+        alpha_optimal (alpha value that yields the lowest validation rmse)
+
     '''
 
     if alphas is None:
-        alphas = np.logspace(-6, -0.3, 50)
+        alphas = np.logspace(-9, 0.5, 100)
 
-    # Alpha grid search
-    lasso = Lasso(fit_intercept=fit_intercept, **kwargs)
-    kf = KFold(n_splits=fold, shuffle=False)
-
-    RMSE_path = []
-    for i, alpha in enumerate(alphas):
-        lasso.alpha = alpha
-        cv_fold = []
-        for train, test in kf.split(X):
-            X_train, X_test = X[train], X[test]
-            y_train, y_test = y[train], y[test]
-            lasso.fit(X_train, y_train)
-            RMSE = compute_rmse(X_test, lasso.coef_, y_test)
-            cv_fold.append(RMSE)
-        RMSE_path.append(np.mean(cv_fold))
-
-    RMSE_path = np.array(RMSE_path)
-    alpha_min = alphas[np.argmin(RMSE_path)]
-
-    if np.argmin(RMSE_path) == 0 or np.argmin(RMSE_path) == len(alphas)-1:
-        msg = 'Found the optimal alpha value ({}) at the edge of the ' \
-            'allowed range. In order to change the range, specify `alphas`.'
-        logger.warning(msg.format(alpha_min))
-
-    # Make final fit
-    lasso.alpha = alpha_min
-    lasso.fit(X, y)
-
-    results = {}
-    results['parameters'] = lasso.coef_
-    results['rmse-path'] = RMSE_path
-    results['alpha-path'] = alphas
-    results['alpha-optimal'] = alpha_min
+    lassoCV = LassoCV(alphas=alphas, fit_intercept=False, cv=cv,
+                      max_iter=max_iter, tol=tol)
+    lassoCV.fit(X, y)
+    results = dict()
+    results['parameters'] = lassoCV.coef_
+    results['alpha_optimal'] = lassoCV.alpha_
+    results['alpha_path'] = lassoCV.alphas_
+    results['mse_path'] = lassoCV.mse_path_.mean(axis=1)
     return results
 
 
@@ -182,7 +158,7 @@ def fit_bayesian_ridge(X, y, fit_intercept=False, **kwargs):
     '''
     brr = BayesianRidge(fit_intercept=fit_intercept, **kwargs)
     brr.fit(X, y)
-    results = {}
+    results = dict()
     results['parameters'] = brr.coef_
     results['covariance-matrix'] = brr.sigma_
     return results
@@ -213,7 +189,7 @@ def fit_ardr(X, y, threshold_lambda=1e8, fit_intercept=False, **kwargs):
     ardr = ARDRegression(threshold_lambda=threshold_lambda,
                          fit_intercept=fit_intercept, **kwargs)
     ardr.fit(X, y)
-    results = {}
+    results = dict()
     results['parameters'] = ardr.coef_
     results['covariance-matrix'] = ardr.sigma_
     return results

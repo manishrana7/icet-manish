@@ -130,6 +130,9 @@ class EnsembleOptimizer(BaseOptimizer):
         info['rmse_test_ensemble'] = self.rmse_test_ensemble
         info['training_size'] = self.training_size
         info['bootstrap'] = self.bootstrap
+
+        # add kwargs used for fitting
+        info = {**info, **self._kwargs}
         return info
 
     @property
