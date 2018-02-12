@@ -337,8 +337,15 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         """
         Test get_element_permutations method.
         """
+        # One mc vector will get two permutations
         input = [[0, 0], [0, 1], [1, 1]]
         target = [[[0, 1]], [[0, 1], [1, 0]], [[0, 1]]]
+        retval = self.cs.get_element_permutations(input)
+        self.assertEqual(target, retval)
+
+        # No extra permutation
+        input = [[0, 0], [0, 1], [1, 0], [1, 1]]
+        target = [[[0, 1]], [[0, 1]], [[0, 1]], [[0, 1]]]
         retval = self.cs.get_element_permutations(input)
         self.assertEqual(target, retval)
 
