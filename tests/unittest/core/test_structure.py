@@ -5,7 +5,6 @@ from icet.core.lattice_site import LatticeSite
 import random
 import numpy as np
 
-
 class TestStructure(unittest.TestCase):
     '''
     Container for test of the module functionality.
@@ -16,12 +15,13 @@ class TestStructure(unittest.TestCase):
         super(TestStructure, self).__init__(*args, **kwargs)
         self.atoms = bulk("Al")
         self.noise = 1e-6
-
+        
     def setUp(self):
         '''
         SetUp
         '''
         self.structure = Structure.from_atoms(self.atoms)
+        random.seed(113)
 
     def test_structure_from_atoms(self):
         '''
