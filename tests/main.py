@@ -66,4 +66,7 @@ if __name__ == "__main__":
 
     # Run tests
     ttr = unittest.TextTestRunner(stream=sys.stdout, verbosity=2)
-    ttr.run(suite)
+    results = ttr.run(suite)
+    
+    assert len(results.failures) == 0, "At least one test failed"
+    assert len(results.errors) == 0, "At least one test failed"
