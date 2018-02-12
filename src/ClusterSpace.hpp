@@ -142,4 +142,7 @@ class ClusterSpace
 
     //Maps real elements  to a 0,1,2, ... representation
     std::map<int, int> _elementRepresentation;
+
+    /// Return the element permutations for each mc vector in the set of mc vectors.
+    std::vector<std::vector<std::vector<int>>> getElementPermutations(const std::vector<std::vector<int>> &) const;
 };

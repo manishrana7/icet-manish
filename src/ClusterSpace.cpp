@@ -25,12 +25,12 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
         clusterCounts.countOrbitList(structure, local_orbit_list, orderIntact);
     }
 
-    if ( uniqueOffsets != structure2.size() / _primitive_structure.size())
-    {   
+    if (uniqueOffsets != structure2.size() / _primitive_structure.size())
+    {
         std::string errorMessage = "The number of unique offsets do not match supercell.size() / primitive.size()";
-        errorMessage += " {" + std::to_string(uniqueOffsets)+ "}";
+        errorMessage += " {" + std::to_string(uniqueOffsets) + "}";
         errorMessage += " != ";
-        errorMessage += " {" + std::to_string( structure2.size() / _primitive_structure.size())+ "}";
+        errorMessage += " {" + std::to_string(structure2.size() / _primitive_structure.size()) + "}";
         throw std::runtime_error(errorMessage);
     }
 
@@ -43,6 +43,7 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
         auto repCluster = _primitive_orbit_list.getOrbit(i).getRepresentativeCluster();
         auto allowedOccupations = getAllowedOccupations(_primitive_structure, _primitive_orbit_list.getOrbit(i).getRepresentativeSites());
         auto mcVectors = _primitive_orbit_list.getOrbit(i).getMCVectors(allowedOccupations);
+        auto elementPermutations = getElementPermutations(mcVectors);
         repCluster.setClusterTag(i);
 
         for (const auto &mcVector : mcVectors)
@@ -68,7 +69,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
     bool orderIntact = true; // count the clusters in the orbit with the same orientation as the prototype cluster
     LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(_primitive_orbit_list, structure);
     size_t uniqueOffsets = localOrbitListGenerator.getUniqueOffsetsCount();
-    ClusterCounts clusterCounts = ClusterCounts();    
+    ClusterCounts clusterCounts = ClusterCounts();
     int tags = 0;
     for (int i = 0; i < uniqueOffsets; i++)
     {
@@ -99,7 +100,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                     {
                         elements[i] = structure.getAtomicNumber(sites[i].index());
                     }
-                    clusterCounts.countCluster(repr_cluster, elements,orderIntact);
+                    clusterCounts.countCluster(repr_cluster, elements, orderIntact);
                 }
                 else
                 {
@@ -108,12 +109,30 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                     {
                         elements[i] = structure.getAtomicNumber(sites[i].index());
                     }
-                    clusterCounts.countCluster(repr_cluster, elements,orderIntact);
+                    clusterCounts.countCluster(repr_cluster, elements, orderIntact);
                 }
             }
         }
     }
     return clusterCounts;
+}
+
+/**
+  @details This method return the element permutations for each mc vector.
+  Example1: Given mc vectors [0, 0], [0,1] and [1,1]
+  the returned permutations should be [[1,0]], [[0,1],[1,0]], [1,1].
+  i.e. the [0,1] mc vector should count elements with permutations [1,0] and [1,0]
+
+  Given mc vectors [0, 0], [0,1], [1,0] and [1,1] the returned permutations 
+  will only be the self permutations since the mc vectors [0,1] and [1,0] will handle
+  the AB vs BA choice.
+
+  @param mcVectors the mc vectors for this orbit
+ 
+*/
+
+std::vector<std::vector<std::vector<int>>> ClusterSpace::getElementPermutations(const std::vector<std::vector<int>> &mcVectors) const
+{
 }
 
 /**
@@ -171,7 +190,7 @@ void ClusterSpace::setupClusterSpaceInfo()
 {
     _clusterSpaceInfo.clear();
     std::vector<int> emptyVec = {0};
-    _clusterSpaceInfo.push_back(std::make_pair(-1,emptyVec));
+    _clusterSpaceInfo.push_back(std::make_pair(-1, emptyVec));
     for (int i = 0; i < _primitive_orbit_list.size(); i++)
     {
         auto allowedOccupations = getAllowedOccupations(_primitive_structure, _primitive_orbit_list.getOrbit(i).getRepresentativeSites());
