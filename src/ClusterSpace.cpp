@@ -45,7 +45,7 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
         auto mcVectors = _primitive_orbit_list.getOrbit(i).getMCVectors(allowedOccupations);
         auto elementPermutations = getElementPermutations(mcVectors);
         repCluster.setClusterTag(i);
-
+        int currentMCVectorIndex =0;
         for (const auto &mcVector : mcVectors)
         {
             double clusterVectorElement = 0;
@@ -53,11 +53,20 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
 
             for (const auto &elementsCountPair : clusterMap.at(repCluster))
             {
-                clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
+                for(const auto &perm :elementPermutations[currentMCVectorIndex])
+                {
+                auto permutatedElement = icet::getPermutatedVector( elementsCountPair.first, perm);
+                clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, permutatedElement) * elementsCountPair.second;
+                // clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                 multiplicity += elementsCountPair.second;
+
+                }
+
             }
             clusterVectorElement /= ((double)multiplicity);
             clusterVector.push_back(clusterVectorElement);
+
+            currentMCVectorIndex++;
         }
     }
     return clusterVector;
