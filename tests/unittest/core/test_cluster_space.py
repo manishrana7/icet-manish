@@ -333,6 +333,15 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         self.assertEqual(len(self.cs.structure),
                          len(self.atoms_prim))
 
+    def test_get_element_permutations(self):
+        """
+        Test get_element_permutations method.
+        """
+        input = [[0, 0], [0, 1], [1, 1]]
+        target = [[[0, 1]], [[0, 1], [1, 0]], [[0, 1]]]
+        retval = self.cs.get_element_permutations(input)
+        self.assertEqual(target, retval)
+
 
 class TestClusterSpaceSurface(unittest.TestCase):
     '''
