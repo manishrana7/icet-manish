@@ -712,5 +712,6 @@ PYBIND11_MODULE(_icet, m)
         .def("get_cutoffs", &ClusterSpace::getCutoffs)
         .def("get_primitive_structure", &ClusterSpace::getPrimitiveStructure)
         .def("get_native_clusters", &ClusterSpace::getNativeClusters)
+        .def("get_element_permutations",&ClusterSpace::getElementPermutations)
         .def("__len__", &ClusterSpace::getClusterSpaceSize);
 }
