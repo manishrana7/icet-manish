@@ -348,6 +348,12 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         target = [[[0, 1]], [[0, 1]], [[0, 1]], [[0, 1]]]
         retval = self.cs.get_element_permutations(input)
         self.assertEqual(target, retval)
+        
+        # Try triplets
+        input = [[1, 0, 0]]
+        target = [[[0, 1, 2], [1, 0, 2], [1, 2, 0]]]
+        retval = self.cs.get_element_permutations(input)
+        self.assertEqual(target, retval)
 
 
 class TestClusterSpaceSurface(unittest.TestCase):

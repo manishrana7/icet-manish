@@ -45,7 +45,7 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
         auto mcVectors = _primitive_orbit_list.getOrbit(i).getMCVectors(allowedOccupations);
         auto elementPermutations = getElementPermutations(mcVectors);
         repCluster.setClusterTag(i);
-        int currentMCVectorIndex =0;
+        int currentMCVectorIndex = 0;
         for (const auto &mcVector : mcVectors)
         {
             double clusterVectorElement = 0;
@@ -53,15 +53,13 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
 
             for (const auto &elementsCountPair : clusterMap.at(repCluster))
             {
-                for(const auto &perm :elementPermutations[currentMCVectorIndex])
+                for (const auto &perm : elementPermutations[currentMCVectorIndex])
                 {
-                auto permutatedElement = icet::getPermutatedVector( elementsCountPair.first, perm);
-                clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, permutatedElement) * elementsCountPair.second;
-                // clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
-                multiplicity += elementsCountPair.second;
-
+                    auto permutatedElement = icet::getPermutatedVector(elementsCountPair.first, perm);
+                    clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, permutatedElement) * elementsCountPair.second;
+                    // clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
+                    multiplicity += elementsCountPair.second;
                 }
-
             }
             clusterVectorElement /= ((double)multiplicity);
             clusterVector.push_back(clusterVectorElement);
@@ -148,27 +146,26 @@ std::vector<std::vector<std::vector<int>>> ClusterSpace::getElementPermutations(
     {
         selfPermutation.push_back(i);
     }
+    auto allPermutations = icet::getAllPermutations(selfPermutation);
 
     for (const auto &mc : mcVectors)
     {
+
         std::vector<std::vector<int>> mcPermutations;
         mcPermutations.push_back(selfPermutation);
-        auto allPermutations = icet::getAllPermutations(mc);
-
-        std::vector<std::vector<int>> permutationsNotFound;
-        for (const auto allPerms : allPermutations)
+        std::vector<std::vector<int>> allPermutationsOfMCVector;
+        std::vector<std::vector<int>> takenPermutations;
+        for (const auto &perm : allPermutations)
         {
-            auto findPerm = std::find(mcVectors.begin(), mcVectors.end(), allPerms);
-            if (findPerm == mcVectors.end())
+            auto permutatedMcVector = icet::getPermutatedVector(mc, perm);
+            auto findPerm = std::find(mcVectors.begin(), mcVectors.end(), permutatedMcVector);
+            auto findIfTaken = std::find(takenPermutations.begin(), takenPermutations.end(), permutatedMcVector);
+            if (findPerm == mcVectors.end() && findIfTaken == takenPermutations.end())
             {
-                permutationsNotFound.push_back(allPerms);
+                mcPermutations.push_back(perm);
+                takenPermutations.push_back(permutatedMcVector);
             }
         }
-        for (const auto &notFoundPerm : permutationsNotFound)
-        {
-            mcPermutations.push_back(icet::getPermutation(mc, notFoundPerm));
-        }
-
         elementPermutations.push_back(mcPermutations);
     }
     return elementPermutations;
