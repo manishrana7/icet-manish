@@ -133,6 +133,36 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
 
 std::vector<std::vector<std::vector<int>>> ClusterSpace::getElementPermutations(const std::vector<std::vector<int>> &mcVectors) const
 {
+    std::vector<std::vector<std::vector<int>>> elementPermutations;
+    std::vector<int> selfPermutation;
+    for (int i = 0; i < mcVectors[0].size(); i++)
+    {
+        selfPermutation.push_back(i);
+    }
+
+    for (const auto &mc : mcVectors)
+    {
+        std::vector<std::vector<int>> mcPermutations;
+        mcPermutations.push_back(selfPermutation);
+        auto allPermutations = icet::getAllPermutations(mc);
+
+        std::vector<std::vector<int>> permutationsNotFound;
+        for (const auto allPerms : allPermutations)
+        {
+            auto findPerm = std::find(mcVectors.begin(), mcVectors.end(), allPerms);
+            if (findPerm == mcVectors.end())
+            {
+                permutationsNotFound.push_back(allPerms);
+            }
+        }
+        for (const auto &notFoundPerm : permutationsNotFound)
+        {
+            mcPermutations.push_back(icet::getPermutation(mc, notFoundPerm));
+        }
+
+        elementPermutations.push_back(mcPermutations);
+    }
+    return elementPermutations;
 }
 
 /**
