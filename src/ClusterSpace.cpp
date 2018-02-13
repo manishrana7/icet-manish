@@ -53,6 +53,8 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
 
             for (const auto &elementsCountPair : clusterMap.at(repCluster))
             {
+
+                // TODO check if allowedOccupations should be permutated as well.
                 for (const auto &perm : elementPermutations[currentMCVectorIndex])
                 {
                     // Permutated element version
@@ -60,6 +62,7 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
                     // clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, permutatedElement) * elementsCountPair.second;
 
                     // Permutated mc vector version
+                    
                     auto permutatedMCVector = icet::getPermutatedVector(mcVector, perm);
                     clusterVectorElement += getClusterProduct(permutatedMCVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                     // clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
