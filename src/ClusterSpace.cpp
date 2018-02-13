@@ -55,8 +55,13 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
             {
                 for (const auto &perm : elementPermutations[currentMCVectorIndex])
                 {
-                    auto permutatedElement = icet::getPermutatedVector(elementsCountPair.first, perm);
-                    clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, permutatedElement) * elementsCountPair.second;
+                    // Permutated element version
+                    // auto permutatedElement = icet::getPermutatedVector(elementsCountPair.first, perm);
+                    // clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, permutatedElement) * elementsCountPair.second;
+
+                    // Permutated mc vector version
+                    auto permutatedMCVector = icet::getPermutatedVector(mcVector, perm);
+                    clusterVectorElement += getClusterProduct(permutatedMCVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                     // clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                     multiplicity += elementsCountPair.second;
                 }
@@ -147,7 +152,7 @@ std::vector<std::vector<std::vector<int>>> ClusterSpace::getElementPermutations(
         selfPermutation.push_back(i);
     }
     auto allPermutations = icet::getAllPermutations(selfPermutation);
-
+    std::sort(allPermutations.begin(),allPermutations.end());
     for (const auto &mc : mcVectors)
     {
 
