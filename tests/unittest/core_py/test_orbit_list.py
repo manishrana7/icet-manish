@@ -10,6 +10,7 @@ from icet.core_py.permutation_matrix import PermutationMatrix
 from ase.build import bulk
 # from icet import Structure
 from icet import ClusterSpace
+from ase.build import fcc111
 
 
 class TestOrbitList(unittest.TestCase):
@@ -376,7 +377,18 @@ class TestOrbitList(unittest.TestCase):
 
         atoms = bulk("Al", 'bcc', a=3.0)
         cutoff = [5] * 3
+        orbit_list = OrbitList(atoms, cutoff)
+
+        
+        cutoff = [4.0] * 3
+        atoms = bulk('Ag', a=4.09)
+        orbit_list = OrbitList(atoms, cutoff)
+
+        cutoff = [4.0] * 1
+        atoms = fcc111('Ag', a=4.09, vacuum=5.0, size=[1, 1, 3])
+        atoms.pbc = [True, True, False]
         orbit_list = OrbitList(atoms, cutoff) # noqa
+
 
     def test_get_matches_in_pm(self):
         """

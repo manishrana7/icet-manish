@@ -63,6 +63,12 @@ class OrbitList(object):
             for compressed_sites in mb_neigbhors_index:
                 for sites in mbnl.unzip(compressed_sites):
                     sites.sort()
+                    zero_cells = 0
+                    for site in sites:
+                        if np.linalg.norm(site.unitcell_offset) < 0.1:
+                            zero_cells += 1
+                    assert zero_cells != 0
+
                     if self.is_new_orbit(sites):
                         orbit = self.make_orbit(sites)
                         self._orbits.append(orbit)
@@ -155,6 +161,8 @@ class OrbitList(object):
         orbit = Orbit(cluster)
         for i in range(len(rows[0])):
             eq_sites = [row[i] for row in rows]
+            if not self.is_valid_sites(eq_sites):
+                raise RuntimeError("error eq sites not in unitcell")
 
             translated_eq_sites = self.get_all_translated_sites(eq_sites)
             sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
@@ -164,12 +172,29 @@ class OrbitList(object):
                     new_sites = False
                     break
             if new_sites:
-                orbit.equivalent_sites.append(copy.deepcopy(eq_sites))
+                for valid_sites in sites_indices_match:
+                    if self.is_valid_sites(valid_sites[0]):
+                        orbit.equivalent_sites.append(
+                            copy.deepcopy(valid_sites[0]))
+                        # orbit.equivalent_sites.append(copy.deepcopy(eq_sites))
+                        break
+                else:
+                    raise RuntimeError("No sites were valid")
             for site_index in sites_indices_match:
                 self.take_row(site_index[1])
 
         orbit.sort()
         return orbit
+
+    def is_valid_sites(self, sites):
+        """
+        Check if sites are valid, i.e. at least one
+        lattice site has the offset [0,0,0]
+        """
+        for site in sites:
+            if np.linalg.norm(site.unitcell_offset) < 0.1:
+                return True
+        return False
 
     def get_rows(self, sites):
         """
@@ -202,7 +227,7 @@ class OrbitList(object):
         # TODO check if this should be done elsewhere
         return tuple(indices)
 
-    def get_all_translated_sites(self, sites):
+    def get_all_translated_sites(self, sites_in):
         """
         Construct a list of lists of sites.
         Will for each site that has
@@ -217,7 +242,7 @@ class OrbitList(object):
         ----------
         sites : list of icet Lattice Sites object
         """
-
+        sites = copy.deepcopy(sites_in)
         for site in sites:
             if not isinstance(site, LatticeSite):
                 raise TypeError(
@@ -316,15 +341,22 @@ class OrbitList(object):
 
         1. Take representative sites
         2. Find the rows these sites belong to
-           (also find the unit cell offsets equivalent sites??)
+           (also find the unit cell offsets equivalent sites)
+
         3. Get all columns for these rows, i.e the sites that
-           are directly equivalent, call these p_equal.
+           are directly equivalent, call these p_equal. 
+           Don't sort the actual list of lattice sites 
+           (ok to sort list of lists of lattice sites)
+
         4. Construct all possible permutations for the
            representative sites, call these p_all
+
         5. Construct the intersect of p_equal and
            p_all, call this p_allowed_permutations.
-        6. Get the indice version of p_allowed_permutations
+        6. Get the index version of p_allowed_permutations
            and these are then the allowed permutations for this orbit.
+
+        Start to find the permutation to representative sites now
         7. take the sites in the orbit:
             site exist in p_all?:
                 those sites are then related to
@@ -395,7 +427,7 @@ class OrbitList(object):
 
             for sites in orbit.equivalent_sites:
 
-                if tuple(sites) not in p_equal_set:
+                if not tuple(sites) in p_equal_set:
                     #  Did not find the orbit.eq_sites in p_equal
                     #  meaning that this eq site does not have an
                     #  allowed permutation
@@ -405,11 +437,11 @@ class OrbitList(object):
                     for trans_sites in translated_sites:
                         for permutation in all_possible_permutations:
                             all_permutation_of_sites.append(
-                                tuple((get_permutation(trans_sites,
+                                [get_permutation(trans_sites,
                                                        permutation),
-                                       trans_sites)))
+                                       trans_sites])
 
-                    for i, perm_sites in enumerate(all_permutation_of_sites):
+                    for perm_sites in all_permutation_of_sites:
                         if tuple(perm_sites[0]) in p_equal_set:
                             # one perm is one of the equivalent sites.
                             #  This means that eqOrbitSites is
@@ -418,13 +450,18 @@ class OrbitList(object):
                                 perm_sites[0], perm_sites[1])
                             site_permutations.append(permutation)
                             break
-
-                        if i == len(all_permutation_of_sites) - 1:
-                            # reached end without break so throw error
-                            raise RuntimeError(
-                                "did not find a permutation of the"
-                                " orbit sites to the permutations"
-                                " of the representative sites")
+                    else:
+                        # reached end without break so throw error
+                        print("error print ", len(
+                            all_permutation_of_sites), len(sites))
+                        print(sites)
+                        print()
+                        print(p_equal_set)
+                        print("len of structure {}".format(len(self.primitive_structure)))
+                        raise RuntimeError(
+                            "did not find a permutation of the"
+                            " orbit sites to the permutations"
+                            " of the representative sites")
 
                 else:
                     # Direct match. Score!
