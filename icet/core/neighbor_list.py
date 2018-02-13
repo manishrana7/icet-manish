@@ -33,8 +33,8 @@ def get_neighbor_lists(atoms, cutoffs=None):
     if cutoffs is None:
         raise Exception('Both n and cutoffs is None in count clusters')
     else:
-        for co in cutoffs:
-            nl = NeighborList(co)
+        for cutoff in cutoffs:
+            nl = NeighborList(cutoff)
             neighbor_lists.append(nl)
 
     # build the neighbor_lists
