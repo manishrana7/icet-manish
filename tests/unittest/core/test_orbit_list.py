@@ -27,6 +27,10 @@ class TestOrbitList(unittest.TestCase):
         """
 
         for orbit in self.orbit_list.orbits:
-            orbit.representative_cluster.geometrical_size
+            size = orbit.geometrical_size
+            for eq_sites in orbit.equivalent_sites:
+                cluster = Cluster(self.structure, eq_sites,True)
+                self.assertAlmostEqual(cluster.geometrical_size, size,places=5)
+    
 if __name__ == '__main__':
     unittest.main()
