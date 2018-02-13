@@ -451,7 +451,7 @@ std::vector<std::vector<LatticeSite>> OrbitList::getSitesTranslatedToUnitcell(co
     if (!isSitesPBCCorrect(latticeNeighbors))
     {
         throw std::runtime_error("Error: function: OrbitList::getSitesTranslatedToUnitcell received a latnbr that had a repeated site in the unitcell direction where pbc was false");
-    }
+    }sortIt
 
     std::vector<std::vector<LatticeSite>> translatedLatticeSites;
     translatedLatticeSites.push_back(latticeNeighbors);
