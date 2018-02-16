@@ -140,7 +140,7 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
                 {
                     throw std::runtime_error("Original sites is not sorted");
                 }
-                std::vector<std::vector<LatticeSite>> translatedSites = getSitesTranslatedToUnitcell(lat_nbrs);
+                std::vector<std::vector<LatticeSite>> translatedSites = getSitesTranslatedToUnitcell(lat_nbrs, false);
                 int missedSites = 0;
 
                 auto sites_index_pair = getMatchesInPM(translatedSites);
