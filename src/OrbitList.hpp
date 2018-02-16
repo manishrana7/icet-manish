@@ -136,13 +136,16 @@ class OrbitList
 
     std::vector<LatticeSite> translateSites(const std::vector<LatticeSite> &, const unsigned int) const;
     std::vector<std::vector<LatticeSite>> getSitesTranslatedToUnitcell(const std::vector<LatticeSite> &, bool sortit = true) const;
-    std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> getMatchesInPM(const std::vector<std::vector<LatticeSite>> &, const std::vector<LatticeSite> &) const;
+    std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> getMatchesInPM(const std::vector<std::vector<LatticeSite>> &) const;
 
     void transformSiteToSupercell(LatticeSite &site, const Structure &superCell, std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap) const;
     void setPrimitiveStructure(const Structure &primitive)
     {
         _primitiveStructure = primitive;
     }
+
+    void takeRows(std::unordered_set<std::vector<int>, VectorHash> &taken_rows, std::vector<int> rows) const;
+
 
     ///Returns the primitive structure
     Structure getPrimitiveStructure() const
@@ -194,4 +197,6 @@ class OrbitList
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;
     Structure _primitiveStructure;
     std::vector<Orbit> _orbitList;
+     std::vector<std::vector<LatticeSite>> _permutation_matrix;
+     std::vector<LatticeSite> _column1;
 };

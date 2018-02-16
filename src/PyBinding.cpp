@@ -686,6 +686,19 @@ PYBIND11_MODULE(_icet, m)
         .def("get_primitive_structure", &OrbitList::getPrimitiveStructure)
         .def("__len__", &OrbitList::size)
         .def("print", &OrbitList::print, py::arg("verbosity") = 0)
+        .def("get_matches_in_pm", &OrbitList::getMatchesInPM,
+          R"pbdoc(
+           Return first set of sites that exists in column1 of Permutation Matrix
+
+           Parameters
+           ---------
+           translated_sites : list of list of lattice sites.
+
+           returns 
+           -------
+           matched_sites : list of tuple of list of lattice sites and corresponding
+               index in column1.
+           )pbdoc")
         // .def("get_supercell_orbit_list", &OrbitList::getSupercellOrbitList)
         ;
 
