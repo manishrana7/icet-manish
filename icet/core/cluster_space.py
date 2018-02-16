@@ -225,13 +225,20 @@ class ClusterSpace(_ClusterSpace):
             cluster_space_info = self.get_cluster_space_info(index)
             orbit_index = cluster_space_info[0]
             mc_vector = cluster_space_info[1]
+            mc_vectors = self.get_orbit(
+                orbit_index).get_mc_vectors(self.get_allowed_occupations(
+                self.get_primitive_structure(), self.get_orbit(
+                orbit_index).representative_sites))
+            mc_permutations = self.get_mc_vector_permutations(mc_vectors)
+            mc_index = mc_vectors.index(mc_vector)
+            mc_permutations_multiplicity = len(mc_permutations[mc_index] )
             cluster = self.get_orbit(orbit_index).get_representative_cluster()
             multiplicity = len(self.get_orbit(
                                orbit_index).get_equivalent_sites())
             record = OrderedDict([('index', index),
                                   ('order', cluster.order),
                                   ('size', cluster.geometrical_size),
-                                  ('multiplicity', multiplicity),
+                                  ('multiplicity', multiplicity*mc_permutations_multiplicity),
                                   ('orbit index', orbit_index)])
             record['MC vector'] = mc_vector
             data.append(record)

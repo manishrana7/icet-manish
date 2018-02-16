@@ -43,7 +43,7 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
         auto repCluster = _primitive_orbit_list.getOrbit(i).getRepresentativeCluster();
         auto allowedOccupations = getAllowedOccupations(_primitive_structure, _primitive_orbit_list.getOrbit(i).getRepresentativeSites());
         auto mcVectors = _primitive_orbit_list.getOrbit(i).getMCVectors(allowedOccupations);
-        auto elementPermutations = getElementPermutations(mcVectors);
+        auto elementPermutations = getMCVectorPermutations(mcVectors);
         repCluster.setClusterTag(i);
         int currentMCVectorIndex = 0;
         for (const auto &mcVector : mcVectors)
@@ -133,7 +133,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
 }
 
 /**
-  @details This method return the element permutations for each mc vector.
+  @details This method return the mc vector permutations for each mc vector.
   Example1: Given mc vectors [0, 0], [0,1] and [1,1]
   the returned permutations should be [[1,0]], [[0,1],[1,0]], [1,1].
   i.e. the [0,1] mc vector should count elements with permutations [1,0] and [1,0]
@@ -146,7 +146,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
  
 */
 
-std::vector<std::vector<std::vector<int>>> ClusterSpace::getElementPermutations(const std::vector<std::vector<int>> &mcVectors) const
+std::vector<std::vector<std::vector<int>>> ClusterSpace::getMCVectorPermutations(const std::vector<std::vector<int>> &mcVectors) const
 {
     std::vector<std::vector<std::vector<int>>> elementPermutations;
     std::vector<int> selfPermutation;

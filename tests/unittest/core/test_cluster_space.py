@@ -333,32 +333,32 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         self.assertEqual(len(self.cs.structure),
                          len(self.atoms_prim))
 
-    def test_get_element_permutations(self):
+    def test_get_mc_vector_permutations(self):
         """
-        Test get_element_permutations method.
+        Test get_mc_vector_permutations method.
         """
         # One mc vector will get two permutations
         input = [[0, 0], [0, 1], [1, 1]]
         target = [[[0, 1]], [[0, 1], [1, 0]], [[0, 1]]]
-        retval = self.cs.get_element_permutations(input)
+        retval = self.cs.get_mc_vector_permutations(input)
         self.assertEqual(target, retval)
 
         # No extra permutation
         input = [[0, 0], [0, 1], [1, 0], [1, 1]]
         target = [[[0, 1]], [[0, 1]], [[0, 1]], [[0, 1]]]
-        retval = self.cs.get_element_permutations(input)
+        retval = self.cs.get_mc_vector_permutations(input)
         self.assertEqual(target, retval)
 
         # Try triplets
         input = [[1, 0, 0]]
         target = [[[0, 1, 2], [1, 0, 2], [1, 2, 0]]]
-        retval = self.cs.get_element_permutations(input)
+        retval = self.cs.get_mc_vector_permutations(input)
         self.assertEqual(target, retval)
 
         input = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1],
                  [1, 1, 0], [1, 0, 1], [0, 1, 1], [1, 1, 1]]
         target = [[[0, 1, 2]] for _ in range(8)]
-        retval = self.cs.get_element_permutations(input)
+        retval = self.cs.get_mc_vector_permutations(input)
         self.assertEqual(target, retval)
 
         input = [[0, 0, 0],
@@ -369,7 +369,7 @@ index | order |   size   | multiplicity | orbit index |  MC vector
                   [[0, 1, 2], [1, 0, 2], [1, 2, 0]],
                   [[0, 1, 2], [0, 2, 1], [2, 0, 1]],
                   [[0, 1, 2]]]
-        retval = self.cs.get_element_permutations(input)
+        retval = self.cs.get_mc_vector_permutations(input)
         self.assertEqual(target, retval)
 
 
@@ -380,7 +380,7 @@ index | order |   size   | multiplicity | orbit index |  MC vector
                 [1,0,1],
                 [1,1,1]]
         target_length = [1,2,1,2,1,1]
-        retval = self.cs.get_element_permutations(input)
+        retval = self.cs.get_mc_vector_permutations(input)
         for ret in retval:
             print(ret)
         for ret, length in zip(retval, target_length):

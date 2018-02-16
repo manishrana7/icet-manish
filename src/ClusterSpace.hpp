@@ -102,8 +102,12 @@ class ClusterSpace
 
     ClusterCounts getNativeClusters(const Structure &structure) const;
 
-    /// Return the element permutations for each mc vector in the set of mc vectors.
-    std::vector<std::vector<std::vector<int>>> getElementPermutations(const std::vector<std::vector<int>> &) const;
+    /// Return the MC vector permutations for each mc vector in the set of mc vectors.
+    std::vector<std::vector<std::vector<int>>> getMCVectorPermutations(const std::vector<std::vector<int>> &) const;
+
+    ///Returns the allowed occupations on the sites
+    std::vector<int> getAllowedOccupations(const Structure &structure, const std::vector<LatticeSite> &latticeNeighbors) const;
+
 
   private:
     ///Currently we have constant Mi for development but will later change to dynamic Mi
@@ -139,8 +143,6 @@ class ClusterSpace
     ///return the default clusterfunction of the input element when this site can have Mi elements
     double defaultClusterFunction(const int Mi, const int clusterFunction, const int element) const;
 
-    //////Returns the allowed occupations on the sites
-    std::vector<int> getAllowedOccupations(const Structure &structure, const std::vector<LatticeSite> &latticeNeighbors) const;
 
     //Maps real elements  to a 0,1,2, ... representation
     std::map<int, int> _elementRepresentation;
