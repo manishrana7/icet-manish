@@ -373,6 +373,21 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         self.assertEqual(target, retval)
 
 
+        input = [[0,0,0],
+                [1,0,0],
+                [0,1,0],
+                [1,1,0],
+                [1,0,1],
+                [1,1,1]]
+        target_length = [1,2,1,2,1,1]
+        retval = self.cs.get_element_permutations(input)
+        for ret in retval:
+            print(ret)
+        for ret, length in zip(retval, target_length):
+            self.assertEqual(len(ret),length)
+
+
+
 class TestClusterSpaceSurface(unittest.TestCase):
     '''
     Container for tests of the class functionality for non-periodic structures

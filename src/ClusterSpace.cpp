@@ -62,7 +62,7 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
                     // clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, permutatedElement) * elementsCountPair.second;
 
                     // Permutated mc vector version
-                    
+
                     auto permutatedMCVector = icet::getPermutatedVector(mcVector, perm);
                     clusterVectorElement += getClusterProduct(permutatedMCVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                     // clusterVectorElement += getClusterProduct(mcVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
@@ -154,21 +154,40 @@ std::vector<std::vector<std::vector<int>>> ClusterSpace::getElementPermutations(
     {
         selfPermutation.push_back(i);
     }
-    auto allPermutations = icet::getAllPermutations(selfPermutation);
-    std::sort(allPermutations.begin(),allPermutations.end());
+    std::vector<std::vector<int>> allPermutations = icet::getAllPermutations(selfPermutation);
+    std::sort(allPermutations.begin(), allPermutations.end());
+
+    std::set<std::vector<int>> notAllowedPermutations;
     for (const auto &mc : mcVectors)
     {
+        for (const auto perm : allPermutations)
+        {
+            auto permutatedMcVector = icet::getPermutatedVector(mc, perm);
+            auto findPerm = std::find(mcVectors.begin(), mcVectors.end(), permutatedMcVector);
 
+            if (permutatedMcVector != mc && findPerm != mcVectors.end())
+            {
+                notAllowedPermutations.insert(perm);
+            }
+        }
+    }
+
+    std::vector<std::vector<int>> allowedPermutations;
+    std::set_difference(allPermutations.begin(), allPermutations.end(), notAllowedPermutations.begin(), notAllowedPermutations.end(), std::back_inserter(allowedPermutations));
+
+    for (const auto &mc : mcVectors)
+    {
         std::vector<std::vector<int>> mcPermutations;
         mcPermutations.push_back(selfPermutation);
-        std::vector<std::vector<int>> allPermutationsOfMCVector;
         std::vector<std::vector<int>> takenPermutations;
-        for (const auto &perm : allPermutations)
+        takenPermutations.push_back(selfPermutation);
+
+        for (const std::vector<int> perm : allowedPermutations)
         {
             auto permutatedMcVector = icet::getPermutatedVector(mc, perm);
             auto findPerm = std::find(mcVectors.begin(), mcVectors.end(), permutatedMcVector);
             auto findIfTaken = std::find(takenPermutations.begin(), takenPermutations.end(), permutatedMcVector);
-            if (findPerm == mcVectors.end() && findIfTaken == takenPermutations.end())
+            if (findPerm == mcVectors.end() && findIfTaken == takenPermutations.end() && mc != permutatedMcVector)
             {
                 mcPermutations.push_back(perm);
                 takenPermutations.push_back(permutatedMcVector);
