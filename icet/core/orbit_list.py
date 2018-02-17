@@ -32,7 +32,7 @@ def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
 
     Permutation matrix is in row major format which we will keep
     '''
-    pm_frac = permutation_matrix.get_permutated_positions()
+    pm_frac = permutation_matrix.get_permuted_positions()
 
     pm_lattice_sites = []
     for row in pm_frac:

@@ -378,21 +378,21 @@ class TestOrbit(unittest.TestCase):
         self.assertEqual(self.orbit_pair_cpp.allowed_permutations,
                          self.orbit_pair.allowed_permutations)
 
-    def test_property_permutated_sites(self):
+    def test_property_permuted_sites(self):
         """
-        Test the permutated sites property.
+        Test the permuted sites property.
         """
         # Test python
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
         # Raises IndexError when permutations to primitive is not set
         with self.assertRaises(IndexError):
-            self.orbit_pair.permutated_sites
+            self.orbit_pair.permuted_sites
 
         # Provide the identity permutation
         self.orbit_pair.permutations_to_representative = [
             [i for i in range(self.orbit_pair.order)]] * len(self.orbit_pair)
 
-        self.assertEqual(self.orbit_pair.permutated_sites,
+        self.assertEqual(self.orbit_pair.permuted_sites,
                          self.orbit_pair.equivalent_sites)
 
         # Provide a completely reversed permutation, [i,j,k] ->[k,j,i]
@@ -400,7 +400,7 @@ class TestOrbit(unittest.TestCase):
             [i for i in reversed(range(self.orbit_pair.order))]] * \
             len(self.orbit_pair)
 
-        for perm_sites, sites in zip(self.orbit_pair.permutated_sites,
+        for perm_sites, sites in zip(self.orbit_pair.permuted_sites,
                                      self.orbit_pair.equivalent_sites):
             self.assertEqual(perm_sites, list(reversed(sites)))
 
@@ -408,14 +408,14 @@ class TestOrbit(unittest.TestCase):
         self.orbit_pair_cpp.equivalent_sites = self.lattice_sites_pairs_cpp
         # Raises IndexError when permutations to primitive is not set
         with self.assertRaises(IndexError):
-            self.orbit_pair_cpp.permutated_sites
+            self.orbit_pair_cpp.permuted_sites
 
         # Provide the identity permutation
         self.orbit_pair_cpp.permutations_to_representative = [
             [i for i in range(
                 self.orbit_pair_cpp.order)]] * len(self.orbit_pair_cpp)
 
-        self.assertEqual(self.orbit_pair_cpp.permutated_sites,
+        self.assertEqual(self.orbit_pair_cpp.permuted_sites,
                          self.orbit_pair_cpp.equivalent_sites)
 
         # Provide a completely reversed permutation, [i,j,k] ->[k,j,i]
@@ -423,7 +423,7 @@ class TestOrbit(unittest.TestCase):
             [i for i in reversed(range(
                 self.orbit_pair_cpp.order))]] * len(self.orbit_pair_cpp)
 
-        for perm_sites, sites in zip(self.orbit_pair_cpp.permutated_sites,
+        for perm_sites, sites in zip(self.orbit_pair_cpp.permuted_sites,
                                      self.orbit_pair_cpp.equivalent_sites):
             self.assertEqual(perm_sites, list(reversed(sites)))
 

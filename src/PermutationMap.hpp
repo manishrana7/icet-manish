@@ -32,7 +32,7 @@ class PermutationMap
 
     std::vector<std::vector<Vector3d>> getPermutatedPositions() const
     {
-        return _permutatedPositions;
+        return _permutedPositions;
     }
 
     /**
@@ -42,13 +42,13 @@ class PermutationMap
     std::pair<std::vector<std::vector<int>>, std::vector<Vector3d>> getIndicedPermutatedPositions()
     {
         std::vector<Vector3d> uniquePositions;
-        std::vector<std::vector<int>> indicePositions(_permutatedPositions.size(), std::vector<int>(_permutatedPositions[0].size()));
-        for (size_t row = 0; row < _permutatedPositions.size(); row++)
+        std::vector<std::vector<int>> indicePositions(_permutedPositions.size(), std::vector<int>(_permutedPositions[0].size()));
+        for (size_t row = 0; row < _permutedPositions.size(); row++)
         {
-            for (size_t col = 0; col < _permutatedPositions[0].size(); col++)
+            for (size_t col = 0; col < _permutedPositions[0].size(); col++)
             {
 
-                Vector3d pos = _permutatedPositions[row][col];
+                Vector3d pos = _permutedPositions[row][col];
                 const auto find = std::find(uniquePositions.begin(), uniquePositions.end(), pos);
                 if (find == uniquePositions.end())
                 {
@@ -68,7 +68,7 @@ class PermutationMap
   private:
     std::vector<Vector3d> _translations;
     std::vector<Matrix3d> _rotations;
-    std::vector<std::vector<Vector3d>> _permutatedPositions;
+    std::vector<std::vector<Vector3d>> _permutedPositions;
 
     /** 
     Help function to round a Vector3d for easier comparing the transmutated positions

@@ -15,11 +15,11 @@ neighbor_cutoff = 2.0
 permutation_map, prim_structure, neighbor_list = \
     permutation_matrix_from_atoms(atoms, neighbor_cutoff, verbosity=3)
 
-# Extract the permutated, indexed and unique positions.
-perm_pos = permutation_map.get_permutated_positions()
+# Extract the permuted, indexed and unique positions.
+perm_pos = permutation_map.get_permuted_positions()
 ind_pos, unique_pos = permutation_map.get_indiced_positions()
 
-# Print the permutated, indexed and unique positions.
+# Print the permuted, indexed and unique positions.
 print('Permutated fractional coordinates')
 for pp in perm_pos:
     unique_rows = np.vstack({tuple(row) for row in pp})
@@ -29,6 +29,6 @@ for pp in perm_pos:
 print('Permutated indices and positions')
 for i, pos in enumerate(ind_pos):
     print(i, len(set(pos)), pos)
-print('Unique permutated indices and positions')
+print('Unique permuted indices and positions')
 for index, dist in enumerate(unique_pos):
     print(index, dist)
