@@ -380,10 +380,19 @@ index | order |   size   | multiplicity | orbit index |  MC vector
                  [1, 1, 1]]
         target_length = [1, 2, 1, 2, 1, 1]
         retval = self.cs.get_mc_vector_permutations(input)
-        for ret in retval:
-            print(ret)
         for ret, length in zip(retval, target_length):
             self.assertEqual(len(ret), length)
+
+        input = [[0,0,0,0],
+                [0,0,0,1],
+                [0,0,1,1],
+                [0,1,1,0],
+                [0,1,1,1],
+                [1,1,1,1]]
+        retval = self.cs.get_mc_vector_permutations(input)
+        for ret in retval:
+            print(ret)
+
 
 
 class TestClusterSpaceSurface(unittest.TestCase):

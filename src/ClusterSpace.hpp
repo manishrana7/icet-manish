@@ -103,7 +103,7 @@ class ClusterSpace
     ClusterCounts getNativeClusters(const Structure &structure) const;
 
     /// Return the MC vector permutations for each mc vector in the set of mc vectors.
-    std::vector<std::vector<std::vector<int>>> getMCVectorPermutations(const std::vector<std::vector<int>> &) const;
+    std::vector<std::vector<std::vector<int>>> getMCVectorPermutations(const std::vector<std::vector<int>> &, const std::set<std::vector<int>>) const;
 
     ///Returns the allowed occupations on the sites
     std::vector<int> getAllowedOccupations(const Structure &structure, const std::vector<LatticeSite> &latticeNeighbors) const;
