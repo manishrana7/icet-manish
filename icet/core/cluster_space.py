@@ -229,7 +229,8 @@ class ClusterSpace(_ClusterSpace):
                 orbit_index).get_mc_vectors(self.get_allowed_occupations(
                     self.get_primitive_structure(), self.get_orbit(
                         orbit_index).representative_sites))
-            mc_permutations = self.get_mc_vector_permutations(mc_vectors, orbit_index)
+            mc_permutations = self.get_mc_vector_permutations(
+                mc_vectors, orbit_index)
             mc_index = mc_vectors.index(mc_vector)
             mc_permutations_multiplicity = len(mc_permutations[mc_index])
             cluster = self.get_orbit(orbit_index).get_representative_cluster()
