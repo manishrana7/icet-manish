@@ -30,6 +30,7 @@ from icet.core.lattice_site import LatticeSite
 from collections import OrderedDict
 
 import numpy as np
+import ase.db
 
 
 def strip_surrounding_spaces(input_string):
@@ -333,66 +334,39 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         self.assertEqual(len(self.cs.structure),
                          len(self.atoms_prim))
 
-    def test_get_mc_vector_permutations(self):
+    def _test_cluster_vectors_in_database(self, db_name):
         """
-        Test get_mc_vector_permutations method.
+        Tests the cluster vectors in the database.
         """
-        # One mc vector will get two permutations
-        input = [[0, 0], [0, 1], [1, 1]]
-        target = [[[0, 1]], [[0, 1], [1, 0]], [[0, 1]]]
-        retval = self.cs.get_mc_vector_permutations(input)
-        self.assertEqual(target, retval)
 
-        # No extra permutation
-        input = [[0, 0], [0, 1], [1, 0], [1, 1]]
-        target = [[[0, 1]], [[0, 1]], [[0, 1]], [[0, 1]]]
-        retval = self.cs.get_mc_vector_permutations(input)
-        self.assertEqual(target, retval)
+        db = ase.db.connect(db_name)
 
-        # Try triplets
-        input = [[1, 0, 0]]
-        target = [[[0, 1, 2], [1, 0, 2], [1, 2, 0]]]
-        retval = self.cs.get_mc_vector_permutations(input)
-        self.assertEqual(target, retval)
+        entry1 = db.get(id=1)
+        atoms = entry1.toatoms()
+        elements = entry1.data.elements
+        cutoffs = entry1.data.cutoffs
+        cs = ClusterSpace(atoms, cutoffs, elements)
 
-        input = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1],
-                 [1, 1, 0], [1, 0, 1], [0, 1, 1], [1, 1, 1]]
-        target = [[[0, 1, 2]] for _ in range(8)]
-        retval = self.cs.get_mc_vector_permutations(input)
-        self.assertEqual(target, retval)
+        for row in db.select():
+            atoms = row.toatoms()
+            retval = cs.get_cluster_vector(atoms)
+            target = np.array(row.data.target_cv)
+            self.assertTrue(np.all(np.isclose(target, retval)))
 
-        input = [[0, 0, 0],
-                 [1, 0, 0],
-                 [1, 1, 0],
-                 [1, 1, 1]]
-        target = [[[0, 1, 2]],
-                  [[0, 1, 2], [1, 0, 2], [1, 2, 0]],
-                  [[0, 1, 2], [0, 2, 1], [2, 0, 1]],
-                  [[0, 1, 2]]]
-        retval = self.cs.get_mc_vector_permutations(input)
-        self.assertEqual(target, retval)
+    def test_multi_component_cluster_vectors(self):
+        """
+        Test the consistency of multi components cluster
+        vectors. Will test against ternary and quaternary cluster
+        vectors with fcc, bcc and hcp.
+        """
+        self._test_cluster_vectors_in_database('fcc_ternary.db')
+        self._test_cluster_vectors_in_database('fcc_quaternary.db')
 
-        input = [[0, 0, 0],
-                 [1, 0, 0],
-                 [0, 1, 0],
-                 [1, 1, 0],
-                 [1, 0, 1],
-                 [1, 1, 1]]
-        target_length = [1, 2, 1, 2, 1, 1]
-        retval = self.cs.get_mc_vector_permutations(input)
-        for ret, length in zip(retval, target_length):
-            self.assertEqual(len(ret), length)
+        self._test_cluster_vectors_in_database('bcc_ternary.db')
+        self._test_cluster_vectors_in_database('bcc_quaternary.db')
 
-        input = [[0,0,0,0],
-                [0,0,0,1],
-                [0,0,1,1],
-                [0,1,1,0],
-                [0,1,1,1],
-                [1,1,1,1]]
-        retval = self.cs.get_mc_vector_permutations(input)
-        for ret in retval:
-            print(ret)
-
+        self._test_cluster_vectors_in_database('hcp_ternary.db')
+        self._test_cluster_vectors_in_database('hcp_quaternary.db')
 
 
 class TestClusterSpaceSurface(unittest.TestCase):

@@ -526,9 +526,10 @@ PYBIND11_MODULE(_icet, m)
              py::arg("lattice_neighbors"),
              py::arg("sort") = false)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
+        .def("get_allowed_sites_permutations",&Orbit::getAllowedSitesPermutations)
         .def("get_representative_sites", &Orbit::getRepresentativeSites)
         .def("get_equivalent_sites_permutations", &Orbit::getEquivalentSitesPermutations)
-             
+        
         .def("get_representative_cluster", &Orbit::getRepresentativeCluster,
         R"pbdoc(
         The representative cluster
