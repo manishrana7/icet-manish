@@ -360,14 +360,20 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         vectors. Will test against ternary and quaternary cluster
         vectors with fcc, bcc and hcp.
         """
-        self._test_cluster_vectors_in_database('tests/unittest/core/fcc_ternary.db')
-        self._test_cluster_vectors_in_database('tests/unittest/core/fcc_quaternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/fcc_ternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/fcc_quaternary.db')
 
-        self._test_cluster_vectors_in_database('tests/unittest/core/bcc_ternary.db')
-        self._test_cluster_vectors_in_database('tests/unittest/core/bcc_quaternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/bcc_ternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/bcc_quaternary.db')
 
-        self._test_cluster_vectors_in_database('tests/unittest/core/hcp_ternary.db')
-        self._test_cluster_vectors_in_database('tests/unittest/core/hcp_quaternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/hcp_ternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/hcp_quaternary.db')
 
 
 class TestClusterSpaceSurface(unittest.TestCase):
