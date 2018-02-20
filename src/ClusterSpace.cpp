@@ -58,7 +58,7 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
                 // TODO check if allowedOccupations should be permuted as well.
                 for (const auto &perm : elementPermutations[currentMCVectorIndex])
                 {
-                    auto permutedMCVector = icet::getPermutatedVector(mcVector, perm);
+                    auto permutedMCVector = icet::getPermutedVector(mcVector, perm);
                     clusterVectorElement += getClusterProduct(permutedMCVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                     multiplicity += elementsCountPair.second;
                 }
@@ -87,7 +87,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
         {
             Cluster repr_cluster = local_orbit_list.getOrbit(j).getRepresentativeCluster();
 
-            for (const auto sites : local_orbit_list.getOrbit(j).getPermutatedEquivalentSites())
+            for (const auto sites : local_orbit_list.getOrbit(j).getPermutedEquivalentSites())
             {
                 bool cont = true;
                 for (auto site : sites)
@@ -160,7 +160,7 @@ std::vector<std::vector<std::vector<int>>> ClusterSpace::getMCVectorPermutations
         takenPermutations.push_back(selfPermutation);
         for (const std::vector<int> perm : allowedPermutations)
         {
-            auto permutedMcVector = icet::getPermutatedVector(mc, perm);
+            auto permutedMcVector = icet::getPermutedVector(mc, perm);
             auto findPerm = std::find(mcVectors.begin(), mcVectors.end(), permutedMcVector);
             auto findIfTaken = std::find(takenPermutations.begin(), takenPermutations.end(), permutedMcVector);
             if (findPerm == mcVectors.end() && findIfTaken == takenPermutations.end() && mc != permutedMcVector)

@@ -67,7 +67,7 @@ class Orbit
     }
 
     ///Returns equivalent sites
-    std::vector<std::vector<LatticeSite>> getPermutatedEquivalentSites() const
+    std::vector<std::vector<LatticeSite>> getPermutedEquivalentSites() const
     {
         std::vector<std::vector<LatticeSite>> permutedSites(_equivalentSites.size());
         for(size_t i =0; i < _equivalentSites.size(); i++)
@@ -103,7 +103,7 @@ class Orbit
             throw std::out_of_range(errMSG);
         }
 
-        return icet::getPermutatedVector<LatticeSite>( _equivalentSites[index],_equivalentSitesPermutations[index]);
+        return icet::getPermutedVector<LatticeSite>( _equivalentSites[index],_equivalentSitesPermutations[index]);
     }
 
         ///This sets the equivalent sites

@@ -465,8 +465,8 @@ PYBIND11_MODULE(_icet, m)
         .def(py::init<const std::vector<Vector3d> &,
                       const std::vector<Matrix3d> &>())
         .def("build", &PermutationMap::build)
-        .def("get_permuted_positions", &PermutationMap::getPermutatedPositions)
-        .def("get_indiced_positions", &PermutationMap::getIndicedPermutatedPositions)
+        .def("get_permuted_positions", &PermutationMap::getPermutedPositions)
+        .def("get_indiced_positions", &PermutationMap::getIndicedPermutedPositions)
 
         ;
 
@@ -572,7 +572,7 @@ PYBIND11_MODULE(_icet, m)
         R"pbdoc(        Returns the geometrical size of the
         representative cluster.
         )pbdoc")
-        .def_property_readonly("permuted_sites", &Orbit::getPermutatedEquivalentSites,
+        .def_property_readonly("permuted_sites", &Orbit::getPermutedEquivalentSites,
         R"pbdoc(Get the equivalent sites but permuted
         to representative site.)pbdoc")
         .def_property_readonly("representative_sites",&Orbit::getRepresentativeSites,        
