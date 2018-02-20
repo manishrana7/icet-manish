@@ -242,7 +242,7 @@ def fractional_to_cartesian(atoms, frac_positions):
 
 def get_permutation(container, permutation):
     """
-    Return the permutated version of container.
+    Return the permuted version of container.
     """
     if len(permutation) != len(container):
         raise Exception

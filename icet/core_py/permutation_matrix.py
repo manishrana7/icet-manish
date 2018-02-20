@@ -102,9 +102,9 @@ class PermutationMatrix(object):
             permutation_row = []
             for rotation, translation in zip(
                     self.rotations, self.translations):
-                permutated_position = translation + \
+                permuted_position = translation + \
                     np.dot(frac_pos, rotation.T)
-                permutation_row.append(permutated_position)
+                permutation_row.append(permuted_position)
             permutation_matrix.append(permutation_row)
 
         self.permutaded_matrix_frac = permutation_matrix

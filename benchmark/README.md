@@ -69,11 +69,11 @@ lattice sites of a supercell if your orbit is for the
 primitive cell.
 
 orbit permutation is a property that returns
-the permutated equivalent sites so that they
+the permuted equivalent sites so that they
 are in an identical order to the representative sites.
 This is useful when counting element combinations on
 an orbit. E.g, if we are interested in how many ABB elements
-there are compared to BAB then we would need the permutated
+there are compared to BAB then we would need the permuted
 sites.
 
 A typical output from benchmark/benchmark_orbit.py is
@@ -128,9 +128,9 @@ Running
    200000    2.077    0.000   17.394    0.000 copy.py:269(_reconstruct)
    200000    1.262    0.000    8.114    0.000 copy.py:239(_deepcopy_dict)
         1    0.044    0.044    3.553    3.553 benchmark_orbit.py:116(time_orbit_sites_permutations)
-     5000    0.023    0.000    3.509    0.001 orbit.py:205(permutated_sites)
+     5000    0.023    0.000    3.509    0.001 orbit.py:205(permuted_sites)
      5000    0.390    0.000    3.456    0.001 orbit.py:211(<listcomp>)
-   500000    1.380    0.000    3.066    0.000 orbit.py:213(get_permutated_sites)
+   500000    1.380    0.000    3.066    0.000 orbit.py:213(get_permuted_sites)
    200000    0.873    0.000    2.564    0.000 copy.py:222(_deepcopy_tuple)
    701000    1.441    0.000    2.221    0.000 copy.py:253(_keep_alive)
   3603912    2.184    0.000    2.184    0.000 {method 'get' of 'dict' objects}

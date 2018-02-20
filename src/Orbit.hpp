@@ -69,12 +69,12 @@ class Orbit
     ///Returns equivalent sites
     std::vector<std::vector<LatticeSite>> getPermutatedEquivalentSites() const
     {
-        std::vector<std::vector<LatticeSite>> permutatedSites(_equivalentSites.size());
+        std::vector<std::vector<LatticeSite>> permutedSites(_equivalentSites.size());
         for(size_t i =0; i < _equivalentSites.size(); i++)
         {
-            permutatedSites[i] = getSitesWithPermutation(i);
+            permutedSites[i] = getSitesWithPermutation(i);
         }
-        return permutatedSites;
+        return permutedSites;
     }
 
 
