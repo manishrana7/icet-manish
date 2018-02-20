@@ -47,7 +47,7 @@ for row in db.select('natoms>1'):
     msg = ' '.join(msg)
     assert len(indices) == len(ase_indices), msg
 
-    msg = ['Testing size of neighbor list indices']
+    msg = ['Testing size of neighbor list offsets']
     msg += ['failed for {}'.format(row.tag)]
     msg += ['{} != {} '.format(len(offsets), len(ase_offsets))]
     msg = ' '.join(msg)

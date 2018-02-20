@@ -157,7 +157,7 @@ class Orbit(object):
         This can be used if you for example want to
         count elements and are interested in difference
         between ABB, BAB, BBA and so on. If you count the
-        lattice sites that are permutated according to
+        lattice sites that are permuted according to
         these permutations then you will get the correct
         counts.
 
@@ -204,16 +204,16 @@ class Orbit(object):
         self._allowed_permutations = permutations
 
     @property
-    def permutated_sites(self):
+    def permuted_sites(self):
         """
-        Get the equivalent sites but permutated
+        Get the equivalent sites but permuted
         to representative site.
         """
-        return [self.get_permutated_sites(index) for index in range(len(self))]
+        return [self.get_permuted_sites(index) for index in range(len(self))]
 
-    def get_permutated_sites(self, index):
+    def get_permuted_sites(self, index):
         """
-        Return the permutated to representative
+        Return the permuted to representative
         sites of equivalent_sites[index].
         """
         return get_permutation(self.equivalent_sites[index],
@@ -242,14 +242,14 @@ class Orbit(object):
         all_possible_mc_vectors.sort()
         mc_vectors = []
         for mc_vector in all_possible_mc_vectors:
-            permutated_mc_vector = []
+            permuted_mc_vector = []
             for allowed_permutation in self.allowed_permutations:
-                permutated_mc_vector.append(
+                permuted_mc_vector.append(
                     tuple(get_permutation(mc_vector, allowed_permutation))
                 )
             # If this mc vector or any of its allowed permutations
             # exist in mc_vectors append this to the mc vectors
-            if set(permutated_mc_vector).isdisjoint(mc_vectors):
+            if set(permuted_mc_vector).isdisjoint(mc_vectors):
                 mc_vectors.append(mc_vector)
         return mc_vectors
 

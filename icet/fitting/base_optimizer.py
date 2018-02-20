@@ -129,19 +129,21 @@ class BaseOptimizer:
     def summary(self):
         ''' dict : Comprehensive information about the optimizer '''
         info = dict()
-        info['fit-method'] = self.fit_method
-        info['number-of-target-values'] = self.number_of_target_values
-        info['number-of-parameters'] = self.number_of_parameters
+        info['fit_method'] = self.fit_method
+        info['number_of_target_values'] = self.number_of_target_values
+        info['number_of_parameters'] = self.number_of_parameters
         return {**info, **self._fit_results}
 
     def __str__(self):
-        width = 60
+        width = 54
         s = []
-        s.append(self.__class__.__name__.center(width, '-'))
+        s.append(' {} '.format(self.__class__.__name__).center(width, '='))
         for key, value in self.summary.items():
-            if isinstance(value, (str, int, float)):
+            if isinstance(value, (str, int)):
                 s.append('{:25} : {}'.format(key, value))
-        s.append(''.center(width, '-'))
+            elif isinstance(value, (float)):
+                s.append('{:25} : {:.7g}'.format(key, value))
+        s.append(''.center(width, '='))
         return '\n'.join(s)
 
     def __repr__(self):

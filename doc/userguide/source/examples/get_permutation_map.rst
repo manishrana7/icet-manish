@@ -45,7 +45,7 @@ a :class:`NeighborList <_icet.NeighborList>`.
 
 .. literalinclude:: ../../../../examples/get_permutation_map.py
    :start-after: # Generate a permutation map
-   :end-before: # Extract the permutated,
+   :end-before: # Extract the permuted,
 
 Since the verbosity was set to :math:`\geq 3`, the following extra information
 should be printed by :func:`permutation_matrix_from_atoms
@@ -54,27 +54,27 @@ should be printed by :func:`permutation_matrix_from_atoms
   size of atoms_prim 1
   number of positions: 19
 
-Extract permutated positions
+Extract permuted positions
 ----------------------------
 
-The permutated as well as the indexed and unique positions can be extracted
+The permuted as well as the indexed and unique positions can be extracted
 from the :class:`PermutationMap <icet.core.permutation_map.PermutationMap>`
 object, generated earlier, using the methods
-:meth:`PermutationMap.get_permutated_positions` and
+:meth:`PermutationMap.get_permuted_positions` and
 :meth:`PermutationMap.get_indiced_positions`, respectively.
 
 .. literalinclude:: ../../../../examples/get_permutation_map.py
-   :start-after: # Extract the permutated,
-   :end-before: # Print the permutated,
+   :start-after: # Extract the permuted,
+   :end-before: # Print the permuted,
 
 Print the positions
 -------------------
 
-Finally the permutated as well as the indexed and unique positions, obtained in
+Finally the permuted as well as the indexed and unique positions, obtained in
 the previous section, are printed using the following snippet:
 
 .. literalinclude:: ../../../../examples/get_permutation_map.py
-   :start-after: # Print the permutated,
+   :start-after: # Print the permuted,
 
 These lines should give the following (partial) output::
 
@@ -88,7 +88,7 @@ These lines should give the following (partial) output::
   1 6 [1, 2, 3, 4, 2, 1, 4, 3, 2, 1, 3, 4, 1, 2, 4, 3, 5, 6, 2, 1, 6, 5, 1, 2, 6, 5, 2, 1, 5, 6, 1, 2, 4, 3, 6, 5, 3, 4, 5, 6, 3, 4, 6, 5, 4, 3, 5, 6]
   ...
   18 6 [2, 1, 4, 3, 1, 2, 3, 4, 1, 2, 4, 3, 2, 1, 3, 4, 6, 5, 1, 2, 5, 6, 2, 1, 5, 6, 1, 2, 6, 5, 2, 1, 3, 4, 5, 6, 4, 3, 6, 5, 4, 3, 5, 6, 3, 4, 6, 5]
-  Unique permutated indices and positions
+  Unique permuted indices and positions
   0 [ 0.  0.  0.]
   1 [-1. -1.  1.]
   ...

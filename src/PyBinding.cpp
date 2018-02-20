@@ -465,7 +465,7 @@ PYBIND11_MODULE(_icet, m)
         .def(py::init<const std::vector<Vector3d> &,
                       const std::vector<Matrix3d> &>())
         .def("build", &PermutationMap::build)
-        .def("get_permutated_positions", &PermutationMap::getPermutatedPositions)
+        .def("get_permuted_positions", &PermutationMap::getPermutatedPositions)
         .def("get_indiced_positions", &PermutationMap::getIndicedPermutatedPositions)
 
         ;
@@ -486,7 +486,7 @@ PYBIND11_MODULE(_icet, m)
         .def(py::init<>())
         .def("count_lattice_neighbors", &ClusterCounts::countLatticeSites)
         .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<LatticeSite> &)) & ClusterCounts::count)
-        .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &)) & ClusterCounts::count)
+        .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &,bool)) & ClusterCounts::count)
         .def("count_orbit_list", &ClusterCounts::countOrbitList)
         .def("__len__", &ClusterCounts::size)
         .def("reset", &ClusterCounts::reset)
@@ -556,7 +556,7 @@ PYBIND11_MODULE(_icet, m)
         This can be used if you for example want to
         count elements and are interested in difference
         between ABB, BAB, BBA and so on. If you count the
-        lattice sites that are permutated according to
+        lattice sites that are permuted according to
         these permutations then you will get the correct
        counts. )pbdoc")
         .def_property_readonly("order", [](const Orbit &orbit) { return orbit.getRepresentativeCluster().order(); },
@@ -571,8 +571,8 @@ PYBIND11_MODULE(_icet, m)
         R"pbdoc(        Returns the geometrical size of the
         representative cluster.
         )pbdoc")
-        .def_property_readonly("permutated_sites", &Orbit::getPermutatedEquivalentSites,
-        R"pbdoc(Get the equivalent sites but permutated
+        .def_property_readonly("permuted_sites", &Orbit::getPermutatedEquivalentSites,
+        R"pbdoc(Get the equivalent sites but permuted
         to representative site.)pbdoc")
         .def_property_readonly("representative_sites",&Orbit::getRepresentativeSites,        
         R"pbdoc(
@@ -588,7 +588,7 @@ PYBIND11_MODULE(_icet, m)
         List of equivalent Lattice Sites
         )pbdoc")
         .def("get_sites_with_permutation", &Orbit::getSitesWithPermutation,
-        R"pbdoc(Return the permutated to representative
+        R"pbdoc(Return the permuted to representative
         sites of equivalent_sites[index].)pbdoc")
         // .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
         .def("get_mc_vectors", &Orbit::getMCVectors,
@@ -661,7 +661,7 @@ PYBIND11_MODULE(_icet, m)
         This can be used if you for example want to
         count elements and are interested in difference
         between ABB, BAB, BBA and so on. If you count the
-        lattice sites that are permutated according to
+        lattice sites that are permuted according to
         these permutations then you will get the correct
         counts.
         )pbdoc")

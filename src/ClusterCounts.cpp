@@ -40,15 +40,16 @@ void ClusterCounts::count(const Structure &structure,
         elements[i] = structure.getAtomicNumber(latticeNeighbors[i].index());
     }
 
+    // Don't do intact order since there is no reason for it
     Cluster cluster = Cluster(structure, latticeNeighbors);
-    countCluster(cluster, elements);
+    countCluster(cluster, elements, false);
 }
 
 /**
 Will count the vectors in latticeNeighbors and assuming these sets of sites are represented by the cluster 'cluster'
 */
 void ClusterCounts::count(const Structure &structure, const std::vector<std::vector<LatticeSite>> &latticeNeighbors,
-                          const Cluster &cluster)
+                          const Cluster &cluster, bool orderIntact)
 {
 
     for (const auto &latnbrs : latticeNeighbors)
@@ -58,17 +59,26 @@ void ClusterCounts::count(const Structure &structure, const std::vector<std::vec
         {
             elements[i] = structure.getAtomicNumber(latnbrs[i].index());
         }
-        countCluster(cluster, elements);
+        countCluster(cluster, elements, orderIntact);
     }
 }
 
+
 ///Count cluster only through this function
-void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> &elements)
+void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> &elements, bool orderIntact)
 {
+    if(orderIntact)
+    {
+        _clusterCounts[cluster][elements] += 1;
+    }
+    else
+    {
     std::vector<int> sortedElements = elements;
     std::sort(sortedElements.begin(), sortedElements.end());
-    _clusterCounts[cluster][sortedElements] += 1;
+    _clusterCounts[cluster][sortedElements ] += 1;
+    }
 }
+
 
 /**
     Count the clusters of the sites in each orbit of the orbit list
@@ -90,11 +100,11 @@ void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &
         repr_cluster.setClusterTag(i);
         if(orderIntact && repr_cluster.order()!= 1)
         {
-            count(structure, orbitList.getOrbit(i).getPermutatedEquivalentSites(), repr_cluster);
+            count(structure, orbitList.getOrbit(i).getPermutatedEquivalentSites(), repr_cluster, orderIntact);
         }
         else
         {
-            count(structure, orbitList.getOrbit(i).getEquivalentSites(), repr_cluster);
+            count(structure, orbitList.getOrbit(i).getEquivalentSites(), repr_cluster, orderIntact);
         }
     }
 

@@ -1,3 +1,8 @@
+'''
+Tests most combinations of specifying either training_size or test_size or both
+and training_set or test_set or both and assert that Optimizer handles this
+correctly
+'''
 import numpy as np
 from icet.fitting import Optimizer
 
