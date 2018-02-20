@@ -225,10 +225,10 @@ class ClusterSpace(_ClusterSpace):
             cluster_space_info = self.get_cluster_space_info(index)
             orbit_index = cluster_space_info[0]
             mc_vector = cluster_space_info[1]
-            mc_vectors = self.get_orbit(
-                orbit_index).get_mc_vectors(self.get_allowed_occupations(
-                    self.get_primitive_structure(), self.get_orbit(
-                        orbit_index).representative_sites))
+            orbit = self.get_orbit(orbit_index)
+            local_Mi = self.get_allowed_occupations(
+                self.get_primitive_structure(), orbit.representative_sites)
+            mc_vectors = orbit.get_mc_vectors(local_Mi)
             mc_permutations = self.get_mc_vector_permutations(
                 mc_vectors, orbit_index)
             mc_index = mc_vectors.index(mc_vector)
