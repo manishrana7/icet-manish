@@ -55,11 +55,11 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
             for (const auto &elementsCountPair : clusterMap.at(repCluster))
             {
 
-                // TODO check if allowedOccupations should be permutated as well.
+                // TODO check if allowedOccupations should be permuted as well.
                 for (const auto &perm : elementPermutations[currentMCVectorIndex])
                 {
-                    auto permutatedMCVector = icet::getPermutatedVector(mcVector, perm);
-                    clusterVectorElement += getClusterProduct(permutatedMCVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
+                    auto permutedMCVector = icet::getPermutatedVector(mcVector, perm);
+                    clusterVectorElement += getClusterProduct(permutedMCVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                     multiplicity += elementsCountPair.second;
                 }
             }
@@ -160,13 +160,13 @@ std::vector<std::vector<std::vector<int>>> ClusterSpace::getMCVectorPermutations
         takenPermutations.push_back(selfPermutation);
         for (const std::vector<int> perm : allowedPermutations)
         {
-            auto permutatedMcVector = icet::getPermutatedVector(mc, perm);
-            auto findPerm = std::find(mcVectors.begin(), mcVectors.end(), permutatedMcVector);
-            auto findIfTaken = std::find(takenPermutations.begin(), takenPermutations.end(), permutatedMcVector);
-            if (findPerm == mcVectors.end() && findIfTaken == takenPermutations.end() && mc != permutatedMcVector)
+            auto permutedMcVector = icet::getPermutatedVector(mc, perm);
+            auto findPerm = std::find(mcVectors.begin(), mcVectors.end(), permutedMcVector);
+            auto findIfTaken = std::find(takenPermutations.begin(), takenPermutations.end(), permutedMcVector);
+            if (findPerm == mcVectors.end() && findIfTaken == takenPermutations.end() && mc != permutedMcVector)
             {
                 mcPermutations.push_back(perm);
-                takenPermutations.push_back(permutatedMcVector);
+                takenPermutations.push_back(permutedMcVector);
             }
         }
         std::sort(mcPermutations.begin(), mcPermutations.end());
