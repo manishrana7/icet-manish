@@ -100,7 +100,7 @@ void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &
         repr_cluster.setClusterTag(i);
         if(orderIntact && repr_cluster.order()!= 1)
         {
-            count(structure, orbitList.getOrbit(i).getPermutatedEquivalentSites(), repr_cluster, orderIntact);
+            count(structure, orbitList.getOrbit(i).getPermutedEquivalentSites(), repr_cluster, orderIntact);
         }
         else
         {

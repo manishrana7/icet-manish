@@ -30,6 +30,8 @@ from icet.core.lattice_site import LatticeSite
 from collections import OrderedDict
 
 import numpy as np
+import ase.db
+from ase.build import bulk
 
 
 def strip_surrounding_spaces(input_string):
@@ -333,6 +335,46 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         self.assertEqual(len(self.cs.structure),
                          len(self.atoms_prim))
 
+    def _test_cluster_vectors_in_database(self, db_name):
+        """
+        Tests the cluster vectors in the database.
+        """
+
+        db = ase.db.connect(db_name)
+
+        entry1 = db.get(id=1)
+        atoms = entry1.toatoms()
+        elements = entry1.data.elements
+        cutoffs = entry1.data.cutoffs
+        cs = ClusterSpace(atoms, cutoffs, elements)
+
+        for row in db.select():
+            atoms = row.toatoms()
+            retval = cs.get_cluster_vector(atoms)
+            target = np.array(row.data.target_cv)
+            self.assertTrue(np.all(np.isclose(target, retval)))
+
+    def test_multi_component_cluster_vectors(self):
+        """
+        Test the consistency of multi components cluster
+        vectors. Will test against ternary and quaternary cluster
+        vectors with fcc, bcc and hcp.
+        """
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/fcc_ternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/fcc_quaternary.db')
+
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/bcc_ternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/bcc_quaternary.db')
+
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/hcp_ternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/hcp_quaternary.db')
+
 
 class TestClusterSpaceSurface(unittest.TestCase):
     '''
@@ -424,14 +466,110 @@ class TestClusterSpaceSurface(unittest.TestCase):
         self.assertTrue('missing from dictionary' in str(context.exception))
 
 
-def suite():
-    test_classes_to_run = [TestClusterSpace, TestClusterSpaceSurface]
-    suites_list = []
-    for test_class in test_classes_to_run:
-        suite = unittest.defaultTestLoader.loadTestsFromTestCase(test_class)
-        suites_list.append(suite)
-    test_suite = unittest.TestSuite(suites_list)
-    return test_suite
+class TestClusterSpaceTernary(unittest.TestCase):
+    '''
+    Container for tests of the class functionality for non-periodic structures
+    '''
+
+    def __init__(self, *args, **kwargs):
+        super(TestClusterSpaceTernary, self).__init__(*args, **kwargs)
+        self.subelements = ['Ag', 'Au', 'Pd']
+        self.cutoffs = [4.0] * 3
+        self.atoms_prim = bulk('Ag', 'fcc')
+
+    def setUp(self):
+        '''
+        Instantiate class before each test.
+        '''
+        self.cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
+        print(self.cs)
+
+    def _get_mc_vector(self, cluster_space, orbit_index):
+        """
+        Helper function to  return the mc vectors for a
+        particular orbit.
+
+        Parameters
+        ----------
+        cluster_space : icet cluster space
+        orbit_index : int
+            The orbit which the mc vectors should be returned from.
+        """
+        orbit = cluster_space.get_orbit(orbit_index)
+        local_Mi = cluster_space.get_allowed_occupations(
+            cluster_space.get_primitive_structure(),
+            orbit.representative_sites)
+
+        mc_vectors = orbit.get_mc_vectors(local_Mi)
+        return mc_vectors
+
+    def test_multi_component_cluster_vector_permutation(self):
+        """
+        Test the multicomponent permutation functionality.
+        """
+        # Test orbit number 1
+        orbit_index = 1
+        mc_vector_target = [[0, 0], [0, 1], [1, 1]]
+        mc_vector_retval = self._get_mc_vector(self.cs, orbit_index)
+        self.assertEqual(mc_vector_retval, mc_vector_target)
+
+        permutations_target = [[[0, 1]],
+                               [[0, 1], [1, 0]],
+                               [[0, 1]]]
+        permutation_retval = self.cs.get_mc_vector_permutations(
+            mc_vector_target, orbit_index)
+        self.assertEqual(permutations_target, permutation_retval)
+
+        # Test orbit number 2
+        orbit_index = 2
+        mc_vector_target = [[0, 0, 0],
+                            [0, 0, 1],
+                            [0, 1, 1],
+                            [1, 1, 1]]
+        mc_vector_retval = self._get_mc_vector(self.cs, orbit_index)
+        self.assertEqual(mc_vector_retval, mc_vector_target)
+
+        permutations_target = [[[0, 1, 2]],
+                               [[0, 1, 2], [0, 2, 1], [2, 1, 0]],
+                               [[0, 1, 2]],
+                               [[0, 1, 2]]]
+        permutations_target = [[[0, 1, 2]],
+                               [[0, 1, 2], [1, 2, 0], [2, 1, 0]],
+                               [[0, 1, 2], [2, 0, 1], [2, 1, 0]],
+                               [[0, 1, 2]]]
+        permutation_retval = self.cs.get_mc_vector_permutations(
+            mc_vector_target, orbit_index)
+        self.assertEqual(permutations_target, permutation_retval)
+
+        # Test orbit 3
+        orbit_index = 3
+
+        mc_vector_target = [[0, 0, 0, 0],
+                            [0, 0, 0, 1],
+                            [0, 0, 1, 1],
+                            [0, 1, 1, 1],
+                            [1, 1, 1, 1]]
+        mc_vector_retval = self._get_mc_vector(self.cs, orbit_index)
+        self.assertEqual(mc_vector_retval, mc_vector_target)
+        permutations_target = [[[0, 1, 2, 3]],
+                               [[0, 1, 2, 3],
+                                [2, 1, 3, 0], [2, 3, 1, 0],
+                                [3, 1, 2, 0]],
+                               [[0, 1, 2, 3],
+                                [0, 3, 1, 2], [
+                                   1, 2, 3, 0],
+                                [2, 0, 1, 3], [
+                                   2, 3, 1, 0],
+                                [3, 1, 2, 0]],
+                               [[0, 1, 2, 3],
+                                [2, 0, 3, 1], [
+                                   2, 3, 1, 0],
+                                [3, 2, 0, 1]],
+                               [[0, 1, 2, 3]]]
+        permutation_retval = self.cs.get_mc_vector_permutations(
+            mc_vector_target, orbit_index)
+        print(permutation_retval)
+        self.assertEqual(permutations_target, permutation_retval)
 
 
 if __name__ == '__main__':
