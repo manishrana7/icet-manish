@@ -34,8 +34,6 @@ def strip_surrounding_spaces(input_string):
 class TestClusterCounts(unittest.TestCase):
     """
     Container for test of the module functionality.
-
-    WIP: Uncompleted tests.
     """
 
     def __init__(self, *args, **kwargs):
@@ -67,9 +65,17 @@ class TestClusterCounts(unittest.TestCase):
         self.cluster_counts.count_lattice_neighbors(self.structure, mbnl_pairs)
         cluster_map = self.cluster_counts.get_cluster_counts()
 
+        cluster_singlet = Cluster(self.structure,
+                                  [LatticeSite(0, [0., 0., 0.])])
+        cluster_pair = Cluster(self.structure,
+                               [LatticeSite(0, [0., 0., 0.]),
+                                LatticeSite(1, [0., 0., 0.])])
+        clusters = [cluster_singlet, cluster_pair]
+
         expected_counts = [{(13,): 1},
                            {(13, 13): 8, (13, 29): 4}]
-        for k, count in enumerate(cluster_map.values()):
+        for k, cluster in enumerate(clusters):
+            count = cluster_map[cluster]
             self.assertEqual(count, expected_counts[k])
 
     def test_count_lattice_sites(self):
@@ -84,9 +90,9 @@ class TestClusterCounts(unittest.TestCase):
 
         self.cluster_counts.count(self.structure, lattice_sites)
         cluster_map = self.cluster_counts.get_cluster_counts()
-        for key, val in cluster_map.items():
-            self.assertEqual(key, cluster)
-            self.assertTrue(val == {(13, 29): 1})
+
+        count = cluster_map[cluster]
+        self.assertEqual(count, {(13, 29): 1})
 
     def test_count_list_lattice_sites(self):
         """
@@ -106,29 +112,31 @@ class TestClusterCounts(unittest.TestCase):
 
         self.cluster_counts.count(self.structure, lattice_neighbors, cluster)
         cluster_map = self.cluster_counts.get_cluster_counts()
-        for key, val in cluster_map.items():
-            self.assertEqual(key, cluster)
-            self.assertTrue(val == {(13, 13): 1, (13, 29): 1})
+
+        count = cluster_map[cluster]
+        self.assertEqual(count, {(13, 13): 1, (13, 29): 1})
 
     def test_count_orbitlist(self):
         """
         Test cluster count using orbitlist.
-        @todo: It might be also good to test clusters but
-               clusters retrieved from this count seems to be
-               not sorted.
         """
+        cluster_singlet = Cluster(self.structure, [], False, 0)
+        cluster_pair = Cluster(self.structure, [], False, 1)
+        clusters = [cluster_singlet, cluster_pair]
+
         expected_counts = [{(13,): 3, (29,): 1},
                            {(13, 13): 12, (13, 29): 12}]
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
         cluster_map = self.cluster_counts.get_cluster_counts()
 
-        for k, count in enumerate(cluster_map.values()):
+        for k, cluster in enumerate(clusters):
+            count = cluster_map[cluster]
             self.assertEqual(count, expected_counts[k])
 
     def test_count_orbitlist_non_pbc(self):
         """
-        Test cluster count using orbotlist for a non-pbc structure.
+        Test cluster counts using orbitlist for a non-pbc structure.
         """
         atoms_non_pbc = self.atoms.copy()
         atoms_non_pbc.set_pbc(False)
@@ -137,14 +145,29 @@ class TestClusterCounts(unittest.TestCase):
                                             cutoffs=self.cutoffs)
         orbit_list = OrbitList(neighbor_lists, structure)
 
+        cluster_singlet = Cluster(self.structure, [], False, 0)
+        cluster_pair = Cluster(self.structure, [], False, 1)
+        clusters = [cluster_singlet, cluster_pair]
+
         expected_counts = [{(13,): 3, (29,): 1},
                            {(13, 13): 3, (13, 29): 3}]
 
         self.cluster_counts.count_clusters(structure,
                                            orbit_list, False)
         cluster_map = self.cluster_counts.get_cluster_counts()
-        for k, count in enumerate(cluster_map.values()):
+
+        for k, cluster in enumerate(clusters):
+            count = cluster_map[cluster]
             self.assertEqual(count, expected_counts[k])
+
+    def test_len(self):
+        """
+        Test total size of counts.
+        """
+        self.cluster_counts.count_clusters(self.structure,
+                                           self.orbit_list, False)
+        self.assertEqual(len(self.cluster_counts),
+                         len(self.orbit_list))
 
     def test_reset(self):
         """
@@ -157,7 +180,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_get_cluster_count_info(self):
         """
-        Test get cluster count info functionality.
+        Test get cluster counts info functionality.
         """
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
@@ -168,7 +191,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_repr(self):
         """
-        Test representation.
+        Test representation of cluster counts.
         """
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
