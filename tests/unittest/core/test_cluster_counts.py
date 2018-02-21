@@ -118,7 +118,7 @@ class TestClusterCounts(unittest.TestCase):
                not sorted.
         """
         expected_counts = [{(13,): 3, (29,): 1},
-                           {(13, 13): 12, (13, 29): 4, (29, 13): 8}]
+                           {(13, 13): 12, (13, 29): 12}]
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
         cluster_map = self.cluster_counts.get_cluster_counts()
@@ -138,7 +138,7 @@ class TestClusterCounts(unittest.TestCase):
         orbit_list = OrbitList(neighbor_lists, structure)
 
         expected_counts = [{(13,): 3, (29,): 1},
-                           {(13, 13): 3, (13, 29): 1, (29, 13): 2}]
+                           {(13, 13): 3, (13, 29): 3}]
 
         self.cluster_counts.count_clusters(structure,
                                            orbit_list, False)
@@ -184,8 +184,7 @@ Cu    1
 [0, 0] [2.12132] 1.0607
 ------------------------------
 Al   Al    12
-Al   Cu    4
-Cu   Al    8
+Al   Cu    12
 '''
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
