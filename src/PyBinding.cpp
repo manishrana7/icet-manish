@@ -490,6 +490,8 @@ PYBIND11_MODULE(_icet, m)
         .def("count_orbit_list", &ClusterCounts::countOrbitList)
         .def("__len__", &ClusterCounts::size)
         .def("reset", &ClusterCounts::reset)
+        .def("setup_cluster_counts_info", &ClusterCounts::setupClusterCountsInfo)
+        .def("get_cluster_counts_info", &ClusterCounts::getClusterCountsInfo)
         .def("get_cluster_counts", [](const ClusterCounts &clusterCounts) {
             //&ClusterCounts::getClusterCounts
             py::dict clusterCountDict;
