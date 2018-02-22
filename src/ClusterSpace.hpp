@@ -31,7 +31,7 @@ class ClusterSpace
         _primitive_structure = primOrbitList.getPrimitiveStructure();
         _primitive_structure.setNumberOfAllowedComponents(_Mi);
         initElementMap(elements);
-        _isClusterSpaceInitialized= false;
+        _isClusterSpaceInitialized = false;
     };
 
     void initElementMap(std::vector<std::string> elements)
@@ -77,7 +77,7 @@ class ClusterSpace
     std::vector<std::string> getAtomicNumbers() const
     {
         std::vector<std::string> elements;
-        for(const auto &intEl : _elements )
+        for (const auto &intEl : _elements)
         {
             elements.push_back(PeriodicTable::intStr[intEl]);
         }
@@ -101,6 +101,13 @@ class ClusterSpace
     }
 
     ClusterCounts getNativeClusters(const Structure &structure) const;
+
+    /// Return the MC vector permutations for each mc vector in the set of mc vectors.
+    std::vector<std::vector<std::vector<int>>> getMCVectorPermutations(const std::vector<std::vector<int>> &, const int ) const;
+
+    ///Returns the allowed occupations on the sites
+    std::vector<int> getAllowedOccupations(const Structure &structure, const std::vector<LatticeSite> &latticeNeighbors) const;
+
 
   private:
     ///Currently we have constant Mi for development but will later change to dynamic Mi
@@ -127,7 +134,6 @@ class ClusterSpace
     ///a boolean to keep track if this is initialized or not
     bool _isClusterSpaceInitialized;
 
-
     /**
     This maps a orbit to other orbits i.e. of _equalSitesList[0] = [1,2,3] then orbit zero should be seen as equal to orbit 1,2 and three.
     This will mean that when retrieving the cluster vector the zeroth element will be a combination of orbit 0,1,2 and 3.
@@ -137,8 +143,6 @@ class ClusterSpace
     ///return the default clusterfunction of the input element when this site can have Mi elements
     double defaultClusterFunction(const int Mi, const int clusterFunction, const int element) const;
 
-    //////Returns the allowed occupations on the sites
-    std::vector<int> getAllowedOccupations(const Structure &structure, const std::vector<LatticeSite> &latticeNeighbors) const;
 
     //Maps real elements  to a 0,1,2, ... representation
     std::map<int, int> _elementRepresentation;

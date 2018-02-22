@@ -465,8 +465,8 @@ PYBIND11_MODULE(_icet, m)
         .def(py::init<const std::vector<Vector3d> &,
                       const std::vector<Matrix3d> &>())
         .def("build", &PermutationMap::build)
-        .def("get_permuted_positions", &PermutationMap::getPermutatedPositions)
-        .def("get_indiced_positions", &PermutationMap::getIndicedPermutatedPositions)
+        .def("get_permuted_positions", &PermutationMap::getPermutedPositions)
+        .def("get_indiced_positions", &PermutationMap::getIndicedPermutedPositions)
 
         ;
 
@@ -526,9 +526,10 @@ PYBIND11_MODULE(_icet, m)
              py::arg("lattice_neighbors"),
              py::arg("sort") = false)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
+        .def("get_allowed_sites_permutations",&Orbit::getAllowedSitesPermutations)
         .def("get_representative_sites", &Orbit::getRepresentativeSites)
         .def("get_equivalent_sites_permutations", &Orbit::getEquivalentSitesPermutations)
-             
+        
         .def("get_representative_cluster", &Orbit::getRepresentativeCluster,
         R"pbdoc(
         The representative cluster
@@ -571,7 +572,7 @@ PYBIND11_MODULE(_icet, m)
         R"pbdoc(        Returns the geometrical size of the
         representative cluster.
         )pbdoc")
-        .def_property_readonly("permuted_sites", &Orbit::getPermutatedEquivalentSites,
+        .def_property_readonly("permuted_sites", &Orbit::getPermutedEquivalentSites,
         R"pbdoc(Get the equivalent sites but permuted
         to representative site.)pbdoc")
         .def_property_readonly("representative_sites",&Orbit::getRepresentativeSites,        
@@ -712,5 +713,7 @@ PYBIND11_MODULE(_icet, m)
         .def("get_cutoffs", &ClusterSpace::getCutoffs)
         .def("get_primitive_structure", &ClusterSpace::getPrimitiveStructure)
         .def("get_native_clusters", &ClusterSpace::getNativeClusters)
+        .def("get_mc_vector_permutations",&ClusterSpace::getMCVectorPermutations)
+        .def("get_allowed_occupations",&ClusterSpace::getAllowedOccupations)
         .def("__len__", &ClusterSpace::getClusterSpaceSize);
 }

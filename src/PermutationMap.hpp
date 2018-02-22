@@ -30,7 +30,7 @@ class PermutationMap
     ///Build the permutationmap usng the input positions
     void build(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &positions);
 
-    std::vector<std::vector<Vector3d>> getPermutatedPositions() const
+    std::vector<std::vector<Vector3d>> getPermutedPositions() const
     {
         return _permutedPositions;
     }
@@ -39,7 +39,7 @@ class PermutationMap
      Returns indices for unique positions as well as the representative positions,
      same indices share the same position
     */
-    std::pair<std::vector<std::vector<int>>, std::vector<Vector3d>> getIndicedPermutatedPositions()
+    std::pair<std::vector<std::vector<int>>, std::vector<Vector3d>> getIndicedPermutedPositions()
     {
         std::vector<Vector3d> uniquePositions;
         std::vector<std::vector<int>> indicePositions(_permutedPositions.size(), std::vector<int>(_permutedPositions[0].size()));

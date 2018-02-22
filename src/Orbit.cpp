@@ -69,7 +69,7 @@ std::vector<std::vector<int>> Orbit::getMCVectors(const std::vector<int> &Mi_loc
         std::vector<std::vector<int>> permutedMCVectors;
         for(const auto &allowedPermutation : _allowedSitesPermutations )
         {
-            permutedMCVectors.push_back(icet::getPermutatedVector<int>(mcVector, allowedPermutation));
+            permutedMCVectors.push_back(icet::getPermutedVector<int>(mcVector, allowedPermutation));
         }
         if(! std::any_of(permutedMCVectors.begin(), permutedMCVectors.end(),[&](const std::vector<int> &permMcVector){
                  return !(std::find(distinctMCVectors.begin(),distinctMCVectors.end(),permMcVector) == distinctMCVectors.end()); }  ))
