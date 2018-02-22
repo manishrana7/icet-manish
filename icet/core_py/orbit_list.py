@@ -161,8 +161,8 @@ class OrbitList(object):
         orbit = Orbit(cluster)
         for i in range(len(rows[0])):
             eq_sites = [row[i] for row in rows]
-            if not self.is_valid_sites(eq_sites):
-                raise RuntimeError("error eq sites not in unitcell")
+            # if not self.is_valid_sites(eq_sites):
+            #     raise RuntimeError("error eq sites not in unitcell")
 
             translated_eq_sites = self.get_all_translated_sites(eq_sites)
             sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
