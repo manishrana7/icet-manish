@@ -141,13 +141,12 @@ class TestOrbitList(unittest.TestCase):
         self.assertListEqual(
             self.orbit_list.get_all_translated_sites(sites), sorted(target))
 
-        # test a singlet site with offset        
+        # test a singlet site with offset
         sites = [LatticeSite(3, [0, 0, -1])]
         target = [[LatticeSite(3, [0, 0, 0])],
-                  [LatticeSite(3, [0, 0, -1])]                  ]
+                  [LatticeSite(3, [0, 0, -1])]]
         self.assertListEqual(
             self.orbit_list.get_all_translated_sites(sites), sorted(target))
-        
 
         # Does it break when the offset is floats?
         sites = [LatticeSite(0, [0.0, 0.0, 0.0])]
@@ -204,23 +203,13 @@ class TestOrbitList(unittest.TestCase):
             self.orbit_list.permutation_matrix.cutoff, max(self.cutoffs))
 
     def test_str(self):
-        print(self.orbit_list)
-        print(self.cluster_space_cpp)
+        """
+        Test str functionality.
 
-        for orbit in self.orbit_list.orbits:
-            for sites in orbit.equivalent_sites:
-                for site in sites:
-                    print(site, end=' ')
-                print()
-            print("----")
-        print("C++ version")
-        for orbit in self.cluster_space_cpp.get_orbit_list().get_orbit_list():
-            for sites in orbit.equivalent_sites:
-                for site in sites:
-                    print(site, end=' ')
-                print()
-            print("----")
-
+        Just print the orbitlist and see that it works.
+        """
+        print(self.orbit_list)        
+        
     def test_singlets_particle(self):
         """
         Test that a particle get correct number of singlets.
