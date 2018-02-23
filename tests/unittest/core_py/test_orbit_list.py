@@ -136,20 +136,25 @@ class TestOrbitList(unittest.TestCase):
         sites = [LatticeSite(0, [0, 0, 0])]
         target = [[LatticeSite(0, [0, 0, 0])]]
         self.assertListEqual(
-            self.orbit_list.get_all_translated_sites(sites), target)
+            self.orbit_list.get_all_translated_sites(sites), sorted(target))
 
+        sites = [LatticeSite(3, [0, 0, -1])]
+        target = [[LatticeSite(3, [0, 0, 0])],
+                  [LatticeSite(3, [0, 0, -1])]
+                  ]
+        self.assertListEqual(
+            self.orbit_list.get_all_translated_sites(sites), sorted(target))
         # Does it break when the offset is floats?
         sites = [LatticeSite(0, [0.0, 0.0, 0.0])]
         target = [[LatticeSite(0, [0.0, 0.0, 0.0])]]
         self.assertListEqual(
-            self.orbit_list.get_all_translated_sites(sites), target)
+            self.orbit_list.get_all_translated_sites(sites), sorted(target))
 
         sites = [LatticeSite(0, [1.0, 0.0, 0.0])]
         target = [[LatticeSite(0, [1.0, 0.0, 0.0])], [
             LatticeSite(0, [0.0, 0.0, 0.0])]]
         self.assertListEqual(
-            self.orbit_list.get_all_translated_sites(sites), target)
-
+            self.orbit_list.get_all_translated_sites(sites), sorted(target))
         sites = [LatticeSite(0, [1.0, 0.0, 0.0]),
                  LatticeSite(0, [0.0, 0.0, 0.0])]
         target = [[LatticeSite(0, [1.0, 0.0, 0.0]),
@@ -157,7 +162,7 @@ class TestOrbitList(unittest.TestCase):
                   [LatticeSite(0, [0.0, 0.0, 0.0]),
                    LatticeSite(0, [-1, 0.0, 0.0])]]
         self.assertListEqual(
-            self.orbit_list.get_all_translated_sites(sites), target)
+            self.orbit_list.get_all_translated_sites(sites), sorted(target))
 
         sites = [LatticeSite(0, [1.0, 2.0, -1.0]),
                  LatticeSite(2, [2.0, 0.0, 0.0])]
@@ -168,7 +173,7 @@ class TestOrbitList(unittest.TestCase):
                   [LatticeSite(0, [-1.0, 2.0, -1.0]),
                    LatticeSite(2, [0.0, 0.0, 0.0])]]
         self.assertListEqual(
-            self.orbit_list.get_all_translated_sites(sites), target)
+            self.orbit_list.get_all_translated_sites(sites), sorted(target))
 
     def test_no_duplicates_in_orbit(self):
         """
@@ -367,19 +372,18 @@ class TestOrbitList(unittest.TestCase):
         """
         Try to construct higher order orbit list
         """
-        atoms = bulk("Al", 'hcp', a=3.0)
+        atoms = bulk("Al", 'hcp', a=3.01)
         cutoff = [5] * 3
         orbit_list = OrbitList(atoms, cutoff)
 
-        atoms = bulk("Al", 'fcc', a=3.0)
+        atoms = bulk("Al", 'fcc', a=3.01)
         cutoff = [5] * 3
         orbit_list = OrbitList(atoms, cutoff)
 
-        atoms = bulk("Al", 'bcc', a=3.0)
+        atoms = bulk("Al", 'bcc', a=3.01)
         cutoff = [5] * 3
         orbit_list = OrbitList(atoms, cutoff)
 
-        
         cutoff = [4.0] * 3
         atoms = bulk('Ag', a=4.09)
         orbit_list = OrbitList(atoms, cutoff)
@@ -387,8 +391,7 @@ class TestOrbitList(unittest.TestCase):
         cutoff = [4.0] * 1
         atoms = fcc111('Ag', a=4.09, vacuum=5.0, size=[1, 1, 3])
         atoms.pbc = [True, True, False]
-        orbit_list = OrbitList(atoms, cutoff) # noqa
-
+        orbit_list = OrbitList(atoms, cutoff)  # noqa
 
     def test_get_matches_in_pm(self):
         """

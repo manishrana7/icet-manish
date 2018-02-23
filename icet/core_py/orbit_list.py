@@ -171,6 +171,7 @@ class OrbitList(object):
                 if self.is_rows_taken(site_index[1]):
                     new_sites = False
                     break
+
             if new_sites:
                 for valid_sites in sites_indices_match:
                     if self.is_valid_sites(valid_sites[0]):
@@ -209,7 +210,7 @@ class OrbitList(object):
         """
         row_indices = self.get_row_indices(sites)
 
-        return [self.permutation_matrix.pm_lattice_sites[index]
+        return [copy.deepcopy(self.permutation_matrix.pm_lattice_sites[index])
                 for index in row_indices]
 
     def get_row_indices(self, sites):
@@ -255,7 +256,7 @@ class OrbitList(object):
                 translated_sites.append(
                     [ls - site.unitcell_offset for ls in sites])
 
-        return translated_sites
+        return sorted(translated_sites)
 
     def __len__(self):
         """
@@ -374,7 +375,7 @@ class OrbitList(object):
             eq_sites = orbit.representative_sites
             # get all translated variations of eq sites
             translated_eq_sites = self.get_all_translated_sites(eq_sites)
-
+            # Step 2: find the rows these sites belong to and:
             # Step 3: get all rows for all the translated sites
             all_translated_p_equal = []
             for sites in translated_eq_sites:
@@ -382,15 +383,19 @@ class OrbitList(object):
                 for i in range(len(rows[0])):
                     row_sites = [row[i] for row in rows]
                     all_translated_p_equal.append(tuple(row_sites))
+                    translated_row_sites = self.get_all_translated_sites(
+                        row_sites)
+                    for trans_row_sites in translated_row_sites:
+                        all_translated_p_equal.append(tuple(trans_row_sites))
 
             all_translated_p_equal.sort()  # check what this does
+
             # Step four: Construct all possible permutations
             #  for the representative sites
 
             p_all_with_translated_equivalent = []
             all_possible_permutations = list(
                 permutations(range(len(eq_sites)), len(eq_sites)))
-
             for sites in translated_eq_sites:
                 for permutation in all_possible_permutations:
                     p_all_with_translated_equivalent.append(
@@ -400,7 +405,7 @@ class OrbitList(object):
             # Step five:  Construct the intersect of p_equal and p_all
 
             p_allowed_permutations = set(all_translated_p_equal).intersection(
-                set(p_all_with_translated_equivalent))
+                set(copy.deepcopy(p_all_with_translated_equivalent)))
 
             # Step six: Get the indice version of p_allowed_permutations
             allowed_permutations = set()
@@ -426,20 +431,24 @@ class OrbitList(object):
             site_permutations = []
 
             for sites in orbit.equivalent_sites:
+                any_translated_equivalents = False
+                translated_sites = self.get_all_translated_sites(sites)
+                for site in translated_sites:
+                    if tuple(site) in p_equal_set:
+                        any_translated_equivalents = True
 
-                if not tuple(sites) in p_equal_set:
+                if not tuple(sites) in p_equal_set and not any_translated_equivalents:
                     #  Did not find the orbit.eq_sites in p_equal
                     #  meaning that this eq site does not have an
                     #  allowed permutation
 
-                    translated_sites = self.get_all_translated_sites(sites)
                     all_permutation_of_sites = []
                     for trans_sites in translated_sites:
                         for permutation in all_possible_permutations:
                             all_permutation_of_sites.append(
                                 [get_permutation(trans_sites,
-                                                       permutation),
-                                       trans_sites])
+                                                 permutation),
+                                 trans_sites])
 
                     for perm_sites in all_permutation_of_sites:
                         if tuple(perm_sites[0]) in p_equal_set:
@@ -451,13 +460,6 @@ class OrbitList(object):
                             site_permutations.append(permutation)
                             break
                     else:
-                        # reached end without break so throw error
-                        print("error print ", len(
-                            all_permutation_of_sites), len(sites))
-                        print(sites)
-                        print()
-                        print(p_equal_set)
-                        print("len of structure {}".format(len(self.primitive_structure)))
                         raise RuntimeError(
                             "did not find a permutation of the"
                             " orbit sites to the permutations"
