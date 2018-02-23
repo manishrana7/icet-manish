@@ -375,6 +375,11 @@ class TestOrbitList(unittest.TestCase):
     def test_higher_order_orbits(self):
         """
         Try to construct higher order orbit list
+
+        These tests will simply create orbit list
+        and see that the orbit list gets created
+        without any errors thrown.
+
         """
         atoms = bulk("Al", 'hcp', a=3.01)
         cutoff = [5] * 3
