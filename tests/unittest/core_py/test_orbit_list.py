@@ -422,9 +422,14 @@ class TestOrbitList(unittest.TestCase):
         Test permutations to representative.
         """
         for orbit in self.orbit_list.orbits:
+            # Test that the permutations to representative is
+            # the same length as the number of equivalent_sites
+            # i.e. len(orbit)
             self.assertEqual(
                 len(orbit.permutations_to_representative), len(orbit))
             for perm in orbit.permutations_to_representative:
+                # Assert that the permutation doesn't have any
+                # duplicates
                 self.assertEqual(len(set(perm)), len(perm))
 
     def test_property_allowed_permutations(self):
@@ -433,6 +438,8 @@ class TestOrbitList(unittest.TestCase):
         """
         for orbit in self.orbit_list.orbits:
             for perm in orbit.allowed_permutations:
+                # Assert that the permutation doesn't have any
+                # duplicates
                 self.assertEqual(len(set(perm)), len(perm))
 
 
