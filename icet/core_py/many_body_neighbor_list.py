@@ -217,6 +217,19 @@ class ManyBodyNeighborList(object):
         Return a list of list of lattice sites
         from the compresed sites.
 
+        the unzip will do the following:
+        unzipped_sits = []
+        for site in sites2
+            unzipped_sites.append(sites1+site)
+        return unzipped sites
+
+        i.e. if sites1=[ls1, ls2]
+        and sites2= [ls3,ls4,ls5]
+        unzipped will return
+        [[ls1,ls2,ls3],
+        [ls1,ls2,ls4],
+        [ls1,sl2,ls5]]
+
         parameters
         ----------
         compressed_sites : tuple of list of lattice sites
