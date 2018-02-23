@@ -208,8 +208,8 @@ class TestOrbitList(unittest.TestCase):
 
         Just print the orbitlist and see that it works.
         """
-        print(self.orbit_list)        
-        
+        print(self.orbit_list)
+
     def test_singlets_particle(self):
         """
         Test that a particle get correct number of singlets.

@@ -339,8 +339,8 @@ class OrbitList(object):
            (also find the unit cell offsets equivalent sites)
 
         3. Get all columns for these rows, i.e the sites that
-           are directly equivalent, call these p_equal. 
-           Don't sort the actual list of lattice sites 
+           are directly equivalent, call these p_equal.
+           Don't sort the actual list of lattice sites
            (ok to sort list of lists of lattice sites)
 
         4. Construct all possible permutations for the
@@ -431,7 +431,8 @@ class OrbitList(object):
                     if tuple(site) in p_equal_set:
                         any_translated_equivalents = True
 
-                if not tuple(sites) in p_equal_set and not any_translated_equivalents:
+                if not tuple(sites) in p_equal_set \
+                        and not any_translated_equivalents:
                     #  Did not find the orbit.eq_sites in p_equal
                     #  meaning that this eq site does not have an
                     #  allowed permutation
