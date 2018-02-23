@@ -352,7 +352,7 @@ class TestOrbitList(unittest.TestCase):
         self.assertEqual(len(orbit_list), 1)
 
         # Gets two pairs
-        #  TODO think if this is correct.
+        #  TODO think if this is the correct result for hcp
         atoms = bulk("Al", 'hcp', a=3.0)
         cutoff = [3.1]
         orbit_list = OrbitList(atoms, cutoff)
