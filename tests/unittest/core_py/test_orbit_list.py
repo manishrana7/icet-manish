@@ -330,7 +330,11 @@ class TestOrbitList(unittest.TestCase):
         cutoff = [2.7]
         orbit_list = OrbitList(atoms, cutoff)
         self.assertEqual(len(orbit_list), 2)
-        # Multiplicity of pair should be 6
+
+        # Multiplicity of pair should be 4
+        # i.e. 8 neighboring cells each
+        # with an atom in the center and
+        # divided by 2 since it is per atom
         orbit_pair = orbit_list.orbits[1]
         self.assertEqual(len(orbit_pair), 4)
 
