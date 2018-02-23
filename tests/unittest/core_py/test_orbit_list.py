@@ -117,7 +117,7 @@ class TestOrbitList(unittest.TestCase):
         self.assertEqual(
             rows[1], self.orbit_list.permutation_matrix.pm_lattice_sites[1])
 
-    def test_get_indices(self):
+    def test_get_row_indices(self):
         """
         Test the get indices method
         """
