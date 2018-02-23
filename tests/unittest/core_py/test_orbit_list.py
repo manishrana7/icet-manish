@@ -132,30 +132,35 @@ class TestOrbitList(unittest.TestCase):
 
     def test_get_all_translated_sites(self):
         """
-        Test teh get all translated sites functionality.
+        Test the get all translated sites functionality.
         """
+
+        # no offset site shoud get itself as translated
         sites = [LatticeSite(0, [0, 0, 0])]
         target = [[LatticeSite(0, [0, 0, 0])]]
         self.assertListEqual(
             self.orbit_list.get_all_translated_sites(sites), sorted(target))
 
+        # test a singlet site with offset        
         sites = [LatticeSite(3, [0, 0, -1])]
         target = [[LatticeSite(3, [0, 0, 0])],
-                  [LatticeSite(3, [0, 0, -1])]
-                  ]
+                  [LatticeSite(3, [0, 0, -1])]                  ]
         self.assertListEqual(
             self.orbit_list.get_all_translated_sites(sites), sorted(target))
+        
+
         # Does it break when the offset is floats?
         sites = [LatticeSite(0, [0.0, 0.0, 0.0])]
         target = [[LatticeSite(0, [0.0, 0.0, 0.0])]]
         self.assertListEqual(
             self.orbit_list.get_all_translated_sites(sites), sorted(target))
-
+        # Float test continued
         sites = [LatticeSite(0, [1.0, 0.0, 0.0])]
         target = [[LatticeSite(0, [1.0, 0.0, 0.0])], [
             LatticeSite(0, [0.0, 0.0, 0.0])]]
         self.assertListEqual(
             self.orbit_list.get_all_translated_sites(sites), sorted(target))
+        # Test two sites with floats
         sites = [LatticeSite(0, [1.0, 0.0, 0.0]),
                  LatticeSite(0, [0.0, 0.0, 0.0])]
         target = [[LatticeSite(0, [1.0, 0.0, 0.0]),
@@ -165,6 +170,7 @@ class TestOrbitList(unittest.TestCase):
         self.assertListEqual(
             self.orbit_list.get_all_translated_sites(sites), sorted(target))
 
+        # Test sites where none is inside unit cell
         sites = [LatticeSite(0, [1.0, 2.0, -1.0]),
                  LatticeSite(2, [2.0, 0.0, 0.0])]
 
