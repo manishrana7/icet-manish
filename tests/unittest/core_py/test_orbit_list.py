@@ -47,6 +47,7 @@ class TestOrbitList(unittest.TestCase):
         Test that length is equal to number of orbits.
         """
         self.assertEqual(len(self.orbit_list), len(self.orbit_list.orbits))
+        self.assertEqual(len(self.orbit_list), 3)
 
     def test_sort(self):
         '''
