@@ -107,7 +107,7 @@ class OrbitList(object):
 
     def is_new_orbit(self, sites):
         """
-        Checks if this sites has been added into
+        Checks if these sites has been added into
         an orbit already.
         """
         if len(sites) == 0:
@@ -261,8 +261,8 @@ class OrbitList(object):
     def get_matches_in_pm(self, list_of_sites):
         """
         Returns a list of tuple of lattice sites and
-        matched rows in pm of those that has a
-        match in column 1.
+        matched rows in permutation matrix (pm) of those that has a
+        match in column 1 of permutation matrix.
 
         Parameters
         ----------
