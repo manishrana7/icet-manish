@@ -225,11 +225,15 @@ class TestOrbitList(unittest.TestCase):
         """
         Test that a particle get correct number of singlets.
         """
+        # Below is an explanation on how the particle looks like
+        # and what its unique sites are:
+        # ------------------------------
+        #
         #  One corner site,X,
         #  one next to the corner along the side, O,
         #  one site on the surface, K,
         #  and one of the center 2x2x2 sites J
-        #  and in the darkness to bind them all
+        #
         #
         #    from the side:
         #    X O O X
