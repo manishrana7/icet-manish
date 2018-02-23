@@ -108,7 +108,7 @@ class OrbitList(object):
     def is_new_orbit(self, sites):
         """
         Checks if this sites has been added into
-        an orbit allready.
+        an orbit already.
         """
         if len(sites) == 0:
             raise RuntimeError("sites is empty in is new orbit")
@@ -144,10 +144,7 @@ class OrbitList(object):
         returns orbit : icet Orbit object
         """
 
-        # TODO check sorted rows?
         rows = self.get_rows(sites)
-        # if len(sites) ==1:
-        #     return orbit
         assert len(rows) == len(sites)
         assert isinstance(rows, list)
         assert isinstance(rows[0], list)
@@ -161,8 +158,6 @@ class OrbitList(object):
         orbit = Orbit(cluster)
         for i in range(len(rows[0])):
             eq_sites = [row[i] for row in rows]
-            # if not self.is_valid_sites(eq_sites):
-            #     raise RuntimeError("error eq sites not in unitcell")
 
             translated_eq_sites = self.get_all_translated_sites(eq_sites)
             sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
@@ -177,7 +172,6 @@ class OrbitList(object):
                     if self.is_valid_sites(valid_sites[0]):
                         orbit.equivalent_sites.append(
                             copy.deepcopy(valid_sites[0]))
-                        # orbit.equivalent_sites.append(copy.deepcopy(eq_sites))
                         break
                 else:
                     raise RuntimeError("No sites were valid")
