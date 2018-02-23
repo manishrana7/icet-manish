@@ -204,14 +204,34 @@ class TestManyBodyNeighborList(unittest.TestCase):
     def test_unzip(self):
         """
         Test the unzip functionality.
+
+        sites are in the format:
+        list( list(lattice_sites), list_of_lattice_sites)
+        call it list(sites1, sites2)
+        the unzip will do the following:
+        unzipped_sits = []
+        for site in sites2
+            unzipped_sites.append(sites1+site)
+        return unzipped sites
+
+        i.e. if sites1=[ls1, ls2]
+        and sites2= [ls3,ls4,ls5]
+        unzipped will return
+        [[ls1,ls2,ls3],
+        [ls1,ls2,ls4],
+        [ls1,sl2,ls5]]
+
         """
+
         ls = LatticeSite(0, [1, 2, 3])
+        # Should get one triplet
         sites = [[ls, ls], [ls]]
         unzipped_sites = self.mbnl.unzip(sites)
         target = [[ls, ls, ls]]
         self.assertEqual(len(unzipped_sites), 1)
         self.assertListEqual(target, unzipped_sites)
 
+        # Should get two triplets
         sites = [[ls, ls], [ls, ls]]
         unzipped_sites = self.mbnl.unzip(sites)
         target = [[ls, ls, ls], [ls, ls, ls]]
@@ -219,6 +239,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
         self.assertListEqual(target, unzipped_sites)
 
         ls2 = LatticeSite(1, [3, 2, 1])
+        # should get 4 triplets
         sites = [[ls, ls2], [ls, ls, ls2, ls]]
         unzipped_sites = self.mbnl.unzip(sites)
         target = [
@@ -233,15 +254,16 @@ class TestManyBodyNeighborList(unittest.TestCase):
         target = [[ls]]
         self.assertEqual(len(unzipped_sites), 1)
         self.assertListEqual(target, unzipped_sites)
-
+        # Test unzipping entire mbnl
         for index in range(len(self.atoms)):
             mbnl_py = self.mbnl.build(index, bothways=False)
             for compressed_sites in mbnl_py:
                 for unzipped in self.mbnl.unzip(compressed_sites):
+                    # If singlet len of unzip is the len of sites1
                     if len(compressed_sites[1]) == 0:
                         self.assertEqual(
                             len(unzipped), len(compressed_sites[0]))
-                    else:
+                    else:  # else len of unzip is the len of sites1 + 1
                         self.assertEqual(len(unzipped), len(
                             compressed_sites[0]) + 1)
 
