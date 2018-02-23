@@ -407,10 +407,14 @@ class TestOrbitList(unittest.TestCase):
         Test function get_matches_in_pm
         """
 
+        # Find indices in column1 for list of lattice sites
+        # permutation matrix
         indices = [0, 5, 2]
+        # manually get sites
         sites = [[self.orbit_list.column1[i] for i in indices]]
 
         match = self.orbit_list.get_matches_in_pm(sites)
+        # match[0][1] is the indices we found
         self.assertEqual(match[0][1], tuple(indices))
 
     def test_property_permutations_to_representative(self):
