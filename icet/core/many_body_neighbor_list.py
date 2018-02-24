@@ -1,6 +1,6 @@
 from ase import Atoms
 from _icet import ManyBodyNeighborList
-from .lattice_site import LatticeSite
+# from .lattice_site import LatticeSite
 from .neighbor_list import get_neighbor_lists
 from .structure import Structure
 
@@ -26,6 +26,12 @@ def get_all_lattice_neighbors(atoms, neighbor_lists=None, cutoffs=None):
     list of tuples
         the first part of each tuple identifies the lattice neighbor, the
         second part is a list of neighbors (by index)
+
+    TODO: 
+        * uncoment or remove last lines that add singlets and pairs. mbnl already
+        list those.
+        * cutoff is always used even if `neighbor_list` is not None.
+        * if last lines can be removed then `order` is senseless
     '''
 
     bothways = False
@@ -48,7 +54,7 @@ def get_all_lattice_neighbors(atoms, neighbor_lists=None, cutoffs=None):
             raise Exception('Need to specify either neighbor list or cutoffs')
         else:
             neighbor_lists = get_neighbor_lists(
-                structure=structure, cutoffs=cutoffs)
+                atoms=structure, cutoffs=cutoffs)
     else:
         # build the neighbor lists
         for nl in neighbor_lists:
@@ -66,10 +72,10 @@ def get_all_lattice_neighbors(atoms, neighbor_lists=None, cutoffs=None):
                 lattice_neighbors.append(lat_nbrs)
 
     # add the pairs and singlets
-    for lattice_index in range(len(structure)):
-        lat_nbr_i = LatticeSite(lattice_index, [0.0, 0.0, 0.0])
-        lattice_neighbors.append(([lat_nbr_i], []))  # singlet
-        lattice_neighbors.append(
-            ([lat_nbr_i], neighbor_lists[0].get_neighbors(lattice_index)))
+    # for lattice_index in range(len(structure)):
+    #    lat_nbr_i = LatticeSite(lattice_index, [0., 0., 0.])
+    #    lattice_neighbors.append(([lat_nbr_i], []))  # singlet
+    #    lattice_neighbors.append(
+    #        ([lat_nbr_i], neighbor_lists[0].get_neighbors(lattice_index)))
 
     return lattice_neighbors
