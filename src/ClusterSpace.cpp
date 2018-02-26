@@ -41,7 +41,21 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
     for (size_t i = 0; i < _primitive_orbit_list.size(); i++)
     {
         auto repCluster = _primitive_orbit_list.getOrbit(i).getRepresentativeCluster();
-        auto allowedOccupations = getAllowedOccupations(_primitive_structure, _primitive_orbit_list.getOrbit(i).getRepresentativeSites());
+        std::vector<int> allowedOccupations;
+        try { 
+                allowedOccupations = getAllowedOccupations(_primitive_structure, _primitive_orbit_list.getOrbit(i).getRepresentativeSites());
+            }
+        catch (const std::exception& e)
+        { 
+            throw std::runtime_error("Failed getting allowed occupations in genereteClusterVector"); 
+        }
+
+        // Skip rest if any sites aren't active sites (i.e. allowed occupation < 2)
+        if (std::any_of(allowedOccupations.begin(), allowedOccupations.end(),[](int allowedOccupation ){ return allowedOccupation < 2; }))
+        {
+            continue;
+        }
+        
         auto mcVectors = _primitive_orbit_list.getOrbit(i).getMCVectors(allowedOccupations);
         auto allowedPermutationsSet = _primitive_orbit_list.getOrbit(i).getAllowedSitesPermutations();
         auto elementPermutations = getMCVectorPermutations(mcVectors, i);
@@ -59,7 +73,8 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
                 for (const auto &perm : elementPermutations[currentMCVectorIndex])
                 {
                     auto permutedMCVector = icet::getPermutedVector(mcVector, perm);
-                    clusterVectorElement += getClusterProduct(permutedMCVector, allowedOccupations, elementsCountPair.first) * elementsCountPair.second;
+                    auto permutedAllowedOccupations = icet::getPermutedVector(allowedOccupations, perm);
+                    clusterVectorElement += getClusterProduct(permutedMCVector, permutedAllowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                     multiplicity += elementsCountPair.second;
                 }
             }
