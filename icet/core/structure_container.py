@@ -1,6 +1,12 @@
+import tarfile
+import tempfile
+
 import numpy as np
+
+import ase.db
 from ase import Atoms
 from ase.calculators.calculator import PropertyNotImplementedError
+from icet import ClusterSpace
 
 
 class StructureContainer(object):
@@ -56,8 +62,6 @@ class StructureContainer(object):
                                        properties=properties)
                 except AssertionError:
                     raise
-        else:
-            raise Exception('list of atoms required for initialization')
 
     def __len__(self):
         return len(self._structure_list)
@@ -328,6 +332,65 @@ class StructureContainer(object):
         Returns the icet ClusterSpace object.
         '''
         return self._cluster_space
+
+    @property
+    def fit_structures(self):
+        """
+        Return the fit structures.
+        """
+        return self._structure_list
+
+    def write(self, filename):
+        """
+        Write structure container to a file.
+        """
+        # Write cluster space to tempfile
+        temp_cs_file = tempfile.NamedTemporaryFile()
+        self.cluster_space.write(temp_cs_file.name)
+        temp_cs_file.seek(0)
+        # write fit structures to ASE database in tempfile
+        temp_db_file = tempfile.NamedTemporaryFile()
+        db = ase.db.connect(temp_db_file.name, type='db', append=False)
+
+        for fit_structure in self.fit_structures:
+            data_dict = {'user_tag': fit_structure.user_tag,
+                         'properties': fit_structure.properties,
+                         'cluster_vector': fit_structure.cluster_vector}
+            db.write(fit_structure.atoms, data=data_dict)
+        temp_db_file.seek(0)
+        import os
+        with tarfile.open(filename, mode='w') as handle:
+            handle.add(temp_db_file.name, arcname='database')
+            handle.add(temp_cs_file.name,
+                       arcname='cluster_space')
+
+    @staticmethod
+    def read(filename):
+        """
+        Read structure container from file.
+        """
+        temp_db_file = tempfile.NamedTemporaryFile()
+        with tarfile.open(mode='r', name=filename) as tar_file:
+            cs_file = tar_file.extractfile('cluster_space')
+            database_file = tar_file.extractfile('database')
+            
+            temp_db_file.write(tar_file.extractfile('database').read())
+            temp_db_file.seek(0)
+            cluster_space = ClusterSpace.read(cs_file)
+            database = ase.db.connect(temp_db_file.name, type='db')
+
+
+            structure_container = StructureContainer(cluster_space)
+            fit_structures = []
+            for row in database.select():
+                data = row.data
+                fit_structure = FitStructure(row.toatoms(),
+                                             user_tag=data['user_tag'],
+                                             cv=data['cluster_vector'],
+                                             properties=data['properties'])
+                fit_structures.append(fit_structure)
+            structure_container._structure_list = fit_structures
+        return structure_container
 
 
 class FitStructure:

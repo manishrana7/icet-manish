@@ -354,9 +354,11 @@ class ClusterSpace(_ClusterSpace):
         filename : str with filename to saved
         cluster space.
         """
-
-        with open(filename, 'rb') as handle:
-            parameters = pickle.load(handle)
+        if isinstance(filename, str):    
+            with open(filename, 'rb') as handle:
+                parameters = pickle.load(handle)
+        else:
+            parameters = pickle.load(filename)
 
         return ClusterSpace(parameters['atoms'],
                             parameters['cutoffs'],
