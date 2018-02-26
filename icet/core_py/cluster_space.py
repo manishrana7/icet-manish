@@ -49,6 +49,7 @@ class ClusterSpace(object):
         orbit_list = OrbitList(self._structure, self._cutoffs,
                                verbosity=verbosity)
         orbit_list.sort()
+        self._orbit_list = orbit_list
         self._mi = Mi
 
     @staticmethod
@@ -203,7 +204,9 @@ class ClusterSpace(object):
             cluster_space_info = self.get_cluster_space_info(index)
             orbit_index = cluster_space_info[0]
             mc_vector = cluster_space_info[1]
-            cluster = self.get_orbit(orbit_index).get_representative_cluster()
+            cluster = \
+                self.orbit_list.orbits[orbit_index].get_representative_cluster(
+                )
             multiplicity = len(self.get_orbit(
                                orbit_index).get_equivalent_sites())
             record = OrderedDict([('index', index),
@@ -262,8 +265,23 @@ class ClusterSpace(object):
         ''' list of sub elements considered in the cluster space '''
         return self._chemical_symbols
 
+    @property
+    def orbit_list(self):
+        """
+        Return orbit list object
+        """
+        return self._orbit_list
+
     def get_orbit(self, index):
-        pass
+        """
+        Return orbit with index from
+        orbit list
+
+        parameters
+        ----------
+        index : int
+        """
+        return self.orbit_list.orbits[index]
 
     def get_cluster_space_info(self, index):
         pass

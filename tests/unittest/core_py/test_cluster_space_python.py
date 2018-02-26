@@ -242,14 +242,14 @@ class TestClusterSpaceSurface(unittest.TestCase):
         pass
 
 
-def suite():
-    test_classes_to_run = [TestClusterSpace, TestClusterSpaceSurface]
-    suites_list = []
-    for test_class in test_classes_to_run:
-        suite = unittest.defaultTestLoader.loadTestsFromTestCase(test_class)
-        suites_list.append(suite)
-    test_suite = unittest.TestSuite(suites_list)
-    return test_suite
+# def suite():
+#     test_classes_to_run = [TestClusterSpace, TestClusterSpaceSurface]
+#     suites_list = []
+#     for test_class in test_classes_to_run:
+#         suite = unittest.defaultTestLoader.loadTestsFromTestCase(test_class)
+#         suites_list.append(suite)
+#     test_suite = unittest.TestSuite(suites_list)
+#     return test_suite
 
 
 if __name__ == '__main__':
