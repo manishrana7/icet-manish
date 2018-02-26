@@ -1,4 +1,6 @@
 import numpy as np
+import pickle
+from icet import ClusterSpace
 
 
 class ClusterExpansion(object):
@@ -56,3 +58,41 @@ class ClusterExpansion(object):
     def parameters(self):
         '''list of floats : effective cluster interactions (ECIs)'''
         return self._parameters
+
+    def write(self, filename):
+        """
+        Write Cluster expansion to file.
+
+        Parameters
+        ---------
+        filename : str with filename to saved
+        cluster space.
+        """
+
+        self.cluster_space.write(filename)
+
+        with open(filename, 'rb') as handle:
+            data = pickle.load(handle)
+
+        data['parameters'] = self.parameters
+
+        with open(filename, "wb") as handle:
+            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    @staticmethod
+    def read(filename):
+        """
+        Read cluster expansion from file.
+
+        Parameters
+        ---------
+        filename : str with filename to saved
+        cluster space.
+        """
+        cs = ClusterSpace.read(filename)
+
+        with open(filename, 'rb') as handle:
+            data = pickle.load(handle)
+        parameters = data['parameters']
+
+        return ClusterExpansion(cs, parameters)

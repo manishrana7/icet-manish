@@ -5,9 +5,11 @@ from _icet import ClusterSpace as _ClusterSpace
 from ase import Atoms
 from icet.tools.geometry import get_primitive_structure
 
-from ..tools.geometry import add_vacuum_in_non_pbc
-from .orbit_list import create_orbit_list
-from .structure import Structure
+from icet.tools.geometry import add_vacuum_in_non_pbc
+from icet.core.orbit_list import create_orbit_list
+from icet.core.structure import Structure
+
+import pickle
 
 
 class ClusterSpace(_ClusterSpace):
@@ -42,14 +44,19 @@ class ClusterSpace(_ClusterSpace):
         # deal with different types of structure objects
         if isinstance(atoms, Atoms):
             self._structure = Structure.from_atoms(atoms)
+            self._input_atoms = atoms
         elif isinstance(atoms, Structure):
             self._structure = atoms
+            self._input_atoms = atoms.to_atoms()
         else:
             msg = 'Unknown structure format'
             msg += ' {} (ClusterSpace)'.format(type(atoms))
             raise Exception(msg)
-        self._cutoffs = cutoffs
 
+        self._cutoffs = cutoffs
+        self._chemical_symbols = chemical_symbols
+        self._mi = Mi
+        self._verbosity = verbosity
         # set up orbit list
         orbit_list = create_orbit_list(self._structure, self._cutoffs,
                                        verbosity=verbosity)
@@ -312,6 +319,50 @@ class ClusterSpace(_ClusterSpace):
     def cutoffs(self):
         ''' list : cutoffs used for initializing the cluster space '''
         return self._cutoffs
+
+    def write(self, filename):
+        """
+        Save cluster space to a file.
+
+        Parameters
+        ---------
+        filename : str
+        filename for file
+        """
+        # atoms = self._input_atoms.copy()
+        # atoms.info = {'cutoffs': self._cutoffs,
+        #               'chemical_symbols': self._chemical_symbols,
+        #               "Mi": self._mi,
+        #               'verbosity': self._verbosity}
+        parameters = {'atoms': self._input_atoms.copy(),
+                      'cutoffs': self._cutoffs,
+                      'chemical_symbols': self._chemical_symbols,
+                      "Mi": self._mi,
+                      'verbosity': self._verbosity}
+        with open(filename, 'wb') as handle:
+            pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        # ase.io.write(filename, atoms, format='traj')
+
+    @staticmethod
+    def read(filename):
+        """
+        Read cluster space from filename.
+
+        Parameters
+        ---------
+        filename : str with filename to saved
+        cluster space.
+        """
+
+        with open(filename, 'rb') as handle:
+            parameters = pickle.load(handle)
+
+        return ClusterSpace(parameters['atoms'],
+                            parameters['cutoffs'],
+                            parameters['chemical_symbols'],
+                            parameters['Mi'],
+                            parameters['verbosity'])
 
 
 def get_singlet_info(atoms, return_cluster_space=False):
