@@ -39,8 +39,8 @@ class TestClusterCounts(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestClusterCounts, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk('Al', 'fcc', cubic=True, a=3.0)
-        self.atoms.set_chemical_symbols('AlCuAl2')
+        self.atoms = bulk('Ni', 'hcp', a=2.0).repeat([2, 1, 1])
+        self.atoms.set_chemical_symbols('NiFeNi2')
         self.cutoffs = [2.2]
         self.neighbor_lists = get_neighbor_lists(
             atoms=self.atoms, cutoffs=self.cutoffs)
@@ -73,8 +73,8 @@ class TestClusterCounts(unittest.TestCase):
                                 LatticeSite(1, [0., 0., 0.])])
         clusters = [cluster_singlet, cluster_pair]
 
-        expected_counts = [{(13,): 1},
-                           {(13, 13): 8, (13, 29): 4}]
+        expected_counts = [{(28,): 1},
+                           {(26, 28): 4, (28, 28): 7}]
         for k, cluster in enumerate(clusters):
             count = cluster_map[cluster]
             self.assertEqual(count, expected_counts[k])
@@ -94,7 +94,7 @@ class TestClusterCounts(unittest.TestCase):
         cluster_map = self.cluster_counts.get_cluster_counts()
 
         count = cluster_map[cluster]
-        self.assertEqual(count, {(13, 29): 1})
+        self.assertEqual(count, {(26, 28): 1})
 
     def test_count_list_lattice_sites(self):
         """
@@ -118,7 +118,7 @@ class TestClusterCounts(unittest.TestCase):
         cluster_map = self.cluster_counts.get_cluster_counts()
 
         count = cluster_map[cluster]
-        self.assertEqual(count, {(13, 13): 1, (13, 29): 1})
+        self.assertEqual(count, {(28, 26): 1, (28, 28): 1})
 
     def test_count_orbitlist(self):
         """
@@ -128,8 +128,8 @@ class TestClusterCounts(unittest.TestCase):
         cluster_pair = Cluster(self.structure, [], False, 1)
         clusters = [cluster_singlet, cluster_pair]
 
-        expected_counts = [{(13,): 3, (29,): 1},
-                           {(13, 13): 12, (13, 29): 12}]
+        expected_counts = [{(26,): 1, (28,): 3},
+                           {(26, 26): 1, (26, 28): 10, (28, 28): 13}]
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
         cluster_map = self.cluster_counts.get_cluster_counts()
@@ -153,8 +153,8 @@ class TestClusterCounts(unittest.TestCase):
         cluster_pair = Cluster(self.structure, [], False, 1)
         clusters = [cluster_singlet, cluster_pair]
 
-        expected_counts = [{(13,): 3, (29,): 1},
-                           {(13, 13): 3, (13, 29): 3}]
+        expected_counts = [{(26,): 1, (28,): 3},
+                           {(26, 28): 2, (28, 28): 2}]
 
         self.cluster_counts.count_clusters(structure,
                                            orbit_list, False)
@@ -190,8 +190,8 @@ class TestClusterCounts(unittest.TestCase):
                                            self.orbit_list, False)
         self.cluster_counts.setup_cluster_counts_info()
         elements, count = self.cluster_counts.get_cluster_counts_info(0)
-        self.assertEqual(elements, ['Al'])
-        self.assertEqual(count, 3)
+        self.assertEqual(elements, ['Fe'])
+        self.assertEqual(count, 1)
 
     def test_repr(self):
         """
@@ -208,13 +208,14 @@ Cluster Counts
 ------------------------------
 [0] [] 0.0000
 ------------------------------
-Al    3
-Cu    1
+Fe    1
+Ni    3
 ------------------------------
-[0, 0] [2.12132] 1.0607
+[0, 0] [2.0] 1.0000
 ------------------------------
-Al   Al    12
-Al   Cu    12
+Fe   Fe    1
+Fe   Ni    10
+Ni   Ni    13
 '''
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(target))
