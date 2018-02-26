@@ -180,7 +180,6 @@ class TestStructure(unittest.TestCase):
         3. Find lattice site from the position and assert that it should
            be equivalent to the original lattice site.
         """
-
         lattice_sites = []
         noise_position = []
         unit_cell_range = 1000
@@ -211,7 +210,8 @@ class TestStructure(unittest.TestCase):
         3. Find lattice site from the position and assert that it should
            be equivalent to the original lattice site.
         """
-        atoms = bulk("Au", 'hcp', a=2.0).repeat([3, 2, 5])
+        atoms = self.atoms.repeat([3, 2, 5])
+
         structure = Structure.from_atoms(atoms)
         lattice_sites = []
         unit_cell_range = 1000
@@ -245,8 +245,7 @@ class TestStructure(unittest.TestCase):
         3. Find lattice site from the position and assert that it should
            be equivalent to the original lattice site.
         """
-
-        atoms = bulk("Au", 'hcp', a=2.0).repeat([3, 5, 5])
+        atoms = self.atoms.repeat([3, 5, 5])
 
         # Set pbc false in Z-direction and add vacuum
         atoms.pbc = [True, True, False]
@@ -298,6 +297,9 @@ class TestStructure(unittest.TestCase):
         struc_positions = self.structure.get_positions()
         for pos, struc_pos in zip(positions, struc_positions):
             self.assertListEqual(pos.tolist(), struc_pos.tolist())
+
+        chem_symbols = atoms.get_chemical_symbols()
+        self.assertListEqual(chem_symbols, ['Ag', 'Ag'])
 
     def test_repr_function(self):
         """
