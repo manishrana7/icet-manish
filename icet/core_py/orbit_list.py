@@ -111,11 +111,11 @@ class OrbitList(object):
         an orbit already.
         """
         if len(sites) == 0:
-            raise RuntimeError("sites is empty in is new orbit")
+            raise RuntimeError("sites is empty in is_new_orbit")
 
         translated_eq_sites = self.get_all_translated_sites(sites)
         if len(translated_eq_sites) == 0:
-            raise RuntimeError("translated_eq_sites is empty in is new orbit")
+            raise RuntimeError("translated_eq_sites is empty in is_new_orbit")
         try:
             sites_indices_match = self.get_matches_in_pm(translated_eq_sites)
         except RuntimeError as e:
