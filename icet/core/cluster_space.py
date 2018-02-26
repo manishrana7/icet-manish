@@ -295,7 +295,8 @@ class ClusterSpace(_ClusterSpace):
             try:
                 atoms = get_primitive_structure(atoms)
             except Exception as e:
-                raise "Failed getting primitive structure in get_primitive_structure"
+                raise "Failed getting primitive "
+                "structure in get_primitive_structure"
             structure = Structure.from_atoms(atoms)
         return _ClusterSpace.get_cluster_vector(self, structure)
 
