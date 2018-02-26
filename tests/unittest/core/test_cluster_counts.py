@@ -58,7 +58,8 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_count_lattice_neighbor(self):
         """
-        Test cluster counts from a many-body neighbor list.
+        Test singlet and pair counts given
+        many-body neighbor list.
         """
         mbnl = ManyBodyNeighborList()
         mbnl_pairs = mbnl.build(self.neighbor_lists, 0, False)
@@ -80,7 +81,8 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_count_lattice_sites(self):
         """
-        Test count clusters thorugh lattice neighbors.
+        Test cluster_counts counts a pair given a set of
+        lattice neighbors.
         """
         lattice_sites = []
         lattice_sites.append(LatticeSite(0, [0., 0., 0.]))
@@ -96,7 +98,8 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_count_list_lattice_sites(self):
         """
-        Test cluster count thorugh a list of lattice neighbors.
+        Test cluster_counts counts the right number of pairs
+        given a list of lattice neighbors.
         """
         lattice_sites = []
         lattice_sites.append(LatticeSite(0, [0., 0., 0.]))
@@ -110,7 +113,8 @@ class TestClusterCounts(unittest.TestCase):
 
         lattice_neighbors = [lattice_sites, lattice_sites2]
 
-        self.cluster_counts.count(self.structure, lattice_neighbors, cluster)
+        self.cluster_counts.count(self.structure, lattice_neighbors,
+                                  cluster, True)
         cluster_map = self.cluster_counts.get_cluster_counts()
 
         count = cluster_map[cluster]
@@ -118,7 +122,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_count_orbitlist(self):
         """
-        Test cluster count using orbitlist.
+        Test cluster_counts given orbits in an orbitlist.
         """
         cluster_singlet = Cluster(self.structure, [], False, 0)
         cluster_pair = Cluster(self.structure, [], False, 1)
@@ -180,7 +184,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_get_cluster_count_info(self):
         """
-        Test get cluster counts info functionality.
+        Test get_cluster_counts_info functionality.
         """
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
@@ -191,7 +195,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_repr(self):
         """
-        Test representation of cluster counts.
+        Test representation of cluster_counts.
         """
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
