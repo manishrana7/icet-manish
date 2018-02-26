@@ -347,8 +347,8 @@ class StructureContainer(object):
         # Write cluster space to tempfile
         temp_cs_file = tempfile.NamedTemporaryFile()
         self.cluster_space.write(temp_cs_file.name)
-        temp_cs_file.seek(0)
-        # write fit structures to ASE database in tempfile
+
+        # Write fit structures as an ASE db in tempfile
         temp_db_file = tempfile.NamedTemporaryFile()
         db = ase.db.connect(temp_db_file.name, type='db', append=False)
 
@@ -357,8 +357,7 @@ class StructureContainer(object):
                          'properties': fit_structure.properties,
                          'cluster_vector': fit_structure.cluster_vector}
             db.write(fit_structure.atoms, data=data_dict)
-        temp_db_file.seek(0)
-        import os
+
         with tarfile.open(filename, mode='w') as handle:
             handle.add(temp_db_file.name, arcname='database')
             handle.add(temp_cs_file.name,
@@ -372,13 +371,10 @@ class StructureContainer(object):
         temp_db_file = tempfile.NamedTemporaryFile()
         with tarfile.open(mode='r', name=filename) as tar_file:
             cs_file = tar_file.extractfile('cluster_space')
-            database_file = tar_file.extractfile('database')
-            
             temp_db_file.write(tar_file.extractfile('database').read())
             temp_db_file.seek(0)
             cluster_space = ClusterSpace.read(cs_file)
             database = ase.db.connect(temp_db_file.name, type='db')
-
 
             structure_container = StructureContainer(cluster_space)
             fit_structures = []

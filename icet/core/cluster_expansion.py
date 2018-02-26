@@ -93,7 +93,7 @@ class ClusterExpansion(object):
         if isinstance(filename, str):
             with open(filename, 'rb') as handle:
                 data = pickle.load(handle)
-        else:            
+        else:
             with open(filename) as handle:
                 data = pickle.load(handle)
         parameters = data['parameters']
