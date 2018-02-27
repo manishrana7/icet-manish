@@ -306,7 +306,6 @@ class TestStructure(unittest.TestCase):
         Test representation.
         """
         retval = self.structure.__repr__()
-        print(retval)
         target = '''
 Cell:
 [[ 2.          0.          0.        ]
@@ -314,8 +313,8 @@ Cell:
  [ 0.          0.          3.26598632]]
 
 Element and positions:
- Ag  [0. 0. 0.]
- Ag  [0.         1.15470054 1.63299316]
+Ag  [0.0  0.0  0.0]
+Ag  [0.0  1.15470054  1.63299316]
  '''
         self.assertEqual(strip_surrounding_spaces(retval),
                          strip_surrounding_spaces(target))
