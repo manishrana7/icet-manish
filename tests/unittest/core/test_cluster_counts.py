@@ -196,13 +196,10 @@ class TestClusterCounts(unittest.TestCase):
     def test_repr(self):
         """
         Test representation of cluster_counts.
-        TODO: Silly test as test failed in CI but works in local repo
-        because retrieved clusters from cluster_counts are sorted
-        in different order.
         """
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
-        # retval = self.cluster_counts.repr()
+        retval = self.cluster_counts.repr()
         target = '''
 Cluster Counts
 ------------------------------
@@ -218,7 +215,7 @@ Fe   Ni    10
 Ni   Ni    13
 '''
         self.assertEqual(strip_surrounding_spaces(target),
-                         strip_surrounding_spaces(target))
+                         strip_surrounding_spaces(retval))
 
     def test_print_overview(self):
         """

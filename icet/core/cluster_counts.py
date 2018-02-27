@@ -45,14 +45,14 @@ def __get_string_representation(self):
     cluster_counts = {key: len(values)
                       for key, values in self.get_cluster_counts().items()}
     m = 0
-    for cluster, counts in cluster_counts.items():
+    for cluster in sorted(cluster_counts.keys()):
         horizontal_line = '{s:-^{n}}'.format(s='', n=30)
         s += [horizontal_line]
         s += ['{} {:} {:.4f}'.format(cluster.sites,
                                      cluster.distances,
                                      cluster.geometrical_size)]
         s += [horizontal_line]
-        for k in range(counts):
+        for k in range(cluster_counts[cluster]):
             elements, count = self.get_cluster_counts_info(m)
             t = ['{} '.format(el) for el in elements]
             s += ['{}   {}'.format('  '.join(t), count)]

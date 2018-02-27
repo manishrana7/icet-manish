@@ -73,9 +73,9 @@ void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> 
     }
     else
     {
-    std::vector<int> sortedElements = elements;
-    std::sort(sortedElements.begin(), sortedElements.end());
-    _clusterCounts[cluster][sortedElements ] += 1;
+        std::vector<int> sortedElements = elements;
+        std::sort(sortedElements.begin(), sortedElements.end());
+        _clusterCounts[cluster][sortedElements ] += 1;
     }
 }
 
