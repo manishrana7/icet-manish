@@ -17,6 +17,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
         super(TestManyBodyNeighborList, self).__init__(*args, **kwargs)
 
         self.atoms = bulk('Al').repeat(2)
+        # self.atoms = bulk('Ni', 'hcp', a=3.0).repeat([2, 2, 1])
         self.cutoffs = [5.0, 5.0]
 
     def setUp(self):
@@ -61,27 +62,24 @@ class TestManyBodyNeighborList(unittest.TestCase):
             self.assertNotEqual(mbnl_size, len(self.mbnl.build(
                 self.neighbor_lists, index, False)))
 
-    def test_singlet_and_pairs(self):
+    def test_singlets(self):
         """
-        Test singlet and pairs are returned in mbnl.
+        Test singlet.
         """
-        from ase.neighborlist import NeighborList as ASENeighborList
-        ase_nl = ASENeighborList([5.0/2]*len(self.atoms),
-                                 self_interaction=False,
-                                 bothways=True)
-        ase_nl.update(self.atoms)
-
         for index in range(len(self.atoms)):
-            singlet, pair = 0, 0
-            for n in self.mbnl.build(self.neighbor_lists, index, True):
-                if len(n[0]) == 1:
-                    if len(n[1]) == 0:
-                        singlet += 1
-                    else:
-                        pair += len(n[1])
-            self.assertEqual(singlet, 1)
-            neighbors = ase_nl.get_neighbors(index)
-            self.assertEqual(len(neighbors[0]), pair)
+            target = tuple(([LatticeSite(index, [0., 0., 0.])], []))
+            neighbors = self.mbnl.build(self.neighbor_lists, index, False)
+            self.assertEqual(neighbors[0], target)
+
+    def test_pairs(self):
+        """
+        Test pairs.
+        """
+        index = 0
+        nl_neighbors = self.neighbor_lists[0].get_neighbors(0)
+        target = tuple(([LatticeSite(index, [0., 0., 0.])], nl_neighbors))
+        neighbors = self.mbnl.build(self.neighbor_lists, index, False)
+        self.assertEqual(neighbors[1], target)
 
     def test_calculate_intersections(self):
         """
