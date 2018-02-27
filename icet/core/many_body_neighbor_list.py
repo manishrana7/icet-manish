@@ -27,9 +27,9 @@ def get_all_lattice_neighbors(atoms, neighbor_lists=None, cutoffs=None):
         the first part of each tuple identifies the lattice neighbor, the
         second part is a list of neighbors (by index)
 
-    TODO: 
-        * uncoment or remove last lines that add singlets and pairs. mbnl already
-        list those.
+    TODO:
+        * uncoment or remove last lines that add singlets and pairs since
+        mbnl already list those.
         * cutoff is always used even if `neighbor_list` is not None.
         * if last lines can be removed then `order` is senseless
     '''
