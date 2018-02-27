@@ -48,11 +48,13 @@ Structure.to_atoms = __structure_to_atoms
 
 
 def __repr_function(self):
+    import numpy
     s = ['Cell:']
     s += ['{}\n'.format(self.cell)]
     s += ['Element and positions:']
     for symbol, position in zip(self.chemical_symbols, self.positions):
-        s += [' {}  {}'.format(symbol, position)]
+        s += [' {}  {}'.format(symbol, numpy.array(position.tolist()))]
+
     return '\n'.join(s)
 
 
