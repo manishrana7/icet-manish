@@ -329,11 +329,7 @@ class ClusterSpace(_ClusterSpace):
         filename : str
         filename for file
         """
-        # atoms = self._input_atoms.copy()
-        # atoms.info = {'cutoffs': self._cutoffs,
-        #               'chemical_symbols': self._chemical_symbols,
-        #               "Mi": self._mi,
-        #               'verbosity': self._verbosity}
+
         parameters = {'atoms': self._input_atoms.copy(),
                       'cutoffs': self._cutoffs,
                       'chemical_symbols': self._chemical_symbols,
@@ -341,8 +337,6 @@ class ClusterSpace(_ClusterSpace):
                       'verbosity': self._verbosity}
         with open(filename, 'wb') as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-        # ase.io.write(filename, atoms, format='traj')
 
     @staticmethod
     def read(filename):
@@ -354,9 +348,11 @@ class ClusterSpace(_ClusterSpace):
         filename : str with filename to saved
         cluster space.
         """
-
-        with open(filename, 'rb') as handle:
-            parameters = pickle.load(handle)
+        if isinstance(filename, str):
+            with open(filename, 'rb') as handle:
+                parameters = pickle.load(handle)
+        else:
+            parameters = pickle.load(filename)
 
         return ClusterSpace(parameters['atoms'],
                             parameters['cutoffs'],

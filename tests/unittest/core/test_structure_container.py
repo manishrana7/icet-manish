@@ -21,6 +21,7 @@ the structure_container.py file
 '''
 
 import unittest
+import tempfile
 
 from ase import Atoms
 from ase.build import bulk
@@ -135,13 +136,13 @@ class TestStructureContainer(unittest.TestCase):
         properties = self.properties_list[0]
         tag = "struct5"
         self.sc.add_structure(atoms, tag, properties)
-        self.assertEqual(self.sc.__len__(), len(self.structure_list)+1)
+        self.assertEqual(self.sc.__len__(), len(self.structure_list) + 1)
         # implicit properties in attached calculator
         calc = EMT()
         atoms.set_calculator(calc)
         atoms.get_potential_energy()
         self.sc.add_structure(atoms)
-        self.assertEqual(self.sc.__len__(), len(self.structure_list)+2)
+        self.assertEqual(self.sc.__len__(), len(self.structure_list) + 2)
 
     def test_get_fit_data(self):
         '''
@@ -257,11 +258,30 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
         cs_onlyread = self.sc.cluster_space
         self.assertEqual(cs_onlyread, self.cs)
 
+    def test_read_write(self):
+        """
+        Test the read write functionality.
+        """
+        temp_file = tempfile.NamedTemporaryFile()
+        self.sc.write(temp_file.name)
+        sc_read = self.sc.read(temp_file.name)
+
+        self.assertEqual(len(self.sc), len(sc_read))
+        self.assertEqual(self.sc.__str__(), sc_read.__str__())
+
+        for fs, fs_read in zip(self.sc.fit_structures, sc_read.fit_structures):
+            self.assertEqual(list(fs.cluster_vector),
+                             list(fs_read.cluster_vector))
+            self.assertEqual(fs.atoms, fs_read.atoms)
+            self.assertEqual(fs.user_tag, fs_read.user_tag)
+            self.assertEqual(fs.properties, fs_read.properties)
+
 
 class TestFitStructure(unittest.TestCase):
     '''
     Container for tests of the class functionality
     '''
+
     def __init__(self, *args, **kwargs):
         super(TestFitStructure, self).__init__(*args, **kwargs)
         self.subelements = ['Ag', 'Au']

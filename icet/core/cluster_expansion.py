@@ -90,9 +90,12 @@ class ClusterExpansion(object):
         cluster space.
         """
         cs = ClusterSpace.read(filename)
-
-        with open(filename, 'rb') as handle:
-            data = pickle.load(handle)
+        if isinstance(filename, str):
+            with open(filename, 'rb') as handle:
+                data = pickle.load(handle)
+        else:
+            with open(filename) as handle:
+                data = pickle.load(handle)
         parameters = data['parameters']
 
         return ClusterExpansion(cs, parameters)
