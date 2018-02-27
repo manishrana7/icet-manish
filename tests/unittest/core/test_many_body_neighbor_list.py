@@ -5,7 +5,7 @@ from icet import Structure
 from icet.core.lattice_site import LatticeSite
 from icet.core.neighbor_list import NeighborList
 from icet.core.many_body_neighbor_list import (
-    ManyBodyNeighborList, get_all_lattice_neighbors)
+    ManyBodyNeighborList)
 
 
 class TestManyBodyNeighborList(unittest.TestCase):
@@ -101,22 +101,10 @@ class TestManyBodyNeighborList(unittest.TestCase):
         self.assertEqual(sorted(intersection), [LatticeSite(
             0, [0, 0, 0]), LatticeSite(0, [1, 0, 0])])
 
-    def test_get_all_lattice_neighbors(self):
-        """
-        Test get_all_lattice_neighbors functionality.
-        """
-        neighbors = get_all_lattice_neighbors(self.atoms,
-                                              self.neighbor_lists,
-                                              self.cutoffs)
-        neighbors2 = get_all_lattice_neighbors(atoms=self.atoms,
-                                               cutoffs=self.cutoffs)
-        for neighbor, neighbor2 in zip(neighbors, neighbors2):
-            self.assertEqual(neighbor, neighbor2)
-
     def test_mbnl_non_pbc(self):
         """
         Test many-body neighbor list for non-pbc structure gives
-        less neighbors under the same cutoffs.
+        less set of lattice neighbors under the same cutoffs.
         """
         atoms = self.atoms.copy()
         atoms.set_pbc([False])
@@ -127,15 +115,22 @@ class TestManyBodyNeighborList(unittest.TestCase):
             nl.build(structure)
             neighbor_lists.append(nl)
 
-        neighbors_non_pbc = get_all_lattice_neighbors(atoms,
-                                                      neighbor_lists,
-                                                      self.cutoffs)
+        mbnl = ManyBodyNeighborList()
+        lattice_neighbors_non_pbc = []
+        lattice_neighbors = []
+        # add the mbnl lattice neighbors
+        for lattice_index in range(len(structure)):
+            neighbors_non_pbc = mbnl.build(neighbor_lists,
+                                           lattice_index, False)
+            neighbors = mbnl.build(self.neighbor_lists,
+                                   lattice_index, False)
+            for lat_nbrs in neighbors_non_pbc:
+                lattice_neighbors_non_pbc.append(lat_nbrs)
+            for lat_nbrs in neighbors:
+                lattice_neighbors.append(lat_nbrs)
 
-        neighbors = get_all_lattice_neighbors(self.atoms,
-                                              self.neighbor_lists,
-                                              self.cutoffs)
-
-        self.assertLess(len(neighbors_non_pbc), len(neighbors))
+        self.assertLess(len(lattice_neighbors_non_pbc),
+                        len(lattice_neighbors))
 
 
 if __name__ == '__main__':
