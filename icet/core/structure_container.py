@@ -35,6 +35,7 @@ class StructureContainer(object):
         '''
 
         self._cluster_space = cluster_space
+        self._structure_list = []
 
         # Add atomic structures
         if list_of_atoms is not None:
@@ -54,7 +55,6 @@ class StructureContainer(object):
             if not isinstance(list_of_atoms[0], tuple):
                 list_of_atoms = [(atoms, None) for atoms in list_of_atoms]
 
-            self._structure_list = []
             for (atoms, user_tag), properties in zip(list_of_atoms,
                                                      list_of_properties):
                 try:
