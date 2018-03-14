@@ -26,9 +26,7 @@ RUN pip3 install --upgrade setuptools
 RUN pip3 install ase \
                  coverage \
                  flake8 \
-                 numba \
-                 spglib \
                  scikit-learn \
                  sphinx-rtd-theme \
                  sphinxcontrib-bibtex \
-                 sympy
+                 sphinx_sitemap
