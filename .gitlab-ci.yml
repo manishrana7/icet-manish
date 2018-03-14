@@ -55,7 +55,6 @@ pages:
   script:
     # prepare homepage
     - mkdir public
-    - mv doc/google*.html public/
     # coverage report
     - mv coverage/ public/
     # letsencrypt setup
