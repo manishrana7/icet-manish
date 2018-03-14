@@ -58,45 +58,40 @@ information in a tabular format by simply calling the :func:`print` function
 with the instance of interest as input argument. For the case at hand, the
 output should be the following::
 
-  ------------------------- Cluster Space -------------------------
+  -------------------------- Cluster Space ---------------------------
    subelements: Ag Au
-   cutoffs: 6.0 5.0 4.0
-   number of orbits: 14
-  -----------------------------------------------------------------
-  order |  radius  | multiplicity | index | orbit |    MC vector
-  -----------------------------------------------------------------
-    0   |   0.0000 |        1     |    0  |    -1  |    
-    1   |   0.0000 |        1     |    1  |    0  |    [0]
-    2   |   1.4425 |        6     |    2  |    1  |  [0, 0]
-    2   |   2.0400 |        3     |    3  |    2  |  [0, 0]
-    2   |   2.4985 |       12     |    4  |    3  |  [0, 0]
-    2   |   2.8850 |        6     |    5  |    4  |  [0, 0]
-    3   |   1.6657 |        8     |    6  |    5  | [0, 0, 0]
-    3   |   1.8869 |       12     |    7  |    6  | [0, 0, 0]
-    3   |   2.0168 |       24     |    8  |    7  | [0, 0, 0]
-    3   |   2.3021 |       24     |    9  |    8  | [0, 0, 0]
-    3   |   2.4967 |       24     |    10  |    9  | [0, 0, 0]
-    3   |   2.7099 |       24     |   11  |   10  | [0, 0, 0]
-    3   |   2.8850 |        8     |   12  |   11  | [0, 0, 0]
-    4   |   1.7667 |        2     |   13  |   12  | [0, 0, 0, 0]
-  -----------------------------------------------------------------
+   cutoffs: 6.0000 5.0000 4.0000
+   total number of orbits: 14
+   number of orbits by order: 0= 1  1= 1  2= 4  3= 7  4= 1
+  --------------------------------------------------------------------
+  index | order |   size   | multiplicity | orbit index |  MC vector  
+  --------------------------------------------------------------------
+     0  |   0   |   0.0000 |        1     |      -1
+     1  |   1   |   0.0000 |        1     |       0     |    [0]
+     2  |   2   |   1.4425 |        6     |       1     |  [0, 0]
+     3  |   2   |   2.0400 |        3     |       2     |  [0, 0]
+     4  |   2   |   2.4985 |       12     |       3     |  [0, 0]
+     5  |   2   |   2.8850 |        6     |       4     |  [0, 0]
+     6  |   3   |   1.6657 |        8     |       5     | [0, 0, 0]
+     7  |   3   |   1.8869 |       12     |       6     | [0, 0, 0]
+     8  |   3   |   2.0168 |       24     |       7     | [0, 0, 0]
+     9  |   3   |   2.3021 |       24     |       8     | [0, 0, 0]
+    10  |   3   |   2.4967 |       24     |       9     | [0, 0, 0]
+    11  |   3   |   2.7099 |       24     |      10     | [0, 0, 0]
+    12  |   3   |   2.8850 |        8     |      11     | [0, 0, 0]
+    13  |   4   |   1.7667 |        2     |      12     | [0, 0, 0, 0]
+  --------------------------------------------------------------------
 
 Compilation of structure container
 ----------------------------------
 
 Once a :class:`ClusterSpace <icet.core.cluster_space.ClusterSpace>` has been
 prepared, the next step is to compile a :class:`StructureContainer
-<icet.core.structure_container.StructureContainer>`. The initiation of the
-latter requires, in addition to the former, a list of :class:`ASE Atoms`
-objects as well as a list of target properties with one item for each structure
-as input arguments. Since the property of interest is the mixing energy, we
-start by obtaining the energy associated with the (elemental) boundary phases.
-Once these reference energies have been obtained, it is possible to loop over
-all entries in the database and calculate the mixing energies before adding
-these to the list of properties and the :class:`ASE Atoms` object to the list
-of structures. Once these lists have been compiled, the
-:class:`StructureContainer
-<icet.core.structure_container.StructureContainer>` object is ready.
+<icet.core.structure_container.StructureContainer>`. To this end, we first
+initialize an empty :class:`StructureContainer
+<icet.core.structure_container.StructureContainer>` and then add the
+tructures from the database prepared previously including for each structure
+the mixing energy in the property dictionary.
 
 .. literalinclude:: ../../../../tutorial/construct_cluster_expansion.py
    :start-after: # step 2
@@ -106,33 +101,33 @@ By calling the :func:`print` function with the :class:`StructureContainer
 <icet.core.structure_container.StructureContainer>` as input argument, one
 obtains the following result::
 
- ----------------------- Structure Container ------------------------
- Total number of structures: 137
- --------------------------------------------------------------------
- index |       user_tag        | natoms | chemical formula |  energy
- --------------------------------------------------------------------
-    0  | None                  |     1  | Ag               |    0.000
-    1  | None                  |     1  | Au               |    0.000
-    2  | None                  |     2  | AgAu             |   -0.010
-    3  | None                  |     2  | AgAu             |   -0.011
-    4  | None                  |     3  | Ag2Au            |   -0.008
-    5  | None                  |     3  | AgAu2            |   -0.008
-    6  | None                  |     3  | Ag2Au            |   -0.009
-    7  | None                  |     3  | AgAu2            |   -0.011
-    8  | None                  |     3  | Ag2Au            |   -0.011
-    9  | None                  |     3  | AgAu2            |   -0.010
-  ...
-  127  | None                  |     6  | Ag2Au4           |   -0.010
-  128  | None                  |     6  | AgAu5            |   -0.006
-  129  | None                  |     6  | Ag5Au            |   -0.006
-  130  | None                  |     6  | Ag4Au2           |   -0.009
-  131  | None                  |     6  | Ag4Au2           |   -0.009
-  132  | None                  |     6  | Ag3Au3           |   -0.011
-  133  | None                  |     6  | Ag3Au3           |   -0.012
-  134  | None                  |     6  | Ag2Au4           |   -0.011
-  135  | None                  |     6  | Ag2Au4           |   -0.011
-  136  | None                  |     6  | AgAu5            |   -0.007
- --------------------------------------------------------------------
+  ----------------------- Structure Container ------------------------
+  Total number of structures: 137
+  --------------------------------------------------------------------
+  index |       user_tag        | natoms | chemical formula |  energy
+  --------------------------------------------------------------------
+     0  | 0                     |     1  | Ag               |    0.000
+     1  | 1                     |     1  | Au               |    0.000
+     2  | 2                     |     2  | AgAu             |   -0.010
+     3  | 3                     |     2  | AgAu             |   -0.011
+     4  | 4                     |     3  | Ag2Au            |   -0.008
+     5  | 5                     |     3  | AgAu2            |   -0.008
+     6  | 6                     |     3  | Ag2Au            |   -0.009
+     7  | 7                     |     3  | AgAu2            |   -0.011
+     8  | 8                     |     3  | Ag2Au            |   -0.011
+     9  | 9                     |     3  | AgAu2            |   -0.010
+   ...
+   127  | 127                   |     6  | Ag2Au4           |   -0.010
+   128  | 128                   |     6  | AgAu5            |   -0.006
+   129  | 129                   |     6  | Ag5Au            |   -0.006
+   130  | 130                   |     6  | Ag4Au2           |   -0.009
+   131  | 131                   |     6  | Ag4Au2           |   -0.009
+   132  | 132                   |     6  | Ag3Au3           |   -0.011
+   133  | 133                   |     6  | Ag3Au3           |   -0.012
+   134  | 134                   |     6  | Ag2Au4           |   -0.011
+   135  | 135                   |     6  | Ag2Au4           |   -0.011
+   136  | 136                   |     6  | AgAu5            |   -0.007
+  --------------------------------------------------------------------
 
 Training of parameters
 ----------------------
@@ -157,26 +152,20 @@ input argument.
    :end-before: # step 4
 
 The training process is started by calling the :func:`Optimizer.train
-<icet.fitting.Optimizer.train>` method. Once it is finished, the
-lines below should have been printed::
-
-  ------------------Training-------------------
-  Fit Method least-squares, N_params 14
-  Train size 102, Test size 35
-  Train RMSE  0.00018
-  Test  RMSE  0.00022
-  --------------------Done---------------------
-
-Now that the solution to the optimization problem has been found, the results
+<icet.fitting.Optimizer.train>` method. Once it is finished, the results
 can be displayed by providing the :class:`Optimizer
 <icet.fitting.Optimizer>` object to the :func:`print` function, which gives
 the output shown below::
 
-  fit method             : least-squares
-  number of target values : 137
-  number of parameters   : 14
-  training set size      : 102
-  testing set size       : 35
+  ===================== Optimizer ======================
+  fit_method                : least-squares
+  number_of_target_values   : 137
+  number_of_parameters      : 14
+  rmse_training             : 0.000177534
+  rmse_test                 : 0.000216184
+  training_size             : 102
+  test_size                 : 35
+  ======================================================
 
 Comparison with target data
 ---------------------------
@@ -209,7 +198,7 @@ are plotted as functions of the concentration of silver atoms.
    :end-before: # step 4
 
 Be aware of the fact that the diagram, which is shown below is saved as an
-image file, ``mixing-energy- comparison.png``.
+image file, ``mixing-energy-comparison.png``.
 
 .. figure:: ../../../../tutorial/mixing-energy-comparison.png
 

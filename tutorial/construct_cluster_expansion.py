@@ -19,24 +19,10 @@ print(cs)
 
 # step 2: Parse the input structures and set up a structure container
 db = connect('structures.db')
-# get reference energies for the elements
-eref = {}
-for elem in subelements:
-    for row in db.select('{}=1'.format(elem), natoms=1):
-        eref[elem] = row.energy / row.natoms
-        break
-# compile the structures into a structure container and add the mixing energies
-atoms_list = []
-properties = []
+sc = StructureContainer(cs)
 for row in db.select():
-    conc = float(row.count_atoms().get('Ag', 0)) / row.natoms
-    emix = row.energy / row.natoms
-    emix -= conc * eref['Ag'] + (1.0 - conc) * eref['Au']
-    properties.append({'energy': emix})
-    atoms = row.toatoms()
-    atoms.set_positions(row.data['original_positions'])
-    atoms_list.append(atoms)
-sc = StructureContainer(cs, atoms_list, properties)
+    sc.add_structure(row.toatoms(), user_tag=str(row.structure_id),
+                     properties={'energy': row.emix})
 print(sc)
 
 # step 3: Train parameters
@@ -48,14 +34,10 @@ print(opt)
 ce = ClusterExpansion(cs, opt.parameters)
 data = []
 for row in db.select():
-    conc = float(row.count_atoms().get('Ag', 0)) / row.natoms
-    emix = row.energy / row.natoms
-    emix -= conc * eref['Ag'] + (1.0 - conc) * eref['Au']
-    atoms = row.toatoms()
-    atoms.set_positions(row.data['original_positions'])
-    emix_ce = ce.predict(atoms)
-    data.append([conc, emix, emix_ce])
+    emix_ce = ce.predict(row.toatoms())
+    data.append([row.conc, row.emix, emix_ce])
 data = np.array(data).T
+
 # plot the results
 fig, ax = plt.subplots()
 ax.set_xlabel(r'Ag concentration')

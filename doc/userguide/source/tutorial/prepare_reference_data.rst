@@ -45,7 +45,7 @@ atoms.
 Enumeration and relaxation
 --------------------------
 
-The second and final step is to generate, relax and then add the structures to
+The second step is to generate, relax and then add the structures to
 the database. This is achieved by looping over the :class:`ASE Atoms` instances
 obtained by calling the :func:`enumerate_structures
 <icet.tools.structure_enumeration.enumerate_structures>` function with the
@@ -58,6 +58,7 @@ the relaxed structure is added to the database.
 
 .. literalinclude:: ../../../../tutorial/prepare_reference_data.py
    :start-after: # step 2
+   :end-before: # step 3
 
 When running this script, the :func:`ase.optimize.BFGS.run` function prints the
 time, energy and maximum forces after each step of the structure relaxation. In
@@ -78,6 +79,21 @@ following::
         Step     Time          Energy         fmax
   BFGS:    0 17:12:42       -0.023467        0.0000
   ...
+
+Note that after relaxation the energy is stored and the positions are reset
+to the original ones. This is done in order to simplify the access to the
+original positions during construction of the cluster expansion.
+
+
+Computation of mixing energy and concentration
+----------------------------------------------
+
+Finally, for the sake of clarity and convenience when constructing the
+cluster expansion in the next step of this tutorial, the mixing energy
+and concentration are computed and added as fields to the database.
+
+.. literalinclude:: ../../../../tutorial/prepare_reference_data.py
+   :start-after: # step 3
 
 
 Source code
