@@ -152,8 +152,6 @@ class Orbit(object):
         takes self.equivalent_sites[i] to
         the same order as self.representative_sites.
 
-        Explanation
-        -------
         This can be used if you for example want to
         count elements and are interested in difference
         between ABB, BAB, BBA and so on. If you count the
@@ -179,8 +177,6 @@ class Orbit(object):
         Get the list of equivalent permutations
         for this orbit.
 
-        Explanation
-        -------
         If this orbit is a triplet
         and the permutation [0,2,1]
         exists this means that
