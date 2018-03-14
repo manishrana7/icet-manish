@@ -40,8 +40,12 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
+    'sphinx_sitemap',
     'breathe'
 ]
+
+site_url = 'https://icet.materialsmodeling.org/'
+
 napoleon_use_ivar = True
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
