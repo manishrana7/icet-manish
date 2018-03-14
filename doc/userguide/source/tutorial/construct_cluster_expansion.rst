@@ -200,7 +200,7 @@ are plotted as functions of the concentration of silver atoms.
 Be aware of the fact that the diagram, which is shown below is saved as an
 image file, ``mixing-energy-comparison.png``.
 
-.. figure:: ../../../../tutorial/mixing-energy-comparison.png
+.. figure:: _static/mixing-energy-comparison.png
 
   Predicted (crosses) and target (open circles) mixing energies versus silver
   concentration for the structures used in the construction of the cluster
@@ -233,7 +233,7 @@ structures can be calculated with the help of a :class:`ConvexHull
 The result is a file, ``mixing-energy-predicted.png``, that contains an image
 of the following diagram:
 
-.. figure:: ../../../../tutorial/mixing-energy-predicted.png
+.. figure:: _static/mixing-energy-predicted.png
 
   Predicted mixing energies versus silver concentration for a set of
   systematically enumerated structures.
