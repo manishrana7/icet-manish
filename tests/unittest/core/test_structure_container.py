@@ -176,7 +176,7 @@ class TestStructureContainer(unittest.TestCase):
         '''
         retval = self.sc.__repr__()
         target = '''
------------------------------ Structure Container -----------------------------
+============================= Structure Container =============================
 Total number of structures: 4
 -------------------------------------------------------------------------------
 index |       user_tag        | natoms | chemical formula |  energy  |  volume
@@ -185,7 +185,7 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
    1  | None                  |     8  | Ag7Au            |   -0.007 |  136.836
    2  | None                  |     8  | Ag6Au2           |   -0.026 |  136.836
    3  | None                  |     8  | Ag5Au3           |   -0.038 |  136.836
--------------------------------------------------------------------------------
+===============================================================================
 '''
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
@@ -197,7 +197,7 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
         retval = self.sc._get_string_representation(print_threshold=2,
                                                     print_minimum=1)
         target = '''
------------------------------ Structure Container -----------------------------
+============================= Structure Container =============================
 Total number of structures: 4
 -------------------------------------------------------------------------------
 index |       user_tag        | natoms | chemical formula |  energy  |  volume
@@ -205,7 +205,7 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
    0  | None                  |     8  | Ag8              |    0.013 |  136.836
  ...
    3  | None                  |     8  | Ag5Au3           |   -0.038 |  136.836
--------------------------------------------------------------------------------
+===============================================================================
 '''
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))

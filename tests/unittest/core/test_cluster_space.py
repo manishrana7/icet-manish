@@ -196,7 +196,7 @@ class TestClusterSpace(unittest.TestCase):
         '''
         retval = self.cs.__repr__()
         target = '''
- -------------------------- Cluster Space ---------------------------
+========================== Cluster Space ===========================
  subelements: Ag Au
  cutoffs: 4.0000 4.0000 4.0000
  total number of orbits: 5
@@ -209,7 +209,7 @@ index | order |   size   | multiplicity | orbit index |  MC vector
    2  |   2   |   1.4460 |        6     |       1     |  [0, 0]
    3  |   3   |   1.6697 |        8     |       2     | [0, 0, 0]
    4  |   4   |   1.7710 |        2     |       3     | [0, 0, 0, 0]
---------------------------------------------------------------------'''
+===================================================================='''
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
 
@@ -220,7 +220,7 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         retval = self.cs._get_string_representation(print_threshold=2,
                                                     print_minimum=1)
         target = '''
--------------------------- Cluster Space ---------------------------
+========================== Cluster Space ===========================
  subelements: Ag Au
  cutoffs: 4.0000 4.0000 4.0000
  total number of orbits: 5
@@ -231,7 +231,7 @@ index | order |   size   | multiplicity | orbit index |  MC vector
    0  |   0   |   0.0000 |        1     |      -1
  ...
    4  |   4   |   1.7710 |        2     |       3     | [0, 0, 0, 0]
---------------------------------------------------------------------
+====================================================================
 '''
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
