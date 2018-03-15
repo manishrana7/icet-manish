@@ -22,10 +22,10 @@ Specifically, :func:`ase.build.bulk` and :func:`ase.db.connect` are required to
 build a primitive structure and import relaxed configurations from the database
 that was generated :ref:`previously <tutorial_prepare_reference_data>`. The
 :program:`icet` classes
-:class:`ClusterSpace <icet.core.cluster_space.ClusterSpace>`,
-:class:`StructureContainer <icet.core.structure_container.StructureContainer>`,
-:class:`Optimizer <icet.fitting.Optimizer>` and
-:class:`ClusterExpansion <icet.core.cluster_expansion.ClusterExpansion>`
+:class:`ClusterSpace <icet.ClusterSpace>`,
+:class:`StructureContainer <icet.StructureContainer>`,
+:class:`Optimizer <icet.Optimizer>` and
+:class:`ClusterExpansion <icet.ClusterExpansion>`
 are used, in sequence, during preparation, compilation and training of the
 cluster expansion followed by the extraction of information in the form of
 predicted energies from the latter. In the final step, the function
@@ -43,7 +43,7 @@ Preparation of cluster space
 ----------------------------
 
 In order to be able to build a cluster expansion, it is first necessary to
-create a :class:`ClusterSpace <icet.core.cluster_space.ClusterSpace>` object
+create a :class:`ClusterSpace <icet.ClusterSpace>` object
 based on a prototype structure, here in the form of a bulk gold unit cell. When
 initiating the former, one must also provide cutoffs and a list of elements
 that should be considered, in this case gold and silver. Here, the cutoffs are
@@ -85,11 +85,11 @@ output should be the following::
 Compilation of structure container
 ----------------------------------
 
-Once a :class:`ClusterSpace <icet.core.cluster_space.ClusterSpace>` has been
+Once a :class:`ClusterSpace <icet.ClusterSpace>` has been
 prepared, the next step is to compile a :class:`StructureContainer
-<icet.core.structure_container.StructureContainer>`. To this end, we first
+<icet.StructureContainer>`. To this end, we first
 initialize an empty :class:`StructureContainer
-<icet.core.structure_container.StructureContainer>` and then add the
+<icet.StructureContainer>` and then add the
 tructures from the database prepared previously including for each structure
 the mixing energy in the property dictionary.
 
@@ -98,7 +98,7 @@ the mixing energy in the property dictionary.
    :end-before: # step 3
 
 By calling the :func:`print` function with the :class:`StructureContainer
-<icet.core.structure_container.StructureContainer>` as input argument, one
+<icet.StructureContainer>` as input argument, one
 obtains the following result::
 
   ======================= Structure Container ========================
@@ -132,30 +132,29 @@ obtains the following result::
 Training of parameters
 ----------------------
 
-Since the :class:`StructureContainer
-<icet.core.structure_container.StructureContainer>` object created in the
-previous section, contains all the information required for constructing a
-cluster expansion, the next step is to train the parameters, i.e. to fit the
-*effective cluster interactions* (ECIs) using the target data. More precisely,
-the goal is to achieve the best possible agreement with set of training
-structures, which represent a subset of all the structures in the
-:class:`StructureContainer
-<icet.core.structure_container.StructureContainer>`. In practice, this is a
-two step process that involves the initiation of an :class:`Optimizer
-<icet.fitting.Optimizer>` object with the a list of target properties
+Since the :class:`StructureContainer <icet.StructureContainer>` object
+created in the previous section, contains all the information required
+for constructing a cluster expansion, the next step is to train the
+parameters, i.e. to fit the *effective cluster interactions* (ECIs)
+using the target data. More precisely, the goal is to achieve the best
+possible agreement with set of training structures, which represent a
+subset of all the structures in the :class:`StructureContainer
+<icet.StructureContainer>`. In practice, this is a two step process
+that involves the initiation of an :class:`Optimizer
+<icet.Optimizer>` object with the a list of target properties
 produced by the :func:`StructureContainer.get_fit_data
-<icet.core.structure_container.StructureContainer.get_fit_data>` method as
-input argument.
+<icet.StructureContainer.get_fit_data>`
+method as input argument.
 
 .. literalinclude:: ../../../../tutorial/construct_cluster_expansion.py
    :start-after: # step 3
    :end-before: # step 4
 
 The training process is started by calling the :func:`Optimizer.train
-<icet.fitting.Optimizer.train>` method. Once it is finished, the results
-can be displayed by providing the :class:`Optimizer
-<icet.fitting.Optimizer>` object to the :func:`print` function, which gives
-the output shown below::
+<icet.Optimizer.train>` method. Once it is finished, the results can
+be displayed by providing the :class:`Optimizer <icet.Optimizer>`
+object to the :func:`print` function, which gives the output shown
+below::
 
   ===================== Optimizer ======================
   fit_method                : least-squares
@@ -174,10 +173,10 @@ At this point, the task of constructing the cluster expansion is almost
 complete. In fact, the only step that remains is to tie the parameter values
 obtained from the optimization to the cluster space. This is achieved through
 the initiation of a :class:`ClusterExpansion
-<icet.core.cluster_expansion.ClusterExpansion>` object with the previously
-created :class:`ClusterSpace <icet.core.cluster_space.ClusterSpace>`
+<icet.ClusterExpansion>` object with the previously
+created :class:`ClusterSpace <icet.ClusterSpace>`
 instance together with the list of parameters, available via the
-:class:`Optimizer.parameters <icet.fitting.Optimizer.parameters>` attribute,
+:class:`Optimizer.parameters <icet.Optimizer.parameters>` attribute,
 as input arguments. Using this cluster expansion, it is now possible to predict
 the properties of any configuration that is based on a supercell of the
 primitive structure. A convenient and illustrative ways of checking the
@@ -188,7 +187,7 @@ over all rows in the ``structures.db`` database and by compiling the silver
 concentration as well as the target and predicted mixing energies into a list.
 Note that the latter of the three values is calculated by calling the
 :func:`ClusterExpansion.predict
-<icet.core.cluster_expansion.ClusterExpansion.predict>` method with the
+<icet.ClusterExpansion.predict>` method with the
 :class:`ASE Atoms` object that represents the present structure as input
 argument. Once the list is complete the predicted and target mixing energies
 are plotted as functions of the concentration of silver atoms.
