@@ -58,7 +58,7 @@ information in a tabular format by simply calling the :func:`print` function
 with the instance of interest as input argument. For the case at hand, the
 output should be the following::
 
-  -------------------------- Cluster Space ---------------------------
+  ========================== Cluster Space ===========================
    subelements: Ag Au
    cutoffs: 6.0000 5.0000 4.0000
    total number of orbits: 14
@@ -80,7 +80,7 @@ output should be the following::
     11  |   3   |   2.7099 |       24     |      10     | [0, 0, 0]
     12  |   3   |   2.8850 |        8     |      11     | [0, 0, 0]
     13  |   4   |   1.7667 |        2     |      12     | [0, 0, 0, 0]
-  --------------------------------------------------------------------
+  ====================================================================
 
 Compilation of structure container
 ----------------------------------
@@ -101,7 +101,7 @@ By calling the :func:`print` function with the :class:`StructureContainer
 <icet.core.structure_container.StructureContainer>` as input argument, one
 obtains the following result::
 
-  ----------------------- Structure Container ------------------------
+  ======================= Structure Container ========================
   Total number of structures: 137
   --------------------------------------------------------------------
   index |       user_tag        | natoms | chemical formula |  energy
@@ -127,7 +127,7 @@ obtains the following result::
    134  | 134                   |     6  | Ag2Au4           |   -0.011
    135  | 135                   |     6  | Ag2Au4           |   -0.011
    136  | 136                   |     6  | AgAu5            |   -0.007
-  --------------------------------------------------------------------
+  ====================================================================
 
 Training of parameters
 ----------------------

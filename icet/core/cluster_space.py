@@ -156,9 +156,9 @@ class ClusterSpace(_ClusterSpace):
         # basic information
         # (use largest orbit to obtain maximum line length)
         prototype_orbit = self.get_orbit_list_info()[-1]
-        n = len(repr_orbit(prototype_orbit))
+        width = len(repr_orbit(prototype_orbit))
         s = []
-        s += ['{s:-^{n}}'.format(s=' Cluster Space ', n=n)]
+        s += ['{s:=^{n}}'.format(s=' Cluster Space ', n=width)]
         s += [' subelements: {}'.format(' '.join(self.get_atomic_numbers()))]
         s += [' cutoffs: {}'.format(' '.join(['{:.4f}'.format(co)
                                               for co in self._cutoffs]))]
@@ -168,10 +168,9 @@ class ClusterSpace(_ClusterSpace):
         s += [' number of orbits by order: {}'.format('  '.join(t))]
 
         # table header
-        horizontal_line = '{s:-^{n}}'.format(s='', n=n)
-        s += [horizontal_line]
+        s += [''.center(width, '-')]
         s += [repr_orbit(prototype_orbit, header=True)]
-        s += [horizontal_line]
+        s += [''.center(width, '-')]
 
         # table body
         index = 0
@@ -185,7 +184,7 @@ class ClusterSpace(_ClusterSpace):
                 s += [' ...']
             s += [repr_orbit(orbit_list_info[index]).rstrip()]
             index += 1
-        s += [horizontal_line]
+        s += [''.center(width, '=')]
 
         return '\n'.join(s)
 
@@ -301,7 +300,7 @@ class ClusterSpace(_ClusterSpace):
             atoms = structure.to_atoms()
             try:
                 atoms = get_primitive_structure(atoms)
-            except Exception as e:
+            except Exception:
                 raise "Failed getting primitive "
                 "structure in get_primitive_structure"
             structure = Structure.from_atoms(atoms)

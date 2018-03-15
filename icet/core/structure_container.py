@@ -132,16 +132,15 @@ class StructureContainer(object):
         # basic information
         # (use last structure in list to obtain maximum line length)
         dummy = self._structure_list[-1]
-        n = len(repr_structure(dummy))
-        horizontal_line = '{s:-^{n}}'.format(s='', n=n)
+        width = len(repr_structure(dummy))
 
         # table header
         s = []
-        s += ['{s:-^{n}}'.format(s=' Structure Container ', n=n)]
+        s += ['{s:=^{n}}'.format(s=' Structure Container ', n=width)]
         s += ['Total number of structures: {}'.format(len(self))]
-        s += [horizontal_line]
+        s += [''.center(width, '-')]
         s += [repr_structure(dummy, header=True).rstrip()]
-        s += [horizontal_line]
+        s += [''.center(width, '-')]
 
         # table body
         index = 0
@@ -154,7 +153,7 @@ class StructureContainer(object):
                 s += [' ...']
             s += [repr_structure(self._structure_list[index], index=index)]
             index += 1
-        s += [horizontal_line]
+        s += [''.center(width, '=')]
 
         return '\n'.join(s)
 
