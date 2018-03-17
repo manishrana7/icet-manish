@@ -25,7 +25,7 @@ class EnsembleOptimizer(BaseOptimizer):
         parameters
     fit_method : string
         method to be used for training; possible choice are
-        "least-squares", "lasso", "bayesian-ridge", "ardr"
+        "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
     ensemble_size : int
         number of fits in the ensemble
     training_size : float or int
@@ -39,7 +39,7 @@ class EnsembleOptimizer(BaseOptimizer):
     '''
 
     def __init__(self, fit_data, fit_method='least-squares', ensemble_size=50,
-                 training_size=0.75, bootstrap=True, seed=42, **kwargs):
+                 training_size=1.0, bootstrap=True, seed=42, **kwargs):
 
         BaseOptimizer.__init__(self, fit_data, fit_method, seed)
 

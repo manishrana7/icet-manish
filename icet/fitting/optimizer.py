@@ -25,7 +25,7 @@ class Optimizer(BaseOptimizer):
         parameters
     fit_method : string
         method to be used for training; possible choice are
-        "least-squares", "lasso", "bayesian-ridge", "ardr"
+        "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
     training_size : float or int
         If float represents the fraction of `fit_data` (rows) to be used for
         training. If int, represents the absolute number of rows to be used for
