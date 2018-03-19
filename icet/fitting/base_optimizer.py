@@ -7,6 +7,7 @@ from collections import OrderedDict
 from .tools import compute_rmse
 from .fit_methods import (fit_least_squares,
                           fit_lasso,
+                          fit_elasticnet,
                           fit_bayesian_ridge,
                           fit_ardr)
 
@@ -14,6 +15,7 @@ from .fit_methods import (fit_least_squares,
 fit_methods = OrderedDict([
     ('least-squares', fit_least_squares),
     ('lasso', fit_lasso),
+    ('elasticnet', fit_elasticnet),
     ('bayesian-ridge', fit_bayesian_ridge),
     ('ardr', fit_ardr),
     ])
@@ -35,7 +37,7 @@ class BaseOptimizer:
         parameters
     fit_method : string
         method to be used for training; possible choice are
-        "least-squares", "lasso", "bayesian-ridge", "ardr"
+        "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
     seed : int
         seed for pseudo random number generator
     '''

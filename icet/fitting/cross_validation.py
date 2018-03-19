@@ -31,8 +31,8 @@ class CrossValidationEstimator(BaseOptimizer):
         of target values and `M` (=columns of `A`) equals the number of
         parameters
     fit_method : string
-        method to be used for training; possible choices are
-        "least-squares", "lasso", "bayesian-ridge", "ardr"
+        method to be used for training; possible choice are
+        "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
     validation_method : string
         method to use for cross-validation; possible choices are
         "shuffle-split", "k-fold"
