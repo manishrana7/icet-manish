@@ -107,6 +107,12 @@ class TestEnsemble(unittest.TestCase):
         """
         pass
 
+    def test_property_data_container(self):
+        """
+        Test the data container property.
+        """
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()

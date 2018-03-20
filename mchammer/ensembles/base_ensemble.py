@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from mchammer.calculator import Calculator
+from mchammer.data_container import DataContainer
 
 
 class BaseEnsemble(ABC):
@@ -17,17 +17,23 @@ class BaseEnsemble(ABC):
     """
 
     def __init__(self, atoms, cluster_expansion, name='BaseEnsemble',
-                 random_seed=42):
+                 data_container=None, random_seed=42):
 
         self._cluster_expansion = cluster_expansion
-        self._calculator = Calculator(atoms, self.cluster_expansion)
+        # self._calculator = Calculator(atoms, self.cluster_expansion)
         self._atoms = atoms
         self._name = name
+
         self.accepted_trials = 0
         self.total_trials = 0
         self._random_seed = random_seed
         self._boltzmann_constant = 8.6173303e-5
         self._observers = {}
+
+        if data_container is None:
+            self._data_container = DataContainer()
+        else:
+            pass
 
     @property
     def structure(self):
@@ -36,6 +42,13 @@ class BaseEnsemble(ABC):
         The current state of the  structure being sampled in the ensemble.
         """
         return self._atoms
+
+    @property
+    def data_container(self):
+        """
+        mchammer DataContainer.
+        """
+        return self._data_container
 
     @property
     def observers(self):
@@ -59,12 +72,12 @@ class BaseEnsemble(ABC):
         """
         return self._cluster_expansion
 
-    @property
-    def calculator(self):
-        """
-        mchammer Calculator.
-        """
-        return self._calculator
+    # @property
+    # def calculator(self):
+    #     """
+    #     mchammer Calculator.
+    #     """
+    #     return self._calculator
 
     def run(self, trial_moves, observation_interval=None):
         """
@@ -127,6 +140,7 @@ class BaseEnsemble(ABC):
         ----------
         observer : mchammer Observer object
         """
+
         if tag is not None:
             self.observers[tag] = observer
         else:
