@@ -29,15 +29,16 @@ class TestEnsemble(unittest.TestCase):
         # Create a concreate child of Ensemble for testing
         class ConcreteEnsemble(BaseEnsemble):
 
-            def __init__(self, atoms, cluster_expansion, name):
-                super().__init__(atoms, cluster_expansion, name)
+            def __init__(self, atoms, calculator, name=None):
+                super().__init__(atoms, calculator, name=name)
 
             def do_trial_move(self):
                 pass
 
             def _run(self):
                 pass
-        self.ensemble = ConcreteEnsemble(self.atoms, self.ce, 'test-ensemble')
+        self.ensemble = ConcreteEnsemble(
+            self.atoms, calculator=None, name='test-ensemble')
 
     def test_property_name(self):
         """
@@ -77,11 +78,11 @@ class TestEnsemble(unittest.TestCase):
         """
         self.assertEqual(self.ensemble.kB, 8.6173303e-5)
 
-    def test_property_cluster_expansion(self):
+    def test_property_calculator(self):
         """
-        Test the cluster expansion property.
+        Test the calculator property.
         """
-        self.assertEqual(self.ensemble.cluster_expansion, self.ce)
+        pass
 
     def test_run(self):
         """

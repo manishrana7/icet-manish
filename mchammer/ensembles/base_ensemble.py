@@ -16,11 +16,10 @@ class BaseEnsemble(ABC):
         Numer of total trial steps.
     """
 
-    def __init__(self, atoms, cluster_expansion, name='BaseEnsemble',
+    def __init__(self, atoms, calculator, name='BaseEnsemble',
                  data_container=None, random_seed=42):
 
-        self._cluster_expansion = cluster_expansion
-        # self._calculator = Calculator(atoms, self.cluster_expansion)
+        self._calculator = calculator
         self._atoms = atoms
         self._name = name
 
@@ -66,18 +65,11 @@ class BaseEnsemble(ABC):
         return self.accepted_trials / self.total_trials
 
     @property
-    def cluster_expansion(self):
+    def calculator(self):
         """
-        icet ClusterExpansion.
+        mchammer Calculator.
         """
-        return self._cluster_expansion
-
-    # @property
-    # def calculator(self):
-    #     """
-    #     mchammer Calculator.
-    #     """
-    #     return self._calculator
+        return self._calculator
 
     def run(self, trial_moves, observation_interval=None):
         """
