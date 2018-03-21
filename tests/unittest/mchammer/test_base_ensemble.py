@@ -72,7 +72,7 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble.total_trials += 1
         self.assertEqual(self.ensemble.total_trials, 1)
 
-    def test_test_boltzmann_constant(self):
+    def test_property_boltzmann_constant(self):
         """
         Test boltzmann constant.
         """
