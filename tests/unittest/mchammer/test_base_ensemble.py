@@ -29,8 +29,8 @@ class TestEnsemble(unittest.TestCase):
         # Create a concreate child of Ensemble for testing
         class ConcreteEnsemble(BaseEnsemble):
 
-            def __init__(self, atoms, calculator, name=None):
-                super().__init__(atoms, calculator, name=name)
+            def __init__(self, atoms, calculator, name=None, random_seed=None):
+                super().__init__(atoms, calculator, name=name, random_seed=random_seed)
 
             def do_trial_move(self):
                 pass
@@ -38,7 +38,7 @@ class TestEnsemble(unittest.TestCase):
             def _run(self):
                 pass
         self.ensemble = ConcreteEnsemble(
-            self.atoms, calculator=None, name='test-ensemble')
+            self.atoms, calculator=None, name='test-ensemble', random_seed=42)
 
     def test_property_name(self):
         """
@@ -83,6 +83,13 @@ class TestEnsemble(unittest.TestCase):
         Test the calculator property.
         """
         pass
+
+    def test_get_next_random_number(self):
+        """
+        Test the get_next_random_number method.
+        """
+        self.assertAlmostEqual(
+            self.ensemble.next_random_number(), 0.6394267984578837)
 
     def test_run(self):
         """

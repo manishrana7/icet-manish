@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from mchammer.data_container import DataContainer
+import random
 
 
 class BaseEnsemble(ABC):
@@ -17,7 +18,7 @@ class BaseEnsemble(ABC):
     """
 
     def __init__(self, atoms, calculator, name='BaseEnsemble',
-                 data_container=None, random_seed=42):
+                 data_container=None, random_seed=None):
 
         self._calculator = calculator
         self._atoms = atoms
@@ -25,14 +26,18 @@ class BaseEnsemble(ABC):
 
         self.accepted_trials = 0
         self.total_trials = 0
-        self._random_seed = random_seed
         self._boltzmann_constant = 8.6173303e-5
         self._observers = {}
 
+        if random_seed is None:
+            self._random_seed = random.randint(0, 1e16)
+        else:
+            self._random_seed = random_seed
+        random.seed(a=self.random_seed)
         if data_container is None:
             self._data_container = DataContainer()
         else:
-            pass
+            raise NotImplementedError
 
     @property
     def structure(self):
@@ -105,7 +110,7 @@ class BaseEnsemble(ABC):
         """
         Return the next random number from the RNG.
         """
-        pass
+        return random.random()
 
     @property
     def kB(self):
