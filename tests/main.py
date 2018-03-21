@@ -64,6 +64,7 @@ if __name__ == "__main__":
     # Collect tests
     suite = unittest.TestLoader().discover(unittest_dir, pattern="*.py")
     find_script_tests(suite, integration_dir)
+    find_script_tests(suite, mchammer_dir)
 
     # Run tests
     ttr = unittest.TextTestRunner(stream=sys.stdout, verbosity=2)
