@@ -76,7 +76,7 @@ class TestEnsemble(unittest.TestCase):
         """
         Test boltzmann constant.
         """
-        self.assertEqual(self.ensemble.kB, 8.6173303e-5)
+        self.assertEqual(self.ensemble.boltzmann_constant, 8.6173303e-5)
 
     def test_property_calculator(self):
         """

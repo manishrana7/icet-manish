@@ -113,7 +113,7 @@ class BaseEnsemble(ABC):
         return random.random()
 
     @property
-    def kB(self):
+    def boltzmann_constant(self):
         """
         Boltzmann constant in eV / K.
         """
