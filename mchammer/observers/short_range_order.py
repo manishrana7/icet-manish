@@ -1,6 +1,8 @@
-'''
+"""
 Definition of the short-range order observer class.
-'''
+"""
+from mchammer.observers.base_observer import BaseObserver
+
 
 class ShortRangeOrder(BaseObserver):
 

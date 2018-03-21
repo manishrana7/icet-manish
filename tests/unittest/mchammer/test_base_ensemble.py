@@ -30,7 +30,8 @@ class TestEnsemble(unittest.TestCase):
         class ConcreteEnsemble(BaseEnsemble):
 
             def __init__(self, atoms, calculator, name=None, random_seed=None):
-                super().__init__(atoms, calculator, name=name, random_seed=random_seed)
+                super().__init__(atoms, calculator, name=name,
+                                 random_seed=random_seed)
 
             def do_trial_move(self):
                 pass
@@ -120,6 +121,31 @@ class TestEnsemble(unittest.TestCase):
         Test the data container property.
         """
         pass
+
+    def test_find_minimum_observation_interval(self):
+        """
+        Test the method to find the minimum observation interval.
+        """
+        pass
+
+    def test_property_minimum_observation_interval(self):
+        """
+        Test property minimum observation interval.
+        """
+        pass
+
+    def test_get_gcd(self):
+        """
+        Test the get gcd method.
+        """
+
+        input = [2, 4, 6, 8]
+        target = 2
+        self.assertEqual(self.ensemble._get_gcd(input), target)
+
+        input = [20, 15, 10]
+        target = 5
+        self.assertEqual(self.ensemble._get_gcd(input), target)
 
 
 if __name__ == '__main__':

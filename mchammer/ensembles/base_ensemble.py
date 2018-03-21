@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from mchammer.data_container import DataContainer
 import random
+from math import gcd
 
 
 class BaseEnsemble(ABC):
@@ -34,6 +35,7 @@ class BaseEnsemble(ABC):
         else:
             self._random_seed = random_seed
         random.seed(a=self.random_seed)
+
         if data_container is None:
             self._data_container = DataContainer()
         else:
@@ -113,6 +115,14 @@ class BaseEnsemble(ABC):
         return random.random()
 
     @property
+    def minimum_observation_interval(self):
+        """
+        int : minimum number of steps to run
+        Monte Carlo simulation without observation interruptions.
+        """
+        return self._minimum_observation_interval
+
+    @property
     def boltzmann_constant(self):
         """
         Boltzmann constant in eV / K.
@@ -129,6 +139,30 @@ class BaseEnsemble(ABC):
         """
         pass
 
+    def _find_minimum_observation_interval(self):
+        """
+        Find the greatest common denominator from the observation intervals.
+        """
+
+        intervals = [obs.interval for obs in self.observers]
+        self._minimum_observation_interval = self._get_gcd(intervals)
+
+    def _get_gcd(self, interval_list):
+        """
+        Find the gcd from the list of intervals.
+
+        interval_list : list of int
+        """
+
+        if len(interval_list) > 2:
+            gcd_right = gcd(interval_list[-1], interval_list[-2])
+            interval_list.pop()
+            interval_list.pop()
+            interval_list.append(gcd_right)
+            return self._get_gcd(interval_list)
+        else:
+            return gcd(interval_list[0], interval_list[1])
+
     def attach_observer(self, observer, tag=None):
         """
         Attaches an observer to the ensemble.
@@ -142,3 +176,5 @@ class BaseEnsemble(ABC):
             self.observers[tag] = observer
         else:
             self.observers[observer.tag] = observer
+
+        self._find_minimum_observation_interval()
