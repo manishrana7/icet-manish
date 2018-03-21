@@ -59,6 +59,7 @@ if __name__ == "__main__":
     main_dir = os.path.dirname(__file__)
     unittest_dir = os.path.join(main_dir, 'unittest')
     integration_dir = os.path.join(main_dir, 'integration')
+    mchammer_dir = os.path.join(main_dir, 'mchammer')
 
     # Collect tests
     suite = unittest.TestLoader().discover(unittest_dir, pattern="*.py")
