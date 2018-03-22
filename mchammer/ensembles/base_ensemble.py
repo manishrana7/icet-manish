@@ -26,7 +26,7 @@ class BaseEnsemble(ABC):
         self._name = name
 
         self.accepted_trials = 0
-        self.total_trials = 0        
+        self.total_trials = 0
         self._observers = {}
 
         if random_seed is None:
