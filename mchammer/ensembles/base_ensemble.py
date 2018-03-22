@@ -26,8 +26,7 @@ class BaseEnsemble(ABC):
         self._name = name
 
         self.accepted_trials = 0
-        self.total_trials = 0
-        self._boltzmann_constant = 8.6173303e-5
+        self.total_trials = 0        
         self._observers = {}
 
         if random_seed is None:
@@ -121,13 +120,6 @@ class BaseEnsemble(ABC):
         Monte Carlo simulation without observation interruptions.
         """
         return self._minimum_observation_interval
-
-    @property
-    def boltzmann_constant(self):
-        """
-        Boltzmann constant in eV / K.
-        """
-        return self._boltzmann_constant
 
     @abstractmethod
     def _run(self, trial_moves):

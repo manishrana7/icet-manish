@@ -73,12 +73,6 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble.total_trials += 1
         self.assertEqual(self.ensemble.total_trials, 1)
 
-    def test_property_boltzmann_constant(self):
-        """
-        Test boltzmann constant.
-        """
-        self.assertEqual(self.ensemble.boltzmann_constant, 8.6173303e-5)
-
     def test_property_calculator(self):
         """
         Test the calculator property.
