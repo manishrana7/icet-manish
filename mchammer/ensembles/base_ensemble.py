@@ -58,14 +58,14 @@ class BaseEnsemble(ABC):
     @property
     def observers(self):
         """
-        dict of mchammer Observer's.
+        dict of mchammer observers.
         """
         return self._observers
 
     @property
     def acceptance_ratio(self):
         """
-        Returns the acceptance ratio,
+        float : the acceptance ratio,
         i.e. accepted_trials / total_trials.
         """
         return self.accepted_trials / self.total_trials
@@ -77,14 +77,14 @@ class BaseEnsemble(ABC):
         """
         return self._calculator
 
-    def run(self, trial_moves, observation_interval=None):
+    def run(self, trial_steps, observation_interval=None):
         """
-        Sample the ensemble `trial_moves` steps.
+        Sample the ensemble for `trial_steps` steps.
 
         Parameters:
         -----------
 
-        trial_moves: int
+        trial_steps: int
             number of steps to run in total
         """
         pass
@@ -124,10 +124,11 @@ class BaseEnsemble(ABC):
     @abstractmethod
     def _run(self, trial_moves):
         """
-        Internal running of the MC without interruption.
+        Private method for running the MCMC simulation
+        without interruption.
 
         trial_moves : int
-           Number of trial moves to run without stopping.
+           number of trial_moves to run without stopping.
         """
         pass
 
