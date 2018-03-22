@@ -11,11 +11,11 @@ class BaseEnsemble(ABC):
     Attributes
     ----------
     name : str
-        Name of the ensemble.
+        name of the ensemble.
     accepted_trials : int
-        Number of accepted trial steps.
+        number of accepted trial steps.
     total_trials : int
-        Numer of total trial steps.
+        number of total trial steps.
     """
 
     def __init__(self, atoms, calculator, name='BaseEnsemble',
