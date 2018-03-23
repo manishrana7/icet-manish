@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from mchammer.data_container import DataContainer
+from mchammer.observers.base_observer import BaseObserver
 import random
 from math import gcd
 
@@ -164,6 +165,7 @@ class BaseEnsemble(ABC):
         ----------
         observer : mchammer Observer object
         """
+        assert isinstance(observer, BaseObserver)
 
         if tag is not None:
             self.observers[tag] = observer
