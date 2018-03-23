@@ -31,4 +31,6 @@ RUN pip3 install ase \
                  pandas \
                  sphinx-rtd-theme \
                  sphinxcontrib-bibtex \
-                 sphinx_sitemap
+                 sphinx_sitemap \
+                 breathe \
+                 cloud_sptheme
