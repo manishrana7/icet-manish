@@ -77,14 +77,14 @@ class BaseEnsemble(ABC):
         """
         return self._calculator
 
-    def run(self, trial_steps, observation_interval=None):
+    def run(self, number_of_MC_steps):
         """
-        Sample the ensemble for `trial_steps` steps.
+        Sample the ensemble for `number_of_MC_steps` steps.
 
         Parameters:
         -----------
 
-        trial_steps: int
+        number_of_MC_steps: int
             number of steps to run in total
         """
         pass
