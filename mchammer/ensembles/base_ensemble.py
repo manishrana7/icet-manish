@@ -122,12 +122,12 @@ class BaseEnsemble(ABC):
         return self._minimum_observation_interval
 
     @abstractmethod
-    def _run(self, n_trial_moves):
+    def _run(self, number_of_trial_moves):
         """
         Private method for running the MCMC simulation
         without interruption.
 
-        n_trial_moves : int
+        number_of_trial_moves : int
            number of trial moves to run without stopping.
         """
         pass
