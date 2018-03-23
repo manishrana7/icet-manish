@@ -28,6 +28,7 @@ RUN pip3 install ase \
                  flake8 \
                  spglib \
                  scikit-learn \
+                 pandas \
                  sphinx-rtd-theme \
                  sphinxcontrib-bibtex \
                  sphinx_sitemap
