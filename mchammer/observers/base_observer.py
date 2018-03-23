@@ -3,6 +3,12 @@ Definition of the base observer class.
 '''
 
 class BaseObserver:
+    """
+    Base Observer class.
 
-    def __init__(self):
-        pass
+    Attributes
+    ----------
+    
+    """
+    def __init__(self, tag='BaseObserver'):
+        self.tag = tag
