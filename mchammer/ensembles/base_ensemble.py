@@ -165,7 +165,8 @@ class BaseEnsemble(ABC):
         ----------
         observer : mchammer Observer object
         """
-        assert isinstance(observer, BaseObserver)
+        assert isinstance(observer, BaseObserver), \
+            'observer argument invalid; must be child of BaseObserver'
 
         if tag is not None:
             self.observers[tag] = observer
