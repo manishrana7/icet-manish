@@ -1,6 +1,5 @@
-"""
-Definition of the semi-grand canonical ensemble class.
-"""
+"""Definition of the semi-grand canonical ensemble class."""
+
 from mchammer.ensembles.base_ensemble import BaseEnsemble
 
 
