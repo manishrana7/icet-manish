@@ -1,0 +1,83 @@
+# dot -Tsvg workflow.dot -o workflow.svg
+
+digraph g {
+
+  graph [ fontname = "helvetica",
+          fontsize = 12.0,
+          rankdir = "TB",
+          bgcolor = "transparent" ];
+
+  edge [ fontname = "helvetica",
+         fontsize = 12.0,
+         penwidth = 1.5 ]
+
+  node [ fontname = "helvetica",
+         fontsize = 12.0,
+         fontcolor=white,
+         shape="ellipse",
+         color=cornflowerblue,
+         style=filled];
+
+  Prototype [ color=darkgoldenrod2,
+              label="prototype structure",
+              shape=box];
+  Cutoffs [ color=darkgoldenrod2,
+            label="cutoff radii for\neach order",
+            shape=box];
+  Elements [ color=darkgoldenrod2,
+            label="active species",
+            shape=box];
+  Structures [ color=darkgoldenrod2,
+               label="input structures\nwith reference data",
+	       shape=box];
+
+  ClusterSpace [ href="./moduleref/cluster_space.html#icet.ClusterSpace",
+                 target="_top" ];
+
+  StructureContainer [ href="./moduleref/structure_container.html#icet.StructureContainer",
+                       target="_top" ];
+  Optimizer [ label="Optimizer",
+              href="./moduleref/optimizers.html",
+              target="_top"];
+  ClusterExpansion [ href="./moduleref/cluster_expansion.html#icet.ClusterExpansion",
+                           target="_top" ];
+  ClusterExpansionCalculator [ href="./moduleref/calculators.html#mchammer.calculators.ClusterExpansionCalculator",
+                   target="_top" ];
+
+  Supercell [ color=darkgoldenrod2,
+              label="supercell structure",
+              shape=box];
+
+  structures [ color=darkgoldenrod2,
+               label="arbitrary structures",
+               shape=box];
+
+  predict [ shape=rectangle,
+            color=darkgreen,
+            label="Predict property",
+            fontcolor=white];
+
+  MC [ shape=rectangle,
+       color=darkgreen,
+       label="Monte Carlo simulations\nvia mchammer",
+       fontcolor=white];
+
+  Prototype -> ClusterSpace;
+  Elements -> ClusterSpace;
+  Cutoffs -> ClusterSpace;
+
+  ClusterSpace -> StructureContainer;
+  Structures -> StructureContainer;
+
+  StructureContainer -> Optimizer [label="fit matrix and\nvector of target values"];
+
+  ClusterSpace -> ClusterExpansion;
+  Optimizer -> ClusterExpansion [label=parameters];
+
+  structures -> predict;
+  ClusterExpansion -> predict;
+
+  Supercell -> ClusterExpansionCalculator;
+  ClusterExpansion -> ClusterExpansionCalculator;
+  ClusterExpansionCalculator -> MC;
+}

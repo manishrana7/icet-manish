@@ -1,4 +1,4 @@
-.. _tutorial:
+.. _tutorial_basics:
 .. index:: Tutorial
 
 Tutorial

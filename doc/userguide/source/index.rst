@@ -33,6 +33,7 @@ team can also be reached by email via icet@materialsmodeling.org.
 
    overview
    background
+   workflow
    installation
    tutorial/index
    examples/index

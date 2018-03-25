@@ -12,6 +12,6 @@ User interface
 
    cluster_space
    structure_container
-   optimizer
+   optimizers
    cluster_expansion
    tools
