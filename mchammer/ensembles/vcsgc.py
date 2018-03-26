@@ -1,8 +1,10 @@
-'''
-Definition of the variance constrained semi-grand canonical ensemble class.
-'''
+"""Definition of the variance constrained semi-grand canonical
+ensemble class."""
 
-class VSCG(BaseEnsemble):
+from mchammer.ensembles.base_ensemble import BaseEnsemble
+
+
+class VCSGC(BaseEnsemble):
 
     def __init__(self):
         pass

@@ -11,6 +11,7 @@ omit =
 
 include = 
     icet/*
+    mchammer/*
 
 [report]
 # Regexes for lines to exclude from consideration

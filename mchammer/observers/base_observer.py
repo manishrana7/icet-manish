@@ -2,6 +2,7 @@
 Definition of the base observer class.
 '''
 
+
 class BaseObserver:
     """
     Base Observer class.
