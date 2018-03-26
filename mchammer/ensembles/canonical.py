@@ -2,6 +2,7 @@
 
 from mchammer.ensembles.base_ensemble import BaseEnsemble
 import numpy as np
+from ase.units import kB
 
 class Canonical(BaseEnsemble):
     """
@@ -45,7 +46,7 @@ class Canonical(BaseEnsemble):
         Check if this energy diff is accepted.
         """
 
-        return np.exp(-energy_diff/(self.boltzmann_constant * self.temperature)) > self.next_random_number()
+        return np.exp(-energy_diff/(kB * self.temperature)) > self.next_random_number()
 
     def _run(self, number_of_trial_moves):
         """
