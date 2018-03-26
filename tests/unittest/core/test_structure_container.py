@@ -108,11 +108,9 @@ class TestStructureContainer(unittest.TestCase):
             sc = StructureContainer(self.cs, ['something'])
         msg = 'atoms has not ASE Atoms format'
         self.assertTrue(msg in str(context.exception))
-        # check that init fails with not list of atoms
-        with self.assertRaises(Exception) as context:
-            sc = StructureContainer(self.cs)
-        msg = 'list of atoms is required for initialization'
-        self.assertTrue(msg in str(context.exception))
+        # check empty initialization
+        sc = StructureContainer(self.cs)
+        self.assertIsInstance(sc, StructureContainer)
 
     def test_len(self):
         '''
@@ -143,20 +141,10 @@ class TestStructureContainer(unittest.TestCase):
         properties = self.properties_list[0]
         tag = "struct5"
         self.sc.add_structure(atoms, tag, properties)
-<<<<<<< HEAD
-        self.assertEqual(self.sc.__len__(), len(self.structure_list) + 1)
-        # implicit properties in attached calculator
-        calc = EMT()
-        atoms.set_calculator(calc)
-        atoms.get_potential_energy()
-        self.sc.add_structure(atoms)
-        self.assertEqual(self.sc.__len__(), len(self.structure_list) + 2)
-=======
         self.assertEqual(self.sc.__len__(), len(self.structure_list)+1)
         # check that adding structures without properties fails
         with self.assertRaises(AssertionError):
             self.sc.add_structure(atoms)
->>>>>>> BUG: Fixed SC initialization where properties are passed implicitily through attached calc
 
     def test_get_fit_data(self):
         '''

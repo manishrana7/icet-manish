@@ -62,11 +62,6 @@ class StructureContainer(object):
                                        properties=properties)
                 except AssertionError:
                     raise
-<<<<<<< HEAD
-=======
-        else:
-            raise Exception('list of atoms is required for initialization')
->>>>>>> BUG: Fixed SC initialization where properties are passed implicitily through attached calc
 
     def __len__(self):
         return len(self._structure_list)
