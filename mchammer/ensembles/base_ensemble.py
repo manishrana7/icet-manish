@@ -19,11 +19,10 @@ class BaseEnsemble(ABC):
         number of total trial steps.
     """
 
-    def __init__(self, atoms, calculator, name='BaseEnsemble',
+    def __init__(self, calculator, name='BaseEnsemble',
                  data_container=None, random_seed=None):
 
         self._calculator = calculator
-        self._atoms = atoms
         self._name = name
 
         self.accepted_trials = 0
@@ -47,7 +46,7 @@ class BaseEnsemble(ABC):
         ASE Atoms object :
         The current state of the  structure being sampled in the ensemble.
         """
-        return self._atoms
+        return self.calculator.atoms
 
     @property
     def data_container(self):
