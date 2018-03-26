@@ -17,6 +17,7 @@ http://scikit-learn.org/stable/modules/linear_model.html
 
 import numpy as np
 from ..io.logging import logger
+from .split_bregman import split_bregman
 try:
     from sklearn.linear_model import (Lasso,
                                       LassoCV,

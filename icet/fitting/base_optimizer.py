@@ -9,7 +9,8 @@ from .fit_methods import (fit_least_squares,
                           fit_lasso,
                           fit_elasticnet,
                           fit_bayesian_ridge,
-                          fit_ardr)
+                          fit_ardr,
+                          split_bregman)
 
 
 fit_methods = OrderedDict([
@@ -18,7 +19,8 @@ fit_methods = OrderedDict([
     ('elasticnet', fit_elasticnet),
     ('bayesian-ridge', fit_bayesian_ridge),
     ('ardr', fit_ardr),
-    ])
+    ('split-bregman', split_bregman)
+])
 
 
 class BaseOptimizer:
