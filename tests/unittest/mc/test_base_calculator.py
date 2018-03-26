@@ -61,7 +61,7 @@ class TestBaseCalculator(unittest.TestCase):
         self.assertEqual(self.atoms[1].symbol, 'H')
         self.assertEqual(self.atoms[3].symbol, 'He')
 
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(Exception):
             self.calculator.set_elements([0, 1], [0, 1, 2, 3])
 
 

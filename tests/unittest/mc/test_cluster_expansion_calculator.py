@@ -1,9 +1,7 @@
 import unittest
 
-from ase.atoms import Atoms
 from ase.build import bulk
 from icet import ClusterExpansion, ClusterSpace
-from mchammer.calculators.base_calculator import BaseCalculator
 from mchammer.calculators.cluster_expansion_calculator import \
     ClusterExpansionCalculator
 
@@ -75,8 +73,9 @@ class TestCECalculator(unittest.TestCase):
         indices = [1, 2, 3]
         local_contribution = 0
         for index in indices:
-            local_contribution += self.calculator._calculate_local_contribution(
-                index)
+            local_contribution +=\
+                self.calculator._calculate_local_contribution(
+                    index)
         self.assertEqual(local_contribution,
                          self.calculator.calculate_local_contribution(indices))
 

@@ -21,7 +21,8 @@ class ClusterExpansionCalculator(BaseCalculator):
 
     """
 
-    def __init__(self, atoms, cluster_expansion, name='Cluster Expansion Calculator'):
+    def __init__(self, atoms, cluster_expansion,
+                 name='Cluster Expansion Calculator'):
         super().__init__(atoms=atoms, name=name)
 
         self._cluster_expansion = cluster_expansion

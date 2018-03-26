@@ -8,13 +8,13 @@ class BaseCalculator(ABC):
     Attributes
     ----------
     name : str
-        name of the calculator.    
+        name of the calculator.
     """
 
     def __init__(self, atoms, name='BaseCalculator'):
         self._atoms = atoms
         self.name = name
-    
+
     @property
     def atoms(self):
         """

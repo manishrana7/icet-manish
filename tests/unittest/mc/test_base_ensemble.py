@@ -77,7 +77,7 @@ class TestEnsemble(unittest.TestCase):
     def test_property_structure(self):
         """Test the get current structure method."""
         # need calculator for structure
-        pass 
+        pass
         # self.assertEqual(self.ensemble.structure, self.atoms)
 
     def test_attach_observer(self):
