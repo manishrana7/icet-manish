@@ -1,10 +1,16 @@
-# Split Bregman Algorithm as defined on p. 5 in Nelson, Hart (Compressive sensing as a new paradigm for model building)
+"""
+Split Bregman Algorithm as defined on p. 5 in
+Nelson, Hart (Compressive sensing as a new paradigm for model building)
+"""
 import numpy as np
 from scipy.optimize import minimize
 
 
 def split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6, verbose=0):
-    """ Split Bregman Algorithm as defined on p. 5 in Nelson, Hart (Compressive sensing as a new paradigm for model building) """
+    """
+    Split Bregman Algorithm as defined
+    on p. 5 in Nelson, Hart (Compressive
+    sensing as a new paradigm for model building) """
     nCols = A.shape[1]
     d = np.squeeze(np.zeros((nCols, 1)))
     b = np.squeeze(np.zeros((nCols, 1)))
@@ -57,10 +63,10 @@ def objectivefunction(x, A, y, mu, lmbda, d, b, AtA, ftA):
     term2 = 0.5*lmbda*np.vdot(tmp2, tmp2)
     if term1.imag > 0.0:
         print(term1.imag)
-        print('This should never happen! Objective function contains non-zero imaginary part. ')
+        print('Objective function contains non-zero imaginary part. ')
     if term2.imag > 0.0:
         print(term2.imag)
-        print('This should never happen! Objective function contains non-zero imaginary part. ')
+        print('Objective function contains non-zero imaginary part. ')
 
     return term1 + term2
 
@@ -68,12 +74,21 @@ def objectivefunction(x, A, y, mu, lmbda, d, b, AtA, ftA):
 
 
 def objectivefunctionDer(x, A, y, mu, lmbda, d, b, AtA, ftA):
-    # More things can be precomputed in this function, but you wont gain that much since the heavy matrix operations are alread precomputed.
+    """
+    More things can be precomputed in this
+    function, but you wont gain that much
+    since the heavy matrix operations are alread precomputed.
+    """
     ret = np.squeeze(np.dot(x[np.newaxis, :], AtA) -
                      ftA - lmbda*mu*(d - mu * x - b))
     return ret
 
-# Shrink operator as defined in Eq. (11) (p. 5) in Nelson, Hart (Compressive sensing as a new paradigm for model building)
+
+"""
+Shrink operator as defined in Eq. (11) (p. 5)
+in Nelson, Hart (Compressive sensing as a new
+paradigm for model building)
+"""
 
 
 def shrink(y, alpha):
