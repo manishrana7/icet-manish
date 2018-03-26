@@ -10,13 +10,29 @@ def split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6, verbose=0):
     """
     Split Bregman Algorithm as defined
     on p. 5 in Nelson, Hart (Compressive
-    sensing as a new paradigm for model building) """
-    nCols = A.shape[1]
-    d = np.squeeze(np.zeros((nCols, 1)))
-    b = np.squeeze(np.zeros((nCols, 1)))
-    x = np.squeeze(np.zeros((nCols, 1)))
+    sensing as a new paradigm for model building)
 
-    oldNorm = 0.0
+    Parameters:
+    A : matrix
+        Sensing matrix.
+    y : numpy array
+        solution vector
+    mu : float
+        Sparseness parameter
+    lmbda : float
+        Split bregmar parameter
+    n_iters : int
+        maximal number of split bregman iterations.
+    tol : float
+        tolerance for when stopping split bregman
+        iterations.
+    """
+    n_cols = A.shape[1]
+    d = np.squeeze(np.zeros((n_cols, 1)))
+    b = np.squeeze(np.zeros((n_cols, 1)))
+    x = np.squeeze(np.zeros((n_cols, 1)))
+
+    old_norm = 0.0
 
     # Precompute for speed.
     AtA = np.dot(A.conj().transpose(), A)
@@ -26,70 +42,108 @@ def split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6, verbose=0):
         if verbose:
             print('Iteration ', i)
         args = (A, y, mu, lmbda, d, b, AtA, ftA)
-        res = minimize(objectivefunction, x, args, method="BFGS", options={
-                       'disp': False}, jac=objectivefunctionDer)
+        res = minimize(objective_function, x, args, method="BFGS", options={
+                       'disp': False}, jac=objective_function_derivative)
         x = res.x
 
         d = shrink(mu*x + b, 1.0/lmbda)
         b = b + mu*x - d
 
-        newNorm = np.linalg.norm(x)
+        new_norm = np.linalg.norm(x)
         ii = ii + 1
 
         if verbose:
-            print('|newNorm-oldNorm| = ', abs(newNorm-oldNorm))
-        if abs(newNorm-oldNorm) < tol:
+            print('|new_norm-old_norm| = ', abs(new_norm-old_norm))
+        if abs(new_norm-old_norm) < tol:
             break
 
-        oldNorm = newNorm
+        old_norm = new_norm
     else:
         print("Warning: split bregman ran for max iters")
 
     tmp = np.dot(A, x) - y
     res = np.dot(tmp.conj().transpose(), tmp)
-    fit_results = {'parameters': x,
-                   'iters_run': ii
-                   }
+    fit_results = {'parameters': x}
     return fit_results
 
-# objective function to minimize by BFGS
 
-
-def objectivefunction(x, A, y, mu, lmbda, d, b, AtA, ftA):
-    tmp1 = np.dot(A, x) - y
-    term1 = 0.5*np.vdot(tmp1, tmp1)
-
-    tmp2 = d - b - mu*x
-    term2 = 0.5*lmbda*np.vdot(tmp2, tmp2)
-    if term1.imag > 0.0:
-        print(term1.imag)
-        print('Objective function contains non-zero imaginary part. ')
-    if term2.imag > 0.0:
-        print(term2.imag)
-        print('Objective function contains non-zero imaginary part. ')
-
-    return term1 + term2
-
-# The derivative of the analytical function above
-
-
-def objectivefunctionDer(x, A, y, mu, lmbda, d, b, AtA, ftA):
+def objective_function(x, A, y, mu, lmbda, d, b):
     """
+    Objective function to minimize by BFGS.
+
+    Parameters:
+    x : numpy array
+        solution vector
+    y : numpy array
+        solution vector
+    mu : float
+        the parameter that adjusts sparseness.
+    lmbda : float
+        Split Bregman parameter
+    d : numpy array
+        same notation as Nelson, Hart paper
+    b : numpy array
+        same notation as Nelson, Hart paper
+    """
+
+    error_vector = np.dot(A, x) - y
+
+    obj_function = 0.5*np.vdot(error_vector, error_vector)
+
+    if obj_function.imag > 0.0:
+        raise RuntimeError(
+            "Objective function contains non-zero imaginary part.)")
+
+    sparseness_correction = d - b - mu*x
+    obj_function += 0.5*lmbda * \
+        np.vdot(sparseness_correction, sparseness_correction)
+
+    if obj_function.imag > 0.0:
+        raise RuntimeError(
+            "Objective function contains non-zero imaginary part.)")
+
+    return obj_function
+
+
+def objective_function_derivative(x, A, y, mu, lmbda, d, b, AtA, ftA):
+    """
+    The derivative of the objective function.
+
     More things can be precomputed in this
     function, but you wont gain that much
     since the heavy matrix operations are alread precomputed.
+
+    Parameters:
+    x : numpy array
+        solution vector
+    y : numpy array
+        solution vector
+    mu : float
+        the parameter that adjusts sparseness.
+    lmbda : float
+        Split Bregman parameter
+    d : numpy array
+        same notation as Nelson, Hart paper
+    b : numpy array
+        same notation as Nelson, Hart paper
+    AtA : matrix
+        sensing matrix transpose times sensing matrix.
+    ftA : matrix
+        np.dot(y.conj().transpose(), A)
+
     """
     ret = np.squeeze(np.dot(x[np.newaxis, :], AtA) -
                      ftA - lmbda*mu*(d - mu * x - b))
     return ret
 
 
-"""
-Shrink operator as defined in Eq. (11) (p. 5)
-in Nelson, Hart (Compressive sensing as a new
-paradigm for model building)
-"""
-
-
 def shrink(y, alpha):
+    """
+    Shrink operator as defined in Eq. (11) (p. 5)
+    in Nelson, Hart (Compressive sensing as a new
+    paradigm for model building).
+
+    y : numpy array
+    alpha : float
+    """
     return np.sign(y)*np.maximum(np.abs(y)-alpha, 0.0)

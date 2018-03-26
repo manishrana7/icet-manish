@@ -5,7 +5,7 @@ BaseOptimizer serves as base for all optimizers.
 import numpy as np
 from collections import OrderedDict
 from .tools import compute_rmse
-from .split_bregman import split_bregman
+from .split_bregman import split_bregman as fit_split_bregman
 from .fit_methods import (fit_least_squares,
                           fit_lasso,
                           fit_elasticnet,
@@ -19,7 +19,7 @@ fit_methods = OrderedDict([
     ('elasticnet', fit_elasticnet),
     ('bayesian-ridge', fit_bayesian_ridge),
     ('ardr', fit_ardr),
-    ('split-bregman', split_bregman)
+    ('split-bregman', fit_split_bregman)
 ])
 
 
