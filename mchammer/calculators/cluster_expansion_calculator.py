@@ -66,11 +66,11 @@ class ClusterExpansionCalculator(BaseCalculator):
         """
         Internal method to calculate the local contribution for one
         index.
-        
+
         Parameters
         ----------
         index : int
-            lattice index 
+            lattice index
 
         """
         return self.calculate_total()
