@@ -1,8 +1,8 @@
 .. _tutorial_basics:
-.. index:: Tutorial
+.. index:: Tutorial, basics
 
-Tutorial
-********
+Basic tutorial
+**************
 
 This tutorial serves as a hands-on introduction to :program:`icet` and provides
 an overview of its key features. The construction of cluster expasions requires
