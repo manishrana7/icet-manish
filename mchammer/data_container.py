@@ -8,10 +8,13 @@ from collections import OrderedDict
 class DataContainer(object):
     """
     Data Container class which serves to store
-    all information revelant for Base Ensemble module.
+    all information concerned to Monte Carlo
+    calculation performed with mchammer.
 
-    TODO: Current implementation requires improvements once
-    this is properly integrated with Base Ensemble class.
+    Todo
+    ----
+    * Improvements required once integrated with
+      Base Ensemble class.
 
     """
 
@@ -53,7 +56,8 @@ class DataContainer(object):
     def add_observable(self, tag, property_type):
         """
         Add observable to list of observables
-        which serves as headers in data frame.
+        which serves as headers of the data frame
+        containing the runtime data.
 
         Parameters :
         ----------
@@ -74,8 +78,8 @@ class DataContainer(object):
 
     def add_parameter(self, tag, property_value):
         """
-        Add any sort of parameter required for
-        initial settings of the associated ensemble.
+        Add parameter required for initial setting
+        of the associated ensemble.
 
         Parameters :
         ----------
@@ -96,7 +100,7 @@ class DataContainer(object):
 
     def add_metadata(self, tag, input_value):
         """
-        Add metadata (author, hostname, time).
+        Add descriptive metadata (author, hostname, time).
 
         Parameters :
         ----------
@@ -105,6 +109,10 @@ class DataContainer(object):
 
         input_value : str, date
             value of the input metadata
+
+        Todo
+        ----
+        * Include name of ensemble, observer, keywords
 
         """
         msg = 'Metadata tag has wrong type (str)'
@@ -117,7 +125,7 @@ class DataContainer(object):
 
     def append(self, mcstep, tag, input_value):
         """
-        Append data to Pandas Data Frame.
+        Append runtime data to data frame.
 
         Parameters :
         ----------
@@ -219,11 +227,21 @@ class DataContainer(object):
     def load(self):
         """
         Load data container from file.
+
+        Todo
+        ----
+        * To be implemented in a different issue.
+
         """
         pass
 
     def write(self):
         """
         Write data container to file.
+
+        Todo
+        ----
+        * To be implemented in a different issue.
+
         """
         pass
