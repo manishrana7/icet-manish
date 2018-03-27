@@ -595,8 +595,8 @@ PYBIND11_MODULE(_icet, m)
         Return the mc vectors for this orbit given the allowed components.
         The mc vectors are returned as a list of tuples
 
-        parameters
-       ----------
+        Parameters
+        ----------
         allowed_components : list of int
            The allowed components for the lattice sites,
            allowed_components[i] correspond to the number
@@ -609,15 +609,15 @@ PYBIND11_MODULE(_icet, m)
         .def("get_all_possible_mc_vector_permutations", &Orbit::getAllPossibleMCVectorPermutations,
         R"pbdoc(
         Similar to get all permutations but
-       needs to be filtered through the
-       number of allowed elements.
+        needs to be filtered through the
+        number of allowed elements.
 
-       parameters
-       ----------
-       allowed_components : list of int
-           The allowed components for the lattice sites,
-           allowed_components[i] correspond to the lattice site
-           self.representative_sites[i].
+        Parameters
+        ----------
+        allowed_components : list of int
+            The allowed components for the lattice sites,
+            allowed_components[i] correspond to the lattice site
+            self.representative_sites[i].
 
         returns all_mc_vectors : list of tuples of int
         )pbdoc")
