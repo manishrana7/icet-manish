@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 
 class BaseObserver(ABC):
     """
-    Base Observer class.
+    Base observer class.
 
     Parameters
     ----------
@@ -38,12 +38,13 @@ class BaseObserver(ABC):
         """
         Method used for extracting data.
 
-        Returns:
-            self.return_type()
+        Returns
+        -------
+        self.return_type()
 
-        When implementing this method use the
-        following names for the following types
-        of data:
+        When implementing this method use the following names for the
+        following types of data:
+
         ASE atoms object : `atoms`.
         list of chemical elements : `elements`.
         icet structure object : `structure`.
