@@ -72,7 +72,6 @@ html_context = {
 htmlhelp_basename = 'icetdoc'
 
 
-
 # Options for LaTeX output
 _PREAMBLE = r"""
 \usepackage{amsmath,amssymb}
