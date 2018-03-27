@@ -3,13 +3,110 @@
 Glossary
 ********
 
+
+General
+=======
 .. glossary::
 
    BCC
-        Several metallic including for example elements from groups 5
-        (V, Nb, Ta) and 6 (Cr, Mo, W) have a body-centered cubic (BCC)
-        ground state structure.
+        Several metallic including for example elements from groups 5 (V, Nb,
+        Ta) and 6 (Cr, Mo, W) have a `body-centered cubic (BCC)
+        <https://en.wikipedia.org/wiki/Cubic_crystal_system>`_ ground state
+        structure.
 
+   FCC
+        The `face-centered cubic (FCC) lattice
+        <https://en.wikipedia.org/wiki/Cubic_crystal_system>`_ is one of the
+        most common crystal structures for metallic elements including e.g.,
+        the late transition metals from group 10 (Ni, Pd, Pt) and 11 (Cu, Ag,
+        Au).
+
+   DFT
+        The construction of force constants requires accurate reference data.
+        `Density functional theory (DFT)
+        <https://en.wikipedia.org/wiki/Density_functional_theory>`_
+        calculations are one of the most common source for such data.
+
+
+
+
+Optimization and machine learning
+=================================
+.. glossary::
+
+   Automatic relevance determination regression
+        Automatic relevance determination regression (ARDR) is an optimization
+        algorithm provided by `scikit-learn
+        <http://scikit-learn.org/stable/auto_examples/linear_model/plot_ard.html>`_
+
+   Compressive sensing
+        `Compressive sensing (CS)
+        <https://en.wikipedia.org/wiki/Compressed_sensing>`_, also known as
+        compressive sampling, is an efficient method for constructing sparse
+        solutions for linear systems.
+
+   CV
+   Cross validation
+        `Cross validation (CV) <https://en.wikipedia.org/wiki/Cross-validation_(statistics)>`_
+	is employed to evaluated the transferability and accuracy of :term:`CEs`.
+
+   LASSO
+        The `least absolute shrinkage and selection operator (LASSO)
+        <https://en.wikipedia.org/wiki/Lasso_(statistics)>`_ is a method for
+        performing variable selection and regularization in problems in
+        statistics and machine learning.
+
+   LOOCV
+        The leave one out cross validation (LOOCV) score
+        is one of the most commonly adopted measures for quantifying
+        the basic performance of a :term:`CE`.
+
+   Kernel ridge regression
+        `Kernel ridge regression (KRR) <http://scikit-
+        learn.org/stable/modules/kernel_ridge.html>`_ combines `ridge
+        regression <https://en.wikipedia.org/wiki/Tikhonov_regularization>`_
+        with the `kernel trick <https://en.wikipedia.org/wiki/Kernel_method>`_.
+
+   Regularization
+        `Regularization
+        <https://en.wikipedia.org/wiki/Regularization_(mathematics)>`_,
+        is commonly used in machine learning to combat overfitting and
+        for solving underdetermined systems.
+
+
+Crystal symmetry and clusters
+=============================
+.. glossary::
+
+   Crystal symmetry operation
+        A crystal symmetry operation for a specific lattice means that the
+        lattice is invariant under this operation. An operation comprises
+        translational and rotational components.
+
+   Cluster
+        A cluster is defined as a set of points on a lattice.
+
+   Cluster size
+        The size of a cluster (commonly refered to as the cluster radii) is
+        defined as the average distance to the geometrical center of the cluster.
+
+   Cluster space
+        The set of clusters into which a structure can be decomposed.
+
+   Cutoff
+        Cutoff define the longest allowed distance between two atoms in a
+        cluster for each order.
+
+   Orbit
+        An orbit is defined as a group of symmetry equivalent clusters
+
+
+
+CLuster expansions
+==================
+.. glossary::
+
+   Cluster expansion
    CE
    CEs
    	:ref:`Cluster expansion <cluster-expansions>` provide a
@@ -17,43 +114,10 @@ Glossary
    	that can be many orders of magnitude faster than the
    	underlying reference calculations from e.g., :term:`DFT`.
 
-   CV
-        `Cross validation (CV) <https://en.wikipedia.org/wiki/Cross-validation_(statistics)>`_
-	is employed to evaluated the transferability and accuracy of :term:`CEs`.
-
-   CS
-        `Compressive sensing (CS) <https://en.wikipedia.org/wiki/Compressed_sensing>`_,
-        also known as compressive sampling, is a
-        very efficient method for construction sparse models [CanWak08]_
-	including :term:`CEs` [NelOzoRee13]_.
-
-   DFT
-        The construction of a :term:`CE` requires reference data from
-        a high-level source. Density functional theory (DFT)
-        calculations are one of the most common sources for such data.
-
    ECI
    ECIs
 	The parameters of a :term:`CE` are usually referred to as
 	:ref:`effective cluster interaction <cluster-expansions>`.
-
-   FCC
-        The face-centered cubic (FCC) lattice is one of the most
-        common crystal structures for metallic elements including
-        e.g., the late transition metals from group 10 (Ni, Pd, Pt)
-        and 11 (Cu, Ag, Au).
-
-   LASSO
-        The least absolute shrinkage and selection operator is a
-        method for performing variable selection and regularization in
-        problems in statistics and machine learning. More information
-        can be found `on the LASSO Wikipedia entry
-        <https://en.wikipedia.org/wiki/Lasso_(statistics)>`_.
-
-   LOOCV
-        The leave one out cross validation (LOOCV) score
-        is one of the most commonly adopted measures for quantifying
-        the basic performance of a :term:`CE`.
 
    MC
         Monte Carlo (MC) simulations are an effective method for
