@@ -14,7 +14,6 @@ RUN apt-get install -qy cmake \
                         python3-numpy \
                         python3-scipy \
                         python3-h5py \
-                        python3-sphinx \
                         doxygen \
                         pyflakes \
                         pep8 \
@@ -23,11 +22,13 @@ RUN apt-get install -qy cmake \
 # Set up some Python3 packages via pip
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade setuptools
-RUN pip3 install ase \
+RUN pip3 install --upgrade \
+                 ase \
                  coverage \
                  flake8 \
                  spglib \
                  scikit-learn \
+		 sphinx \
                  sphinx-rtd-theme \
                  sphinxcontrib-bibtex \
                  sphinx_sitemap
