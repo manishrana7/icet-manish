@@ -65,9 +65,9 @@ where :math:`\boldsymbol{Q}` is the vector of target properties,
 :math:`\mathbf{\bar{\Pi}}` is a matrix that is obtained by stacking the vectors
 that represent the clusters present in each structure of the training set. This
 problem can be approached by choosing the number of structures
-:math:`n_{\boldsymbol{Q}}=||\boldsymbol{Q}||_0` (and thus the dimensionality of
+:math:`n_{\boldsymbol{Q}}` (and thus the dimensionality of
 :math:`\boldsymbol{Q}`), to be (much) larger than the number of ECIs
-:math:`n_{\boldsymbol{J}=||\boldsymbol{J}||_0}` (and thus the dimensionality of
+:math:`n_{\boldsymbol{J}}` (and thus the dimensionality of
 :math:`\boldsymbol{J}`, (:math:`n_{\boldsymbol{Q}}>n_{\boldsymbol{J}}`). The
 set of equations is thus overdetermined. The optimal set of ECIs for fixed
 training set and cluster function basis is then obtained by minimizing the

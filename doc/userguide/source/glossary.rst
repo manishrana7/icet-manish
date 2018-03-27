@@ -102,14 +102,14 @@ Crystal symmetry and clusters
 
 
 
-CLuster expansions
+Cluster expansions
 ==================
 .. glossary::
 
    Cluster expansion
    CE
    CEs
-   	:ref:`Cluster expansion <cluster-expansions>` provide a
+   	:ref:`Cluster expansions <cluster-expansions>` provide a
    	mapping between a configuration and a property of interest
    	that can be many orders of magnitude faster than the
    	underlying reference calculations from e.g., :term:`DFT`.
@@ -117,7 +117,7 @@ CLuster expansions
    ECI
    ECIs
 	The parameters of a :term:`CE` are usually referred to as
-	:ref:`effective cluster interaction <cluster-expansions>`.
+	:ref:`effective cluster interactions (ECIs) <cluster-expansions>`.
 
    MC
         Monte Carlo (MC) simulations are an effective method for
