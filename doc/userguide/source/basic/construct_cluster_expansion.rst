@@ -64,7 +64,7 @@ output should be the following::
    total number of orbits: 14
    number of orbits by order: 0= 1  1= 1  2= 4  3= 7  4= 1
   --------------------------------------------------------------------
-  index | order |   size   | multiplicity | orbit index |  MC vector  
+  index | order |   size   | multiplicity | orbit index |  MC vector
   --------------------------------------------------------------------
      0  |   0   |   0.0000 |        1     |      -1
      1  |   1   |   0.0000 |        1     |       0     |    [0]
@@ -193,8 +193,8 @@ argument. Once the list is complete the predicted and target mixing energies
 are plotted as functions of the concentration of silver atoms.
 
 .. literalinclude:: ../../../../tutorial/construct_cluster_expansion.py
-   :start-after: # step 3
-   :end-before: # step 4
+   :start-after: # step 4
+   :end-before: # step 5
 
 Be aware of the fact that the diagram, which is shown below is saved as an
 image file, ``mixing-energy-comparison.png``.
