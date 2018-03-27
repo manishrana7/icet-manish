@@ -60,7 +60,6 @@ class TestStructureContainer(unittest.TestCase):
         self.cutoffs = [4.0] * 3
         self.atoms_prim = bulk('Ag', a=4.09)
         self.structure_list = []
-        calc = EMT()
         for k in range(4):
             atoms = self.atoms_prim.repeat(2)
             symbols = [self.subelements[0]] * len(atoms)
@@ -72,7 +71,7 @@ class TestStructureContainer(unittest.TestCase):
         self.properties_list = []
         self.add_properties_list = []
         for k, atoms in enumerate(self.structure_list):
-            atoms.set_calculator(calc)
+            atoms.set_calculator(EMT())
             properties = {'energy': atoms.get_potential_energy(),
                           'volume': atoms.get_volume()}
             self.properties_list.append(properties)
@@ -94,6 +93,9 @@ class TestStructureContainer(unittest.TestCase):
         sc = StructureContainer(self.cs, self.structure_list,
                                 self.properties_list)
         self.assertIsInstance(sc, StructureContainer)
+        # with only list of atoms (properties read from calc)
+        sc = StructureContainer(self.cs, self.structure_list)
+        self.assertIsInstance(sc, StructureContainer)
         # add atoms along with tags
         structure_list_with_tags = []
         for k, atoms in enumerate(self.structure_list, start=1):
@@ -106,6 +108,9 @@ class TestStructureContainer(unittest.TestCase):
             sc = StructureContainer(self.cs, ['something'])
         msg = 'atoms has not ASE Atoms format'
         self.assertTrue(msg in str(context.exception))
+        # check empty initialization
+        sc = StructureContainer(self.cs)
+        self.assertIsInstance(sc, StructureContainer)
 
     def test_len(self):
         '''
@@ -132,17 +137,14 @@ class TestStructureContainer(unittest.TestCase):
         '''
         Testing add_structure functionality
         '''
-        atoms = self.structure_list[0]
+        atoms = self.structure_list[0].copy()
         properties = self.properties_list[0]
         tag = "struct5"
         self.sc.add_structure(atoms, tag, properties)
-        self.assertEqual(self.sc.__len__(), len(self.structure_list) + 1)
-        # implicit properties in attached calculator
-        calc = EMT()
-        atoms.set_calculator(calc)
-        atoms.get_potential_energy()
-        self.sc.add_structure(atoms)
-        self.assertEqual(self.sc.__len__(), len(self.structure_list) + 2)
+        self.assertEqual(self.sc.__len__(), len(self.structure_list)+1)
+        # check that adding structures without properties fails
+        with self.assertRaises(AssertionError):
+            self.sc.add_structure(atoms)
 
     def test_get_fit_data(self):
         '''
