@@ -8,10 +8,19 @@ class BaseObserver(ABC):
     """
     Base Observer class.
 
+    Parameters
+    ----------
+    interval : int
+        the observation interval
+    tag : str
+        human readable tag used for identifying the observer
+
     Attributes
     ----------
     tag : str
-        Human readable tag used for identifying the observer.
+        human readable tag used for identifying the observer
+    interval : int
+        the observation interval
     """
 
     def __init__(self, interval, tag='BaseObserver'):
@@ -21,9 +30,7 @@ class BaseObserver(ABC):
     @property
     @abstractmethod
     def return_type(self):
-        """
-        Data type of the observed data.
-        """
+        """Data type of the observed data."""
         raise NotImplementedError
 
     @abstractmethod
