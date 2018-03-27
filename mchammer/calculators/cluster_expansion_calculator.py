@@ -12,12 +12,12 @@ class ClusterExpansionCalculator(BaseCalculator):
     Parameters
     ----------
     atoms : ASE Atoms object
-        the structure which the calculator can use
-        to optimize the calculate function.
+        the structure that the calculator can use
+        to optimize the calculate functions.
 
     cluster_expansion : icet ClusterExpansion object
     name : str
-        Human readable identifier for this calculator
+        human readable identifier for this calculator
 
     """
 
@@ -30,7 +30,7 @@ class ClusterExpansionCalculator(BaseCalculator):
     @property
     def cluster_expansion(self):
         """
-        icet cluster expansion.
+        icet ClusterExpansion object.
         """
         return self._cluster_expansion
 
@@ -38,17 +38,23 @@ class ClusterExpansionCalculator(BaseCalculator):
         """
         Calculator the total property of the current configuration.
 
-        Return:
+        Return
+        -------
             total_property : float
         """
         return self.cluster_expansion.predict(self.atoms)
 
     def calculate_local_contribution(self, indices):
         """
-        return the local contribution of the index in indices.
+        Return the sum of the contributions from the indices in the input list.
 
-        Return:
-            local_contribution : float
+        Parameters
+        ----------
+        indices : list of ints
+
+        Return
+        ------
+        float : sum of contributions
         """
         local_contribution = 0
         for index in indices:
@@ -58,7 +64,13 @@ class ClusterExpansionCalculator(BaseCalculator):
 
     def _calculate_local_contribution(self, index):
         """
-        Internal method to calculate the local contribtuion for one
+        Internal method to calculate the local contribution for one
         index.
+        
+        Parameters
+        ----------
+        index : int
+            lattice index 
+
         """
         return self.calculate_total()

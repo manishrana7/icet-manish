@@ -46,7 +46,7 @@ class BaseEnsemble(ABC):
         ASE Atoms object :
         The current state of the  structure being sampled in the ensemble.
         """
-        return self.calculator.atoms
+        return self.calculator.atoms.copy()
 
     @property
     def data_container(self):

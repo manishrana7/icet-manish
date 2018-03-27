@@ -10,9 +10,10 @@ class TestCECalculator(unittest.TestCase):
     """
     Container for tests of the class functionality.
 
-    TODO:
+    Todo
+    ----
         * add property test to calculate local contribution when that
-          method has been added as intentional.
+          method has been added as intended.
 
     """
 
@@ -34,16 +35,12 @@ class TestCECalculator(unittest.TestCase):
             self.atoms, self.ce, name='Test CE calc')
 
     def test_property_cluster_expansion(self):
-        """
-        Test the cluster expansion property.
-        """
+        """Test the cluster expansion property."""
         self.assertIsInstance(
             self.calculator.cluster_expansion, ClusterExpansion)
 
     def test_calculate_total(self):
-        """
-        Test calculating total property.
-        """
+        """Test calculating total property."""
 
         self.assertEqual(self.calculator.calculate_total(), 283.0)
         self.assertEqual(self.calculator.cluster_expansion.predict(
@@ -58,18 +55,14 @@ class TestCECalculator(unittest.TestCase):
             self.calculator.atoms),  66.96296296)
 
     def test_calculate_local_contribution(self):
-        """
-        Test calculate local contribution.
-        """
+        """Test calculate local contribution."""
         indices = [1, 2, 3]
         local_contribution = self.calculator.calculate_local_contribution(
             indices)
         self.assertIsInstance(local_contribution, float)
 
     def test_internal_calc_local_contribution(self):
-        """
-        Test the internal calc local contribution.
-        """
+        """Test the internal calc local contribution."""
         indices = [1, 2, 3]
         local_contribution = 0
         for index in indices:

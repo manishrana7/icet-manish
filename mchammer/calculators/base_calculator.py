@@ -17,9 +17,7 @@ class BaseCalculator(ABC):
 
     @property
     def atoms(self):
-        """
-        ASE Atoms object
-        """
+        """ASE Atoms object."""
         return self._atoms
 
     @abstractmethod
@@ -34,10 +32,12 @@ class BaseCalculator(ABC):
         """
         Set elements on the atoms object.
 
+        Parameters
+        ----------
         indices : list of int
-            The list refer to indices on the lattice.
+            The list refer to indice on the lattice.
         elements : list of int
-            The elements to put on the corresponding indice.
+            The elements to put on the corresponding lattice site.
         """
 
         assert len(indices) == len(
