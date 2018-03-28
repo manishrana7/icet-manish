@@ -26,9 +26,12 @@ RUN pip3 install --upgrade \
                  ase \
                  coverage \
                  flake8 \
-                 spglib \
+                 pandas \
                  scikit-learn \
+                 spglib \
 		 sphinx \
                  sphinx-rtd-theme \
                  sphinxcontrib-bibtex \
-                 sphinx_sitemap
+                 sphinx_sitemap \
+                 breathe \
+                 cloud_sptheme
