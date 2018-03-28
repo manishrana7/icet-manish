@@ -87,18 +87,18 @@ Crystal symmetry and clusters
         A cluster is defined as a set of points on a lattice.
 
    Cluster size
-        The size of a cluster (commonly refered to as the cluster radii) is
+        The size of a cluster (commonly refered to as the cluster radius) is
         defined as the average distance to the geometrical center of the cluster.
 
    Cluster space
         The set of clusters into which a structure can be decomposed.
 
    Cutoff
-        Cutoff define the longest allowed distance between two atoms in a
+        Cutoffs define the longest allowed distance between two atoms in a
         cluster for each order.
 
    Orbit
-        An orbit is defined as a group of symmetry equivalent clusters
+        An orbit is defined as a set of symmetry equivalent clusters.
 
 
 
