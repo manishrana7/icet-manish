@@ -1,4 +1,3 @@
-# import modules
 from ase.build import bulk
 from ase.db import connect
 from ase.calculators.emt import EMT
@@ -36,7 +35,7 @@ for elem in subelements:
         eref[elem] = row.energy / row.natoms
         break
 
-# compute mixing energies and add to database
+# step 4: compute mixing energies and add them to the database
 for row in db.select():
     conc = float(row.count_atoms().get('Ag', 0)) / row.natoms
     emix = row.relaxed_energy / row.natoms

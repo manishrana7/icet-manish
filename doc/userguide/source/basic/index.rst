@@ -5,21 +5,20 @@ Basic tutorial
 **************
 
 This tutorial serves as a hands-on introduction to :program:`icet` and provides
-an overview of its key features. The construction of cluster expasions requires
-input in the form of training structures. Also we will require some reference
-data for comparison. These data are generated in the following "preamble"
-section.
+an overview of its key features.
 
 .. toctree::
    :maxdepth: 1
+   :caption: icet
 
    prepare_reference_data
-
-The main part of the tutorial is split into several steps, which can be
-accessed below.
+   construct_cluster_expansion
+   compare_to_target_data
+   enumerate_structures
+   analyze_ecis
 
 .. toctree::
    :maxdepth: 1
+   :caption: mchammer
 
-   construct_cluster_expansion
    run_monte_carlo

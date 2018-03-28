@@ -34,19 +34,18 @@ allows one to express :math:`Q` in the form [Wal09]_
    J_\alpha
    \left<\Gamma_{\alpha'}(\boldsymbol{\sigma})\right>_{\alpha}.
 
-Here, the sum extends over all symmetry equivalent clusters
- (:term:`orbit`) :math:`\alpha`, :math:`m_{\alpha}` denotes the
- multiplicity [#]_ whereas the coefficients :math:`J_{\alpha}` are the
- so-called effective cluster interactions (ECIs). The last term in the
- above expression represents the average over cluster functions
- :math:`\Gamma_{\alpha}(\boldsymbol{\sigma})` belonging to symmetry
- equivalent clusters (:term:`orbits`). The cluster functions
- themselves are obtained as a product over basis functions
- :math:`\Theta` as described in the :ref:`section detailing the
- construction of cluster functions <cluster-functions>`.
+Here, the sum extends over all symmetry equivalent clusters  (:term:`orbit`)
+:math:`\alpha`, :math:`m_{\alpha}` denotes the  multiplicity [#]_ whereas the
+coefficients :math:`J_{\alpha}` are the  so-called effective cluster
+interactions (ECIs). The last term in the  above expression represents the
+average over cluster functions  :math:`\Gamma_{\alpha}(\boldsymbol{\sigma})`
+belonging to symmetry  equivalent clusters (:term:`orbits`). The cluster
+functions  themselves are obtained as a product over basis functions
+:math:`\Theta` as described in the :ref:`section detailing the  construction of
+cluster functions <cluster-functions>`.
 
 .. todo:
-   
+
    insert section on cluster functions
 
 .. [#] Note that some authors include :math:`m_{\alpha}` in the

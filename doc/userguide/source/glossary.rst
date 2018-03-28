@@ -43,12 +43,13 @@ Optimization and machine learning
         `Compressive sensing (CS)
         <https://en.wikipedia.org/wiki/Compressed_sensing>`_, also known as
         compressive sampling, is an efficient method for constructing sparse
-        solutions for linear systems.
+        solutions for linear systems [CanWak08]_ [NelOzoRee13]_.
 
    CV
    Cross validation
-        `Cross validation (CV) <https://en.wikipedia.org/wiki/Cross-validation_(statistics)>`_
-	is employed to evaluated the transferability and accuracy of :term:`CEs`.
+        `Cross validation (CV)
+        <https://en.wikipedia.org/wiki/Cross-validation_(statistics)>`_
+       	is employed to evaluated the transferability and accuracy of :term:`CEs`.
 
    LASSO
         The `least absolute shrinkage and selection operator (LASSO)
@@ -98,6 +99,7 @@ Crystal symmetry and clusters
         cluster for each order.
 
    Orbit
+   Orbits
         An orbit is defined as a set of symmetry equivalent clusters.
 
 
