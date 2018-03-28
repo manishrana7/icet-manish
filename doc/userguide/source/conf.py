@@ -19,7 +19,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.graphviz',
     'sphinx_sitemap',
-    'breathe'
+    'breathe',
+    'sphinx.ext.intersphinx',
 ]
 
 graphviz_output_format = 'svg'
@@ -70,7 +71,14 @@ html_context = {
           'Monte Carlo simulations with lammps'),
          ]}
 htmlhelp_basename = 'icetdoc'
+intersphinx_mapping = {'ase':    ('https://wiki.fysik.dtu.dk/ase', None),
+                       'python': ('https://docs.python.org/3.6', None)}
 
+
+# Options for doxygen incorporation
+breathe_projects = {'icet': '../../apidoc/xml/'}
+breathe_default_project = 'icet'
+breathe_domain_by_extension = {'h': 'cpp'}
 
 # Options for LaTeX output
 _PREAMBLE = r"""
@@ -102,9 +110,3 @@ texinfo_documents = [
      author, 'icet', 'A Pythonic approach to cluster expansions',
      'Miscellaneous'),
 ]
-
-
-# Options for doxygen incorporation
-breathe_projects = {'icet': '../../apidoc/xml/'}
-breathe_default_project = 'icet'
-breathe_domain_by_extension = {'h': 'cpp'}
