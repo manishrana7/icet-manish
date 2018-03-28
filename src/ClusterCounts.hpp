@@ -38,13 +38,16 @@ public:
     return _clusterCounts;
   }
 
+  void setupClusterCountsInfo();
 
+  std::pair<std::vector<std::string>, int> getClusterCountsInfo(const unsigned int index);
 
+  /// Returns the cluster counts size i.e. the total number of clusters
   size_t size() const
   {
     return _clusterCounts.size();
   }
-
+  /// Reset cluster counts
   void reset()
   {
     _clusterCounts.clear();
@@ -82,4 +85,6 @@ private:
     return round(double_value * 1.0 / symprec) / (1.0 / symprec);
   }
   double symprec;
+
+  std::vector<std::pair<std::vector<std::string>, int>> _clusterCountsInfo;
 };
