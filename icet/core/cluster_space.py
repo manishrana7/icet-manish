@@ -317,10 +317,17 @@ class ClusterSpace(_ClusterSpace):
     @property
     def primitive_structure(self):
         '''
-        ASE Atoms obejct : primitive structure on which the cluster space
-        is built
+        ASE Atoms object : primitive structure on which the cluster space
+        is based
         '''
         return self._get_primitive_structure().to_atoms()
+
+    @property
+    def chemical_symbols(self):
+        '''
+        list of str : list of elements considered
+        '''
+        return self._chemical_symbols.copy()
 
     @property
     def cutoffs(self):
