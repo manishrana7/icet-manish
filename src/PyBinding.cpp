@@ -434,8 +434,6 @@ PYBIND11_MODULE(_icet, m)
              tag : int
                  cluster tag
          )pbdoc")
-        //.def("count", &Cluster::count)
-        //.def("get_count", &Cluster::getCount)
         .def("print", &Cluster::print)
         .def_property_readonly("sites",
                                &Cluster::sites,
@@ -473,8 +471,14 @@ PYBIND11_MODULE(_icet, m)
     py::class_<LatticeSite>(m, "LatticeSite")
         .def(py::init<const int, const Vector3d &>())
         .def("print", &LatticeSite::print)
-        .def_property("index", &LatticeSite::index, &LatticeSite::setIndex)
-        .def_property("unitcell_offset", &LatticeSite::unitcellOffset, &LatticeSite::setUnitcellOffset)
+        .def_property("index",
+                      &LatticeSite::index,
+                      &LatticeSite::setIndex,
+                      "int : site index")
+        .def_property("unitcell_offset",
+                      &LatticeSite::unitcellOffset,
+                      &LatticeSite::setUnitcellOffset,
+                      "list of three ints : unit cell offset (in units of the cell vectors)")
         .def(py::self < py::self)
         .def(py::self == py::self)
         .def(py::self + Eigen::Vector3d())
@@ -509,7 +513,7 @@ PYBIND11_MODULE(_icet, m)
     py::class_<Orbit>(m, "Orbit")
         .def(py::init<const Cluster &>())
 
-        /* 
+        /*
         @TODO Remove the usage of these functions
             in favor of the property versions.
 
@@ -529,7 +533,7 @@ PYBIND11_MODULE(_icet, m)
         .def("get_allowed_sites_permutations",&Orbit::getAllowedSitesPermutations)
         .def("get_representative_sites", &Orbit::getRepresentativeSites)
         .def("get_equivalent_sites_permutations", &Orbit::getEquivalentSitesPermutations)
-        
+
         .def("get_representative_cluster", &Orbit::getRepresentativeCluster,
         R"pbdoc(
         The representative cluster
@@ -573,7 +577,7 @@ PYBIND11_MODULE(_icet, m)
         .def_property_readonly("permuted_sites", &Orbit::getPermutedEquivalentSites,
         R"pbdoc(Get the equivalent sites but permuted
         to representative site.)pbdoc")
-        .def_property_readonly("representative_sites",&Orbit::getRepresentativeSites,        
+        .def_property_readonly("representative_sites",&Orbit::getRepresentativeSites,
         R"pbdoc(
         The representative sites
         is a list of lattice sites
@@ -622,14 +626,14 @@ PYBIND11_MODULE(_icet, m)
         returns all_mc_vectors : list of tuples of int
         )pbdoc")
         .def_property("allowed_permutations", [](const Orbit &orbit) {
-             auto permutationSet = orbit.getAllowedSitesPermutations(); 
+             auto permutationSet = orbit.getAllowedSitesPermutations();
              std::vector<std::vector<int>> vectorPermutations;
             for(auto vector : permutationSet)
             {
                 vectorPermutations.push_back(vector);
             }
              return vectorPermutations; }, [](Orbit &orbit, const std::vector<std::vector<int>> &permutations) {
-                
+
                 std::unordered_set<std::vector<int>, VectorHash> setPermutations;
                 setPermutations.insert(permutations.begin(),permutations.end());
                  orbit.setAllowedSitesPermutations(setPermutations); },
@@ -652,7 +656,7 @@ PYBIND11_MODULE(_icet, m)
         Where permutations_to_representative[i]
         takes self.equivalent_sites[i] to
         the same order as self.representative_sites.
-    
+
         This can be used if you for example want to
         count elements and are interested in difference
         between ABB, BAB, BBA and so on. If you count the
