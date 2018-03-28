@@ -90,7 +90,9 @@ class TestDataContainer(unittest.TestCase):
                         self.data.append(mcstep,
                                          self.obs_tag,
                                          self.obs_observable)
-        self.assertEqual(len(self.data), 9)
+                        self.data.update()
+
+        self.assertEqual(len(self.data), minimum_interval)
 
     def test_parameters(self):
         """
@@ -108,6 +110,10 @@ class TestDataContainer(unittest.TestCase):
     def test_observables(self):
         """
         Test that added observables has OrderedDict type.
+
+        Todo
+        ----
+        * Add seed or PRNG, interval, minimum interval
         """
         target = OrderedDict([('energy', float),
                               ('temperature', float),
@@ -149,14 +155,14 @@ class TestDataContainer(unittest.TestCase):
 
         minimum_interval = 10
         obs_interval = 100
-        for mcstep in range(1, 1001):
+        for mcstep in range(1, 1000):
             if mcstep % minimum_interval == 0:
                 for obs in self.observers:
                     if mcstep % obs_interval == 0:
                         self.data.append(mcstep,
                                          self.obs_tag,
                                          self.obs_observable)
-
+                        self.data.update()
         retval = self.data.get_data(['mcstep', self.obs_tag])
         self.assertListEqual(target, retval)
 
@@ -181,7 +187,8 @@ class TestDataContainer(unittest.TestCase):
         temperatures = list(range(1000, 100, -100))
         for mcstep, temperature in enumerate(temperatures):
             self.data.append(mcstep, 'temperature', temperature)
-        self.assertEqual(len(self.data), len(temperatures)-1)
+            self.data.update()
+        self.assertEqual(len(self.data), len(temperatures))
 
     def test_get_average(self):
         """

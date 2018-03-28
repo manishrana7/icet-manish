@@ -13,8 +13,7 @@ class DataContainer(object):
 
     Todo
     ----
-    * Improvements required once integrated with
-      Base Ensemble class.
+    * Append function needs improvements
 
     """
 
@@ -125,7 +124,7 @@ class DataContainer(object):
 
     def append(self, mcstep, tag, input_value):
         """
-        Append runtime data to data frame.
+        Append runtime data to data row dict.
 
         Parameters :
         ----------
@@ -140,6 +139,11 @@ class DataContainer(object):
             value of parameter or observable to be appended
             to data container
 
+        Todo
+        ----
+        Might be a quite expensive way to add data
+        to data frame.
+
         """
         msg = 'Monte Carlo step has wrong type (int)'
         assert isinstance(mcstep, int), msg
@@ -150,16 +154,19 @@ class DataContainer(object):
         msg = 'Input value has unknown type'
         assert isinstance(input_value, (int, float, list)), msg
 
-        if not len(self._row_data) == 0:
-            if not mcstep == self._row_data['mcstep']:
-                # append row
-                self._data = self._data.append(self._row_data,
-                                               ignore_index=True)
-                # restart row
-                self._row_data.clear()
-
         self._row_data['mcstep'] = mcstep
         self._row_data[tag] = input_value
+
+    def update(self):
+        """
+        Append current data row to data frame
+        and clear dict for the next row of data.
+
+        """
+        self._data = self._data.append(self._row_data,
+                                       ignore_index=True)
+        # restart row
+        self._row_data.clear()
 
     def get_data(self, key_tags):
         """
