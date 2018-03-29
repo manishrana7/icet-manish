@@ -45,8 +45,8 @@ Enumeration and relaxation
 --------------------------
 
 The second step is to generate, relax and then add the structures to
-the database. This is achieved by looping over the :class:`ASE Atoms` instances
-obtained by calling the :func:`enumerate_structures
+the database. This is achieved by looping over the :class:`ASE Atoms
+<ase.atoms>` instances obtained by calling the :func:`enumerate_structures
 <icet.tools.structure_enumeration.enumerate_structures>` function with the
 primitive structure and the list of elements specified earlier as well as the
 list ``sizes``, which specifies the permissible number of atoms per cell, as
