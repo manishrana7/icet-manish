@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from icet import ClusterExpansion
 from collections import OrderedDict
-from matplotlib.markers import MarkerStyle
 
 # step 1: Collect ECIs in dictionary
 ce = ClusterExpansion.read('cluster_expansion.icet')
@@ -14,7 +13,6 @@ for order in range(len(ce.cluster_space.cutoffs)+2):
         if order not in ecis:
             ecis[order] = []
         ecis[order].append([orbit['size'], ce.parameters[orbit['index']]])
-print(ecis[0])
 
 # step 2: Plot ECIs
 fig, axs = plt.subplots(1, 2, sharey=True, figsize=(5, 3))
