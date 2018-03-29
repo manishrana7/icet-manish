@@ -40,6 +40,7 @@ project = re.search("__project__ = '(.*)'", lines).group(1)
 author = re.search("__maintainer__ = '(.*)'", lines).group(1)
 
 site_url = 'https://icet.materialsmodeling.org/'
+html_show_sourcelink = False
 html_logo = "_static/logo.png"
 html_favicon = "_static/logo.ico"
 html_theme = 'sphinx_rtd_theme'
