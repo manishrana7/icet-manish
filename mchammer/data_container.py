@@ -16,10 +16,6 @@ class DataContainer:
     Data container class, which serves for storing
     all information concerned with Monte Carlo
     simulations performed with mchammer.
-
-    Todo
-    ----
-    * append function needs improving
     """
 
     def __init__(self, ensemble):
@@ -61,8 +57,8 @@ class DataContainer:
         Parameters
         ----------
         tag : str
-            name of observable used as header for the pandas data frame
-        property_type : type
+            name of observable used as header for the Pandas data frame
+        obs_type : type
             type of observable parameter
         """
         assert isinstance(tag, str), \
@@ -103,7 +99,7 @@ class DataContainer:
         assert isinstance(tag, str), \
             'Metadata tag has wrong type (str)'
         assert isinstance(value, (str, dt, int)), \
-            'Unknown metadata type'
+            'Unknown metadata type {}'.format(value)
         if tag in self._metadata:
             logger.warning('Cannot overwrite existing metadata ({})'
                            .format(tag))
@@ -212,9 +208,5 @@ class DataContainer:
         ----------
         outfile : str or FileObj
             file to which to write
-
-        Todo
-        ----
-        * To be implemented in a different issue.
         """
         pass

@@ -12,6 +12,10 @@ from collections import OrderedDict
 class TestDataContainer(unittest.TestCase):
     """
     Container for the tests of the class functionality
+
+    Todo
+    ----
+    * Replace current "observers" with instance of real observers.
     """
     def __init__(self, *args, **kwargs):
         super(TestDataContainer, self).__init__(*args, **kwargs)
@@ -31,17 +35,13 @@ class TestDataContainer(unittest.TestCase):
         self.atoms = atoms_prim.repeat(4)
 
     def setUp(self):
-        """
-        setUp all tests with this.
-        """
+        """Set up all test cases with this."""
         SomeEnsemble = BaseEnsemble(atoms=self.atoms,
                                     calculator=self.ce)
         self.data = DataContainer(SomeEnsemble)
 
     def test_add_structure(self):
-        """
-        Test that reference structure is added to DataContainer.
-        """
+        """Test that reference structure is added to DataContainer."""
         self.data.add_structure(self.atoms)
         self.assertEqual(self.data.structure, self.atoms)
         # test another type fails
@@ -49,25 +49,19 @@ class TestDataContainer(unittest.TestCase):
             self.data.add_structure('something')
 
     def test_add_observable(self):
-        """
-        Test that observables are added to DataContainer.
-        """
+        """Test that observables are added to DataContainer."""
         self.data.add_observable('energy', float)
         self.data.add_observable('temperature', float)
         self.assertEqual(len(self.data.observables), 2)
 
     def test_add_parameter(self):
-        """
-        Test that parameters are added to DataContainer
-        """
+        """Test that parameters are added to DataContainer"""
         self.data.add_parameter('temperature', 1000.0)
         self.data.add_parameter('chemical-potential-difference', -0.5)
         self.assertEqual(len(self.data.parameters), 2)
 
     def test_append_data(self):
-        """
-        Test that data is appended to DataContainer.
-        """
+        """Test that data is appended to DataContainer."""
         for mctrial in range(1, 1001):
             if mctrial % min(self.intervals) == 0:
                 row_data = OrderedDict()
@@ -81,9 +75,7 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(len(self.data), 10)
 
     def test_parameters(self):
-        """
-        Test that added parameters has OrderedDict type.
-        """
+        """Test that added parameters has OrderedDict type."""
         target = OrderedDict([('temperature', 300.0),
                               ('chemical-potential-difference', -0.5)])
 
@@ -113,9 +105,7 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(retval, target)
 
     def test_metadata(self):
-        """
-        Test metadata.
-        """
+        """Test metadata."""
         for key in self.data.metadata:
             retval = self.data.metadata[key]
             if key == 'date-created':
@@ -125,8 +115,8 @@ class TestDataContainer(unittest.TestCase):
 
     def test_get_data(self):
         """
-        Test that data is returned from DataContainer
-        has right format (list of lists).
+        Test that data is returned from DataContainer has right format
+        (list of lists).
         """
         target = [[100.0, 100.0], [200.0, 100.0], [300.0, 100.0],
                   [400.0, 100.0], [500.0, 100.0], [600.0, 100.0],
@@ -151,8 +141,7 @@ class TestDataContainer(unittest.TestCase):
 
     def test_reset(self):
         """
-        Test this functionality removes the
-        appended data to DataContainer.
+        Test this functionality removes the appended data to DataContainer.
         """
         row_data = OrderedDict()
         row_data['temperature'] = 100.0
@@ -162,9 +151,7 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(len(self.data), 0)
 
     def test_len(self):
-        """
-        Test total number of rows is returned.
-        """
+        """Test total number of rows is returned."""
         row_data = OrderedDict()
         row_data['temperature'] = 100.0
         for mctrial in range(10, 101, 10):
@@ -172,21 +159,15 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(len(self.data), 10)
 
     def test_get_average(self):
-        """
-        Test functionality.
-        """
+        """Test functionality."""
         pass
 
     def test_load_data(self):
-        """
-        Test read data container from file.
-        """
+        """Test read data container from file."""
         pass
 
     def test_save_data(self):
-        """
-        Test data container is saved in file.
-        """
+        """Test data container is saved in file."""
         pass
 
 
