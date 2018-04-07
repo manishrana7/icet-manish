@@ -28,6 +28,7 @@ Mapping structures
    :undoc-members:
    :inherited-members:
 
+.. _structure_enumeration:
 
 .. index::
    single: Function reference; Structure enumeration

@@ -58,9 +58,9 @@ pages:
     # coverage report
     - mv coverage/ public/
     # letsencrypt setup
-    - fname=`awk '{split($0, s, "."); print s[1]}' doc/homepage/letsencrypt-setup.html`
+    - fname=`awk '{split($0, s, "."); print s[1]}' doc/letsencrypt-setup.html`
     - mkdir -p public/.well-known/acme-challenge/
-    - mv doc/homepage/letsencrypt-setup.html public/.well-known/acme-challenge/$fname
+    - mv doc/letsencrypt-setup.html public/.well-known/acme-challenge/$fname
     # C++ documentation (doxygen)
     - cd doc/apidoc/
     - doxygen Doxyfile
