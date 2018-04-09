@@ -126,11 +126,11 @@ class DataContainer:
         assert isinstance(record, dict), \
             'Input record has wrong type (dict)'
 
-        self._row_data = OrderedDict()
-        self._row_data['mctrial'] = mctrial
-        self._row_data.update(record)
+        row_data = OrderedDict()
+        row_data['mctrial'] = mctrial
+        row_data.update(record)
 
-        self._data = self._data.append(self._row_data,
+        self._data = self._data.append(row_data,
                                        ignore_index=True)
 
     def get_data(self, tags, fill_missing=False):
@@ -162,17 +162,17 @@ class DataContainer:
 
     @property
     def parameters(self):
-        """list : ensemble parameters"""
+        """list : simulation parameters"""
         return self._parameters.copy()
 
     @property
     def observables(self):
-        """list of BaseObserver objects : observables"""
+        """dict of BaseObservers objects : observables"""
         return self._observables
 
     @property
     def metadata(self):
-        """list : metadata associated with data container"""
+        """dict : metadata associated with data container"""
         return self._metadata
 
     def reset(self):
@@ -183,13 +183,16 @@ class DataContainer:
         """number of rows in data frame"""
         return len(self._data)
 
-    def get_average(self, tag: str):
+    def get_average(self, start, stop, tag: str, ):
         """
-        Return average over MonteCarlo steps of parameter
-        and/or observable.
+        Return average of an observable over an interval of trial steps.
 
         Parameters
         ----------
+        start : int
+            lower limit of trial step interval
+        stop : int
+            upper limit of trial step interval
         tag : str
             tag of field over which to average
         """

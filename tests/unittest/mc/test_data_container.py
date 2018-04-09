@@ -41,8 +41,8 @@ class TestDataContainer(unittest.TestCase):
         # test another type of atoms fails
         with self.assertRaises(Exception):
             self.data = DataContainer(atoms='something',
-                                  ensemble_name='some-ensemble',
-                                  random_seed=44)
+                                      ensemble_name='some-ensemble',
+                                      random_seed=44)
 
     def test_structure(self):
         """Test that reference structure is added to DataContainer."""
