@@ -1,44 +1,28 @@
 #!/usr/bin/env python3
-
 import unittest
 
-from mchammer import BaseEnsemble, DataContainer
-from icet import ClusterSpace, ClusterExpansion
+from mchammer import DataContainer
 from ase.build import bulk
 from datetime import datetime
 from collections import OrderedDict
 
 
 class TestDataContainer(unittest.TestCase):
-    """
-    Container for the tests of the class functionality
+    """Container for the tests of the class functionality"""
 
-    Todo
-    ----
-    * Replace current "observers" with instance of real observers.
-    """
     def __init__(self, *args, **kwargs):
         super(TestDataContainer, self).__init__(*args, **kwargs)
-        subelements = ['Ag', 'Pd', 'Au']
-        cutoffs = [1.4] * 3
-        atoms_prim = bulk("Al")
-        cluster_space = ClusterSpace(atoms_prim, cutoffs, subelements)
-        params = list(range(len(cluster_space)))
-
+        self.atoms = bulk('Al').repeat(4)
         self.observers = ['termostat', 'other_obs']
         self.intervals = [100, 200]
         self.obs_tag = ['temperature', 'energy']
         self.obs_observable = [100.0, 100.0]
 
-        self.ce = ClusterExpansion(cluster_space, params)
-        # self.atoms = self.ce.primitive_structure.repeat(4)
-        self.atoms = atoms_prim.repeat(4)
-
     def setUp(self):
-        """Set up all test cases with this."""
-        SomeEnsemble = BaseEnsemble(atoms=self.atoms,
-                                    calculator=self.ce)
-        self.data = DataContainer(SomeEnsemble)
+        """Set up before each test case."""
+        self.data = DataContainer(atoms=self.atoms,
+                                  ensemble_name='some-ensemble',
+                                  random_seed=44)
 
     def test_add_structure(self):
         """Test that reference structure is added to DataContainer."""
@@ -58,7 +42,7 @@ class TestDataContainer(unittest.TestCase):
         """Test that parameters are added to DataContainer"""
         self.data.add_parameter('temperature', 1000.0)
         self.data.add_parameter('chemical-potential-difference', -0.5)
-        self.assertEqual(len(self.data.parameters), 2)
+        self.assertEqual(len(self.data.parameters), 3)
 
     def test_append_data(self):
         """Test that data is appended to DataContainer."""
@@ -76,7 +60,8 @@ class TestDataContainer(unittest.TestCase):
 
     def test_parameters(self):
         """Test that added parameters has OrderedDict type."""
-        target = OrderedDict([('temperature', 300.0),
+        target = OrderedDict([('random-seed', 44),
+                              ('temperature', 300.0),
                               ('chemical-potential-difference', -0.5)])
 
         self.data.add_parameter('temperature', 300.0)
@@ -103,15 +88,6 @@ class TestDataContainer(unittest.TestCase):
         retval = self.data.observables
 
         self.assertEqual(retval, target)
-
-    def test_metadata(self):
-        """Test metadata."""
-        for key in self.data.metadata:
-            retval = self.data.metadata[key]
-            if key == 'date-created':
-                self.assertIsInstance(retval, datetime)
-            else:
-                self.assertIsInstance(retval, str)
 
     def test_get_data(self):
         """

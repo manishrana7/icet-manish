@@ -7,6 +7,8 @@ from ase import Atoms
 from collections import OrderedDict
 from icet.io.logging import logger
 
+from mchammer.observers.base_observer import BaseObserver
+
 logger = logger.getChild('data_container')
 
 
@@ -18,13 +20,34 @@ class DataContainer:
     simulations performed with mchammer.
     """
 
-    def __init__(self, ensemble):
+    def __init__(self, atoms, ensemble_name, random_seed):
         """
         Initialize a DataContainer object.
 
+        Paremeter
+        ---------
+        atoms : ASE Atoms object
+            BaseEnsemble atoms 
+
+        name_ensemble : str
+            BaseEnsemble name
+
+        random_seed : int
+            BaseEnsemble random seed
+
         Attributes
         ----------
-        ensemble : BaseEnsemble object
+        observables : dict
+            dictionary of tag-type pair of added observables.
+
+        parameters : dict
+            dictionary of tag-value pair of added parameters.
+        
+        metadata : dict
+            dictionary of tag-value pair of added metadata.
+
+        data : Pandas data frame object
+            Runtime data collected during the Monte Carlo simulation. 
         """
 
         self._observables = OrderedDict()
@@ -32,10 +55,13 @@ class DataContainer:
         self._metadata = OrderedDict()
         self._data = pd.DataFrame()
 
-        # self._add_metadata('ensemble-name', ensemble.name)
-        self._add_metadata('date-created', datetime.now())
-        self._add_metadata('username', getpass.getuser())
-        self._add_metadata('hostname', socket.gethostname())
+        self.add_structure(atoms)
+        self.add_parameter('random-seed', random_seed)
+
+        self._metadata['ensemble-name'] =  ensemble_name
+        self._metadata['date-created'] = datetime.now()
+        self._metadata['username'] = getpass.getuser()
+        self._metadata['hostname'] = socket.gethostname()
 
     def add_structure(self, atoms):
         """
@@ -47,7 +73,7 @@ class DataContainer:
         """
         assert isinstance(atoms, Atoms), \
             'Structure must be provided as ASE Atoms object'
-        self.structure = atoms
+        self.structure = atoms.copy()
 
     def add_observable(self, tag: str, obs_type):
         """
@@ -63,7 +89,7 @@ class DataContainer:
         assert isinstance(tag, str), \
             'Observable tag has wrong type (str)'
         assert isinstance(obs_type, (type, list)), \
-            'Unknown observable type'
+            'Unknown observable type ({})'.format(obs_type)
         self._observables[tag] = obs_type
 
     def add_parameter(self, tag, value):
@@ -84,26 +110,6 @@ class DataContainer:
             'Unknown parameter type: {}'.format(type(value))
         self._parameters[tag] = value
 
-    def _add_metadata(self, tag, value):
-        """
-        Add metadata to the data container.
-
-        Parameters
-        ----------
-        tag : str
-            name of the metadata field
-        value : str, date, int
-            value of the metadata
-        """
-        assert isinstance(tag, str), \
-            'Metadata tag has wrong type (str)'
-        assert isinstance(value, (str, dt, int)), \
-            'Unknown metadata type {}'.format(value)
-        if tag in self._metadata:
-            logger.warning('Cannot overwrite existing metadata ({})'
-                           .format(tag))
-            return
-        self._metadata[tag] = value
 
     def append(self, mctrial: int, record: dict):
         """
