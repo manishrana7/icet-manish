@@ -7,7 +7,6 @@ from ase import Atoms
 from collections import OrderedDict
 from icet.io.logging import logger
 
-
 logger = logger.getChild('data_container')
 
 
@@ -48,8 +47,7 @@ class DataContainer:
         """
         assert isinstance(atoms, Atoms), \
             'Structure must be provided as ASE Atoms object'
-        atoms_copy = atoms.copy()
-        self.structure = atoms_copy
+        self.structure = atoms
 
     def add_observable(self, tag: str, obs_type):
         """
