@@ -99,6 +99,15 @@ class TestDataContainer(unittest.TestCase):
 
         self.assertDictEqual(retval, target)
 
+    def test_metadata(self):
+        """Test metadata."""
+        for key in self.data.metadata:
+            retval = self.data.metadata[key]
+            if key in ['date-created', 'date-last-backup']:
+                self.assertIsInstance(retval, datetime)
+            else:
+                self.assertIsInstance(retval, str)
+
     def test_get_data(self):
         """
         Test that data is returned from DataContainer has right format
