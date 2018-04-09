@@ -141,7 +141,7 @@ class DataContainer:
         self._data = self._data.append(self._row_data,
                                        ignore_index=True)
 
-    def get_data(self, tags):
+    def get_data(self, tags, fill_missing=False):
         """
         Returns a list of lists with the current
         data stored in the Pandas data frame.
@@ -160,7 +160,10 @@ class DataContainer:
                     'observable is not part of DataContainer: {}'.format(tag)
                 data_elem = self._data.loc[row, tag] 
                 if math.isnan(data_elem):
-                    data_elem = None  
+                    if fill_missing and row>0:
+                        data_elem = self._data.loc[row-1, tag]
+                    else:
+                        data_elem = None  
                 data_row.append(data_elem)
             data_list.append(data_row)
         return data_list

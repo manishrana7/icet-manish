@@ -104,13 +104,13 @@ class TestDataContainer(unittest.TestCase):
         Test that data is returned from DataContainer has right format
         (list of lists).
         """
-        target = [[10.0, 64.0, None], [20.0, 64.0, 64.0], [30.0, 64.0, None],
+        target = [[20.0, 64.0, 64.0], [30.0, 64.0, None],
                   [40.0, 64.0, 64.0], [50.0, 64.0, None], [60.0, 64.0, 64.0],
                   [70.0, 64.0, None], [80.0, 64.0, 64.0], [90.0, 64.0, None],
                   [100.0, 64.0, 64.0]]
 
         min_interval = min([obs.interval for obs in self.observers])
-        for mctrial in range(1, 101):
+        for mctrial in range(20, 101):
             if mctrial % min_interval == 0:
                 row_data = OrderedDict()
                 for obs in self.observers:
@@ -123,8 +123,17 @@ class TestDataContainer(unittest.TestCase):
                                      'other_observer'])
         self.assertListEqual(target, retval)
 
+        target = [[20.0, 64.0, 64.0], [30.0, 64.0, 64.0],
+                  [40.0, 64.0, 64.0], [50.0, 64.0, 64.0], [60.0, 64.0, 64.0],
+                  [70.0, 64.0, 64.0], [80.0, 64.0, 64.0], [90.0, 64.0, 64.0],
+                  [100.0, 64.0, 64.0]]
+
+        retval = self.data.get_data(['mctrial', 'test_observer',
+                                     'other_observer'], fill_missing=True)
+        self.assertListEqual(target, retval)
+
         with self.assertRaises(AssertionError):
-            self.data.get_data(['concentration'])
+            self.data.get_data(['temperature'])
 
     def test_reset(self):
         """
