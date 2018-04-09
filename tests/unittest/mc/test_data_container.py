@@ -13,9 +13,9 @@ class TestDataContainer(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestDataContainer, self).__init__(*args, **kwargs)
         self.atoms = bulk('Al').repeat(4)
-        self.observers = ['termostat', 'other_obs']
+        self.observers = ['termostat', 'SRO']
         self.intervals = [100, 200]
-        self.obs_tag = ['temperature', 'energy']
+        self.obs_tag = ['temperature', 'sro']
         self.obs_observable = [100.0, 100.0]
 
     def setUp(self):
@@ -39,10 +39,13 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(len(self.data.observables), 2)
 
     def test_add_parameter(self):
-        """Test that parameters are added to DataContainer"""
-        self.data.add_parameter('temperature', 1000.0)
+        """Test that parameters are added to DataContainer."""
+        self.data.add_parameter('temperature', 273.15)
         self.data.add_parameter('chemical-potential-difference', -0.5)
         self.assertEqual(len(self.data.parameters), 3)
+        index_atoms = [i for i in range(len(self.atoms))]
+        self.data.add_parameter('index_atoms', index_atoms)
+        self.assertEqual(len(self.data.parameters), 4)
 
     def test_append_data(self):
         """Test that data is appended to DataContainer."""
@@ -61,23 +64,17 @@ class TestDataContainer(unittest.TestCase):
     def test_parameters(self):
         """Test that added parameters has OrderedDict type."""
         target = OrderedDict([('random-seed', 44),
-                              ('temperature', 300.0),
+                              ('temperature', 375.15),
                               ('chemical-potential-difference', -0.5)])
 
-        self.data.add_parameter('temperature', 300.0)
+        self.data.add_parameter('temperature', 375.15)
         self.data.add_parameter('chemical-potential-difference', -0.5)
 
         retval = self.data.parameters
         self.assertEqual(retval, target)
 
     def test_observables(self):
-        """
-        Test that added observables has OrderedDict type.
-
-        Todo
-        ----
-        * Add seed or PRNG, interval, minimum interval
-        """
+        """Test that added observables has OrderedDict type."""
         target = OrderedDict([('energy', float),
                               ('temperature', float),
                               ('sro1', list)])

@@ -89,7 +89,7 @@ class DataContainer:
         assert isinstance(tag, str), \
             'Observable tag has wrong type (str)'
         assert isinstance(obs_type, (type, list)), \
-            'Unknown observable type ({})'.format(obs_type)
+            'Unknown observable type: {}'.format(obs_type)
         self._observables[tag] = obs_type
 
     def add_parameter(self, tag, value):
@@ -108,7 +108,11 @@ class DataContainer:
             'Parameter tag has the wrong type (str).'
         assert isinstance(value, (int, float, list)), \
             'Unknown parameter type: {}'.format(type(value))
-        self._parameters[tag] = value
+
+        if isinstance(value, list):
+            self._parameters[tag] = value[:]
+        else:
+            self._parameters[tag] = value
 
 
     def append(self, mctrial: int, record: dict):
