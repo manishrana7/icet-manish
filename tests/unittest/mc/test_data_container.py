@@ -38,14 +38,15 @@ class TestDataContainer(unittest.TestCase):
         self.data = DataContainer(atoms=self.atoms,
                                   ensemble_name='some-ensemble',
                                   random_seed=44)
-
-    def test_add_structure(self):
-        """Test that reference structure is added to DataContainer."""
-        self.data.add_structure(self.atoms)
-        self.assertEqual(self.data.structure, self.atoms)
-        # test another type fails
+        # test another type of atoms fails
         with self.assertRaises(Exception):
-            self.data.add_structure('something')
+            self.data = DataContainer(atoms='something',
+                                  ensemble_name='some-ensemble',
+                                  random_seed=44)
+
+    def test_structure(self):
+        """Test that reference structure is added to DataContainer."""
+        self.assertEqual(self.data.structure, self.atoms)
 
     def test_add_observable(self):
         """Test that observables are added to DataContainer."""

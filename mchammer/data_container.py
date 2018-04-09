@@ -25,7 +25,7 @@ class DataContainer:
         Paremeter
         ---------
         atoms : ASE Atoms object
-            BaseEnsemble atoms 
+            Add a reference atomic structure to the data container.
 
         name_ensemble : str
             BaseEnsemble name
@@ -48,30 +48,22 @@ class DataContainer:
             Runtime data collected during the Monte Carlo simulation. 
         """
 
+        if atoms is not None:
+            assert isinstance(atoms, Atoms), \
+            'Structure must be provided as ASE Atoms object'
+            self.structure = atoms.copy()
+
         self._observables = OrderedDict()
         self._parameters = OrderedDict()
         self._metadata = OrderedDict()
         self._data = pd.DataFrame()
 
-        self.add_structure(atoms)
         self.add_parameter('random-seed', random_seed)
 
         self._metadata['ensemble-name'] =  ensemble_name
         self._metadata['date-created'] = datetime.now()
         self._metadata['username'] = getpass.getuser()
         self._metadata['hostname'] = socket.gethostname()
-
-    def add_structure(self, atoms):
-        """
-        Add a reference atomic structure to the data container.
-
-        Parameters
-        ----------
-        atoms : ASE Atoms object
-        """
-        assert isinstance(atoms, Atoms), \
-            'Structure must be provided as ASE Atoms object'
-        self.structure = atoms.copy()
 
     def add_observable(self, tag: str, obs_type):
         """

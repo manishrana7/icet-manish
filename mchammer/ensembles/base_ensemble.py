@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from mchammer.data_container import DataContainer
 from mchammer.observers.base_observer import BaseObserver
+from mchammer.calculators.base_calculator import BaseCalculator
 import random
 from math import gcd
 
@@ -36,7 +37,13 @@ class BaseEnsemble(ABC):
         random.seed(a=self.random_seed)
 
         if data_container is None:
-            self._data_container = DataContainer()
+            if calculator is None:
+                atoms = None
+            else:
+                atoms = self._calculator.atoms
+            self._data_container = DataContainer(atoms,
+                                                 name,
+                                                 random_seed)
         else:
             raise NotImplementedError
 
