@@ -306,7 +306,7 @@ class StructureContainer(object):
 
         return prop_list
 
-    def get_structure(self, structure_indices=None):
+    def get_structures(self, structure_indices=None):
         '''
         Return a list of structures in the form of ASE Atoms
 

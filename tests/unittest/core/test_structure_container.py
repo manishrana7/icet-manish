@@ -243,14 +243,14 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
         p_list = self.sc.get_properties(key='total_energy')
         self.assertTrue(isinstance(properties, float) for properties in p_list)
 
-    def test_get_structure(self):
+    def test_get_structures(self):
         '''
         Testing get_structures functionality
         '''
-        s_list = self.sc.get_structure()
+        s_list = self.sc.get_structures()
         self.assertTrue(isinstance(atoms, Atoms) for atoms in s_list)
         # passing a list of indexes
-        s_list = self.sc.get_structure([0])
+        s_list = self.sc.get_structures([0])
         self.assertTrue(isinstance(atoms, Atoms) for atoms in s_list)
 
     def test_cluster_space(self):
