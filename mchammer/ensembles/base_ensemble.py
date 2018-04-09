@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from mchammer.data_container import DataContainer
 from mchammer.observers.base_observer import BaseObserver
-from mchammer.calculators.base_calculator import BaseCalculator
 import random
 from math import gcd
 

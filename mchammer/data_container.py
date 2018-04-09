@@ -1,12 +1,10 @@
 import pandas as pd
-from datetime import date as dt
 from datetime import datetime
 import getpass
 import socket
 from ase import Atoms
 from collections import OrderedDict
 from icet.io.logging import logger
-from mchammer.observers.base_observer import BaseObserver
 
 logger = logger.getChild('data_container')
 
@@ -40,17 +38,17 @@ class DataContainer:
 
         parameters : dict
             dictionary of tag-value pair of added parameters.
-        
+
         metadata : dict
             dictionary of tag-value pair of added metadata.
 
         data : Pandas data frame object
-            Runtime data collected during the Monte Carlo simulation. 
+            Runtime data collected during the Monte Carlo simulation.
         """
 
         if atoms is not None:
             assert isinstance(atoms, Atoms), \
-            'Structure must be provided as ASE Atoms object'
+             'Structure must be provided as ASE Atoms object'
             self.structure = atoms.copy()
 
         self._observables = OrderedDict()
@@ -60,7 +58,7 @@ class DataContainer:
 
         self.add_parameter('random-seed', random_seed)
 
-        self._metadata['ensemble-name'] =  ensemble_name
+        self._metadata['ensemble-name'] = ensemble_name
         self._metadata['date-created'] = datetime.now()
         self._metadata['username'] = getpass.getuser()
         self._metadata['hostname'] = socket.gethostname()
@@ -103,7 +101,6 @@ class DataContainer:
             self._parameters[tag] = value[:]
         else:
             self._parameters[tag] = value
-
 
     def append(self, mctrial: int, record: dict):
         """
@@ -150,12 +147,12 @@ class DataContainer:
             for tag in tags:
                 assert tag in self._data, \
                     'observable is not part of DataContainer: {}'.format(tag)
-                data_elem = self._data.loc[row, tag] 
+                data_elem = self._data.loc[row, tag]
                 if math.isnan(data_elem):
-                    if fill_missing and row>0:
+                    if fill_missing and row > 0:
                         data_elem = self._data.loc[row-1, tag]
                     else:
-                        data_elem = None  
+                        data_elem = None
                 data_row.append(data_elem)
             data_list.append(data_row)
         return data_list
