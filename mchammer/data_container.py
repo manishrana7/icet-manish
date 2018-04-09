@@ -6,11 +6,9 @@ import socket
 from ase import Atoms
 from collections import OrderedDict
 from icet.io.logging import logger
-
 from mchammer.observers.base_observer import BaseObserver
 
 logger = logger.getChild('data_container')
-
 
 
 class DataContainer:
@@ -153,13 +151,17 @@ class DataContainer:
         tags : list of str
             list with tags of the required properties.
         """
+        import math
         data_list = []
         for row in range(len(self._data)):
             data_row = []
             for tag in tags:
                 assert tag in self._data, \
-                    'observable/parameter is not part of DataContainer'
-                data_row.append(self._data.loc[row, tag])
+                    'observable is not part of DataContainer: {}'.format(tag)
+                data_elem = self._data.loc[row, tag] 
+                if math.isnan(data_elem):
+                    data_elem = None  
+                data_row.append(data_elem)
             data_list.append(data_row)
         return data_list
 
