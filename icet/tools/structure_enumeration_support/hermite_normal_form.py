@@ -70,7 +70,6 @@ def yield_hermite_normal_forms(det, pbc):
             if bc:
                 hnf[i, i] = det
                 break
-        print(hnf)
         yield hnf
 
     # 2D
