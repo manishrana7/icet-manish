@@ -56,8 +56,8 @@ Generate surface slabs with adsorbates
 Lower dimensional systems can also be enumerated. Here, this is demonstrated
 with a copper surface with oxygen atoms adsorbed in hollow sites on a {111}
 surface. The key to trigger a two- or one-dimensional enumeration is to make
-sure that the periodic boundary conditions on the input structure reflect the
-expected behavior. For the surface system, this means that the the boundary
+sure that the periodic boundary conditions of the input structure reflect the
+desired behavior. For the surface system, this means that the the boundary
 conditions are *not* periodic in the direction of the normal to the surface.
 This is the default behavior with ASE:s surface building functions, but is in
 the below example enforced for clarity.
