@@ -36,7 +36,13 @@ class BaseEnsemble(ABC):
         random.seed(a=self.random_seed)
 
         if data_container is None:
-            self._data_container = DataContainer()
+            if calculator is None:
+                atoms = None
+            else:
+                atoms = self._calculator.atoms
+            self._data_container = DataContainer(atoms,
+                                                 name,
+                                                 random_seed)
         else:
             raise NotImplementedError
 
