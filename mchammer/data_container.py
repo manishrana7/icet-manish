@@ -92,15 +92,13 @@ class DataContainer:
         value : int, float, list of int or float
             parameter value
         """
+        import copy
         assert isinstance(tag, str), \
             'Parameter tag has the wrong type (str).'
         assert isinstance(value, (int, float, list)), \
             'Unknown parameter type: {}'.format(type(value))
 
-        if isinstance(value, list):
-            self._parameters[tag] = value[:]
-        else:
-            self._parameters[tag] = value
+        self._parameters[tag] = copy.deepcopy(value)
 
     def append(self, mctrial: int, record: dict):
         """
@@ -130,31 +128,52 @@ class DataContainer:
         self._data = self._data.append(row_data,
                                        ignore_index=True)
 
-    def get_data(self, tags, fill_missing=False):
+    def get_data(self, tags=None, interval=None, fill_missing=False):
         """
         Returns a list of lists with the current
         data stored in the Pandas data frame.
 
         Parameters
         ----------
-        tags : list of str
-            list with tags of the required properties.
+        tags : list of str, default None
+            list with tags of the required properties. None will return all
+            the actual columns in data frame.
+
+        interval : tuple, default None
+            Range of trial steps values from which data frame will be retuned.
+
+        fill_missing : boolean, default False
+            If True, fill missing values forward.
         """
         import math
-        data_list = []
-        for row in range(len(self._data)):
-            data_row = []
+
+        if tags is None:
+            tags = self._data.columns.tolist()
+        else:
             for tag in tags:
                 assert tag in self._data, \
                     'observable is not part of DataContainer: {}'.format(tag)
-                data_elem = self._data.loc[row, tag]
-                if math.isnan(data_elem):
-                    if fill_missing and row > 0:
-                        data_elem = self._data.loc[row-1, tag]
-                    else:
-                        data_elem = None
-                data_row.append(data_elem)
-            data_list.append(data_row)
+
+        if interval is None:
+            data = self._data.loc[:, tags]
+        else:
+            assert isinstance(interval, tuple), \
+                'interval must be a tuple: {}'.format(type(interval))
+            assert len(interval) == 2, \
+                'interval must contain only a lower and an upper value'
+            data = self._data.set_index(self._data.mctrial)
+            lower, upper = interval
+            data = data.loc[lower:upper, tags]
+
+        if fill_missing:
+                data = data.fillna(method='pad')
+
+        data_list = []
+        for tag in tags:
+            data_column = data.get(tag).tolist()
+            data_column = [None if math.isnan(x) else x for x in data_column]
+            data_list.append(data_column)
+
         return data_list
 
     @property

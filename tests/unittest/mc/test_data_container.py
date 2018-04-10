@@ -114,10 +114,10 @@ class TestDataContainer(unittest.TestCase):
         Test that data is returned from DataContainer has right format
         (list of lists).
         """
-        target = [[20.0, 64.0, 64.0], [30.0, 64.0, None],
-                  [40.0, 64.0, 64.0], [50.0, 64.0, None], [60.0, 64.0, 64.0],
-                  [70.0, 64.0, None], [80.0, 64.0, 64.0], [90.0, 64.0, None],
-                  [100.0, 64.0, 64.0]]
+
+        target = [[20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0],
+                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0],
+                  [64.0, None, 64.0, None, 64.0, None, 64.0, None, 64.0]]
 
         min_interval = min([obs.interval for obs in self.observers])
         for mctrial in range(20, 101):
@@ -133,13 +133,19 @@ class TestDataContainer(unittest.TestCase):
                                      'other_observer'])
         self.assertListEqual(target, retval)
 
-        target = [[20.0, 64.0, 64.0], [30.0, 64.0, 64.0],
-                  [40.0, 64.0, 64.0], [50.0, 64.0, 64.0], [60.0, 64.0, 64.0],
-                  [70.0, 64.0, 64.0], [80.0, 64.0, 64.0], [90.0, 64.0, 64.0],
-                  [100.0, 64.0, 64.0]]
+        target = [[20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0],
+                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0],
+                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0]]
 
         retval = self.data.get_data(['mctrial', 'test_observer',
                                      'other_observer'], fill_missing=True)
+        self.assertListEqual(target, retval)
+
+        target = [[40.0, 50.0, 60.0, 70.0], [64.0, 64.0, 64.0, 64.0],
+                  [64.0, None, 64.0, None]]
+
+        retval = self.data.get_data(['mctrial', 'test_observer',
+                                     'other_observer'], interval=(40, 70))
         self.assertListEqual(target, retval)
 
         with self.assertRaises(AssertionError):
