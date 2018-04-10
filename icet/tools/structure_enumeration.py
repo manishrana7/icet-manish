@@ -12,7 +12,8 @@ The algorithm was developed by Gus L. W Hart and Rodney W. Forcade in
 from itertools import product
 import itertools
 import numpy as np
-from spglib import get_symmetry, niggli_reduce
+from spglib import get_symmetry
+from spglib import niggli_reduce as spg_nigg_red
 from ase import Atoms
 from .structure_enumeration_support.hermite_normal_form import get_reduced_hnfs
 from .structure_enumeration_support.smith_normal_form import get_unique_snfs
@@ -84,7 +85,7 @@ def __get_labelings(snf, iter_elements, nsites):
         Inequivalent labelings.
     '''
     labelings = []
-    for labeling in itertools.product(*iter_elements*snf.ncells):
+    for labeling in itertools.product(*iter_elements * snf.ncells):
         unique = True
         for labeling_trans in __translate_labelings(labeling, snf, nsites,
                                                     include_self=False):
@@ -129,7 +130,7 @@ def __permute_labeling(labeling, snf, transformation, nsites):
     new_group_order = np.dot(snf.group_order, transformation[0].T)
 
     # Loop over every atom to find its new position
-    labeling_new = [0]*len(labeling)
+    labeling_new = [0] * len(labeling)
     for member_index, member in enumerate(new_group_order):
 
         # Transform according to Gp,
@@ -206,7 +207,7 @@ def __yield_unique_labelings(labelings, snf, hnf, nsites):
             yield labeling
 
 
-def __labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements):
+def __labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements, pbc):
     '''
     Get ASE Atoms object from labeling, HNF matrix and parent lattice.
 
@@ -224,6 +225,8 @@ def __labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements):
         Scaled coordinates to all sites in the primitive cell.
     elements : list of str
         List of elements, e.g. ['Au', 'Ag']
+    pbc : list of bools
+        Periodic boundary conditions of the primitive structure
 
     Returns
     -------
@@ -251,6 +254,7 @@ def __labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements):
                     count += 1
     atoms = Atoms(symbols, positions, cell=new_cell, pbc=(True, True, True))
     atoms.wrap()
+    atoms.pbc = pbc
     return atoms
 
 
@@ -323,7 +327,7 @@ def get_symmetry_operations(atoms, tol=1e-3):
     return symmetries
 
 
-def enumerate_structures(atoms, sizes, subelements, niggli_reduction=True):
+def enumerate_structures(atoms, sizes, subelements, niggli_reduce=None):
     '''
     Generate enumerated structures, i.e. all inequivalent structures up to a
     certain size.
@@ -333,6 +337,10 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduction=True):
 
     * Phys. Rev. B 77, 224115 (2008) [HarFor08]_
     * Phys. Rev. B 80, 014120 (2009) [HarFor09]_
+
+    The function is sensitive to the boundary conditions of the input
+    structure. An enumeration of, for example, a surface can thus be performed
+    by setting `atoms.pbc = [True, True, False]`.
 
     Parameters
     ----------
@@ -345,6 +353,8 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduction=True):
         Elements to decorate the structure, e.g. ['Au', 'Ag']
     niggli_reduction : bool
         If True perform a Niggli reduction with spglib for each structure.
+        Default is True if `atoms` has all boundary conditions periodic,
+        otherwise False.
 
     Yields
     ------
@@ -357,7 +367,7 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduction=True):
 
     # Construct descriptor of where species are allowed to be
     if isinstance(subelements[0], str):
-        iter_elements = [range(len(subelements))]*nsites
+        iter_elements = [range(len(subelements))] * nsites
         elements = subelements
     elif len(subelements) == nsites:
         assert isinstance(subelements[0][0], str)
@@ -373,6 +383,11 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduction=True):
         raise Exception('subelements needs to be a list of strings '
                         'or a list of list of strings.')
 
+    # Niggli reduce by default if all directions have
+    # periodic boundary conditions
+    if not niggli_reduce:
+        niggli_reduce = (sum(atoms.pbc) == 3)
+
     symmetries = get_symmetry_operations(atoms)
 
     # Loop over each cell size
@@ -380,17 +395,18 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduction=True):
         if ncells == 0:
             continue
 
-        hnfs = get_reduced_hnfs(ncells, symmetries)
+        hnfs = get_reduced_hnfs(ncells, symmetries, atoms.pbc)
         snfs = get_unique_snfs(hnfs)
 
         for snf in snfs:
             labelings = __get_labelings(snf, iter_elements, nsites)
             for hnf in snf.hnfs:
-                if niggli_reduction:
-                    new_cell = niggli_reduce(np.dot(atoms.cell.T, hnf.H).T)
+                if niggli_reduce:
+                    new_cell = spg_nigg_red(np.dot(atoms.cell.T, hnf.H).T)
                 else:
                     new_cell = np.dot(atoms.cell.T, hnf.H).T
                 for labeling in __yield_unique_labelings(labelings, snf, hnf,
                                                          nsites):
                     yield __labeling_to_atoms(labeling, hnf, atoms.cell,
-                                              new_cell, basis, elements)
+                                              new_cell, basis, elements,
+                                              atoms.pbc)
