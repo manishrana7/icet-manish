@@ -6,6 +6,7 @@ from ase import Atoms
 from collections import OrderedDict
 from icet.io.logging import logger
 
+
 logger = logger.getChild('data_container')
 
 
@@ -14,36 +15,36 @@ class DataContainer:
     Data container class, which serves for storing
     all information concerned with Monte Carlo
     simulations performed with mchammer.
+
+    Parameters
+    ----------
+    atoms : ASE Atoms object
+        reference atomic structure associated with the data container
+
+    name_ensemble : str
+        name of associated ensemble
+
+    random_seed : int
+        random seed used in random number generator
+
+    Attributes
+    ----------
+    observables : dict
+        dictionary of tag-type pair of added observables.
+
+    parameters : dict
+        dictionary of tag-value pair of added parameters.
+
+    metadata : dict
+        dictionary of tag-value pair of added metadata.
+
+    data : Pandas data frame object
+        Runtime data collected during the Monte Carlo simulation.
     """
 
-    def __init__(self, atoms, ensemble_name, random_seed):
+    def __init__(self, atoms, ensemble_name: str, random_seed: int):
         """
         Initialize a DataContainer object.
-
-        Paremeter
-        ---------
-        atoms : ASE Atoms object
-            Reference atomic structure to the data container.
-
-        name_ensemble : str
-            Associated BaseEnsemble object name.
-
-        random_seed : int
-            Random seed used in random number generator.
-
-        Attributes
-        ----------
-        observables : dict
-            dictionary of tag-type pair of added observables.
-
-        parameters : dict
-            dictionary of tag-value pair of added parameters.
-
-        metadata : dict
-            dictionary of tag-value pair of added metadata.
-
-        data : Pandas data frame object
-            Runtime data collected during the Monte Carlo simulation.
         """
 
         if atoms is not None:
@@ -80,44 +81,42 @@ class DataContainer:
             'Unknown observable type: {}'.format(obs_type)
         self._observables[tag] = obs_type
 
-    def add_parameter(self, tag, value):
+    def add_parameter(self, tag: str, value):
         """
-        Add parameter required for initial setting
-        of the associated ensemble.
+        Add parameter of the associated ensemble.
 
-        Parameters :
+        Parameters
         ----------
         tag : str
-            name of the parameter.
-        value : int, float, list of int or float
-            parameter value.
+            parameter name
+        value : int or float or list of int or float
+            parameter value
         """
         import copy
         assert isinstance(tag, str), \
             'Parameter tag has the wrong type (str).'
         assert isinstance(value, (int, float, list)), \
             'Unknown parameter type: {}'.format(type(value))
-
         self._parameters[tag] = copy.deepcopy(value)
 
     def append(self, mctrial: int, record: dict):
         """
-        Append runtime data to buffer dict.
+        Append data to the data container.
 
         Parameters
         ----------
         mctrial : int
-            current Monte Carlo step.
+            current Monte Carlo trial step
         record : dict
-            dictionary of tag-value pairs representing observations.
+            dictionary of tag-value pairs representing observations
 
         Todo
         ----
-        Might be a quite expensive way to add data
-        to data frame.
+        This might be a quite expensive way to add data to the data
+        frame. Testing and profiling to be carried out later.
         """
         assert isinstance(mctrial, int), \
-            'Monte Carlo step has wrong type (int)'
+            'Monte Carlo trial step has wrong type (int)'
         assert isinstance(record, dict), \
             'Input record has wrong type (dict)'
 
@@ -130,20 +129,20 @@ class DataContainer:
 
     def get_data(self, tags=None, interval=None, fill_missing=False):
         """
-        Returns a list of lists with the current
-        data stored in the Pandas data frame.
+        Returns a list of lists representing the accumulated data for
+        the observables specified via tags.
 
         Parameters
         ----------
-        tags : list of str, default None
-            list with tags of the required properties. None will return all
-            the actual columns in data frame.
+        tags : list of str
+            tags of the required properties; if None all columns of the data
+            frame will be returned
 
-        interval : tuple, default None
-            Range of trial steps values from which data frame will be retuned.
+        interval : tuple
+            range of trial steps values from which data frame will be returned
 
-        fill_missing : boolean, default False
-            If True, fill missing values forward.
+        fill_missing : bool
+            If True fill missing values forward
         """
         import math
 
@@ -166,7 +165,7 @@ class DataContainer:
             data = data.loc[lower:upper, tags]
 
         if fill_missing:
-                data = data.fillna(method='pad')
+            data = data.fillna(method='pad')
 
         data_list = []
         for tag in tags:
@@ -178,39 +177,39 @@ class DataContainer:
 
     @property
     def parameters(self):
-        """list : simulation parameters"""
+        """ list : simulation parameters """
         return self._parameters.copy()
 
     @property
     def observables(self):
-        """dict of BaseObservers objects : observables"""
+        """ dict : observables """
         return self._observables
 
     @property
     def metadata(self):
-        """dict : metadata associated with data container"""
+        """ dict : metadata associated with data container """
         return self._metadata
 
     def reset(self):
-        """Reset data frame of data container."""
+        """ Reset (clear) data frame of data container. """
         self._data = pd.DataFrame()
 
     def __len__(self):
-        """number of rows in data frame"""
+        """ Number of rows in data frame """
         return len(self._data)
 
-    def get_average(self, start, stop, tag: str, ):
+    def get_average(self, start: int, stop: int, tag: str):
         """
         Return average of an observable over an interval of trial steps.
 
         Parameters
         ----------
         start : int
-            lower limit of trial step interval.
+            lower limit of trial step interval
         stop : int
-            upper limit of trial step interval.
+            upper limit of trial step interval
         tag : str
-            tag of field over which to average.
+            tag of field over which to average
         """
         pass
 
