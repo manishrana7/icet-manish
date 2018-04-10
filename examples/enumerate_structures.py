@@ -6,7 +6,7 @@ structure up to a certain size.
 
 # Import modules
 from ase import Atom
-from ase.build import bulk
+from ase.build import bulk, fcc111, add_adsorbate
 from ase.db import connect
 from icet.tools import enumerate_structures
 
@@ -27,4 +27,19 @@ atoms.append(Atom('H', (a/2, a/2, a/2)))
 species = [['Pd'], ['H', 'V']]
 db = connect('PdHVac-fcc.db')
 for structure in enumerate_structures(atoms, range(1, 5), species):
+    db.write(structure)
+
+# Enumerate a copper surface with oxygen adsorbates (or vacancies) in
+# fcc and hcp hollow sites.
+atoms = fcc111('Cu', (1, 1, 5), vacuum=10.0)
+atoms.pbc = [True, True, False]
+add_adsorbate(atoms, 'O', 1.2, 'fcc')
+add_adsorbate(atoms, 'O', 1.2, 'hcp')
+species = []
+for atom in atoms:
+    if atom.symbol == 'Cu':
+        species.append(['Cu'])
+    else:
+        species.append(['O', 'H'])
+for structure in enumerate_structures(atoms, range(1, 11), species):
     db.write(structure)
