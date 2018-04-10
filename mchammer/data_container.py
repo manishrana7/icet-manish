@@ -23,13 +23,13 @@ class DataContainer:
         Paremeter
         ---------
         atoms : ASE Atoms object
-            Add a reference atomic structure to the data container.
+            Reference atomic structure to the data container.
 
         name_ensemble : str
-            BaseEnsemble name
+            Associated BaseEnsemble object name.
 
         random_seed : int
-            BaseEnsemble random seed
+            Random seed used in random number generator.
 
         Attributes
         ----------
@@ -65,14 +65,14 @@ class DataContainer:
 
     def add_observable(self, tag: str, obs_type):
         """
-        Add an observable to the list of observables.
+        Add an observable to the dict with observables.
 
         Parameters
         ----------
         tag : str
-            name of observable used as header for the Pandas data frame
+            name of observable.
         obs_type : type
-            type of observable parameter
+            type of observable parameter.
         """
         assert isinstance(tag, str), \
             'Observable tag has wrong type (str)'
@@ -88,9 +88,9 @@ class DataContainer:
         Parameters :
         ----------
         tag : str
-            name of the parameter
+            name of the parameter.
         value : int, float, list of int or float
-            parameter value
+            parameter value.
         """
         import copy
         assert isinstance(tag, str), \
@@ -107,9 +107,9 @@ class DataContainer:
         Parameters
         ----------
         mctrial : int
-            current Monte Carlo step
+            current Monte Carlo step.
         record : dict
-            dictionary of tag-value pairs representing observations
+            dictionary of tag-value pairs representing observations.
 
         Todo
         ----
@@ -206,11 +206,11 @@ class DataContainer:
         Parameters
         ----------
         start : int
-            lower limit of trial step interval
+            lower limit of trial step interval.
         stop : int
-            upper limit of trial step interval
+            upper limit of trial step interval.
         tag : str
-            tag of field over which to average
+            tag of field over which to average.
         """
         pass
 
