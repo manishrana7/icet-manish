@@ -234,4 +234,5 @@ class DataContainer:
         outfile : str or FileObj
             file to which to write
         """
+        self._metadata['date-last-backup'] = datetime.now()
         pass
