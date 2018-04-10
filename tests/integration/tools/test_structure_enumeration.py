@@ -29,7 +29,6 @@ def count_structures(atoms, sizes, species, correct_count, tag):
     count = 0
     for _ in enumerate_structures(atoms, sizes, species):
         count += 1
-    print(count)
     msg = 'Structure enumeration failed for {}'.format(tag)
     assert count == correct_count, msg
 
