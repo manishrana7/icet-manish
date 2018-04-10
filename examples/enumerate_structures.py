@@ -23,7 +23,7 @@ for structure in enumerate_structures(atoms, range(1, 7), ['Pd', 'Au']):
 # either a hydrogen or a vacancy (vanadium will serve as our "vacancy")
 a = 4.0
 atoms = bulk('Au', a=a)
-atoms.append(Atom('H', (a/2, a/2, a/2)))
+atoms.append(Atom('H', (a / 2, a / 2, a / 2)))
 species = [['Pd'], ['H', 'V']]
 db = connect('PdHVac-fcc.db')
 for structure in enumerate_structures(atoms, range(1, 5), species):
