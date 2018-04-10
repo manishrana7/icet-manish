@@ -85,7 +85,7 @@ def yield_hermite_normal_forms(det, pbc):
                     elif not pbc[1]:
                         hnf = [[a, 0, 0],
                                [0, 1, 0],
-                               [0, b, c]]
+                               [b, 0, c]]
                     else:
                         hnf = [[a, 0, 0],
                                [b, c, 0],
