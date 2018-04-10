@@ -42,5 +42,5 @@ for atom in atoms:
     else:
         species.append(['O', 'H'])
 db = connect('Cu-O-adsorbates.db')
-for structure in enumerate_structures(atoms, range(1, 11), species):
+for structure in enumerate_structures(atoms, range(1, 5), species):
     db.write(structure)
