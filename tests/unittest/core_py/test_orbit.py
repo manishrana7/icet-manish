@@ -14,7 +14,7 @@ import numpy as np
 
 
 class TestOrbit(unittest.TestCase):
-    '''
+    """
     Container for tests of the class functionality
 
     TODO
@@ -22,7 +22,7 @@ class TestOrbit(unittest.TestCase):
     *   revise test test_property_geometrical_size when
         cluster is in orbit and the geometrical size can
         be retrieved from the orbit.
-    '''
+    """
 
     def __init__(self, *args, **kwargs):
         super(TestOrbit, self).__init__(*args, **kwargs)
@@ -61,9 +61,9 @@ class TestOrbit(unittest.TestCase):
                                            zip(indices, unitcell_offsets)]
 
     def setUp(self):
-        '''
+        """
         Instantiate class before each test.
-        '''
+        """
         atoms = bulk("Al")
         lattice_site_for_cluster = [
             LatticeSite(0, [i, 0, 0]) for i in range(3)]
@@ -81,37 +81,26 @@ class TestOrbit(unittest.TestCase):
         self.orbit_triplet_cpp = Orbit_cpp(self.triplet_cluster)
 
     def test_init(self):
-        '''
+        """
         Just testing that the setup
         (initialization) of tested class work
-        '''
+        """
         # initialize from ASE Atoms
         orbit = Orbit(self.pair_cluster)
         self.assertIsInstance(orbit, Orbit)
 
-        orbit = Orbit_cpp(self.pair_cluster)
-        self.assertIsInstance(orbit, Orbit_cpp)
-
-        orbit = Orbit_cpp(self.triplet_cluster)
-        self.assertIsInstance(orbit, Orbit_cpp)
-
     def test_property_equivalent_sites(self):
-        '''
+        """
         Testing get_orbit_list_info functionality
-        '''
+        """
 
-        # test Python version
         self.assertEqual(self.orbit_pair.equivalent_sites, [])
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
         self.assertEqual(self.orbit_pair.equivalent_sites,
                          self.lattice_sites_pairs)
 
-        # Test C++ version
-        self.orbit_pair_cpp.equivalent_sites = self.lattice_sites_pairs_cpp
-        self.assertEqual(self.orbit_pair_cpp.equivalent_sites,
-                         self.lattice_sites_pairs_cpp)
-
         # Test C++ and Python together
+        self.orbit_pair_cpp.equivalent_sites = self.lattice_sites_pairs_cpp
         self.assertEqual(
             self.orbit_pair_cpp.equivalent_sites,
             self.orbit_pair.equivalent_sites)
@@ -124,8 +113,6 @@ class TestOrbit(unittest.TestCase):
         * implement this more thoroughly when cluster is added
         """
         self.orbit_pair.representative_cluster
-        self.orbit_pair_cpp.get_representative_cluster()
-        self.orbit_triplet_cpp.get_representative_cluster()
 
     def test_property_representative_sites(self):
         """
@@ -133,19 +120,13 @@ class TestOrbit(unittest.TestCase):
         """
         with self.assertRaises(IndexError):
             self.orbit_pair.representative_sites
-            self.orbit_pair_pair_cpp.representative_sites
 
-        # Test Python version
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
         self.assertEqual(self.orbit_pair.representative_sites,
                          self.lattice_sites_pairs[0])
 
-        # Test C++ version
-        self.orbit_pair_cpp.equivalent_sites = self.lattice_sites_pairs_cpp
-        self.assertEqual(self.orbit_pair_cpp.representative_sites,
-                         self.lattice_sites_pairs_cpp[0])
-
         # Test C++ and Python together
+        self.orbit_pair_cpp.equivalent_sites = self.lattice_sites_pairs_cpp
         self.assertEqual(self.orbit_pair_cpp.representative_sites,
                          self.orbit_pair.representative_sites)
 
@@ -156,40 +137,26 @@ class TestOrbit(unittest.TestCase):
         with self.assertRaises(IndexError):
             self.orbit_pair.order
 
-        # Test python
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
         self.orbit_triplet.equivalent_sites = self.lattice_sites_triplets
         self.assertEqual(self.orbit_pair.order,
                          2)
         self.assertEqual(self.orbit_triplet.order,
                          3)
-        # Test C++
-        self.assertEqual(
-            self.orbit_pair_cpp.order, 2)
-        self.assertEqual(
-            self.orbit_triplet_cpp.order, 3)
 
     def test_len(self):
         """
         Test len of orbit.
         """
-        # Test python
         self.assertEqual(len(self.orbit_pair), 0)
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
         self.assertEqual(len(self.orbit_pair), len(self.lattice_sites_pairs))
-
-        # Test C++
-        self.assertEqual(len(self.orbit_pair_cpp), 0)
-        self.orbit_pair_cpp.equivalent_sites = self.lattice_sites_pairs_cpp
-        self.assertEqual(len(self.orbit_pair_cpp),
-                         len(self.lattice_sites_pairs_cpp))
 
     def test_property_geometrical_size(self):
         """
         Test the property geometrical size.
         """
         self.orbit_pair.geometrical_size
-        self.orbit_pair_cpp.geometrical_size
 
     def test_sort(self):
         """
@@ -203,18 +170,16 @@ class TestOrbit(unittest.TestCase):
         lattice sites.
         """
 
-        # Test python
         self.orbit_pair.equivalent_sites = sorted(self.lattice_sites_pairs,
                                                   reverse=True)
         self.orbit_pair.sort()
         self.assertEqual(self.orbit_pair.equivalent_sites,
                          sorted(self.lattice_sites_pairs))
-        # Test C++
+
+        # sorted orbit from C++ version
         self.orbit_pair_cpp.equivalent_sites = sorted(
             self.lattice_sites_pairs_cpp, reverse=True)
         self.orbit_pair_cpp.sort()
-        self.assertEqual(self.orbit_pair.equivalent_sites,
-                         sorted(self.lattice_sites_pairs_cpp))
 
         # Test C++ and Python together
         self.assertEqual(
@@ -228,33 +193,15 @@ class TestOrbit(unittest.TestCase):
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
         self.orbit_triplet.equivalent_sites = self.lattice_sites_triplets
 
-        # Test python
         self.assertEqual(self.orbit_pair, self.orbit_pair)
         self.assertEqual(self.orbit_triplet, self.orbit_triplet)
         self.assertNotEqual(self.orbit_pair, self.orbit_triplet)
         self.assertNotEqual(self.orbit_triplet, self.orbit_pair)
 
-        # Test C++
-        self.orbit_pair_cpp.equivalent_sites = \
-            self.lattice_sites_pairs_cpp
-        self.orbit_triplet_cpp.equivalent_sites = \
-            self.lattice_sites_triplets_cpp
-        self.assertEqual(self.orbit_pair_cpp,
-                         self.orbit_pair_cpp)
-
-        self.assertEqual(self.orbit_triplet_cpp,
-                         self.orbit_triplet_cpp)
-
-        self.assertNotEqual(self.orbit_pair_cpp,
-                            self.orbit_triplet_cpp)
-
-        self.assertEqual(self.orbit_pair, self.orbit_pair_cpp)
-
     def test_lt(self):
         """
         Test less than functionality.
         """
-        # Test python
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
         self.orbit_triplet.equivalent_sites = self.lattice_sites_triplets
         self.assertFalse(self.orbit_pair < self.orbit_pair)
@@ -262,17 +209,6 @@ class TestOrbit(unittest.TestCase):
 
         self.assertTrue(self.orbit_pair < self.orbit_triplet)
         self.assertTrue(self.orbit_triplet > self.orbit_pair)
-
-        # Test C++
-        self.orbit_pair_cpp.equivalent_sites = \
-            self.lattice_sites_pairs_cpp
-        self.orbit_triplet_cpp.equivalent_sites = \
-            self.lattice_sites_triplets_cpp
-        self.assertTrue(self.orbit_pair_cpp <
-                        self.orbit_triplet_cpp)
-        self.assertTrue(self.orbit_triplet_cpp >
-                        self.orbit_pair_cpp)
-        self.assertFalse(self.orbit_pair_cpp < self.orbit_pair_cpp)
 
     def test_add(self):
         """
@@ -315,24 +251,9 @@ class TestOrbit(unittest.TestCase):
         added_offset = np.array((1., 1., 1.))
         self.orbit_pair_cpp.equivalent_sites =\
             self.lattice_sites_pairs_cpp
-
         # create a new orbit with offseted equivalent lattice sites
         orbit_cpp = self.orbit_pair_cpp + added_offset
         self.assertNotEqual(orbit_cpp, self.orbit_pair_cpp)
-
-        # Loop through sites check index is same and offset has been added
-        for sites, sites_with_offset in zip(
-                self.orbit_pair_cpp.equivalent_sites,
-                orbit_cpp.equivalent_sites):
-            for site, site_with_offset in zip(sites, sites_with_offset):
-                self.assertEqual(site.index, site_with_offset.index)
-                self.assertListEqual(list(site.unitcell_offset),
-                                     list(site_with_offset.unitcell_offset -
-                                          added_offset))
-
-        # list is allowed for C++ but only lenght 3
-        with self.assertRaises(TypeError):
-            orbit_cpp + np.array([1, 1, 1, 1])
 
         # Test C++ and Python together
         self.assertEqual(orbit_cpp.equivalent_sites,
@@ -344,20 +265,10 @@ class TestOrbit(unittest.TestCase):
         """
         allowed_permutations = [[1, 2, 3]]
 
-        # Test python
         self.assertEqual(self.orbit_pair.permutations_to_representative, [])
         self.orbit_pair.permutations_to_representative = allowed_permutations
         self.assertListEqual(
             self.orbit_pair.permutations_to_representative,
-            allowed_permutations)
-
-        # Test C++
-        self.assertEqual(
-            self.orbit_pair_cpp.permutations_to_representative, [])
-        self.orbit_pair_cpp.permutations_to_representative = \
-            allowed_permutations
-        self.assertListEqual(
-            self.orbit_pair_cpp.permutations_to_representative,
             allowed_permutations)
 
         # This functionality is not exposed to python
@@ -370,10 +281,8 @@ class TestOrbit(unittest.TestCase):
         self.orbit_pair.allowed_permutations = allowed_permutations
         self.assertListEqual(
             self.orbit_pair.allowed_permutations, allowed_permutations)
-        # Test C++
+
         self.orbit_pair_cpp.allowed_permutations = allowed_permutations
-        self.assertEqual(
-            self.orbit_pair_cpp.allowed_permutations, allowed_permutations)
 
         # Test C++ and Python together
         self.assertEqual(self.orbit_pair_cpp.allowed_permutations,
@@ -383,7 +292,6 @@ class TestOrbit(unittest.TestCase):
         """
         Test the permuted sites property.
         """
-        # Test python
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
         # Raises IndexError when permutations to primitive is not set
         with self.assertRaises(IndexError):
@@ -405,34 +313,10 @@ class TestOrbit(unittest.TestCase):
                                      self.orbit_pair.equivalent_sites):
             self.assertEqual(perm_sites, list(reversed(sites)))
 
-        # Test C++
-        self.orbit_pair_cpp.equivalent_sites = self.lattice_sites_pairs_cpp
-        # Raises IndexError when permutations to primitive is not set
-        with self.assertRaises(IndexError):
-            self.orbit_pair_cpp.permuted_sites
-
-        # Provide the identity permutation
-        self.orbit_pair_cpp.permutations_to_representative = [
-            [i for i in range(
-                self.orbit_pair_cpp.order)]] * len(self.orbit_pair_cpp)
-
-        self.assertEqual(self.orbit_pair_cpp.permuted_sites,
-                         self.orbit_pair_cpp.equivalent_sites)
-
-        # Provide a completely reversed permutation, [i,j,k] ->[k,j,i]
-        self.orbit_pair_cpp.permutations_to_representative = [
-            [i for i in reversed(range(
-                self.orbit_pair_cpp.order))]] * len(self.orbit_pair_cpp)
-
-        for perm_sites, sites in zip(self.orbit_pair_cpp.permuted_sites,
-                                     self.orbit_pair_cpp.equivalent_sites):
-            self.assertEqual(perm_sites, list(reversed(sites)))
-
     def test_get_mc_vectors_pairs(self):
         """
         Test  the get mc vectors functionality for a pair orbit
         """
-        # Test python version
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
         # Binary mc vectors
         # Allow only identity permutation
@@ -455,35 +339,10 @@ class TestOrbit(unittest.TestCase):
         target = [(0, 0), (0, 1), (1, 1)]
         self.assertEqual(mc_vectors, target)
 
-        # Test C++ version
-        self.orbit_pair_cpp.equivalent_sites = \
-            self.lattice_sites_pairs_cpp
-        # Binary mc vectors
-        # Allow only identity permutation
-        self.orbit_pair_cpp.allowed_permutations = [
-            [i for i in range(self.orbit_pair_cpp.order)]]
-        mc_vectors = self.orbit_pair_cpp.get_mc_vectors(
-            [2] * self.orbit_pair_cpp.order)
-        self.assertEqual(mc_vectors, [[0, 0]])
-
-        # Ternary mc vectors
-        mc_vectors = self.orbit_pair_cpp.get_mc_vectors(
-            [3] * self.orbit_pair_cpp.order)
-        target = [[0, 0], [0, 1], [1, 0], [1, 1]]
-        self.assertEqual(mc_vectors, target)
-
-        # Allow the permutation [1,0] permutation
-        self.orbit_pair_cpp.allowed_permutations = ([0, 1], [1, 0])
-        mc_vectors = self.orbit_pair_cpp.get_mc_vectors(
-            [3] * self.orbit_pair_cpp.order)
-        target = [[0, 0], [0, 1], [1, 1]]
-        self.assertEqual(mc_vectors, target)
-
     def test_get_mc_vectors_triplets(self):
         """
         Test  the get mc vectors functionality for a triplet orbit
         """
-        # Test python version
         self.orbit_pair.equivalent_sites = self.lattice_sites_triplets
         # Binary mc vectors
         # Allow only identity permutation
@@ -503,29 +362,6 @@ class TestOrbit(unittest.TestCase):
             [3] * self.orbit_pair.order)
         target = [(0, 0, 0), (0, 0, 1), (0, 1, 1),
                   (1, 0, 0), (1, 0, 1), (1, 1, 1)]
-        self.assertEqual(mc_vectors, target)
-
-        # Test C++ version, difference is tuples/list (python/C++)
-        self.orbit_triplet_cpp.equivalent_sites = \
-            self.lattice_sites_triplets_cpp
-        # Binary mc vectors
-        # Allow only identity permutation
-        self.orbit_triplet_cpp.allowed_permutations = [
-            [i for i in range(self.orbit_triplet_cpp.order)]]
-
-        # Ternary mc vectors
-        mc_vectors = self.orbit_triplet_cpp.get_mc_vectors(
-            [3] * self.orbit_triplet_cpp.order)
-        target = [[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
-                  [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]]
-        self.assertEqual(mc_vectors, target)
-
-        # Allow the permutation [0,2,1] permutation
-        self.orbit_triplet_cpp.allowed_permutations = ([0, 1, 2], [0, 2, 1])
-        mc_vectors = self.orbit_triplet_cpp.get_mc_vectors(
-            [3] * self.orbit_triplet_cpp.order)
-        target = [[0, 0, 0], [0, 0, 1], [0, 1, 1],
-                  [1, 0, 0], [1, 0, 1], [1, 1, 1]]
         self.assertEqual(mc_vectors, target)
 
 
