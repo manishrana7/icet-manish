@@ -1,7 +1,13 @@
 import pandas as pd
+
+import os
+import tarfile
+import tempfile
+
 from datetime import datetime
 import getpass
 import socket
+
 from ase import Atoms
 from collections import OrderedDict
 from icet.io.logging import logger
@@ -60,6 +66,7 @@ class DataContainer:
         self.add_parameter('random-seed', random_seed)
 
         self._metadata['ensemble-name'] = ensemble_name
+
         self._metadata['date-created'] = datetime.now()
         self._metadata['username'] = getpass.getuser()
         self._metadata['hostname'] = socket.gethostname()
@@ -191,7 +198,7 @@ class DataContainer:
         return self._metadata
 
     def reset(self):
-        """ Reset (clear) data frame of data container. """
+        """ Reset (clear) data frame of data containerß """
         self._data = pd.DataFrame()
 
     def __len__(self):
@@ -213,25 +220,77 @@ class DataContainer:
         """
         pass
 
-    def read(self, infile):
+    @staticmethod
+    def restart(filename):
+        """
+        Restart DataContainer object from file.
+
+        Parameters
+        ----------
+        filename : str or FileObj
+            file from which to read
+        """
+        temp_pkl_file = tempfile.NamedTemporaryFile()
+        temp_cvs_file = tempfile.NamedTemporaryFile()
+
+        with tarfile.open(mode='r', name=filename) as tar_file:
+            temp_pkl_file.write(tar_file.extractfile('reference-data').read())
+            temp_pkl_file.seek(0)
+            if isinstance(filename, str):
+                with open(filename, 'rb') as handle:
+                    reference_data = pickle.load(handle)
+            else:
+                reference = pickle.load(filename)
+            
+            atoms = reference_data['atoms']
+            parameters = reference_data['parameters']
+            metadata = reference_data['metadata']
+            dc = Data_Container(atoms, parameters['seed'], metadata['name_ensemble'])
+
+            temp_cvs_file.write(tar_file.extractfile('runtime-data').read())
+            temp_pkl_file.seek(0)
+            
+        return dc
+            
+
+
+    def read(self, filename):
         """
         Read DataContainer object from file.
 
         Parameters
         ----------
-        infile : str or FileObj
+        filename : str or FileObj
             file from which to read
         """
-        pass
 
-    def write(self, outfile):
+
+    def write(self, filename, append_data=False):
         """
         Write DataContainer object to file.
 
         Parameters
         ----------
-        outfile : str or FileObj
+        filename : str or FileObj
             file to which to write
         """
+        import pickle
+        # Save reference data to a tempfile
         self._metadata['date-last-backup'] = datetime.now()
-        pass
+        reference_data = {'atoms': self.structure,
+                          'observables': self. _observables,
+                          'parameters': self._parameters,
+                          'metadata':self._metadata}
+
+        temp_pkl_file = tempfile.NamedTemporaryFile()
+        with open(temp_pkl_file.name, 'wb') as handle:
+            pickle.dump(reference_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+     
+        # Save Pandas data frame as a csv tempfile
+        temp_csv_file = tempfile.NamedTemporaryFile()
+        self._data.to_csv(temp_csv_file.name)
+
+        with tarfile.open(filename, mode='w') as handle:
+            handle.add(temp_csv_file.name, arcname='runtime-data')
+            handle.add(temp_pkl_file.name,
+                       arcname='reference-data')
