@@ -1,15 +1,15 @@
-'''
+"""
 Handling of Hermite Normal Form matrices
-'''
+"""
 
 import numpy as np
 from .smith_normal_form import SmithNormalForm
 
 
 class HermiteNormalForm(object):
-    '''
+    """
     Hermite Normal Form matrix.
-    '''
+    """
 
     def __init__(self, H, rotations, translations, basis_shifts):
         self.H = H
@@ -19,7 +19,7 @@ class HermiteNormalForm(object):
 
     def compute_transformations(self, rotations, translations, basis_shifts,
                                 tol=1e-3):
-        '''
+        """
         Save transformations (based on rotations) that turns the supercell
         into an equivalent supercell. Precompute these transformations,
         consisting of permutation as well as translation and basis shift, for
@@ -30,7 +30,7 @@ class HermiteNormalForm(object):
         rotations : list of ndarrays
         translations : list of ndarrays
         basis_shifts : ndarray
-        '''
+        """
 
         for R, T, basis_shift in zip(rotations, translations,
                                      basis_shifts):
@@ -47,7 +47,7 @@ class HermiteNormalForm(object):
 
 
 def yield_hermite_normal_forms(det, pbc):
-    '''
+    """
     Yield all Hermite Normal Form matrices with determinant det.
 
     Parameters
@@ -61,7 +61,7 @@ def yield_hermite_normal_forms(det, pbc):
     ------
     ndarray
         3x3 HNF matrix
-    '''
+    """
 
     # 1D
     if sum(pbc) == 1:
@@ -109,7 +109,7 @@ def yield_hermite_normal_forms(det, pbc):
 
 
 def get_reduced_hnfs(ncells, symmetries, pbc, tol=1e-3):
-    '''
+    """
     For a fixed determinant N (i.e., a number of atoms N), yield all
     Hermite Normal Forms (HNF) that are inequivalent under symmetry
     operations of the parent lattice.'
@@ -127,7 +127,7 @@ def get_reduced_hnfs(ncells, symmetries, pbc, tol=1e-3):
     ------
     list of ndarrays
         Symmetrically inequivalent HNFs with determinant N.
-    '''
+    """
     rotations = symmetries['rotations']
     translations = symmetries['translations']
     basis_shifts = symmetries['basis_shifts']

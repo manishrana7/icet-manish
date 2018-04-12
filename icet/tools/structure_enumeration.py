@@ -1,4 +1,4 @@
-'''
+"""
 This module has the purpose of enumerating structures. Given a lattice
 (possibly with as basis) and a number of elements, the code generates all
 the derivative superstructures having a certain size defined by the user.
@@ -7,7 +7,7 @@ The algorithm was developed by Gus L. W Hart and Rodney W. Forcade in
 
 * Hart, G. L. W. and Forcade, R. W., Phys. Rev. B 77, 224115 (2008)
 * Hart, G. L. W. and Forcade, R. W., Phys. Rev. B 80, 014120 (2009)
-'''
+"""
 
 from itertools import product
 import itertools
@@ -20,7 +20,7 @@ from .structure_enumeration_support.smith_normal_form import get_unique_snfs
 
 
 def __translate_labelings(labeling, snf, nsites, include_self=False):
-    '''
+    """
     Yield labelings that are equivalent to original labeling
     under translations as dictated by snf.
 
@@ -38,7 +38,7 @@ def __translate_labelings(labeling, snf, nsites, include_self=False):
     ------
     tuple of ints
         Translated labeling.
-    '''
+    """
 
     # Compute size of each block within which translations occur
     sizes = [nsites * block for block in snf.blocks]
@@ -63,7 +63,7 @@ def __translate_labelings(labeling, snf, nsites, include_self=False):
 
 
 def __get_labelings(snf, iter_elements, nsites):
-    '''
+    """
     Get all labelings corresponding to a Smith Normal Form matrix.
     Superperiodic labelings as well as labelings that are equivalent under
     translations for this particular SNF will not be included. However,
@@ -83,7 +83,7 @@ def __get_labelings(snf, iter_elements, nsites):
     -------
     list of tuples
         Inequivalent labelings.
-    '''
+    """
     labelings = []
     for labeling in itertools.product(*iter_elements * snf.ncells):
         unique = True
@@ -107,7 +107,7 @@ def __get_labelings(snf, iter_elements, nsites):
 
 
 def __permute_labeling(labeling, snf, transformation, nsites):
-    '''
+    """
     Permute labeling according to transformations defined by transformation.
 
     Parameters
@@ -124,7 +124,7 @@ def __permute_labeling(labeling, snf, transformation, nsites):
     -------
     tuple of ints
         Permuted labeling.
-    '''
+    """
 
     # Calculate transformation imposed by LRL multiplication
     new_group_order = np.dot(snf.group_order, transformation[0].T)
@@ -152,7 +152,7 @@ def __permute_labeling(labeling, snf, transformation, nsites):
 
 
 def __yield_unique_labelings(labelings, snf, hnf, nsites):
-    '''
+    """
     Yield labelings that are unique in every imaginable sense.
 
     Parameters
@@ -170,7 +170,7 @@ def __yield_unique_labelings(labelings, snf, hnf, nsites):
     ------
     tuple
         Labeling, each and every one unique.
-    '''
+    """
     saved_labelings = []
     for labeling in labelings:
 
@@ -208,7 +208,7 @@ def __yield_unique_labelings(labelings, snf, hnf, nsites):
 
 
 def __labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements, pbc):
-    '''
+    """
     Get ASE Atoms object from labeling, HNF matrix and parent lattice.
 
     Parameters
@@ -232,7 +232,7 @@ def __labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements, pbc):
     -------
     ASE Atoms
         Atoms object corresponding to the given labeling.
-    '''
+    """
     symbols = []
     positions = []
     count = 0
@@ -259,7 +259,7 @@ def __labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements, pbc):
 
 
 def get_symmetry_operations(atoms, tol=1e-3):
-    '''
+    """
     Use spglib to calculate the symmetry operations of atoms. The
     symmetry operations consist of three parts: rotations, translation
     and "basis_shifts". The latter define the way that the sublattices
@@ -274,7 +274,7 @@ def get_symmetry_operations(atoms, tol=1e-3):
     -------
     dict of lists
         Containing rotations, translations and basis_shifts.
-    '''
+    """
 
     symmetries = get_symmetry(atoms)
     assert symmetries, ('spglib.get_symmetry() failed. Please make sure that'
@@ -337,7 +337,7 @@ def get_symmetry_operations(atoms, tol=1e-3):
 
 
 def enumerate_structures(atoms, sizes, subelements, niggli_reduce=None):
-    '''
+    """
     Generate enumerated structures, i.e. all inequivalent structures up to a
     certain size.
 
@@ -369,7 +369,7 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduce=None):
     ------
     ASE Atoms
         Enumerated structure, each and every one of which is unique.
-    '''
+    """
 
     nsites = len(atoms)
     basis = atoms.get_scaled_positions()

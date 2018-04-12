@@ -10,7 +10,7 @@ def map_structure_to_reference(input_structure,
                                tolerance_cell=0.05,
                                tolerance_positions=0.01,
                                verbose=False):
-    '''
+    """
     Map a relaxed structure onto a reference structure.
 
     Parameters
@@ -73,7 +73,7 @@ def map_structure_to_reference(input_structure,
         atoms.rattle(0.1)
         mapped_atoms = map_structure_to_reference(atoms, reference, 1.0)
 
-    '''
+    """
     assert np.all(input_structure.pbc == reference_structure.pbc), \
         ('The periodic boundary conditions differ'
          ' between input and reference structure')
@@ -210,7 +210,7 @@ def map_structure_to_reference(input_structure,
 
 def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
                      inert_species=None):
-    '''
+    """
     The input structure needs to be scaled in order to match the lattice
     structure of the reference structure. The reference structure can be a
     primitive cell, in which case the input structure would usually be a
@@ -230,7 +230,7 @@ def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
     inert_species: list of str
         List of chemical symbols(e.g., `['Au', 'Pd']`) that are never
         substituted for a vacancy. Needless if `vacancy_type` is `None`.
-    '''
+    """
     modcell = input_structure.get_cell()
     if vacancy_type is None:
         # Without scale factor we can just rescale with number of atoms
@@ -260,7 +260,7 @@ def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
 
 def _get_transformation_matrix(input_cell, reference_cell,
                                tolerance_cell=0.05):
-    '''
+    """
     Obtain the(in general non - integer) transformation matrix connecting the
     input structure to the reference structure L=L_p.P - -> P=L_p ^ -1.L
 
@@ -278,7 +278,7 @@ def _get_transformation_matrix(input_cell, reference_cell,
     - ------
     NumPy array(3, 3)
         Transformation matrix P of integers.
-    '''
+    """
     P = np.dot(input_cell, np.linalg.inv(reference_cell))
 
     # assert that the transformation matrix does not deviate too
@@ -302,7 +302,7 @@ def _get_transformation_matrix(input_cell, reference_cell,
 
 def _rescale_structures(input_structure, reference_structure, P,
                         tolerance_positions=0.01):
-    '''
+    """
     Rescale `input_structure` with `P` so that it matches
     `reference_structure`, and make a supercell of `reference_structure` using
     `P`
@@ -327,7 +327,7 @@ def _rescale_structures(input_structure, reference_structure, P,
     ASE Atoms object
         Supercell of `reference_structure` matching cell metric of
         `scaled_structure`
-    '''
+    """
     scaled_structure = input_structure.copy()
     scaled_structure.set_cell(np.dot(P, reference_structure.cell),
                               scale_atoms=True)
