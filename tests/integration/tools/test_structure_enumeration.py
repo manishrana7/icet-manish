@@ -1,7 +1,7 @@
-'''
+"""
 Test structure numeration by checking that it yields the correct
 number of structure.
-'''
+"""
 
 from ase.build import bulk, fcc100
 from ase import Atom
@@ -9,7 +9,7 @@ from icet.tools import enumerate_structures
 
 
 def count_structures(atoms, sizes, species, correct_count, tag):
-    '''
+    """
     Count structures given by structure enumeration and assert that the
     right number is given.
 
@@ -25,7 +25,7 @@ def count_structures(atoms, sizes, species, correct_count, tag):
         Expected number of structures.
     tag : str
         Describes the structure.
-    '''
+    """
     count = 0
     for _ in enumerate_structures(atoms, sizes, species):
         count += 1
