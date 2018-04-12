@@ -360,15 +360,5 @@ class TestFitStructure(unittest.TestCase):
         self.assertTrue(cv is None)
 
 
-def suite():
-    test_classes_to_run = [TestStructureContainer, TestFitStructure]
-    suites_list = []
-    for test_class in test_classes_to_run:
-        suite = unittest.defaultTestLoader.loadTestsFromTestCase(test_class)
-        suites_list.append(suite)
-    test_suite = unittest.TestSuite(suites_list)
-    return test_suite
-
-
 if __name__ == '__main__':
     unittest.main()
