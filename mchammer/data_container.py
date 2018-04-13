@@ -9,9 +9,8 @@ import socket
 
 from ase import Atoms
 from collections import OrderedDict
+import pickle
 from icet.io.logging import logger
-
-from mchammer.ensembles.base_ensemble import BaseEnsemble
 
 logger = logger.getChild('data_container')
 
@@ -253,15 +252,11 @@ class DataContainer:
         with tarfile.open(mode='r', name=filename) as tar_file:
             temp_pkl_file.write(tar_file.extractfile('reference-data').read())
             temp_pkl_file.seek(0)
-            if isinstance(filename, str):
-                with open(filename, 'rb') as handle:
-                    reference_data = pickle.load(handle)
-            else:
-                reference_data = pickle.load(filename)
+            reference_data = pickle.load(temp_pkl_file)
 
             dc = DataContainer(reference_data['atoms'],
-                               reference_data['parameters']['random-seed'],
-                               reference_data['metadata']['name-ensemble'])
+                               reference_data['metadata']['ensemble-name'],
+                               reference_data['parameters']['random-seed'])
             
             for key in reference_data:
                 if key == 'atoms':
@@ -275,12 +270,12 @@ class DataContainer:
                             continue
                         dc.add_parameter(tag, value)
                 if key == 'observables':
-                    for tag, values in reference_data[key].items():
+                    for tag, value in reference_data[key].items():
                         dc.add_observable(tag, value)
 
             temp_cvs_file.write(tar_file.extractfile('runtime-data').read())
             temp_cvs_file.seek(0)
-            dc._data = pd.read_cvs(temp_cvs_file)
+            dc._data = pd.read_csv(temp_cvs_file)
             
         return dc
 
@@ -305,7 +300,7 @@ class DataContainer:
             pickle.dump(reference_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
      
         # Save Pandas data frame as a csv tempfile
-        self._metadata['date-last-backup'] = datetime.now()
+        #self._metadata['date-last-backup'] = datetime.now()
         temp_csv_file = tempfile.NamedTemporaryFile()
         self._data.to_csv(temp_csv_file.name)
 

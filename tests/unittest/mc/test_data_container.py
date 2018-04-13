@@ -195,10 +195,11 @@ class TestDataContainer(unittest.TestCase):
 
         self.assertDictEqual(self.dc.metadata, dc_read.metadata)
         self.assertDictEqual(self.dc.parameters, dc_read.parameters)
-        self.assertDictEqual(self.dc.add_observables, dc_read.observables)
+        self.assertDictEqual(self.dc.observables, dc_read.observables)
         self.assertEqual(len(self.dc), len(dc_read))
-        self.assertListEqual(self.dc.get_data('mctrial', 'temperature'),
-                             dc_read.get_data('mctrial', 'temperature'))
+        self.assertListEqual(self.dc.get_data(['mctrial', 'temperature']),
+                             dc_read.get_data(['mctrial', 'temperature']))
+
 
 if __name__ == '__main__':
     unittest.main()
