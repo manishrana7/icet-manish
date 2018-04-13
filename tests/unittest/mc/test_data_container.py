@@ -191,7 +191,6 @@ class TestDataContainer(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             self.dc.restart(temp_file.name)
 
-
     def test_read_write_data(self):
         """ Test write and read functionalities of data container. """
         # add an observable

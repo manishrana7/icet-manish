@@ -238,8 +238,8 @@ class DataContainer:
             def _run(self):
                 pass
 
-        ensemble = ConcreteEnsemble(calculator=None, data_container=data_container)
-
+        ensemble = ConcreteEnsemble(calculator=None,
+                                    data_container=data_container)
         return ensemble
 
     @staticmethod
@@ -285,7 +285,6 @@ class DataContainer:
             temp_cvs_file.write(tar_file.extractfile('runtime-data').read())
             temp_cvs_file.seek(0)
             dc._data = pd.read_csv(temp_cvs_file)
-            
         return dc
 
     def write(self, filename):
@@ -297,18 +296,19 @@ class DataContainer:
         filename : str or FileObj
             file to which to write
         """
-        # Save reference data to a tempfile
+        self._metadata['date-last-backup'] = datetime.now()
+        # Save reference data to a pickle tempfile
         reference_data = {'atoms': self.structure,
                           'observables': self. _observables,
                           'parameters': self._parameters,
-                          'metadata':self._metadata}
+                          'metadata': self._metadata}
 
         temp_pkl_file = tempfile.NamedTemporaryFile()
         with open(temp_pkl_file.name, 'wb') as handle:
-            pickle.dump(reference_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
-     
+            pickle.dump(reference_data, handle,
+                        protocol=pickle.HIGHEST_PROTOCOL)
+
         # Save Pandas data frame as a csv tempfile
-        #self._metadata['date-last-backup'] = datetime.now()
         temp_csv_file = tempfile.NamedTemporaryFile()
         self._data.to_csv(temp_csv_file.name)
 
