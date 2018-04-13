@@ -2,11 +2,11 @@
 import unittest
 import tempfile
 
-from mchammer import DataContainer
-from mchammer.observers.base_observer import BaseObserver
-from ase.build import bulk
 from datetime import datetime
 from collections import OrderedDict
+from ase.build import bulk
+from mchammer import DataContainer
+from mchammer.observers.base_observer import BaseObserver
 
 
 class TestDataContainer(unittest.TestCase):
@@ -37,13 +37,13 @@ class TestDataContainer(unittest.TestCase):
     def setUp(self):
         """Set up before each test case."""
         self.dc = DataContainer(atoms=self.atoms,
-                                  ensemble_name='some-ensemble',
-                                  random_seed=44)
+                                ensemble_name='some-ensemble',
+                                random_seed=44)
         # test another type of atoms fails
         with self.assertRaises(Exception):
             self.dc = DataContainer(atoms='something',
-                                      ensemble_name='some-ensemble',
-                                      random_seed=44)
+                                    ensemble_name='some-ensemble',
+                                    random_seed=44)
 
     def test_structure(self):
         """Test that reference structure is added to DataContainer."""
@@ -131,7 +131,7 @@ class TestDataContainer(unittest.TestCase):
                 self.dc.append(mctrial, row_data)
 
         retval = self.dc.get_data(['mctrial', 'test_observer',
-                                     'other_observer'])
+                                   'other_observer'])
         self.assertListEqual(target, retval)
 
         target = [[20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0],
@@ -139,14 +139,14 @@ class TestDataContainer(unittest.TestCase):
                   [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0]]
 
         retval = self.dc.get_data(['mctrial', 'test_observer',
-                                     'other_observer'], fill_missing=True)
+                                   'other_observer'], fill_missing=True)
         self.assertListEqual(target, retval)
 
         target = [[40.0, 50.0, 60.0, 70.0], [64.0, 64.0, 64.0, 64.0],
                   [64.0, None, 64.0, None]]
 
         retval = self.dc.get_data(['mctrial', 'test_observer',
-                                     'other_observer'], interval=(40, 70))
+                                   'other_observer'], interval=(40, 70))
         self.assertListEqual(target, retval)
 
         with self.assertRaises(AssertionError):
@@ -177,7 +177,20 @@ class TestDataContainer(unittest.TestCase):
 
     def test_restart(self):
         """ Test that BaseEnsemble object is restarted from file. """
-        pass
+        # add an observable
+        self.dc.add_observable('temperature', float)
+        # append observations to the data container
+        row_data = {}
+        row_data['temperature'] = 100.0
+        for mctrial in range(10, 101, 10):
+            self.dc.append(mctrial, row_data)
+        # save to file
+        temp_file = tempfile.NamedTemporaryFile()
+        self.dc.write(temp_file.name)
+
+        with self.assertRaises(NotImplementedError):
+            self.dc.restart(temp_file.name)
+
 
     def test_read_write_data(self):
         """ Test write and read functionalities of data container. """
@@ -192,10 +205,13 @@ class TestDataContainer(unittest.TestCase):
         temp_file = tempfile.NamedTemporaryFile()
         self.dc.write(temp_file.name)
         dc_read = self.dc.read(temp_file.name)
-
+        # check metadata
         self.assertDictEqual(self.dc.metadata, dc_read.metadata)
+        # check parameters
         self.assertDictEqual(self.dc.parameters, dc_read.parameters)
+        # check observables
         self.assertDictEqual(self.dc.observables, dc_read.observables)
+        # chech runtime data
         self.assertEqual(len(self.dc), len(dc_read))
         self.assertListEqual(self.dc.get_data(['mctrial', 'temperature']),
                              dc_read.get_data(['mctrial', 'temperature']))

@@ -1,18 +1,12 @@
-import pandas as pd
-
 import tarfile
 import tempfile
-
-from datetime import datetime
 import getpass
 import socket
-
-from ase import Atoms
-from collections import OrderedDict
 import pickle
-from icet.io.logging import logger
-
-logger = logger.getChild('data_container')
+from datetime import datetime
+from collections import OrderedDict
+import pandas as pd
+from ase import Atoms
 
 
 class DataContainer:
@@ -229,12 +223,24 @@ class DataContainer:
         filename : str or FileObj
             file from which to read
         """
-        data_container = DataContainer.read(filename, 
+        from mchammer.ensembles.base_ensemble import BaseEnsemble
+        data_container = DataContainer.read(filename,
                                             overwrite_metadata=False)
-        base_ensemble = BaseEnsemble(calculator=None, 
-                                     data_container=data_container)
-        
-        return base_ensemble
+
+        class ConcreteEnsemble(BaseEnsemble):
+            def __init__(self, calculator, name=None, data_container=None):
+                super().__init__(calculator, name=name,
+                                 data_container=data_container)
+
+            def do_trial_move(self):
+                pass
+
+            def _run(self):
+                pass
+
+        ensemble = ConcreteEnsemble(calculator=None, data_container=data_container)
+
+        return ensemble
 
     @staticmethod
     def read(filename, overwrite_metadata=True):
@@ -245,6 +251,9 @@ class DataContainer:
         ----------
         filename : str or FileObj
             file from which to read
+
+        overwrite_metadata : bool
+            If True overwrite DataContainer's metadata
         """
         temp_pkl_file = tempfile.NamedTemporaryFile()
         temp_cvs_file = tempfile.NamedTemporaryFile()
@@ -257,7 +266,7 @@ class DataContainer:
             dc = DataContainer(reference_data['atoms'],
                                reference_data['metadata']['ensemble-name'],
                                reference_data['parameters']['random-seed'])
-            
+
             for key in reference_data:
                 if key == 'atoms':
                     continue
@@ -288,7 +297,6 @@ class DataContainer:
         filename : str or FileObj
             file to which to write
         """
-        import pickle
         # Save reference data to a tempfile
         reference_data = {'atoms': self.structure,
                           'observables': self. _observables,
