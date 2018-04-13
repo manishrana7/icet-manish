@@ -15,13 +15,13 @@ icet module.
 
 __project__ = 'icet'
 __description__ = 'A Pythonic approach to cluster expansions'
-__authors__ = ['Mattias Angqvist',
+__authors__ = ['Mattias Ångqvist',
                'William Armando Munoz',
                'Thomas Holm Rod',
                'Paul Erhart']
 __copyright__ = '2018'
 __license__ = ''
-__credits__ = ['Mattias Angqvist',
+__credits__ = ['Mattias Ångqvist',
                'William Armando Munoz',
                'Thomas Holm Rod',
                'Paul Erhart']
