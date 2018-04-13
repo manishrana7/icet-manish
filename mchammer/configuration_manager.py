@@ -21,11 +21,14 @@ class ConfigurationManager:
     """
 
         def __init__(self, occupations, strict_occupations, sublattices,  occupation_constraints=None):
-            
-            self._occupations = occupations            
+
+            self._occupations = occupations
             self._sublattices = sublattices
 
-            self.
+            if occupation_constraints is not None:
+                self._check_occupation_constraint(
+                    strict_occupations, occupation_constraints)
+            self._occupation_constraints = occupation_constraints
             # internal representation
             # (strings are probably not preferable in actual implementation;
             # they are used here for clarity)
@@ -36,11 +39,27 @@ class ConfigurationManager:
             #                                'H':  [8, 9, 10],
             #                                'X':  [11, 12, 13, 14]}
 
+        def _check_occupation_constraint(self, strict_occupations, occupation_constraints):
+            """
+            Checks that the user defined occupations constrains are stricter or
+            as strict as the strict occupations.
+
+            Parameters
+            ----------
+            strict_occupations : list of list of int
+            occupation_constraints : list of list of int
+            """
+            raise NotImplementedError
 
         @property
         def occupations(self):
             """ The occupations of the configuration."""
             return self._occupations.copy()
+
+        @property
+        def occupation_constraints(self):
+            """ The occupation constraints for this configuration manager."""
+            return self._occupation_constraints.copy()
 
         @property
         def sublattices(self):
