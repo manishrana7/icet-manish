@@ -1,6 +1,5 @@
 import pandas as pd
 
-import os
 import tarfile
 import tempfile
 
@@ -12,6 +11,7 @@ from ase import Atoms
 from collections import OrderedDict
 from icet.io.logging import logger
 
+from mchammer.ensembles.base_ensemble import BaseEnsemble
 
 logger = logger.getChild('data_container')
 
@@ -198,7 +198,7 @@ class DataContainer:
         return self._metadata
 
     def reset(self):
-        """ Reset (clear) data frame of data containerß """
+        """ Reset (clear) data frame of data container """
         self._data = pd.DataFrame()
 
     def __len__(self):
@@ -230,6 +230,23 @@ class DataContainer:
         filename : str or FileObj
             file from which to read
         """
+        data_container = DataContainer.read(filename, 
+                                            overwrite_metadata=False)
+        base_ensemble = BaseEnsemble(calculator=None, 
+                                     data_container=data_container)
+        
+        return base_ensemble
+
+    @staticmethod
+    def read(filename, overwrite_metadata=True):
+        """
+        Read DataContainer object from file.
+
+        Parameters
+        ----------
+        filename : str or FileObj
+            file from which to read
+        """
         temp_pkl_file = tempfile.NamedTemporaryFile()
         temp_cvs_file = tempfile.NamedTemporaryFile()
 
@@ -240,32 +257,34 @@ class DataContainer:
                 with open(filename, 'rb') as handle:
                     reference_data = pickle.load(handle)
             else:
-                reference = pickle.load(filename)
+                reference_data = pickle.load(filename)
+
+            dc = DataContainer(reference_data['atoms'],
+                               reference_data['parameters']['random-seed'],
+                               reference_data['metadata']['name-ensemble'])
             
-            atoms = reference_data['atoms']
-            parameters = reference_data['parameters']
-            metadata = reference_data['metadata']
-            dc = Data_Container(atoms, parameters['seed'], metadata['name_ensemble'])
+            for key in reference_data:
+                if key == 'atoms':
+                    continue
+                if key == 'metadata' and overwrite_metadata:
+                    for tag, value in reference_data[key].items():
+                        dc._metadata[tag] = value
+                if key == 'parameters':
+                    for tag, value in reference_data[key].items():
+                        if tag == 'random-seed':
+                            continue
+                        dc.add_parameter(tag, value)
+                if key == 'observables':
+                    for tag, values in reference_data[key].items():
+                        dc.add_observable(tag, value)
 
             temp_cvs_file.write(tar_file.extractfile('runtime-data').read())
-            temp_pkl_file.seek(0)
+            temp_cvs_file.seek(0)
+            dc._data = pd.read_cvs(temp_cvs_file)
             
         return dc
-            
 
-
-    def read(self, filename):
-        """
-        Read DataContainer object from file.
-
-        Parameters
-        ----------
-        filename : str or FileObj
-            file from which to read
-        """
-
-
-    def write(self, filename, append_data=False):
+    def write(self, filename):
         """
         Write DataContainer object to file.
 
@@ -276,7 +295,6 @@ class DataContainer:
         """
         import pickle
         # Save reference data to a tempfile
-        self._metadata['date-last-backup'] = datetime.now()
         reference_data = {'atoms': self.structure,
                           'observables': self. _observables,
                           'parameters': self._parameters,
@@ -287,6 +305,7 @@ class DataContainer:
             pickle.dump(reference_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
      
         # Save Pandas data frame as a csv tempfile
+        self._metadata['date-last-backup'] = datetime.now()
         temp_csv_file = tempfile.NamedTemporaryFile()
         self._data.to_csv(temp_csv_file.name)
 

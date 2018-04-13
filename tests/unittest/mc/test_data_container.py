@@ -172,18 +172,33 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(len(self.dc), 10)
 
     def test_get_average(self):
-        """Test functionality."""
+        """ Test functionality. """
         pass
 
-    def test_read_data(self):
-        """Test read dc container from file."""
+    def test_restart(self):
+        """ Test that BaseEnsemble object is restarted from file. """
         pass
 
-    def test_write_data(self):
-        """Test write dc container to file."""
+    def test_read_write_data(self):
+        """ Test write and read functionalities of data container. """
+        # add an observable
+        self.dc.add_observable('temperature', float)
+        # append observations to the data container
+        row_data = {}
+        row_data['temperature'] = 100.0
+        for mctrial in range(10, 101, 10):
+            self.dc.append(mctrial, row_data)
+
         temp_file = tempfile.NamedTemporaryFile()
         self.dc.write(temp_file.name)
+        dc_read = self.dc.read(temp_file.name)
 
+        self.assertDictEqual(self.dc.metadata, dc_read.metadata)
+        self.assertDictEqual(self.dc.parameters, dc_read.parameters)
+        self.assertDictEqual(self.dc.add_observables, dc_read.observables)
+        self.assertEqual(len(self.dc), len(dc_read))
+        self.assertListEqual(self.dc.get_data('mctrial', 'temperature'),
+                             dc_read.get_data('mctrial', 'temperature'))
 
 if __name__ == '__main__':
     unittest.main()
