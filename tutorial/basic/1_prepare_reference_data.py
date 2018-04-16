@@ -32,7 +32,7 @@ for k, atoms in enumerate(enumerate_structures(prim, sizes, subelements)):
 eref = {}
 for elem in subelements:
     for row in db.select('{}=1'.format(elem), natoms=1):
-        eref[elem] = row.energy / row.natoms
+        eref[elem] = row.relaxed_energy / row.natoms
         break
 
 # step 4: compute mixing energies and add them to the database
