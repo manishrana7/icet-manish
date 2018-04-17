@@ -1,6 +1,9 @@
+import random
+
+
 class ConfigurationManager:
     """
-    ConfigurationManager store its own state of the 
+    ConfigurationManager store its own state of the
     configuration that are being sampled in the ensemble.
 
     ConfigurationManager is responsible for all information and
@@ -22,7 +25,8 @@ class ConfigurationManager:
     Todo
     ----
     * occupation constraint not implemented
-
+    * add check that all sites in the different sublattices all have the same
+      occupation constraint.
     """
 
         def __init__(self, occupations, strict_occupations, sublattices,  occupation_constraints=None):
@@ -34,6 +38,9 @@ class ConfigurationManager:
                 self._check_occupation_constraint(
                     strict_occupations, occupation_constraints)
             self._occupation_constraints = occupation_constraints
+            self._possible_elements = self._get_possible_elements()
+            self._element_occupation = self._get_element_occupation()
+
             # internal representation
             # (strings are probably not preferable in actual implementation;
             # they are used here for clarity)
@@ -44,6 +51,32 @@ class ConfigurationManager:
             #                                'H':  [8, 9, 10],
             #                                'X':  [11, 12, 13, 14]}
 
+        def _get_possible_elements(self):
+            """
+            Return a list of the possible elements in
+            the entire configuration.
+            """
+            possible_element = set()
+            for occ in self.occupation_constraints:
+                for element in occ:
+                    possible_element.insert(element)
+
+            return list(possible_element)
+
+        def _get_element_occupation(self):
+            """
+            Return the element occupation, i.e. the element -> lattice sites dict.
+            """
+            element_occupations = []
+            for i, sublattice in enumerate(self.sublattices)
+                element_dict = {}
+                for element in self._possible_elements:
+                    element_dict[element] = []
+                for lattice_site in sublattice:
+                    element = self.occupations[lattice_site]
+                    element_dict[element].push_back(lattice_site)
+                element_occupations.push_back(element_dict)
+            return element_occupations
         def _check_occupation_constraint(self, strict_occupations, occupation_constraints):
             """
             Checks that the user defined occupations constrains are stricter or
@@ -86,8 +119,31 @@ class ConfigurationManager:
             Parameters
             ----------
             sublattice : int
-                The sublattice to pick indices from.            
+                The sublattice to pick indices from.
             """
+
+            index_1 = np.random.choice(self.sublattices[sublattice])
+            element_1 = self.occupations[index_1]
+            # assuming all sites in this sublattice have same allowed occupations
+
+            possible_swap_elements = set(self.occupation_constraints[index_1]) - set(self.occupations[index_1]))
+            total_number_of_indices = 0
+            for element in possible_swap_elements:
+                total_number_of_indices += len(self._element_occupation[sublattice][element])
+            index = random.randint(0, total_number_of_indices-1)
+            for element in possible_swap_elements:
+                if index < len(self._element_occupation[sublattice][element]):
+                    index_2 = self._element_occupation[sublattice][element][index]
+                    break
+                else:
+                    index -= len(self._element_occupation[sublattice][element])
+            else:
+                raise SwapNotPossibleError
+            return index_1, index_2
+            
+                
+            self._element_occupation[sublattice][]
+
             raise NotImplementedError
 
         def get_flip_index(self, sublattice: int):
@@ -99,5 +155,12 @@ class ConfigurationManager:
             ----------
             sublattice : int
                 The sublattice to pick indices from.
+
+            return : (int, int) (index, element)
+
             """
-            raise NotImplementedError
+
+            index=np.random.choice(self.sublattices[sublattice])
+            element=np.random.choice(
+                set(self.occupation_constraints[index]) - set(self.occupations[index]))
+            return index, element
