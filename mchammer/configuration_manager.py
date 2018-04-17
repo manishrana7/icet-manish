@@ -18,6 +18,11 @@ class ConfigurationManager:
         occupation than what is allowed from the Calculator.
     sublattices : list of list of int
         the integers refer to lattice site indices in the configuration.
+
+    Todo
+    ----
+    * occupation constraint not implemented
+
     """
 
         def __init__(self, occupations, strict_occupations, sublattices,  occupation_constraints=None):
@@ -49,7 +54,15 @@ class ConfigurationManager:
             strict_occupations : list of list of int
             occupation_constraints : list of list of int
             """
-            raise NotImplementedError
+            error_message = "strict occupations and occupation constraints must be equal length"
+            assert len(strict_occupations) == len(
+                occupation_constraints), error_message
+
+            for strict_occ, occ in zip(strict_occupations, occupation_constraints):
+                if not set(occ).issubset(strict_occ):
+                    raise RuntTimeEerror(
+                        "User defined occupation constraints must be "
+                        "stricter or as strict as strict occupations constraints.")
 
         @property
         def occupations(self):
