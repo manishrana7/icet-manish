@@ -1,7 +1,7 @@
 import random
 
 
-class ConfigurationManager:
+class ConfigurationManager(object):
     """
     ConfigurationManager store its own state of the
     configuration that are being sampled in the ensemble.
