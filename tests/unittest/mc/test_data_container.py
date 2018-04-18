@@ -177,19 +177,7 @@ class TestDataContainer(unittest.TestCase):
 
     def test_restart(self):
         """ Test that BaseEnsemble object is restarted from file. """
-        # add an observable
-        self.dc.add_observable('temperature', float)
-        # append observations to the data container
-        row_data = {}
-        row_data['temperature'] = 100.0
-        for mctrial in range(10, 101, 10):
-            self.dc.append(mctrial, row_data)
-        # save to file
-        temp_file = tempfile.NamedTemporaryFile()
-        self.dc.write(temp_file.name)
-
-        with self.assertRaises(NotImplementedError):
-            self.dc.restart(temp_file.name)
+        pass
 
     def test_read_write_data(self):
         """ Test write and read functionalities of data container. """
@@ -210,7 +198,7 @@ class TestDataContainer(unittest.TestCase):
         self.assertDictEqual(self.dc.parameters, dc_read.parameters)
         # check observables
         self.assertDictEqual(self.dc.observables, dc_read.observables)
-        # chech runtime data
+        # check runtime data
         self.assertEqual(len(self.dc), len(dc_read))
         self.assertListEqual(self.dc.get_data(['mctrial', 'temperature']),
                              dc_read.get_data(['mctrial', 'temperature']))

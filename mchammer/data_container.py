@@ -223,24 +223,7 @@ class DataContainer:
         filename : str or FileObj
             file from which to read
         """
-        from mchammer.ensembles.base_ensemble import BaseEnsemble
-        data_container = DataContainer.read(filename,
-                                            overwrite_metadata=False)
-
-        class ConcreteEnsemble(BaseEnsemble):
-            def __init__(self, calculator, name=None, data_container=None):
-                super().__init__(calculator, name=name,
-                                 data_container=data_container)
-
-            def do_trial_move(self):
-                pass
-
-            def _run(self):
-                pass
-
-        ensemble = ConcreteEnsemble(calculator=None,
-                                    data_container=data_container)
-        return ensemble
+        pass
 
     @staticmethod
     def read(filename, overwrite_metadata=True):
@@ -253,7 +236,8 @@ class DataContainer:
             file from which to read
 
         overwrite_metadata : bool
-            If True overwrite DataContainer's metadata
+            If True, overwrite metadata created during DataContainer
+            initialization with the metadata saved in file.
         """
         temp_pkl_file = tempfile.NamedTemporaryFile()
         temp_cvs_file = tempfile.NamedTemporaryFile()
