@@ -107,7 +107,12 @@ class ClusterSpace
 
     ///Returns the allowed occupations on the sites
     std::vector<int> getAllowedOccupations(const Structure &structure, const std::vector<LatticeSite> &latticeNeighbors) const;
+    
 
+    std::map<int, int> getElementMap() const
+    {
+        return _elementRepresentation;
+    } 
 
   private:
     ///Currently we have constant Mi for development but will later change to dynamic Mi
