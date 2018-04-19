@@ -45,3 +45,8 @@ class BaseCalculator(ABC):
 
         for index, element in zip(indices, elements):
             self.atoms.numbers[index] = element
+
+    @property
+    def occupation_constraints(self):
+        """A map from site to allowed species."""
+        raise NotImplementedError
