@@ -83,5 +83,6 @@ class ClusterExpansionCalculator(BaseCalculator):
     @property
     def occupation_constraints(self):
         """A map from site to allowed species."""
-        elements = list(self.cluster_expansion.cluster_space.element_map.keys())
+        elements = list(
+            self.cluster_expansion.cluster_space.element_map.keys())
         return [elements] * len(self.atoms)

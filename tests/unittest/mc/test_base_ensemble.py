@@ -2,7 +2,8 @@ import unittest
 
 from icet import ClusterSpace
 from icet import ClusterExpansion
-from mchammer.calculators.cluster_expansion_calculator import ClusterExpansionCalculator
+from mchammer.calculators.cluster_expansion_calculator import \
+    ClusterExpansionCalculator
 from mchammer.ensembles.base_ensemble import BaseEnsemble
 from ase.build import bulk
 import numpy as np
