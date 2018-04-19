@@ -99,6 +99,22 @@ class DataContainer:
             'Unknown parameter type: {}'.format(type(value))
         self._parameters[tag] = copy.deepcopy(value)
 
+    def _update_data(self, data):
+        """
+        Private method to update data from read function.
+
+        Parameters
+        ----------
+        data : Pandas DataFrame object
+            data of DataContainer object read from file
+
+        Todo
+        ----
+        Using concatenate here has futher purposes when an implemenation
+        of backup will be done.
+        """
+        self._data = pd.concat([self._data, data])
+
     def append(self, mctrial: int, record: dict):
         """
         Append data to the data container.
@@ -226,7 +242,7 @@ class DataContainer:
         pass
 
     @staticmethod
-    def read(filename, overwrite_metadata=True):
+    def read(filename):
         """
         Read DataContainer object from file.
 
@@ -234,10 +250,6 @@ class DataContainer:
         ----------
         filename : str or FileObj
             file from which to read
-
-        overwrite_metadata : bool
-            If True, overwrite metadata created during DataContainer
-            initialization with the metadata saved in file.
         """
         temp_pkl_file = tempfile.NamedTemporaryFile()
         temp_cvs_file = tempfile.NamedTemporaryFile()
@@ -254,7 +266,7 @@ class DataContainer:
             for key in reference_data:
                 if key == 'atoms':
                     continue
-                if key == 'metadata' and overwrite_metadata:
+                if key == 'metadata':
                     for tag, value in reference_data[key].items():
                         dc._metadata[tag] = value
                 if key == 'parameters':
@@ -268,7 +280,8 @@ class DataContainer:
 
             temp_cvs_file.write(tar_file.extractfile('runtime-data').read())
             temp_cvs_file.seek(0)
-            dc._data = pd.read_csv(temp_cvs_file)
+            runtime_data = pd.read_csv(temp_cvs_file)
+            dc._update_data(runtime_data)
         return dc
 
     def write(self, filename):

@@ -176,7 +176,7 @@ class TestDataContainer(unittest.TestCase):
         pass
 
     def test_restart(self):
-        """ Test that BaseEnsemble object is restarted from file. """
+        """ Test that Ensemble object is restarted from file. """
         pass
 
     def test_read_write_data(self):
