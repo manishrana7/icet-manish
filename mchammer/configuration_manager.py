@@ -42,6 +42,8 @@ class ConfigurationManager(object):
         if occupation_constraints is not None:
             self._check_occupation_constraint(
                 strict_constraints, occupation_constraints)
+        else:
+            occupation_constraints = strict_constraints
         self._occupation_constraints = occupation_constraints
         self._possible_elements = self._get_possible_elements()
         self._element_occupation = self._get_element_occupation()

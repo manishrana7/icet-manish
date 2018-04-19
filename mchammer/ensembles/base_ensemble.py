@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from mchammer.data_container import DataContainer
+from mchammer.configuration_manager import ConfigurationManager
 from mchammer.observers.base_observer import BaseObserver
 import random
 from math import gcd
@@ -45,6 +46,11 @@ class BaseEnsemble(ABC):
                                                  random_seed)
         else:
             raise NotImplementedError
+
+        strict_constraints = self.calculator.occupation_constraints
+        sublattices = [[i for i in range(len(self.calculator.atoms))]]
+        self.configuration = ConfigurationManager(
+            self._calculator.atoms.numbers, strict_constraints, sublattices)
 
     @property
     def structure(self):
