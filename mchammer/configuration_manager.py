@@ -104,17 +104,17 @@ class ConfigurationManager(object):
 
     @property
     def occupations(self):
-        """ The occupations of the configuration."""
+        """The occupations of the configuration."""
         return self._occupations.copy()
 
     @property
     def occupation_constraints(self):
-        """ The occupation constraints for this configuration manager."""
+        """The occupation constraints for this configuration manager."""
         return self._occupation_constraints.copy()
 
     @property
     def sublattices(self):
-        """ The sublattices of the configuration. """
+        """The sublattices of the configuration."""
         return self._sublattices.copy()
 
     def get_swap_indices(self, sublattice: int):
@@ -132,7 +132,8 @@ class ConfigurationManager(object):
 
         possible_swap_elements = set(
             self.occupation_constraints[index_1]) - set(
-                self.occupations[index_1])
+                [self.occupations[index_1]] )
+
         total_number_of_indices = 0
         for element in possible_swap_elements:
             total_number_of_indices += len(
@@ -171,4 +172,4 @@ class ConfigurationManager(object):
 
 class SwapNotPossibleError(BaseException):
     def __init__(self):
-        Exception.__init__(self,"Swapping not possible on sublattice.") 
+        Exception.__init__(self, "Swapping not possible on sublattice.")

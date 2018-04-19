@@ -8,8 +8,10 @@ class TestConfigurationManager(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestConfigurationManager, self).__init__(*args, **kwargs)
-        self.atoms = bulk("Al").repeat(3)
-        self.constraints = [[13, 47]*len(self.atoms)]
+        self.atoms = bulk('Al').repeat([2,1,1])
+        self.atoms[1].symbol = 'Ag'
+        self.atoms = self.atoms.repeat(3)
+        self.constraints = [[13, 47]  for _ in range(len(self.atoms)) ]
         self.strict_constraints = self.constraints
         self.sublattices = [[i for i in range(len(self.atoms))]]
 
@@ -19,11 +21,11 @@ class TestConfigurationManager(unittest.TestCase):
             self.constraints)
 
     def test_type(self):
-        """ Test cm type """
+        """Test cm type."""
         self.assertIsInstance(self.cm, ConfigurationManager)
 
     def test_check_occupation_constraint(self):
-        """ Test the check occupation constraint method. """
+        """Test the check occupation constraint method."""
 
         # Check that equal constraint is allowed
         constraint = [[1, 2], [1, 2], [1], [2]]
@@ -111,6 +113,11 @@ class TestConfigurationManager(unittest.TestCase):
         sublattices[0] = sublattices[0][0] + 1
         self.assertNotEqual(list(sublattices), list(self.cm.sublattices))
 
+
+    def test_get_swap_indices(self):
+        """Test the getting swap indices method."""
+        
+        index1, index2 = self.cm.get_swap_indices(0)
 
 
 if __name__ == '__main__':
