@@ -167,3 +167,8 @@ class ConfigurationManager(object):
             set(self.occupation_constraints[index]) - set(
                 self.occupations[index]))
         return index, element
+
+
+class SwapNotPossibleError(BaseException):
+    def __init__(self):
+        Exception.__init__(self,"Swapping not possible on sublattice.") 
