@@ -8,10 +8,10 @@ class TestConfigurationManager(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestConfigurationManager, self).__init__(*args, **kwargs)
-        self.atoms = bulk('Al').repeat([2,1,1])
+        self.atoms = bulk('Al').repeat([2, 1, 1])
         self.atoms[1].symbol = 'Ag'
         self.atoms = self.atoms.repeat(3)
-        self.constraints = [[13, 47]  for _ in range(len(self.atoms)) ]
+        self.constraints = [[13, 47] for _ in range(len(self.atoms))]
         self.strict_constraints = self.constraints
         self.sublattices = [[i for i in range(len(self.atoms))]]
 
@@ -72,7 +72,6 @@ class TestConfigurationManager(unittest.TestCase):
         occupations[0] = occupations[0] + 1
         self.assertNotEqual(list(occupations), list(self.cm.occupations))
 
-
     def test_property_occupation_constraints(self):
         """
         Test that the occupation_constraints property returns expected result
@@ -91,7 +90,8 @@ class TestConfigurationManager(unittest.TestCase):
         # returned occupations
         occupation_constraints = self.cm.occupation_constraints
         occupation_constraints[0] = occupation_constraints[0][0] + 1
-        self.assertNotEqual(list(occupation_constraints), list(self.cm.occupation_constraints))
+        self.assertNotEqual(list(occupation_constraints),
+                            list(self.cm.occupation_constraints))
 
     def test_property_sublattices(self):
         """
@@ -113,11 +113,20 @@ class TestConfigurationManager(unittest.TestCase):
         sublattices[0] = sublattices[0][0] + 1
         self.assertNotEqual(list(sublattices), list(self.cm.sublattices))
 
-
     def test_get_swap_indices(self):
         """Test the getting swap indices method."""
-        
-        index1, index2 = self.cm.get_swap_indices(0)
+
+        for _ in range(1000):
+            index1, index2 = self.cm.get_swap_indices(0)
+            self.assertNotEqual(
+                self.cm.occupations[index1], self.cm.occupations[index2])
+
+    def test_get_flip_index(self):
+        """Test the getting flip indices method."""
+
+        for _ in range(1000):
+            index, element = self.cm.get_flip_index(0)
+            self.assertNotEqual(self.cm.occupations[index], element)
 
 
 if __name__ == '__main__':

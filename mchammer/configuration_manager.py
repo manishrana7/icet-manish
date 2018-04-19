@@ -1,6 +1,10 @@
 import random
 
 
+class SwapNotPossibleError(BaseException):
+    pass
+
+
 class ConfigurationManager(object):
     """
     ConfigurationManager store its own state of the
@@ -132,7 +136,7 @@ class ConfigurationManager(object):
 
         possible_swap_elements = set(
             self.occupation_constraints[index_1]) - set(
-                [self.occupations[index_1]] )
+                [self.occupations[index_1]])
 
         total_number_of_indices = 0
         for element in possible_swap_elements:
@@ -164,12 +168,7 @@ class ConfigurationManager(object):
         """
 
         index = random.choice(self.sublattices[sublattice])
-        element = random.choice(
+        element = random.choice(list(
             set(self.occupation_constraints[index]) - set(
-                self.occupations[index]))
+                [self.occupations[index]])))
         return index, element
-
-
-class SwapNotPossibleError(BaseException):
-    def __init__(self):
-        Exception.__init__(self, "Swapping not possible on sublattice.")
