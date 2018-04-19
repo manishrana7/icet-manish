@@ -71,5 +71,47 @@ class TestConfigurationManager(unittest.TestCase):
         self.assertNotEqual(list(occupations), list(self.cm.occupations))
 
 
+    def test_property_occupation_constraints(self):
+        """
+        Test that the occupation_constraints property returns expected result
+        and that it cannot be modified.
+        """
+
+        self.assertListEqual(list(self.cm.occupation_constraints),
+                             list(self.constraints))
+
+        # Test that the property can not be set.
+        with self.assertRaises(AttributeError) as context:
+            self.cm.occupation_constraints = []
+        self.assertTrue("can't set attribute" in str(context.exception))
+
+        # Test that the property can't be set by modifying the
+        # returned occupations
+        occupation_constraints = self.cm.occupation_constraints
+        occupation_constraints[0] = occupation_constraints[0][0] + 1
+        self.assertNotEqual(list(occupation_constraints), list(self.cm.occupation_constraints))
+
+    def test_property_sublattices(self):
+        """
+        Test that the occupation_constraints property returns expected result
+        and that it cannot be modified.
+        """
+
+        self.assertListEqual(list(self.cm.sublattices),
+                             list(self.sublattices))
+
+        # Test that the property can not be set.
+        with self.assertRaises(AttributeError) as context:
+            self.cm.sublattices = []
+        self.assertTrue("can't set attribute" in str(context.exception))
+
+        # Test that the property can't be set by modifying the
+        # returned occupations
+        sublattices = self.cm.sublattices
+        sublattices[0] = sublattices[0][0] + 1
+        self.assertNotEqual(list(sublattices), list(self.cm.sublattices))
+
+
+
 if __name__ == '__main__':
     unittest.main()
