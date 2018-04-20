@@ -191,7 +191,8 @@ class ConfigurationManager(object):
             for sublattice_index, sublattice in enumerate(self.sublattices):
                 if index in sublattice:
                     # Remove index from current element
-                    self._element_occupation[sublattice_index][current_element].remove(
+                    self._element_occupation[
+                        sublattice_index][current_element].remove(
                         index)
                     # Add index to new element
                     self._element_occupation[sublattice_index][element].append(

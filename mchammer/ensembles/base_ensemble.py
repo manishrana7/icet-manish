@@ -202,10 +202,12 @@ class BaseEnsemble(ABC):
 
         raises
         ------
-        ValueError : if list_of_sites are not the same length as list_of_elements
+        ValueError : if list_of_sites are not the same length
+                     as list_of_elements
         """
 
         if len(list_of_sites) != len(list_of_elements):
-            raise ValueError("List of sites and list of elements are not the same size.")
+            raise ValueError(
+                "List of sites and list of elements are not the same size.")
         self.calculator.update_occupations(list_of_sites, list_of_elements)
         self.configuration.update_occupations(list_of_sites, list_of_elements)

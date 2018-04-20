@@ -140,6 +140,40 @@ class TestConfigurationManager(unittest.TestCase):
         self.assertEqual(list(self.cm.occupations[indices]), elements)
         self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
 
+    def test_element_occupations(self):
+        """Test the element occupation dict."""
+
+        # Initially consistent
+        self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
+
+        # Test that changing occupations manually is wrong
+
+        element = self.cm._occupations[0]
+        self.cm._occupations[0] = 200
+        self.assertFalse(self._is_element_occupation_dict_correct(self.cm))
+
+        # Fix error
+        self.cm._occupations[0] = element
+        self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
+
+        # Set everything to Al
+        indices = [i for i in range(len(self.atoms))]
+        elements = [13] * len(self.atoms)
+        self.cm.update_occupations(indices, elements)
+        self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
+
+        # Set everything to Ag
+        indices = [i for i in range(len(self.atoms))]
+        elements = [47] * len(self.atoms)
+        self.cm.update_occupations(indices, elements)
+        self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
+
+        # Set everything to Al-Ag-Al-Ag ...
+        indices = [i for i in range(len(self.atoms))]
+        elements = [13, 47] * (len(self.atoms)//2)
+        self.cm.update_occupations(indices, elements)
+        self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
+
     def _is_element_occupation_dict_correct(self, configuration_manager):
         """
         Check that the internal Element -> site dict is consistent
