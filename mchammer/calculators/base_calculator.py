@@ -28,7 +28,7 @@ class BaseCalculator(ABC):
     def calculate_local_contribution(self):
         pass
 
-    def set_elements(self, indices, elements):
+    def update_occupations(self, indices, elements):
         """
         Set elements on the atoms object.
 

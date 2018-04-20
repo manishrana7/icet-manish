@@ -48,16 +48,6 @@ class ConfigurationManager(object):
         self._possible_elements = self._get_possible_elements()
         self._element_occupation = self._get_element_occupation()
 
-        # internal representation
-        # (strings are probably not preferable in actual implementation;
-        # they are used here for clarity)
-        # ConfigurationManager._sublattices = [['Pd', 'Au'],
-        #                                      ['H',  'X']]
-        # ConfigurationManager._sites = {'Pd': [0, 1, 2, 3],
-        #                                'Au': [4, 5, 6, 7],
-        #                                'H':  [8, 9, 10],
-        #                                'X':  [11, 12, 13, 14]}
-
     def _get_possible_elements(self):
         """
         Return a list of the possible elements in
@@ -174,3 +164,39 @@ class ConfigurationManager(object):
             set(self.occupation_constraints[index]) - set(
                 [self.occupations[index]])))
         return index, element
+
+    def update_occupations(self, list_of_sites, list_of_elements):
+        """
+        Update the element occupation of the configuration being sampled.
+        This will change the state in both the configuration in the calculator
+        and the state of configuration manager.
+
+        parameters
+        ----------
+        list_of_sites : list of int
+            list of indices of the configuration to change.
+        list_of_elements : list of int
+            list of elements to put on the lattice sites the
+            indices refer to.
+
+        todo
+        ----
+        * change occupation
+        * change the element occupation 
+        """
+
+        # change element occupation dict
+        for index, element in zip(list_of_sites, list_of_elements):
+            current_element = self._occupations[index]
+            for sublattice_index, sublattice in enumerate(self.sublattices):
+                if index in sublattice:
+                    # Remove index from current element
+                    self._element_occupation[sublattice_index][current_element].remove(
+                        index)
+                    # Add index to new element
+                    self._element_occupation[sublattice_index][element].append(
+                        index)
+
+        # change occupation list
+        for index, element in zip(list_of_sites, list_of_elements):
+            self._occupations[index] = element
