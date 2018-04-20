@@ -182,7 +182,7 @@ class ConfigurationManager(object):
         todo
         ----
         * change occupation
-        * change the element occupation 
+        * change the element occupation
         """
 
         # change element occupation dict

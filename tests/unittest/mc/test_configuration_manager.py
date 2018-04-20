@@ -128,6 +128,39 @@ class TestConfigurationManager(unittest.TestCase):
             index, element = self.cm.get_flip_index(0)
             self.assertNotEqual(self.cm.occupations[index], element)
 
+    def test_update_occupations(self):
+        """Test the update occupation method."""
+
+        indices = [0, 2, 3, 5, 7, 8]
+        elements = [13, 13, 47, 47, 13, 47]
+
+        self.assertNotEqual(list(self.cm.occupations[indices]), list(elements))
+        self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
+        self.cm.update_occupations(indices, elements)
+        self.assertEqual(list(self.cm.occupations[indices]), elements)
+        self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
+
+    def _is_element_occupation_dict_correct(self, configuration_manager):
+        """
+        Check that the internal Element -> site dict is consistent
+        with the occupation list.
+
+        parameters
+        ----------
+        configuration_manager : ConfigurationManager
+
+        return : bool
+        True if the dict is correct
+        False if the dict is inconsistent with self.occupations
+        """
+
+        for element_dict in configuration_manager._element_occupation:
+            for element in element_dict.keys():
+                for index in element_dict[element]:
+                    if element != configuration_manager.occupations[index]:
+                        return False
+        return True
+
 
 if __name__ == '__main__':
     unittest.main()
