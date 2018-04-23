@@ -132,8 +132,40 @@ class BaseEnsemble(ABC):
         number_of_trial_moves : int
            number of trial moves to run without stopping.
         """
-        pass
 
+        for step in range(number_of_trial_moves):
+            self.do_trial_move()
+            if step % self.minimum_observation_interval == 0:
+                self._observe_observers(step)
+
+    def _observe_observers(self, step):
+        """
+        Observe all observers that coincicide with the step.
+
+        parameters
+        ----------
+        step : int
+            the current step
+        """
+        row_dict = {}
+        for observer in self.observers:
+            if observer.return_type is dict:
+                observation_dict = observer.get_keys()
+                for key in observation_dict:
+                    row_dict[key] = None
+            else:
+                row_dict[observer.tag] = None
+
+            if observer.interval % step == 0:
+                if observer.return_type is dict:
+                    observation_dict = observer.get_observable(
+                        self.calculator.atoms)
+                    for key in observation_dict:
+                        row_dict[key] = observation_dict[key]
+                else:
+                    self._data_container.append(
+                        observer.tag, observer.get_observable(self.calculator.atoms))
+        self._data_container.append(step, row_dict)
     def _find_minimum_observation_interval(self):
         """
         Find the greatest common denominator from the observation intervals.
@@ -170,8 +202,16 @@ class BaseEnsemble(ABC):
             'observer argument invalid; must be child of BaseObserver'
 
         if tag is not None:
+            observer.tag = tag
             self.observers[tag] = observer
+
         else:
             self.observers[observer.tag] = observer
+
+        if observer.return_type is dict:
+            for key in observer:
+                self._data_container.add_observable(key, float)
+
+        self._data_container.add_observable(tag, observer.return_type)
 
         self._find_minimum_observation_interval()
