@@ -123,7 +123,6 @@ class TestDataContainer(unittest.TestCase):
 
         retval = self.dc.get_data(['mctrial', 'test_observer',
                                    'other_observer'])
-        print(retval)
         self.assertListEqual(target, retval)
 
         target = [[20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0],

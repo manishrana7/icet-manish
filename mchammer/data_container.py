@@ -260,10 +260,12 @@ class DataContainer:
             for key in reference_data:
                 if key == 'metadata':
                     for tag, value in reference_data[key].items():
+                        if tag == 'ensemble_name':
+                            continue
                         dc._metadata[tag] = value
                 elif key == 'parameters':
                     for tag, value in reference_data[key].items():
-                        if tag == 'random-seed':
+                        if tag == 'seed':
                             continue
                         dc.add_parameter(tag, value)
                 elif key == 'observables':
