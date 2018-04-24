@@ -56,7 +56,8 @@ class DataContainer:
         self._observables = []
         self._parameters = OrderedDict()
         self._metadata = OrderedDict()
-        self._data = pd.DataFrame()
+        self._data = pd.DataFrame(columns=['mctrial'])
+        self._data = self._data.astype({'mctrial': int})
 
         self.add_parameter('seed', random_seed)
 

@@ -99,8 +99,6 @@ class TestDataContainer(unittest.TestCase):
     def test_metadata(self):
         """Test metadata."""
         for key in self.dc.metadata:
-            if key == 'icet_version':
-                print(self.dc.metadata[key])
             self.assertIsInstance(self.dc.metadata[key], str)
 
     def test_get_data(self):
@@ -125,6 +123,7 @@ class TestDataContainer(unittest.TestCase):
 
         retval = self.dc.get_data(['mctrial', 'test_observer',
                                    'other_observer'])
+        print(retval)
         self.assertListEqual(target, retval)
 
         target = [[20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0],
