@@ -2,6 +2,8 @@ import unittest
 from mchammer.configuration_manager import ConfigurationManager
 from ase.build import bulk
 
+from mchammer.configuration_manager import SwapNotPossibleError
+
 
 class TestConfigurationManager(unittest.TestCase):
     """Container for tests of the class functionality."""
@@ -120,6 +122,25 @@ class TestConfigurationManager(unittest.TestCase):
             index1, index2 = self.cm.get_swap_indices(0)
             self.assertNotEqual(
                 self.cm.occupations[index1], self.cm.occupations[index2])
+
+        # set everything to Al and see that swap is not possible
+        indices = [i for i in range(len(self.atoms))]
+        elements = [13] * len(self.atoms)
+        self.cm.update_occupations(indices, elements)
+
+        with self.assertRaises(SwapNotPossibleError) as context:
+            index1, index2 = self.cm.get_swap_indices(0)
+
+        # try swapping in an empty sublattice
+        sublattices = [indices, []]
+
+        cm_two_sublattices = ConfigurationManager(
+            self.atoms.numbers, self.strict_constraints, sublattices,
+            self.constraints)
+        with self.assertRaises(SwapNotPossibleError) as context:
+            index1, index2 = cm_two_sublattices.get_swap_indices(1)
+
+        self.assertTrue("Sublattice is empty" in str(context.exception))
 
     def test_get_flip_index(self):
         """Test the getting flip indices method."""

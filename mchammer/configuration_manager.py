@@ -1,7 +1,7 @@
 import random
 
 
-class SwapNotPossibleError(BaseException):
+class SwapNotPossibleError(Exception):
     pass
 
 
@@ -122,8 +122,10 @@ class ConfigurationManager(object):
         sublattice : int
             The sublattice to pick indices from.
         """
-
-        index_1 = random.choice(self.sublattices[sublattice])
+        try:
+            index_1 = random.choice(self.sublattices[sublattice])
+        except IndexError:
+            raise SwapNotPossibleError("Sublattice is empty")
         # assuming all sites in this sublattice have same allowed occupations
 
         possible_swap_elements = set(
@@ -134,7 +136,10 @@ class ConfigurationManager(object):
         for element in possible_swap_elements:
             total_number_of_indices += len(
                 self._element_occupation[sublattice][element])
-        index = random.randint(0, total_number_of_indices-1)
+        try:
+            index = random.randint(0, total_number_of_indices-1)
+        except ValueError:
+            raise SwapNotPossibleError
         for element in possible_swap_elements:
             if index < len(self._element_occupation[sublattice][element]):
                 index_2 = self._element_occupation[sublattice][element][index]
