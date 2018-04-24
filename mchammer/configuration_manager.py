@@ -118,6 +118,9 @@ class ConfigurationManager(object):
     def get_swap_indices(self, sublattice: int) -> Tuple[int, int]:
         """
         Returns a tuple of two random indices in a specific sublattice.
+        The two indices refer to lattice sites and the indices
+        will, if swapped, produce a new, different configuration
+        that is allowed by the occupation constraints.
 
         Parameters
         ----------
