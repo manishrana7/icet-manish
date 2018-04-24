@@ -91,7 +91,7 @@ class TestConfigurationManager(unittest.TestCase):
         # Test that the property can't be set by modifying the
         # returned occupations
         occupation_constraints = self.cm.occupation_constraints
-        occupation_constraints[0] = occupation_constraints[0][0] + 1
+        occupation_constraints[0][0] = occupation_constraints[0][0] + 1
         self.assertNotEqual(list(occupation_constraints),
                             list(self.cm.occupation_constraints))
 
@@ -112,7 +112,7 @@ class TestConfigurationManager(unittest.TestCase):
         # Test that the property can't be set by modifying the
         # returned occupations
         sublattices = self.cm.sublattices
-        sublattices[0] = sublattices[0][0] + 1
+        sublattices[0][0] = sublattices[0][0] + 1
         self.assertNotEqual(list(sublattices), list(self.cm.sublattices))
 
     def test_get_swap_indices(self):
