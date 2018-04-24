@@ -3,12 +3,13 @@ import tempfile
 import getpass
 import socket
 import json
-import re
 from datetime import datetime
 from collections import OrderedDict
 import pandas as pd
 from ase import Atoms
-from ase.io import write, read
+from ase.io import write as ase_write
+from ase.io import read as ase_read
+from icet import __version__ as icet_version
 
 
 class DataContainer:
@@ -41,6 +42,12 @@ class DataContainer:
 
     data : Pandas data frame object
         Runtime data collected during the Monte Carlo simulation.
+
+    Todo
+    ----
+    atoms is always expected to be given among the arguments so stop
+    querying whether atoms is None once it has been fixed in BaseEnsemble
+    class.
     """
 
     def __init__(self, atoms, ensemble_name: str, random_seed: int):
@@ -67,10 +74,7 @@ class DataContainer:
             datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
         self._metadata['username'] = getpass.getuser()
         self._metadata['hostname'] = socket.gethostname()
-        with open('icet/__init__.py') as fd:
-            lines = '\n'.join(fd.readlines())
-        self.metadata['icet_version'] = \
-            re.search("__version__ = '(.*)'", lines).group(1)
+        self.metadata['icet_version'] = icet_version
 
     def add_observable(self, tag: str):
         """
@@ -241,13 +245,13 @@ class DataContainer:
         infile : str or FileObj
             file from which to read
         """
-        temp_atoms_file = tempfile.NamedTemporaryFile(suffix='.xyz')
+        temp_atoms_file = tempfile.NamedTemporaryFile()
         temp_json_file = tempfile.NamedTemporaryFile()
         temp_cvs_file = tempfile.NamedTemporaryFile()
 
         with tarfile.open(mode='r', name=infile) as tar_file:
             temp_atoms_file.write(tar_file.extractfile('atoms').read())
-            atoms = read(temp_atoms_file.name)
+            atoms = ase_read(temp_atoms_file.name, format='xyz')
 
             temp_json_file.write(tar_file.extractfile('reference_data').read())
             temp_json_file.seek(0)
@@ -279,21 +283,21 @@ class DataContainer:
 
         return dc
 
-    def write(self, infile):
+    def write(self, outfile):
         """
         Write DataContainer object to file.
 
         Parameters
         ----------
-        infile : str or FileObj
+        outfile : str or FileObj
             file to which to write
         """
         self._metadata['date_last_backup'] = \
             datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 
         # Save reference atomic structure
-        temp_atoms_file = tempfile.NamedTemporaryFile(suffix='.xyz')
-        write(temp_atoms_file.name, self.structure)
+        temp_atoms_file = tempfile.NamedTemporaryFile()
+        ase_write(temp_atoms_file.name, self.structure, format='xyz')
 
         # Save reference data to a json tempfile
         reference_data = {'observables': self._observables,
@@ -308,7 +312,7 @@ class DataContainer:
         temp_csv_file = tempfile.NamedTemporaryFile()
         self._data.to_csv(temp_csv_file.name)
 
-        with tarfile.open(infile, mode='w') as handle:
+        with tarfile.open(outfile, mode='w') as handle:
             handle.add(temp_csv_file.name, arcname='runtime_data')
             handle.add(temp_json_file.name, arcname='reference_data')
             handle.add(temp_atoms_file.name, arcname='atoms')
