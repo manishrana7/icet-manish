@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import unittest
 import tempfile
-
-from datetime import datetime
 from collections import OrderedDict
+import numpy as np
 from ase.build import bulk
 from mchammer import DataContainer
 from mchammer.observers.base_observer import BaseObserver
@@ -51,21 +50,21 @@ class TestDataContainer(unittest.TestCase):
 
     def test_add_observable(self):
         """Test that observables are added to DataContainer."""
-        self.dc.add_observable('energy', float)
-        self.dc.add_observable('temperature', float)
+        self.dc.add_observable('energy')
+        self.dc.add_observable('temperature')
         self.assertEqual(len(self.dc.observables), 2)
 
     def test_add_parameter(self):
         """Test that parameters are added to DataContainer."""
         self.dc.add_parameter('temperature', 273.15)
-        self.dc.add_parameter('chemical-potential-difference', -0.5)
+        self.dc.add_parameter('chemical_potential_difference', -0.5)
         self.assertEqual(len(self.dc.parameters), 3)
         index_atoms = [i for i in range(len(self.atoms))]
         self.dc.add_parameter('index_atoms', index_atoms)
         self.assertEqual(len(self.dc.parameters), 4)
 
     def test_append_data(self):
-        """Test that dc is appended to DataContainer."""
+        """Test that data is appended to DataContainer."""
         min_interval = min([obs.interval for obs in self.observers])
         for mctrial in range(1, 101):
             if mctrial % min_interval == 0:
@@ -76,39 +75,33 @@ class TestDataContainer(unittest.TestCase):
                         row_data[obs.tag] = observable
                 self.dc.append(mctrial, row_data)
 
-        self.assertEqual(len(self.dc), 10)
+        self.assertEqual(self.dc.get_number_of_entries(), 10)
 
     def test_parameters(self):
         """Test that added parameters has OrderedDict type."""
-        target = OrderedDict([('random-seed', 44),
+        target = OrderedDict([('seed', 44),
                               ('temperature', 375.15),
-                              ('chemical-potential-difference', -0.5)])
+                              ('sro', -0.1)])
 
         self.dc.add_parameter('temperature', 375.15)
-        self.dc.add_parameter('chemical-potential-difference', -0.5)
+        self.dc.add_parameter('sro', -0.1)
 
         retval = self.dc.parameters
         self.assertEqual(retval, target)
 
     def test_observables(self):
         """Test that added observables has OrderedDict type."""
-        target = OrderedDict([('temperature', float),
-                              ('latt_occupation', list)])
-
-        self.dc.add_observable('temperature', float)
-        self.dc.add_observable('latt_occupation', list)
-        retval = self.dc.observables
-
-        self.assertDictEqual(retval, target)
+        observables = ['temperature', 'sro']
+        for obs in observables:
+            self.dc.add_observable(obs)
+        self.assertEqual(self.dc.observables, observables)
 
     def test_metadata(self):
         """Test metadata."""
         for key in self.dc.metadata:
-            retval = self.dc.metadata[key]
-            if key in ['date-created', 'date-last-backup']:
-                self.assertIsInstance(retval, datetime)
-            else:
-                self.assertIsInstance(retval, str)
+            if key == 'icet_version':
+                print(self.dc.metadata[key])
+            self.assertIsInstance(self.dc.metadata[key], str)
 
     def test_get_data(self):
         """
@@ -154,35 +147,32 @@ class TestDataContainer(unittest.TestCase):
 
     def test_reset(self):
         """
-        Test this functionality removes the appended dc to DataContainer.
+        Test that appended data is deleted from DataContainer.
         """
-        row_data = OrderedDict()
-        row_data['temperature'] = 100.0
-        for mctrial in range(10, 100, 10):
+        row_data = {}
+        row_data['temperature'] = 273.15
+        for mctrial in range(1, 5):
             self.dc.append(mctrial, row_data)
         self.dc.reset()
-        self.assertEqual(len(self.dc), 0)
+        self.assertEqual(self.dc.get_number_of_entries(), 0)
 
-    def test_len(self):
-        """Test total number of rows is returned."""
-        row_data = OrderedDict()
-        row_data['temperature'] = 100.0
-        for mctrial in range(10, 101, 10):
-            self.dc.append(mctrial, row_data)
-        self.assertEqual(len(self.dc), 10)
+    def test_get_number_of_entries(self):
+        """ Test number of entries is returned from function. """
+        row_data = [100, np.nan, 1000, np.nan]
+        for mctrial, data in zip(range(1, 5), row_data):
+            self.dc.append(mctrial, dict([('temperature', data)]))
+
+        self.assertEqual(self.dc.get_number_of_entries('temperature'), 2)
+        self.assertEqual(self.dc.get_number_of_entries(), 4)
 
     def test_get_average(self):
         """ Test functionality. """
         pass
 
-    def test_restart(self):
-        """ Test that Ensemble object is restarted from file. """
-        pass
-
     def test_read_write_data(self):
         """ Test write and read functionalities of data container. """
         # add an observable
-        self.dc.add_observable('temperature', float)
+        self.dc.add_observable('temperature')
         # append observations to the data container
         row_data = {}
         row_data['temperature'] = 100.0
@@ -197,9 +187,10 @@ class TestDataContainer(unittest.TestCase):
         # check parameters
         self.assertDictEqual(self.dc.parameters, dc_read.parameters)
         # check observables
-        self.assertDictEqual(self.dc.observables, dc_read.observables)
+        self.assertEqual(self.dc.observables, dc_read.observables)
         # check runtime data
-        self.assertEqual(len(self.dc), len(dc_read))
+        self.assertEqual(self.dc.get_number_of_entries(),
+                         dc_read.get_number_of_entries())
         self.assertListEqual(self.dc.get_data(['mctrial', 'temperature']),
                              dc_read.get_data(['mctrial', 'temperature']))
 

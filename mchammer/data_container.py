@@ -2,11 +2,13 @@ import tarfile
 import tempfile
 import getpass
 import socket
-import pickle
+import json
+import re
 from datetime import datetime
 from collections import OrderedDict
 import pandas as pd
 from ase import Atoms
+from ase.io import write, read
 
 
 class DataContainer:
@@ -51,20 +53,25 @@ class DataContainer:
              'Structure must be provided as ASE Atoms object'
             self.structure = atoms.copy()
 
-        self._observables = OrderedDict()
+        self._observables = []
         self._parameters = OrderedDict()
         self._metadata = OrderedDict()
         self._data = pd.DataFrame()
 
-        self.add_parameter('random-seed', random_seed)
+        self.add_parameter('seed', random_seed)
 
-        self._metadata['ensemble-name'] = ensemble_name
+        self._metadata['ensemble_name'] = ensemble_name
 
-        self._metadata['date-created'] = datetime.now()
+        self._metadata['date_created'] = \
+            datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
         self._metadata['username'] = getpass.getuser()
         self._metadata['hostname'] = socket.gethostname()
+        with open('icet/__init__.py') as fd:
+            lines = '\n'.join(fd.readlines())
+        self.metadata['icet_version'] = \
+            re.search("__version__ = '(.*)'", lines).group(1)
 
-    def add_observable(self, tag: str, obs_type):
+    def add_observable(self, tag: str):
         """
         Add an observable to the dict with observables.
 
@@ -72,14 +79,10 @@ class DataContainer:
         ----------
         tag : str
             name of observable.
-        obs_type : type
-            type of observable parameter.
         """
         assert isinstance(tag, str), \
             'Observable tag has wrong type (str)'
-        assert isinstance(obs_type, (type, list)), \
-            'Unknown observable type: {}'.format(obs_type)
-        self._observables[tag] = obs_type
+        self._observables.append(tag)
 
     def add_parameter(self, tag: str, value):
         """
@@ -98,22 +101,6 @@ class DataContainer:
         assert isinstance(value, (int, float, list)), \
             'Unknown parameter type: {}'.format(type(value))
         self._parameters[tag] = copy.deepcopy(value)
-
-    def _update_data(self, data):
-        """
-        Private method to update data from read function.
-
-        Parameters
-        ----------
-        data : Pandas DataFrame object
-            data of DataContainer object read from file
-
-        Todo
-        ----
-        Using concatenate here has futher purposes when an implemenation
-        of backup will be done.
-        """
-        self._data = pd.concat([self._data, data])
 
     def append(self, mctrial: int, record: dict):
         """
@@ -210,9 +197,23 @@ class DataContainer:
         """ Reset (clear) data frame of data container """
         self._data = pd.DataFrame()
 
-    def __len__(self):
-        """ Number of rows in data frame """
-        return len(self._data)
+    def get_number_of_entries(self, tag=None):
+        """
+        Return the total number of entries in the column labeled with the
+        given observable tag.
+
+        Parameters
+        ----------
+        tag : str
+            name of observable. If None the total number of rows in the Pandas
+            data frame will be returned.
+        """
+        if tag is None:
+            return len(self._data)
+        else:
+            assert tag in self._data, \
+                    'observable is not part of DataContainer: {}'.format(tag)
+            return self._data[tag].count()
 
     def get_average(self, start: int, stop: int, tag: str):
         """
@@ -230,86 +231,81 @@ class DataContainer:
         pass
 
     @staticmethod
-    def restart(filename):
-        """
-        Restart DataContainer object from file.
-
-        Parameters
-        ----------
-        filename : str or FileObj
-            file from which to read
-        """
-        pass
-
-    @staticmethod
-    def read(filename):
+    def read(infile):
         """
         Read DataContainer object from file.
 
         Parameters
         ----------
-        filename : str or FileObj
+        infile : str or FileObj
             file from which to read
         """
-        temp_pkl_file = tempfile.NamedTemporaryFile()
+        temp_atoms_file = tempfile.NamedTemporaryFile(suffix='.xyz')
+        temp_json_file = tempfile.NamedTemporaryFile()
         temp_cvs_file = tempfile.NamedTemporaryFile()
 
-        with tarfile.open(mode='r', name=filename) as tar_file:
-            temp_pkl_file.write(tar_file.extractfile('reference-data').read())
-            temp_pkl_file.seek(0)
-            reference_data = pickle.load(temp_pkl_file)
+        with tarfile.open(mode='r', name=infile) as tar_file:
+            temp_atoms_file.write(tar_file.extractfile('atoms').read())
+            atoms = read(temp_atoms_file.name)
 
-            dc = DataContainer(reference_data['atoms'],
-                               reference_data['metadata']['ensemble-name'],
-                               reference_data['parameters']['random-seed'])
+            temp_json_file.write(tar_file.extractfile('reference_data').read())
+            temp_json_file.seek(0)
+            reference_data = json.load(temp_json_file)
+
+            dc = DataContainer(atoms,
+                               reference_data['metadata']['ensemble_name'],
+                               reference_data['parameters']['seed'])
 
             for key in reference_data:
-                if key == 'atoms':
-                    continue
                 if key == 'metadata':
                     for tag, value in reference_data[key].items():
                         dc._metadata[tag] = value
-                if key == 'parameters':
+                elif key == 'parameters':
                     for tag, value in reference_data[key].items():
                         if tag == 'random-seed':
                             continue
                         dc.add_parameter(tag, value)
-                if key == 'observables':
-                    for tag, value in reference_data[key].items():
-                        dc.add_observable(tag, value)
+                elif key == 'observables':
+                    for value in reference_data[key]:
+                        dc.add_observable(value)
 
-            temp_cvs_file.write(tar_file.extractfile('runtime-data').read())
+            temp_cvs_file.write(tar_file.extractfile('runtime_data').read())
             temp_cvs_file.seek(0)
             runtime_data = pd.read_csv(temp_cvs_file)
-            dc._update_data(runtime_data)
+            dc._data = runtime_data
+
         return dc
 
-    def write(self, filename):
+    def write(self, infile):
         """
         Write DataContainer object to file.
 
         Parameters
         ----------
-        filename : str or FileObj
+        infile : str or FileObj
             file to which to write
         """
-        self._metadata['date-last-backup'] = datetime.now()
-        # Save reference data to a pickle tempfile
-        reference_data = {'atoms': self.structure,
-                          'observables': self. _observables,
+        self._metadata['date_last_backup'] = \
+            datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+
+        # Save reference atomic structure
+        temp_atoms_file = tempfile.NamedTemporaryFile(suffix='.xyz')
+        write(temp_atoms_file.name, self.structure)
+
+        # Save reference data to a json tempfile
+        reference_data = {'observables': self._observables,
                           'parameters': self._parameters,
                           'metadata': self._metadata}
 
-        temp_pkl_file = tempfile.NamedTemporaryFile()
-        with open(temp_pkl_file.name, 'wb') as handle:
-            pickle.dump(reference_data, handle,
-                        protocol=pickle.HIGHEST_PROTOCOL)
+        temp_json_file = tempfile.NamedTemporaryFile()
+        with open(temp_json_file.name, 'w') as handle:
+            json.dump(reference_data, handle)
 
         # Save Pandas data frame as a csv tempfile
         temp_csv_file = tempfile.NamedTemporaryFile()
         self._data.to_csv(temp_csv_file.name)
 
-        with tarfile.open(filename, mode='w') as handle:
-            handle.add(temp_csv_file.name, arcname='runtime-data')
-            handle.add(temp_pkl_file.name,
-                       arcname='reference-data')
+        with tarfile.open(infile, mode='w') as handle:
+            handle.add(temp_csv_file.name, arcname='runtime_data')
+            handle.add(temp_json_file.name, arcname='reference_data')
+            handle.add(temp_atoms_file.name, arcname='atoms')
