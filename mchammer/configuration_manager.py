@@ -56,7 +56,7 @@ class ConfigurationManager(object):
         the entire configuration.
         """
         possible_element = set()
-        for occ in self.occupation_constraints:
+        for occ in self._occupation_constraints:
             for element in occ:
                 possible_element.add(element)
 
@@ -67,12 +67,12 @@ class ConfigurationManager(object):
         Return the element occupation, i.e. the element -> lattice sites dict.
         """
         element_occupations = []
-        for i, sublattice in enumerate(self.sublattices):
+        for i, sublattice in enumerate(self._sublattices):
             element_dict = {}
             for element in self._possible_elements:
                 element_dict[element] = []
             for lattice_site in sublattice:
-                element = self.occupations[lattice_site]
+                element = self._occupations[lattice_site]
                 element_dict[element].append(lattice_site)
             element_occupations.append(element_dict)
         return element_occupations
@@ -128,14 +128,14 @@ class ConfigurationManager(object):
             The sublattice to pick indices from.
         """
         try:
-            index_1 = random.choice(self.sublattices[sublattice])
+            index_1 = random.choice(self._sublattices[sublattice])
         except IndexError:
             raise SwapNotPossibleError("Sublattice is empty")
         # assuming all sites in this sublattice have same allowed occupations
 
         possible_swap_elements = set(
-            self.occupation_constraints[index_1]) - set(
-                [self.occupations[index_1]])
+            self._occupation_constraints[index_1]) - set(
+                [self._occupations[index_1]])
 
         total_number_of_indices = 0
         for element in possible_swap_elements:
@@ -169,10 +169,10 @@ class ConfigurationManager(object):
 
         """
 
-        index = random.choice(self.sublattices[sublattice])
+        index = random.choice(self._sublattices[sublattice])
         element = random.choice(list(
-            set(self.occupation_constraints[index]) - set(
-                [self.occupations[index]])))
+            set(self._occupation_constraints[index]) - set(
+                [self._occupations[index]])))
         return index, element
 
     def update_occupations(self, list_of_sites, list_of_elements):
@@ -198,7 +198,7 @@ class ConfigurationManager(object):
         # change element occupation dict
         for index, element in zip(list_of_sites, list_of_elements):
             current_element = self._occupations[index]
-            for sublattice_index, sublattice in enumerate(self.sublattices):
+            for sublattice_index, sublattice in enumerate(self._sublattices):
                 if index in sublattice:
                     # Remove index from current element
                     self._element_occupation[
