@@ -29,9 +29,9 @@ class TestDataContainer(unittest.TestCase):
                 """
                 return atoms.get_chemical_symbols().count('Al')
 
-        obs1 = ConcreteObserver(interval=10, tag='test_observer')
-        obs2 = ConcreteObserver(interval=20, tag='other_observer')
-        self.observers = [obs1, obs2]
+        test_observer = ConcreteObserver(interval=10, tag='obs1')
+        other_observer = ConcreteObserver(interval=20, tag='obs2')
+        self.observers = [test_observer, other_observer]
 
     def setUp(self):
         """Set up before each test case."""
@@ -107,12 +107,12 @@ class TestDataContainer(unittest.TestCase):
         (list of lists).
         """
 
-        target = [[20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0],
-                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0],
-                  [64.0, None, 64.0, None, 64.0, None, 64.0, None, 64.0]]
+        target = [[10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0],
+                  [None, 64.0, None, 64.0, None, 64.0, None, 64.0, None, 64.0]]
 
         min_interval = min([obs.interval for obs in self.observers])
-        for mctrial in range(20, 101):
+        for mctrial in range(1, 101):
             if mctrial % min_interval == 0:
                 row_data = OrderedDict()
                 for obs in self.observers:
@@ -121,23 +121,22 @@ class TestDataContainer(unittest.TestCase):
                         row_data[obs.tag] = observable
                 self.dc.append(mctrial, row_data)
 
-        retval = self.dc.get_data(['mctrial', 'test_observer',
-                                   'other_observer'])
+        retval = self.dc.get_data()
         self.assertListEqual(target, retval)
 
-        target = [[20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0],
-                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0],
-                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0]]
+        target = [[10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0],
+                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0]]
 
-        retval = self.dc.get_data(['mctrial', 'test_observer',
-                                   'other_observer'], fill_missing=True)
+        retval = self.dc.get_data(['mctrial', 'obs1', 'obs2'],
+                                  fill_missing=True)
         self.assertListEqual(target, retval)
 
-        target = [[40.0, 50.0, 60.0, 70.0], [64.0, 64.0, 64.0, 64.0],
+        target = [[40, 50, 60, 70], [64.0, 64.0, 64.0, 64.0],
                   [64.0, None, 64.0, None]]
 
-        retval = self.dc.get_data(['mctrial', 'test_observer',
-                                   'other_observer'], interval=(40, 70))
+        retval = self.dc.get_data(['mctrial', 'obs1', 'obs2'],
+                                  interval=(40, 70))
         self.assertListEqual(target, retval)
 
         with self.assertRaises(AssertionError):
@@ -171,6 +170,7 @@ class TestDataContainer(unittest.TestCase):
         """ Test write and read functionalities of data container. """
         # add an observable
         self.dc.add_observable('temperature')
+        self.dc.add_parameter('chemical_potential_difference', -0.5)
         # append observations to the data container
         row_data = {}
         row_data['temperature'] = 100.0

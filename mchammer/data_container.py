@@ -131,8 +131,9 @@ class DataContainer:
         row_data = OrderedDict()
         row_data['mctrial'] = mctrial
         row_data.update(record)
-
-        self._data = self._data.append(row_data,
+        # dict to DataFrame to avoid dtype conversion when appending data
+        temp_data = pd.DataFrame(row_data, index=[0])
+        self._data = self._data.append(temp_data,
                                        ignore_index=True)
 
     def get_data(self, tags=None, interval=None, fill_missing=False):
@@ -144,13 +145,13 @@ class DataContainer:
         ----------
         tags : list of str
             tags of the required properties; if None all columns of the data
-            frame will be returned
+            frame will be returned in lexigraphical order
 
         interval : tuple
             range of trial steps values from which data frame will be returned
 
         fill_missing : bool
-            If True fill missing values forward
+            If True fill missing values backward
         """
         import math
 
@@ -173,7 +174,7 @@ class DataContainer:
             data = data.loc[lower:upper, tags]
 
         if fill_missing:
-            data = data.fillna(method='pad')
+            data = data.fillna(method='bfill')
 
         data_list = []
         for tag in tags:
