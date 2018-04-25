@@ -10,18 +10,18 @@ import numpy as np
 
 
 class ParrotObserver(BaseObserver):
-    """Parrot says Quaaack."""
+    """Parrot says 141516."""
 
     def __init__(self, interval, tag='Parrot'):
         super().__init__(interval=interval, tag=tag)
 
     def get_observable(self, atoms):  # noqa
-        """Say Quaaack."""
+        """Say 141516."""
         return 3.141516
 
     def return_type(self):
-        """ Return str."""
-        return int
+        """ Return float."""
+        return float
 
 # Create a concrete child of Ensemble for testing
 
@@ -56,10 +56,7 @@ class TestEnsemble(unittest.TestCase):
             calculator=calculator, name='test-ensemble', random_seed=42)
 
         # Create an observer for testing.
-        observer = ParrotObserver(interval=2)
-        self.ensemble.attach_observer(observer)
-
-        observer = ParrotObserver(interval=3,tag='Parrot2')
+        observer = ParrotObserver(interval=7)
         self.ensemble.attach_observer(observer)
 
     def test_property_name(self):
@@ -94,13 +91,12 @@ class TestEnsemble(unittest.TestCase):
     def test_run(self):
         """Test the run method."""
 
-        self.ensemble.run(1000)
-        # self.assertEqual(self.ensemble.minimum_observation_interval, 2)
+        n_iters = 3235
+        self.ensemble.run(n_iters)
         dc_data = self.ensemble.data_container.get_data(tags=['Parrot'])
-        print(dc_data)
-        # dc_data = self.ensemble.data_container.get_data()
-        # print(self.ensemble.data_container._data)
-        # self.assertEqual(dc_data, '')
+        # plus one since we also count step 0
+        self.assertEqual(
+            len(dc_data[0]), n_iters//self.ensemble.observers['Parrot'].interval + 1)
 
     def test_internal_run(self):
         """Test the _run method."""

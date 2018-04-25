@@ -227,14 +227,13 @@ class BaseEnsemble(ABC):
         if tag is not None:
             observer.tag = tag
             self.observers[tag] = observer
-
         else:
             self.observers[observer.tag] = observer
 
-        if observer.return_type is dict:
+        if observer.return_type() is dict:
             for key in observer:
                 self._data_container.add_observable(key, float)
-
-        self._data_container.add_observable(tag, observer.return_type)
+        
+        self._data_container.add_observable(observer.tag, observer.return_type())
 
         self._find_minimum_observation_interval()
