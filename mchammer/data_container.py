@@ -179,7 +179,12 @@ class DataContainer:
             data_list.append(data_column)
 
         return data_list
-
+    
+    @property
+    def data(self):
+        """Panda data frame."""
+        return self._data
+    
     @property
     def parameters(self):
         """ list : simulation parameters """
