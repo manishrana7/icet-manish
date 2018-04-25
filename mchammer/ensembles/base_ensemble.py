@@ -87,18 +87,13 @@ class BaseEnsemble(ABC):
 
     def run(self, number_of_trial_moves):
         """
-        Sample the ensemble for `number_of_MC_steps` steps.
+        Sample the ensemble for `number_of_trial_moves` steps.
 
         Parameters:
         -----------
 
-        number_of_MC_steps: int
+        number_of_trial_moves: int
             number of steps to run in total
-
-        Todo
-        ----
-        * incorporate the _run function
-
         """
 
         last_backup_time = time()
@@ -106,7 +101,7 @@ class BaseEnsemble(ABC):
                           self.minimum_observation_interval):
             self._run(self.minimum_observation_interval)
             if step % self.minimum_observation_interval == 0:
-                self._observe_observers(step)
+                self._observe_configuration(step)
             if time() - last_backup_time > self.data_container_write_period \
                     and self._data_container_filename is not None:
                 self.data_container.write(self._data_container_filename)
@@ -157,9 +152,10 @@ class BaseEnsemble(ABC):
         for _ in range(number_of_trial_moves):
             self.do_trial_move()
 
-    def _observe_observers(self, step):
+    def _observe_configuration(self, step):
         """
-        Observe all observers that coincicide with the step.
+        Observe the configuration with the observers that has an interval
+        that coincicide with the step.
 
         parameters
         ----------
