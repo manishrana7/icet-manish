@@ -1,5 +1,5 @@
 import random
-import time
+from time import time
 from abc import ABC, abstractmethod
 from math import gcd
 
@@ -24,7 +24,8 @@ class BaseEnsemble(ABC):
     """
 
     def __init__(self, calculator, name='BaseEnsemble',
-                 data_container=None, data_container_write_period=np.inf, random_seed=None):
+                 data_container=None, data_container_write_period=np.inf,
+                 random_seed=None):
 
         self._calculator = calculator
         self._name = name
@@ -100,12 +101,13 @@ class BaseEnsemble(ABC):
 
         """
 
-        last_backup_time = time.time()
-        for step in range(0, number_of_trial_moves, self.minimum_observation_interval):
+        last_backup_time = time()
+        for step in range(0, number_of_trial_moves,
+                          self.minimum_observation_interval):
             self._run(self.minimum_observation_interval)
             if step % self.minimum_observation_interval == 0:
                 self._observe_observers(step)
-            if time.time() - last_backup_time > self.data_container_write_period \
+            if time() - last_backup_time > self.data_container_write_period \
                     and self._data_container_filename is not None:
                 self.data_container.write(self._data_container_filename)
 
@@ -182,7 +184,8 @@ class BaseEnsemble(ABC):
                     for key in observation_dict:
                         row_dict[key] = observation_dict[key]
                 else:
-                    row_dict[observer.tag] =  observer.get_observable(self.calculator.atoms)
+                    row_dict[observer.tag] = observer.get_observable(
+                        self.calculator.atoms)
         if new_observations:
             self._data_container.append(mctrial=step, record=row_dict)
 
@@ -190,7 +193,7 @@ class BaseEnsemble(ABC):
         """
         Find the greatest common denominator from the observation intervals.
         """
-        
+
         intervals = [obs.interval for _, obs in self.observers.items()]
         if len(intervals) == 1:
             self._minimum_observation_interval = intervals[0]
@@ -233,7 +236,8 @@ class BaseEnsemble(ABC):
         if observer.return_type() is dict:
             for key in observer:
                 self._data_container.add_observable(key, float)
-        
-        self._data_container.add_observable(observer.tag, observer.return_type())
+
+        self._data_container.add_observable(
+            observer.tag, observer.return_type())
 
         self._find_minimum_observation_interval()

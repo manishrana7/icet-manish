@@ -4,7 +4,8 @@ from icet import ClusterSpace
 from icet import ClusterExpansion
 from mchammer.ensembles.base_ensemble import BaseEnsemble
 from mchammer.observers.base_observer import BaseObserver
-from mchammer.calculators.cluster_expansion_calculator import ClusterExpansionCalculator
+from mchammer.calculators.cluster_expansion_calculator import \
+    ClusterExpansionCalculator
 from ase.build import bulk
 import numpy as np
 
@@ -96,7 +97,8 @@ class TestEnsemble(unittest.TestCase):
         dc_data = self.ensemble.data_container.get_data(tags=['Parrot'])
         # plus one since we also count step 0
         self.assertEqual(
-            len(dc_data[0]), n_iters//self.ensemble.observers['Parrot'].interval + 1)
+            len(dc_data[0]),
+            n_iters // self.ensemble.observers['Parrot'].interval + 1)
 
     def test_internal_run(self):
         """Test the _run method."""
@@ -110,7 +112,22 @@ class TestEnsemble(unittest.TestCase):
 
     def test_attach_observer(self):
         """Test the attach method."""
-        pass
+        self.assertEqual(len(self.ensemble.observers), 1)
+
+        self.ensemble.attach_observer(
+            ParrotObserver(interval=10, tag='test_parrot'))
+        self.assertEqual(self.ensemble.observers['test_parrot'].interval, 10)
+        self.assertEqual(
+            self.ensemble.observers['test_parrot'].tag, 'test_parrot')
+        self.assertEqual(len(self.ensemble.observers), 2)
+
+        # test no duplicates, this should overwrite the last parrot
+        self.ensemble.attach_observer(
+            ParrotObserver(interval=15, tag='test_parrot'))
+        self.assertEqual(len(self.ensemble.observers), 2)
+        self.assertEqual(self.ensemble.observers['test_parrot'].interval, 15)
+        self.assertEqual(
+            self.ensemble.observers['test_parrot'].tag, 'test_parrot')
 
     def test_property_data_container(self):
         """Test the data container property."""
