@@ -182,7 +182,7 @@ class DataContainer:
 
     @property
     def data(self):
-        """Panda data frame."""
+        """Pandas data frame."""
         return self._data
 
     @property
