@@ -3,8 +3,37 @@ import unittest
 from icet import ClusterSpace
 from icet import ClusterExpansion
 from mchammer.ensembles.base_ensemble import BaseEnsemble
+from mchammer.observers.base_observer import BaseObserver
+from mchammer.calculators.cluster_expansion_calculator import ClusterExpansionCalculator
 from ase.build import bulk
 import numpy as np
+
+
+class ParrotObserver(BaseObserver):
+    """Parrot says Quaaack."""
+
+    def __init__(self, interval, tag='Parrot'):
+        super().__init__(interval=interval, tag=tag)
+
+    def get_observable(self, atoms):  # noqa
+        """Say Quaaack."""
+        return 3.141516
+
+    def return_type(self):
+        """ Return str."""
+        return int
+
+# Create a concrete child of Ensemble for testing
+
+
+class ConcreteEnsemble(BaseEnsemble):
+
+    def __init__(self, calculator, name=None, random_seed=None):
+        super().__init__(calculator, name=name,
+                         random_seed=random_seed)
+
+    def do_trial_move(self):
+        pass
 
 
 class TestEnsemble(unittest.TestCase):
@@ -22,20 +51,16 @@ class TestEnsemble(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        # Create a concrete child of Ensemble for testing
-        class ConcreteEnsemble(BaseEnsemble):
-
-            def __init__(self, calculator, name=None, random_seed=None):
-                super().__init__(calculator, name=name,
-                                 random_seed=random_seed)
-
-            def do_trial_move(self):
-                pass
-
-            def _run(self):
-                pass
+        calculator = ClusterExpansionCalculator(self.atoms, self.ce)
         self.ensemble = ConcreteEnsemble(
-            calculator=None, name='test-ensemble', random_seed=42)
+            calculator=calculator, name='test-ensemble', random_seed=42)
+
+        # Create an observer for testing.
+        observer = ParrotObserver(interval=2)
+        self.ensemble.attach_observer(observer)
+
+        observer = ParrotObserver(interval=3,tag='Parrot2')
+        self.ensemble.attach_observer(observer)
 
     def test_property_name(self):
         """Test name property."""
@@ -68,7 +93,14 @@ class TestEnsemble(unittest.TestCase):
 
     def test_run(self):
         """Test the run method."""
-        pass
+
+        self.ensemble.run(1000)
+        # self.assertEqual(self.ensemble.minimum_observation_interval, 2)
+        dc_data = self.ensemble.data_container.get_data(tags=['Parrot'])
+        print(dc_data)
+        # dc_data = self.ensemble.data_container.get_data()
+        # print(self.ensemble.data_container._data)
+        # self.assertEqual(dc_data, '')
 
     def test_internal_run(self):
         """Test the _run method."""

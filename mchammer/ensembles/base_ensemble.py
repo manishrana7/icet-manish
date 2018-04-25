@@ -1,8 +1,12 @@
+import random
+import time
 from abc import ABC, abstractmethod
+from math import gcd
+
 from mchammer.data_container import DataContainer
 from mchammer.observers.base_observer import BaseObserver
-import random
-from math import gcd
+
+import numpy as np
 
 
 class BaseEnsemble(ABC):
@@ -20,11 +24,11 @@ class BaseEnsemble(ABC):
     """
 
     def __init__(self, calculator, name='BaseEnsemble',
-                 data_container=None, random_seed=None):
+                 data_container=None, data_container_write_period=np.inf, random_seed=None):
 
         self._calculator = calculator
         self._name = name
-
+        self.data_container_write_period = data_container_write_period
         self.accepted_trials = 0
         self.total_trials = 0
         self._observers = {}
@@ -41,6 +45,7 @@ class BaseEnsemble(ABC):
                                                  random_seed=random_seed)
         else:
             raise NotImplementedError
+        self._data_container_filename = None
 
     @property
     def structure(self):
@@ -79,7 +84,7 @@ class BaseEnsemble(ABC):
         """
         return self._calculator
 
-    def run(self, number_of_MC_steps):
+    def run(self, number_of_trial_moves):
         """
         Sample the ensemble for `number_of_MC_steps` steps.
 
@@ -88,8 +93,24 @@ class BaseEnsemble(ABC):
 
         number_of_MC_steps: int
             number of steps to run in total
+
+        Todo
+        ----
+        * incorporate the _run function
+
         """
-        pass
+
+        last_backup_time = time.time()
+        for step in range(0, number_of_trial_moves, self.minimum_observation_interval):
+            self._run(self.minimum_observation_interval)
+            if step % self.minimum_observation_interval == 0:
+                self._observe_observers(step)
+            if time.time() - last_backup_time > self.data_container_write_period \
+                    and self._data_container_filename is not None:
+                self.data_container.write(self._data_container_filename)
+
+        if self._data_container_filename is not None:
+            self.data_container.write(self._data_container_filename)
 
     @abstractmethod
     def do_trial_move(self):
@@ -123,7 +144,6 @@ class BaseEnsemble(ABC):
         """
         return self._minimum_observation_interval
 
-    @abstractmethod
     def _run(self, number_of_trial_moves):
         """
         Private method for running the MCMC simulation
@@ -132,11 +152,8 @@ class BaseEnsemble(ABC):
         number_of_trial_moves : int
            number of trial moves to run without stopping.
         """
-
-        for step in range(number_of_trial_moves):
+        for _ in range(number_of_trial_moves):
             self.do_trial_move()
-            if step % self.minimum_observation_interval == 0:
-                self._observe_observers(step)
 
     def _observe_observers(self, step):
         """
@@ -148,7 +165,8 @@ class BaseEnsemble(ABC):
             the current step
         """
         row_dict = {}
-        for observer in self.observers:
+        new_observations = False
+        for _, observer in self.observers.items():
             if observer.return_type is dict:
                 observation_dict = observer.get_keys()
                 for key in observation_dict:
@@ -156,23 +174,28 @@ class BaseEnsemble(ABC):
             else:
                 row_dict[observer.tag] = None
 
-            if observer.interval % step == 0:
+            if step % observer.interval == 0:
+                new_observations = True
                 if observer.return_type is dict:
                     observation_dict = observer.get_observable(
                         self.calculator.atoms)
                     for key in observation_dict:
                         row_dict[key] = observation_dict[key]
                 else:
-                    self._data_container.append(
-                        observer.tag, observer.get_observable(self.calculator.atoms))
-        self._data_container.append(step, row_dict)
+                    row_dict[observer.tag] =  observer.get_observable(self.calculator.atoms)
+        if new_observations:
+            self._data_container.append(mctrial=step, record=row_dict)
+
     def _find_minimum_observation_interval(self):
         """
         Find the greatest common denominator from the observation intervals.
         """
-
-        intervals = [obs.interval for obs in self.observers]
-        self._minimum_observation_interval = self._get_gcd(intervals)
+        
+        intervals = [obs.interval for _, obs in self.observers.items()]
+        if len(intervals) == 1:
+            self._minimum_observation_interval = intervals[0]
+        else:
+            self._minimum_observation_interval = self._get_gcd(intervals)
 
     def _get_gcd(self, interval_list):
         """
