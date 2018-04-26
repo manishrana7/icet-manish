@@ -224,8 +224,8 @@ class BaseEnsemble(ABC):
         if observer.return_type() is dict:
             for key in observer:
                 self._data_container.add_observable(key, float)
-
-        self._data_container.add_observable(
-            observer.tag, observer.return_type())
+        else:
+            self._data_container.add_observable(
+                observer.tag, observer.return_type())
 
         self._find_minimum_observation_interval()
