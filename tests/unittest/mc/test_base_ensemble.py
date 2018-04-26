@@ -10,10 +10,10 @@ from ase.build import bulk
 import numpy as np
 
 
-class ParrotObserver(BaseObserver):
-    """Parrot says 141516."""
+class ParakeetObserver(BaseObserver):
+    """Parakeet says 141516."""
 
-    def __init__(self, interval, tag='Parrot'):
+    def __init__(self, interval, tag='Parakeet'):
         super().__init__(interval=interval, tag=tag)
 
     def get_observable(self, atoms):  # noqa
@@ -57,7 +57,9 @@ class TestEnsemble(unittest.TestCase):
             calculator=calculator, name='test-ensemble', random_seed=42)
 
         # Create an observer for testing.
-        observer = ParrotObserver(interval=7)
+        observer = ParakeetObserver(interval=7)
+        self.ensemble.attach_observer(observer)
+        observer = ParakeetObserver(interval=14, tag='Parakeet2')
         self.ensemble.attach_observer(observer)
 
     def test_property_name(self):
@@ -92,13 +94,15 @@ class TestEnsemble(unittest.TestCase):
     def test_run(self):
         """Test the run method."""
 
-        n_iters = 3235
+        n_iters = 50
         self.ensemble.run(n_iters)
-        dc_data = self.ensemble.data_container.get_data(tags=['Parrot'])
+        dc_data = self.ensemble.data_container.get_data(tags=['Parakeet2'])
+        print(dc_data)
         # plus one since we also count step 0
+        number_of_observations = len([x for x in dc_data[0] if x is not None])
         self.assertEqual(
-            len(dc_data[0]),
-            n_iters // self.ensemble.observers['Parrot'].interval + 1)
+            number_of_observations,
+            n_iters // self.ensemble.observers['Parakeet2'].interval + 1)
 
     def test_internal_run(self):
         """Test the _run method."""
@@ -112,22 +116,22 @@ class TestEnsemble(unittest.TestCase):
 
     def test_attach_observer(self):
         """Test the attach method."""
-        self.assertEqual(len(self.ensemble.observers), 1)
-
-        self.ensemble.attach_observer(
-            ParrotObserver(interval=10, tag='test_parrot'))
-        self.assertEqual(self.ensemble.observers['test_parrot'].interval, 10)
-        self.assertEqual(
-            self.ensemble.observers['test_parrot'].tag, 'test_parrot')
         self.assertEqual(len(self.ensemble.observers), 2)
 
-        # test no duplicates, this should overwrite the last parrot
         self.ensemble.attach_observer(
-            ParrotObserver(interval=15, tag='test_parrot'))
-        self.assertEqual(len(self.ensemble.observers), 2)
-        self.assertEqual(self.ensemble.observers['test_parrot'].interval, 15)
+            ParakeetObserver(interval=10, tag='test_Parakeet'))
+        self.assertEqual(self.ensemble.observers['test_Parakeet'].interval, 10)
         self.assertEqual(
-            self.ensemble.observers['test_parrot'].tag, 'test_parrot')
+            self.ensemble.observers['test_Parakeet'].tag, 'test_Parakeet')
+        self.assertEqual(len(self.ensemble.observers), 3)
+
+        # test no duplicates, this should overwrite the last Parakeet
+        self.ensemble.attach_observer(
+            ParakeetObserver(interval=15, tag='test_Parakeet'))
+        self.assertEqual(len(self.ensemble.observers), 3)
+        self.assertEqual(self.ensemble.observers['test_Parakeet'].interval, 15)
+        self.assertEqual(
+            self.ensemble.observers['test_Parakeet'].tag, 'test_Parakeet')
 
     def test_property_data_container(self):
         """Test the data container property."""

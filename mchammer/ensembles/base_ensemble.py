@@ -164,21 +164,13 @@ class BaseEnsemble(ABC):
         """
         row_dict = {}
         new_observations = False
-        for _, observer in self.observers.items():
-            if observer.return_type is dict:
-                observation_dict = observer.get_keys()
-                for key in observation_dict:
-                    row_dict[key] = None
-            else:
-                row_dict[observer.tag] = None
-
+        for observer in self.observers.values():
             if step % observer.interval == 0:
                 new_observations = True
-                if observer.return_type is dict:
-                    observation_dict = observer.get_observable(
-                        self.calculator.atoms)
-                    for key in observation_dict:
-                        row_dict[key] = observation_dict[key]
+                if observer.return_type() is dict:
+                    for key, value in observer.get_observable(
+                            self.calculator.atoms).items():
+                        row_dict[key] = value
                 else:
                     row_dict[observer.tag] = observer.get_observable(
                         self.calculator.atoms)
