@@ -24,7 +24,7 @@ class BaseEnsemble(ABC):
     """
 
     def __init__(self, calculator, name='BaseEnsemble',
-                 data_container=None, data_container_write_period=None,
+                 data_container=None, data_container_write_period=np.inf,
                  random_seed=None):
 
         self._calculator = calculator
@@ -109,8 +109,19 @@ class BaseEnsemble(ABC):
         if self._data_container_filename is not None:
             self.data_container.write(self._data_container_filename)
 
+    def _run(self, number_of_trial_steps):
+        """
+        Private method for running the MCMC simulation
+        without interruption.
+
+        number_of_trial_steps : int
+           number of trial steps to run without stopping.
+        """
+        for _ in range(number_of_trial_steps):
+            self.do_trial_step()
+
     @abstractmethod
-    def do_trial_move(self):
+    def do_trial_step(self):
         pass
 
     @property
@@ -140,17 +151,6 @@ class BaseEnsemble(ABC):
         Monte Carlo simulation without observation interruptions.
         """
         return self._minimum_observation_interval
-
-    def _run(self, number_of_trial_steps):
-        """
-        Private method for running the MCMC simulation
-        without interruption.
-
-        number_of_trial_steps : int
-           number of trial steps to run without stopping.
-        """
-        for _ in range(number_of_trial_steps):
-            self.do_trial_move()
 
     def _observe_configuration(self, step):
         """

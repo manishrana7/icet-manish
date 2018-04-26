@@ -33,7 +33,7 @@ class ConcreteEnsemble(BaseEnsemble):
         super().__init__(calculator, name=name,
                          random_seed=random_seed)
 
-    def do_trial_move(self):
+    def do_trial_step(self):
         pass
 
 
