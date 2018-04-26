@@ -24,7 +24,7 @@ class BaseEnsemble(ABC):
     """
 
     def __init__(self, calculator, name='BaseEnsemble',
-                 data_container=None, data_container_write_period=np.inf,
+                 data_container=None, data_container_write_period=None,
                  random_seed=None):
 
         self._calculator = calculator
@@ -85,19 +85,19 @@ class BaseEnsemble(ABC):
         """
         return self._calculator
 
-    def run(self, number_of_trial_moves):
+    def run(self, number_of_trial_steps):
         """
-        Sample the ensemble for `number_of_trial_moves` steps.
+        Sample the ensemble for `number_of_trial_steps` steps.
 
         Parameters:
         -----------
 
-        number_of_trial_moves: int
+        number_of_trial_steps: int
             number of steps to run in total
         """
 
         last_backup_time = time()
-        for step in range(0, number_of_trial_moves,
+        for step in range(0, number_of_trial_steps,
                           self.minimum_observation_interval):
             self._run(self.minimum_observation_interval)
             if step % self.minimum_observation_interval == 0:
@@ -141,15 +141,15 @@ class BaseEnsemble(ABC):
         """
         return self._minimum_observation_interval
 
-    def _run(self, number_of_trial_moves):
+    def _run(self, number_of_trial_steps):
         """
         Private method for running the MCMC simulation
         without interruption.
 
-        number_of_trial_moves : int
-           number of trial moves to run without stopping.
+        number_of_trial_steps : int
+           number of trial steps to run without stopping.
         """
-        for _ in range(number_of_trial_moves):
+        for _ in range(number_of_trial_steps):
             self.do_trial_move()
 
     def _observe_configuration(self, step):
