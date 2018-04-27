@@ -33,6 +33,7 @@ class BaseEnsemble(ABC):
         self.accepted_trials = 0
         self.total_trials = 0
         self._observers = {}
+        self._step = 0
 
         if random_seed is None:
             self._random_seed = random.randint(0, 1e16)
@@ -57,16 +58,23 @@ class BaseEnsemble(ABC):
         return self.calculator.atoms.copy()
 
     @property
+    def step(self) -> int:
+        """
+        int : current MC trial step.
+        """
+        return self._step
+
+    @property
     def data_container(self):
         """
-        mchammer DataContainer.
+        mchammer DataContainer object
         """
         return self._data_container
 
     @property
     def observers(self):
         """
-        dict of mchammer observers.
+        dict : mchammer observers.
         """
         return self._observers
 
@@ -85,26 +93,54 @@ class BaseEnsemble(ABC):
         """
         return self._calculator
 
-    def run(self, number_of_trial_steps):
+    def run(self, number_of_trial_steps: int, reset_step=False):
         """
         Sample the ensemble for `number_of_trial_steps` steps.
 
         Parameters:
         -----------
-
         number_of_trial_steps: int
             number of steps to run in total
+        reset_step : bool
+            if True the MC trial step counter will be initialized to zero
         """
 
-        last_backup_time = time()
-        for step in range(0, number_of_trial_steps,
-                          self.minimum_observation_interval):
-            self._run(self.minimum_observation_interval)
-            if step % self.minimum_observation_interval == 0:
-                self._observe_configuration(step)
-            if time() - last_backup_time > self.data_container_write_period \
-                    and self._data_container_filename is not None:
+        last_write_time = time()
+        if reset_step:
+            initial_step = 0
+            final_step = number_of_trial_steps
+            self._step = 0
+        else:
+            initial_step = self._step
+            final_step = self._step + number_of_trial_steps
+            # run mc so that we start at an interval which lands
+            # on the observers interval
+            if not initial_step == 0:
+                first_run_interval = self.minimum_observation_interval-(initial_step - \
+                    (initial_step // self.minimum_observation_interval) * \
+                    self.minimum_observation_interval)
+                first_run_interval = min(first_run_interval, number_of_trial_steps)
+                self._run(first_run_interval)
+                initial_step += first_run_interval
+                self._step += first_run_interval
+
+        step = initial_step
+        while step < final_step:
+            uninterrupted_steps = min(
+                self.minimum_observation_interval, final_step - step)            
+            if self._step % self.minimum_observation_interval == 0:
+                self._observe_configuration(self._step)
+            if self._data_container_filename is not None and \
+                    time() - last_write_time > self.data_container_write_period:
                 self.data_container.write(self._data_container_filename)
+
+            self._run(uninterrupted_steps)
+            step += uninterrupted_steps
+            self._step += uninterrupted_steps
+
+        # If we end on an observation interval we also observe
+        if self._step % self.minimum_observation_interval == 0:
+            self._observe_configuration(self._step)
 
         if self._data_container_filename is not None:
             self.data_container.write(self._data_container_filename)
@@ -229,3 +265,8 @@ class BaseEnsemble(ABC):
                 observer.tag, observer.return_type())
 
         self._find_minimum_observation_interval()
+
+    def reset_data_container(self):
+        """Reset the data container and the internal step attribute."""
+        self._step = 0
+        self._data_container.reset()

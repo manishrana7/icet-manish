@@ -11,14 +11,14 @@ import numpy as np
 
 
 class ParakeetObserver(BaseObserver):
-    """Parakeet says 141516."""
+    """Parakeet says 2.63323e+20."""
 
     def __init__(self, interval, tag='Parakeet'):
         super().__init__(interval=interval, tag=tag)
 
     def get_observable(self, atoms):  # noqa
-        """Say 141516."""
-        return 3.141516
+        """Say 2.63323e+20."""
+        return 2.63323e+20
 
     def return_type(self):
         """ Return float."""
@@ -94,15 +94,45 @@ class TestEnsemble(unittest.TestCase):
     def test_run(self):
         """Test the run method."""
 
-        n_iters = 50
+        n_iters = 364
         self.ensemble.run(n_iters)
+        self.assertEqual(self.ensemble.step, n_iters)
         dc_data = self.ensemble.data_container.get_data(tags=['Parakeet2'])
-        print(dc_data)
-        # plus one since we also count step 0
+
         number_of_observations = len([x for x in dc_data[0] if x is not None])
+        # plus one since we also count step 0
         self.assertEqual(
             number_of_observations,
             n_iters // self.ensemble.observers['Parakeet2'].interval + 1)
+
+        # runt it again to check that step is the same
+        n_iters = 50
+        self.ensemble.run(n_iters, reset_step=True)
+        self.assertEqual(self.ensemble.step, 50)
+
+        # runt it yet again to check that step accumulates
+        n_iters = 10
+        self.ensemble.run(n_iters, reset_step=False)
+        self.ensemble.run(n_iters, reset_step=False)
+        self.assertEqual(self.ensemble.step, 70)
+
+        # Do a number of steps of continuous runs and see that we get the expected
+        # number of parakeet observations.
+        for i in range(30):
+            self.ensemble.reset_data_container()
+            run_iters = [1, 50, 100, 200, i]
+            for n_iter in run_iters:
+                self.ensemble.run(n_iter)
+            total_iters = sum(run_iters)
+            # Check that the number of iters are correct
+            self.assertEqual(self.ensemble.step, total_iters)
+            dc_data = self.ensemble.data_container.get_data(tags=['Parakeet2'])
+            number_of_observations = len(
+                [x for x in dc_data[0] if x is not None])
+            # plus one since we also count step 0
+            self.assertEqual(
+                number_of_observations,
+                total_iters // self.ensemble.observers['Parakeet2'].interval + 1)
 
     def test_internal_run(self):
         """Test the _run method."""
