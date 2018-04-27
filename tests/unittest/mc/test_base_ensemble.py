@@ -14,19 +14,13 @@ class ParakeetObserver(BaseObserver):
     """Parakeet says 2.63323e+20."""
 
     def __init__(self, interval, tag='Parakeet'):
-        super().__init__(interval=interval, tag=tag)
+        super().__init__(interval=interval,return_type=float, tag=tag)
 
     def get_observable(self, atoms):  # noqa
         """Say 2.63323e+20."""
         return 2.63323e+20
 
-    def return_type(self):
-        """ Return float."""
-        return float
-
 # Create a concrete child of Ensemble for testing
-
-
 class ConcreteEnsemble(BaseEnsemble):
 
     def __init__(self, calculator, name=None, random_seed=None):
