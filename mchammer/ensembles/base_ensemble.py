@@ -116,10 +116,11 @@ class BaseEnsemble(ABC):
             # run mc so that we start at an interval which lands
             # on the observers interval
             if not initial_step == 0:
-                first_run_interval = self.minimum_observation_interval-(initial_step - \
-                    (initial_step // self.minimum_observation_interval) * \
-                    self.minimum_observation_interval)
-                first_run_interval = min(first_run_interval, number_of_trial_steps)
+                first_run_interval = self.minimum_observation_interval-(initial_step -
+                                                                        (initial_step // self.minimum_observation_interval) *
+                                                                        self.minimum_observation_interval)
+                first_run_interval = min(
+                    first_run_interval, number_of_trial_steps)
                 self._run(first_run_interval)
                 initial_step += first_run_interval
                 self._step += first_run_interval
@@ -127,7 +128,7 @@ class BaseEnsemble(ABC):
         step = initial_step
         while step < final_step:
             uninterrupted_steps = min(
-                self.minimum_observation_interval, final_step - step)            
+                self.minimum_observation_interval, final_step - step)
             if self._step % self.minimum_observation_interval == 0:
                 self._observe_configuration(self._step)
             if self._data_container_filename is not None and \
@@ -190,10 +191,10 @@ class BaseEnsemble(ABC):
 
     def _observe_configuration(self, step):
         """
-        Observe the configuration with the observers that has an interval
+        Add observations from observers which has an interval
         that coincicide with the step.
 
-        parameters
+        Parameters
         ----------
         step : int
             the current step
