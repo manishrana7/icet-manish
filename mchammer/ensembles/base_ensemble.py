@@ -220,10 +220,7 @@ class BaseEnsemble(ABC):
         """
 
         intervals = [obs.interval for _, obs in self.observers.items()]
-        if len(intervals) == 1:
-            self._minimum_observation_interval = intervals[0]
-        else:
-            self._minimum_observation_interval = self._get_gcd(intervals)
+        self._minimum_observation_interval = self._get_gcd(intervals)
 
     def _get_gcd(self, interval_list):
         """
@@ -231,6 +228,8 @@ class BaseEnsemble(ABC):
 
         interval_list : list of int
         """
+        if len(interval_list) == 1:
+            return interval_list[0]
 
         if len(interval_list) > 2:
             gcd_right = gcd(interval_list[-1], interval_list[-2])
