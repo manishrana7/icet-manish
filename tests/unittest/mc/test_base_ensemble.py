@@ -14,13 +14,15 @@ class ParakeetObserver(BaseObserver):
     """Parakeet says 2.63323e+20."""
 
     def __init__(self, interval, tag='Parakeet'):
-        super().__init__(interval=interval,return_type=float, tag=tag)
+        super().__init__(interval=interval, return_type=float, tag=tag)
 
     def get_observable(self, atoms):  # noqa
         """Say 2.63323e+20."""
         return 2.63323e+20
 
 # Create a concrete child of Ensemble for testing
+
+
 class ConcreteEnsemble(BaseEnsemble):
 
     def __init__(self, calculator, name=None, random_seed=None):
@@ -110,8 +112,8 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble.run(n_iters, reset_step=False)
         self.assertEqual(self.ensemble.step, 70)
 
-        # Do a number of steps of continuous runs and see that we get the expected
-        # number of parakeet observations.
+        # Do a number of steps of continuous runs and see that
+        # we get the expected number of parakeet observations.
         for i in range(30):
             self.ensemble.reset_data_container()
             run_iters = [1, 50, 100, 200, i]
@@ -126,7 +128,8 @@ class TestEnsemble(unittest.TestCase):
             # plus one since we also count step 0
             self.assertEqual(
                 number_of_observations,
-                total_iters // self.ensemble.observers['Parakeet2'].interval + 1)
+                total_iters //
+                self.ensemble.observers['Parakeet2'].interval + 1)
 
     def test_internal_run(self):
         """Test the _run method."""
