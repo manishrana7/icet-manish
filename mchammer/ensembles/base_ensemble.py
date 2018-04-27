@@ -161,13 +161,13 @@ class BaseEnsemble(ABC):
 
     def _observe_configuration(self, step):
         """
-        Add observations from observers which has an interval
-        that coincicide with the step.
+        Submit current configuration to observers and append observations to
+        data container.
 
         Parameters
         ----------
         step : int
-            the current step
+            the current trial step
         """
         row_dict = {}
         new_observations = False
