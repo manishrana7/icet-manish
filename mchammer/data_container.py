@@ -54,7 +54,7 @@ class DataContainer:
 
         if atoms is not None:
             assert isinstance(atoms, Atoms), \
-             'Structure must be provided as ASE Atoms object'
+                'Structure must be provided as ASE Atoms object'
             self.structure = atoms.copy()
 
         self._observables = OrderedDict()
@@ -179,6 +179,11 @@ class DataContainer:
             data_list.append(data_column)
 
         return data_list
+
+    @property
+    def data(self):
+        """Pandas data frame."""
+        return self._data
 
     @property
     def parameters(self):
