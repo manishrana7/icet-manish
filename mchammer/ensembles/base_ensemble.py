@@ -157,6 +157,31 @@ class BaseEnsemble(ABC):
         for _ in range(number_of_trial_steps):
             self.do_trial_step()
 
+    def _observe_configuration(self, step):
+        """
+        Add observations from observers which has an interval
+        that coincicide with the step.
+
+        Parameters
+        ----------
+        step : int
+            the current step
+        """
+        row_dict = {}
+        new_observations = False
+        for observer in self.observers.values():
+            if step % observer.interval == 0:
+                new_observations = True
+                if observer.return_type is dict:
+                    for key, value in observer.get_observable(
+                            self.calculator.atoms).items():
+                        row_dict[key] = value
+                else:
+                    row_dict[observer.tag] = observer.get_observable(
+                        self.calculator.atoms)
+        if new_observations:
+            self._data_container.append(mctrial=step, record=row_dict)
+
     @abstractmethod
     def do_trial_step(self):
         pass
@@ -188,31 +213,6 @@ class BaseEnsemble(ABC):
         Monte Carlo simulation without observation interruptions.
         """
         return self._minimum_observation_interval
-
-    def _observe_configuration(self, step):
-        """
-        Add observations from observers which has an interval
-        that coincicide with the step.
-
-        Parameters
-        ----------
-        step : int
-            the current step
-        """
-        row_dict = {}
-        new_observations = False
-        for observer in self.observers.values():
-            if step % observer.interval == 0:
-                new_observations = True
-                if observer.return_type() is dict:
-                    for key, value in observer.get_observable(
-                            self.calculator.atoms).items():
-                        row_dict[key] = value
-                else:
-                    row_dict[observer.tag] = observer.get_observable(
-                        self.calculator.atoms)
-        if new_observations:
-            self._data_container.append(mctrial=step, record=row_dict)
 
     def _find_minimum_observation_interval(self):
         """
@@ -257,12 +257,12 @@ class BaseEnsemble(ABC):
         else:
             self.observers[observer.tag] = observer
 
-        if observer.return_type() is dict:
+        if observer.return_type is dict:
             for key in observer:
                 self._data_container.add_observable(key, float)
         else:
             self._data_container.add_observable(
-                observer.tag, observer.return_type())
+                observer.tag, observer.return_type)
 
         self._find_minimum_observation_interval()
 
