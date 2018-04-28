@@ -2,6 +2,8 @@ import unittest
 
 from icet import ClusterSpace
 from icet import ClusterExpansion
+from mchammer.calculators.cluster_expansion_calculator import \
+    ClusterExpansionCalculator
 from mchammer.ensembles.base_ensemble import BaseEnsemble
 from ase.build import bulk
 import numpy as np
@@ -34,8 +36,9 @@ class TestEnsemble(unittest.TestCase):
 
             def _run(self):
                 pass
+        calculator = ClusterExpansionCalculator(self.atoms, self.ce)
         self.ensemble = ConcreteEnsemble(
-            calculator=None, name='test-ensemble', random_seed=42)
+            calculator=calculator, name='test-ensemble', random_seed=42)
 
     def test_property_name(self):
         """Test name property."""

@@ -19,6 +19,11 @@ class ClusterExpansionCalculator(BaseCalculator):
     name : str
         human readable identifier for this calculator
 
+    Todo
+    ----
+    * add the real occupation constraints when
+      that is setup in the cluster space.
+
     """
 
     def __init__(self, atoms, cluster_expansion,
@@ -74,3 +79,10 @@ class ClusterExpansionCalculator(BaseCalculator):
 
         """
         return self.calculate_total()
+
+    @property
+    def occupation_constraints(self):
+        """A map from site to allowed species."""
+        elements = list(
+            self.cluster_expansion.cluster_space.element_map.keys())
+        return [elements] * len(self.atoms)

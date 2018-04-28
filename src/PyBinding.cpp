@@ -705,6 +705,7 @@ PYBIND11_MODULE(_icet, m)
             return py::array(cv.size(), cv.data());
         })
         .def("get_orbit_list", &ClusterSpace::getOrbitList)
+        .def_property_readonly("element_map", &ClusterSpace::getElementMap)
         .def("get_orbit", &ClusterSpace::getOrbit)
         .def("get_cluster_product", &ClusterSpace::getClusterProduct)
         .def("get_cluster_space_info", &ClusterSpace::getClusterSpaceInfo)

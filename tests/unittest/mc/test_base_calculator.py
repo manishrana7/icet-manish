@@ -40,7 +40,7 @@ class TestBaseCalculator(unittest.TestCase):
         """Test calculate local contribution."""
         self.calculator.calculate_local_contribution()
 
-    def test_set_elements(self):
+    def test_update_occupations(self):
         """Test set elements method."""
         indices = [0, 1, 3]
         elements = [6, 1, 2]
@@ -50,13 +50,13 @@ class TestBaseCalculator(unittest.TestCase):
         self.assertEqual(self.atoms[1].symbol, 'Al')
         self.assertEqual(self.atoms[3].symbol, 'Al')
 
-        self.calculator.set_elements(indices, elements)
+        self.calculator.update_occupations(indices, elements)
         self.assertEqual(self.atoms[0].symbol, 'C')
         self.assertEqual(self.atoms[1].symbol, 'H')
         self.assertEqual(self.atoms[3].symbol, 'He')
 
         with self.assertRaises(Exception):
-            self.calculator.set_elements([0, 1], [0, 1, 2, 3])
+            self.calculator.update_occupations([0, 1], [0, 1, 2, 3])
 
 
 if __name__ == '__main__':
