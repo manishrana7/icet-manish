@@ -20,14 +20,16 @@ the structure_container.py file
 
 """
 
-import unittest
+import sys
 import tempfile
+import unittest
 
 from ase import Atoms
 from ase.build import bulk
 from ase.calculators.emt import EMT
 from icet import ClusterSpace, StructureContainer
 from icet.core.structure_container import FitStructure
+from io import StringIO
 
 
 def strip_surrounding_spaces(input_string):
@@ -40,12 +42,12 @@ def strip_surrounding_spaces(input_string):
     str
         original string minus surrounding spaces and empty lines
     """
-    from io import StringIO
     s = []
-    for line in StringIO(input_string):
-        if len(line.strip()) == 0:
-            continue
-        s += [line.strip()]
+    with StringIO(input_string) as data:
+        for line in data:
+            if len(line.strip()) == 0:
+                continue
+            s += [line.strip()]
     return '\n'.join(s)
 
 
@@ -220,10 +222,11 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
         """
         Testing print_overview functionality
         """
-        # this runs the function but since the latter merely invokes another
-        # function to print some information to stdout there is not much to
-        # test here (other than the function not throwing an exception)
-        self.sc.print_overview()
+        with StringIO() as capturedOutput:
+            sys.stdout = capturedOutput  # redirect stdout
+            self.sc.print_overview()
+            sys.stdout = sys.__stdout__  # reset redirect
+            self.assertTrue('Structure Container' in capturedOutput.getvalue())
 
     def test_get_properties(self):
         """

@@ -22,10 +22,12 @@ the cluster_space.py file
 
 import numpy as np
 import sys
+import tempfile
 import unittest
 
+from ase import Atoms
+from ase.build import bulk, fcc111
 from ase.db import connect as db_connect
-from ase.build import bulk
 from collections import OrderedDict
 from icet import ClusterSpace
 from icet.core.cluster_space import (get_singlet_info,
@@ -44,7 +46,6 @@ def strip_surrounding_spaces(input_string):
     str
         original string minus surrounding spaces and empty lines
     """
-    from io import StringIO
     s = []
     for line in StringIO(input_string):
         if len(line.strip()) == 0:
@@ -101,7 +102,6 @@ class TestClusterSpace(unittest.TestCase):
     """
 
     def __init__(self, *args, **kwargs):
-        from ase.build import bulk
         super(TestClusterSpace, self).__init__(*args, **kwargs)
         self.subelements = ['Ag', 'Au']
         self.cutoffs = [4.0] * 3
@@ -229,12 +229,11 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         """
         Testing print_overview functionality
         """
-        # create StringIO object and redirect stdout.
-        capturedOutput = StringIO()
-        sys.stdout = capturedOutput
-        self.cs.print_overview()
-        sys.stdout = sys.__stdout__  # reset redirect
-        self.assertTrue('Cluster Space' in capturedOutput.getvalue())
+        with StringIO() as capturedOutput:
+            sys.stdout = capturedOutput  # redirect stdout
+            self.cs.print_overview()
+            sys.stdout = sys.__stdout__  # reset redirect
+            self.assertTrue('Cluster Space' in capturedOutput.getvalue())
 
     def test_get_number_of_orbits_by_order(self):
         """
@@ -284,7 +283,6 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         """
         Testing get_singlet_configuration functionality
         """
-        from ase import Atoms
         retval = get_singlet_configuration(self.atoms_prim)
         self.assertIsInstance(retval, Atoms)
         self.assertEqual(retval[0].symbol, 'H')
@@ -354,7 +352,6 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         """
         Test read/write functionality.
         """
-        import tempfile
         f = tempfile.NamedTemporaryFile()
         self.cs.write(f.name)
         f.seek(0)
@@ -377,7 +374,6 @@ class TestClusterSpaceSurface(unittest.TestCase):
     """
 
     def __init__(self, *args, **kwargs):
-        from ase.build import fcc111
         super(TestClusterSpaceSurface, self).__init__(*args, **kwargs)
         self.subelements = ['Ag', 'Au']
         self.cutoffs = [4.0] * 3

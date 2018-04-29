@@ -222,14 +222,11 @@ Ni   Ni    13
         """
         Test print overview.
         """
-        self.cluster_counts.count_clusters(self.structure,
-                                           self.orbit_list, False)
-        # create StringIO object and redirect stdout.
-        capturedOutput = StringIO()
-        sys.stdout = capturedOutput
-        self.cluster_counts.print_overview()  # call method
-        sys.stdout = sys.__stdout__  # reset redirect
-        self.assertTrue('Cluster Counts' in capturedOutput.getvalue())
+        with StringIO() as capturedOutput:
+            sys.stdout = capturedOutput  # redirect stdout
+            self.cluster_counts.print_overview()  # call method
+            sys.stdout = sys.__stdout__  # reset redirect
+            self.assertTrue('Cluster Counts' in capturedOutput.getvalue())
 
 
 if __name__ == '__main__':
