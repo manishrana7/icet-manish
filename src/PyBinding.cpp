@@ -690,18 +690,18 @@ PYBIND11_MODULE(_icet, m)
 
     py::class_<LocalOrbitListGenerator>(m, "LocalOrbitListGenerator")
         .def(py::init<const OrbitList &, const Structure &>())
-        .def("generate_local_orbit_list", (OrbitList(LocalOrbitListGenerator::*)(const unsigned int)) & LocalOrbitListGenerator::generateLocalOrbitList)
-        .def("generate_local_orbit_list", (OrbitList(LocalOrbitListGenerator::*)(const Vector3d &)) & LocalOrbitListGenerator::generateLocalOrbitList)
-        .def("generate_full_orbit_list", &LocalOrbitListGenerator::generateFullOrbitList)
+        .def("generate_local_orbit_list", (OrbitList(LocalOrbitListGenerator::*)(const unsigned int)) & LocalOrbitListGenerator::getLocalOrbitList)
+        .def("generate_local_orbit_list", (OrbitList(LocalOrbitListGenerator::*)(const Vector3d &)) & LocalOrbitListGenerator::getLocalOrbitList)
+        .def("generate_full_orbit_list", &LocalOrbitListGenerator::getFullOrbitList)
         .def("clear", &LocalOrbitListGenerator::clear)
-        .def("get_unique_offsets_count", &LocalOrbitListGenerator::getUniqueOffsetsCount)
-        .def("get_prim_to_supercell_map", &LocalOrbitListGenerator::getPrimToSupercellMap)
-        .def("get_unique_primcell_offsets", &LocalOrbitListGenerator::getUniquePrimcellOffsets);
+        .def("get_unique_offsets_count", &LocalOrbitListGenerator::getNumberOfUniqueOffsets)
+        .def("get_prim_to_supercell_map", &LocalOrbitListGenerator::getMapFromPrimitiveToSupercell)
+        .def("get_unique_primcell_offsets", &LocalOrbitListGenerator::getUniquePrimitiveCellOffsets);
 
     py::class_<ClusterSpace>(m, "ClusterSpace", py::dynamic_attr())
         .def(py::init<std::vector<int>, std::vector<std::string>, const OrbitList &>())
         .def("get_cluster_vector", [](const ClusterSpace &ClusterSpace, const Structure &structure) {
-            auto cv = ClusterSpace.generateClusterVector(structure);
+            auto cv = ClusterSpace.getClusterVector(structure);
             return py::array(cv.size(), cv.data());
         })
         .def("get_orbit_list", &ClusterSpace::getOrbitList)

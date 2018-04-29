@@ -40,31 +40,31 @@ class LocalOrbitListGenerator
     LocalOrbitListGenerator(const OrbitList &, const Structure &);
 
     ///generate and returns the local orbit list with the input index
-    OrbitList generateLocalOrbitList(const unsigned int);
+    OrbitList getLocalOrbitList(const unsigned int);
 
     ///generate and returns the local orbit list with the input offset (require that the offset is in uniquecell offset?)
-    OrbitList generateLocalOrbitList(const Vector3d &);
+    OrbitList getLocalOrbitList(const Vector3d &);
 
     /// Generate the full orbit list from this structure
-    OrbitList generateFullOrbitList();
+    OrbitList getFullOrbitList();
 
     //clears the unordered_map and the vector
     void clear();
 
     ///Returns the number of unique offsets
-    size_t getUniqueOffsetsCount() const
+    size_t getNumberOfUniqueOffsets() const
     {
         return _uniquePrimcellOffsets.size();
     }
 
     ///Return the primitive lattice neighbor to supercell latticeneigbhor map
-    std::unordered_map<LatticeSite, LatticeSite> getPrimToSupercellMap() const
+    std::unordered_map<LatticeSite, LatticeSite> getMapFromPrimitiveToSupercell() const
     {
         return _primToSupercellMap;
     }
 
     ///Returns the unique primitive cells
-    std::vector<Vector3d> getUniquePrimcellOffsets() const
+    std::vector<Vector3d> getUniquePrimitiveCellOffsets() const
     {
         return _uniquePrimcellOffsets;
     }
