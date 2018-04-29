@@ -19,7 +19,7 @@ class ClusterSpace(_ClusterSpace):
 
     Parameters
     ----------
-    atoms : ASE Atoms object
+    atoms : ASE Atoms object / icet Structure object (bi-optional)
         atomic configuration
     cutoffs : list of floats
         cutoff radii per order that define the cluster space
@@ -45,6 +45,9 @@ class ClusterSpace(_ClusterSpace):
         if isinstance(atoms, Atoms):
             self._structure = Structure.from_atoms(atoms)
             self._input_atoms = atoms
+        elif isinstance(atoms, Structure):
+            self._structure = atoms
+            self._input_atoms = atoms.to_atoms()
         else:
             msg = 'Unknown structure format'
             msg += ' {} (ClusterSpace)'.format(type(atoms))
