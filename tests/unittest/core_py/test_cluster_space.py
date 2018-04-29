@@ -1,6 +1,6 @@
 #!/usr/bin/env Python3
 
-'''
+"""
 This file contains unit tests and other tests. It can be executed by
 simply executing this file from a shell prompt:
 
@@ -18,7 +18,7 @@ https://docs.python.org/3/library/unittest.html
 When executing this file doc testing is also performed on all doc tests in
 the cluster_space.py file
 
-'''
+"""
 
 import unittest
 
@@ -26,7 +26,7 @@ from icet.core_py.cluster_space import ClusterSpace
 
 
 def strip_surrounding_spaces(input_string):
-    '''
+    """
     Helper function that removes both leading and trailing spaces from a
     multi-line string.
 
@@ -34,7 +34,7 @@ def strip_surrounding_spaces(input_string):
     -------
     str
         original string minus surrounding spaces and empty lines
-    '''
+    """
     from io import StringIO
     s = []
     for line in StringIO(input_string):
@@ -45,10 +45,10 @@ def strip_surrounding_spaces(input_string):
 
 
 def _assertEqualComplexList(self, retval, target):
-    '''
+    """
     Helper function that conducts a systematic comparison of a nested list
     with dictionaries.
-    '''
+    """
     self.assertIsInstance(retval, type(target))
     for row_retval, row_target in zip(retval, target):
         self.assertIsInstance(row_retval, type(row_target))
@@ -70,9 +70,9 @@ unittest.TestCase.assertEqualComplexList = _assertEqualComplexList
 
 
 def _assertAlmostEqualList(self, retval, target, places=6):
-    '''
+    """
     Helper function that conducts an element-wise comparison of two lists.
-    '''
+    """
     self.assertIsInstance(retval, type(target))
     self.assertEqual(len(retval), len(target))
     for k, (r, t) in enumerate(zip(retval, target)):
@@ -87,9 +87,9 @@ unittest.TestCase.assertAlmostEqualList = _assertAlmostEqualList
 
 
 class TestClusterSpace(unittest.TestCase):
-    '''
+    """
     Container for tests of the class functionality
-    '''
+    """
 
     def __init__(self, *args, **kwargs):
         from ase.build import bulk
@@ -106,98 +106,94 @@ class TestClusterSpace(unittest.TestCase):
             self.structure_list.append(atoms)
 
     def setUp(self):
-        '''
+        """
         Instantiate class before each test.
-        '''
+        """
         self.cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
 
     def test_init(self):
-        '''
+        """
         Just testing that the setup
         (initialization) of tested class work
-        '''
+        """
         # initialize from ASE Atoms
         cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
         self.assertIsInstance(cs, ClusterSpace)
 
     def test_len(self):
-        '''
-        Testing len functionality
-        '''
+        """ Tests len functionality. """
         pass
 
-    def test_get_orbit_data(self):
-        '''
-        Testing get_orbit_data functionality
-        '''
+    def test_orbit_data(self):
+        """ Tests orbit_data property. """
         pass
 
     def test_repr(self):
-        '''
+        """
         Testing repr functionality
-        '''
+        """
         pass
 
     def test_get_string_representation(self):
-        '''
+        """
         Testing _get_string_representation functionality
-        '''
+        """
         pass
 
     def test_print_overview(self):
-        '''
+        """
         Testing print_overview functionality
-        '''
+        """
         pass
 
     def test_get_number_of_orbits_by_order(self):
-        '''
+        """
         Testing get_number_of_orbits_by_order functionality
-        '''
+        """
         pass
 
     def test_get_cluster_vector(self):
-        '''
+        """
         Testing get_cluster_vector functionality
-        '''
+        """
         pass
 
     def test_get_singlet_info(self):
-        '''
+        """
         Testing get_singlet_info functionality
-        '''
+        """
         pass
 
     def test_get_singlet_configuration(self):
-        '''
+        """
         Testing get_singlet_configuration functionality
-        '''
+        """
         pass
 
     def test_get_Mi_from_dict(self):
-        '''
+        """
         Testing get_Mi_from_dict functionality
-        '''
+        """
         pass
 
     def test_cutoffs(self):
-        ''' Testing cutoffs property '''
+        """ Testing cutoffs property """
         self.assertEqual(self.cs.cutoffs, self.cutoffs)
 
     def test_structure(self):
-        ''' Testing structure property '''
+        """ Testing structure property """
         self.assertEqual(len(self.cs.structure),
                          len(self.atoms_prim))
 
     def test_chemical_symbols(self):
-        ''' Testing chemical symbols property '''
+        """ Testing chemical symbols property """
         self.assertEqual(self.cs.chemical_symbols, self.subelements)
 
 
 class TestClusterSpaceSurface(unittest.TestCase):
-    '''
+    """
     Container for tests of the class functionality for non-periodic structures
-    '''
+    """
 
     def __init__(self, *args, **kwargs):
         from ase.build import fcc111
@@ -215,30 +211,30 @@ class TestClusterSpaceSurface(unittest.TestCase):
             self.structure_list.append(atoms)
 
     def setUp(self):
-        '''
+        """
         Instantiate class before each test.
-        '''
+        """
         self.cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
 
     def test_get_cluster_vector(self):
-        '''
+        """
         Testing get_cluster_vector functionality
-        '''
+        """
         pass
 
     def test_get_number_of_orbits_by_order(self):
-        '''
+        """
         Testing get_number_of_orbits_by_order functionality
-        '''
+        """
         pass
         # retval = self.cs.get_number_of_orbits_by_order()
         # target = OrderedDict([(0, 1), (1, 3), (2, 5), (3, 10), (4, 4)])
         # self.assertEqual(target, retval)
 
     def test_get_Mi_from_dict(self):
-        '''
+        """
         Testing _get_Mi_from_dict functionality
-        '''
+        """
         pass
 
 

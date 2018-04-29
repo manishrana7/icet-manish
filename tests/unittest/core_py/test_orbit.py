@@ -90,9 +90,7 @@ class TestOrbit(unittest.TestCase):
         self.assertIsInstance(orbit, Orbit)
 
     def test_property_equivalent_sites(self):
-        """
-        Testing get_orbit_data functionality
-        """
+        """ Tests equivalent_sites property. """
 
         self.assertEqual(self.orbit_pair.equivalent_sites, [])
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
@@ -107,7 +105,8 @@ class TestOrbit(unittest.TestCase):
 
     def test_property_representative_cluster(self):
         """
-        Test getting the representative Cluster
+        Tests retrieving the representative Cluster.
+
         TODO
         ----
         * implement this more thoroughly when cluster is added
