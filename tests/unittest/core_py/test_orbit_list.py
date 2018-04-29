@@ -60,7 +60,7 @@ class TestOrbitList(unittest.TestCase):
 
     def test_property_primitive_structure(self):
         '''
-        Testing get_orbit_list_info functionality
+        Testing get_orbit_data functionality
         '''
         self.orbit_list.primitive_structure
         self.assertEqual(

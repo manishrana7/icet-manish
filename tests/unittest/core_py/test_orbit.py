@@ -91,7 +91,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_property_equivalent_sites(self):
         """
-        Testing get_orbit_list_info functionality
+        Testing get_orbit_data functionality
         """
 
         self.assertEqual(self.orbit_pair.equivalent_sites, [])

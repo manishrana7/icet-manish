@@ -158,9 +158,9 @@ class TestClusterSpace(unittest.TestCase):
         number_orbits = self.cs.__len__()
         self.assertEqual(number_orbits, len(self.cs.get_orbit_list()) + 1)
 
-    def test_get_orbit_list_info(self):
+    def test_get_orbit_data(self):
         """
-        Testing get_orbit_list_info functionality
+        Testing get_orbit_data functionality
         """
         target = [OrderedDict([('index', 0),
                                ('order', 0),
@@ -187,7 +187,7 @@ class TestClusterSpace(unittest.TestCase):
                                ('multiplicity', 2),
                                ('orbit_index', 3),
                                ('multi_component_vector', [0, 0, 0, 0])])]
-        retval = self.cs.get_orbit_list_info()
+        retval = self.cs.get_orbit_data()
         self.assertEqualComplexList(retval, target)
 
     def test_repr(self):

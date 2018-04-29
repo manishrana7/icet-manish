@@ -127,7 +127,7 @@ class ClusterSpace(object):
 
         # basic information
         # (use largest orbit to obtain maximum line length)
-        prototype_orbit = self.get_orbit_list_info()[-1]
+        prototype_orbit = self.get_orbit_data()[-1]
         n = len(repr_orbit(prototype_orbit))
         s = []
         s += ['{s:-^{n}}'.format(s=' Cluster Space ', n=n)]
@@ -147,7 +147,7 @@ class ClusterSpace(object):
 
         # table body
         index = 0
-        orbit_list_info = self.get_orbit_list_info()
+        orbit_list_info = self.get_orbit_data()
         while index < len(orbit_list_info):
             if (print_threshold is not None and
                     len(self) > print_threshold and
@@ -181,7 +181,7 @@ class ClusterSpace(object):
         print(self._get_string_representation(print_threshold=print_threshold,
                                               print_minimum=print_minimum))
 
-    def get_orbit_list_info(self):
+    def get_orbit_data(self):
         '''
         Return list of orbits that provides information concerning their order,
         radius, multiplicity etc).

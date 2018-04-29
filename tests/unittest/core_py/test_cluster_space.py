@@ -126,9 +126,9 @@ class TestClusterSpace(unittest.TestCase):
         '''
         pass
 
-    def test_get_orbit_list_info(self):
+    def test_get_orbit_data(self):
         '''
-        Testing get_orbit_list_info functionality
+        Testing get_orbit_data functionality
         '''
         pass
 
