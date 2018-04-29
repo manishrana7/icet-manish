@@ -108,7 +108,7 @@ class Structure
     void setNumberOfAllowedComponents(const int);
 
     /// Returns number of allowed components on each site.
-    int getNumberOfAllowedComponents(const unsigned int) const;
+    int getNumberOfAllowedComponentsBySite(const unsigned int) const;
 
     /// Set tolerance applied when comparing positions.
     void setTolerance(double tolerance) { _tolerance = tolerance; }

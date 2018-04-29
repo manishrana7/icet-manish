@@ -80,7 +80,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
         throw std::runtime_error(errorMessage);
     }
 
-    // 
+    //
     const auto clusterMap = clusterCounts.getClusterCounts();
     std::vector<double> clusterVector;
     clusterVector.push_back(1);
@@ -92,12 +92,12 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
     {
         auto repCluster = _primitiveOrbitList.getOrbit(i).getRepresentativeCluster();
         std::vector<int> allowedOccupations;
-        try { 
-                allowedOccupations = getAllowedOccupations(_primitiveStructure, _primitiveOrbitList.getOrbit(i).getRepresentativeSites());
+        try {
+                allowedOccupations = getNumberOfAllowedComponentsBySite(_primitiveStructure, _primitiveOrbitList.getOrbit(i).getRepresentativeSites());
             }
         catch (const std::exception& e)
-        { 
-            throw std::runtime_error("Failed getting allowed occupations in genereteClusterVector"); 
+        {
+            throw std::runtime_error("Failed getting allowed occupations in genereteClusterVector");
         }
 
         // Skip rest if any sites aren't active sites (i.e. allowed occupation < 2)
@@ -105,10 +105,10 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
         {
             continue;
         }
-        
+
         auto mcVectors = _primitiveOrbitList.getOrbit(i).getMCVectors(allowedOccupations);
         auto allowedPermutationsSet = _primitiveOrbitList.getOrbit(i).getAllowedSitesPermutations();
-        auto elementPermutations = getMCVectorPermutations(mcVectors, i);
+        auto elementPermutations = getMultiComponentVectorPermutations(mcVectors, i);
         repCluster.setClusterTag(i);
         int currentMCVectorIndex = 0;
         for (const auto &mcVector : mcVectors)
@@ -197,16 +197,16 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
   the returned permutations should be [[1,0]], [[0,1],[1,0]], [1,1].
   i.e. the [0,1] mc vector should count elements with permutations [1,0] and [1,0]
 
-  Given mc vectors [0, 0], [0,1], [1,0] and [1,1] the returned permutations 
+  Given mc vectors [0, 0], [0,1], [1,0] and [1,1] the returned permutations
   will only be the self permutations since the mc vectors [0,1] and [1,0] will handle
   the AB vs BA choice.
 
   @param mcVectors the mc vectors for this orbit
   @param orbitIndex : The orbit index to take the allowed permutations from.
- 
+
 */
 
-std::vector<std::vector<std::vector<int>>> ClusterSpace::getMCVectorPermutations(const std::vector<std::vector<int>> &mcVectors, const int orbitIndex) const
+std::vector<std::vector<std::vector<int>>> ClusterSpace::getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &mcVectors, const int orbitIndex) const
 {
     const auto allowedPermutations = _primitiveOrbitList.getOrbit(orbitIndex).getAllowedSitesPermutations();
 
@@ -267,26 +267,26 @@ double ClusterSpace::getClusterProduct(const std::vector<int> &mcVector, const s
 }
 
 /// Returns the allowed occupations on the sites
-std::vector<int> ClusterSpace::getAllowedOccupations(const Structure &structure, const std::vector<LatticeSite> &latticeNeighbors) const
+std::vector<int> ClusterSpace::getNumberOfAllowedComponentsBySite(const Structure &structure, const std::vector<LatticeSite> &latticeNeighbors) const
 {
     std::vector<int> numberOfAllowedComponents;
     numberOfAllowedComponents.reserve(latticeNeighbors.size());
     for (const auto &latnbr : latticeNeighbors)
     {
-        numberOfAllowedComponents.push_back(structure.getNumberOfAllowedComponents(latnbr.index()));
+        numberOfAllowedComponents.push_back(structure.getNumberOfAllowedComponentsBySite(latnbr.index()));
     }
     return numberOfAllowedComponents;
 }
 
 /// Collect information about the cluster space
-void ClusterSpace::setupClusterSpaceInfo()
+void ClusterSpace::collectClusterSpaceInfo()
 {
     _clusterSpaceInfo.clear();
     std::vector<int> emptyVec = {0};
     _clusterSpaceInfo.push_back(std::make_pair(-1, emptyVec));
     for (int i = 0; i < _primitiveOrbitList.size(); i++)
     {
-        auto allowedOccupations = getAllowedOccupations(_primitiveStructure, _primitiveOrbitList.getOrbit(i).getRepresentativeSites());
+        auto allowedOccupations = getNumberOfAllowedComponentsBySite(_primitiveStructure, _primitiveOrbitList.getOrbit(i).getRepresentativeSites());
         auto mcVectors = _primitiveOrbitList.getOrbit(i).getMCVectors(allowedOccupations);
         for (const auto &mcVector : mcVectors)
         {
@@ -296,12 +296,12 @@ void ClusterSpace::setupClusterSpaceInfo()
     _isClusterSpaceInitialized = true;
 }
 
-/// Retrieve information about the cluster space
+/// Returns information about the cluster space
 std::pair<int, std::vector<int>> ClusterSpace::getClusterSpaceInfo(const unsigned int index)
 {
     if (!_isClusterSpaceInitialized)
     {
-        setupClusterSpaceInfo();
+        collectClusterSpaceInfo();
     }
 
     if (index >= _clusterSpaceInfo.size())
@@ -311,15 +311,4 @@ std::pair<int, std::vector<int>> ClusterSpace::getClusterSpaceInfo(const unsigne
     }
 
     return _clusterSpaceInfo[index];
-}
-
-/// Returns the cluster space size i.e. the length of a cluster vector
-size_t ClusterSpace::getClusterSpaceSize()
-{
-    if (!_isClusterSpaceInitialized)
-    {
-        setupClusterSpaceInfo();
-    }
-    // Plus one for zerolet
-    return _clusterSpaceInfo.size();
 }

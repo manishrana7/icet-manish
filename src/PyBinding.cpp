@@ -612,7 +612,7 @@ PYBIND11_MODULE(_icet, m)
         R"pbdoc(
         Sort the equivalent sites list.
         )pbdoc")
-        .def("get_all_possible_mc_vector_permutations", &Orbit::getAllPossibleMCVectorPermutations,
+        .def("get_all_possible_mc_vector_permutations", &Orbit::getAllPossibleMultiComponentVectorPermutations,
         R"pbdoc(
         Similar to get all permutations but
         needs to be filtered through the
@@ -705,16 +705,17 @@ PYBIND11_MODULE(_icet, m)
             return py::array(cv.size(), cv.data());
         })
         .def("get_orbit_list", &ClusterSpace::getOrbitList)
-        .def_property_readonly("element_map", &ClusterSpace::getElementMap)
         .def("get_orbit", &ClusterSpace::getOrbit)
-        .def("get_cluster_product", &ClusterSpace::getClusterProduct)
+        .def_property_readonly("element_map", &ClusterSpace::getElementMap)
         .def("get_cluster_space_info", &ClusterSpace::getClusterSpaceInfo)
         .def("get_cluster_space_size", &ClusterSpace::getClusterSpaceSize)
-        .def("get_atomic_numbers", &ClusterSpace::getAtomicNumbers)
+        .def("get_chemical_symbols",
+             &ClusterSpace::getChemicalSymbols,
+             "Returns list of species associated with cluster space as chemical symbols.")
         .def("get_cutoffs", &ClusterSpace::getCutoffs)
         .def("_get_primitive_structure", &ClusterSpace::getPrimitiveStructure)
         .def("get_native_clusters", &ClusterSpace::getNativeClusters)
-        .def("get_mc_vector_permutations",&ClusterSpace::getMCVectorPermutations)
-        .def("get_allowed_occupations",&ClusterSpace::getAllowedOccupations)
+        .def("get_mc_vector_permutations",&ClusterSpace::getMultiComponentVectorPermutations)
+        .def("get_allowed_occupations",&ClusterSpace::getNumberOfAllowedComponentsBySite)
         .def("__len__", &ClusterSpace::getClusterSpaceSize);
 }

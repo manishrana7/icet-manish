@@ -159,7 +159,7 @@ class ClusterSpace(_ClusterSpace):
         width = len(repr_orbit(prototype_orbit))
         s = []
         s += ['{s:=^{n}}'.format(s=' Cluster Space ', n=width)]
-        s += [' subelements: {}'.format(' '.join(self.get_atomic_numbers()))]
+        s += [' subelements: {}'.format(' '.join(self.get_chemical_symbols()))]
         s += [' cutoffs: {}'.format(' '.join(['{:.4f}'.format(co)
                                               for co in self._cutoffs]))]
         s += [' total number of orbits: {}'.format(len(self))]

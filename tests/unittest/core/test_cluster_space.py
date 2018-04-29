@@ -376,9 +376,7 @@ index | order |   size   | multiplicity | orbit index |  MC vector
             'tests/unittest/core/hcp_quaternary.db')
 
     def test_read_write(self):
-        """
-        Test read/write functionality.
-        """
+        """ Tests read/write functionality. """
         import tempfile
         f = tempfile.NamedTemporaryFile()
         self.cs.write(f.name)
@@ -391,7 +389,7 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         self.assertEqual(self.cs._verbosity, cs_read._verbosity)
 
     def test_chemical_symbols(self):
-        """Test chemical_symbols functionality."""
+        """ Tests chemical_symbols property. """
         target = ['Ag', 'Au']
         self.assertEqual(self.cs.chemical_symbols, target)
 
