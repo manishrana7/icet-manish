@@ -208,7 +208,7 @@ class ClusterSpace(_ClusterSpace):
         print(self._get_string_representation(print_threshold=print_threshold,
                                               print_minimum=print_minimum))
 
-    @property    
+    @property
     def orbit_data(self):
         """
         list of dicts : list of orbits ith information regarding
