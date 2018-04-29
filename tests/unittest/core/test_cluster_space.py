@@ -129,17 +129,6 @@ class TestClusterSpace(unittest.TestCase):
         cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
         self.assertIsInstance(cs, ClusterSpace)
         self.assertEqual(len(cs), len(self.cs))
-        # initialize from icet Structure
-        cs = ClusterSpace(Structure.from_atoms(self.atoms_prim), self.cutoffs,
-                          self.subelements)
-        self.assertIsInstance(cs, ClusterSpace)
-        self.assertEqual(len(cs), len(self.cs))
-        cs = ClusterSpace(Structure.from_atoms(self.atoms_prim), self.cutoffs,
-                          self.subelements)
-        # check that other types fail
-        with self.assertRaises(Exception) as context:
-            cs = ClusterSpace('something', self.cutoffs, self.subelements)
-        self.assertTrue('Unknown structure format' in str(context.exception))
         # check Mi as int
         cs = ClusterSpace(self.atoms_prim, self.cutoffs,
                           self.subelements, Mi=2)
@@ -271,19 +260,9 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         info = ' '.join(s)
         self.assertEqual(len(target_cluster_vectors), len(self.structure_list),
                          msg=info)
-        # use ASE Atoms
         for atoms, target in zip(self.structure_list, target_cluster_vectors):
             retval = list(self.cs.get_cluster_vector(atoms))
             self.assertAlmostEqual(retval, target, places=9)
-        # use icet Structure
-        for atoms, target in zip(self.structure_list, target_cluster_vectors):
-            retval = list(self.cs.get_cluster_vector(
-                Structure.from_atoms(atoms)))
-            self.assertAlmostEqual(retval, target, places=9)
-        # check that other types fail
-        with self.assertRaises(Exception) as context:
-            retval = self.cs.get_cluster_vector('something')
-        self.assertTrue('Unknown structure format' in str(context.exception))
 
     def test_get_singlet_info(self):
         """
@@ -329,11 +308,6 @@ index | order |   size   | multiplicity | orbit index |  MC vector
     def test_cutoffs(self):
         """ Testing cutoffs property """
         self.assertEqual(self.cs.cutoffs, self.cutoffs)
-
-    def test_structure(self):
-        """ Testing structure property """
-        self.assertEqual(len(self.cs.structure),
-                         len(self.atoms_prim))
 
     def _test_cluster_vectors_in_database(self, db_name):
         """
@@ -384,7 +358,7 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         self.cs.write(f.name)
         f.seek(0)
         cs_read = ClusterSpace.read(f.name)
-        self.assertEqual(self.cs._input_atoms, cs_read._input_atoms)
+        self.assertEqual(self.cs._atoms, cs_read._atoms)
         self.assertEqual(list(self.cs._cutoffs), list(cs_read._cutoffs))
         self.assertEqual(self.cs._chemical_symbols, cs_read._chemical_symbols)
         self.assertEqual(self.cs._mi, cs_read._mi)
@@ -448,18 +422,9 @@ class TestClusterSpaceSurface(unittest.TestCase):
         info = ' '.join(s)
         self.assertEqual(len(target_cluster_vectors), len(self.structure_list),
                          msg=info)
-        # use ASE Atoms
         for atoms, target in zip(self.structure_list, target_cluster_vectors):
             retval = self.cs.get_cluster_vector(atoms)
             self.assertAlmostEqualList(retval, target, places=9)
-        # use icet Structure
-        for atoms, target in zip(self.structure_list, target_cluster_vectors):
-            retval = self.cs.get_cluster_vector(Structure.from_atoms(atoms))
-            self.assertAlmostEqualList(retval, target, places=9)
-        # check that other types fail
-        with self.assertRaises(Exception) as context:
-            retval = self.cs.get_cluster_vector('something')
-        self.assertTrue('Unknown structure format' in str(context.exception))
 
     def test_get_number_of_orbits_by_order(self):
         """

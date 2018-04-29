@@ -1,20 +1,20 @@
-'''
+"""
 This script checks that all atom objects in the database can have
 its cluster vector computed
-'''
+"""
 
 import numpy as np
 import random
 from ase.db import connect
-from icet import Structure, ClusterSpace
+from icet import ClusterSpace
 from icet.tools.geometry import add_vacuum_in_non_pbc
 
 
 def generate_mixed_structure(atoms_prim, subelements):
-    '''
+    """
     Generate a supercell structure based on the input structure and populate it
     randomly with the species specified.
-    '''
+    """
     repeat = [1] * 3
     for i, pbc in enumerate(atoms_prim.pbc):
         if pbc:
@@ -29,21 +29,20 @@ def generate_mixed_structure(atoms_prim, subelements):
 
 
 def generate_cluster_vector_set(n, atoms_prim, subelements, cluster_space):
-    '''
+    """
     Generate a set of cluster vectors from cluster space.
-    '''
+    """
     cluster_vectors = []
     for i in range(n):
         atoms = generate_mixed_structure(atoms_prim, subelements)
-        conf = Structure.from_atoms(atoms)
-        cv = cluster_space.get_cluster_vector(conf)
+        cv = cluster_space.get_cluster_vector(atoms)
         cluster_vectors.append(cv)
 
     return cluster_vectors
 
 
 def assert_decorrelation(matrix, tolerance=0.99):
-    '''
+    """
     Confirm that the correlation between any two columns of the input matrix
     does not exceed the tolerance specified.
 
@@ -53,7 +52,7 @@ def assert_decorrelation(matrix, tolerance=0.99):
         input matrix
     tolerance : float
         the correlation of any two columns must be lower than this value
-    '''
+    """
     A = np.array(matrix)
     for i in range(len(matrix[0])):
         if i == 0:  # skip zerolets (always one)

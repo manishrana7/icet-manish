@@ -223,7 +223,7 @@ Ni   Ni    13
         """
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
-        self.cluster_counts.print_overview()
+        self.cluster_counts.print_overview()  # call method
 
 
 if __name__ == '__main__':
