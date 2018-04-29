@@ -1,15 +1,12 @@
-import numpy as np
-
-from collections import OrderedDict
+import pickle
 
 from ase import Atoms
-import pickle
+from collections import OrderedDict
 
 from _icet import ClusterSpace as _ClusterSpace
 from icet.tools.geometry import get_primitive_structure, add_vacuum_in_non_pbc
 from icet.core.orbit_list import create_orbit_list
 from icet.core.structure import Structure
-
 
 
 class ClusterSpace(_ClusterSpace):
@@ -284,8 +281,6 @@ class ClusterSpace(_ClusterSpace):
         '''
         assert isinstance(atoms, Atoms), \
             'input configuration must be an ASE Atoms object'
-        structure = Structure.from_atoms(atoms)
-
         if not atoms.pbc.all():
             add_vacuum_in_non_pbc(atoms)
         else:
