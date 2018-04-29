@@ -16,7 +16,7 @@ class ClusterSpace(_ClusterSpace):
 
     Parameters
     ----------
-    atoms : ASE Atoms object
+    atoms : ASE Atoms object / icet Structure object (bi-optional)
         atomic configuration
     cutoffs : list of floats
         cutoff radii per order that define the cluster space
