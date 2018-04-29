@@ -20,9 +20,13 @@ cluster_space = ClusterSpace(conf, cutoffs, subelements)
 supercell = bulk('Si').repeat([2, 2, 1])
 for atom in supercell:
     atom.symbol = np.random.choice(subelements)
-structure = Structure.from_atoms(supercell)
 
 # Extract and print the native clusters for the supercell.
+# TODO: The cluster_space.get_native_clusters method is provided
+# directly via Pybind. What does it do? Is it necessary to expose it
+# to the user? This appears to be the _only_ place in Python where it
+# shows up.
+structure = Structure.from_atoms(supercell)
 native_clusters = cluster_space.get_native_clusters(structure)
 print(structure)
 print('\nNative cluster counts:')

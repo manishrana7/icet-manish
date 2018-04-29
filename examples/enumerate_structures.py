@@ -1,8 +1,8 @@
-'''
+"""
 This example demonstrates how to enumerate structures, i.e. how to
 generate all inequivalent structures derived from a primitive
 structure up to a certain size.
-'''
+"""
 
 # Import modules
 from ase import Atom
