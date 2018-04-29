@@ -20,18 +20,19 @@ the cluster_space.py file
 
 """
 
+import numpy as np
+import sys
 import unittest
 
+from ase.db import connect as db_connect
+from ase.build import bulk
+from collections import OrderedDict
 from icet import ClusterSpace
 from icet.core.cluster_space import (get_singlet_info,
                                      get_singlet_configuration)
-from icet.core.structure import Structure
 from icet.core.lattice_site import LatticeSite
-from collections import OrderedDict
-
-import numpy as np
-import ase.db
-from ase.build import bulk
+from icet.core.structure import Structure
+from io import StringIO
 
 
 def strip_surrounding_spaces(input_string):
@@ -229,17 +230,18 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         """
         Testing print_overview functionality
         """
-        # this runs the function but since the latter merely invokes another
-        # function to print some information to stdout there is not much to
-        # test here (other than the function not throwing an exception)
+        # create StringIO object and redirect stdout.
+        capturedOutput = StringIO()
+        sys.stdout = capturedOutput
         self.cs.print_overview()
+        sys.stdout = sys.__stdout__  # reset redirect
+        self.assertTrue('Cluster Space' in capturedOutput.getvalue())
 
     def test_get_number_of_orbits_by_order(self):
         """
         Testing get_number_of_orbits_by_order functionality
         """
         retval = self.cs.get_number_of_orbits_by_order()
-        print("retval\n", retval)
         target = OrderedDict([(0, 1), (1, 1), (2, 1), (3, 1), (4, 1)])
         self.assertEqual(target, retval)
 
@@ -314,7 +316,7 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         Tests the cluster vectors in the database.
         """
 
-        db = ase.db.connect(db_name)
+        db = db_connect(db_name)
 
         entry1 = db.get(id=1)
         atoms = entry1.toatoms()
@@ -467,7 +469,6 @@ class TestClusterSpaceTernary(unittest.TestCase):
         Instantiate class before each test.
         """
         self.cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
-        print(self.cs)
 
     def _get_mc_vector(self, cluster_space, orbit_index):
         """
@@ -553,7 +554,6 @@ class TestClusterSpaceTernary(unittest.TestCase):
                                [[0, 1, 2, 3]]]
         permutation_retval = self.cs.get_mc_vector_permutations(
             mc_vector_target, orbit_index)
-        print(permutation_retval)
         self.assertEqual(permutations_target, permutation_retval)
 
 
