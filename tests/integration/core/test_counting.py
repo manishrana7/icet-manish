@@ -28,8 +28,8 @@ def get_equivalent_clustermap_key(key1, clustermap_keys, tol=1e-3):
         if len(key1.sites) == len(key2.sites):
             if np.linalg.norm(np.array(key1.distances) -
                               np.array(key2.distances)) < tol:
-                if np.abs(key1.geometrical_size -
-                          key2.geometrical_size) < tol:
+                if np.abs(key1.radius -
+                          key2.radius) < tol:
                     if np.linalg.norm(np.array(key1.sites) -
                                       np.array(key2.sites)) < tol:
                         return key2
@@ -207,10 +207,10 @@ def test_no_symmetry_vs_symmetry_count(atoms_primitive, atoms_tag,
     for key1, key2 in zip(sorted(cluster_map_no_symmetry.keys()),
                           sorted(cluster_map_symmetry.keys())):
         msg = 'sizes for keys are not equal'
-        msg += ' {} != {}'.format(key1.geometrical_size,
-                                  key2.geometrical_size)
-        assert (key1.geometrical_size -
-                key2.geometrical_size) < 1e-3, msg
+        msg += ' {} != {}'.format(key1.radius,
+                                  key2.radius)
+        assert (key1.radius -
+                key2.radius) < 1e-3, msg
 
         msg = 'clusters are not of the same order.'
         msg += ' {} != {}'.format(key1.distances, key2.distances)

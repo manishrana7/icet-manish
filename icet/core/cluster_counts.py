@@ -50,7 +50,7 @@ def __get_string_representation(self):
         s += [horizontal_line]
         s += ['{} {:} {:.4f}'.format(cluster.sites,
                                      cluster.distances,
-                                     cluster.geometrical_size)]
+                                     cluster.radius)]
         s += [horizontal_line]
         for k in range(cluster_counts[cluster]):
             elements, count = self.get_cluster_counts_info(m)

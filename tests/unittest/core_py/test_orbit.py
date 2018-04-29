@@ -19,7 +19,7 @@ class TestOrbit(unittest.TestCase):
 
     TODO
     ---
-    *   revise test test_property_geometrical_size when
+    *   revise test test_property_radius when
         cluster is in orbit and the geometrical size can
         be retrieved from the orbit.
     """
@@ -152,11 +152,11 @@ class TestOrbit(unittest.TestCase):
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
         self.assertEqual(len(self.orbit_pair), len(self.lattice_sites_pairs))
 
-    def test_property_geometrical_size(self):
+    def test_property_radius(self):
         """
         Test the property geometrical size.
         """
-        self.orbit_pair.geometrical_size
+        self.orbit_pair.radius
 
     def test_sort(self):
         """

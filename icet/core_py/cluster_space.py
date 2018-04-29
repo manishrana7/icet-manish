@@ -81,10 +81,10 @@ class ClusterSpace(object):
         Mi_ret = [-1] * len(structure)
         for singlet in cluster_data:
             for site in singlet['sites']:
-                if singlet['orbit index'] not in Mi:
+                if singlet['orbit_index'] not in Mi:
                     raise Exception('Mi for site {} missing from dictionary'
-                                    ''.format(singlet['orbit index']))
-                Mi_ret[site[0].index] = Mi[singlet['orbit index']]
+                                    ''.format(singlet['orbit_index']))
+                Mi_ret[site[0].index] = Mi[singlet['orbit_index']]
 
         return Mi_ret
 
@@ -110,11 +110,11 @@ class ClusterSpace(object):
 
         def repr_orbit(orbit, header=False):
             formats = {'order': '{:2}',
-                       'size': '{:8.4f}',
+                       'radius': '{:8.4f}',
                        'multiplicity': '{:4}',
                        'index': '{:4}',
-                       'orbit index': '{:4}',
-                       'MC vector': '{:}'}
+                       'orbit_index': '{:4}',
+                       'multi_component_vector': '{:}'}
             s = []
             for name, value in orbit.items():
                 str_repr = formats[name].format(value)
@@ -194,9 +194,9 @@ class ClusterSpace(object):
         data = []
         zerolet = OrderedDict([('index', 0),
                                ('order', 0),
-                               ('size', 0),
+                               ('radius', 0),
                                ('multiplicity', 1),
-                               ('orbit index', -1)])
+                               ('orbit_index', -1)])
 
         data.append(zerolet)
         index = 1
@@ -211,10 +211,10 @@ class ClusterSpace(object):
                                orbit_index).get_equivalent_sites())
             record = OrderedDict([('index', index),
                                   ('order', cluster.order),
-                                  ('size', cluster.geometrical_size),
+                                  ('radius', cluster.radius),
                                   ('multiplicity', multiplicity),
-                                  ('orbit index', orbit_index)])
-            record['MC vector'] = mc_vector
+                                  ('orbit_index', orbit_index)])
+            record['multi_component_vector'] = mc_vector
             data.append(record)
             index += 1
         return data
@@ -326,10 +326,10 @@ def get_singlet_info(atoms, return_cluster_space=False):
             'Cluster space contains higher-order terms (beyond singlets)'
 
         singlet = {}
-        singlet['orbit index'] = orbit_index
+        singlet['orbit_index'] = orbit_index
         singlet['sites'] = cs.get_orbit(orbit_index).get_equivalent_sites()
         singlet['multiplicity'] = multiplicity
-        singlet['representative site'] = cs.get_orbit(
+        singlet['representative_site'] = cs.get_orbit(
             orbit_index).get_representative_sites()
         singlet_data.append(singlet)
 
@@ -366,7 +366,7 @@ def get_singlet_configuration(atoms, to_primitive=False):
         singlet_configuration = cluster_space.primitive_structure
         for singlet in cluster_data:
             for site in singlet['sites']:
-                element = chemical_symbols[singlet['orbit index'] + 1]
+                element = chemical_symbols[singlet['orbit_index'] + 1]
                 atom_index = site[0].index
                 singlet_configuration[atom_index].symbol = element
     else:
@@ -377,9 +377,9 @@ def get_singlet_configuration(atoms, to_primitive=False):
             = orbit_list.get_supercell_orbit_list(singlet_configuration)
         for singlet in cluster_data:
             for site in singlet['sites']:
-                element = chemical_symbols[singlet['orbit index'] + 1]
+                element = chemical_symbols[singlet['orbit_index'] + 1]
                 sites = orbit_list_supercell.get_orbit(
-                    singlet['orbit index']).get_equivalent_sites()
+                    singlet['orbit_index']).get_equivalent_sites()
                 for lattice_site in sites:
                     k = lattice_site[0].index
                     singlet_configuration[k].symbol = element

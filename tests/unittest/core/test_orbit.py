@@ -111,11 +111,11 @@ class TestOrbit(unittest.TestCase):
         self.assertEqual(len(self.orbit_pair),
                          len(self.lattice_sites_pairs))
 
-    def test_geometrical_size(self):
+    def test_radius(self):
         """
         Test geometrical size of orbit.
         """
-        self.orbit_pair.geometrical_size
+        self.orbit_pair.radius
 
     def test_sort(self):
         """
