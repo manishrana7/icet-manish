@@ -698,6 +698,8 @@ PYBIND11_MODULE(_icet, m)
         .def("get_prim_to_supercell_map", &LocalOrbitListGenerator::getMapFromPrimitiveToSupercell)
         .def("get_unique_primcell_offsets", &LocalOrbitListGenerator::getUniquePrimitiveCellOffsets);
 
+    /// @todo Check which of the following members must actually be exposed.
+    /// @todo Turn getters into properties as possible. (Some might require massaging in cluster_space.py.)
     py::class_<ClusterSpace>(m, "ClusterSpace", py::dynamic_attr())
         .def(py::init<std::vector<int>, std::vector<std::string>, const OrbitList &>())
         .def("get_cluster_vector", [](const ClusterSpace &ClusterSpace, const Structure &structure) {
@@ -716,6 +718,6 @@ PYBIND11_MODULE(_icet, m)
         .def("_get_primitive_structure", &ClusterSpace::getPrimitiveStructure)
         .def("get_native_clusters", &ClusterSpace::getNativeClusters)
         .def("get_mc_vector_permutations",&ClusterSpace::getMultiComponentVectorPermutations)
-        .def("get_allowed_occupations",&ClusterSpace::getNumberOfAllowedComponentsBySite)
+        .def("get_allowed_occupations",&ClusterSpace::getNumberOfAllowedComponentsForEachSite)
         .def("__len__", &ClusterSpace::getClusterSpaceSize);
 }

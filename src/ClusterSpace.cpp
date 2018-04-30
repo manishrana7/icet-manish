@@ -1,113 +1,114 @@
 #include "ClusterSpace.hpp"
 
+//namespace icet {
+
+using namespace std;
+
 /**
-@details Initialize a ClusterSpace object.
+@details Initializes a ClusterSpace object.
 @param numberOfAllowedComponents number of allowed components for each site of the primitive structure
 @param chemicalSymbols chemical symbol for each site
-@param primitiveOrbitList list of orbits for the primitive structure
+@param orbitList list of orbits for the primitive structure
 */
-ClusterSpace::ClusterSpace(std::vector<int> numberOfAllowedComponents,
-                           std::vector<std::string> chemicalSymbols,
-                           const OrbitList primitiveOrbitList)
+ClusterSpace::ClusterSpace(vector<int> numberOfAllowedComponents,
+                           vector<string> chemicalSymbols,
+                           const OrbitList orbitList)
 {
     _numberOfAllowedComponents = numberOfAllowedComponents;
-    _primitiveOrbitList = primitiveOrbitList;
-    _primitiveStructure = primitiveOrbitList.getPrimitiveStructure();
+    _orbitList = orbitList;
+    _primitiveStructure = orbitList.getPrimitiveStructure();
     _primitiveStructure.setNumberOfAllowedComponents(_numberOfAllowedComponents);
+    /// @todo Why is the task of setting up the element map outsourced to a private function that is not used anywhere else?
     setupElementMap(chemicalSymbols);
+    /// @todo Why is the collectClusterSpaceInfo function not executed immediately, which would render _isClusterSpaceInitialized unnecessary?
     _isClusterSpaceInitialized = false;
 };
+
 
 /**
 @brief Sets up a map between chemical elements and the internal species enumeration scheme.
 @param elements list of chemical symbols
 */
-void ClusterSpace::setupElementMap(const std::vector<std::string> elements)
+void ClusterSpace::setupElementMap(const vector<string> elements)
 {
     // convert chemical symbols to atomic numbers
-    std::vector<int> intElements;
+    vector<int> intElements;
     for (const auto el : elements)
-    {
         intElements.push_back(PeriodicTable::strInt[el]);
-    }
 
     // sort list of elements
-    std::sort(intElements.begin(), intElements.end());
+    sort(intElements.begin(), intElements.end());
     _elements = intElements;
 
     // map atomic numbers to internal species enumeration scheme
     for (size_t i = 0; i < elements.size(); i++)
-    {
         _elementMap[intElements[i]] = i;
-    }
 }
 
 
-
 /**
-@details Calculates the cluster vector for the input structure in the cluster space.
-The first element in the cluster vector will always be one (1) corresponding to the zerolet.
-The remaining elements of the cluster vector represent averages over orbits
-(symmetry equivalent clusters) of increasing order and size.
+@details Calculates and then returns the cluster vector for the input
+structure in the cluster space. The first element in the cluster vector will
+always be one (1) corresponding to the zerolet. The remaining elements of the
+cluster vector represent averages over orbits (symmetry equivalent clusters)
+of increasing order and size.
 
-The length of the cluster vector is `1 + sum_i(orbit_i * orbit_i.multiComponentVectors.size())`
 @param structure input configuration
-@todo review the necessity to have the orderIntact argument to e.g., countOrbitList.
-**/
 
-std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) const
+@todo review the necessity for having the orderIntact argument to e.g., countOrbitList.
+**/
+vector<double> ClusterSpace::getClusterVector(const Structure &structure) const
 {
-    bool orderIntact = true; // count the clusters in the orbit with the same orientation as the prototype cluster
-    LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(_primitiveOrbitList, structure);
+    // count the clusters in the orbit with the same orientation (order) as the prototype cluster
+    // @todo Clarify description.
+    bool orderIntact = true;
+
+    LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(_orbitList, structure);
     size_t uniqueOffsets = localOrbitListGenerator.getNumberOfUniqueOffsets();
     ClusterCounts clusterCounts = ClusterCounts();
 
-    // create local orbit list and count associated clusters
-    for (int i = 0; i < uniqueOffsets; i++)
-    {
-        const auto local_orbit_list = localOrbitListGenerator.getLocalOrbitList(i);
-        clusterCounts.countOrbitList(structure, local_orbit_list, orderIntact);
+    // Create local orbit list and count associated clusters.
+    for (int i = 0; i < uniqueOffsets; i++) {
+        const auto localOrbitList = localOrbitListGenerator.getLocalOrbitList(i);
+        clusterCounts.countOrbitList(structure, localOrbitList, orderIntact);
     }
 
-    // check that the number of unique offsets equals the number of unit cells the supercell is made of
+    // Check that the number of unique offsets equals the number of unit cells in the supercell.
     int numberOfUnitcellRepetitions = structure.size() / _primitiveStructure.size();
-    if (uniqueOffsets != numberOfUnitcellRepetitions)
-    {
-        std::string errorMessage = "The number of unique offsets does not match the number of primitive units in the input structure";
-        errorMessage += " {" + std::to_string(uniqueOffsets) + "}";
-        errorMessage += " != ";
-        errorMessage += " {" + std::to_string(numberOfUnitcellRepetitions) + "}";
-        throw std::runtime_error(errorMessage);
+    if (uniqueOffsets != numberOfUnitcellRepetitions) {
+        string errorMessage = "The number of unique offsets does not match the number of primitive units in the input structure: ";
+        errorMessage += to_string(uniqueOffsets) + " != " + to_string(numberOfUnitcellRepetitions);
+        throw runtime_error(errorMessage);
     }
 
-    //
+    /// @todo Describe what is happening here.
     const auto clusterMap = clusterCounts.getClusterCounts();
-    std::vector<double> clusterVector;
+    vector<double> clusterVector;
+
+    // insert the zerolet.
     clusterVector.push_back(1);
 
 // CONTINUE HERE
 
-    // Finally begin occupying the cluster vector
-    for (size_t i = 0; i < _primitiveOrbitList.size(); i++)
-    {
-        auto repCluster = _primitiveOrbitList.getOrbit(i).getRepresentativeCluster();
-        std::vector<int> allowedOccupations;
+    // Loop over orbits.
+    /// @todo Turn this into a proper loop over orbits.
+    for (size_t i = 0; i < _orbitList.size(); i++) {
+
+        auto repCluster = _orbitList.getOrbit(i).getRepresentativeCluster();
+        vector<int> numberOfAllowedOccupations;
         try {
-                allowedOccupations = getNumberOfAllowedComponentsBySite(_primitiveStructure, _primitiveOrbitList.getOrbit(i).getRepresentativeSites());
-            }
-        catch (const std::exception& e)
-        {
-            throw std::runtime_error("Failed getting allowed occupations in genereteClusterVector");
+            numberOfAllowedOccupations = getNumberOfAllowedComponentsForEachSite(_primitiveStructure, _orbitList.getOrbit(i).getRepresentativeSites());
+        }
+        catch (const exception& e) {
+            throw runtime_error("Failed retrieving the number of allowed occupations in ClusterSpace::getClusterVector");
         }
 
-        // Skip rest if any sites aren't active sites (i.e. allowed occupation < 2)
-        if (std::any_of(allowedOccupations.begin(), allowedOccupations.end(),[](int allowedOccupation ){ return allowedOccupation < 2; }))
-        {
+        // Jump to the next orbit if none of the sites in the representative cluster are active (i.e. there allowed occupation is less than 2).
+        if (any_of(numberOfAllowedOccupations.begin(), numberOfAllowedOccupations.end(), [](int numberOfAllowedOccupation){ return numberOfAllowedOccupation < 2; }))
             continue;
-        }
 
-        auto mcVectors = _primitiveOrbitList.getOrbit(i).getMCVectors(allowedOccupations);
-        auto allowedPermutationsSet = _primitiveOrbitList.getOrbit(i).getAllowedSitesPermutations();
+        auto mcVectors = _orbitList.getOrbit(i).getMCVectors(numberOfAllowedOccupations);
+        auto allowedPermutationsSet = _orbitList.getOrbit(i).getAllowedSitesPermutations();
         auto elementPermutations = getMultiComponentVectorPermutations(mcVectors, i);
         repCluster.setClusterTag(i);
         int currentMCVectorIndex = 0;
@@ -119,12 +120,12 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
             for (const auto &elementsCountPair : clusterMap.at(repCluster))
             {
 
-                // TODO check if allowedOccupations should be permuted as well.
+                // TODO check if numberOfAllowedOccupations should be permuted as well.
                 for (const auto &perm : elementPermutations[currentMCVectorIndex])
                 {
                     auto permutedMCVector = icet::getPermutedVector(mcVector, perm);
-                    auto permutedAllowedOccupations = icet::getPermutedVector(allowedOccupations, perm);
-                    clusterVectorElement += getClusterProduct(permutedMCVector, permutedAllowedOccupations, elementsCountPair.first) * elementsCountPair.second;
+                    auto permutednumberOfAllowedOccupations = icet::getPermutedVector(numberOfAllowedOccupations, perm);
+                    clusterVectorElement += getClusterProduct(permutedMCVector, permutednumberOfAllowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                     multiplicity += elementsCountPair.second;
                 }
             }
@@ -137,22 +138,23 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
     return clusterVector;
 }
 
+
 /// Returns the native clusters count in this structure, i.e. only clusters inside the unit cell
 ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
 {
     bool orderIntact = true; // count the clusters in the orbit with the same orientation as the prototype cluster
-    LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(_primitiveOrbitList, structure);
+    LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(_orbitList, structure);
     size_t uniqueOffsets = localOrbitListGenerator.getNumberOfUniqueOffsets();
     ClusterCounts clusterCounts = ClusterCounts();
     int tags = 0;
     for (int i = 0; i < uniqueOffsets; i++)
     {
-        const auto local_orbit_list = localOrbitListGenerator.getLocalOrbitList(i);
-        for (int j = 0; j < local_orbit_list.size(); j++)
+        const auto localOrbitList = localOrbitListGenerator.getLocalOrbitList(i);
+        for (int j = 0; j < localOrbitList.size(); j++)
         {
-            Cluster repr_cluster = local_orbit_list.getOrbit(j).getRepresentativeCluster();
+            Cluster repr_cluster = localOrbitList.getOrbit(j).getRepresentativeCluster();
 
-            for (const auto sites : local_orbit_list.getOrbit(j).getPermutedEquivalentSites())
+            for (const auto sites : localOrbitList.getOrbit(j).getPermutedEquivalentSites())
             {
                 bool cont = true;
                 for (auto site : sites)
@@ -169,7 +171,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                 repr_cluster.setClusterTag(j);
                 if (repr_cluster.order() != 1)
                 {
-                    std::vector<int> elements(sites.size());
+                    vector<int> elements(sites.size());
                     for (size_t i = 0; i < sites.size(); i++)
                     {
                         elements[i] = structure.getAtomicNumber(sites[i].index());
@@ -178,7 +180,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                 }
                 else
                 {
-                    std::vector<int> elements(sites.size());
+                    vector<int> elements(sites.size());
                     for (size_t i = 0; i < sites.size(); i++)
                     {
                         elements[i] = structure.getAtomicNumber(sites[i].index());
@@ -206,12 +208,12 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
 
 */
 
-std::vector<std::vector<std::vector<int>>> ClusterSpace::getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &mcVectors, const int orbitIndex) const
+vector<vector<vector<int>>> ClusterSpace::getMultiComponentVectorPermutations(const vector<vector<int>> &mcVectors, const int orbitIndex) const
 {
-    const auto allowedPermutations = _primitiveOrbitList.getOrbit(orbitIndex).getAllowedSitesPermutations();
+    const auto allowedPermutations = _orbitList.getOrbit(orbitIndex).getAllowedSitesPermutations();
 
-    std::vector<std::vector<std::vector<int>>> elementPermutations;
-    std::vector<int> selfPermutation;
+    vector<vector<vector<int>>> elementPermutations;
+    vector<int> selfPermutation;
     for (int i = 0; i < mcVectors[0].size(); i++)
     {
         selfPermutation.push_back(i);
@@ -219,22 +221,22 @@ std::vector<std::vector<std::vector<int>>> ClusterSpace::getMultiComponentVector
 
     for (const auto &mc : mcVectors)
     {
-        std::vector<std::vector<int>> mcPermutations;
+        vector<vector<int>> mcPermutations;
         mcPermutations.push_back(selfPermutation);
-        std::vector<std::vector<int>> takenPermutations;
+        vector<vector<int>> takenPermutations;
         takenPermutations.push_back(selfPermutation);
-        for (const std::vector<int> perm : allowedPermutations)
+        for (const vector<int> perm : allowedPermutations)
         {
             auto permutedMcVector = icet::getPermutedVector(mc, perm);
-            auto findPerm = std::find(mcVectors.begin(), mcVectors.end(), permutedMcVector);
-            auto findIfTaken = std::find(takenPermutations.begin(), takenPermutations.end(), permutedMcVector);
+            auto findPerm = find(mcVectors.begin(), mcVectors.end(), permutedMcVector);
+            auto findIfTaken = find(takenPermutations.begin(), takenPermutations.end(), permutedMcVector);
             if (findPerm == mcVectors.end() && findIfTaken == takenPermutations.end() && mc != permutedMcVector)
             {
                 mcPermutations.push_back(perm);
                 takenPermutations.push_back(permutedMcVector);
             }
         }
-        std::sort(mcPermutations.begin(), mcPermutations.end());
+        sort(mcPermutations.begin(), mcPermutations.end());
         elementPermutations.push_back(mcPermutations);
     }
     return elementPermutations;
@@ -256,7 +258,7 @@ double ClusterSpace::defaultClusterFunction(const int numberOfAllowedComponents,
 }
 
 /// Returns the full cluster product of the entire cluster (elements vector) assuming all sites have same numberOfAllowedComponents.
-double ClusterSpace::getClusterProduct(const std::vector<int> &mcVector, const std::vector<int> &numberOfAllowedComponents, const std::vector<int> &elements) const
+double ClusterSpace::getClusterProduct(const vector<int> &mcVector, const vector<int> &numberOfAllowedComponents, const vector<int> &elements) const
 {
     double clusterProduct = 1;
     for (int i = 0; i < elements.size(); i++)
@@ -267,37 +269,38 @@ double ClusterSpace::getClusterProduct(const std::vector<int> &mcVector, const s
 }
 
 /// Returns the allowed occupations on the sites
-std::vector<int> ClusterSpace::getNumberOfAllowedComponentsBySite(const Structure &structure, const std::vector<LatticeSite> &latticeNeighbors) const
+/// @todo Why is function not a member of Structure?
+vector<int> ClusterSpace::getNumberOfAllowedComponentsForEachSite(const Structure &structure, const vector<LatticeSite> &latticeNeighbors) const
 {
-    std::vector<int> numberOfAllowedComponents;
+    vector<int> numberOfAllowedComponents;
     numberOfAllowedComponents.reserve(latticeNeighbors.size());
     for (const auto &latnbr : latticeNeighbors)
     {
-        numberOfAllowedComponents.push_back(structure.getNumberOfAllowedComponentsBySite(latnbr.index()));
+        numberOfAllowedComponents.push_back(structure.getNumberOfAllowedComponentsForEachSite(latnbr.index()));
     }
     return numberOfAllowedComponents;
 }
 
-/// Collect information about the cluster space
+/// Collect information about the cluster space.
 void ClusterSpace::collectClusterSpaceInfo()
 {
     _clusterSpaceInfo.clear();
-    std::vector<int> emptyVec = {0};
-    _clusterSpaceInfo.push_back(std::make_pair(-1, emptyVec));
-    for (int i = 0; i < _primitiveOrbitList.size(); i++)
+    vector<int> emptyVec = {0};
+    _clusterSpaceInfo.push_back(make_pair(-1, emptyVec));
+    for (int i = 0; i < _orbitList.size(); i++)
     {
-        auto allowedOccupations = getNumberOfAllowedComponentsBySite(_primitiveStructure, _primitiveOrbitList.getOrbit(i).getRepresentativeSites());
-        auto mcVectors = _primitiveOrbitList.getOrbit(i).getMCVectors(allowedOccupations);
+        auto numberOfAllowedOccupations = getNumberOfAllowedComponentsForEachSite(_primitiveStructure, _orbitList.getOrbit(i).getRepresentativeSites());
+        auto mcVectors = _orbitList.getOrbit(i).getMCVectors(numberOfAllowedOccupations);
         for (const auto &mcVector : mcVectors)
         {
-            _clusterSpaceInfo.push_back(std::make_pair(i, mcVector));
+            _clusterSpaceInfo.push_back(make_pair(i, mcVector));
         }
     }
     _isClusterSpaceInitialized = true;
 }
 
-/// Returns information about the cluster space
-std::pair<int, std::vector<int>> ClusterSpace::getClusterSpaceInfo(const unsigned int index)
+/// Returns information about the cluster space.
+pair<int, vector<int>> ClusterSpace::getClusterSpaceInfo(const unsigned int index)
 {
     if (!_isClusterSpaceInitialized)
     {
@@ -306,9 +309,11 @@ std::pair<int, std::vector<int>> ClusterSpace::getClusterSpaceInfo(const unsigne
 
     if (index >= _clusterSpaceInfo.size())
     {
-        std::string errMSG = "Out of range in ClusterSpace::getClusterSpaceInfo " + std::to_string(index) + " >= " + std::to_string(_clusterSpaceInfo.size());
-        throw std::out_of_range(errMSG);
+        string errMSG = "Out of range in ClusterSpace::getClusterSpaceInfo " + to_string(index) + " >= " + to_string(_clusterSpaceInfo.size());
+        throw out_of_range(errMSG);
     }
 
     return _clusterSpaceInfo[index];
 }
+
+//}

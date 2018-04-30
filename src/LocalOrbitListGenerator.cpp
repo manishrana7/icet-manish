@@ -1,6 +1,6 @@
 #include "LocalOrbitListGenerator.hpp"
 
-LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &primitiveOrbitList, const Structure &superCell) : _orbit_list(primitiveOrbitList), _supercell(superCell)
+LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &orbitList, const Structure &superCell) : _orbitList(orbitList), _supercell(superCell)
 {
     _positionClosestToOrigin = getClosestToOrigin();
     mapSitesAndFindCellOffsets();
@@ -24,8 +24,8 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
     {
         Vector3d position_i = _supercell.getPositions().row(i);
 
-        LatticeSite primitive_site = _orbit_list.getPrimitiveStructure().findLatticeSiteByPosition(position_i);
-        Vector3d primitive_position = _orbit_list.getPrimitiveStructure().getPositions().row(primitive_site.index());
+        LatticeSite primitive_site = _orbitList.getPrimitiveStructure().findLatticeSiteByPosition(position_i);
+        Vector3d primitive_position = _orbitList.getPrimitiveStructure().getPositions().row(primitive_site.index());
         // Basically only append offsets to indices that correspond to the atom in the origin
         if ((primitive_position - _positionClosestToOrigin).norm() < 1e-5)
         {
@@ -49,7 +49,7 @@ OrbitList LocalOrbitListGenerator::getLocalOrbitList(const unsigned int index)
         throw std::out_of_range(errMsg);
     }
 
-    return _orbit_list.getLocalOrbitList(_supercell, _uniquePrimcellOffsets[index], _primToSupercellMap);
+    return _orbitList.getLocalOrbitList(_supercell, _uniquePrimcellOffsets[index], _primToSupercellMap);
 }
 
 ///generate and returns the local orbit list with the input offset (require that the offset is in uniquecell offset?)
@@ -61,7 +61,7 @@ OrbitList LocalOrbitListGenerator::getLocalOrbitList(const Vector3d &primOffset)
         std::cout << "Warning: generating local orbit list with offset not found in _uniquePrimcellOffsets" << std::endl;
     }
 
-    return _orbit_list.getLocalOrbitList(_supercell, primOffset, _primToSupercellMap);
+    return _orbitList.getLocalOrbitList(_supercell, primOffset, _primToSupercellMap);
 }
 
 /// Generate the complete orbit list (the sum of all local orbit lists)

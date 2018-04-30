@@ -18,9 +18,6 @@ the primToSupercellMap
 
 you can query this object with
 
-///Give number of possible local orbit lists one can make from current supercell and the primitive orbit list
-size_t number_of_possible_local_orbit_lists();
-
 ///Generate the orbit list from the primitive offset with count i
 OrbitList getLocalOrbitList(int i);
 
@@ -78,7 +75,7 @@ class LocalOrbitListGenerator
     void mapSitesAndFindCellOffsets();
 
     ///Primitive orbit list
-    OrbitList _orbit_list;
+    OrbitList _orbitList;
 
     ///supercell structure from which the local orbit list will be based upon
     Structure _supercell;
@@ -92,9 +89,9 @@ class LocalOrbitListGenerator
     {
         Vector3d closestToOrigin;
         double distanceToOrigin = 1e6;
-        for (int i = 0; i < _orbit_list.getPrimitiveStructure().size(); i++)
+        for (int i = 0; i < _orbitList.getPrimitiveStructure().size(); i++)
         {
-            Vector3d position_i = _orbit_list.getPrimitiveStructure().getPositions().row(i);
+            Vector3d position_i = _orbitList.getPrimitiveStructure().getPositions().row(i);
             if ((position_i.norm()) < distanceToOrigin)
             {
                 distanceToOrigin = position_i.norm();

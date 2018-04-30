@@ -297,14 +297,14 @@ void Structure::setNumberOfAllowedComponents(const int numberOfAllowedComponents
   @param i index of the site
   @returns the number of the allowed components
 **/
-int Structure::getNumberOfAllowedComponentsBySite(const unsigned int i) const
+int Structure::getNumberOfAllowedComponentsForEachSite(const unsigned int i) const
 {
     if (i >= _numbersOfAllowedComponents.size())
     {
         std::string errorMessage = "Site index out of bounds";
         errorMessage += " i: " + std::to_string(i);
         errorMessage += " nsites: " + std::to_string(_numbersOfAllowedComponents.size());
-        errorMessage += " (Structure::getNumberOfAllowedComponentsBySite)";
+        errorMessage += " (Structure::getNumberOfAllowedComponentsForEachSite)";
         throw std::out_of_range(errorMessage);
     }
     return _numbersOfAllowedComponents[i];
