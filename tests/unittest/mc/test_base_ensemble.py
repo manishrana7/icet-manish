@@ -1,15 +1,13 @@
 import unittest
 
-from icet import ClusterSpace
-from icet import ClusterExpansion
+import numpy as np
+from ase.build import bulk
+
+from icet import ClusterExpansion, ClusterSpace
 from mchammer.calculators.cluster_expansion_calculator import \
     ClusterExpansionCalculator
 from mchammer.ensembles.base_ensemble import BaseEnsemble
 from mchammer.observers.base_observer import BaseObserver
-from mchammer.calculators.cluster_expansion_calculator import \
-    ClusterExpansionCalculator
-from ase.build import bulk
-import numpy as np
 
 
 class ParakeetObserver(BaseObserver):
