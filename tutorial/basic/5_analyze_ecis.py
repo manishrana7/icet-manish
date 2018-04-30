@@ -7,7 +7,7 @@ from collections import OrderedDict
 ce = ClusterExpansion.read('cluster_expansion.icet')
 ecis = OrderedDict()
 for order in range(len(ce.cluster_space.cutoffs)+2):
-    for orbit in ce.cluster_space.get_orbit_list_info():
+    for orbit in ce.cluster_space.orbit_data:
         if orbit['order'] != order:
             continue
         if order not in ecis:

@@ -447,9 +447,9 @@ PYBIND11_MODULE(_icet, m)
         .def_property_readonly("tag",
                                &Cluster::tag,
                                "int : cluster tag (defined for sorted cluster)")
-        .def_property_readonly("geometrical_size",
-                               &Cluster::geometricalSize,
-                               "float : the geometrical size of the cluster")
+        .def_property_readonly("radius",
+                               &Cluster::radius,
+                               "float : the radius of the cluster")
         .def_property_readonly("order",
                                &Cluster::order,
                                "int : order of the cluster (= number of sites)")
@@ -572,8 +572,8 @@ PYBIND11_MODULE(_icet, m)
         or the number of lattice sites per element
         in equivalent_sites.
         )pbdoc")
-        .def_property_readonly("geometrical_size", [](const Orbit &orbit) { return orbit.getRepresentativeCluster().geometricalSize(); },
-        R"pbdoc(        Returns the geometrical size of the
+        .def_property_readonly("radius", [](const Orbit &orbit) { return orbit.getRepresentativeCluster().radius(); },
+        R"pbdoc(        Returns the radius of the
         representative cluster.
         )pbdoc")
         .def_property_readonly("permuted_sites", &Orbit::getPermutedEquivalentSites,

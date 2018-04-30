@@ -16,8 +16,7 @@ from io import StringIO
 
 def strip_surrounding_spaces(input_string):
     """
-    Helper function that removes both leading and trailing spaces from a
-    multi-line string.
+    Removes both leading and trailing spaces from a multi-line string.
 
     Returns
     -------
@@ -33,9 +32,7 @@ def strip_surrounding_spaces(input_string):
 
 
 class TestClusterCounts(unittest.TestCase):
-    """
-    Container for test of the module functionality.
-    """
+    """ Container for test of the module functionality. """
 
     def __init__(self, *args, **kwargs):
         super(TestClusterCounts, self).__init__(*args, **kwargs)
@@ -52,14 +49,12 @@ class TestClusterCounts(unittest.TestCase):
         self.orbit_list.sort()
 
     def setUp(self):
-        """
-        SetUp an empty cluster counts .
-        """
+        """ Sets up an empty cluster counts object. """
         self.cluster_counts = ClusterCounts()
 
     def test_count_lattice_neighbors(self):
         """
-        Test singlet and pair counts given
+        Tests singlet and pair counts given
         many-body neighbor list.
         """
         mbnl = ManyBodyNeighborList()
@@ -82,7 +77,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_count_lattice_sites(self):
         """
-        Test cluster_counts counts a pair given a set of
+        Tests cluster_counts counts a pair given a set of
         lattice neighbors.
         """
         lattice_sites = []
@@ -99,7 +94,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_count_list_lattice_sites(self):
         """
-        Test cluster_counts counts the right number of pairs
+        Tests whether cluster_counts returns the correct number of pairs
         given a list of lattice neighbors.
         """
         lattice_sites = []
@@ -121,10 +116,8 @@ class TestClusterCounts(unittest.TestCase):
         count = cluster_map[cluster]
         self.assertEqual(count, {(28, 26): 1, (28, 28): 1})
 
-    def test_count_orbitlist(self):
-        """
-        Test cluster_counts given orbits in an orbitlist.
-        """
+    def test_count_orbit_list(self):
+        """ Tests cluster_counts given orbits in an orbit list. """
         cluster_singlet = Cluster(self.structure, [], False, 0)
         cluster_pair = Cluster(self.structure, [], False, 1)
         clusters = [cluster_singlet, cluster_pair]
@@ -139,9 +132,9 @@ class TestClusterCounts(unittest.TestCase):
             count = cluster_map[cluster]
             self.assertEqual(count, expected_counts[k])
 
-    def test_count_orbitlist_non_pbc(self):
+    def test_count_orbit_list_non_pbc(self):
         """
-        Test cluster counts using orbitlist for a non-pbc structure.
+        Test cluster counts using orbit_list for a non-pbc structure.
         """
         atoms_non_pbc = self.atoms.copy()
         atoms_non_pbc.set_pbc(False)
