@@ -10,7 +10,7 @@ from icet.core.structure import Structure
 
 
 class ClusterSpace(_ClusterSpace):
-    '''
+    """
     This class provides functionality for generating and maintaining cluster
     spaces.
 
@@ -33,7 +33,7 @@ class ClusterSpace(_ClusterSpace):
           components will be set to `Mi` for sites in the structure
     verbosity : int
         verbosity level
-    '''
+    """
 
     def __init__(self, atoms, cutoffs, chemical_symbols,
                  Mi=None, verbosity=0):
@@ -72,7 +72,7 @@ class ClusterSpace(_ClusterSpace):
 
     @staticmethod
     def _get_Mi_from_dict(Mi, atoms):
-        '''
+        """
         Mi maps the orbit index to the number of allowed components. This
         function maps a dictionary onto the list format that is used
         internatlly for representing Mi.
@@ -95,7 +95,7 @@ class ClusterSpace(_ClusterSpace):
         ----
         * rename function
         * remove bi-optionality between icet Structure and ASE Atoms input
-        '''
+        """
         assert isinstance(atoms, (Atoms, Structure)), \
             'input configuration must be an ASE Atoms/icet Structure object'
         if isinstance(atoms, Atoms):
@@ -114,7 +114,7 @@ class ClusterSpace(_ClusterSpace):
 
     def _get_string_representation(self, print_threshold=None,
                                    print_minimum=10):
-        '''
+        """
         String representation of the cluster space that provides an overview of
         the orbits (order, radius, multiplicity etc) that constitute the space.
 
@@ -130,7 +130,7 @@ class ClusterSpace(_ClusterSpace):
         -------
         multi-line string
             string representation of the cluster space.
-        '''
+        """
 
         def repr_orbit(orbit, header=False):
             formats = {'order': '{:2}',
@@ -185,11 +185,11 @@ class ClusterSpace(_ClusterSpace):
         return '\n'.join(s)
 
     def __repr__(self):
-        ''' String representation. '''
+        """ String representation. """
         return self._get_string_representation(print_threshold=50)
 
     def print_overview(self, print_threshold=None, print_minimum=10):
-        '''
+        """
         Print an overview of the cluster space in terms of the orbits (order,
         radius, multiplicity etc).
 
@@ -200,12 +200,12 @@ class ClusterSpace(_ClusterSpace):
         print_minimum : int
             number of lines printed from the top and the bottom of the orbit
             list if `print_threshold` is exceeded
-        '''
+        """
         print(self._get_string_representation(print_threshold=print_threshold,
                                               print_minimum=print_minimum))
 
     def get_orbit_list_info(self):
-        '''
+        """
         Return list of orbits that provides information concerning their order,
         radius, multiplicity etc).
 
@@ -213,7 +213,7 @@ class ClusterSpace(_ClusterSpace):
         -------
         list of dictionaries
             information about the orbits that constitute the cluster space.
-        '''
+        """
         data = []
         zerolet = OrderedDict([('index', 0),
                                ('order', 0),
@@ -250,7 +250,7 @@ class ClusterSpace(_ClusterSpace):
         return data
 
     def get_number_of_orbits_by_order(self):
-        '''
+        """
         Return the number of orbits by order.
 
         Returns
@@ -258,7 +258,7 @@ class ClusterSpace(_ClusterSpace):
         dictionary (ordered)
             the key represents the order, the value represents the number of
             orbits
-        '''
+        """
         count_orbits = {}
         for orbit in self.get_orbit_list_info():
             k = orbit['order']
@@ -266,7 +266,7 @@ class ClusterSpace(_ClusterSpace):
         return OrderedDict(sorted(count_orbits.items()))
 
     def get_cluster_vector(self, atoms):
-        '''
+        """
         Returns the cluster vector for a structure.
 
         Parameters
@@ -278,7 +278,7 @@ class ClusterSpace(_ClusterSpace):
         -------
         NumPy array
             the cluster vector
-        '''
+        """
         assert isinstance(atoms, Atoms), \
             'input configuration must be an ASE Atoms object'
         if not atoms.pbc.all():
@@ -290,22 +290,22 @@ class ClusterSpace(_ClusterSpace):
 
     @property
     def primitive_structure(self):
-        '''
+        """
         ASE Atoms object : primitive structure on which the cluster space
         is based
-        '''
+        """
         return self._get_primitive_structure().to_atoms()
 
     @property
     def chemical_symbols(self):
-        '''
+        """
         list of str : list of elements considered
-        '''
+        """
         return self._chemical_symbols.copy()
 
     @property
     def cutoffs(self):
-        ''' list : cutoffs used for initializing the cluster space '''
+        """ list : cutoffs used for initializing the cluster space """
         return self._cutoffs
 
     def write(self, filename):
@@ -350,7 +350,7 @@ class ClusterSpace(_ClusterSpace):
 
 
 def get_singlet_info(atoms, return_cluster_space=False):
-    '''
+    """
     Retrieve information concerning the singlets in the input structure.
 
     Parameters
@@ -366,7 +366,7 @@ def get_singlet_info(atoms, return_cluster_space=False):
         each dictionary in the list represents one orbit
     ClusterSpace object (optional)
         cluster space created during the process
-    '''
+    """
     assert isinstance(atoms, Atoms), \
         'input configuration must be an ASE Atoms object'
 
@@ -401,7 +401,7 @@ def get_singlet_info(atoms, return_cluster_space=False):
 
 
 def get_singlet_configuration(atoms, to_primitive=False):
-    '''
+    """
     Return atomic configuration decorated with a different element for each
     Wyckoff site. This is useful for visualization and analysis.
 
@@ -417,7 +417,7 @@ def get_singlet_configuration(atoms, to_primitive=False):
     -------
     ASE Atoms object
         structure with singlets highlighted by different elements
-    '''
+    """
     from ase.data import chemical_symbols
     assert isinstance(atoms, Atoms), \
         'input configuration must be an ASE Atoms object'
@@ -450,7 +450,7 @@ def get_singlet_configuration(atoms, to_primitive=False):
 
 
 def view_singlets(atoms, to_primitive=False):
-    '''
+    """
     Visualize singlets in a structure using the ASE graphical user interface.
 
     Parameters
@@ -460,7 +460,7 @@ def view_singlets(atoms, to_primitive=False):
     to_primitive : boolean
         if True the input structure will be reduced to its primitive unit cell
         before processing
-    '''
+    """
     from ase.visualize import view
     assert isinstance(atoms, Atoms), \
         'input configuration must be an ASE Atoms object'

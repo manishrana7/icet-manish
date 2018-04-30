@@ -15,7 +15,7 @@ from io import StringIO
 
 
 def strip_surrounding_spaces(input_string):
-    '''
+    """
     Helper function that removes both leading and trailing spaces from a
     multi-line string.
 
@@ -23,7 +23,7 @@ def strip_surrounding_spaces(input_string):
     -------
     str
         original string minus surrounding spaces and empty lines
-    '''
+    """
     s = []
     for line in StringIO(input_string):
         if len(line.strip()) == 0:
@@ -201,7 +201,7 @@ class TestClusterCounts(unittest.TestCase):
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
         retval = self.cluster_counts.repr()
-        target = '''
+        target = """
 Cluster Counts
 ------------------------------
 [0] [] 0.0000
@@ -214,7 +214,7 @@ Ni    3
 Fe   Fe    1
 Fe   Ni    10
 Ni   Ni    13
-'''
+"""
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
 
