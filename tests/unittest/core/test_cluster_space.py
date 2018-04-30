@@ -158,37 +158,34 @@ class TestClusterSpace(unittest.TestCase):
         number_orbits = self.cs.__len__()
         self.assertEqual(number_orbits, len(self.cs.get_orbit_list()) + 1)
 
-    def test_get_orbit_list_info(self):
-        """
-        Testing get_orbit_list_info functionality
-        """
+    def test_orbit_data(self):
+        """ Tests orbit_data property. """
         target = [OrderedDict([('index', 0),
                                ('order', 0),
-                               ('size', 0),
+                               ('radius', 0),
                                ('multiplicity', 1),
-                               ('orbit index', -1)]),
+                               ('orbit_index', -1)]),
                   OrderedDict([('index', 1), ('order', 1),
-                               ('size', 0.0),
+                               ('radius', 0.0),
                                ('multiplicity', 1),
-                               ('orbit index', 0),
-                               ('MC vector', [0])]),
+                               ('orbit_index', 0),
+                               ('multi_component_vector', [0])]),
                   OrderedDict([('index', 2), ('order', 2),
-                               ('size', 1.4460333675264896),
+                               ('radius', 1.4460333675264896),
                                ('multiplicity', 6),
-                               ('orbit index', 1),
-                               ('MC vector', [0, 0])]),
+                               ('orbit_index', 1),
+                               ('multi_component_vector', [0, 0])]),
                   OrderedDict([('index', 3), ('order', 3),
-                               ('size', 1.6697355079971996),
+                               ('radius', 1.6697355079971996),
                                ('multiplicity', 8),
-                               ('orbit index', 2),
-                               ('MC vector', [0, 0, 0])]),
+                               ('orbit_index', 2),
+                               ('multi_component_vector', [0, 0, 0])]),
                   OrderedDict([('index', 4), ('order', 4),
-                               ('size', 1.771021950739177),
+                               ('radius', 1.771021950739177),
                                ('multiplicity', 2),
-                               ('orbit index', 3),
-                               ('MC vector', [0, 0, 0, 0])])]
-        retval = self.cs.get_orbit_list_info()
-        self.assertEqualComplexList(retval, target)
+                               ('orbit_index', 3),
+                               ('multi_component_vector', [0, 0, 0, 0])])]
+        self.assertEqualComplexList(self.cs.orbit_data, target)
 
     def test_repr(self):
         """
@@ -196,20 +193,21 @@ class TestClusterSpace(unittest.TestCase):
         """
         retval = self.cs.__repr__()
         target = """
-========================== Cluster Space ===========================
+=============================== Cluster Space ================================
  subelements: Ag Au
  cutoffs: 4.0000 4.0000 4.0000
  total number of orbits: 5
  number of orbits by order: 0= 1  1= 1  2= 1  3= 1  4= 1
---------------------------------------------------------------------
-index | order |   size   | multiplicity | orbit index |  MC vector
---------------------------------------------------------------------
+------------------------------------------------------------------------------
+index | order |  radius  | multiplicity | orbit_index | multi_component_vector
+------------------------------------------------------------------------------
    0  |   0   |   0.0000 |        1     |      -1
-   1  |   1   |   0.0000 |        1     |       0     |    [0]
-   2  |   2   |   1.4460 |        6     |       1     |  [0, 0]
-   3  |   3   |   1.6697 |        8     |       2     | [0, 0, 0]
-   4  |   4   |   1.7710 |        2     |       3     | [0, 0, 0, 0]
-===================================================================="""
+   1  |   1   |   0.0000 |        1     |       0     |          [0]
+   2  |   2   |   1.4460 |        6     |       1     |         [0, 0]
+   3  |   3   |   1.6697 |        8     |       2     |       [0, 0, 0]
+   4  |   4   |   1.7710 |        2     |       3     |      [0, 0, 0, 0]
+==============================================================================
+"""
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
 
@@ -220,18 +218,18 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         retval = self.cs._get_string_representation(print_threshold=2,
                                                     print_minimum=1)
         target = """
-========================== Cluster Space ===========================
+=============================== Cluster Space ================================
  subelements: Ag Au
  cutoffs: 4.0000 4.0000 4.0000
  total number of orbits: 5
  number of orbits by order: 0= 1  1= 1  2= 1  3= 1  4= 1
---------------------------------------------------------------------
-index | order |   size   | multiplicity | orbit index |  MC vector
---------------------------------------------------------------------
+------------------------------------------------------------------------------
+index | order |  radius  | multiplicity | orbit_index | multi_component_vector
+------------------------------------------------------------------------------
    0  |   0   |   0.0000 |        1     |      -1
  ...
-   4  |   4   |   1.7710 |        2     |       3     | [0, 0, 0, 0]
-====================================================================
+   4  |   4   |   1.7710 |        2     |       3     |      [0, 0, 0, 0]
+==============================================================================
 """
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
@@ -290,10 +288,10 @@ index | order |   size   | multiplicity | orbit index |  MC vector
         Testing get_singlet_info functionality
         """
         retval = get_singlet_info(self.structure_list[0])
-        target = [{'orbit index': 0,
+        target = [{'orbit_index': 0,
                    'sites': [[LatticeSite(0, [0., 0., 0.])]],
                    'multiplicity': 1,
-                   'representative site': [LatticeSite(0, [0., 0., 0.])]}]
+                   'representative_site': [LatticeSite(0, [0., 0., 0.])]}]
         self.assertEqualComplexList(retval, target)
         retval1, retval2 = get_singlet_info(self.structure_list[0],
                                             return_cluster_space=True)

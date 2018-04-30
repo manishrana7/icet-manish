@@ -66,7 +66,7 @@ class PermutationMatrix(object):
         self.primitive_structure = atoms
 
         if self.verbosity >= 3:
-            print('size of atoms {}'.format(len(self.primitive_structure)))
+            print('number of atoms {}'.format(len(self.primitive_structure)))
 
         # Get symmetry information and load into a permutation map object
         symmetry = spglib.get_symmetry(self.primitive_structure)

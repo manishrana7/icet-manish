@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from math import gcd
 
 from mchammer.data_container import DataContainer
+from mchammer.configuration_manager import ConfigurationManager
 from mchammer.observers.base_observer import BaseObserver
 
 import numpy as np
@@ -48,6 +49,11 @@ class BaseEnsemble(ABC):
         else:
             raise NotImplementedError
         self._data_container_filename = None
+
+        strict_constraints = self.calculator.occupation_constraints
+        sublattices = [[i for i in range(len(self.calculator.atoms))]]
+        self.configuration = ConfigurationManager(
+            self._calculator.atoms.numbers, strict_constraints, sublattices)
 
     @property
     def structure(self):
@@ -272,3 +278,29 @@ class BaseEnsemble(ABC):
         """Reset the data container and the internal step attribute."""
         self._step = 0
         self._data_container.reset()
+
+    def update_occupations(self, list_of_sites, list_of_elements):
+        """
+        Update the element occupation of the configuration being sampled.
+        This will change the state in both the configuration in the calculator
+        and the state of configuration manager.
+
+        parameters
+        ----------
+        list_of_sites : list of int
+            list of indices of the configuration to change.
+        list_of_elements : list of int
+            list of elements to put on the lattice sites the
+            indices refer to.
+
+        raises
+        ------
+        ValueError : if list_of_sites are not the same length
+                     as list_of_elements
+        """
+
+        if len(list_of_sites) != len(list_of_elements):
+            raise ValueError(
+                "List of sites and list of elements are not the same size.")
+        self.calculator.update_occupations(list_of_sites, list_of_elements)
+        self.configuration.update_occupations(list_of_sites, list_of_elements)
