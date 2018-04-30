@@ -296,7 +296,7 @@ class Orbit
         }
 
         ///Mi_local are the same size as representative sites and details the allowed occupations on the representative sites
-        std::vector<std::vector<int>> getMCVectors(const std::vector<int> & Mi_local) const;
+        std::vector<std::vector<int>> getMultiComponentVectors(const std::vector<int> & Mi_local) const;
 
         std::vector<std::vector<int>> getAllPossibleMultiComponentVectorPermutations(const std::vector<int> &Mi_local) const;
 

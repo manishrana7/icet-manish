@@ -102,13 +102,13 @@ class Structure
     Eigen::Matrix<double, 3, 3> getCell() const { return _cell; }
 
     /// Set allowed components for each site by vector.
-    void setNumberOfAllowedComponents(const std::vector<int> &);
+    void setNumberOfAllowedSpecies(const std::vector<int> &);
 
     /// Set allowed components for each site by scalar.
-    void setNumberOfAllowedComponents(const int);
+    void setNumberOfAllowedSpecies(const int);
 
     /// Returns number of allowed components on each site.
-    int getNumberOfAllowedComponentsForEachSite(const unsigned int) const;
+    int getNumberOfAllowedSpeciesForEachSite(const unsigned int) const;
 
     /// Set tolerance applied when comparing positions.
     void setTolerance(double tolerance) { _tolerance = tolerance; }
@@ -164,7 +164,7 @@ class Structure
     std::vector<int> _uniqueSites;
 
     /// List of the number of allowed components on each site.
-    std::vector<int> _numbersOfAllowedComponents;
+    std::vector<int> _numbersOfAllowedSpecies;
 
     /// tolerance used for rounding positions.
     double _tolerance;

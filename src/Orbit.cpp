@@ -54,7 +54,7 @@ int Orbit::getNumberOfDuplicates(int verbosity) const
         Mi_local : Vector of the number of allowed sites
 
  */
-std::vector<std::vector<int>> Orbit::getMCVectors(const std::vector<int> &Mi_local) const
+std::vector<std::vector<int>> Orbit::getMultiComponentVectors(const std::vector<int> &Mi_local) const
 {
     if( std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i){ return  i<2; }))
     {

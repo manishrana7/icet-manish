@@ -8,8 +8,6 @@
 
 //namespace icet {
 
-using namespace std;
-
 /**
 @brief This class handles the cluster space.
 @details It provides functionality for setting up a cluster space, calculating cluster vectors as well as retrieving various types of associated information.
@@ -21,13 +19,13 @@ class ClusterSpace
   public:
 
     /// Constructor.
-    ClusterSpace(vector<int>, vector<string>, const OrbitList);
+    ClusterSpace(std::vector<int>, std::vector<std::string>, const OrbitList);
 
     /// Returns the cluster vector corresponding to the input structure.
-    vector<double> getClusterVector(const Structure &) const;
+    std::vector<double> getClusterVector(const Structure &) const;
 
     /// Returns information concerning the cluster space.
-    pair<int, vector<int>> getClusterSpaceInfo(const unsigned int);
+    std::pair<int, std::vector<int>> getClusterSpaceInfo(const unsigned int);
 
     /// Returns the entire orbit list.
     OrbitList getOrbitList() const { return _orbitList; }
@@ -41,24 +39,24 @@ class ClusterSpace
 
     /// Returns the multi-component (MC) vector permutations for each MC vector in the set of MC vectors.
     /// @todo Clean up this description.
-    vector<vector<vector<int>>> getMultiComponentVectorPermutations(const vector<vector<int>> &, const int ) const;
+    std::vector<std::vector<std::vector<int>>> getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &, const int ) const;
 
 
   public:
 
     /// Returns the cutoff for each order.
-    vector<double> getCutoffs() const { return _clusterCutoffs; }
+    std::vector<double> getCutoffs() const { return _clusterCutoffs; }
 
     /// Returns the primitive structure.
     Structure getPrimitiveStructure() const { return _primitiveStructure; }
 
     /// Returns the number of allowed components for each site.
-    vector<int> getNumberOfAllowedComponentsForEachSite(const Structure &structure, const vector<LatticeSite> &latticeNeighbors) const;
+    std::vector<int> getNumberOfAllowedSpeciesForEachSite(const Structure &structure, const std::vector<LatticeSite> &latticeNeighbors) const;
 
     /// Returns a list of elements associated with cluster space as chemical symbols.
-    vector<string> getChemicalSymbols() const
+    std::vector<std::string> getChemicalSymbols() const
     {
-        vector<string> elements;
+        std::vector<std::string> elements;
         for (const auto &elem : _elements)
             elements.push_back(PeriodicTable::intStr[elem]);
         return elements;
@@ -73,23 +71,20 @@ class ClusterSpace
     }
 
     /// Returns the mapping between atomic numbers and the internal species enumeration scheme.
-    map<int, int> getElementMap() const { return _elementMap; }
+    std::map<int, int> getElementMap() const { return _elementMap; }
 
 
   private:
 
     /// Returns the cluster product.
-    /// @todo What is a cluster product?
-    double getClusterProduct(const vector<int> &mcVector, const vector<int> &numberOfAllowedComponents, const vector<int> &elements) const;
+    /// @todo This function computes a specific term in the cluster vector. Can we find a more telling name?
+    double getClusterProduct(const std::vector<int> &mcVector, const std::vector<int> &numberOfAllowedSpecies, const std::vector<int> &elements) const;
 
     /// Collect information about the cluster space.
     void collectClusterSpaceInfo();
 
-    /// Sets up a map between chemical elements and the internal species enumeration scheme.
-    void setupElementMap(const vector<string>);
-
     /// Returns the default cluster function.
-    double defaultClusterFunction(const int numberOfAllowedComponents, const int clusterFunction, const int element) const;
+    double defaultClusterFunction(const int numberOfAllowedSpecies, const int clusterFunction, const int element) const;
 
 
   private:
@@ -101,10 +96,10 @@ class ClusterSpace
     /// The first index (int) corresponds to the orbit index, the second index (vector of ints) refers to a multi-component vector.
     /// @todo Check description.
     /// @todo This function returns a very specific type of information. Consider giving it a more descriptive name.
-    vector<pair<int, vector<int>>> _clusterSpaceInfo;
+    std::vector<std::pair<int, std::vector<int>>> _clusterSpaceInfo;
 
     /// Number of allowed components on each site of the primitive structure.
-    vector<int> _numberOfAllowedComponents;
+    std::vector<int> _numberOfAllowedSpecies;
 
     /// Primitive (prototype) structure.
     Structure _primitiveStructure;
@@ -113,13 +108,13 @@ class ClusterSpace
     OrbitList _orbitList;
 
     /// Radial cutoffs by cluster order starting with pairs.
-    vector<double> _clusterCutoffs;
+    std::vector<double> _clusterCutoffs;
 
     /// Elements identified by atomic number considered in this cluster space.
-    vector<int> _elements;
+    std::vector<int> _elements;
 
     /// Map between atomic numbers and the internal species enumeration scheme.
-    map<int, int> _elementMap;
+    std::map<int, int> _elementMap;
 
 };
 

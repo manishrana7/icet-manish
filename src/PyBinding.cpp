@@ -596,7 +596,7 @@ PYBIND11_MODULE(_icet, m)
         R"pbdoc(Return the permuted to representative
         sites of equivalent_sites[index].)pbdoc")
         // .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
-        .def("get_mc_vectors", &Orbit::getMCVectors,
+        .def("get_mc_vectors", &Orbit::getMultiComponentVectors,
                 R"pbdoc(
         Return the mc vectors for this orbit given the allowed components.
         The mc vectors are returned as a list of tuples
@@ -718,6 +718,6 @@ PYBIND11_MODULE(_icet, m)
         .def("_get_primitive_structure", &ClusterSpace::getPrimitiveStructure)
         .def("get_native_clusters", &ClusterSpace::getNativeClusters)
         .def("get_mc_vector_permutations",&ClusterSpace::getMultiComponentVectorPermutations)
-        .def("get_allowed_occupations",&ClusterSpace::getNumberOfAllowedComponentsForEachSite)
+        .def("get_allowed_occupations",&ClusterSpace::getNumberOfAllowedSpeciesForEachSite)
         .def("__len__", &ClusterSpace::getClusterSpaceSize);
 }
