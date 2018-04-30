@@ -23,15 +23,15 @@ class BaseObserver(ABC):
         the observation interval
     """
 
-    def __init__(self, interval, tag='BaseObserver'):
+    def __init__(self, interval, return_type, tag='BaseObserver'):
         self.tag = tag
         self.interval = interval
+        self._return_type = return_type
 
     @property
-    @abstractmethod
     def return_type(self):
         """Data type of the observed data."""
-        raise NotImplementedError
+        return self._return_type
 
     @abstractmethod
     def get_observable(self):
