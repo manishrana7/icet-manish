@@ -1,15 +1,15 @@
-'''
+"""
 Test structure numeration by checking that it yields the correct
 number of structure.
-'''
+"""
 
-from ase.build import bulk
+from ase.build import bulk, fcc100
 from ase import Atom
 from icet.tools import enumerate_structures
 
 
 def count_structures(atoms, sizes, species, correct_count, tag):
-    '''
+    """
     Count structures given by structure enumeration and assert that the
     right number is given.
 
@@ -25,7 +25,7 @@ def count_structures(atoms, sizes, species, correct_count, tag):
         Expected number of structures.
     tag : str
         Describes the structure.
-    '''
+    """
     count = 0
     for _ in enumerate_structures(atoms, sizes, species):
         count += 1
@@ -54,6 +54,21 @@ count_structures(atoms, sizes, species, correct_count, tag)
 tag = 'HCP'
 atoms = bulk('Au', crystalstructure='hcp', a=4.0)
 species = ['Au', 'Pd']
-sizes = range(1, 7)
-correct_count = 5777
+sizes = range(1, 6)
+correct_count = 984
+count_structures(atoms, sizes, species, correct_count, tag)
+
+tag = 'Surface'
+atoms = fcc100('Au', (1, 1, 1), a=4.0, vacuum=2.0)
+species = ['Au', 'Pd']
+sizes = range(1, 9)
+correct_count = 271
+count_structures(atoms, sizes, species, correct_count, tag)
+
+tag = 'Chain'
+atoms = bulk('Au', a=4.0)
+atoms.set_pbc((False, False, True))
+species = ['Au', 'Pd']
+sizes = range(1, 9)
+correct_count = 62
 count_structures(atoms, sizes, species, correct_count, tag)

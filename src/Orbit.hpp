@@ -49,10 +49,10 @@ class Orbit
     {
         return _equivalentSites.size();
     }
-    ///Returns the geometric size of the orbit defines as the mean distance to the center of the
-    double geometricalSize() const
+    ///Returns the radius of the orbit defines as the mean distance to the center of the
+    double radius() const
     {
-        return _representativeCluster.geometricalSize();
+        return _representativeCluster.radius();
     }
     ///Return the sorted, reprasentative cluster for this orbit
     Cluster getRepresentativeCluster() const
@@ -130,8 +130,8 @@ class Orbit
             {
                 return false;
             }
-            ///not equal size: compare by geometrical size
-            if (fabs(orbit1.geometricalSize() - orbit2.geometricalSize()) > 1e-5) // @TODO: remove 1e-4 and add tunable parameter
+            ///not equal size: compare by radius
+            if (fabs(orbit1.radius() - orbit2.radius()) > 1e-5) // @TODO: remove hard-coded tolerance and add tunable parameter
             {
                 return false;
             }
@@ -155,10 +155,10 @@ class Orbit
             {
                 return orbit1.getRepresentativeCluster().order() < orbit2.getRepresentativeCluster().order();
             }
-            ///not equal size: compare by geometrical size
-            if (fabs(orbit1.geometricalSize() - orbit2.geometricalSize()) > 1e-5) // @TODO: remove 1e-4 and add tunable parameter
+            ///not equal size: compare by radius
+            if (fabs(orbit1.radius() - orbit2.radius()) > 1e-5) // @TODO: remove 1e-4 and add tunable parameter
             {
-                return orbit1.geometricalSize() < orbit2.geometricalSize();
+                return orbit1.radius() < orbit2.radius();
             }
 
             // check size of vector of equivalent sites
@@ -259,7 +259,7 @@ class Orbit
 
             for (size_t i = 0; i < rep_sites_this.size(); i++)
             {
-                // 
+                //
                 // if (rep_sites_this[i].index() != rep_sites_rhs[i].index())
                 // {
                 //     std::cout<< rep_sites_this[i].index()<< " "<< rep_sites_rhs[i].index()<<std::endl;

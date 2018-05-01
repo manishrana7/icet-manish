@@ -35,12 +35,9 @@ Cluster::Cluster(const Structure &structure,
     _sites = sites;
     _distances = distances;
     _tag = tag;
-    _geometricalSize = icet::getGeometricalRadius(latticeSites, structure);
+    _radius = icet::getClusterRadius(latticeSites, structure);
     _sorted = sorted;
-    if (_sorted)
-    {
-        sort();
-    }
+    if (_sorted) sort();
 }
 
 /**
@@ -353,7 +350,7 @@ std::tuple<std::vector<double>, std::vector<int>, std::vector<int>> Cluster::cas
 
 
 /**
-Rearranges distances and sites to the order given in minimumOrder
+@details Rearranges distances and sites to the order given in minimumOrder.
 
 example:
 -------
@@ -813,7 +810,7 @@ void Cluster::print() const
     {
         std::cout << s << " ";
     }
-    std::cout<< _geometricalSize<< " ";
+    std::cout << _radius << " ";
     std::cout << std::endl;
 
 }

@@ -34,7 +34,7 @@ pygments_style = 'sphinx'
 todo_include_todos = True
 
 # Collect basic information from main module
-with open('../../../icet/__init__.py') as fd:
+with open('../../../icet/__init__.py', encoding='utf-8') as fd:
     lines = '\n'.join(fd.readlines())
 version = re.search("__version__ = '(.*)'", lines).group(1)
 release = ''
