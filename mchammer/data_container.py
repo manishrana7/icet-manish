@@ -218,7 +218,7 @@ class DataContainer:
             return len(self._data)
         else:
             assert tag in self._data, \
-                    'observable is not part of DataContainer: {}'.format(tag)
+                'observable is not part of DataContainer: {}'.format(tag)
             return self._data[tag].count()
 
     def get_average(self, start: int, stop: int, tag: str):
