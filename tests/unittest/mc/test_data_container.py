@@ -191,6 +191,11 @@ class TestDataContainer(unittest.TestCase):
                          dc_read.get_number_of_entries())
         self.assertListEqual(self.dc.get_data(['mctrial', 'temperature']),
                              dc_read.get_data(['mctrial', 'temperature']))
+        # check exception raises when file does not exist
+        with self.assertRaises(Exception) as context:
+            dc_read = self.dc.read("notafile")
+        msg = 'File cannot be found'
+        self.assertTrue(msg in str(context.exception))
 
 
 if __name__ == '__main__':

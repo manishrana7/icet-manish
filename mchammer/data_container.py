@@ -246,6 +246,11 @@ class DataContainer:
         infile : str or FileObj
             file from which to read
         """
+        import os
+
+        if not os.path.isfile(infile):
+            raise Exception("File cannot be found")
+
         temp_atoms_file = tempfile.NamedTemporaryFile()
         temp_json_file = tempfile.NamedTemporaryFile()
         temp_cvs_file = tempfile.NamedTemporaryFile()
