@@ -51,7 +51,7 @@ class ClusterSpace
     Structure getPrimitiveStructure() const { return _primitiveStructure; }
 
     /// Returns the number of allowed components for each site.
-    std::vector<int> getNumberOfAllowedSpeciesForEachSite(const Structure &structure, const std::vector<LatticeSite> &latticeNeighbors) const;
+    std::vector<int> getNumberOfAllowedSpeciesForEachSite(const Structure &, const std::vector<LatticeSite> &) const;
 
     /// Returns a list of elements associated with cluster space as chemical symbols.
     std::vector<std::string> getChemicalSymbols() const

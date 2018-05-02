@@ -75,16 +75,10 @@ class Structure
     std::vector<int> getAtomicNumbers() const { return _atomicNumbers; }
 
     /// Set atomic numbers via chemical symbols.
-    void setChemicalSymbols(const std::vector<std::string> &chemicalSymbols)
-    {
-        setAtomicNumbers(convertChemicalSymbolsToAtomicNumbers(chemicalSymbols));
-    }
+    void setChemicalSymbols(const std::vector<std::string> &chemicalSymbols) { setAtomicNumbers(convertChemicalSymbolsToAtomicNumbers(chemicalSymbols)); }
 
     /// Returns chemical symbols.
-    std::vector<std::string> getChemicalSymbols() const
-    {
-        return convertAtomicNumbersToChemicalSymbols(_atomicNumbers);
-    }
+    std::vector<std::string> getChemicalSymbols() const { return convertAtomicNumbersToChemicalSymbols(_atomicNumbers); }
 
     /// Returns periodic boundary condition along direction k.
     bool hasPBC(const int k) const { return _pbc[k]; }
@@ -132,19 +126,6 @@ class Structure
         return round(val * 1.0 / rounding_tolerance) / (1.0 / rounding_tolerance);
     }
 
-    /// Round to nearest integer toward zero.
-    /// @todo move to a more general location.
-    int nearestIntegerTowardZero(const double value) const
-    {
-        if (value > 0)
-        {
-            return int(floor(value));
-        }
-        else
-        {
-            return int(floor(value));
-        }
-    }
 
   private:
 
