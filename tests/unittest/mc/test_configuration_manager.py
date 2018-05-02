@@ -128,7 +128,6 @@ class TestConfigurationManager(unittest.TestCase):
                 elements[0], elements[1])
             self.assertEqual(self.cm.occupations[index1], elements[1])
             self.assertEqual(self.cm.occupations[index2], elements[0])
-            
 
         # set everything to Al and see that swap is not possible
         indices = [i for i in range(len(self.atoms))]
