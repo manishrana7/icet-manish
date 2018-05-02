@@ -9,6 +9,8 @@ from mchammer.observers.base_observer import BaseObserver
 
 import numpy as np
 
+from typing import List
+
 
 class BaseEnsemble(ABC):
     """
@@ -305,3 +307,28 @@ class BaseEnsemble(ABC):
             raise ValueError(
                 "List of sites and list of elements are not the same size.")
         self.configuration.update_occupations(list_of_sites, list_of_elements)
+
+    def get_property_change(self, indices: List[int], elements: List[int]):
+        """
+        Get the property change for a hypothetical change
+        of the input indices, elements.
+
+        Parameters
+        ----------
+        indices : list of int
+        elements : list of int
+
+        Return
+        ------
+        property_change : float        
+        """
+        current_elements = [self.configuration.occupations[i] for i in indices]
+
+        current_property = self.calculator.calculate_local_contribution(
+            indices, current_elements)
+        self.update_occupations(list_of_sites=indices,
+                                list_of_elements=elements)
+        new_property = self.calculator.calculate_local_contribution(
+            indices, self.configuration.occupations)
+        property_change = new_property - current_property
+        return property_change
