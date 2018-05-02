@@ -331,4 +331,7 @@ class BaseEnsemble(ABC):
         new_property = self.calculator.calculate_local_contribution(
             indices, self.configuration.occupations)
         property_change = new_property - current_property
+
+        # Set elements back to what they were
+        self.update_occupations(indices, current_elements)
         return property_change
