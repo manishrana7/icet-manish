@@ -17,11 +17,7 @@ class TestBaseObserver(unittest.TestCase):
         class ConcreteObserver(BaseObserver):
 
             def __init__(self, interval, tag='ConcreteObserver'):
-                super().__init__(interval, tag=tag)
-
-            @property
-            def return_type(self):
-                return int
+                super().__init__(interval, return_type=int, tag=tag)
 
             def get_observable(self, atoms):
                 """
