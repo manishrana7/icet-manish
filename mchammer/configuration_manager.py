@@ -114,6 +114,11 @@ class ConfigurationManager(object):
     def sublattices(self):# -> List[List[int]]:
         """The sublattices of the configuration."""
         return copy.deepcopy(self._sublattices)
+    @property
+    def atoms(self):
+        """The atoms object."""
+        self.atoms.set_atomic_numbers(self.occupations)
+        return self.atoms.copy()
 
     def get_swap_indices(self, sublattice: int):# -> Tuple[int, int]:
         """
