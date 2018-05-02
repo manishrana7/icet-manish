@@ -181,6 +181,28 @@ class ConfigurationManager(object):
                 [self._occupations[index]])))
         return index, element
 
+
+    def get_flip_state(self, sublattice: int) -> Tuple[int, int]:
+        """
+        Returns a tuple of a list of a random index in a specific sublattice
+        and a list of the element to flip it to.
+
+        Parameters
+        ----------
+        sublattice : int
+            The sublattice to pick indices from.
+
+        return : (list[int], list[int])
+
+        """
+
+        index = random.choice(self._sublattices[sublattice])
+        element = random.choice(list(
+            set(self._occupation_constraints[index]) - set(
+                [self._occupations[index]])))
+        return [index], [element]
+
+
     def update_occupations(self, list_of_sites, list_of_elements):
         """
         Update the element occupation of the configuration being sampled.
