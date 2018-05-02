@@ -186,7 +186,7 @@ class TestEnsemble(unittest.TestCase):
         """Test ensemble init without atoms parameter."""
 
         with self.assertRaises(Exception) as context:
-            ensemble = ConcreteEnsemble(
+            ensemble = ConcreteEnsemble( # noqa
             calculator=self.calculator, atoms=None, name='test-ensemble', random_seed=42)
         
         self.assertTrue("atoms need to be set" in str(context.exception))

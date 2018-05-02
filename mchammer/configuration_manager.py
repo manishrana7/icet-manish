@@ -114,6 +114,7 @@ class ConfigurationManager(object):
     def sublattices(self):# -> List[List[int]]:
         """The sublattices of the configuration."""
         return copy.deepcopy(self._sublattices)
+
     @property
     def atoms(self):
         """The atoms object."""

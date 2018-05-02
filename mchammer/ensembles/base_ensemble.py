@@ -63,7 +63,7 @@ class BaseEnsemble(ABC):
         ASE Atoms object :
         The current state of the  structure being sampled in the ensemble.
         """
-        return self.calculator.atoms.copy()
+        return self.configuration.atoms.copy()
 
     @property
     def step(self) -> int:
@@ -304,5 +304,4 @@ class BaseEnsemble(ABC):
         if len(list_of_sites) != len(list_of_elements):
             raise ValueError(
                 "List of sites and list of elements are not the same size.")
-        self.calculator.update_occupations(list_of_sites, list_of_elements)
         self.configuration.update_occupations(list_of_sites, list_of_elements)
