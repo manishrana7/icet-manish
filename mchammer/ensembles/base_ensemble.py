@@ -320,7 +320,7 @@ class BaseEnsemble(ABC):
 
         Return
         ------
-        property_change : float        
+        property_change : float
         """
         current_elements = [self.configuration.occupations[i] for i in indices]
 

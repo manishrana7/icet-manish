@@ -72,7 +72,8 @@ class TestCECalculator(unittest.TestCase):
                 self.calculator._calculate_local_contribution(
                     index)
         self.assertEqual(local_contribution,
-                         self.calculator.calculate_local_contribution(indices, occupations=self.atoms.numbers))
+                         self.calculator.calculate_local_contribution(
+                             indices, occupations=self.atoms.numbers))
 
 
 if __name__ == '__main__':

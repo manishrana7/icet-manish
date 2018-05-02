@@ -51,7 +51,8 @@ class ClusterExpansionCalculator(BaseCalculator):
         self.atoms.set_atomic_numbers(occupations)
         return self.cluster_expansion.predict(self.atoms)
 
-    def calculate_local_contribution(self, local_indices: List[int] = None, occupations: List[int] = None):
+    def calculate_local_contribution(self, local_indices: List[int] = None,
+                                     occupations: List[int] = None):
         """
         Return the sum of the contributions from the indices in the input list.
 

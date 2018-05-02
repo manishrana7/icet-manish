@@ -50,7 +50,8 @@ class TestEnsemble(unittest.TestCase):
         """Setup before each test."""
         self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
         self.ensemble = ConcreteEnsemble(
-            calculator=self.calculator, atoms=self.atoms, name='test-ensemble', random_seed=42)
+            calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
+            random_seed=42)
 
         # Create an observer for testing.
         observer = ParakeetObserver(interval=7)
@@ -186,10 +187,12 @@ class TestEnsemble(unittest.TestCase):
         """Test ensemble init without atoms parameter."""
 
         with self.assertRaises(Exception) as context:
-            ensemble = ConcreteEnsemble( # noqa
-            calculator=self.calculator, atoms=None, name='test-ensemble', random_seed=42)
-        
-        self.assertTrue("atoms need to be set" in str(context.exception))
+            ensemble = ConcreteEnsemble(  # noqa
+            calculator=self.calculator, atoms=None,
+            name='test-ensemble', random_seed=42)
+
+        self.assertTrue("atoms need to be set"
+                        in str(context.exception))
 
 
 if __name__ == '__main__':
