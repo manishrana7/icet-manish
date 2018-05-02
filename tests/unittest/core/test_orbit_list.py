@@ -114,7 +114,7 @@ class TestOrbitList(unittest.TestCase):
     def test_get_supercell_orbit_list(self):
         """
         Test orbit list is returned from supercell.
-        
+
         Todo
         ----
         Test fails for an actual supercell of the testing structure
