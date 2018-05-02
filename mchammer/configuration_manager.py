@@ -121,46 +121,6 @@ class ConfigurationManager(object):
         self.atoms.set_atomic_numbers(self.occupations)
         return self.atoms.copy()
 
-    def get_swap_indices(self, sublattice: int) -> Tuple[int, int]:
-        """
-        Returns a tuple of two random indices in a specific sublattice.
-        The two indices refer to lattice sites and the indices
-        will, if swapped, produce a new, different configuration
-        that is allowed by the occupation constraints.
-
-        Parameters
-        ----------
-        sublattice : int
-            The sublattice to pick indices from.
-        """
-        try:
-            index_1 = random.choice(self._sublattices[sublattice])
-        except IndexError:
-            raise SwapNotPossibleError("Sublattice is empty")
-        # assuming all sites in this sublattice have same allowed occupations
-
-        possible_swap_elements = set(
-            self._occupation_constraints[index_1]) - set(
-                [self._occupations[index_1]])
-
-        total_number_of_indices = 0
-        for element in possible_swap_elements:
-            total_number_of_indices += len(
-                self._element_occupation[sublattice][element])
-        try:
-            index = random.randint(0, total_number_of_indices-1)
-        except ValueError:
-            raise SwapNotPossibleError
-        for element in possible_swap_elements:
-            if index < len(self._element_occupation[sublattice][element]):
-                index_2 = self._element_occupation[sublattice][element][index]
-                break
-            else:
-                index -= len(self._element_occupation[sublattice][element])
-        else:
-            raise SwapNotPossibleError
-        return index_1, index_2
-
     def get_swap_state(self, sublattice: int) -> Tuple[int, int]:
         """
         Returns a tuple of a list of two random indices in a specific sublattice
@@ -202,28 +162,6 @@ class ConfigurationManager(object):
             raise SwapNotPossibleError
         return [index_1, index_2], [self._occupations[index_2], self._occupations[index_1]]
 
-
-    def get_flip_index(self, sublattice: int) -> Tuple[int, int]:
-        """
-        Returns a tuple of a random index in a specific sublattice
-        and the element to flip it to.
-
-        Parameters
-        ----------
-        sublattice : int
-            The sublattice to pick indices from.
-
-        return : (int, int) (index, element)
-
-        """
-
-        index = random.choice(self._sublattices[sublattice])
-        element = random.choice(list(
-            set(self._occupation_constraints[index]) - set(
-                [self._occupations[index]])))
-        return index, element
-
-
     def get_flip_state(self, sublattice: int) -> Tuple[int, int]:
         """
         Returns a tuple of a list of a random index in a specific sublattice
@@ -243,7 +181,6 @@ class ConfigurationManager(object):
             set(self._occupation_constraints[index]) - set(
                 [self._occupations[index]])))
         return [index], [element]
-
 
     def update_occupations(self, list_of_sites, list_of_elements):
         """
