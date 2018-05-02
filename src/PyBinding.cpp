@@ -464,7 +464,7 @@ PYBIND11_MODULE(_icet, m)
                       const std::vector<Matrix3d> &>())
         .def("build", &PermutationMap::build)
         .def("get_permuted_positions", &PermutationMap::getPermutedPositions)
-        .def("get_indiced_positions", &PermutationMap::getIndicedPermutedPositions)
+        .def("get_indexed_positions", &PermutationMap::getIndexedPermutedPositions)
 
         ;
 
