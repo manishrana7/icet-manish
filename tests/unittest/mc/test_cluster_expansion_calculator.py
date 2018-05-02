@@ -42,7 +42,8 @@ class TestCECalculator(unittest.TestCase):
     def test_calculate_total(self):
         """Test calculating total property."""
 
-        self.assertEqual(self.calculator.calculate_total(), 283.0)
+        self.assertEqual(self.calculator.calculate_total(
+            self.atoms.numbers), 283.0)
         self.assertEqual(self.calculator.cluster_expansion.predict(
             self.calculator.atoms), 283.0)
 
@@ -50,7 +51,8 @@ class TestCECalculator(unittest.TestCase):
         indices = [10, 2, 4, 2]
         elements = [32] * 4
         self.calculator.update_occupations(indices, elements)
-        self.assertAlmostEqual(self.calculator.calculate_total(), 66.96296296)
+        self.assertAlmostEqual(self.calculator.calculate_total(
+            self.atoms.numbers), 66.96296296)
         self.assertAlmostEqual(self.calculator.cluster_expansion.predict(
             self.calculator.atoms),  66.96296296)
 
@@ -58,7 +60,7 @@ class TestCECalculator(unittest.TestCase):
         """Test calculate local contribution."""
         indices = [1, 2, 3]
         local_contribution = self.calculator.calculate_local_contribution(
-            indices)
+            indices, self.atoms.numbers)
         self.assertIsInstance(local_contribution, float)
 
     def test_internal_calc_local_contribution(self):
@@ -70,7 +72,7 @@ class TestCECalculator(unittest.TestCase):
                 self.calculator._calculate_local_contribution(
                     index)
         self.assertEqual(local_contribution,
-                         self.calculator.calculate_local_contribution(indices))
+                         self.calculator.calculate_local_contribution(indices, occupations=self.atoms.numbers))
 
 
 if __name__ == '__main__':

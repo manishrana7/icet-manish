@@ -51,7 +51,7 @@ class ClusterExpansionCalculator(BaseCalculator):
         self.atoms.set_atomic_numbers(occupations)
         return self.cluster_expansion.predict(self.atoms)
 
-    def calculate_local_contribution(self, local_indices: List[int], occupations: List[int]):
+    def calculate_local_contribution(self, local_indices: List[int] = None, occupations: List[int] = None):
         """
         Return the sum of the contributions from the indices in the input list.
 
@@ -66,6 +66,11 @@ class ClusterExpansionCalculator(BaseCalculator):
         ------
         float : sum of contributions
         """
+        if local_indices is None:
+            raise TypeError("Local indices need to be set")
+        if occupations is None:
+            raise TypeError("occupations need to be set")
+
         self.atoms.set_atomic_numbers(occupations)
         local_contribution = 0
         for index in local_indices:
@@ -84,7 +89,7 @@ class ClusterExpansionCalculator(BaseCalculator):
             lattice index
 
         """
-        return self.calculate_total()
+        return self.calculate_total(self.atoms.numbers)
 
     @property
     def occupation_constraints(self):
