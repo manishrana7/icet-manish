@@ -8,7 +8,7 @@ from .structure import Structure
 
 
 def __fractional_to_cartesian(fractional_coordinates, cell):
-    '''
+    """
     Convert from fractional to Cartesian coordinates.
 
     Parameters
@@ -18,7 +18,7 @@ def __fractional_to_cartesian(fractional_coordinates, cell):
 
     cell : 3x3 matrix
         cell metric
-    '''
+    """
     cartesian_coordinates = [np.dot(frac, cell)
                              for frac in fractional_coordinates]
     return cartesian_coordinates
@@ -26,7 +26,7 @@ def __fractional_to_cartesian(fractional_coordinates, cell):
 
 def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
                                           prune=True, verbosity=0):
-    '''
+    """
     Return a transformed permutation matrix with lattice sites instead of
     fractional coordinates.
 
@@ -45,7 +45,7 @@ def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
         set verbosity level. Default to 0
 
     Permutation matrix is in row major format which we will keep
-    '''
+    """
     pm_frac = permutation_matrix.get_permuted_positions()
 
     pm_lattice_sites = []
@@ -77,7 +77,7 @@ def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
 
 
 def __prune_permutation_matrix(permutation_matrix, verbosity=0):
-    '''
+    """
     Prunes the matrix so that the first column only contains unique elements.
 
     Parameters
@@ -87,7 +87,7 @@ def __prune_permutation_matrix(permutation_matrix, verbosity=0):
 
     verbosity : int
         set verbosity level. Default to 0
-    '''
+    """
     for i in range(len(permutation_matrix)):
         for j in reversed(range(len(permutation_matrix))):
             if j <= i:
@@ -106,7 +106,10 @@ def _get_supercell_orbit_list(self, atoms):
     """
     Returns an orbit list for a supercell structure
 
+    Parameters
+    ----------
     atoms: ASE Atoms object
+        supercell atomic structure
     """
     structure = Structure.from_atoms(atoms)
     log = LocalOrbitListGenerator(self, structure)

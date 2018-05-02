@@ -113,7 +113,7 @@ class TestOrbitList(unittest.TestCase):
 
     def test_get_supercell_orbit_list(self):
         """
-        Test orbit list is returned from supercell.
+        Test orbit list is returned for the given supercell.
 
         Todo
         ----
@@ -144,36 +144,38 @@ class TestOrbitList(unittest.TestCase):
 
     def test_orbit_list_non_pbc(self):
         """
-        Test that singlets in orbit list retrieves the
-        right number of unique sites of the structure with
-        different periodic boundary conditions.
-        TODO: Python version returns different values
+        Test that singlets in orbit list retrieves the right number of unique
+        sites of the structure with different periodic boundary conditions.
+
+        Todo
+        ----
+        Returned results are incorrect for simple-cubic structures.
         """
-        atoms = bulk('Al', 'sc', a=3.0).repeat(3)
+        atoms = bulk('Al', 'sc', a=4.0).repeat(4)
         structure = Structure.from_atoms(atoms)
         # [True, True, False]
         structure.set_pbc([True, True, False])
         orbit_list = create_orbit_list(structure, [0.])
-        self.assertEqual(len(orbit_list), 3)
+        self.assertEqual(len(orbit_list), 4)
         # [True, False, False]
         structure.set_pbc([True, False, False])
         orbit_list = create_orbit_list(structure, [0.])
-        self.assertEqual(len(orbit_list), 5)
+        self.assertEqual(len(orbit_list), 7)
         # [False]
         structure.set_pbc([False, False, False])
         orbit_list = create_orbit_list(structure, [0.])
-        self.assertEqual(len(orbit_list), 10)
+        self.assertEqual(len(orbit_list), 20)
 
     def test_orbit_list_fcc(self):
         """
-        Test that orbit list get the right number of
-        singlet and pairs for a fcc structure.
+        Test orbit list has the right number of singlet and pairs for
+        a fcc structure.
         """
-        atoms = bulk("Al", 'fcc', a=3.0)
+        atoms = bulk('Al', 'fcc', a=3.0)
         cutoffs = [2.5]
         structure = Structure.from_atoms(atoms)
         orbit_list = create_orbit_list(structure, cutoffs)
-        # only one singlet and one pair expected
+        # only a singlet and a pair are expected
         self.assertEqual(len(orbit_list), 2)
         # singlet
         singlet = orbit_list.get_orbit(0)
@@ -187,10 +189,10 @@ class TestOrbitList(unittest.TestCase):
 
     def test_orbit_list_bcc(self):
         """
-        Test that orbit list get the right number of
-        singlet and pairs for a bcc structure.
+        Test orbit list has the right number  of singlet and pairs for
+        a bcc structure.
         """
-        atoms = bulk("Al", 'bcc', a=3.0)
+        atoms = bulk('Al', 'bcc', a=3.0)
         cutoffs = [3.0]
         structure = Structure.from_atoms(atoms)
         orbit_list = create_orbit_list(structure, cutoffs)
@@ -211,10 +213,10 @@ class TestOrbitList(unittest.TestCase):
 
     def test_orbit_list_hcp(self):
         """
-        Test that orbit list get the right number of
-        singlet and pairs for a hcp structure.
+        Test orbit list has the right number of singlet and pairs for
+        a hcp structure.
         """
-        atoms = bulk("Ni", 'hcp', a=3.0)
+        atoms = bulk('Ni', 'hcp', a=3.0)
         cutoffs = [3.1]
         structure = Structure.from_atoms(atoms)
         orbit_list = create_orbit_list(structure, cutoffs)
