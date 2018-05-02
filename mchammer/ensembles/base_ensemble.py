@@ -24,7 +24,7 @@ class BaseEnsemble(ABC):
         number of total trial steps.
     """
 
-    def __init__(self, calculator, name='BaseEnsemble',
+    def __init__(self, calculator, atoms=None, name='BaseEnsemble',
                  data_container=None, data_container_write_period=np.inf,
                  random_seed=None):
 
@@ -36,6 +36,8 @@ class BaseEnsemble(ABC):
         self._observers = {}
         self._step = 0
 
+        if atoms is None:
+            raise Exception("atoms need to be set")
         if random_seed is None:
             self._random_seed = random.randint(0, 1e16)
         else:
@@ -53,7 +55,7 @@ class BaseEnsemble(ABC):
         strict_constraints = self.calculator.occupation_constraints
         sublattices = [[i for i in range(len(self.calculator.atoms))]]
         self.configuration = ConfigurationManager(
-            self._calculator.atoms.numbers, strict_constraints, sublattices)
+            atoms, strict_constraints, sublattices)
 
     @property
     def structure(self):

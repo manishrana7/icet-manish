@@ -19,7 +19,7 @@ class TestConfigurationManager(unittest.TestCase):
 
     def setUp(self):
         self.cm = ConfigurationManager(
-            self.atoms.numbers, self.strict_constraints, self.sublattices,
+            self.atoms, self.strict_constraints, self.sublattices,
             self.constraints)
 
     def test_type(self):
@@ -135,7 +135,7 @@ class TestConfigurationManager(unittest.TestCase):
         sublattices = [indices, []]
 
         cm_two_sublattices = ConfigurationManager(
-            self.atoms.numbers, self.strict_constraints, sublattices,
+            self.atoms, self.strict_constraints, sublattices,
             self.constraints)
         with self.assertRaises(SwapNotPossibleError) as context:
             index1, index2 = cm_two_sublattices.get_swap_indices(1)
