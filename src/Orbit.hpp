@@ -54,7 +54,7 @@ class Orbit
     {
         return _representativeCluster.radius();
     }
-    ///Return the sorted, reprasentative cluster for this orbit
+    ///Return the sorted, representative cluster for this orbit
     Cluster getRepresentativeCluster() const
     {
         return _representativeCluster;

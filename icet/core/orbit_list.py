@@ -104,7 +104,7 @@ def __prune_permutation_matrix(permutation_matrix, verbosity=0):
 
 def _get_supercell_orbit_list(self, atoms):
     """
-    Returns a orbit list for a supercell structure
+    Returns an orbit list for a supercell structure
 
     atoms: ASE Atoms object
     """
