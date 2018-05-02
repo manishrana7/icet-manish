@@ -6,12 +6,8 @@ from icet.core.cluster import Cluster
 from icet.core.orbit import Orbit
 from icet.core.orbit_list import OrbitList, create_orbit_list
 from icet.core.orbit_list import (
-    __fractional_to_cartesian as fractional_to_cartesian)
-from icet.core.orbit_list import (
     __get_lattice_site_permutation_matrix as
     get_lattice_site_permutation_matrix)
-from icet.core.orbit_list import (
-    __prune_permutation_matrix as prune_permutation_matrix)
 from icet.core.neighbor_list import get_neighbor_lists
 from icet.core.permutation_map import permutation_matrix_from_atoms
 from icet.core.structure import Structure
@@ -28,25 +24,21 @@ class TestOrbitList(unittest.TestCase):
         self.atoms = bulk('Ag', 'sc', a=4.09)
 
     def setUp(self):
-        """
-        Instantiate class before each test.
-        """
-        self.permutation_matrix, self.prim_structure, _ = \
+        """ Instantiate class before each test. """
+        permutation_matrix, self.prim_structure, _ = \
             permutation_matrix_from_atoms(self.atoms, self.cutoffs[0])
-        self.pm_lattice_sites = \
+        pm_lattice_sites = \
             get_lattice_site_permutation_matrix(self.prim_structure,
-                                                self.permutation_matrix)
+                                                permutation_matrix)
         self.neighbor_lists = get_neighbor_lists(
             self.prim_structure, self.cutoffs)
 
         self.orbit_list = OrbitList(self.prim_structure,
-                                    self.pm_lattice_sites,
+                                    pm_lattice_sites,
                                     self.neighbor_lists)
 
     def test_init(self):
-        """
-        Test the different initializers.
-        """
+        """ Test the different initializers. """
         # empty
         orbit_list = OrbitList()
         self.assertIsInstance(orbit_list, OrbitList)
@@ -57,12 +49,9 @@ class TestOrbitList(unittest.TestCase):
         self.assertIsInstance(self.orbit_list, OrbitList)
 
     def test_add_orbit(self):
-        """
-        Test that add orbit increases orbit_list size.
-        TODO: Think if retrived cluster from_python is ok
-        """
+        """ Test add orbit funcionality. """
         lattice_site_for_cluster = [
-            LatticeSite(0, [i, 0, 0]) for i in range(3)]
+            LatticeSite(0, [i, 0, 0]) for i in range(2)]
         pair_cluster = Cluster.from_python(
             self.atoms, [lattice_site_for_cluster[0],
                          lattice_site_for_cluster[1]], True)
@@ -71,48 +60,37 @@ class TestOrbitList(unittest.TestCase):
         self.assertEqual(len(self.orbit_list), 3)
 
     def test_get_number_of_NClusters(self):
-        """
-        Test that functionality counts the right number of
-        pairs.
-        """
+        """ Test that only a pair is counted in the orbit list. """
         NPairs = self.orbit_list.get_number_of_NClusters(2)
         self.assertEqual(NPairs, 1)
 
     def test_get_orbit(self):
-        """
-        Test get_orbit functionality.
-        """
+        """ Test function returns the number of orbits of a given order. """
         # get singlet
         orbit = self.orbit_list.get_orbit(0)
         self.assertEqual(orbit.order, 1)
         # get pair
         orbit = self.orbit_list.get_orbit(1)
         self.assertEqual(orbit.order, 2)
-
+        # check higher order raises an error
         with self.assertRaises(IndexError):
             self.orbit_list.get_orbit(3)
 
     def test_clear(self):
-        """
-        Test that clear return an empty orbit list.
-        """
+        """ Test orbit list is empty after calling this function. """
         self.orbit_list.clear()
         with self.assertRaises(IndexError):
             self.orbit_list.get_orbit(0)
 
     def test_sort(self):
-        """
-        Test sort functionality.
-        """
+        """ Test orbits in orbit list are sorted. """
         self.orbit_list.sort()
         for i in range(len(self.orbit_list) - 1):
             self.assertLess(
                 self.orbit_list.get_orbit(i), self.orbit_list.get_orbit(i + 1))
 
     def test_get_orbit_list(self):
-        """
-        Test getter for orbit list (depends on initializer).
-        """
+        """ Test getter for orbit list (depends on initializer). """
         lattice_sites = \
             [[LatticeSite(0, [0., 0., 0.])],
              [LatticeSite(0, [0., 0., 0.]), LatticeSite(0, [-1., 0., 0.])],
@@ -124,87 +102,22 @@ class TestOrbitList(unittest.TestCase):
                              lattice_sites[i])
 
     def test_get_primitive_structure(self):
-        """
-        Test get primitive structure.
-        """
+        """ Test primitive structure. """
         prim_structure = self.orbit_list.get_primitive_structure()
-        self.assertEqual(prim_structure.cell.tolist(),
-                         self.prim_structure.cell.tolist())
+        self.assertEqual(prim_structure.positions.tolist(),
+                         self.prim_structure.positions.tolist())
 
     def test_len(self):
-        """
-        Test lenght of orbit list.
-        """
+        """ Test len of orbit list. """
         self.assertEqual(len(self.orbit_list), 2)
-
-    def test_fractional_to_cartesian(self):
-        """
-        Test that fractional are transformed into
-        cartesians coordinates.
-        TODO: Maybe not the most practical test
-        """
-        import itertools
-        # generate a set of all possible atom positions
-        # using the lattice parameter value
-        cartesian_product_lists = [[0., 4.09, -4.09],
-                                   [0., 4.09, -4.09],
-                                   [0., 4.09, -4.09]]
-        cartesian_atom_pos = []
-        for element in itertools.product(*cartesian_product_lists):
-            cartesian_atom_pos.append(list(element))
-        # cartesian positions from fractional positions
-        frac_pm = self.permutation_matrix.get_permuted_positions()
-        fractional_pos = frac_pm[1]
-        cartesian_pos = fractional_to_cartesian(
-            fractional_pos, self.prim_structure.cell)
-        # check that cartesian_pos are among generated set
-        for pos in cartesian_pos:
-            self.assertIn(pos.tolist(), cartesian_atom_pos)
-
-    def test_get_lattice_site_permutation_matrix(self):
-        """
-        Test lattice sites in permutation matrix by
-        asserting the distances between r_ik and r_jk sites
-        in the same column.
-        TODO: Think about moving this to permutation_map
-        """
-        import numpy
-
-        for i in range(len(self.pm_lattice_sites)):
-            for j in range(i + 1, len(self.pm_lattice_sites)):
-                dist_last = -1
-                for k in range(len(self.pm_lattice_sites[i])):
-                    site_1 = self.pm_lattice_sites[i][k]
-                    site_2 = self.pm_lattice_sites[j][k]
-                    pos1 = self.atoms[site_1.index].position +\
-                        numpy.dot(site_1.unitcell_offset, self.atoms.cell)
-                    pos2 = self.atoms[site_2.index].position +\
-                        numpy.dot(site_2.unitcell_offset, self.atoms.cell)
-                    dist_first = numpy.linalg.norm(pos1 - pos2)
-                    if dist_last != -1:
-                        self.assertAlmostEqual(dist_first, dist_last, places=8)
-                    dist_last = dist_first
-
-    def test_prune_permutation_matrix(self):
-        """
-        Test that first column of pruned permutation matrix
-        containes unique elements.
-        """
-        pruned_matrix = prune_permutation_matrix(self.pm_lattice_sites)
-        firstCol = []
-        for row in pruned_matrix:
-            firstCol.append(row[0])
-        for i, site_i in enumerate(firstCol):
-            for j, site_j in enumerate(firstCol):
-                if i <= j:
-                    continue
-                else:
-                    self.assertNotEqual(site_i, site_j)
 
     def test_get_supercell_orbit_list(self):
         """
-        Test orbit list retrieved for supercell.
-        TODO: Test failing for other structures, e.g. fcc
+        Test orbit list is returned from supercell.
+        
+        Todo
+        ----
+        Test fails for an actual supercell of the testing structure
         """
         atoms_supercell = self.atoms.copy()
         orbit_list_super = \
@@ -218,7 +131,8 @@ class TestOrbitList(unittest.TestCase):
 
     def test_create_orbit_list(self):
         """
-        Test create_orbit_lists functionality.
+        Test  orbit list is built from structure and cutoffs through
+        this function.
         """
         structure = Structure.from_atoms(self.atoms)
         orbit_list = create_orbit_list(structure, self.cutoffs)
