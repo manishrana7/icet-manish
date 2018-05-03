@@ -121,7 +121,7 @@ class ConfigurationManager(object):
         self.atoms.set_atomic_numbers(self.occupations)
         return self.atoms.copy()
 
-    def get_swap_state(self, sublattice: int) -> Tuple[int, int]:
+    def get_swap_state(self, sublattice: int) -> Tuple[List[int], List[int]]:
         """
         Returns a tuple of a list of two random indices in a specific sublattice
         and what elements they will occupy after a swap.
@@ -162,7 +162,7 @@ class ConfigurationManager(object):
             raise SwapNotPossibleError
         return [index_1, index_2], [self._occupations[index_2], self._occupations[index_1]]
 
-    def get_flip_state(self, sublattice: int) -> Tuple[int, int]:
+    def get_flip_state(self, sublattice: int) -> Tuple[List[int], List[int]]:
         """
         Returns a tuple of a list of a random index in a specific sublattice
         and a list of the element to flip it to.
