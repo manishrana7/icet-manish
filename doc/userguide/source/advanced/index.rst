@@ -1,8 +1,8 @@
-.. _examples:
-.. index:: Examples
+.. _tutorial_advanced_topics:
+.. index:: Tutorial, advanced topics
 
-Examples
-********
+Advanced topics
+***************
 
 This section demonstrates the use of :program:`icet` via a set of examples that
 showcase different features and modes of usage.

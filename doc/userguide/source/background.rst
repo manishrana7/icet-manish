@@ -34,14 +34,19 @@ allows one to express :math:`Q` in the form [Wal09]_
    J_\alpha
    \left<\Gamma_{\alpha'}(\boldsymbol{\sigma})\right>_{\alpha}.
 
-Here, the sum extends over all symmetry equivalent clusters :math:`\alpha`,
-:math:`m_{\alpha}` denotes the multiplicity [#]_ whereas the coefficients
-:math:`J_{\alpha}` are the so-called effective cluster interactions (ECIs). The
-last term in the above expression represents the average over cluster functions
-:math:`\Gamma_{\alpha}(\boldsymbol{\sigma})` belonging to symmetry equivalent
-clusters. The cluster functions themselves are obtained as a product over basis
-functions :math:`\Theta` as described in the `section detailing the
-construction of cluster functions <cluster-functions>`.
+Here, the sum extends over all symmetry equivalent clusters  (:term:`orbit`)
+:math:`\alpha`, :math:`m_{\alpha}` denotes the  multiplicity [#]_ whereas the
+coefficients :math:`J_{\alpha}` are the  so-called effective cluster
+interactions (ECIs). The last term in the  above expression represents the
+average over cluster functions  :math:`\Gamma_{\alpha}(\boldsymbol{\sigma})`
+belonging to symmetry  equivalent clusters (:term:`orbits`). The cluster
+functions  themselves are obtained as a product over basis functions
+:math:`\Theta` as described in the :ref:`section detailing the  construction of
+cluster functions <cluster-functions>`.
+
+.. todo:
+
+   insert section on cluster functions
 
 .. [#] Note that some authors include :math:`m_{\alpha}` in the
        symmetrized product over cluster functions
@@ -54,23 +59,24 @@ construction of cluster functions <cluster-functions>`.
 CE construction
 ===============
 
-The task of training a :term:`CE` can be formally written as a linear set of
-equations
+The task of training a :term:`CE` can be formally written as a linear problem
 
 .. math::
    \mathbf{\bar{\Pi}} \boldsymbol{J} = \boldsymbol{Q}
 
-where :math:`\boldsymbol{Q}` is the vector of target properties,
-:math:`\boldsymbol{J}` represents the vector of coefficients, and
-:math:`\mathbf{\bar{\Pi}}` is a matrix that is obtained by stacking the vectors
-that represent the clusters present in each structure of the training set. This
-problem can be approached by choosing the number of structures
-:math:`n_{\boldsymbol{Q}}=||\boldsymbol{Q}||_0` (and thus the dimensionality of
+where :math:`\boldsymbol{Q}` is the vector of target properties, the
+vector :math:`\boldsymbol{J}` represents the ECIs, and
+:math:`\mathbf{\bar{\Pi}}` is a matrix that is obtained by stacking
+the vectors that represent each structure (also referred to in this
+documentation as cluster vectors) of the training set. This problem
+can be approached by choosing the number of structures
+:math:`n_{\boldsymbol{Q}}` (and thus the dimensionality of
 :math:`\boldsymbol{Q}`), to be (much) larger than the number of ECIs
-:math:`n_{\boldsymbol{J}=||\boldsymbol{J}||_0}` (and thus the dimensionality of
-:math:`\boldsymbol{J}`, (:math:`n_{\boldsymbol{Q}}>n_{\boldsymbol{J}}`). The
-set of equations is thus overdetermined. The optimal set of ECIs for fixed
-training set and cluster function basis is then obtained by minimizing the
+:math:`n_{\boldsymbol{J}}` (and thus the dimensionality of
+:math:`\boldsymbol{J}`,
+(:math:`n_{\boldsymbol{Q}}>n_{\boldsymbol{J}}`). The set of equations
+is thus overdetermined. The optimal set of ECIs for fixed training set
+and cluster function basis is then obtained by minimizing the
 :math:`l_2`-norm of :math:`\mathbf{\bar{\Pi}} \boldsymbol{J} -
 \boldsymbol{Q}`
 

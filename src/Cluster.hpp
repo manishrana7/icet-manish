@@ -56,8 +56,8 @@ class Cluster
     /// Returns the order (i.e., the number of sites) of the cluster.
     unsigned int order() const { return _sites.size(); }
 
-    /// Returns the geometrical size of the cluster.
-    double geometricalSize() const { return _geometricalSize; }
+    /// Returns the radius of the cluster.
+    double radius() const { return _radius; }
 
     // Returns the sites in the cluster.
     std::vector<int> sites() const { return _sites; }
@@ -229,8 +229,8 @@ private:
     /// @todo what is this? The _element_counts member was deactivated since it is not in use.
     // std::map<std::vector<int>, int> _element_counts;
 
-    /// Geometrical size of cluster.
-    double _geometricalSize;
+    /// Cluster radius.
+    double _radius;
 
     /// True/False if this is a sorted/unsorted cluster.
     bool _sorted;
