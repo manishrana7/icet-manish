@@ -208,7 +208,7 @@ class TestEnsemble(unittest.TestCase):
         # Test that the method doesn't change the occupation.
         self.assertListEqual(list(initial_occupations),
                              list(self.ensemble.configuration.occupations))
-        
+
 
 if __name__ == '__main__':
     unittest.main()

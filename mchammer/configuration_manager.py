@@ -123,8 +123,8 @@ class ConfigurationManager(object):
 
     def get_swap_state(self, sublattice: int) -> Tuple[List[int], List[int]]:
         """
-        Returns a tuple of a list of two random indices in a specific sublattice
-        and what elements they will occupy after a swap.
+        Returns a tuple of a list of two random indices in a specific
+        sublattice and what elements they will occupy after a swap.
         The two indices refer to lattice sites and the indices
         will, if swapped, produce a new, different configuration
         that is allowed by the occupation constraints.
@@ -160,7 +160,8 @@ class ConfigurationManager(object):
                 index -= len(self._element_occupation[sublattice][element])
         else:
             raise SwapNotPossibleError
-        return [index_1, index_2], [self._occupations[index_2], self._occupations[index_1]]
+        return [index_1, index_2], [self._occupations[index_2],
+                                    self._occupations[index_1]]
 
     def get_flip_state(self, sublattice: int) -> Tuple[List[int], List[int]]:
         """

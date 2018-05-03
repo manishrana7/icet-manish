@@ -308,7 +308,8 @@ class BaseEnsemble(ABC):
                 "List of sites and list of elements are not the same size.")
         self.configuration.update_occupations(list_of_sites, list_of_elements)
 
-    def get_property_change(self, indices: List[int], elements: List[int]):
+    def get_property_change(self, indices: List[int],
+                            elements: List[int]) -> float:
         """
         Get the property change for a hypothetical change
         of the input indices, elements.
