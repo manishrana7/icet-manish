@@ -26,10 +26,12 @@ class BaseEnsemble(ABC):
         number of total trial steps.
     """
 
-    def __init__(self, calculator, atoms=None, name='BaseEnsemble',
+    def __init__(self, calculator=None, atoms=None, name='BaseEnsemble',
                  data_container=None, data_container_write_period=np.inf,
                  random_seed=None):
 
+        if calculator is None:
+            raise TypeError("calculator needs to be set")
         self._calculator = calculator
         self._name = name
         self.data_container_write_period = data_container_write_period
@@ -335,3 +337,14 @@ class BaseEnsemble(ABC):
         # Set elements back to what they were
         self.update_occupations(indices, current_elements)
         return property_change
+
+    def get_random_sublattice_index(self) -> int:
+        """
+        Get a random sublattice index based
+        on the weights of the sublattice.
+
+        Return
+        ------
+        sublattice_index : int
+        """
+        return 0
