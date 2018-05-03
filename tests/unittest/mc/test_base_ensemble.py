@@ -39,7 +39,7 @@ class TestEnsemble(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEnsemble, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al")
+        self.atoms = bulk("Al").repeat(3)
         cutoffs = [5, 5, 4]
         elements = ["Al", "Ga"]
         self.cs = ClusterSpace(self.atoms, cutoffs, elements)
@@ -194,6 +194,21 @@ class TestEnsemble(unittest.TestCase):
         self.assertTrue("atoms need to be set"
                         in str(context.exception))
 
+    def test_get_property_change(self):
+        """Test the get property change method."""
+
+        initial_occupations = self.ensemble.configuration.occupations
+
+        indices = [0, 1, 2, 3, 4]
+        elements = [13, 31, 13, 31, 13]
+
+        prop_diff = self.ensemble.get_property_change(indices, elements)
+        self.assertAlmostEqual(prop_diff, 10.37037037037037)
+
+        # Test that the method doesn't change the occupation.
+        self.assertListEqual(list(initial_occupations),
+                             list(self.ensemble.configuration.occupations))
+        
 
 if __name__ == '__main__':
     unittest.main()

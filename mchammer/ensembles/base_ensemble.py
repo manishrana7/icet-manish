@@ -325,7 +325,7 @@ class BaseEnsemble(ABC):
         current_elements = [self.configuration.occupations[i] for i in indices]
 
         current_property = self.calculator.calculate_local_contribution(
-            indices, current_elements)
+            indices, self.configuration.occupations)
         self.update_occupations(list_of_sites=indices,
                                 list_of_elements=elements)
         new_property = self.calculator.calculate_local_contribution(
