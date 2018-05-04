@@ -282,6 +282,9 @@ class BaseEnsemble(ABC):
     def reset_data_container(self):
         """Reset the data container and the internal step attribute."""
         self._step = 0
+        self.total_trials = 0
+        self.accepted_trials = 0
+
         self._data_container.reset()
 
     def update_occupations(self, list_of_sites, list_of_elements):

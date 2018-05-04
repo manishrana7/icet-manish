@@ -5,7 +5,7 @@ import numpy as np
 from ase.units import kB
 
 
-class Canonical(BaseEnsemble):
+class CanonicalEnsemble(BaseEnsemble):
     """
     Canonical Ensemble.
 
@@ -14,14 +14,16 @@ class Canonical(BaseEnsemble):
         temperature in kelvin.
     """
 
-    def __init__(self, atoms=None, temperature=None, calculator=None, name='Canonical Ensemble',
-                 data_container=None, random_seed=None):
+    def __init__(self, atoms=None, calculator=None, name='Canonical Ensemble',
+                 data_container=None, random_seed=None, **kwargs):
 
         super().__init__(atoms=atoms, calculator=calculator, name=name,
                          data_container=data_container,
                          random_seed=random_seed)
-        if temperature is not None:
-            self.temperature = temperature
+        if not 'temperature' in kwargs.keys():
+            raise KeyError("Temperature needs to be set in canonical ensemble")
+        else:
+            self.temperature = kwargs['temperature']
 
     def do_trial_step(self):
         """Do a trial step."""
