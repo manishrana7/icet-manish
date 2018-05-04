@@ -7,7 +7,6 @@ from icet import ClusterExpansion, ClusterSpace
 from mchammer.calculators.cluster_expansion_calculator import \
     ClusterExpansionCalculator
 from mchammer.ensembles.canonical_ensemble import CanonicalEnsemble
-from test_base_ensemble import ParakeetObserver
 
 
 class TestEnsemble(unittest.TestCase):
@@ -33,12 +32,6 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble = CanonicalEnsemble(
             calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
             random_seed=42, temperature=self.temperature)
-
-        # Create an observer for testing.
-        observer = ParakeetObserver(interval=7)
-        self.ensemble.attach_observer(observer)
-        observer = ParakeetObserver(interval=14, tag='Parakeet2')
-        self.ensemble.attach_observer(observer)
 
     def test_temperature_attribute(self):
         """Test temperature attribute."""
