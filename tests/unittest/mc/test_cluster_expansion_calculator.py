@@ -21,11 +21,13 @@ class TestCECalculator(unittest.TestCase):
         super(TestCECalculator, self).__init__(*args, **kwargs)
 
         self.atoms = bulk("Al").repeat(3)
-        self.cutoffs = [0,5]
+        self.cutoffs = [0,7]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
         params = [1.25] * params_len
+        params[0] = 0
+        params[1] = 0
 
         self.ce = ClusterExpansion(self.cs, params)
 
@@ -58,8 +60,8 @@ class TestCECalculator(unittest.TestCase):
 
     def test_calculate_local_contribution(self):
         """Test calculate local contribution."""
-        indices = [i for i in range(len(self.atoms))]
-        indices = [1,2,3,4]
+        # indices = [i for i in range(len(self.atoms))]
+        indices = [1,12,0]
         local_contribution = self.calculator.calculate_local_contribution(
             indices, self.atoms.numbers)
         self.assertIsInstance(local_contribution, float)

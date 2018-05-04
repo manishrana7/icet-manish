@@ -158,7 +158,7 @@ std::vector<double> ClusterSpace::generateLocalClusterVector(const Structure &st
                 }
             }
             clusterVectorElement /= ((double) multiplicity * uniqueOffsets);
-            clusterVector.push_back(clusterVectorElement * mcVector.size() );
+            clusterVector.push_back(clusterVectorElement * mcVector.size());
 
             currentMCVectorIndex++;
         }
