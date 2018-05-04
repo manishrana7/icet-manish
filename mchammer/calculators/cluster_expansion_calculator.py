@@ -1,4 +1,5 @@
 from mchammer.calculators.base_calculator import BaseCalculator
+from typing import List
 
 
 class ClusterExpansionCalculator(BaseCalculator):
@@ -39,7 +40,7 @@ class ClusterExpansionCalculator(BaseCalculator):
         """
         return self._cluster_expansion
 
-    def calculate_total(self):
+    def calculate_total(self, occupations: List[int]):
         """
         Calculator the total property of the current configuration.
 
@@ -47,22 +48,33 @@ class ClusterExpansionCalculator(BaseCalculator):
         -------
             total_property : float
         """
+        self.atoms.set_atomic_numbers(occupations)
         return self.cluster_expansion.predict(self.atoms)
 
-    def calculate_local_contribution(self, indices):
+    def calculate_local_contribution(self, local_indices: List[int] = None,
+                                     occupations: List[int] = None):
         """
         Return the sum of the contributions from the indices in the input list.
 
         Parameters
         ----------
-        indices : list of ints
+        local_indices : list of ints
+            the lattice indices to get the local energy of
+        occupations : list of ints
+            the occupation vector
 
         Return
         ------
         float : sum of contributions
         """
+        if local_indices is None:
+            raise TypeError("Local indices need to be set")
+        if occupations is None:
+            raise TypeError("occupations need to be set")
+
+        self.atoms.set_atomic_numbers(occupations)
         local_contribution = 0
-        for index in indices:
+        for index in local_indices:
             local_contribution += self._calculate_local_contribution(index)
 
         return local_contribution
@@ -78,7 +90,7 @@ class ClusterExpansionCalculator(BaseCalculator):
             lattice index
 
         """
-        return self.calculate_total()
+        return self.calculate_total(self.atoms.numbers)
 
     @property
     def occupation_constraints(self):
