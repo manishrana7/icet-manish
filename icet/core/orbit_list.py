@@ -119,7 +119,7 @@ def _get_supercell_orbit_list(self, atoms):
 OrbitList.get_supercell_orbit_list = _get_supercell_orbit_list
 
 
-def create_orbit_list(structure, cutoffs, verbosity=0):
+def create_orbit_list(structure, cutoffs, verbosity=0, bothways=False):
     '''
     Build an orbit list.
 
@@ -176,7 +176,7 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
         print(' '.join(msg))
 
     t0 = time.time()
-    orbit_list = OrbitList(prim_structure, pm_lattice_sites, neighbor_lists)
+    orbit_list = OrbitList(prim_structure, pm_lattice_sites, neighbor_lists, bothways)
     t1 = time.time()
     time_spent = t1 - t0
     total_time_spent += time_spent

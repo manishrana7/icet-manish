@@ -54,6 +54,9 @@ class ClusterSpace
 
     ///Generate the cluster vector on the input structure
     std::vector<double> generateClusterVector(const Structure &) const;
+    
+    ///Generate the local cluster vector on the input structure
+    std::vector<double> generateLocalClusterVector(const Structure &, const int) const;
 
     ///Return the full cluster product of entire cluster (elements vector). Assuming all sites have same Mi
     double getClusterProduct(const std::vector<int> &mcVector, const std::vector<int> &Mi, const std::vector<int> &elements) const;

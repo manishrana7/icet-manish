@@ -103,12 +103,11 @@ int OrbitList::findOrbit(const Cluster &cluster, const std::unordered_map<Cluste
     }
 }
 
-OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<LatticeSite>> &permutation_matrix, const std::vector<NeighborList> &neighbor_lists)
+OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<LatticeSite>> &permutation_matrix, const std::vector<NeighborList> &neighbor_lists, bool bothways)
 {
     _primitiveStructure = structure;
     std::vector<std::vector<std::vector<LatticeSite>>> lattice_neighbors;
     std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> many_bodyNeighborIndices;
-    bool saveBothWays = false;
     ManyBodyNeighborList mbnl = ManyBodyNeighborList();
 
     //if [0,1,2] exists in taken_rows then these three rows (with columns) have been accounted for and should not be looked at
@@ -124,7 +123,7 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
     for (size_t index = 0; index < neighbor_lists[0].size(); index++)
     {
 
-        std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> mbnl_latnbrs = mbnl.build(neighbor_lists, index, saveBothWays);
+        std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> mbnl_latnbrs = mbnl.build(neighbor_lists, index, bothways);
         for (const auto &mbnl_pair : mbnl_latnbrs)
         {
 
@@ -134,7 +133,7 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
                 lat_nbrs.push_back(latnbr);
                 auto lat_nbrs_copy = lat_nbrs;
                 std::sort(lat_nbrs_copy.begin(), lat_nbrs_copy.end());
-                if (lat_nbrs_copy != lat_nbrs)
+                if (lat_nbrs_copy != lat_nbrs and !bothways)
                 {
                     throw std::runtime_error("Original sites is not sorted");
                 }

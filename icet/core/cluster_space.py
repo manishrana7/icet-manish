@@ -39,7 +39,7 @@ class ClusterSpace(_ClusterSpace):
     """
 
     def __init__(self, atoms, cutoffs, chemical_symbols,
-                 Mi=None, verbosity=0):
+                 Mi=None, verbosity=0, bothways=False):
 
         # deal with different types of structure objects
         if isinstance(atoms, Atoms):
@@ -59,7 +59,7 @@ class ClusterSpace(_ClusterSpace):
         self._verbosity = verbosity
         # set up orbit list
         orbit_list = create_orbit_list(self._structure, self._cutoffs,
-                                       verbosity=verbosity)
+                                       verbosity=verbosity, bothways=bothways)
         orbit_list.sort()
         if Mi is None:
             Mi = len(chemical_symbols)

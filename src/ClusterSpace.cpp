@@ -87,6 +87,87 @@ std::vector<double> ClusterSpace::generateClusterVector(const Structure &structu
     return clusterVector;
 }
 
+
+    ///Generate the local cluster vector on the input structure
+std::vector<double> ClusterSpace::generateLocalClusterVector(const Structure &structure, const int index) const
+{
+    bool orderIntact = true; // count the clusters in the orbit with the same orientation as the prototype cluster
+    LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(_primitive_orbit_list, structure);
+    size_t uniqueOffsets = localOrbitListGenerator.getUniqueOffsetsCount();
+    ClusterCounts clusterCounts = ClusterCounts();
+    
+    Vector3d localPosition = structure.getPositions().row(index);
+    LatticeSite localSite = _primitive_orbit_list.getPrimitiveStructure().findLatticeSiteByPosition(localPosition);
+
+    const auto localOrbitList = localOrbitListGenerator.generateLocalOrbitList(localSite.unitcellOffset());
+    clusterCounts.countOrbitList(structure, localOrbitList, orderIntact);
+
+    
+
+    if (uniqueOffsets != structure.size() / _primitive_structure.size())
+    {
+        std::string errorMessage = "The number of unique offsets do not match supercell.size() / primitive.size()";
+        errorMessage += " {" + std::to_string(uniqueOffsets) + "}";
+        errorMessage += " != ";
+        errorMessage += " {" + std::to_string(structure.size() / _primitive_structure.size()) + "}";
+        throw std::runtime_error(errorMessage);
+    }
+
+    const auto clusterMap = clusterCounts.getClusterCounts();
+    std::vector<double> clusterVector;
+    clusterVector.push_back(1);
+    // Finally begin occupying the cluster vector
+    for (size_t i = 0; i < _primitive_orbit_list.size(); i++)
+    {
+        auto repCluster = _primitive_orbit_list.getOrbit(i).getRepresentativeCluster();
+        std::vector<int> allowedOccupations;
+        try { 
+                allowedOccupations = getAllowedOccupations(_primitive_structure, _primitive_orbit_list.getOrbit(i).getRepresentativeSites());
+            }
+        catch (const std::exception& e)
+        { 
+            throw std::runtime_error("Failed getting allowed occupations in genereteClusterVector"); 
+        }
+
+        // Skip rest if any sites aren't active sites (i.e. allowed occupation < 2)
+        if (std::any_of(allowedOccupations.begin(), allowedOccupations.end(),[](int allowedOccupation ){ return allowedOccupation < 2; }))
+        {
+            continue;
+        }
+        
+        auto mcVectors = _primitive_orbit_list.getOrbit(i).getMCVectors(allowedOccupations);
+        auto allowedPermutationsSet = _primitive_orbit_list.getOrbit(i).getAllowedSitesPermutations();
+        auto elementPermutations = getMCVectorPermutations(mcVectors, i);
+        repCluster.setClusterTag(i);
+        int currentMCVectorIndex = 0;
+        for (const auto &mcVector : mcVectors)
+        {
+            double clusterVectorElement = 0;
+            int multiplicity = 0;
+
+            for (const auto &elementsCountPair : clusterMap.at(repCluster))
+            {
+
+                // TODO check if allowedOccupations should be permuted as well.
+                for (const auto &perm : elementPermutations[currentMCVectorIndex])
+                {
+                    auto permutedMCVector = icet::getPermutedVector(mcVector, perm);
+                    auto permutedAllowedOccupations = icet::getPermutedVector(allowedOccupations, perm);
+                    clusterVectorElement += getClusterProduct(permutedMCVector, permutedAllowedOccupations, elementsCountPair.first) * elementsCountPair.second;
+                    multiplicity += elementsCountPair.second;
+                }
+            }
+            clusterVectorElement /= ((double) multiplicity * uniqueOffsets);
+            clusterVector.push_back(clusterVectorElement * mcVector.size() );
+
+            currentMCVectorIndex++;
+        }
+    }
+    return clusterVector;
+
+}
+
+
 /// Returns the native clusters count in this structure, i.e. only clusters inside the unit cell
 ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
 {

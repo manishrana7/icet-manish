@@ -675,7 +675,11 @@ PYBIND11_MODULE(_icet, m)
     py::class_<OrbitList>(m, "OrbitList")
         .def(py::init<>())
         .def(py::init<const std::vector<NeighborList> &, const Structure &>())
-        .def(py::init<const Structure &, const std::vector<std::vector<LatticeSite>> &, const std::vector<NeighborList> &>())
+        .def(py::init<const Structure &, const std::vector<std::vector<LatticeSite>> &, const std::vector<NeighborList> &, bool>(),
+             py::arg("structure"),
+             py::arg("permutation_matrix"),
+             py::arg("neighborlists"),             
+             py::arg("bothways") = false)
         .def("add_orbit", &OrbitList::addOrbit)
         .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters)
         .def("get_orbit", &OrbitList::getOrbit)
@@ -702,6 +706,10 @@ PYBIND11_MODULE(_icet, m)
         .def(py::init<std::vector<int>, std::vector<std::string>, const OrbitList &>())
         .def("get_cluster_vector", [](const ClusterSpace &ClusterSpace, const Structure &structure) {
             auto cv = ClusterSpace.generateClusterVector(structure);
+            return py::array(cv.size(), cv.data());
+        })
+        .def("get_local_cluster_vector", [](const ClusterSpace &ClusterSpace, const Structure &structure, const int index) {
+            auto cv = ClusterSpace.generateLocalClusterVector(structure, index);
             return py::array(cv.size(), cv.data());
         })
         .def("get_orbit_list", &ClusterSpace::getOrbitList)

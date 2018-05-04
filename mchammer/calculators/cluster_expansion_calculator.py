@@ -1,6 +1,8 @@
 from mchammer.calculators.base_calculator import BaseCalculator
 from typing import List
-
+from icet import Structure
+from icet import ClusterSpace
+import numpy as np
 
 class ClusterExpansionCalculator(BaseCalculator):
     """
@@ -32,6 +34,11 @@ class ClusterExpansionCalculator(BaseCalculator):
         super().__init__(atoms=atoms, name=name)
 
         self._cluster_expansion = cluster_expansion
+        self._local_cluster_space = ClusterSpace(self.cluster_expansion.cluster_space._input_atoms.copy(),
+                    self.cluster_expansion.cluster_space._cutoffs,
+                    self.cluster_expansion.cluster_space._chemical_symbols,
+                    self.cluster_expansion.cluster_space._mi,
+                    bothways=True)
 
     @property
     def cluster_expansion(self):
@@ -90,7 +97,11 @@ class ClusterExpansionCalculator(BaseCalculator):
             lattice index
 
         """
-        return self.calculate_total(self.atoms.numbers)
+        structure = Structure.from_atoms(self.atoms)
+        local_cv = self._local_cluster_space.get_local_cluster_vector(structure, index)
+        return np.dot(local_cv, self.cluster_expansion.parameters)
+
+        # return self.calculate_total(self.atoms.numbers)
 
     @property
     def occupation_constraints(self):
