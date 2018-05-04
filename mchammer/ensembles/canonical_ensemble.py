@@ -20,7 +20,7 @@ class CanonicalEnsemble(BaseEnsemble):
         super().__init__(atoms=atoms, calculator=calculator, name=name,
                          data_container=data_container,
                          random_seed=random_seed)
-        if not 'temperature' in kwargs.keys():
+        if 'temperature' not in kwargs.keys():
             raise KeyError("Temperature needs to be set in canonical ensemble")
         else:
             self.temperature = kwargs['temperature']
@@ -51,4 +51,5 @@ class CanonicalEnsemble(BaseEnsemble):
         if energy_diff < 0:
             return True
         else:
-            return np.exp(-energy_diff/(kB * self.temperature)) > self.next_random_number()
+            return np.exp(-energy_diff/(kB * self.temperature)) > \
+                self.next_random_number()

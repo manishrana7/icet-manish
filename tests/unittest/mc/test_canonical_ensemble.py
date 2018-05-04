@@ -64,11 +64,12 @@ class TestEnsemble(unittest.TestCase):
     def test_init_without_temperature(self):
         """ Test init without temperature."""
         with self.assertRaises(KeyError) as context:
-            ensemble = CanonicalEnsemble(
-                calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
-                random_seed=42)
+            CanonicalEnsemble(
+                calculator=self.calculator, atoms=self.atoms,
+                name='test-ensemble', random_seed=42)
         self.assertTrue(
-            "Temperature needs to be set in canonical ensemble" in str(context.exception))
+            "Temperature needs to be set in canonical "
+            "ensemble" in str(context.exception))
 
 
 if __name__ == '__main__':
