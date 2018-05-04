@@ -63,6 +63,33 @@ class TestCECalculator(unittest.TestCase):
             indices, self.atoms.numbers)
         self.assertIsInstance(local_contribution, float)
 
+        # test local contribution by comparing with differences
+
+        initial_value_total = self.calculator.calculate_total(
+            self.atoms.numbers)
+        initial_value_local = self.calculator.calculate_local_contribution(
+            indices, self.atoms.numbers)
+        
+        current_occupations = [self.atoms.numbers[i] for i in indices]
+        swapped_elements = []
+        for atom in current_occupations:
+            if atom == 13:
+                swapped_elements.append(32)
+            elif atom == 32:
+                swapped_elements.append(13)
+            else:
+                raise Exception("Found unknown element in atoms object. {}".format(atom))
+        new_occupations = self.atoms.numbers.copy()
+        for index, element in zip(indices, swapped_elements):
+            new_occupations[index] = element
+        
+        new_value_total = self.calculator.calculate_total(new_occupations)
+        new_value_local = self.calculator.calculate_local_contribution(indices, new_occupations)
+
+        total_diff = new_value_total - initial_value_total
+        local_diff = new_value_local - initial_value_local
+        self.assertEqual(total_diff, local_diff)
+
     def test_internal_calc_local_contribution(self):
         """Test the internal calc local contribution."""
         indices = [1, 2, 3]
