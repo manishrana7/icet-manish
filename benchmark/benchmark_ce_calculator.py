@@ -8,8 +8,9 @@ import time
 def time_local_energy(calculator, iters=100):
     """ Get time of local energy calculations."""
     indices = [2, 16]
+    occupations = calculator.atoms.numbers
     t0 = time.time()
-    calculator.calculate_local_contribution(indices)
+    calculator.calculate_local_contribution(local_indices=indices,occupations=occupations)
     t1 = time.time() - t0
     t1 /= iters
     return t1
@@ -17,8 +18,9 @@ def time_local_energy(calculator, iters=100):
 
 def time_total_energy(calculator, iters=100):
     """ Get time of local energy calculations."""
+    occupations = calculator.atoms.numbers
     t0 = time.time()
-    calculator.calculate_total()
+    calculator.calculate_total(occupations)
     t1 = time.time() - t0
     t1 /= iters
     return t1
