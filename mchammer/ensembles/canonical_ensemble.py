@@ -9,7 +9,8 @@ class CanonicalEnsemble(BaseEnsemble):
     """
     Canonical Ensemble.
 
-    Attributes:
+    Attributes
+    -----------
     temperature : float
         temperature in Kelvin.
     boltzmann_constant : float (default is ev/K)    
