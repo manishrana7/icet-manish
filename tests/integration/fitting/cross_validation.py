@@ -3,7 +3,9 @@ Test that CrossValidationEstimator gives correct rmse_validation_splits using
 k-fold validation. Also asserts that the correct data is stored into
 cve.valdidation_sactter_data
 '''
+
 import numpy as np
+
 from icet.fitting import CrossValidationEstimator
 from sklearn.model_selection import KFold
 

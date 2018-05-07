@@ -3,6 +3,7 @@ Simple test for using ensemble optimizer and if correctly can identify outliers
 '''
 
 import numpy as np
+
 from icet.fitting import EnsembleOptimizer
 
 
@@ -37,7 +38,7 @@ eopt.train()
 assert np.linalg.norm(eopt.parameters - x_true) < 5.0
 
 # find outliters
-E = eopt.get_errors()
+E = eopt.error_matrix
 E_ave = np.mean(np.abs(E), axis=1)
 predicted_outliers = find_outliers(E_ave)
 
