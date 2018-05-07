@@ -1,3 +1,4 @@
+from _icet import _ClusterExpansionCalculator
 from mchammer.calculators.base_calculator import BaseCalculator
 from typing import List
 from icet import Structure
@@ -33,6 +34,7 @@ class ClusterExpansionCalculator(BaseCalculator):
                  name='Cluster Expansion Calculator'):
         super().__init__(atoms=atoms, name=name)
 
+        self.cpp_calc = _ClusterExpansionCalculator(cluster_expansion.cluster_space, Structure.from_atoms(atoms) )
         self._cluster_expansion = cluster_expansion
         self._local_cluster_space = ClusterSpace(self.cluster_expansion.cluster_space._input_atoms.copy(),
                     self.cluster_expansion.cluster_space._cutoffs,
@@ -107,7 +109,7 @@ class ClusterExpansionCalculator(BaseCalculator):
 
         """
         structure = Structure.from_atoms(self.atoms)
-        local_cv = self._local_cluster_space.get_local_cluster_vector(structure, index)
+        local_cv = self.cpp_calc.get_local_cluster_vector(structure, index)
         return np.dot(local_cv, self.cluster_expansion.parameters)
 
         # return self.calculate_total(self.atoms.numbers)

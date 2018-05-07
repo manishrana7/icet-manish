@@ -115,7 +115,7 @@ std::vector<double> ClusterSpace::generateLocalClusterVector(const Structure &st
 
     const auto clusterMap = clusterCounts.getClusterCounts();
     std::vector<double> clusterVector;
-    clusterVector.push_back(1);
+    clusterVector.push_back(1.0 / structure.size());
     // Finally begin occupying the cluster vector
     for (size_t i = 0; i < _primitive_orbit_list.size(); i++)
     {

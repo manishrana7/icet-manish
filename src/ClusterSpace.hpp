@@ -24,6 +24,8 @@ It will have the definition of the cluster space a cluster expansion is based on
 class ClusterSpace
 {
   public:
+    ClusterSpace(){};
+
     ClusterSpace(std::vector<int> Mi, std::vector<std::string> elements, const OrbitList primOrbitList)
     {
         _Mi = Mi;

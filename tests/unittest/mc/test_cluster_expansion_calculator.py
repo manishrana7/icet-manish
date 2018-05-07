@@ -5,7 +5,7 @@ from icet import ClusterExpansion, ClusterSpace
 from mchammer.calculators.cluster_expansion_calculator import \
     ClusterExpansionCalculator
 
-
+import random
 class TestCECalculator(unittest.TestCase):
     """
     Container for tests of the class functionality.
@@ -20,14 +20,16 @@ class TestCECalculator(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestCECalculator, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al").repeat(3)
-        self.cutoffs = [0,7]
+        self.atoms = bulk("Al",'hcp',a=4.0,c=1.1).repeat(3)
+        self.cutoffs = [5]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
-        params = [1.25] * params_len
-        params[0] = 0
-        params[1] = 0
+
+        params = [random.random() for _ in range(params_len)]
+
+        # params[0] = 21.2
+        # params[1] = 123.1
 
         self.ce = ClusterExpansion(self.cs, params)
 
@@ -69,7 +71,7 @@ class TestCECalculator(unittest.TestCase):
         # test local contribution by comparing with differences
 
         initial_value_total = self.calculator.calculate_total(
-            self.atoms.numbers)
+            occupations=self.atoms.numbers)
         initial_value_local = self.calculator.calculate_local_contribution(
             indices, self.atoms.numbers)
         
@@ -86,7 +88,7 @@ class TestCECalculator(unittest.TestCase):
         for index, element in zip(indices, swapped_elements):
             new_occupations[index] = element
         
-        new_value_total = self.calculator.calculate_total(new_occupations)
+        new_value_total = self.calculator.calculate_total(occupations=new_occupations)
         new_value_local = self.calculator.calculate_local_contribution(indices, new_occupations)
 
         total_diff = new_value_total - initial_value_total

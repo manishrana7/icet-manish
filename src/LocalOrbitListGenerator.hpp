@@ -37,6 +37,8 @@ etc...
 class LocalOrbitListGenerator
 {
   public:
+    LocalOrbitListGenerator(){};
+
     LocalOrbitListGenerator(const OrbitList &, const Structure &);
 
     ///generate and returns the local orbit list with the input index

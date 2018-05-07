@@ -7,6 +7,7 @@
 #include "ClusterCounts.hpp"
 #include "LocalOrbitListGenerator.hpp"
 #include "ClusterSpace.hpp"
+#include "ClusterExpansionCalculator.hpp"
 #include <pybind11/pybind11.h>
 #include "Symmetry.hpp"
 #include "Orbit.hpp"
@@ -490,7 +491,7 @@ PYBIND11_MODULE(_icet, m)
         .def(py::init<>())
         .def("count_lattice_neighbors", &ClusterCounts::countLatticeSites)
         .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<LatticeSite> &)) & ClusterCounts::count)
-        .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &,bool)) & ClusterCounts::count)
+        .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool)) & ClusterCounts::count)
         .def("count_orbit_list", &ClusterCounts::countOrbitList)
         .def("__len__", &ClusterCounts::size)
         .def("reset", &ClusterCounts::reset)
@@ -532,12 +533,12 @@ PYBIND11_MODULE(_icet, m)
              py::arg("lattice_neighbors"),
              py::arg("sort") = false)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
-        .def("get_allowed_sites_permutations",&Orbit::getAllowedSitesPermutations)
+        .def("get_allowed_sites_permutations", &Orbit::getAllowedSitesPermutations)
         .def("get_representative_sites", &Orbit::getRepresentativeSites)
         .def("get_equivalent_sites_permutations", &Orbit::getEquivalentSitesPermutations)
 
         .def("get_representative_cluster", &Orbit::getRepresentativeCluster,
-        R"pbdoc(
+             R"pbdoc(
         The representative cluster
         represents the geometrical
         version of what this orbit is.
@@ -546,13 +547,13 @@ PYBIND11_MODULE(_icet, m)
         ------------ END removal -----------------------
         */
         .def_property_readonly("representative_cluster", &Orbit::getRepresentativeCluster,
-        R"pbdoc(
+                               R"pbdoc(
         The representative cluster
         represents the geometrical
         version of what this orbit is.
         )pbdoc")
-        .def_property("permutations_to_representative", &Orbit::getEquivalentSitesPermutations,&Orbit::setEquivalentSitesPermutations,
-               R"pbdoc(
+        .def_property("permutations_to_representative", &Orbit::getEquivalentSitesPermutations, &Orbit::setEquivalentSitesPermutations,
+                      R"pbdoc(
         Get the list of permutations.
         Where permutations_to_representative[i]
         takes self.equivalent_sites[i] to
@@ -565,7 +566,7 @@ PYBIND11_MODULE(_icet, m)
         these permutations then you will get the correct
        counts. )pbdoc")
         .def_property_readonly("order", [](const Orbit &orbit) { return orbit.getRepresentativeCluster().order(); },
-        R"pbdoc(
+                               R"pbdoc(
         Returns the order of the orbit.
         The order is the same as the number
         of bodies in the representative cluster
@@ -573,14 +574,14 @@ PYBIND11_MODULE(_icet, m)
         in equivalent_sites.
         )pbdoc")
         .def_property_readonly("radius", [](const Orbit &orbit) { return orbit.getRepresentativeCluster().radius(); },
-        R"pbdoc(        Returns the radius of the
+                               R"pbdoc(        Returns the radius of the
         representative cluster.
         )pbdoc")
         .def_property_readonly("permuted_sites", &Orbit::getPermutedEquivalentSites,
-        R"pbdoc(Get the equivalent sites but permuted
+                               R"pbdoc(Get the equivalent sites but permuted
         to representative site.)pbdoc")
-        .def_property_readonly("representative_sites",&Orbit::getRepresentativeSites,
-        R"pbdoc(
+        .def_property_readonly("representative_sites", &Orbit::getRepresentativeSites,
+                               R"pbdoc(
         The representative sites
         is a list of lattice sites
         that are uniquely picked out
@@ -588,16 +589,16 @@ PYBIND11_MODULE(_icet, m)
         used to represent and distinguish
         between orbits.
         )pbdoc")
-        .def_property("equivalent_sites",&Orbit::getEquivalentSites, &Orbit::setEquivalentSites,
-        R"pbdoc(
+        .def_property("equivalent_sites", &Orbit::getEquivalentSites, &Orbit::setEquivalentSites,
+                      R"pbdoc(
         List of equivalent Lattice Sites
         )pbdoc")
         .def("get_sites_with_permutation", &Orbit::getSitesWithPermutation,
-        R"pbdoc(Return the permuted to representative
+             R"pbdoc(Return the permuted to representative
         sites of equivalent_sites[index].)pbdoc")
         // .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
         .def("get_mc_vectors", &Orbit::getMCVectors,
-                R"pbdoc(
+             R"pbdoc(
         Return the mc vectors for this orbit given the allowed components.
         The mc vectors are returned as a list of tuples
 
@@ -609,11 +610,11 @@ PYBIND11_MODULE(_icet, m)
            of allowed compoments at lattice site
            orbit.representative_sites[i].)pbdoc")
         .def("sort", &Orbit::sortOrbit,
-        R"pbdoc(
+             R"pbdoc(
         Sort the equivalent sites list.
         )pbdoc")
         .def("get_all_possible_mc_vector_permutations", &Orbit::getAllPossibleMCVectorPermutations,
-        R"pbdoc(
+             R"pbdoc(
         Similar to get all permutations but
         needs to be filtered through the
         number of allowed elements.
@@ -639,7 +640,7 @@ PYBIND11_MODULE(_icet, m)
                 std::unordered_set<std::vector<int>, VectorHash> setPermutations;
                 setPermutations.insert(permutations.begin(),permutations.end());
                  orbit.setAllowedSitesPermutations(setPermutations); },
-        R"pbdoc(Get the list of equivalent permutations
+                      R"pbdoc(Get the list of equivalent permutations
         for this orbit.
 
         If this orbit is a triplet
@@ -653,7 +654,7 @@ PYBIND11_MODULE(_icet, m)
         be considered since it is
         equivalent to (0,0,1).)pbdoc")
         .def_property("permutations_to_representative", &Orbit::getEquivalentSitesPermutations, &Orbit::setEquivalentSitesPermutations,
-        R"pbdoc(
+                      R"pbdoc(
         Get the list of permutations.
         Where permutations_to_representative[i]
         takes self.equivalent_sites[i] to
@@ -678,7 +679,7 @@ PYBIND11_MODULE(_icet, m)
         .def(py::init<const Structure &, const std::vector<std::vector<LatticeSite>> &, const std::vector<NeighborList> &, bool>(),
              py::arg("structure"),
              py::arg("permutation_matrix"),
-             py::arg("neighborlists"),             
+             py::arg("neighborlists"),
              py::arg("bothways") = false)
         .def("add_orbit", &OrbitList::addOrbit)
         .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters)
@@ -722,7 +723,13 @@ PYBIND11_MODULE(_icet, m)
         .def("get_cutoffs", &ClusterSpace::getCutoffs)
         .def("_get_primitive_structure", &ClusterSpace::getPrimitiveStructure)
         .def("get_native_clusters", &ClusterSpace::getNativeClusters)
-        .def("get_mc_vector_permutations",&ClusterSpace::getMCVectorPermutations)
-        .def("get_allowed_occupations",&ClusterSpace::getAllowedOccupations)
+        .def("get_mc_vector_permutations", &ClusterSpace::getMCVectorPermutations)
+        .def("get_allowed_occupations", &ClusterSpace::getAllowedOccupations)
         .def("__len__", &ClusterSpace::getClusterSpaceSize);
+
+    py::class_<ClusterExpansionCalculator>(m,"_ClusterExpansionCalculator")
+    .def(py::init<const ClusterSpace &, const Structure &>())
+    .def("get_local_cluster_vector", &ClusterExpansionCalculator::getLocalClusterVector)
+    
+    ;
 }

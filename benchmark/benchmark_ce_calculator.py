@@ -20,7 +20,7 @@ def time_total_energy(calculator, iters=100):
     """ Get time of local energy calculations."""
     occupations = calculator.atoms.numbers
     t0 = time.time()
-    calculator.calculate_total(occupations)
+    calculator.calculate_total(occupations=occupations)
     t1 = time.time() - t0
     t1 /= iters
     return t1
