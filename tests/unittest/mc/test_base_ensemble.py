@@ -8,6 +8,7 @@ from mchammer.calculators.cluster_expansion_calculator import \
     ClusterExpansionCalculator
 from mchammer.ensembles.base_ensemble import BaseEnsemble
 from mchammer.observers.base_observer import BaseObserver
+from mchammer import DataContainer
 
 
 class ParakeetObserver(BaseObserver):
@@ -102,12 +103,12 @@ class TestEnsemble(unittest.TestCase):
             number_of_observations,
             n_iters // self.ensemble.observers['Parakeet2'].interval + 1)
 
-        # runt it again to check that step is the same
+        # run it again to check that step is the same
         n_iters = 50
         self.ensemble.run(n_iters, reset_step=True)
         self.assertEqual(self.ensemble.step, 50)
 
-        # runt it yet again to check that step accumulates
+        # run it yet again to check that step accumulates
         n_iters = 10
         self.ensemble.run(n_iters, reset_step=False)
         self.ensemble.run(n_iters, reset_step=False)
@@ -163,7 +164,10 @@ class TestEnsemble(unittest.TestCase):
 
     def test_property_data_container(self):
         """Test the data container property."""
-        pass
+        n_iters = 303
+        self.ensemble.run(n_iters)
+        dc = self.ensemble.data_container
+        self.assertIsInstance(dc, DataContainer)
 
     def test_find_minimum_observation_interval(self):
         """Test the method to find the minimum observation interval."""

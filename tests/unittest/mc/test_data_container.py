@@ -7,6 +7,17 @@ from ase.build import bulk
 from mchammer import DataContainer
 from mchammer.observers.base_observer import BaseObserver
 
+# Create concrete child of BaseObserver for testing
+
+
+class ConcreteObserver(BaseObserver):
+    def __init__(self, interval, tag='ConcreteObserver'):
+        super().__init__(interval, tag=tag, return_type=int)
+
+    def get_observable(self, atoms):
+        """ Return number of Al atoms. """
+        return atoms.get_chemical_symbols().count('Al')
+
 
 class TestDataContainer(unittest.TestCase):
     """Container for the tests of the class functionality"""
@@ -14,17 +25,6 @@ class TestDataContainer(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestDataContainer, self).__init__(*args, **kwargs)
         self.atoms = bulk('Al').repeat(4)
-
-        class ConcreteObserver(BaseObserver):
-            def __init__(self, interval, tag='ConcreteObserver'):
-                super().__init__(interval, tag=tag, return_type=int)
-
-            def get_observable(self, atoms):
-                """
-                Return number of Al atoms.
-                """
-                return atoms.get_chemical_symbols().count('Al')
-
         test_observer = ConcreteObserver(interval=10, tag='obs1')
         other_observer = ConcreteObserver(interval=20, tag='obs2')
         self.observers = [test_observer, other_observer]

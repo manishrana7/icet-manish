@@ -49,12 +49,13 @@ class BaseEnsemble(ABC):
         random.seed(a=self.random_seed)
 
         if data_container is None:
-            self._data_container = DataContainer(atoms=None,
+            self._data_container = DataContainer(atoms=calculator.atoms,
                                                  ensemble_name=name,
                                                  random_seed=random_seed)
         else:
-            raise NotImplementedError
-        self._data_container_filename = None
+            self._data_container = DataContainer.read(data_container)
+
+        self._data_container_filename = name + ".mc"
 
         strict_constraints = self.calculator.occupation_constraints
         sublattices = [[i for i in range(len(self.calculator.atoms))]]
