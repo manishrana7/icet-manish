@@ -107,7 +107,7 @@ class BaseEnsemble(ABC):
 
     def run(self, number_of_trial_steps: int, reset_step=False):
         """
-        Sample the ensemble for `number_of_trial_steps` steps.
+        Samples the ensemble for `number_of_trial_steps` steps.
 
         Parameters:
         -----------
@@ -173,7 +173,7 @@ class BaseEnsemble(ABC):
 
     def _observe_configuration(self, step):
         """
-        Submit current configuration to observers and append observations to
+        Submits current configuration to observers and append observations to
         data container.
 
         Parameters
@@ -216,7 +216,7 @@ class BaseEnsemble(ABC):
 
     def next_random_number(self):
         """
-        Return the next random number from the RNG.
+        Returns the next random number from the RNG.
         """
         return random.random()
 
@@ -238,7 +238,7 @@ class BaseEnsemble(ABC):
 
     def _get_gcd(self, interval_list):
         """
-        Find the gcd from the list of intervals.
+        Finds the gcd from the list of intervals.
 
         interval_list : list of int
         """
@@ -280,7 +280,7 @@ class BaseEnsemble(ABC):
         self._find_minimum_observation_interval()
 
     def reset_data_container(self):
-        """Reset the data container and the internal step attribute."""
+        """Resets the data container and the internal step attribute."""
         self._step = 0
         self.total_trials = 0
         self.accepted_trials = 0
@@ -289,7 +289,7 @@ class BaseEnsemble(ABC):
 
     def update_occupations(self, list_of_sites, list_of_elements):
         """
-        Update the element occupation of the configuration being sampled.
+        Updates the element occupation of the configuration being sampled.
         This will change the state in both the configuration in the calculator
         and the state of configuration manager.
 
