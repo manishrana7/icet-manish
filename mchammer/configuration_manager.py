@@ -121,7 +121,7 @@ class ConfigurationManager(object):
         self.atoms.set_atomic_numbers(self.occupations)
         return self.atoms.copy()
 
-    def get_swap_state(self, sublattice: int) -> Tuple[List[int], List[int]]:
+    def get_swapped_state(self, sublattice: int) -> Tuple[List[int], List[int]]:
         """
         Returns a tuple of a list of two random indices in a specific
         sublattice and what elements they will occupy after a swap.

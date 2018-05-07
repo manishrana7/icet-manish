@@ -35,7 +35,7 @@ class CanonicalEnsemble(BaseEnsemble):
         self.total_trials += 1
 
         sublattice_index = self.get_random_sublattice_index()
-        indices, elements = self.configuration.get_swap_state(sublattice_index)
+        indices, elements = self.configuration.get_swapped_state(sublattice_index)
 
         energy_diff = self.get_property_change(indices, elements)
 
