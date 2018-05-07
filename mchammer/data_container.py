@@ -7,8 +7,7 @@ from datetime import datetime
 from collections import OrderedDict
 import pandas as pd
 from ase import Atoms
-from ase.io import write as ase_write
-from ase.io import read as ase_read
+from ase.io import write as ase_write, read as ase_read
 from icet import __version__ as icet_version
 
 
@@ -69,12 +68,11 @@ class DataContainer:
         self.add_parameter('seed', random_seed)
 
         self._metadata['ensemble_name'] = ensemble_name
-
         self._metadata['date_created'] = \
             datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
         self._metadata['username'] = getpass.getuser()
         self._metadata['hostname'] = socket.gethostname()
-        self.metadata['icet_version'] = icet_version
+        self._metadata['icet_version'] = icet_version
 
     def add_observable(self, tag: str):
         """
@@ -262,7 +260,8 @@ class DataContainer:
 
         with tarfile.open(mode='r', name=infile) as tar_file:
             temp_atoms_file.write(tar_file.extractfile('atoms').read())
-            atoms = ase_read(temp_atoms_file.name, format='xyz')
+            temp_atoms_file.seek(0)
+            atoms = ase_read(temp_atoms_file.name, format='json')
 
             temp_json_file.write(tar_file.extractfile('reference_data').read())
             temp_json_file.seek(0)
@@ -308,7 +307,7 @@ class DataContainer:
 
         # Save reference atomic structure
         temp_atoms_file = tempfile.NamedTemporaryFile()
-        ase_write(temp_atoms_file.name, self.structure, format='xyz')
+        ase_write(temp_atoms_file.name, self.structure, format='json')
 
         # Save reference data to a json tempfile
         reference_data = {'observables': self._observables,
