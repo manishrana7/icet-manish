@@ -68,9 +68,9 @@ class ClusterExpansionCalculator(BaseCalculator):
         float : sum of contributions
         """
         if local_indices is None:
-            raise TypeError("Local indices need to be set")
+            raise TypeError("Missing required keyword argument: local_indices")
         if occupations is None:
-            raise TypeError("occupations need to be set")
+            raise TypeError("Missing required keyword argument: occupations")
 
         self.atoms.set_atomic_numbers(occupations)
         local_contribution = 0
