@@ -321,7 +321,9 @@ class BaseEnsemble(ABC):
         Parameters
         ----------
         indices : list of int
+            refer to indices in the lattice
         elements : list of int
+            refer to atomic species
 
         Return
         ------
