@@ -11,7 +11,8 @@ class CanonicalEnsemble(BaseEnsemble):
 
     Attributes:
     temperature : float
-        temperature in kelvin.
+        temperature in Kelvin.
+    boltzmann_constant : float (default is ev/K)    
     """
 
     def __init__(self, atoms=None, calculator=None, name='Canonical Ensemble',
@@ -24,6 +25,10 @@ class CanonicalEnsemble(BaseEnsemble):
             raise KeyError("Temperature needs to be set in canonical ensemble")
         else:
             self.temperature = kwargs['temperature']
+        if 'boltzmann_constant' in kwargs.keys():
+            self._boltzmann_constant = kwargs['boltzmann_constant']
+        else:
+            self._boltzmann_constant = kB
 
     def do_trial_step(self):
         """Do a trial step."""
@@ -51,5 +56,5 @@ class CanonicalEnsemble(BaseEnsemble):
         if energy_diff < 0:
             return True
         else:
-            return np.exp(-energy_diff/(kB * self.temperature)) > \
+            return np.exp(-energy_diff/(self._boltzmann_constant * self.temperature)) > \
                 self.next_random_number()
