@@ -55,13 +55,16 @@ class ClusterExpansionCalculator(BaseCalculator):
                                      occupations: List[int] = None):
         """
         Return the sum of the contributions from the indices in the input list.
-
+        local_indices refer to the lattice sites from which the local
+        contributions should be summed up from. Occupations is the entire
+        occupation vector.
+        
         Parameters
         ----------
         local_indices : list of ints
             the lattice indices for which to obtain the local contribution
         occupations : list of ints
-            the occupation vector
+            the entire occupation vector
 
         Return
         ------
