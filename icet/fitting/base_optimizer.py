@@ -4,7 +4,6 @@ BaseOptimizer serves as base for all optimizers.
 
 import numpy as np
 from collections import OrderedDict
-from .tools import compute_rmse
 from .fit_methods import (fit_least_squares,
                           fit_lasso,
                           fit_elasticnet,
@@ -42,7 +41,7 @@ class BaseOptimizer:
         seed for pseudo random number generator
     """
 
-    def __init__(self, fit_data, fit_method, seed):
+    def __init__(self, fit_data, fit_method, seed=42):
         """
         Attributes
         ----------
@@ -87,7 +86,10 @@ class BaseOptimizer:
         float
             root mean squared error
         """
-        return compute_rmse(A, self.parameters, y)
+        y_predicted = self.predict(A)
+        delta_y = y_predicted - y
+        rmse = np.sqrt(np.mean(delta_y**2))
+        return rmse
 
     def predict(self, A):
         """
@@ -177,7 +179,5 @@ class BaseOptimizer:
 
     @property
     def seed(self):
-        """
-        int : seed used to initialize pseudo random number of generator.
-        """
+        """ int : seed used to initialize pseudo random number generator."""
         return self._seed

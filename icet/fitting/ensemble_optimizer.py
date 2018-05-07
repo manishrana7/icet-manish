@@ -62,7 +62,12 @@ class EnsembleOptimizer(BaseOptimizer):
         self._ensemble_size = ensemble_size
         self._bootstrap = bootstrap
         self._kwargs = kwargs
-        self._parameters_stddev = None
+        self._train_set_list = None
+        self._test_set_list = None
+        self._parameter_vectors = None
+        self._parameters_std = None
+        self._rmse_train_ensemble = None
+        self._rmse_test_ensemble = None
 
     def train(self):
         """
@@ -92,7 +97,9 @@ class EnsembleOptimizer(BaseOptimizer):
             optimizers.append(opt)
 
         # collect data from each fit
-        self._parameters_set = np.array([opt.parameters for opt in optimizers])
+
+        self._parameter_vectors = np.array(
+            [opt.parameters for opt in optimizers])
         self._train_set_list = [opt.train_set for opt in optimizers]
         self._test_set_list = [opt.test_set for opt in optimizers]
         self._rmse_train_ensemble = np.array(
@@ -106,21 +113,7 @@ class EnsembleOptimizer(BaseOptimizer):
         """
         self._fit_results['parameters'] = np.mean(
             self.parameter_vectors, axis=0)
-        self._parameters_stddev = np.std(self.parameter_vectors, axis=0)
-
-    def get_errors(self):
-        """ Get the errors for each fit and each target value.
-
-        Returns
-        -------
-        NumPy (N,M) array
-            matrix of fit errors where `N` is the number of target values and
-            `M` is the number of fits (i.e., the size of the ensemble)
-        """
-        error_matrix = np.zeros((self._Nrows, self.ensemble_size))
-        for i, parameters in enumerate(self.parameter_vectors):
-            error_matrix[:, i] = np.dot(self._A, parameters) - self._y
-        return error_matrix
+        self._parameters_std = np.std(self.parameter_vectors, axis=0)
 
     def predict(self, A, return_std=False):
         """
@@ -155,12 +148,24 @@ class EnsembleOptimizer(BaseOptimizer):
             return prediction
 
     @property
+    def error_matrix(self):
+        """
+        NumPy (N,M) array : matrix of fit errors where `N` is the number of
+                            target values and `M` is the number of fits
+                            (i.e., the size of the ensemble)
+        """
+        error_matrix = np.zeros((self._Nrows, self.ensemble_size))
+        for i, parameters in enumerate(self.parameter_vectors):
+            error_matrix[:, i] = np.dot(self._A, parameters) - self._y
+        return error_matrix
+
+    @property
     def summary(self):
         """ dict : Comprehensive information about the optimizer. """
         info = super().summary
 
         # Add class specific data
-        info['parameters_stddev'] = self.parameters_stddev
+        info['parameters_std'] = self.parameters_std
         info['ensemble_size'] = self.ensemble_size
         info['rmse_train'] = self.rmse_train
         info['rmse_train_ensemble'] = self.rmse_train_ensemble
@@ -185,14 +190,14 @@ class EnsembleOptimizer(BaseOptimizer):
             ', '.join('{}={}'.format(*kwarg) for kwarg in kwargs.items()))
 
     @property
-    def parameters_stddev(self):
+    def parameters_std(self):
         """ NumPy array : standard deviation for each parameter. """
-        return self._parameters_stddev
+        return self._parameters_std
 
     @property
     def parameter_vectors(self):
         """ list : all parameter vectors in the ensemble. """
-        return self._parameters_set
+        return self._parameter_vectors
 
     @property
     def ensemble_size(self):
@@ -204,6 +209,8 @@ class EnsembleOptimizer(BaseOptimizer):
         """
         float : ensemble average of root mean squared error over train sets.
         """
+        if self.rmse_train_ensemble is None:
+            return None
         return np.sqrt(np.mean((self.rmse_train_ensemble)**2))
 
     @property
@@ -217,6 +224,8 @@ class EnsembleOptimizer(BaseOptimizer):
         """
         float : ensemble average of root mean squared error over test sets.
         """
+        if self.rmse_test_ensemble is None:
+            return None
         return np.sqrt(np.mean((self.rmse_test_ensemble)**2))
 
     @property

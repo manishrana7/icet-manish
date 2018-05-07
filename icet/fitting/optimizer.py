@@ -107,42 +107,43 @@ class Optimizer(BaseOptimizer):
         """
 
         if train_set is None and test_set is None:
-            # get rows from fractions
-            train_set, test_set = \
-                self._get_rows_via_fractions(train_size, test_size)
-        else:  # get rows from specified rows
-            train_set, test_set = \
-                self._get_rows_from_indices(train_set, test_set)
+            train_set, test_set = self._get_rows_via_sizes(
+                train_size, test_size)
+        else:
+            train_set, test_set = self._get_rows_from_indices(
+                train_set, test_set)
 
         if len(train_set) == 0:
             raise ValueError('No training rows was selected from fit_data')
 
+        if test_set is not None:  # then check overlap between train and test
+            if len(np.intersect1d(train_set, test_set)):
+                raise ValueError('Overlap between train set and test set')
+            if len(test_set) == 0:
+                test_set = None
+
         self._train_set = train_set
         self._test_set = test_set
 
-    def _get_rows_via_fractions(self, train_size, test_size):
-        """ Gets row via fractions. """
+    def _get_rows_via_sizes(self, train_size, test_size):
+        """ Gets train and test rows via sizes. """
 
         # Handle special cases
         if test_size is None and train_size is None:
             raise ValueError('Both train fraction and test fraction are None')
         elif train_size is None and abs(test_size - 1.0) < 1e-10:
             raise ValueError('train rows is empty for these fractions')
-        elif test_size is None and abs(train_size - 1.0) < 1e-10:
-            train_set = np.arange(self._Nrows)
-            test_set = None
-            return train_set, test_set
+
+        elif test_size is None:
+            if train_size == self._Nrows or abs(train_size-1.0) < 1e-10:
+                train_set = np.arange(self._Nrows)
+                test_set = None
+                return train_set, test_set
 
         # split
-        train_set, test_set = \
-            train_test_split(np.arange(self._Nrows),
-                             train_size=train_size,
-                             test_size=test_size,
-                             random_state=self.seed)
-        if len(test_set) == 0:
-            test_set = None
-        if len(train_set) == 0:
-            raise ValueError('train rows is empty, too small train_size')
+        train_set, test_set = train_test_split(
+            np.arange(self._Nrows), train_size=train_size, test_size=test_size,
+            random_state=self.seed)
 
         return train_set, test_set
 
