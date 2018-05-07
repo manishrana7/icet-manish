@@ -31,7 +31,7 @@ class BaseEnsemble(ABC):
                  random_seed=None):
 
         if calculator is None:
-            raise TypeError("calculator needs to be set")
+            raise TypeError("Missing required keyword argument: calculator")
         self._calculator = calculator
         self._name = name
         self.data_container_write_period = data_container_write_period
@@ -41,7 +41,7 @@ class BaseEnsemble(ABC):
         self._step = 0
 
         if atoms is None:
-            raise Exception("atoms need to be set")
+            raise TypeError("Missing required keyword argument: atoms")
         if random_seed is None:
             self._random_seed = random.randint(0, 1e16)
         else:
