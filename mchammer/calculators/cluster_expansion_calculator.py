@@ -42,7 +42,13 @@ class ClusterExpansionCalculator(BaseCalculator):
 
     def calculate_total(self, occupations: List[int]):
         """
-        Calculator the total property of the current configuration.
+        Calculates the total property of the current configuration.
+
+        Parameters
+        ----------
+        occupations: list of int
+            the entire occupation vector
+
 
         Return
         -------
@@ -58,7 +64,7 @@ class ClusterExpansionCalculator(BaseCalculator):
         local_indices refer to the lattice sites from which the local
         contributions should be summed up from. Occupations is the entire
         occupation vector.
-        
+
         Parameters
         ----------
         local_indices : list of ints
