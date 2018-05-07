@@ -96,14 +96,14 @@ class BaseOptimizer:
 
         Parameters
         ----------
-        A : NumPy (N, M) array
+        A : NumPy (N, M) array or NumPy (M, )
             fit matrix where `N` (=rows of `A`, elements of `y`) equals the
             number of target values and `M` (=columns of `A`) equals the number
             of parameters
 
         Returns
         -------
-        NumPy (N) array
+        NumPy (N) array, or float if single row is inputed
             vector of predicted values
         """
         return np.dot(A, self.parameters)

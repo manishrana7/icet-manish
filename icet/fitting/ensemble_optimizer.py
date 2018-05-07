@@ -35,7 +35,7 @@ class EnsembleOptimizer(BaseOptimizer):
         "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
     ensemble_size : int
         number of fits in the ensemble
-    training_size : float or int
+    train_size : float or int
         If float represents the fraction of `fit_data` (rows) to be used for
         training. If int, represents the absolute number of rows to be used for
         training.
@@ -46,16 +46,16 @@ class EnsembleOptimizer(BaseOptimizer):
     """
 
     def __init__(self, fit_data, fit_method='least-squares', ensemble_size=50,
-                 training_size=1.0, bootstrap=True, seed=42, **kwargs):
+                 train_size=1.0, bootstrap=True, seed=42, **kwargs):
 
         BaseOptimizer.__init__(self, fit_data, fit_method, seed)
 
         # set training size
-        if isinstance(training_size, float):
-            self._training_size = int(
-                np.round(training_size * self.number_of_target_values))
-        elif isinstance(training_size, int):
-            self._training_size = training_size
+        if isinstance(train_size, float):
+            self._train_size = int(
+                np.round(train_size * self.number_of_target_values))
+        elif isinstance(train_size, int):
+            self._train_size = train_size
         else:
             raise TypeError('Training size must be int or float')
 
@@ -79,25 +79,24 @@ class EnsembleOptimizer(BaseOptimizer):
         optimizers = []
         for _ in range(self.ensemble_size):
             # construct training and test sets
-            training_set = rs.choice(
-                np.arange(self.number_of_target_values), self.training_size,
-                replace=self.bootstrap)
+            train_set = rs.choice(np.arange(self.number_of_target_values),
+                                  self.train_size, replace=self.bootstrap)
             test_set = np.setdiff1d(
-                range(self.number_of_target_values), training_set)
+                range(self.number_of_target_values), train_set)
 
             # train
             opt = Optimizer(
-                (self._A, self._y), self.fit_method, training_set=training_set,
+                (self._A, self._y), self.fit_method, train_set=train_set,
                 test_set=test_set, **self._kwargs)
             opt.train()
             optimizers.append(opt)
 
         # collect data from each fit
         self._parameters_set = np.array([opt.parameters for opt in optimizers])
-        self._training_set_list = [opt.training_set for opt in optimizers]
+        self._train_set_list = [opt.train_set for opt in optimizers]
         self._test_set_list = [opt.test_set for opt in optimizers]
-        self._rmse_training_ensemble = np.array(
-            [opt.rmse_training for opt in optimizers])
+        self._rmse_train_ensemble = np.array(
+            [opt.rmse_train for opt in optimizers])
         self._rmse_test_ensemble = np.array(
             [opt.rmse_test for opt in optimizers])
 
@@ -123,6 +122,38 @@ class EnsembleOptimizer(BaseOptimizer):
             error_matrix[:, i] = np.dot(self._A, parameters) - self._y
         return error_matrix
 
+    def predict(self, A, return_std=False):
+        """
+        Predict data given an input matrix `A`, i.e., `Ax`, where `x` is
+        the vector of the fitted parameters.
+
+        By using all parameter vectors in the ensemble a standard deviation of
+        the prediction can be obtained.
+
+        Parameters
+        ----------
+        A : NumPy (N, M) array
+            fit matrix where `N` (=rows of `A`, elements of `y`) equals the
+            number of target values and `M` (=columns of `A`) equals the number
+            of parameters
+        return_std : bool
+            whether or not to return the standard deviation of the prediction
+        Returns
+        -------
+        (NumPy (N) array, NumPy (N) array) or (float, float)
+            vector of predicted values, vector of standard deviations
+        """
+        prediction = np.dot(A, self.parameters)
+        if return_std:
+            predictions = np.dot(A, self.parameter_vectors.T)
+            if len(predictions.shape) == 1:  # shape is (N, )
+                std = np.std(predictions)
+            else:  # shape is (N, M)
+                std = np.std(predictions, axis=1)
+            return prediction, std
+        else:
+            return prediction
+
     @property
     def summary(self):
         """ dict : Comprehensive information about the optimizer. """
@@ -131,11 +162,11 @@ class EnsembleOptimizer(BaseOptimizer):
         # Add class specific data
         info['parameters_stddev'] = self.parameters_stddev
         info['ensemble_size'] = self.ensemble_size
-        info['rmse_training'] = self.rmse_training
-        info['rmse_training_ensemble'] = self.rmse_training_ensemble
+        info['rmse_train'] = self.rmse_train
+        info['rmse_train_ensemble'] = self.rmse_train_ensemble
         info['rmse_test'] = self.rmse_test
         info['rmse_test_ensemble'] = self.rmse_test_ensemble
-        info['training_size'] = self.training_size
+        info['train_size'] = self.train_size
         info['bootstrap'] = self.bootstrap
 
         # add kwargs used for fitting
@@ -146,7 +177,7 @@ class EnsembleOptimizer(BaseOptimizer):
         kwargs = dict()
         kwargs['fit_method'] = self.fit_method
         kwargs['ensemble_size'] = self.ensemble_size
-        kwargs['training_size'] = self.training_size
+        kwargs['train_size'] = self.train_size
         kwargs['bootstrap'] = self.bootstrap
         kwargs['seed'] = self.seed
         kwargs = {**kwargs, **self._kwargs}
@@ -165,21 +196,21 @@ class EnsembleOptimizer(BaseOptimizer):
 
     @property
     def ensemble_size(self):
-        """ int : number of training rounds. """
+        """ int : number of train rounds. """
         return self._ensemble_size
 
     @property
-    def rmse_training(self):
+    def rmse_train(self):
         """
-        float : ensemble average of root mean squared error over training sets.
+        float : ensemble average of root mean squared error over train sets.
         """
-        return np.sqrt(np.mean((self.rmse_training_ensemble)**2))
+        return np.sqrt(np.mean((self.rmse_train_ensemble)**2))
 
     @property
-    def rmse_training_ensemble(self):
-        """ list : root mean squared training errors obtained during for each
+    def rmse_train_ensemble(self):
+        """ list : root mean squared train errors obtained during for each
                    fit in ensemble. """
-        return self._rmse_training_ensemble
+        return self._rmse_train_ensemble
 
     @property
     def rmse_test(self):
@@ -195,17 +226,17 @@ class EnsembleOptimizer(BaseOptimizer):
         return self._rmse_test_ensemble
 
     @property
-    def training_size(self):
-        """ int : number of rows included in training sets. Note that this will
+    def train_size(self):
+        """ int : number of rows included in train sets. Note that this will
         be different from the number of unique rows if boostrapping. """
-        return self._training_size
+        return self._train_size
 
     @property
-    def training_fraction(self):
+    def train_fraction(self):
         """ float : fraction of input data used for training; this value can
                     differ slightly from the value set during initialization
                     due to rounding. """
-        return self.training_set_size / self._Nrows
+        return self.train_set_size / self._Nrows
 
     @property
     def bootstrap(self):
