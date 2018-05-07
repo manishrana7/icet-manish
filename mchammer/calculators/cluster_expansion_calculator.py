@@ -47,9 +47,15 @@ class ClusterExpansionCalculator(BaseCalculator):
         """
         return self._cluster_expansion
 
-    def calculate_total(self, occupations: List[int]):
+    def calculate_total(self, *, occupations: List[int]):
         """
-        Calculator the total property of the current configuration.
+        Calculates the total property of the current configuration.
+
+        Parameters
+        ----------
+        occupations: list of int
+            the entire occupation vector (i.e. list of atomic species)
+
 
         Return
         -------
@@ -62,22 +68,25 @@ class ClusterExpansionCalculator(BaseCalculator):
                                      occupations: List[int] = None):
         """
         Return the sum of the contributions from the indices in the input list.
+        local_indices refer to the lattice sites from which the local
+        contributions should be summed up from. Occupations is the entire
+        occupation vector.
 
         Parameters
         ----------
         local_indices : list of ints
-            the lattice indices to get the local energy of
+            the lattice indices for which to obtain the local contribution
         occupations : list of ints
-            the occupation vector
+            the entire occupation vector
 
         Return
         ------
         float : sum of contributions
         """
         if local_indices is None:
-            raise TypeError("Local indices need to be set")
+            raise TypeError("Missing required keyword argument: local_indices")
         if occupations is None:
-            raise TypeError("occupations need to be set")
+            raise TypeError("Missing required keyword argument: occupations")
 
         self.atoms.set_atomic_numbers(occupations)
         local_contribution = 0

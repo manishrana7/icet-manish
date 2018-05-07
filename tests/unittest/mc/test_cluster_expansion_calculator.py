@@ -45,7 +45,7 @@ class TestCECalculator(unittest.TestCase):
         """Test calculating total property."""
 
         self.assertEqual(self.calculator.calculate_total(
-            self.atoms.numbers), 283.0)
+            occupations=self.atoms.numbers), 283.0)
         self.assertEqual(self.calculator.cluster_expansion.predict(
             self.calculator.atoms), 283.0)
 
@@ -54,7 +54,7 @@ class TestCECalculator(unittest.TestCase):
         elements = [32] * 4
         self.calculator.update_occupations(indices, elements)
         self.assertAlmostEqual(self.calculator.calculate_total(
-            self.atoms.numbers), 66.96296296)
+            occupations=self.atoms.numbers), 66.96296296)
         self.assertAlmostEqual(self.calculator.cluster_expansion.predict(
             self.calculator.atoms),  66.96296296)
 

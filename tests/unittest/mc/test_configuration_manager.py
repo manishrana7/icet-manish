@@ -115,11 +115,11 @@ class TestConfigurationManager(unittest.TestCase):
         sublattices[0][0] = sublattices[0][0] + 1
         self.assertNotEqual(list(sublattices), list(self.cm.sublattices))
 
-    def test_get_swap_state(self):
+    def test_get_swapped_state(self):
         """Test the getting swap indices method."""
 
         for _ in range(1000):
-            indices, elements = self.cm.get_swap_state(0)
+            indices, elements = self.cm.get_swapped_state(0)
             index1 = indices[0]
             index2 = indices[1]
             self.assertNotEqual(
@@ -135,7 +135,7 @@ class TestConfigurationManager(unittest.TestCase):
         self.cm.update_occupations(indices, elements)
 
         with self.assertRaises(SwapNotPossibleError) as context:
-            indices, elements = self.cm.get_swap_state(0)
+            indices, elements = self.cm.get_swapped_state(0)
 
         # try swapping in an empty sublattice
         sublattices = [indices, []]
@@ -144,7 +144,7 @@ class TestConfigurationManager(unittest.TestCase):
             self.atoms, self.strict_constraints, sublattices,
             self.constraints)
         with self.assertRaises(SwapNotPossibleError) as context:
-            indices, elements = cm_two_sublattices.get_swap_state(1)
+            indices, elements = cm_two_sublattices.get_swapped_state(1)
 
         self.assertTrue("Sublattice is empty" in str(context.exception))
 

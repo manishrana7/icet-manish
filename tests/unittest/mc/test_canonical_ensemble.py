@@ -4,8 +4,8 @@ import numpy as np
 from ase.build import bulk
 
 from icet import ClusterExpansion, ClusterSpace
-from mchammer.calculators.cluster_expansion_calculator import \
-    ClusterExpansionCalculator
+from mchammer.calculators import ClusterExpansionCalculator
+
 from mchammer.ensembles.canonical_ensemble import CanonicalEnsemble
 
 
@@ -15,14 +15,14 @@ class TestEnsemble(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEnsemble, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al").repeat(3)
+        self.atoms = bulk('Al').repeat(3)
         for i, atom in enumerate(self.atoms):
             if i % 2 == 0:
-                atom.symbol = "Ga"
+                atom.symbol = 'Ga'
         cutoffs = [5, 5, 4]
-        elements = ["Al", "Ga"]
+        elements = ['Al', 'Ga']
         self.cs = ClusterSpace(self.atoms, cutoffs, elements)
-        parameters = np.array([1.2 for _ in range(len(self.cs))])
+        parameters = parameters = np.array([1.2]*len(self.cs))
         self.ce = ClusterExpansion(self.cs, parameters)
         self.temperature = 100.0
 

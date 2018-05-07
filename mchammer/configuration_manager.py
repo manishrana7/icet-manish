@@ -47,10 +47,10 @@ class ConfigurationManager(object):
         else:
             occupation_constraints = strict_constraints
         self._occupation_constraints = occupation_constraints
-        self._possible_elements = self._get_possible_elements()
+        self._possible_elements = self._setup_possible_elements()
         self._element_occupation = self._get_element_occupation()
 
-    def _get_possible_elements(self)->List[int]:
+    def _setup_possible_elements(self)->List[int]:
         """
         Return a list of the possible elements in
         the entire configuration.
@@ -121,7 +121,8 @@ class ConfigurationManager(object):
         self.atoms.set_atomic_numbers(self.occupations)
         return self.atoms.copy()
 
-    def get_swap_state(self, sublattice: int) -> Tuple[List[int], List[int]]:
+    def get_swapped_state(self, sublattice: int) -> Tuple[List[int],
+                                                          List[int]]:
         """
         Returns a tuple of a list of two random indices in a specific
         sublattice and what elements they will occupy after a swap.

@@ -191,7 +191,7 @@ class TestEnsemble(unittest.TestCase):
             calculator=self.calculator, atoms=None,
             name='test-ensemble', random_seed=42)
 
-        self.assertTrue("atoms need to be set"
+        self.assertTrue("Missing required keyword argument: atoms"
                         in str(context.exception))
 
     def test_get_property_change(self):
