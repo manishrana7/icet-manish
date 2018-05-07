@@ -59,7 +59,7 @@ class ClusterExpansionCalculator(BaseCalculator):
         Parameters
         ----------
         local_indices : list of ints
-            the lattice indices to get the local energy of
+            the lattice indices to get the local property of
         occupations : list of ints
             the occupation vector
 
