@@ -40,14 +40,14 @@ class ClusterExpansionCalculator(BaseCalculator):
         """
         return self._cluster_expansion
 
-    def calculate_total(self, occupations: List[int]):
+    def calculate_total(self, *, occupations: List[int]):
         """
         Calculates the total property of the current configuration.
 
         Parameters
         ----------
         occupations: list of int
-            the entire occupation vector
+            the entire occupation vector (i.e. list of atomic species)
 
 
         Return
@@ -99,7 +99,7 @@ class ClusterExpansionCalculator(BaseCalculator):
             lattice index
 
         """
-        return self.calculate_total(self.atoms.numbers)
+        return self.calculate_total(occupations=self.atoms.numbers)
 
     @property
     def occupation_constraints(self):
