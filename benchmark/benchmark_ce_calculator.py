@@ -33,8 +33,9 @@ if __name__ == '__main__':
     cs = ClusterSpace(atoms, cutoffs, elements)
     parameters = np.array([1.2 for _ in range(len(cs))])
     ce = ClusterExpansion(cs, parameters)
+    print("Beging construct ce calc")
     calculator = ClusterExpansionCalculator(atoms.repeat(10), ce)
-
+    print("done construct ce calc")
     t_local = time_local_energy(calculator)
     t_total = time_total_energy(calculator)
     print("atoms size {}".format(len(calculator.atoms)))

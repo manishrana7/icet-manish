@@ -50,7 +50,18 @@ Will count the vectors in latticeNeighbors and assuming these sets of sites are 
 */
 void ClusterCounts::count(const Structure &structure, const std::vector<std::vector<LatticeSite>> &latticeNeighbors,
                           const Cluster &cluster, bool orderIntact)
-{
+{   
+
+    if(latticeNeighbors.size()==0)
+    {
+        std::vector<int> placeHolderElements;
+        for(int i = 0; i<cluster.order(); i++)
+        {
+            placeHolderElements.push_back(structure.getAtomicNumber(0));
+        }
+        // _clusterCounts[cluster][placeHolderElements] += 0;
+        std::cout<<"No neighbors in count. Cluster tag= "<<cluster.tag()<<std::endl;
+    }
 
     for (const auto &latnbrs : latticeNeighbors)
     {
