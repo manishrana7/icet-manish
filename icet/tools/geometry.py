@@ -6,6 +6,27 @@ from icet.core.lattice_site import LatticeSite
 from icet.core_py.lattice_site import LatticeSite as LatticeSite_py
 
 
+def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
+    '''Get positions in reduced (scaled) coordinates.
+
+    If wrap is True, positions outside the unit cell will be wrapped into
+    the cell in the directions with periodic boundary conditions
+    such that the scaled coordinates are between zero and one.
+    '''
+
+    fractional = np.linalg.solve(cell.T, positions.T).T
+
+    if wrap:
+        for i, periodic in enumerate(pbc):
+            if periodic:
+                # Yes, we need to do it twice.
+                # See the scaled_positions.py test.
+                fractional[:, i] %= 1.0
+                fractional[:, i] %= 1.0
+
+    return fractional
+
+
 def add_vacuum_in_non_pbc(atoms):
     '''
     Add vacuum in non-periodic directions.
