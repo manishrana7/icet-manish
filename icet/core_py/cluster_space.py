@@ -1,6 +1,4 @@
-from collections import OrderedDict
 from icet.core_py.orbit_list import OrbitList
-from icet.tools.geometry import add_vacuum_in_non_pbc
 
 
 class ClusterSpace(object):
@@ -129,20 +127,3 @@ class ClusterSpace(object):
 
     def __len__(self):
         pass
-
-def view_singlets(atoms, to_primitive=False):
-    """
-    Visualize singlets in a structure using the ASE graphical user interface.
-
-    Parameters
-    ----------
-    atoms : ASE Atoms object / icet Structure object (bi-optional)
-        atomic configuration
-    to_primitive : boolean
-        if True the input structure will be reduced to its primitive unit cell
-        before processing
-    """
-    from ase.visualize import view
-    singlet_configuration = get_singlet_configuration(
-        atoms, to_primitive=to_primitive)
-    view(singlet_configuration)
