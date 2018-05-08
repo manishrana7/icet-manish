@@ -4,7 +4,7 @@ BaseOptimizer serves as base for all optimizers.
 
 import numpy as np
 from collections import OrderedDict
-from .split_bregman import split_bregman as fit_split_bregman
+from .split_bregman import fit_split_bregman
 from .fit_methods import (fit_least_squares,
                           fit_lasso,
                           fit_elasticnet,
