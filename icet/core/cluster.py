@@ -1,6 +1,6 @@
 from _icet import Cluster
-from icet.core.structure import Structure
 from icet.core.lattice_site import LatticeSite
+from icet.core.structure import Structure
 __all__ = ['Cluster']
 
 

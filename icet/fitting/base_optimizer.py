@@ -1,10 +1,9 @@
-'''
+"""
 BaseOptimizer serves as base for all optimizers.
-'''
+"""
 
 import numpy as np
 from collections import OrderedDict
-from .tools import compute_rmse
 from .split_bregman import split_bregman as fit_split_bregman
 from .fit_methods import (fit_least_squares,
                           fit_lasso,
@@ -24,7 +23,7 @@ fit_methods = OrderedDict([
 
 
 class BaseOptimizer:
-    '''
+    """
     BaseOptimizer class.
 
     Serves as base class for all Optimizers solving `Ax = y`.
@@ -42,10 +41,10 @@ class BaseOptimizer:
         "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
     seed : int
         seed for pseudo random number generator
-    '''
+    """
 
-    def __init__(self, fit_data, fit_method, seed):
-        '''
+    def __init__(self, fit_data, fit_method, seed=42):
+        """
         Attributes
         ----------
         _A : NumPy (N, M) array
@@ -54,7 +53,7 @@ class BaseOptimizer:
             target values
         _optimizer_function : function
             optimizer function to be called when training
-        '''
+        """
 
         if fit_method not in fit_methods.keys():
             raise ValueError('Fit method not available')
@@ -71,7 +70,7 @@ class BaseOptimizer:
         self._fit_results = {'parameters': None}
 
     def compute_rmse(self, A, y):
-        '''
+        """
         Compute the root mean square error using the `A`, `y`, and the
         vector of fitted parameters `x` corresponding to `||Ax-y||_2`.
 
@@ -88,30 +87,33 @@ class BaseOptimizer:
         -------
         float
             root mean squared error
-        '''
-        return compute_rmse(A, self.parameters, y)
+        """
+        y_predicted = self.predict(A)
+        delta_y = y_predicted - y
+        rmse = np.sqrt(np.mean(delta_y**2))
+        return rmse
 
     def predict(self, A):
-        '''
+        """
         Predict data given an input matrix `A`, i.e., `Ax`, where `x` is
         the vector of the fitted parameters.
 
         Parameters
         ----------
-        A : NumPy (N, M) array
+        A : NumPy (N, M) array or NumPy (M, )
             fit matrix where `N` (=rows of `A`, elements of `y`) equals the
             number of target values and `M` (=columns of `A`) equals the number
             of parameters
 
         Returns
         -------
-        NumPy (N) array
+        NumPy (N) array, or float if single row is inputed
             vector of predicted values
-        '''
+        """
         return np.dot(A, self.parameters)
 
     def get_contributions(self, A):
-        '''
+        """
         Compute the average contribution to the predicted values from each
         element of the parameter vector.
 
@@ -126,12 +128,12 @@ class BaseOptimizer:
         -------
         NumPy (N, M) array
             average contribution for each row of `A` from each parameter
-        '''
+        """
         return np.mean(np.abs(np.multiply(A, self.parameters)), axis=0)
 
     @property
     def summary(self):
-        ''' dict : Comprehensive information about the optimizer '''
+        """ dict : Comprehensive information about the optimizer. """
         info = dict()
         info['fit_method'] = self.fit_method
         info['number_of_target_values'] = self.number_of_target_values
@@ -151,16 +153,17 @@ class BaseOptimizer:
         return '\n'.join(s)
 
     def __repr__(self):
-        return(str(self))
+        return 'BaseOptimizer((A, y), {}, {}'.format(
+            self.fit_method, self.seed)
 
     @property
     def fit_method(self):
-        ''' string : fit method '''
+        """ string : fit method. """
         return self._fit_method
 
     @property
     def parameters(self):
-        ''' NumPy array : copy of parameter vector '''
+        """ NumPy array : copy of parameter vector. """
         if self._fit_results['parameters'] is None:
             return None
         else:
@@ -168,15 +171,15 @@ class BaseOptimizer:
 
     @property
     def number_of_target_values(self):
-        ''' int : number of target values (=rows in `A` matrix) '''
+        """ int : number of target values (=rows in `A` matrix). """
         return self._Nrows
 
     @property
     def number_of_parameters(self):
-        ''' int : number of parameters (=columns in `A` matrix) '''
+        """ int : number of parameters (=columns in `A` matrix). """
         return self._Ncols
 
     @property
     def seed(self):
-        ''' int : seed used to initialize pseudo random number of generator '''
+        """ int : seed used to initialize pseudo random number generator."""
         return self._seed

@@ -29,16 +29,26 @@ team can also be reached by email via icet@materialsmodeling.org.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents
+   :caption: Main
 
    overview
    background
    workflow
    installation
-   tutorial/index
-   examples/index
-   moduleref/index
+   basic/index
+   advanced/index
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Function reference
+
+   moduleref_icet/index
+   moduleref_mchammer/index
    coreref/index
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Backmatter
 
    bibliography
    glossary

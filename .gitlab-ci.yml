@@ -67,9 +67,7 @@ pages:
     - cd ../..
     - mv doc/apidoc/html/ public/apidoc/
     # user guide (sphinx)
-    - pip3 install breathe
     - export PYTHONPATH=$PWD:$PWD/build/src/:$PYTHONPATH
-    - python3 -m pip install cloud_sptheme
     - sphinx-build doc/userguide/source/ public/
     # clean up
     - ls -l public/.well-known/acme-challenge/
