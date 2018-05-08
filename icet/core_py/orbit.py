@@ -24,7 +24,7 @@ class Orbit(object):
     def __init__(self, cluster):
         self._equivalent_sites = []
         self._representative_cluster = None
-        self.geometrical_size_tolerance = 1e-5
+        self.radius_tolerance = 1e-5
         self._allowed_permutations = []
         self._permutations_to_representative = []
         self._representative_cluster = cluster
@@ -83,15 +83,16 @@ class Orbit(object):
         return len(self.equivalent_sites)
 
     @property
-    def geometrical_size(self):
+    def radius(self):
         """
         Returns the geometrical size of the
         representative cluster.
+
         TODO
         ----
         * Implement this when cluster is available.
         """
-        return self.representative_cluster.geometrical_size
+        return self.representative_cluster.radius
 
     def sort(self):
         """
@@ -119,9 +120,8 @@ class Orbit(object):
         if self.order != other.order:
             return self.order < other.order
 
-        if np.abs(self.geometrical_size -
-                  other.geometrical_size) > self.geometrical_size_tolerance:
-            return self.geometrical_size < other.geometrical_size
+        if np.abs(self.radius - other.radius) > self.radius_tolerance:
+            return self.radius < other.radius
 
         if len(self) != len(other):
             return len(self) < len(other)

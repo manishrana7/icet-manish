@@ -1,14 +1,14 @@
-'''
+"""
 Handling of Smith Normal Form matrices
-'''
+"""
 
 import numpy as np
 
 
 class SmithNormalForm(object):
-    '''
+    """
     Smith Normal Form matrix.
-    '''
+    """
 
     def __init__(self, H):
         self.compute_snf(H)
@@ -24,14 +24,14 @@ class SmithNormalForm(object):
         self.blocks = blocks
 
     def compute_snf(self, H, tol=1e-3):
-        '''
+        """
         Compute Smith Normal Form for 3x3 matrix. Note that H = L*S*R.
 
         Parameters
         ----------
         H : ndarray
             3x3 matrix
-        '''
+        """
         A = H.copy()
         L = np.eye(3, dtype=int)
         R = np.eye(3, dtype=int)
@@ -71,18 +71,18 @@ class SmithNormalForm(object):
         self.L = L
 
     def add_hnf(self, hnf):
-        '''Add HNF to SNF.
+        """Add HNF to SNF.
 
         Paramaters
         ----------
         hnf : HermiteNormalForm object
-        '''
+        """
         self.hnfs.append(hnf)
 
     def set_group_order(self):
-        '''
+        """
         Set group representation of an SNF matrix (the G matrix in HarFor08).
-        '''
+        """
         group_order = []
         for i in range(self.S[0]):
             for j in range(self.S[1]):
@@ -92,7 +92,7 @@ class SmithNormalForm(object):
 
 
 def _switch_rows(A, i, j):
-    '''
+    """
     Switch rows in matrix.
 
     Parameters
@@ -108,7 +108,7 @@ def _switch_rows(A, i, j):
     -------
     ndarray
         Matrix with swapped rows.
-    '''
+    """
     row = A[j].copy()
     A[j] = A[i]
     A[i] = row
@@ -116,7 +116,7 @@ def _switch_rows(A, i, j):
 
 
 def _switch_columns(A, i, j):
-    '''
+    """
     Switch columns in matrix.
 
     Parameters
@@ -132,7 +132,7 @@ def _switch_columns(A, i, j):
     -------
     ndarray
         Matrix with swapped columns.
-    '''
+    """
     col = A[:, j].copy()
     A[:, j] = A[:, i]
     A[:, i] = col
@@ -140,7 +140,7 @@ def _switch_columns(A, i, j):
 
 
 def _gcd_reduce_row(A, R, i):
-    '''
+    """
     Use column operations to make A[i, i] the greatest common
     denominator of the elements in row i and the other elements
     zero.
@@ -160,7 +160,7 @@ def _gcd_reduce_row(A, R, i):
         Treated matrix A.
     ndarray
         Matrix that has been subject to the same operations.
-    '''
+    """
     for j in range(i, 3):
         if A[i, j] < 0:
             A[:, j] = -1 * A[:, j]
@@ -190,7 +190,7 @@ def _gcd_reduce_row(A, R, i):
 
 
 def _gcd_reduce_column(A, L, j):
-    '''
+    """
     Use row operations to make A[i, i] the greatest common
     denominator of the elements in column i and the other elements
     zero.
@@ -210,7 +210,7 @@ def _gcd_reduce_column(A, L, j):
         Treated matrix A.
     ndarray
         Matrix that has been subject to the same operations.
-    '''
+    """
     for i in range(j, 3):
         if A[i, j] < 0:
             A[i] = -1 * A[i]
@@ -240,7 +240,7 @@ def _gcd_reduce_column(A, L, j):
 
 
 def get_unique_snfs(hnfs):
-    '''
+    """
     For a list of Hermite Normal Forms, obtain the set of unique Smith Normal
     Forms.
 
@@ -252,7 +252,7 @@ def get_unique_snfs(hnfs):
     -------
     list of SmithNormalForm objects
         The unique Smith Normal Form matrices.
-    '''
+    """
     snfs = []
     for hnf in hnfs:
         # Check whether the snf is new or already encountered
