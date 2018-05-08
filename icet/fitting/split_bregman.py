@@ -12,20 +12,20 @@ def split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6, verbose=0):
     on p. 5 in Nelson, Hart (Compressive
     sensing as a new paradigm for model building)
 
-    Parameters:
-    A : matrix
-        Sensing matrix.
-    y : numpy array
-        solution vector
+    Parameters
+    -----------
+    X : matrix / array
+        fit matrix
+    y : array
+        target array
     mu : float
         Sparseness parameter
     lmbda : float
-        Split bregmar parameter
+        Split Bregman parameter
     n_iters : int
         maximal number of split bregman iterations.
     tol : float
-        tolerance for when stopping split bregman
-        iterations.
+        tolerance for when stopping split bregman iterations.
     """
     n_cols = A.shape[1]
     d = np.squeeze(np.zeros((n_cols, 1)))
