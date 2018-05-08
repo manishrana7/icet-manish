@@ -85,7 +85,8 @@ class DataContainer:
         """
         assert isinstance(tag, str), \
             'Observable tag has wrong type (str)'
-        self._observables.append(tag)
+        if tag not in self._observables:
+            self._observables.append(tag)
 
     def add_parameter(self, tag: str, value):
         """
