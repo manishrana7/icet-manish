@@ -67,8 +67,8 @@ class TestClusterExpansion(unittest.TestCase):
         ce_read = ClusterExpansion.read(f.name)
 
         # Test clusterspace in cluster expansion
-        self.assertEqual(cluster_space._input_atoms,
-                         ce_read.cluster_space._input_atoms)
+        self.assertEqual(cluster_space._atoms,
+                         ce_read.cluster_space._atoms)
         self.assertEqual(list(cluster_space._cutoffs),
                          list(ce_read.cluster_space._cutoffs))
         self.assertEqual(cluster_space._chemical_symbols,

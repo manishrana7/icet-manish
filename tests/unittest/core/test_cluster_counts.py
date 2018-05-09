@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 
+import sys
 import unittest
 
 from ase.build import bulk
-from icet.core.cluster_counts import ClusterCounts
+from icet import Structure
 from icet.core.cluster import Cluster
+from icet.core.cluster_counts import ClusterCounts
 from icet.core.lattice_site import LatticeSite
+from icet.core.many_body_neighbor_list import ManyBodyNeighborList
 from icet.core.neighbor_list import get_neighbor_lists
 from icet.core.orbit_list import OrbitList
-from icet.core.many_body_neighbor_list import ManyBodyNeighborList
-from icet import Structure
+from io import StringIO
 
 
 def strip_surrounding_spaces(input_string):
@@ -21,7 +23,6 @@ def strip_surrounding_spaces(input_string):
     str
         original string minus surrounding spaces and empty lines
     """
-    from io import StringIO
     s = []
     for line in StringIO(input_string):
         if len(line.strip()) == 0:
@@ -214,9 +215,11 @@ Ni   Ni    13
         """
         Test print overview.
         """
-        self.cluster_counts.count_clusters(self.structure,
-                                           self.orbit_list, False)
-        self.cluster_counts.print_overview()
+        with StringIO() as capturedOutput:
+            sys.stdout = capturedOutput  # redirect stdout
+            self.cluster_counts.print_overview()  # call method
+            sys.stdout = sys.__stdout__  # reset redirect
+            self.assertTrue('Cluster Counts' in capturedOutput.getvalue())
 
 
 if __name__ == '__main__':

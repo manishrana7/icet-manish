@@ -1,9 +1,9 @@
 import time
 import numpy as np
 from _icet import OrbitList
+from .local_orbit_list_generator import LocalOrbitListGenerator
 from .neighbor_list import get_neighbor_lists
 from .permutation_map import permutation_matrix_from_atoms
-from .local_orbit_list_generator import LocalOrbitListGenerator
 from .structure import Structure
 
 
