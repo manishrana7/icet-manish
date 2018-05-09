@@ -112,8 +112,6 @@ class ClusterExpansionCalculator(BaseCalculator):
         local_cv = self.cpp_calc.get_local_cluster_vector(structure, index)
         return np.dot(local_cv, self.cluster_expansion.parameters)
 
-        # return self.calculate_total(self.atoms.numbers)
-
     @property
     def occupation_constraints(self):
         """A map from site to allowed species."""

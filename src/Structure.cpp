@@ -67,7 +67,7 @@ Vector3d Structure::getPosition(const LatticeSite &latticeNeighbor) const
     {
         std::string errorMessage = "Site index out of bounds";
         errorMessage += " index: " + std::to_string(latticeNeighbor.index());
-        errorMessage += " npositions: " + std::to_string(_positions.rows());
+        errorMessage += " number of positions: " + std::to_string(_positions.rows());
         errorMessage += " (Structure::getPosition)";
         throw std::out_of_range(errorMessage);
     }

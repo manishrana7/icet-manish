@@ -205,8 +205,6 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
               else:
                  continue
 
-
-
 */
 void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeSite> &col1, const std::vector<std::vector<LatticeSite>> &permutation_matrix)
 {
@@ -368,8 +366,8 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeSite>
 
 ///Will find the sites in col1, extract all columns along with their unit cell translated indistinguishable sites
 std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromSites(const std::vector<LatticeSite> &sites,
-                                                                            const std::vector<LatticeSite> &col1,
-                                                                            const std::vector<std::vector<LatticeSite>> &permutation_matrix) const
+                                                                        const std::vector<LatticeSite> &col1,
+                                                                        const std::vector<std::vector<LatticeSite>> &permutation_matrix) const
 {
     bool sortRows = false;
     std::vector<int> rowsFromCol1 = findRowsFromCol1(col1, sites, sortRows);
@@ -835,4 +833,3 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &superCell, const Vector3
     }
     return localOrbitList;
 }
-

@@ -26,11 +26,11 @@ public:
     //empty constructor
   }
   void countLatticeSites(const Structure &,
-                             const std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &);
+                         const std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &);
   void count(const Structure &,
              const std::vector<LatticeSite> &);
   void count(const Structure &, const std::vector<std::vector<LatticeSite>> &,
-             const Cluster &,bool);
+             const Cluster &, bool);
   void countCluster(const Cluster &, const std::vector<int> &, bool);
   void countOrbitList(const Structure &, const OrbitList &, bool orderIntact);
   std::unordered_map<Cluster, std::map<std::vector<int>, int>> getClusterCounts() const
@@ -70,9 +70,9 @@ public:
           std::cout << PeriodicTable::intStr[el] << " ";
         }
         std::cout << map_pair.second.at(element_count_pair.first) << std::endl;
-        total +=map_pair.second.at(element_count_pair.first);
+        total += map_pair.second.at(element_count_pair.first);
       }
-      std::cout<<"Total: "<<total<<std::endl;
+      std::cout << "Total: " << total << std::endl;
       std::cout << std::endl;
     }
   }

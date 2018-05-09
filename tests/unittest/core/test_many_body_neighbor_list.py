@@ -46,6 +46,24 @@ class TestManyBodyNeighborList(unittest.TestCase):
             self.assertEqual(mbnl_size, len(self.mbnl.build(
                 self.neighbor_lists, index, True)))
 
+    def test_correctness_of_bothways_true(self):
+        """
+        Build the mbnl with bothways = True and assert that
+        each index in the atoms object have the same number
+        of neighbors.
+        """
+
+        
+        i=0
+        mbnl_bothways = self.mbnl.build(self.neighbor_lists, i, True)
+
+
+        for index in range(1, len(self.atoms)):
+            self.assertEqual(mbnl_size, len(self.mbnl.build(
+                self.neighbor_lists, index, True)))
+
+
+
     def test_bothways_false(self):
         """
         Build the mbnl with bothways = False and assert that

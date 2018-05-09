@@ -4,6 +4,8 @@ from ase.build import bulk
 from icet import ClusterExpansion, ClusterSpace
 from mchammer.calculators.cluster_expansion_calculator import \
     ClusterExpansionCalculator
+from _icet import _ClusterExpansionCalculator
+from icet import Structure
 
 import random
 class TestCECalculator(unittest.TestCase):
@@ -115,6 +117,23 @@ class TestCECalculator(unittest.TestCase):
         self.assertEqual(local_contribution,
                          self.calculator.calculate_local_contribution(
                              indices, occupations=self.atoms.get_atomic_numbers()))
+
+    def test_get_local_cluster_vector(self):
+        """ Tests the get local clustervector method."""
+
+        cpp_calc = _ClusterExpansionCalculator(self.cs, Structure.from_atoms(self.atoms))
+
+        structure = Structure.from_atoms(self.atoms)
+        index = 4
+        local_cv_before = cpp_calc.get_local_cluster_vector(structure, index)
+
+        self.atoms[index].symbol = 'Ge'
+        structure = Structure.from_atoms(self.atoms)
+        local_cv_after = cpp_calc.get_local_cluster_vector(structure, index)
+
+        print(local_cv_before-local_cv_after)
+
+
 
 
 if __name__ == '__main__':

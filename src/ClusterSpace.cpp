@@ -304,6 +304,10 @@ std::vector<int> ClusterSpace::getAllowedOccupations(const Structure &structure,
     Mi.reserve(latticeNeighbors.size());
     for (const auto &latnbr : latticeNeighbors)
     {
+        if(latnbr.index() >= structure.size())
+        {
+            throw std::runtime_error("latnbr index >= structure.size() in ClusterSpace::getAllowedOccupations");
+        }
         Mi.push_back(structure.getNumberOfAllowedComponents(latnbr.index()));
     }
     return Mi;
