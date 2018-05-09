@@ -99,7 +99,7 @@ class ClusterSpace
     std::vector<std::pair<int, std::vector<int>>> _clusterSpaceInfo;
 
     /// Number of allowed components on each site of the primitive structure.
-    std::vector<int> _numberOfAllowedSpecies;
+    std::vector<int> _numberOfAllowedSpeciesPerSite;
 
     /// Primitive (prototype) structure.
     Structure _primitiveStructure;

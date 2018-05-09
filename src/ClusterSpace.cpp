@@ -12,17 +12,21 @@ ClusterSpace::ClusterSpace(std::vector<int> numberOfAllowedSpecies,
                            std::vector<std::string> chemicalSymbols,
                            const OrbitList orbitList)
 {
-    _numberOfAllowedSpecies = numberOfAllowedSpecies;
+    _numberOfAllowedSpeciesPerSite = numberOfAllowedSpecies;
     _orbitList = orbitList;
     _primitiveStructure = orbitList.getPrimitiveStructure();
-    _primitiveStructure.setNumberOfAllowedSpecies(_numberOfAllowedSpecies);
+    _primitiveStructure.setNumberOfAllowedSpecies(_numberOfAllowedSpeciesPerSite);
 
     // Set up a map between chemical elements and the internal species enumeration scheme.
     for (const auto el : chemicalSymbols)
+    {
         _elements.push_back(PeriodicTable::strInt[el]);
+    }
     sort(_elements.begin(), _elements.end());
     for (size_t i = 0; i < _elements.size(); i++)
+    {
         _elementMap[_elements[i]] = i;
+    }
 
     /// @todo Why is the collectClusterSpaceInfo function not executed
     /// immediately, which would render _isClusterSpaceInitialized unnecessary?
@@ -74,35 +78,41 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
     std::vector<double> clusterVector;
     clusterVector.push_back(1);
 
-// CONTINUE HERE
-
     // Loop over orbits.
     /// @todo Turn this into a proper loop over orbits. This probably requires upgrading OrbitList.
-    for (size_t i = 0; i < _orbitList.size(); i++) {
+    for (size_t i = 0; i < _orbitList.size(); i++)
+    {
 
         auto representativeCluster = _orbitList.getOrbit(i).getRepresentativeCluster();
+        // @todo This is necessary. Side effects need to carefully evaluated. Ideally move this task elsewhere as it is repeated for every structure, for which the cluster vector is computed.
+        representativeCluster.setTag(i);
 
-        /// @todo Catching this particular exception seems a bit arbitrary. Why now, why here?
-        std::vector<int> numberOfAllowedSpecies;
+        std::vector<int> numberOfAllowedSpeciesForEachSite;
         try {
-            numberOfAllowedSpecies = getNumberOfAllowedSpeciesForEachSite(_primitiveStructure, _orbitList.getOrbit(i).getRepresentativeSites());
+            numberOfAllowedSpeciesForEachSite = getNumberOfAllowedSpeciesForEachSite(_primitiveStructure, _orbitList.getOrbit(i).getRepresentativeSites());
         }
         catch (const std::exception& e) {
-            throw std::runtime_error("Failed retrieving the number of allowed species in ClusterSpace::getClusterVector");
+            std::string msg = "Failed retrieving the number of allowed species in ClusterSpace::getClusterVector\n";
+            msg += e.what();
+            throw std::runtime_error(msg);
         }
 
         // Jump to the next orbit if none of the sites in the representative cluster are active (i.e. the number of allowed species on this site is less than 2).
-        if (any_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int numberOfAllowedSpecies){ return numberOfAllowedSpecies < 2; }))
+        if (any_of(numberOfAllowedSpeciesForEachSite.begin(), numberOfAllowedSpeciesForEachSite.end(), [](int n){ return n < 2; }))
+        {
             continue;
+        }
 
-        auto multiComponentVectors = _orbitList.getOrbit(i).getMultiComponentVectors(numberOfAllowedSpecies);
-        auto allowedPermutationsSet = _orbitList.getOrbit(i).getAllowedSitesPermutations();
+        // First we obtain the multi-component vectors for this orbit, i.e. a vector
+        // of vectors of int (where the int represents a cluster function index).
+        // Example 1: For an AB alloy we obtain [0, 0] and [0, 0, 0] for pair and triplet terms, respectively.
+        // Example 2: For an ABC alloy we obtain [0, 0], [0, 1], [1, 1] for pairs and similarly for triplets.
+        // Depending on the symmetry of the cluster one might also obtain [1, 0] (e.g., in a clathrate or for some clusters on a HCP lattice).
+        auto multiComponentVectors = _orbitList.getOrbit(i).getMultiComponentVectors(numberOfAllowedSpeciesForEachSite);
         // @todo Make getMultiComponentVectorPermutations take an Orbit rather than an index. Then swap the loop over int for a loop over Orbit above.
         auto elementPermutations = getMultiComponentVectorPermutations(multiComponentVectors, i);
-        // @todo What does this do!?
-        representativeCluster.setClusterTag(i);
         int currentMultiComponentVectorIndex = 0;
-        for (const auto &MultiComponentVector : multiComponentVectors)
+        for (const auto &multiComponentVector : multiComponentVectors)
         {
             double clusterVectorElement = 0;
             int multiplicity = 0;
@@ -113,9 +123,9 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
                 /// @todo Check if numberOfAllowedSpecies should be permuted as well. Is this todo still relevant?
                 for (const auto &perm : elementPermutations[currentMultiComponentVectorIndex])
                 {
-                    auto permutedMCVector = icet::getPermutedVector(MultiComponentVector, perm);
-                    auto permutedNumberOfAllowedSpecies = icet::getPermutedVector(numberOfAllowedSpecies, perm);
-                    clusterVectorElement += getClusterProduct(permutedMCVector, permutedNumberOfAllowedSpecies, elementsCountPair.first) * elementsCountPair.second;
+                    auto permutedMultiComponentVector = icet::getPermutedVector(multiComponentVector, perm);
+                    auto permutedNumberOfAllowedSpeciesForEachSite = icet::getPermutedVector(numberOfAllowedSpeciesForEachSite, perm);
+                    clusterVectorElement += getClusterProduct(permutedMultiComponentVector, permutedNumberOfAllowedSpeciesForEachSite, elementsCountPair.first) * elementsCountPair.second;
                     multiplicity += elementsCountPair.second;
                 }
             }
@@ -158,7 +168,7 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                 {
                     continue;
                 }
-                repr_cluster.setClusterTag(j);
+                repr_cluster.setTag(j);
                 if (repr_cluster.order() != 1)
                 {
                     std::vector<int> elements(sites.size());
@@ -194,10 +204,11 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
   the AB vs BA choice.
 
   @param multiComponentVectors the mc vectors for this orbit
-  @param orbitIndex : The orbit index to take the allowed permutations from.
-
+getNumberOfAllowedSpeciesForEachSitet index to take the allowed permutations from.
+getNumberOfAllowedSpeciesForEachSite
 
   @todo This function should take an Orbit rather than an orbit index.
+  @returns a vector of a vector of a vector of ints; here the innermost index
 */
 
 std::vector<std::vector<std::vector<int>>> ClusterSpace::getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &multiComponentVectors, const int orbitIndex) const
@@ -219,13 +230,13 @@ std::vector<std::vector<std::vector<int>>> ClusterSpace::getMultiComponentVector
         takenPermutations.push_back(selfPermutation);
         for (const std::vector<int> perm : allowedPermutations)
         {
-            auto permutedMcVector = icet::getPermutedVector(mc, perm);
-            auto findPerm = find(multiComponentVectors.begin(), multiComponentVectors.end(), permutedMcVector);
-            auto findIfTaken = find(takenPermutations.begin(), takenPermutations.end(), permutedMcVector);
-            if (findPerm == multiComponentVectors.end() && findIfTaken == takenPermutations.end() && mc != permutedMcVector)
+            auto permutedMultiComponentVector = icet::getPermutedVector(mc, perm);
+            auto findPerm = find(multiComponentVectors.begin(), multiComponentVectors.end(), permutedMultiComponentVector);
+            auto findIfTaken = find(takenPermutations.begin(), takenPermutations.end(), permutedMultiComponentVector);
+            if (findPerm == multiComponentVectors.end() && findIfTaken == takenPermutations.end() && mc != permutedMultiComponentVector)
             {
                 mcPermutations.push_back(perm);
-                takenPermutations.push_back(permutedMcVector);
+                takenPermutations.push_back(permutedMultiComponentVector);
             }
         }
         sort(mcPermutations.begin(), mcPermutations.end());

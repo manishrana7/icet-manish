@@ -91,7 +91,7 @@ void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &
     for (int i = 0; i < orbitList.size(); i++)
     {
         Cluster repr_cluster = orbitList.getOrbit(i).getRepresentativeCluster();
-        repr_cluster.setClusterTag(i);
+        repr_cluster.setTag(i);
         if(orderIntact && repr_cluster.order()!= 1)
         {
             count(structure, orbitList.getOrbit(i).getPermutedEquivalentSites(), repr_cluster, orderIntact);
@@ -122,7 +122,7 @@ void ClusterCounts::setupClusterCountsInfo()
       }
     }
     std::sort(
-        _clusterCountsInfo.begin(), 
+        _clusterCountsInfo.begin(),
         _clusterCountsInfo.end(),
         [](const std::pair<std::vector<std::string>, int> &a, const std::pair<std::vector<std::string>, int> &b){
             return a.first.size() < b.first.size();

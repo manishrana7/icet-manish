@@ -118,7 +118,7 @@ void Cluster::sort()
     std::vector<int> min_sites;
     std::vector<int> min_indices;
 
-    auto equal_minimum_first_sites = getEqual_minimum_first_sites(localEnvironments);
+    auto equal_minimum_first_sites = getEqualMinimumFirstSites(localEnvironments);
     if (equal_minimum_first_sites.size() > 1)
     {
         // Case 1
@@ -237,7 +237,7 @@ void Cluster::validateSorting()
 Get all equal nearestNeighborDistances that are identical to the minimum one
 Equality means all distances and sites are equal.
 */
-std::vector<LocalEnvironment> Cluster::getEqual_minimum_first_sites(const std::vector<LocalEnvironment> &i_neighbors) const
+std::vector<LocalEnvironment> Cluster::getEqualMinimumFirstSites(const std::vector<LocalEnvironment> &i_neighbors) const
 {
     std::vector<LocalEnvironment> equalFirstDists;
     equalFirstDists.push_back(i_neighbors[0]);
