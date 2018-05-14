@@ -129,6 +129,9 @@ class StructureContainer(object):
                     s += ['{s:^{n}}'.format(s=value, n=n)]
             return ' | '.join(s)
 
+        if len(self) == 0:
+            return 'Empty StructureContainer'
+
         # basic information
         # (use last structure in list to obtain maximum line length)
         dummy = self._structure_list[-1]
