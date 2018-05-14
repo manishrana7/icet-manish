@@ -674,16 +674,49 @@ PYBIND11_MODULE(_icet, m)
 
     py::class_<OrbitList>(m, "OrbitList")
         .def(py::init<>())
-        .def(py::init<const std::vector<NeighborList> &, const Structure &>())
-        .def(py::init<const Structure &, const std::vector<std::vector<LatticeSite>> &, const std::vector<NeighborList> &>())
-        .def("add_orbit", &OrbitList::addOrbit)
-        .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters)
-        .def("get_orbit", &OrbitList::getOrbit)
-        .def("clear", &OrbitList::clear)
-        .def("sort", &OrbitList::sort)
-        .def("get_orbit_list", &OrbitList::getOrbitList)
-        .def("get_primitive_structure", &OrbitList::getPrimitiveStructure)
-        .def("__len__", &OrbitList::size)
+        .def(py::init<const std::vector<NeighborList> &, const Structure &>(),
+             R"pbdoc(
+             Initializes an OrbitList instance from a list of NeighborList and an icet Structure instance.
+
+             Parameters
+             ----------
+             neighborg_lists : list of NeighborList objects
+                list of neighbor list for the atomic configuration under different cutoffs.
+             structure : icet Structure object
+                primitive atomic structure
+        )pbdoc",
+             py::arg("neigbor_lists"),
+             py::arg("structure"))
+        .def(py::init<const Structure &, const std::vector<std::vector<LatticeSite>> &, const std::vector<NeighborList> &>(),
+             R"pbdoc(
+                Construct an OrbitList object from a permutation matrix with LatticeSite type entries and 
+                a Structure instance.
+
+             Parameters
+             ----------
+             permutation_matrix : vector of vector of LatticeSite objects
+                 permutation matrix with lattice sites
+             structure : icet Structure object
+                 primitive atomic structure 
+        )pbdoc",
+             py::arg("permutation_matrix"),
+             py::arg("structure"))
+        .def("add_orbit", &OrbitList::addOrbit,
+             "Add an Orbit object to the OrbitList instance")
+        .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters,
+             "Returns the number of orbits  in the OrbitList instance")
+        .def("get_orbit", &OrbitList::getOrbit,
+             "Returns a copy of the orbit at the position i in the OrbitList instance")
+        .def("clear", &OrbitList::clear,
+             "Clears the OrbitList instance")
+        .def("sort", &OrbitList::sort,
+             "Sort orbits listed in OrbitList instance according to its order")
+        .def("get_orbit_list", &OrbitList::getOrbitList,
+             "Returns a list of orbits from OrbitList instance")
+        .def("get_primitive_structure", &OrbitList::getPrimitiveStructure
+             "Returns the primitive atomic structure used to construct the OrbitList instance")      
+        .def("__len__", &OrbitList::size,
+             "Returns the total number of orbits counted in the OrbitList instance")
         .def("print", &OrbitList::print, py::arg("verbosity") = 0)
         // .def("get_supercell_orbit_list", &OrbitList::getSupercellOrbitList)
         ;

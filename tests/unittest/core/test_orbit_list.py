@@ -14,19 +14,21 @@ from icet.core.structure import Structure
 
 
 class TestOrbitList(unittest.TestCase):
-    """ Container for test of the module functionality """
+    """Container for test of the module functionality."""
     def __init__(self, *args, **kwargs):
         super(TestOrbitList, self).__init__(*args, **kwargs)
         self.cutoffs = [4.2]
         self.atoms = bulk('Ag', 'sc', a=4.09)
 
     def setUp(self):
-        """ Instantiate class before each test. """
+        """Instantiate class before each test."""
+        # @todo: this can be a single line of code
         permutation_matrix, self.prim_structure, _ = \
             permutation_matrix_from_atoms(self.atoms, self.cutoffs[0])
         pm_lattice_sites = \
             get_lattice_site_permutation_matrix(self.prim_structure,
                                                 permutation_matrix)
+        # @todo: check if the same neighborlist is returned from PermutationMap
         self.neighbor_lists = get_neighbor_lists(
             self.prim_structure, self.cutoffs)
 
@@ -35,18 +37,19 @@ class TestOrbitList(unittest.TestCase):
                                     self.neighbor_lists)
 
     def test_init(self):
-        """ Test the different initializers """
-        # empty
+        """Test the different initializers."""
+        # check empty constructor
         orbit_list = OrbitList()
         self.assertIsInstance(orbit_list, OrbitList)
-        # initilize with mbnl
+        # initilize with list of neighborlist
         orbit_list = OrbitList(self.neighbor_lists, self.prim_structure)
         self.assertIsInstance(orbit_list, OrbitList)
         # initiliaze with permutation matrix
         self.assertIsInstance(self.orbit_list, OrbitList)
 
     def test_add_orbit(self):
-        """ Test add orbit funcionality """
+        """Test add orbit funcionality."""
+        # @todo: think on better way to create an orbit to add
         lattice_site_for_cluster = [
             LatticeSite(0, [i, 0, 0]) for i in range(2)]
         pair_cluster = Cluster.from_python(
@@ -57,12 +60,12 @@ class TestOrbitList(unittest.TestCase):
         self.assertEqual(len(self.orbit_list), 3)
 
     def test_get_number_of_NClusters(self):
-        """ Test that only a pair is counted in the orbit list """
+        """Test that only a pair is counted in the orbit list."""
         NPairs = self.orbit_list.get_number_of_NClusters(2)
         self.assertEqual(NPairs, 1)
 
     def test_get_orbit(self):
-        """ Test function returns the number of orbits of a given order """
+        """Test function returns the number of orbits of a given order."""
         # get singlet
         orbit = self.orbit_list.get_orbit(0)
         self.assertEqual(orbit.order, 1)
@@ -74,20 +77,27 @@ class TestOrbitList(unittest.TestCase):
             self.orbit_list.get_orbit(3)
 
     def test_clear(self):
-        """ Test orbit list is empty after calling this function """
+        """Test orbit list is empty after calling this function."""
         self.orbit_list.clear()
         with self.assertRaises(IndexError):
             self.orbit_list.get_orbit(0)
 
     def test_sort(self):
-        """ Test orbits in orbit list are sorted """
+        """Test orbits in orbit list are sorted."""
         self.orbit_list.sort()
         for i in range(len(self.orbit_list) - 1):
             self.assertLess(
                 self.orbit_list.get_orbit(i), self.orbit_list.get_orbit(i + 1))
 
+    def test_find_orbit(self):
+        """
+        Test that an orbit is returned from its given representative cluster.
+        """
+        pass
+
     def test_get_orbit_list(self):
-        """ Test getter for orbit list (depends on initializer) """
+        """Test a list of orbits is returned from this function."""
+        # @todo: method does not work for all initializers
         lattice_sites = \
             [[LatticeSite(0, [0., 0., 0.])],
              [LatticeSite(0, [0., 0., 0.]), LatticeSite(0, [-1., 0., 0.])],
@@ -99,13 +109,13 @@ class TestOrbitList(unittest.TestCase):
                              lattice_sites[i])
 
     def test_get_primitive_structure(self):
-        """ Test primitive structure """
+        """Test primitive structure."""
         prim_structure = self.orbit_list.get_primitive_structure()
         self.assertEqual(prim_structure.positions.tolist(),
                          self.prim_structure.positions.tolist())
 
     def test_len(self):
-        """ Test len of orbit list """
+        """Test len of orbit list."""
         self.assertEqual(len(self.orbit_list), 2)
 
     def test_get_supercell_orbit_list(self):

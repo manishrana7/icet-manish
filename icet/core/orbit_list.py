@@ -82,8 +82,8 @@ def __prune_permutation_matrix(permutation_matrix, verbosity=0):
 
     Parameters
     ----------
-    permutation_matrix : list of icet LatticeSite objects
-        lattice site version of the permutation matrix
+    permutation_matrix : matrix
+        permutation matrix with LatticeSite type entries
 
     verbosity : int
         set verbosity level. Default to 0
