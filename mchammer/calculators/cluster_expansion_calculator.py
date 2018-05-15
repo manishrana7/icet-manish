@@ -80,7 +80,6 @@ class ClusterExpansionCalculator(BaseCalculator):
             raise TypeError("Missing required keyword argument: local_indices")
         if occupations is None:
             raise TypeError("Missing required keyword argument: occupations")
-        
         return self.calculate_total(occupations=occupations)
 
     @property

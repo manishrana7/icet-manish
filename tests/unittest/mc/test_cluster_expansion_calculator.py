@@ -63,5 +63,6 @@ class TestCECalculator(unittest.TestCase):
             indices, self.atoms.numbers)
         self.assertIsInstance(local_contribution, float)
 
+
 if __name__ == '__main__':
     unittest.main()
