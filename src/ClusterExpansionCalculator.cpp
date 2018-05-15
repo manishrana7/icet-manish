@@ -62,10 +62,17 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
                     Vector3d primPos = _clusterSpace.getPrimitiveStructure().getPositions().row(i);
                     LatticeSite primitiveSite_i = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(primPos);
-                    LatticeSite superCellEquivalent = _theLog.getPrimToSupercellMap()[primitiveSite_i];
+                    LatticeSite superCellEquivalent = _superCell.findLatticeSiteByPosition(primPos);//_theLog.getPrimToSupercellMap()[primitiveSite_i];
 
                     if (std::find(latticeSites.begin(), latticeSites.end(), superCellEquivalent) != latticeSites.end())
+                    // if (true)
                     {
+                        // std::cout<<"-----"<<std::endl;
+                        // std::cout<<primPos[0]<< " "<<primPos[1]<< " "<<primPos[2]<<std::endl;
+                        // superCellEquivalent.print();                        
+                        // primitiveSite_i.print();
+                        // std::cout<<"Size: "<<latticeSites.size()<<std::endl;
+                        // std::cout<<"-----"<<std::endl;
                         std::vector<LatticeSite> primitiveEquivalentSites;
                         for (const auto site : latticeSites)
                         {
@@ -206,7 +213,9 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const Stru
         }
     }
 
-    auto translatedOrbitList = _basisAtomOrbitList[basisIndex].getLocalOrbitList(structure, localSite.unitcellOffset(), _primToSupercellMap);
+    // auto translatedOrbitList = _basisAtomOrbitList[basisIndex].getLocalOrbitList(structure, localSite.unitcellOffset(), _primToSupercellMap);
+    auto translatedOrbitList =_theLog.generateLocalOrbitList(localSite.unitcellOffset());
+    std::cout<<"local offset "<<localSite.unitcellOffset()<<std::endl;
     clusterCounts.countOrbitList(structure, translatedOrbitList, orderIntact);
 
     // for( const auto orbit : _basisAtomOrbitList[basisIndex].getOrbitList() )
@@ -293,8 +302,9 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const Stru
                 }
             }
             int realMultiplicity = _clusterSpace.getOrbitList().getOrbitList()[i].getEquivalentSites().size();
-            clusterVectorElement /= ((double)structure.size() * realMultiplicity  );
+            clusterVectorElement /= ((double)structure.size() * realMultiplicity);
             clusterVector.push_back(clusterVectorElement * repCluster.order());
+            // clusterVector.push_back(clusterVectorElement);
 
             currentMCVectorIndex++;
         }
