@@ -47,10 +47,10 @@ class ConfigurationManager(object):
         else:
             occupation_constraints = strict_constraints
         self._occupation_constraints = occupation_constraints
-        self._possible_elements = self._setup_possible_elements()
+        self._possible_elements = self._set_up_possible_elements()
         self._element_occupation = self._get_element_occupation()
 
-    def _setup_possible_elements(self)->List[int]:
+    def _set_up_possible_elements(self)->List[int]:
         """
         Return a list of the possible elements in
         the entire configuration.
