@@ -13,7 +13,11 @@ class CanonicalEnsemble(BaseEnsemble):
     -----------
     temperature : float
         temperature in Kelvin.
-    boltzmann_constant : float (default is ev/K)
+    boltzmann_constant : float
+        Boltzmann constant in appropriate
+        units, i.e. units that are consistent
+        with the underlying cluster expansion
+        and the temperature [default: eV/K]
     """
 
     def __init__(self, atoms=None, calculator=None, name='Canonical Ensemble',
