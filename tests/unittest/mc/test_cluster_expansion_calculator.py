@@ -26,7 +26,7 @@ class TestCECalculator(unittest.TestCase):
         # self.atoms = bulk("Al",'bcc',a=4.0).repeat(3)
         # self.atoms = bulk("Al",'diamond',a=4.0).repeat(3)
         print("atoms len ",len(self.atoms))
-        self.cutoffs = [5.1]#[2.9]
+        self.cutoffs = [2.9]#[2.9]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
@@ -69,7 +69,7 @@ class TestCECalculator(unittest.TestCase):
     def test_calculate_local_contribution(self):
         """Test calculate local contribution."""
         # indices = [i for i in range(len(self.atoms))]
-        indices = [1,4,5]
+        indices = [2]
         local_contribution = self.calculator.calculate_local_contribution(
             indices, self.atoms.get_atomic_numbers())
         self.assertIsInstance(local_contribution, float)
@@ -104,6 +104,8 @@ class TestCECalculator(unittest.TestCase):
 
         total_diff = new_value_total - initial_value_total
         local_diff = new_value_local - initial_value_local
+        print("total/local = {}".format(total_diff/local_diff))
+        print("local/total = {}".format(local_diff/total_diff))
         self.assertAlmostEqual(total_diff, local_diff)
 
     def __test_internal_calc_local_contribution(self):

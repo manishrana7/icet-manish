@@ -25,6 +25,7 @@ class ClusterExpansionCalculator
     double getLocalContribution(const Structure &, const int) const;
 
     private:
+    void validateBasisAtomOrbitLists();
     ClusterSpace _clusterSpace;
     Structure _superCell;
     LocalOrbitListGenerator _theLog;
