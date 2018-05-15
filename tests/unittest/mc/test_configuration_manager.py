@@ -152,8 +152,8 @@ class TestConfigurationManager(unittest.TestCase):
         """Test the getting flip indices method."""
 
         for _ in range(1000):
-            indices, elements = self.cm.get_flip_state(0)
-            self.assertNotEqual(self.cm.occupations[indices[0]], elements[0])
+            index, element = self.cm.get_flip_state(0)
+            self.assertNotEqual(self.cm.occupations[index], element)
 
     def test_update_occupations(self):
         """Test the update occupation method."""
