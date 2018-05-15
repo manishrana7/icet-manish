@@ -80,26 +80,8 @@ class ClusterExpansionCalculator(BaseCalculator):
             raise TypeError("Missing required keyword argument: local_indices")
         if occupations is None:
             raise TypeError("Missing required keyword argument: occupations")
-
-        self.atoms.set_atomic_numbers(occupations)
-        local_contribution = 0
-        for index in local_indices:
-            local_contribution += self._calculate_local_contribution(index)
-
-        return local_contribution
-
-    def _calculate_local_contribution(self, index):
-        """
-        Internal method to calculate the local contribution for one
-        index.
-
-        Parameters
-        ----------
-        index : int
-            lattice index
-
-        """
-        return self.calculate_total(occupations=self.atoms.numbers)
+        
+        return self.calculate_total(occupations=occupations)
 
     @property
     def occupation_constraints(self):

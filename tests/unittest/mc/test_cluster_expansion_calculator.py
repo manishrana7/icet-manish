@@ -63,18 +63,5 @@ class TestCECalculator(unittest.TestCase):
             indices, self.atoms.numbers)
         self.assertIsInstance(local_contribution, float)
 
-    def test_internal_calc_local_contribution(self):
-        """Test the internal calc local contribution."""
-        indices = [1, 2, 3]
-        local_contribution = 0
-        for index in indices:
-            local_contribution +=\
-                self.calculator._calculate_local_contribution(
-                    index)
-        self.assertEqual(local_contribution,
-                         self.calculator.calculate_local_contribution(
-                             indices, occupations=self.atoms.numbers))
-
-
 if __name__ == '__main__':
     unittest.main()
