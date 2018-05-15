@@ -19,13 +19,22 @@ class TestOrbitList(unittest.TestCase):
         super(TestOrbitList, self).__init__(*args, **kwargs)
         self.cutoffs = [4.2]
         self.atoms = bulk('Ag', 'sc', a=4.09)
+        # @todo: add representative clusters for testing
+        structure = Structure.from_atoms(self.atoms)
+        # singlet cluster for testing
+        self.cluster_singlet = Cluster(
+            structure, [LatticeSite(0, [0, 0, 0])])
+        # cluster pair for testing
+        lattice_sites = [LatticeSite(0, [i, 0, 0]) for i in range(3)]
+        self.cluster_pair = Cluster(
+            structure, [lattice_sites[0], lattice_sites[1]], True)
 
     def setUp(self):
         """Instantiate class before each test."""
         # @todo: this can be a single line of code
         permutation_matrix, self.prim_structure, _ = \
             permutation_matrix_from_atoms(self.atoms, self.cutoffs[0])
-        pm_lattice_sites = \
+        self.pm_lattice_sites = \
             get_lattice_site_permutation_matrix(self.prim_structure,
                                                 permutation_matrix)
         # @todo: check if the same neighborlist is returned from PermutationMap
@@ -33,29 +42,25 @@ class TestOrbitList(unittest.TestCase):
             self.prim_structure, self.cutoffs)
 
         self.orbit_list = OrbitList(self.prim_structure,
-                                    pm_lattice_sites,
+                                    self.pm_lattice_sites,
                                     self.neighbor_lists)
 
     def test_init(self):
         """Test the different initializers."""
-        # check empty constructor
+        # empty
         orbit_list = OrbitList()
         self.assertIsInstance(orbit_list, OrbitList)
-        # initilize with list of neighborlist
+        # with mnbl and structure
         orbit_list = OrbitList(self.neighbor_lists, self.prim_structure)
         self.assertIsInstance(orbit_list, OrbitList)
-        # initiliaze with permutation matrix
+        # with mnbl, structure and permutation matrix
+        orbit_list = OrbitList(
+            self.prim_structure, self.pm_lattice_sites, self.neighbor_lists)
         self.assertIsInstance(self.orbit_list, OrbitList)
 
     def test_add_orbit(self):
         """Test add orbit funcionality."""
-        # @todo: think on better way to create an orbit to add
-        lattice_site_for_cluster = [
-            LatticeSite(0, [i, 0, 0]) for i in range(2)]
-        pair_cluster = Cluster.from_python(
-            self.atoms, [lattice_site_for_cluster[0],
-                         lattice_site_for_cluster[1]], True)
-        orbit = Orbit(pair_cluster)
+        orbit = Orbit(self.cluster_pair)
         self.orbit_list.add_orbit(orbit)
         self.assertEqual(len(self.orbit_list), 3)
 
@@ -91,9 +96,13 @@ class TestOrbitList(unittest.TestCase):
 
     def test_find_orbit(self):
         """
-        Test that an orbit is returned from its given representative cluster.
+        Test returned orbit index from the given representative cluster.
         """
-        pass
+        # @todo: test a non-representative cluster returns -1
+        self.assertEqual(
+            self.orbit_list.find_orbit(self.cluster_singlet), 0)
+        self.assertEqual(
+            self.orbit_list.find_orbit(self.cluster_pair), 1)
 
     def test_get_orbit_list(self):
         """Test a list of orbits is returned from this function."""

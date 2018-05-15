@@ -699,8 +699,9 @@ PYBIND11_MODULE(_icet, m)
              structure : icet Structure object
                  primitive atomic structure 
         )pbdoc",
+             py::arg("structure"),
              py::arg("permutation_matrix"),
-             py::arg("structure"))
+             py::arg("neighbor_lists"))
         .def("add_orbit", &OrbitList::addOrbit,
              "Add an Orbit object to the OrbitList instance")
         .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters,
@@ -711,9 +712,11 @@ PYBIND11_MODULE(_icet, m)
              "Clears the OrbitList instance")
         .def("sort", &OrbitList::sort,
              "Sort orbits listed in OrbitList instance according to its order")
+        .def("find_orbit", (int(OrbitList::*)(const Cluster &) const) &OrbitList::findOrbit)
+        //.def("find_orbit", (int (OrbitList::*)(const Cluster &, const std::unordered_map<Cluster, int> &) const) & OrbitList::findOrbit)
         .def("get_orbit_list", &OrbitList::getOrbitList,
              "Returns a list of orbits from OrbitList instance")
-        .def("get_primitive_structure", &OrbitList::getPrimitiveStructure
+        .def("get_primitive_structure", &OrbitList::getPrimitiveStructure,
              "Returns the primitive atomic structure used to construct the OrbitList instance")      
         .def("__len__", &OrbitList::size,
              "Returns the total number of orbits counted in the OrbitList instance")
