@@ -25,8 +25,8 @@ class ParakeetObserver(BaseObserver):
 
 class ConcreteEnsemble(BaseEnsemble):
 
-    def __init__(self, calculator, name=None, random_seed=None):
-        super().__init__(calculator, name=name,
+    def __init__(self, calculator, atoms, name=None, random_seed=None):
+        super().__init__(calculator, atoms=atoms, name=name,
                          random_seed=random_seed)
 
     def do_trial_step(self):
@@ -39,7 +39,7 @@ class TestEnsemble(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEnsemble, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al")
+        self.atoms = bulk("Al").repeat(3)
         cutoffs = [5, 5, 4]
         elements = ["Al", "Ga"]
         self.cs = ClusterSpace(self.atoms, cutoffs, elements)
@@ -48,9 +48,10 @@ class TestEnsemble(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        calculator = ClusterExpansionCalculator(self.atoms, self.ce)
+        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
         self.ensemble = ConcreteEnsemble(
-            calculator=calculator, name='test-ensemble', random_seed=42)
+            calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
+            random_seed=42)
 
         # Create an observer for testing.
         observer = ParakeetObserver(interval=7)
@@ -181,6 +182,32 @@ class TestEnsemble(unittest.TestCase):
         input = [20, 15, 10]
         target = 5
         self.assertEqual(self.ensemble._get_gcd(input), target)
+
+    def test_init_without_atoms(self):
+        """Test ensemble init without atoms parameter."""
+
+        with self.assertRaises(Exception) as context:
+            ensemble = ConcreteEnsemble(  # noqa
+            calculator=self.calculator, atoms=None,
+            name='test-ensemble', random_seed=42)
+
+        self.assertTrue("Missing required keyword argument: atoms"
+                        in str(context.exception))
+
+    def test_get_property_change(self):
+        """Test the get property change method."""
+
+        initial_occupations = self.ensemble.configuration.occupations
+
+        indices = [0, 1, 2, 3, 4]
+        elements = [13, 31, 13, 31, 13]
+
+        prop_diff = self.ensemble.get_property_change(indices, elements)
+        self.assertAlmostEqual(prop_diff, 2.0740740740740735)
+
+        # Test that the method doesn't change the occupation.
+        self.assertListEqual(list(initial_occupations),
+                             list(self.ensemble.configuration.occupations))
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 from mchammer.calculators.base_calculator import BaseCalculator
+from typing import List
 
 
 class ClusterExpansionCalculator(BaseCalculator):
@@ -39,46 +40,47 @@ class ClusterExpansionCalculator(BaseCalculator):
         """
         return self._cluster_expansion
 
-    def calculate_total(self):
+    def calculate_total(self, *, occupations: List[int]):
         """
-        Calculator the total property of the current configuration.
+        Calculates the total property of the current configuration.
+
+        Parameters
+        ----------
+        occupations: list of int
+            the entire occupation vector (i.e. list of atomic species)
+
 
         Return
         -------
             total_property : float
         """
+        self.atoms.set_atomic_numbers(occupations)
         return self.cluster_expansion.predict(self.atoms)
 
-    def calculate_local_contribution(self, indices):
+    def calculate_local_contribution(self, local_indices: List[int] = None,
+                                     occupations: List[int] = None):
         """
         Return the sum of the contributions from the indices in the input list.
+        local_indices refer to the lattice sites from which the local
+        contributions should be summed up from. Occupations is the entire
+        occupation vector.
 
         Parameters
         ----------
-        indices : list of ints
+        local_indices : list of ints
+            the lattice indices for which to obtain the local contribution
+        occupations : list of ints
+            the entire occupation vector
 
         Return
         ------
         float : sum of contributions
         """
-        local_contribution = 0
-        for index in indices:
-            local_contribution += self._calculate_local_contribution(index)
-
-        return local_contribution
-
-    def _calculate_local_contribution(self, index):
-        """
-        Internal method to calculate the local contribution for one
-        index.
-
-        Parameters
-        ----------
-        index : int
-            lattice index
-
-        """
-        return self.calculate_total()
+        if local_indices is None:
+            raise TypeError("Missing required keyword argument: local_indices")
+        if occupations is None:
+            raise TypeError("Missing required keyword argument: occupations")
+        return self.calculate_total(occupations=occupations)
 
     @property
     def occupation_constraints(self):

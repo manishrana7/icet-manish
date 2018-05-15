@@ -9,6 +9,8 @@ from mchammer.observers.base_observer import BaseObserver
 
 import numpy as np
 
+from typing import List
+
 
 class BaseEnsemble(ABC):
     """
@@ -24,10 +26,12 @@ class BaseEnsemble(ABC):
         number of total trial steps.
     """
 
-    def __init__(self, calculator, name='BaseEnsemble',
+    def __init__(self, calculator=None, atoms=None, name='BaseEnsemble',
                  data_container=None, data_container_write_period=np.inf,
                  random_seed=None):
 
+        if calculator is None:
+            raise TypeError("Missing required keyword argument: calculator")
         self._calculator = calculator
         self._name = name
         self.data_container_write_period = data_container_write_period
@@ -36,6 +40,8 @@ class BaseEnsemble(ABC):
         self._observers = {}
         self._step = 0
 
+        if atoms is None:
+            raise TypeError("Missing required keyword argument: atoms")
         if random_seed is None:
             self._random_seed = random.randint(0, 1e16)
         else:
@@ -53,7 +59,7 @@ class BaseEnsemble(ABC):
         strict_constraints = self.calculator.occupation_constraints
         sublattices = [[i for i in range(len(self.calculator.atoms))]]
         self.configuration = ConfigurationManager(
-            self._calculator.atoms.numbers, strict_constraints, sublattices)
+            atoms, strict_constraints, sublattices)
 
     @property
     def structure(self):
@@ -61,7 +67,7 @@ class BaseEnsemble(ABC):
         ASE Atoms object :
         The current state of the  structure being sampled in the ensemble.
         """
-        return self.calculator.atoms.copy()
+        return self.configuration.atoms.copy()
 
     @property
     def step(self) -> int:
@@ -101,7 +107,7 @@ class BaseEnsemble(ABC):
 
     def run(self, number_of_trial_steps: int, reset_step=False):
         """
-        Sample the ensemble for `number_of_trial_steps` steps.
+        Samples the ensemble for `number_of_trial_steps` steps.
 
         Parameters:
         -----------
@@ -167,7 +173,7 @@ class BaseEnsemble(ABC):
 
     def _observe_configuration(self, step):
         """
-        Submit current configuration to observers and append observations to
+        Submits current configuration to observers and append observations to
         data container.
 
         Parameters
@@ -210,7 +216,7 @@ class BaseEnsemble(ABC):
 
     def next_random_number(self):
         """
-        Return the next random number from the RNG.
+        Returns the next random number from the RNG.
         """
         return random.random()
 
@@ -232,7 +238,7 @@ class BaseEnsemble(ABC):
 
     def _get_gcd(self, interval_list):
         """
-        Find the gcd from the list of intervals.
+        Finds the gcd from the list of intervals.
 
         interval_list : list of int
         """
@@ -274,13 +280,16 @@ class BaseEnsemble(ABC):
         self._find_minimum_observation_interval()
 
     def reset_data_container(self):
-        """Reset the data container and the internal step attribute."""
+        """Resets the data container and the internal step attribute."""
         self._step = 0
+        self.total_trials = 0
+        self.accepted_trials = 0
+
         self._data_container.reset()
 
     def update_occupations(self, list_of_sites, list_of_elements):
         """
-        Update the element occupation of the configuration being sampled.
+        Updates the element occupation of the configuration being sampled.
         This will change the state in both the configuration in the calculator
         and the state of configuration manager.
 
@@ -301,5 +310,46 @@ class BaseEnsemble(ABC):
         if len(list_of_sites) != len(list_of_elements):
             raise ValueError(
                 "List of sites and list of elements are not the same size.")
-        self.calculator.update_occupations(list_of_sites, list_of_elements)
         self.configuration.update_occupations(list_of_sites, list_of_elements)
+
+    def get_property_change(self, indices: List[int],
+                            elements: List[int]) -> float:
+        """
+        Get the property change for a hypothetical change
+        of the input indices, elements.
+
+        Parameters
+        ----------
+        indices : list of int
+            refer to indices in the lattice
+        elements : list of int
+            refer to atomic species
+
+        Return
+        ------
+        property_change : float
+        """
+        current_elements = [self.configuration.occupations[i] for i in indices]
+
+        current_property = self.calculator.calculate_local_contribution(
+            indices, self.configuration.occupations)
+        self.update_occupations(list_of_sites=indices,
+                                list_of_elements=elements)
+        new_property = self.calculator.calculate_local_contribution(
+            indices, self.configuration.occupations)
+        property_change = new_property - current_property
+
+        # Set elements back to what they were
+        self.update_occupations(indices, current_elements)
+        return property_change
+
+    def get_random_sublattice_index(self) -> int:
+        """
+        Get a random sublattice index based
+        on the weights of the sublattice.
+
+        Return
+        ------
+        sublattice_index : int
+        """
+        return 0
