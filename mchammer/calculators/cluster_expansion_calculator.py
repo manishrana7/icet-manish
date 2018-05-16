@@ -58,8 +58,8 @@ class ClusterExpansionCalculator(BaseCalculator):
     def calculate_local_contribution(self, local_indices: List[int] = None,
                                      occupations: List[int] = None) -> float:
         """
-        Returns the sum of the contributions from the indices in the input list.
-        `local_indices` refers to the lattice sites from which the local
+        Returns the sum of the contributions from the indices in the input
+        list. `local_indices` refers to the lattice sites from which the local
         contributions should be summed up from. Occupations is the entire
         occupation vector.
 

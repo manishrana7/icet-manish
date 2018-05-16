@@ -1,5 +1,5 @@
 # Base image
-FROM ubuntu:17.10
+FROM ubuntu:18.04
 
 # Install required packages
 RUN apt-get update -qy
@@ -24,6 +24,8 @@ RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade setuptools
 RUN pip3 install --upgrade \
                  ase \
+                 breathe \
+                 cloud_sptheme \
                  coverage \
                  flake8 \
                  pandas \
@@ -31,7 +33,6 @@ RUN pip3 install --upgrade \
                  spglib \
 		 sphinx \
                  sphinx-rtd-theme \
-                 sphinxcontrib-bibtex \
+                 sphinx_autodoc_typehints \
                  sphinx_sitemap \
-                 breathe \
-                 cloud_sptheme
+                 sphinxcontrib-bibtex
