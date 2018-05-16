@@ -91,9 +91,9 @@ class BaseEnsemble(ABC):
         return self._observers
 
     @property
-    def acceptance_ratio(self):
+    def acceptance_ratio(self) -> float:
         """
-        float : the acceptance ratio,
+        acceptance ratio,
         i.e. accepted_trials / total_trials.
         """
         return self.accepted_trials / self.total_trials
@@ -109,8 +109,8 @@ class BaseEnsemble(ABC):
         """
         Samples the ensemble for `number_of_trial_steps` steps.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         number_of_trial_steps: int
             number of steps to run in total
         reset_step : bool
@@ -258,7 +258,7 @@ class BaseEnsemble(ABC):
         """
         Attaches an observer to the ensemble.
 
-        Parameters:
+        Parameters
         ----------
         observer : mchammer Observer object
         """
@@ -325,9 +325,9 @@ class BaseEnsemble(ABC):
         elements : list of int
             refer to atomic species
 
-        Return
-        ------
-        property_change : float
+        Returns
+        -------
+        change in property value
         """
         current_elements = [self.configuration.occupations[i] for i in indices]
 

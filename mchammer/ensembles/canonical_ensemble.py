@@ -31,9 +31,9 @@ class CanonicalEnsemble(BaseEnsemble):
         else:
             self.temperature = kwargs['temperature']
         if 'boltzmann_constant' in kwargs.keys():
-            self._boltzmann_constant = kwargs['boltzmann_constant']
+            self.boltzmann_constant = kwargs['boltzmann_constant']
         else:
-            self._boltzmann_constant = kB
+            self.boltzmann_constant = kB
 
     def do_trial_step(self):
         """Do a trial step."""
@@ -49,9 +49,9 @@ class CanonicalEnsemble(BaseEnsemble):
             self.accepted_trials += 1
             self.update_occupations(indices, elements)
 
-    def _acceptance_condition(self, energy_diff):
+    def _acceptance_condition(self, energy_diff: float) -> bool:
         """
-        Check if this energy diff is accepted.
+        Evaluate Metropolis acceptance criterion.
 
         Parameters
         ----------
@@ -63,5 +63,5 @@ class CanonicalEnsemble(BaseEnsemble):
             return True
         else:
             return np.exp(-energy_diff/(
-                self._boltzmann_constant * self.temperature)) > \
+                self.boltzmann_constant * self.temperature)) > \
                 self.next_random_number()

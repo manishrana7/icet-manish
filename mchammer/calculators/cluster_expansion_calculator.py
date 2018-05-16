@@ -30,7 +30,6 @@ class ClusterExpansionCalculator(BaseCalculator):
     def __init__(self, atoms, cluster_expansion,
                  name='Cluster Expansion Calculator'):
         super().__init__(atoms=atoms, name=name)
-
         self._cluster_expansion = cluster_expansion
 
     @property
@@ -40,7 +39,7 @@ class ClusterExpansionCalculator(BaseCalculator):
         """
         return self._cluster_expansion
 
-    def calculate_total(self, *, occupations: List[int]):
+    def calculate_total(self, *, occupations: List[int]) -> float:
         """
         Calculates the total property of the current configuration.
 
@@ -49,32 +48,31 @@ class ClusterExpansionCalculator(BaseCalculator):
         occupations: list of int
             the entire occupation vector (i.e. list of atomic species)
 
-
-        Return
+        Returns
         -------
-            total_property : float
+        total value of the property
         """
         self.atoms.set_atomic_numbers(occupations)
         return self.cluster_expansion.predict(self.atoms)
 
     def calculate_local_contribution(self, local_indices: List[int] = None,
-                                     occupations: List[int] = None):
+                                     occupations: List[int] = None) -> float:
         """
-        Return the sum of the contributions from the indices in the input list.
-        local_indices refer to the lattice sites from which the local
+        Returns the sum of the contributions from the indices in the input list.
+        `local_indices` refers to the lattice sites from which the local
         contributions should be summed up from. Occupations is the entire
         occupation vector.
 
         Parameters
         ----------
-        local_indices : list of ints
+        local_indices : list of int
             the lattice indices for which to obtain the local contribution
-        occupations : list of ints
+        occupations : list of int
             the entire occupation vector
 
-        Return
-        ------
-        float : sum of contributions
+        Returns
+        -------
+        sum of contributions
         """
         if local_indices is None:
             raise TypeError("Missing required keyword argument: local_indices")
