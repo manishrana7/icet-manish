@@ -104,6 +104,14 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble.total_trials += 1
         self.assertEqual(self.ensemble.total_trials, 1)
 
+    def test_property_acceptance_ratio(self):
+        """Test property acceptance ratio."""
+        for i in range(30):
+            self.ensemble.total_trials += 1
+            if i % 2 == 0:
+                self.ensemble.accepted_trials += 1
+        self.assertEqual(self.ensemble.acceptance_ratio, 0.5)
+
     def test_property_calculator(self):
         """Test the calculator property."""
         pass
