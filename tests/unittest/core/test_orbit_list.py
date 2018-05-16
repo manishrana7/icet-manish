@@ -19,12 +19,13 @@ class TestOrbitList(unittest.TestCase):
         super(TestOrbitList, self).__init__(*args, **kwargs)
         self.cutoffs = [4.2]
         self.atoms = bulk('Ag', 'sc', a=4.09)
-        # @todo: add representative clusters for testing
+
+        # representative clusters for testing
         structure = Structure.from_atoms(self.atoms)
-        # singlet cluster for testing
+        # for singlet
         self.cluster_singlet = Cluster(
             structure, [LatticeSite(0, [0, 0, 0])])
-        # cluster pair for testing
+        # for pair
         lattice_sites = [LatticeSite(0, [i, 0, 0]) for i in range(3)]
         self.cluster_pair = Cluster(
             structure, [lattice_sites[0], lattice_sites[1]], True)
@@ -96,7 +97,7 @@ class TestOrbitList(unittest.TestCase):
 
     def test_find_orbit(self):
         """
-        Test returned orbit index from the given representative cluster.
+        Test orbit index is retuned from the given representative cluster.
         """
         # @todo: test a non-representative cluster returns -1
         self.assertEqual(
@@ -116,8 +117,13 @@ class TestOrbitList(unittest.TestCase):
                                  repr_clusters[k])
 
     def test_get_primitive_structure(self):
-        """Test get primitive structure functionality."""
-        # @todo: test failed
+        """
+        Test get primitive structure functionality.
+
+        Todo
+        ----
+        Test fails
+        """
         self.assertNotEqual(
             self.orbit_list.get_primitive_structure(), self.prim_structure)
 
@@ -145,11 +151,10 @@ class TestOrbitList(unittest.TestCase):
 
     def test_create_orbit_list(self):
         """
-        Test  orbit list is built from structure and cutoffs through
-        this function
+        Test  orbit list is built from structure and cutoffs by calling
+        this function.
         """
-        structure = Structure.from_atoms(self.atoms)
-        orbit_list = create_orbit_list(structure, self.cutoffs)
+        orbit_list = create_orbit_list(self.atoms, self.cutoffs)
         for i in range(len(self.orbit_list)):
             orbit = self.orbit_list.get_orbit(i)
             orbit_ = orbit_list.get_orbit(i)
@@ -183,7 +188,7 @@ class TestOrbitList(unittest.TestCase):
     def test_orbit_list_fcc(self):
         """
         Test orbit list has the right number of singlet and pairs for
-        a fcc structure
+        a fcc structure.
         """
         atoms = bulk('Al', 'fcc', a=3.0)
         cutoffs = [2.5]

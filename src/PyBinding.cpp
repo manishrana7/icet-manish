@@ -711,7 +711,7 @@ PYBIND11_MODULE(_icet, m)
         .def("clear", &OrbitList::clear,
              "Clears the OrbitList instance")
         .def("sort", &OrbitList::sort,
-             "Sort orbits listed in OrbitList instance according to its order")
+             "Sort by order the orbits listed in OrbitList instance")
         .def("find_orbit", (int(OrbitList::*)(const Cluster &) const) &OrbitList::findOrbit)
         //.def("find_orbit", (int (OrbitList::*)(const Cluster &, const std::unordered_map<Cluster, int> &) const) & OrbitList::findOrbit)
         .def("get_orbit_list", &OrbitList::getOrbitList,

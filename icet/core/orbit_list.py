@@ -1,5 +1,6 @@
 import time
 import numpy as np
+from ase import Atoms
 from _icet import OrbitList
 from .neighbor_list import get_neighbor_lists
 from .permutation_map import permutation_matrix_from_atoms
@@ -128,7 +129,7 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
 
     Parameters
     ----------
-    structure: icet Structure object
+    structure: icet Structure or ASE Atoms object (bioptional)
         input configuration used to initialize mbnl and permutation matrix
     cutoffs : list of float
         cutoff radii for each order
@@ -139,12 +140,17 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
     -------
     OrbitList object
     '''
+    if isinstance(structure, Structure):
+        atoms = Structure.to_atoms(structure)
+    else:
+        atoms = structure.copy()
+
     max_cutoff = np.max(cutoffs)
     total_time_spent = 0
 
     t0 = time.time()
     permutation_matrix, prim_structure, neighbor_list \
-        = permutation_matrix_from_atoms(structure.to_atoms(), max_cutoff)
+        = permutation_matrix_from_atoms(atoms, max_cutoff)
     t1 = time.time()
     time_spent = t1 - t0
     total_time_spent += time_spent
