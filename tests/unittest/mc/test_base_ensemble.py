@@ -1,5 +1,6 @@
 import unittest
 
+import os
 import numpy as np
 from ase.build import bulk
 
@@ -159,7 +160,7 @@ class TestEnsemble(unittest.TestCase):
 
         # test no duplicates, this should overwrite the last Parakeet
         self.ensemble.attach_observer(
-            ParakeetObserver(interval=15, tag='test_Parakeet'))
+            ParakeetObserver(interval=15), tag='test_Parakeet')
         self.assertEqual(len(self.ensemble.observers), 3)
         self.assertEqual(self.ensemble.observers['test_Parakeet'].interval, 15)
         self.assertEqual(
@@ -212,6 +213,57 @@ class TestEnsemble(unittest.TestCase):
         # Test that the method doesn't change the occupation.
         self.assertListEqual(list(initial_occupations),
                              list(self.ensemble.configuration.occupations))
+
+
+class TestRestartEnsemble(unittest.TestCase):
+    """Container for tests of the class functionality."""
+
+    def __init__(self, *args, **kwargs):
+        super(TestRestartEnsemble, self).__init__(*args, **kwargs)
+
+        self.atoms = bulk("Al")
+        cutoffs = [5, 5, 4]
+        elements = ["Al", "Ga"]
+        self.cs = ClusterSpace(self.atoms, cutoffs, elements)
+        parameters = np.array([1.2 for _ in range(len(self.cs))])
+        self.ce = ClusterExpansion(self.cs, parameters)
+
+    def setUp(self):
+        """Setup before each test."""
+        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
+        self.ensemble = \
+            ConcreteEnsemble(calculator=self.calculator, name='test-ensemble',
+                             data_container_write_period=1e-4)
+
+        # Create an observer for testing.
+        observer = ParakeetObserver(interval=7)
+        self.ensemble.attach_observer(observer)
+        observer = ParakeetObserver(interval=14, tag='Parakeet2')
+        self.ensemble.attach_observer(observer)
+
+    def tearDown(self):
+        """Delete file after each test."""
+        os.remove('test-ensemble.mc')
+
+    def test_backup_file(self):
+        """Test the data container file exists."""
+        self.assertTrue(os.path.isfile('test-ensemble.mc'))
+
+    def test_read_data_container(self):
+        """Test the data container read from file."""
+        # run ensemble
+        n_iters = 364
+        self.ensemble.run(n_iters)
+
+        # check data container is read from file
+        ensemble_reloaded = \
+            ConcreteEnsemble(calculator=self.calculator, name='test-ensemble',
+                             data_container='test-ensemble.mc')
+        data_dc_reloaded = \
+            ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
+        data_dc = self.ensemble.data_container.get_data(tags=['Parakeet2'])
+
+        self.assertListEqual(data_dc[0], data_dc_reloaded[0])
 
 
 if __name__ == '__main__':
