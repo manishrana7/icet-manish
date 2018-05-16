@@ -28,7 +28,7 @@ class TestDataContainer(unittest.TestCase):
 
     def setUp(self):
         """Set up before each test case."""
-        self.dc = DataContainer(atoms=self.atoms,
+        self.dc = DataContainer(self.atoms,
                                 ensemble_name='test-ensemble',
                                 random_seed=44)
         test_observer = ConcreteObserver(interval=10, tag='obs1')
@@ -37,11 +37,11 @@ class TestDataContainer(unittest.TestCase):
 
     def test_init(self):
         """Test initializing DataContainer."""
-        dc = DataContainer(self.atoms, 'ensemble-name', 44)
-        self.assertIsInstance(dc, DataContainer)
-        # show test fails with a non ASE Atom
+        self.assertIsInstance(self.dc, DataContainer)
+
+        # test fails with a non ASE Atoms type
         with self.assertRaises(Exception):
-            self.dc = DataContainer('atoms', 'ensemble-name', 44)
+            DataContainer('atoms', 'test-ensemble', 44)
 
     def test_structure(self):
         """Test reference structure property."""
@@ -60,10 +60,6 @@ class TestDataContainer(unittest.TestCase):
     def test_add_parameter(self):
         """Test add parameter functionality."""
         self.dc.add_parameter('sro', -0.1)
-        """Test add_observable functionality."""
-        self.dc.add_observable('energy')
-        self.dc.add_observable('temperature')
-        self.assertEqual(len(self.dc.observables), 2)
 
         # add a list as parameters
         index_atoms = [i for i in range(len(self.atoms))]
@@ -76,6 +72,8 @@ class TestDataContainer(unittest.TestCase):
         observers = [ConcreteObserver(interval=10, tag='obs1'),
                      ConcreteObserver(interval=20, tag='obs2')]
         min_interval = min([obs.interval for obs in observers])
+
+        # appending data from observers
         for mctrial in range(1, 101):
             if mctrial % min_interval == 0:
                 row_data = OrderedDict()
@@ -99,17 +97,17 @@ class TestDataContainer(unittest.TestCase):
 
     def test_property_observables(self):
         """Test observables property."""
-        self.assertEqual(self.dc.observables, ['obs1'])
+        self.assertListEqual(self.dc.observables, ['obs1'])
 
     def test_property_metadata(self):
-        """Test metadata property has string type."""
+        """Test metadata property."""
         for key in self.dc.metadata:
             self.assertIsInstance(self.dc.metadata[key], str)
 
     def test_get_data(self):
         """
-        Test the data returned as a list of list and the options provided by
-        this functions works as expected.
+        Test the returned data is a list of list and the options provided by
+        the method works as expected.
         """
         observers = [ConcreteObserver(interval=10, tag='obs1'),
                      ConcreteObserver(interval=20, tag='obs2')]
@@ -131,6 +129,7 @@ class TestDataContainer(unittest.TestCase):
         retval = self.dc.get_data()
         self.assertListEqual(target, retval)
 
+        # with filling_missing = True
         target = [[10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
                   [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0],
                   [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0]]
@@ -139,6 +138,7 @@ class TestDataContainer(unittest.TestCase):
                                   fill_missing=True)
         self.assertListEqual(target, retval)
 
+        # passing an interval
         target = [[40, 50, 60, 70], [64.0, 64.0, 64.0, 64.0],
                   [64.0, None, 64.0, None]]
 
@@ -146,56 +146,62 @@ class TestDataContainer(unittest.TestCase):
                                   interval=(40, 70))
         self.assertListEqual(target, retval)
 
+        # test fails for non-stock data
         with self.assertRaises(AssertionError):
             self.dc.get_data(['temperature'])
 
     def test_reset(self):
-        """
-        Test that appended data is deleted after calling this function.
-        """
+        """Test appended data is cleared."""
+        # add some data first
         for mctrial in range(100):
             self.dc.append(mctrial, dict([('temperature', 100.0)]))
+        # clears data
         self.dc.reset()
         self.assertEqual(self.dc.get_number_of_entries(), 0)
 
     def test_get_number_of_entries(self):
-        """ Test number of entries is returned from function. """
+        """Test number of entries is returned from function."""
         row_data = [100, np.nan, 1000, np.nan]
-        for mctrial, data in zip(range(1, 5), row_data):
+        for mctrial, data in zip([1, 2, 3, 4], row_data):
             self.dc.append(mctrial, dict([('temperature', data)]))
 
         self.assertEqual(self.dc.get_number_of_entries('temperature'), 2)
+
+        # test total number of entries
         self.assertEqual(self.dc.get_number_of_entries(), 4)
 
     def test_get_average(self):
         """ Test functionality. """
         pass
 
-    def test_read_write_data(self):
+    def test_read_and_write(self):
         """Test write and read functionalities of data container."""
-        # append observations to the data container
+        # append data for testing
         for mctrial in range(10, 101, 10):
             self.dc.append(mctrial, dict([('temperature', 100.0)]))
 
+        # save to file
         temp_file = tempfile.NamedTemporaryFile()
         self.dc.write(temp_file.name)
+
+        # read from file
         dc_read = self.dc.read(temp_file.name)
-        # check atoms
+
+        # check properties
         self.assertEqual(self.atoms, dc_read.structure)
-        # check metadata
         self.assertDictEqual(self.dc.metadata, dc_read.metadata)
-        # check parameters
         self.assertDictEqual(self.dc.parameters, dc_read.parameters)
-        # check observables
         self.assertEqual(self.dc.observables, dc_read.observables)
-        # check runtime data
+
+        # check data
         self.assertEqual(self.dc.get_number_of_entries(),
                          dc_read.get_number_of_entries())
         self.assertListEqual(self.dc.get_data(['temperature']),
                              dc_read.get_data(['temperature']))
+
         # check exception raises when file does not exist
         with self.assertRaises(Exception) as context:
-            dc_read = self.dc.read("not_a_file")
+            dc_read = self.dc.read("not_found")
         msg = 'File cannot be found'
         self.assertTrue(msg in str(context.exception))
 
