@@ -64,6 +64,10 @@ class TestEnsemble(unittest.TestCase):
         observer = ParakeetObserver(interval=14, tag='Parakeet2')
         self.ensemble.attach_observer(observer)
 
+    def tearDown(self):
+        """Delete DataContainer file after each test."""
+        os.remove('test-ensemble.dc')
+
     def test_property_name(self):
         """Test name property."""
         self.assertEqual('test-ensemble', self.ensemble.name)
