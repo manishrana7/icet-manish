@@ -49,13 +49,13 @@ class BaseEnsemble(ABC):
         random.seed(a=self.random_seed)
 
         if data_container is None:
-            self._data_container = DataContainer(atoms=calculator.atoms,
+            self._data_container = DataContainer(atoms=atoms,
                                                  ensemble_name=name,
                                                  random_seed=random_seed)
         else:
             self._data_container = DataContainer.read(data_container)
 
-        self._data_container_filename = name + ".mc"
+        self._data_container_filename = name + ".dc"
 
         strict_constraints = self.calculator.occupation_constraints
         sublattices = [[i for i in range(len(self.calculator.atoms))]]
@@ -73,7 +73,7 @@ class BaseEnsemble(ABC):
     @property
     def step(self) -> int:
         """
-        int : current MC trial step.
+        int : current MC trial step
         """
         return self._step
 

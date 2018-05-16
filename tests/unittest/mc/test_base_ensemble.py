@@ -26,9 +26,12 @@ class ParakeetObserver(BaseObserver):
 
 class ConcreteEnsemble(BaseEnsemble):
 
-    def __init__(self, calculator, atoms, name=None, random_seed=None):
-        super().__init__(calculator, atoms=atoms, name=name,
-                         random_seed=random_seed)
+    def __init__(self, calculator, atoms=None, name=None, data_container=None,
+                 data_container_write_period=np.inf, random_seed=None):
+        super().__init__(
+            calculator, atoms=atoms, name=name, data_container=data_container,
+            data_container_write_period=data_container_write_period,
+            random_seed=random_seed)
 
     def do_trial_step(self):
         pass
@@ -164,10 +167,7 @@ class TestEnsemble(unittest.TestCase):
 
     def test_property_data_container(self):
         """Test the data container property."""
-        n_iters = 303
-        self.ensemble.run(n_iters)
-        dc = self.ensemble.data_container
-        self.assertIsInstance(dc, DataContainer)
+        self.assertIsInstance(self.ensemble.data_container, DataContainer)
 
     def test_find_minimum_observation_interval(self):
         """Test the method to find the minimum observation interval."""
