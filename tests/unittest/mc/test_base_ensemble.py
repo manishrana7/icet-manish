@@ -282,6 +282,13 @@ class TestEnsemble(unittest.TestCase):
         self.assertListEqual(list(initial_occupations),
                              list(self.ensemble.configuration.occupations))
 
+        with self.assertRaises(ValueError) as context:
+            self.ensemble.update_occupations(indices, elements+[31])
+
+        self.assertTrue(
+            "List of sites and list of elements are not the same size."
+            in str(context.exception))
+
 
 if __name__ == '__main__':
     unittest.main()
