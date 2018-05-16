@@ -64,6 +64,26 @@ class TestEnsemble(unittest.TestCase):
         observer = ParakeetObserver(interval=14, tag='Parakeet2')
         self.ensemble.attach_observer(observer)
 
+    def test_init(self):
+        """Test exceptions are raised in initialisation."""
+        # without atoms parameters
+        with self.assertRaises(Exception) as context:
+            ensemble = ConcreteEnsemble(  # noqa
+            calculator=self.calculator, atoms=None,
+            name='test-ensemble', random_seed=42)
+
+        self.assertTrue("Missing required keyword argument: atoms"
+                        in str(context.exception))
+
+        # without calculator
+        with self.assertRaises(Exception) as context:
+            ensemble = ConcreteEnsemble(  # noqa
+            calculator=None, atoms=self.atoms,
+            name='test-ensemble', random_seed=42)
+
+        self.assertTrue("Missing required keyword argument: calculator"
+                        in str(context.exception))
+
     def test_property_name(self):
         """Test name property."""
         self.assertEqual('test-ensemble', self.ensemble.name)
@@ -238,17 +258,6 @@ class TestEnsemble(unittest.TestCase):
         input = [20, 15, 10]
         target = 5
         self.assertEqual(self.ensemble._get_gcd(input), target)
-
-    def test_init_without_atoms(self):
-        """Test ensemble init without atoms parameter."""
-
-        with self.assertRaises(Exception) as context:
-            ensemble = ConcreteEnsemble(  # noqa
-            calculator=self.calculator, atoms=None,
-            name='test-ensemble', random_seed=42)
-
-        self.assertTrue("Missing required keyword argument: atoms"
-                        in str(context.exception))
 
     def test_get_property_change(self):
         """Test the get property change method."""
