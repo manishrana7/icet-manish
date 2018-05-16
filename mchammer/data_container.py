@@ -41,12 +41,6 @@ class DataContainer:
 
     data : Pandas data frame object
         Runtime data collected during the Monte Carlo simulation.
-
-    Todo
-    ----
-    atoms is always expected to be given among the arguments so stop
-    querying whether atoms is None once it has been fixed in BaseEnsemble
-    class.
     """
 
     def __init__(self, atoms, ensemble_name: str, random_seed: int):
@@ -54,10 +48,7 @@ class DataContainer:
         Initialize a DataContainer object.
         """
 
-        if atoms is not None:
-            assert isinstance(atoms, Atoms), \
-                'Structure must be provided as ASE Atoms object'
-            self.structure = atoms.copy()
+        self.structure = atoms.copy()
 
         self._observables = []
         self._parameters = OrderedDict()
