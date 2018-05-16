@@ -20,7 +20,7 @@ class ConcreteObserver(BaseObserver):
 
 
 class TestDataContainer(unittest.TestCase):
-    """Container for the tests of the class functionality"""
+    """Container for the tests of the class functionality."""
 
     def __init__(self, *args, **kwargs):
         super(TestDataContainer, self).__init__(*args, **kwargs)
@@ -35,18 +35,20 @@ class TestDataContainer(unittest.TestCase):
         self.dc.add_observable(test_observer.tag)
         self.dc.add_parameter('temperature', 375.15)
 
-        # test another type of atoms fails
+    def test_init(self):
+        """Test initializing DataContainer."""
+        dc = DataContainer(self.atoms, 'ensemble-name', 44)
+        self.assertIsInstance(dc, DataContainer)
+        # show test fails with a non ASE Atom
         with self.assertRaises(Exception):
-            DataContainer(atoms='something',
-                          ensemble_name='test-ensemble',
-                          random_seed=44)
+            self.dc = DataContainer('atoms', 'ensemble-name', 44)
 
     def test_structure(self):
-        """Test that reference structure is added to DataContainer."""
+        """Test reference structure property."""
         self.assertEqual(self.dc.structure, self.atoms)
 
     def test_add_observable(self):
-        """Test that observables are added to DataContainer."""
+        """Test add observable functionality."""
         test_observer = ConcreteObserver(interval=20, tag='obs2')
         self.dc.add_observable(test_observer.tag)
         self.assertEqual(len(self.dc.observables), 2)
@@ -56,9 +58,12 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(len(self.dc.observables), 2)
 
     def test_add_parameter(self):
-        """Test that parameters are added to DataContainer."""
+        """Test add parameter functionality."""
         self.dc.add_parameter('sro', -0.1)
-        self.assertEqual(len(self.dc.parameters), 3)
+        """Test add_observable functionality."""
+        self.dc.add_observable('energy')
+        self.dc.add_observable('temperature')
+        self.assertEqual(len(self.dc.observables), 2)
 
         # add a list as parameters
         index_atoms = [i for i in range(len(self.atoms))]
@@ -66,7 +71,7 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(len(self.dc.parameters), 4)
 
     def test_append_data(self):
-        """Test that data is appended to DataContainer."""
+        """Test append data functionality."""
         # list of observers for testing
         observers = [ConcreteObserver(interval=10, tag='obs1'),
                      ConcreteObserver(interval=20, tag='obs2')]
@@ -83,20 +88,18 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(self.dc.get_number_of_entries(), 10)
 
     def test_property_data(self):
-        """ Test data property is a Pandas DataFrame object."""
+        """ Test data property."""
         self.assertIsInstance(self.dc.data, pd.DataFrame)
 
     def test_property_parameters(self):
-        """Test that added parameters has OrderedDict type."""
-        target = OrderedDict([('seed', 44),
-                              ('temperature', 375.15)])
-        retval = self.dc.parameters
-        self.assertEqual(retval, target)
+        """Test parameters property."""
+        self.assertEqual(self.dc.parameters,
+                         OrderedDict([('seed', 44),
+                                      ('temperature', 375.15)]))
 
     def test_property_observables(self):
-        """Test that added observables has list type."""
-        observables = ['obs1']
-        self.assertEqual(self.dc.observables, observables)
+        """Test observables property."""
+        self.assertEqual(self.dc.observables, ['obs1'])
 
     def test_property_metadata(self):
         """Test metadata property has string type."""
