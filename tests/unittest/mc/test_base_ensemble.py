@@ -64,10 +64,6 @@ class TestEnsemble(unittest.TestCase):
         observer = ParakeetObserver(interval=14, tag='Parakeet2')
         self.ensemble.attach_observer(observer)
 
-    def tearDown(self):
-        """Delete DataContainer file after each test."""
-        os.remove('test-ensemble.dc')
-
     def test_property_name(self):
         """Test name property."""
         self.assertEqual('test-ensemble', self.ensemble.name)
@@ -141,6 +137,35 @@ class TestEnsemble(unittest.TestCase):
                 total_iters //
                 self.ensemble.observers['Parakeet2'].interval + 1)
 
+        # remove data container file
+        os.remove('test-ensemble.dc')
+
+    def test_backup_file(self):
+        """Test data is being saved during runtime."""
+        # set up ensemble with non-inf write period
+        ensemble = ConcreteEnsemble(calculator=self.calculator,
+                                    atoms=self.atoms,
+                                    name='this-ensemble',
+                                    data_container_write_period=1e-4)
+
+        # attach an observer
+        observer = ParakeetObserver(interval=14, tag='Parakeet2')
+        ensemble.attach_observer(observer)
+
+        # run ensemble
+        n_iters = 364
+        ensemble.run(n_iters)
+
+        # check data container file
+        dc_read = DataContainer.read('this-ensemble.dc')
+        dc_data = dc_read.get_data(tags=['Parakeet2'])
+        self.assertEqual(
+            len(dc_data[0]),
+            n_iters // observer.interval + 1)
+
+        # remove file
+        os.remove('this-ensemble.dc')
+
     def test_internal_run(self):
         """Test the _run method."""
         pass
@@ -173,6 +198,28 @@ class TestEnsemble(unittest.TestCase):
     def test_property_data_container(self):
         """Test the data container property."""
         self.assertIsInstance(self.ensemble.data_container, DataContainer)
+
+    def test_init_with_datacontainer_file(self):
+        """Test initialisation with a DataContainer read from file."""
+        # run ensemble
+        n_iters = 364
+        self.ensemble.run(n_iters)
+
+        # initalise a new ensemble
+        ensemble_reloaded = \
+            ConcreteEnsemble(calculator=self.calculator,
+                             atoms=self.atoms,
+                             name='test-ensemble',
+                             data_container='test-ensemble.dc')
+
+        # check loaded data container of new ensemble
+        data_dc_reloaded = \
+            ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
+        data_dc = self.ensemble.data_container.get_data(tags=['Parakeet2'])
+        self.assertListEqual(data_dc[0], data_dc_reloaded[0])
+
+        # remove data container file
+        os.remove('test-ensemble.dc')
 
     def test_find_minimum_observation_interval(self):
         """Test the method to find the minimum observation interval."""
@@ -217,61 +264,6 @@ class TestEnsemble(unittest.TestCase):
         # Test that the method doesn't change the occupation.
         self.assertListEqual(list(initial_occupations),
                              list(self.ensemble.configuration.occupations))
-
-
-class TestRestartEnsemble(unittest.TestCase):
-    """Container for tests of the class functionality."""
-
-    def __init__(self, *args, **kwargs):
-        super(TestRestartEnsemble, self).__init__(*args, **kwargs)
-
-        self.atoms = bulk("Al")
-        cutoffs = [5, 5, 4]
-        elements = ["Al", "Ga"]
-        self.cs = ClusterSpace(self.atoms, cutoffs, elements)
-        parameters = np.array([1.2 for _ in range(len(self.cs))])
-        self.ce = ClusterExpansion(self.cs, parameters)
-
-    def setUp(self):
-        """Setup before each test."""
-        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
-        self.ensemble = \
-            ConcreteEnsemble(calculator=self.calculator,
-                             atoms=self.atoms,
-                             name='test-ensemble',
-                             data_container_write_period=1e-4)
-
-        # Create an observer for testing.
-        observer = ParakeetObserver(interval=7)
-        self.ensemble.attach_observer(observer)
-        observer = ParakeetObserver(interval=14, tag='Parakeet2')
-        self.ensemble.attach_observer(observer)
-
-    def tearDown(self):
-        """Delete file after each test."""
-        os.remove('test-ensemble.dc')
-
-    def test_backup_file(self):
-        """Test the data container file exists."""
-        self.assertTrue(os.path.isfile('test-ensemble.dc'))
-
-    def test_read_data_container(self):
-        """Test ensamble reads the data container from file."""
-        # run ensemble
-        n_iters = 364
-        self.ensemble.run(n_iters)
-
-        # check data container is read from file
-        ensemble_reloaded = \
-            ConcreteEnsemble(calculator=self.calculator,
-                             atoms=self.atoms,
-                             name='test-ensemble',
-                             data_container='test-ensemble.dc')
-        data_dc_reloaded = \
-            ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
-        data_dc = self.ensemble.data_container.get_data(tags=['Parakeet2'])
-
-        self.assertListEqual(data_dc[0], data_dc_reloaded[0])
 
 
 if __name__ == '__main__':
