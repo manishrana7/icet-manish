@@ -49,9 +49,10 @@ class BaseEnsemble(ABC):
         random.seed(a=self._random_seed)
 
         if data_container is None:
-            self._data_container = DataContainer(atoms=atoms,
-                                                 ensemble_name=name,
-                                                 random_seed=random_seed)
+            self._data_container = \
+                DataContainer(atoms=atoms,
+                              ensemble_name=name,
+                              random_seed=self._random_seed)
         else:
             self._data_container = DataContainer.read(data_container)
 

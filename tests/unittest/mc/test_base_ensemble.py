@@ -232,7 +232,9 @@ class TestRestartEnsemble(unittest.TestCase):
         """Setup before each test."""
         self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
         self.ensemble = \
-            ConcreteEnsemble(calculator=self.calculator, name='test-ensemble',
+            ConcreteEnsemble(calculator=self.calculator,
+                             atoms=self.atoms,
+                             name='test-ensemble',
                              data_container_write_period=1e-4)
 
         # Create an observer for testing.
@@ -243,22 +245,24 @@ class TestRestartEnsemble(unittest.TestCase):
 
     def tearDown(self):
         """Delete file after each test."""
-        os.remove('test-ensemble.mc')
+        os.remove('test-ensemble.dc')
 
     def test_backup_file(self):
         """Test the data container file exists."""
-        self.assertTrue(os.path.isfile('test-ensemble.mc'))
+        self.assertTrue(os.path.isfile('test-ensemble.dc'))
 
     def test_read_data_container(self):
-        """Test the data container read from file."""
+        """Test ensamble reads the data container from file."""
         # run ensemble
         n_iters = 364
         self.ensemble.run(n_iters)
 
         # check data container is read from file
         ensemble_reloaded = \
-            ConcreteEnsemble(calculator=self.calculator, name='test-ensemble',
-                             data_container='test-ensemble.mc')
+            ConcreteEnsemble(calculator=self.calculator,
+                             atoms=self.atoms,
+                             name='test-ensemble',
+                             data_container='test-ensemble.dc')
         data_dc_reloaded = \
             ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
         data_dc = self.ensemble.data_container.get_data(tags=['Parakeet2'])
