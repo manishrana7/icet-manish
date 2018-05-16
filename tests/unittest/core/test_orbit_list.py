@@ -158,7 +158,7 @@ class TestOrbitList(unittest.TestCase):
         for i in range(len(self.orbit_list)):
             orbit = self.orbit_list.get_orbit(i)
             orbit_ = orbit_list.get_orbit(i)
-            # all orbits should be equal
+            # check all orbits in both lists are equal
             self.assertEqual(orbit, orbit_)
 
     def test_orbit_list_non_pbc(self):

@@ -703,16 +703,17 @@ PYBIND11_MODULE(_icet, m)
              py::arg("permutation_matrix"),
              py::arg("neighbor_lists"))
         .def("add_orbit", &OrbitList::addOrbit,
-             "Add an Orbit object to the OrbitList instance")
+             "Add an Orbit object to the OrbitList")
         .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters,
-             "Returns the number of orbits  in the OrbitList instance")
+             "Returns the number of orbits in the OrbitList")
         .def("get_orbit", &OrbitList::getOrbit,
-             "Returns a copy of the orbit at the position i in the OrbitList instance")
+             "Returns a copy of the orbit at the position i in the OrbitList")
         .def("clear", &OrbitList::clear,
-             "Clears the OrbitList instance")
+             "Clears the OrbitList")
         .def("sort", &OrbitList::sort,
-             "Sort by order the orbits listed in OrbitList instance")
-        .def("find_orbit", (int(OrbitList::*)(const Cluster &) const) &OrbitList::findOrbit)
+             "Sort by order the orbits listed in OrbitList")
+        .def("find_orbit", (int(OrbitList::*)(const Cluster &) const) &OrbitList::findOrbit,
+             "Return the index of the orbit with the given representative cluster")
         //.def("find_orbit", (int (OrbitList::*)(const Cluster &, const std::unordered_map<Cluster, int> &) const) & OrbitList::findOrbit)
         .def("get_orbit_list", &OrbitList::getOrbitList,
              "Returns a list of orbits from OrbitList instance")
