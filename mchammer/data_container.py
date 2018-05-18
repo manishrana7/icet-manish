@@ -6,7 +6,6 @@ import json
 from datetime import datetime
 from collections import OrderedDict
 import pandas as pd
-from ase import Atoms
 from ase.io import write as ase_write, read as ase_read
 from icet import __version__ as icet_version
 
