@@ -280,7 +280,7 @@ class BaseEnsemble(ABC):
             self.observers[observer.tag] = observer
 
         if observer.return_type is dict:
-            for key in observer:
+            for key in observer.get_keys():
                 self._data_container.add_observable(key)
         else:
             self._data_container.add_observable(observer.tag)

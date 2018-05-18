@@ -22,6 +22,19 @@ class ParakeetObserver(BaseObserver):
         """Say 2.63323e+20."""
         return 2.63323e+20
 
+
+class DictObserver(BaseObserver):
+
+    def __init__(self, interval, tag='Ayaymama'):
+        super().__init__(interval=interval, return_type=dict, tag=tag)
+
+    def get_observable(self, atoms): # noqa
+        return {'value_1': 1.0, 'value_2': 2.0}
+
+    def get_keys(self): # noqa
+        return ['value_1', 'value_2']
+
+
 # Create a concrete child of Ensemble for testing
 
 
@@ -76,8 +89,8 @@ class TestEnsemble(unittest.TestCase):
 
         # without calculator
         with self.assertRaises(Exception) as context:
-            ensemble = ConcreteEnsemble(calculator=None, atoms=self.atoms,
-                                        name='test-ensemble', random_seed=42)
+            ConcreteEnsemble(calculator=None, atoms=self.atoms,
+                             name='test-ensemble', random_seed=42)
 
         self.assertTrue("Missing required keyword argument: calculator"
                         in str(context.exception))
@@ -161,13 +174,32 @@ class TestEnsemble(unittest.TestCase):
                 total_iters //
                 self.ensemble.observers['Parakeet2'].interval + 1)
 
+    def test_run_with_dict_observer(self):
+        """Test the run method with a dict observer."""
+        observer = DictObserver(interval=28)
+        self.ensemble.attach_observer(observer)
+
+        n_iters = 364
+        self.ensemble.run(n_iters)
+        self.assertEqual(self.ensemble.step, n_iters)
+        dc_data = \
+            self.ensemble.data_container.get_data(tags=['value_1', 'value_2'])
+
+        self.assertEqual(len(dc_data[0]), len(dc_data[1]))
+
+        number_of_observations = len([x for x in dc_data[0] if x is not None])
+        # plus one since we also count step 0
+        self.assertEqual(
+            number_of_observations,
+            n_iters // self.ensemble.observers['Ayaymama'].interval + 1)
+
     def test_backup_file(self):
         """Test data is being saved and can be read by the ensemble."""
         # set up ensemble with non-inf write period
         ensemble = ConcreteEnsemble(calculator=self.calculator,
                                     atoms=self.atoms,
                                     name='this-ensemble',
-                                    data_container = 'my-precious',
+                                    data_container='my-precious',
                                     data_container_write_period=1e-4)
 
         # attach an observer
@@ -198,7 +230,7 @@ class TestEnsemble(unittest.TestCase):
         data_dc = \
             ensemble.data_container.get_data(tags=['Parakeet2'])
         self.assertListEqual(data_dc[0], data_dc_reloaded[0])
-        
+
         # remove file
         os.remove('my-precious.dc')
 
