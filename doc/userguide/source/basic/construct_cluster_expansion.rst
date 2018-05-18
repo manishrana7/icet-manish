@@ -150,9 +150,9 @@ displayed by providing the :class:`Optimizer <icet.Optimizer>` object to the
   fit_method                : least-squares
   number_of_target_values   : 137
   number_of_parameters      : 14
-  rmse_training             : 0.000177534
+  rmse_train                : 0.000177534
   rmse_test                 : 0.000216184
-  training_size             : 102
+  train_size                : 102
   test_size                 : 35
   ======================================================
 
