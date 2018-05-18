@@ -152,6 +152,12 @@ class TestStructureContainer(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.sc.add_structure(atoms)
 
+        # check that duplicate structure is not added.
+        self.sc.add_structure(atoms, tag, properties)
+        n_structures = len(self.sc._structure_list)
+        self.sc.add_structure(atoms, tag, properties, check_for_duplicate=True)
+        self.assertEqual(len(self.sc._structure_list), n_structures)
+
     def test_get_fit_data(self):
         """
         Testing get_fit_data functionality
