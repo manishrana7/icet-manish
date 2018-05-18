@@ -282,6 +282,17 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
         cs_onlyread = self.sc.cluster_space
         self.assertEqual(cs_onlyread, self.cs)
 
+    def test_available_properties(self):
+        """
+        Testing available_properties property
+        """
+        available_properties = sorted(self.properties_list[0])
+        self.sc.add_structure(self.structure_list[0],
+                              properties=self.properties_list[0])
+
+        self.assertSequenceEqual(available_properties,
+                                 self.sc.available_properties)
+
     def test_read_write(self):
         """
         Test the read write functionality.

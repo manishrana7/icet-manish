@@ -369,6 +369,11 @@ class StructureContainer(object):
         """
         return self._structure_list
 
+    @property
+    def available_properties(self):
+        """ List : List of the available properties. """
+        return sorted(set([p for fs in self for p in fs.properties.keys()]))
+
     def write(self, filename):
         """
         Write structure container to a file.
