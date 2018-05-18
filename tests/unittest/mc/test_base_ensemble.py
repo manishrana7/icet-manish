@@ -68,18 +68,16 @@ class TestEnsemble(unittest.TestCase):
         """Test exceptions are raised in initialisation."""
         # without atoms parameters
         with self.assertRaises(Exception) as context:
-            ensemble = ConcreteEnsemble(  # noqa
-            calculator=self.calculator, atoms=None,
-            name='test-ensemble', random_seed=42)
+            ConcreteEnsemble(calculator=self.calculator, atoms=None,
+                             name='test-ensemble', random_seed=42)
 
         self.assertTrue("Missing required keyword argument: atoms"
                         in str(context.exception))
 
         # without calculator
         with self.assertRaises(Exception) as context:
-            ensemble = ConcreteEnsemble(  # noqa
-            calculator=None, atoms=self.atoms,
-            name='test-ensemble', random_seed=42)
+            ensemble = ConcreteEnsemble(calculator=None, atoms=self.atoms,
+                                        name='test-ensemble', random_seed=42)
 
         self.assertTrue("Missing required keyword argument: calculator"
                         in str(context.exception))
@@ -106,10 +104,8 @@ class TestEnsemble(unittest.TestCase):
 
     def test_property_acceptance_ratio(self):
         """Test property acceptance ratio."""
-        for i in range(30):
-            self.ensemble.total_trials += 1
-            if i % 2 == 0:
-                self.ensemble.accepted_trials += 1
+        self.ensemble.total_trials = 30
+        self.ensemble.accepted_trials = 15
         self.assertEqual(self.ensemble.acceptance_ratio, 0.5)
 
     def test_property_calculator(self):
@@ -165,11 +161,8 @@ class TestEnsemble(unittest.TestCase):
                 total_iters //
                 self.ensemble.observers['Parakeet2'].interval + 1)
 
-        # remove data container file
-        os.remove('test-ensemble.dc')
-
     def test_backup_file(self):
-        """Test data is being saved during runtime."""
+        """Test data is being saved and can be read by the ensemble."""
         # set up ensemble with non-inf write period
         ensemble = ConcreteEnsemble(calculator=self.calculator,
                                     atoms=self.atoms,
@@ -192,6 +185,20 @@ class TestEnsemble(unittest.TestCase):
             len(dc_data[0]),
             n_iters // observer.interval + 1)
 
+        # initialise a new ensemble with dc file
+        ensemble_reloaded = \
+            ConcreteEnsemble(calculator=self.calculator,
+                             atoms=self.atoms,
+                             name='this-ensemble',
+                             data_container='my-precious.dc')
+
+        # check loaded data container of new ensemble
+        data_dc_reloaded = \
+            ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
+        data_dc = \
+            ensemble.data_container.get_data(tags=['Parakeet2'])
+        self.assertListEqual(data_dc[0], data_dc_reloaded[0])
+        
         # remove file
         os.remove('my-precious.dc')
 
@@ -227,28 +234,6 @@ class TestEnsemble(unittest.TestCase):
     def test_property_data_container(self):
         """Test the data container property."""
         self.assertIsInstance(self.ensemble.data_container, DataContainer)
-
-    def test_init_with_datacontainer_file(self):
-        """Test initialisation with a DataContainer read from file."""
-        # run ensemble
-        n_iters = 364
-        self.ensemble.run(n_iters)
-
-        # initialise a new ensemble
-        ensemble_reloaded = \
-            ConcreteEnsemble(calculator=self.calculator,
-                             atoms=self.atoms,
-                             name='test-ensemble',
-                             data_container='test-ensemble.dc')
-
-        # check loaded data container of new ensemble
-        data_dc_reloaded = \
-            ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
-        data_dc = self.ensemble.data_container.get_data(tags=['Parakeet2'])
-        self.assertListEqual(data_dc[0], data_dc_reloaded[0])
-
-        # remove data container file
-        os.remove('test-ensemble.dc')
 
     def test_find_minimum_observation_interval(self):
         """Test the method to find the minimum observation interval."""

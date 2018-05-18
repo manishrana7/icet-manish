@@ -48,8 +48,7 @@ class BaseEnsemble(ABC):
             self._random_seed = random_seed
         random.seed(a=self._random_seed)
 
-        # default name for dc file
-        self._data_container_filename = name + ".dc"
+        self._data_container_filename = None
 
         if data_container is not None:
             try:
@@ -152,8 +151,11 @@ class BaseEnsemble(ABC):
                 self.minimum_observation_interval, final_step - step)
             if self._step % self.minimum_observation_interval == 0:
                 self._observe_configuration(self._step)
-            if time() - last_write_time > self.data_container_write_period:
-                self.data_container.write(self._data_container_filename)
+            if self._data_container_filename is not None and \
+                    time() - last_write_time > \
+                    self.data_container_write_period:
+                        self.data_container.write(
+                            self._data_container_filename)
 
             self._run(uninterrupted_steps)
             step += uninterrupted_steps
@@ -163,7 +165,8 @@ class BaseEnsemble(ABC):
         if self._step % self.minimum_observation_interval == 0:
             self._observe_configuration(self._step)
 
-        self.data_container.write(self._data_container_filename)
+        if self._data_container_filename is not None:
+            self.data_container.write(self._data_container_filename)
 
     def _run(self, number_of_trial_steps):
         """
