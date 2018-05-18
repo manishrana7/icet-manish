@@ -244,7 +244,7 @@ class DataContainer:
         import os
 
         if not os.path.isfile(infile):
-            raise Exception("File cannot be found")
+            raise FileNotFoundError
 
         temp_atoms_file = tempfile.NamedTemporaryFile()
         temp_json_file = tempfile.NamedTemporaryFile()

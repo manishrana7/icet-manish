@@ -48,15 +48,21 @@ class BaseEnsemble(ABC):
             self._random_seed = random_seed
         random.seed(a=self._random_seed)
 
+        # default name for dc file
+        self._data_container_filename = name + ".dc"
+
+        if data_container is not None:
+            try:
+                self._data_container = DataContainer.read(data_container)
+            except FileNotFoundError:
+                self._data_container_filename = data_container + ".dc"
+                data_container = None
+
         if data_container is None:
             self._data_container = \
                 DataContainer(atoms=atoms,
                               ensemble_name=name,
                               random_seed=self._random_seed)
-        else:
-            self._data_container = DataContainer.read(data_container)
-
-        self._data_container_filename = name + ".dc"
 
         strict_constraints = self.calculator.occupation_constraints
         sublattices = [[i for i in range(len(self.calculator.atoms))]]

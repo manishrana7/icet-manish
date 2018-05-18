@@ -174,6 +174,7 @@ class TestEnsemble(unittest.TestCase):
         ensemble = ConcreteEnsemble(calculator=self.calculator,
                                     atoms=self.atoms,
                                     name='this-ensemble',
+                                    data_container = 'my-precious',
                                     data_container_write_period=1e-4)
 
         # attach an observer
@@ -185,14 +186,14 @@ class TestEnsemble(unittest.TestCase):
         ensemble.run(n_iters)
 
         # check data container file
-        dc_read = DataContainer.read('this-ensemble.dc')
+        dc_read = DataContainer.read('my-precious.dc')
         dc_data = dc_read.get_data(tags=['Parakeet2'])
         self.assertEqual(
             len(dc_data[0]),
             n_iters // observer.interval + 1)
 
         # remove file
-        os.remove('this-ensemble.dc')
+        os.remove('my-precious.dc')
 
     def test_internal_run(self):
         """Test the _run method."""
@@ -233,7 +234,7 @@ class TestEnsemble(unittest.TestCase):
         n_iters = 364
         self.ensemble.run(n_iters)
 
-        # initalise a new ensemble
+        # initialise a new ensemble
         ensemble_reloaded = \
             ConcreteEnsemble(calculator=self.calculator,
                              atoms=self.atoms,

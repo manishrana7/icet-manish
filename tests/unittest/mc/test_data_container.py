@@ -200,10 +200,8 @@ class TestDataContainer(unittest.TestCase):
                              dc_read.get_data(['temperature']))
 
         # check exception raises when file does not exist
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(FileNotFoundError):
             dc_read = self.dc.read("not_found")
-        msg = 'File cannot be found'
-        self.assertTrue(msg in str(context.exception))
 
 
 if __name__ == '__main__':
