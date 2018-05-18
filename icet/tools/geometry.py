@@ -248,7 +248,7 @@ def get_permutation(container, permutation):
     Return the permuted version of container.
     """
     if len(permutation) != len(container):
-        raise RuntimeError("Containter and permutation"
+        raise RuntimeError("Container and permutation"
                            " not of same size {} != {}".format(
                                len(container), len(permutation)))
     if len(set(permutation)) != len(permutation):
