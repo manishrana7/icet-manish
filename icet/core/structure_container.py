@@ -223,10 +223,10 @@ class StructureContainer(object):
 
         cv = self._cluster_space.get_cluster_vector(atoms_copy)
         if not allow_duplicate:
-            for cv2 in [fs.cluster_vector for fs in self]:
-                if np.allclose(cv, cv2):
-                    print('Warning: Skipping duplicate structure')
-                    return
+            for i, fs in enumerate(self):
+                if np.allclose(cv, fs.cluster_vector):
+                    raise ValueError('Atoms have identical cluster vector with'
+                                     'structure {}'.format(i))
 
         structure = FitStructure(atoms_copy, user_tag)
         structure.set_properties(properties)
