@@ -711,12 +711,14 @@ PYBIND11_MODULE(_icet, m)
         .def("clear", &OrbitList::clear,
              "Clears the OrbitList")
         .def("sort", &OrbitList::sort,
-             "Sort by order the orbits listed in OrbitList")
+             "Sort the orbits by orbit comparison")
         .def("find_orbit", (int(OrbitList::*)(const Cluster &) const) &OrbitList::findOrbit,
              "Return the index of the orbit with the given representative cluster")
         //.def("find_orbit", (int (OrbitList::*)(const Cluster &, const std::unordered_map<Cluster, int> &) const) & OrbitList::findOrbit)
+        .def("is_row_taken", &OrbitList::isRowsTaken,
+             "Some random description")
         .def("get_orbit_list", &OrbitList::getOrbitList,
-             "Returns a list of orbits from OrbitList instance")
+             "Returns a list of Orbit objects from OrbitList")
         .def("get_primitive_structure", &OrbitList::getPrimitiveStructure,
              "Returns the primitive atomic structure used to construct the OrbitList instance")      
         .def("__len__", &OrbitList::size,

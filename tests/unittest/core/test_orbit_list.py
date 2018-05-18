@@ -105,6 +105,17 @@ class TestOrbitList(unittest.TestCase):
         self.assertEqual(
             self.orbit_list.find_orbit(self.cluster_pair), 1)
 
+    def test_is_row_taken(self):
+        """Test functionality."""
+        taken_rows = set()
+        row_indices = tuple([0, 1, 2])
+        self.assertFalse(self.orbit_list.is_row_taken(
+            taken_rows, row_indices))
+        
+        taken_rows = set([row_indices])
+        self.assertTrue(self.orbit_list.is_row_taken(
+            taken_rows, row_indices))
+
     def test_get_orbit_list(self):
         """Test a list of orbits is returned from this function."""
         orbit_list = self.orbit_list.get_orbit_list()
@@ -116,6 +127,7 @@ class TestOrbitList(unittest.TestCase):
                 self.assertEqual(orbit.get_representative_cluster(),
                                  repr_clusters[k])
 
+    @unittest.expectedFailure
     def test_get_primitive_structure(self):
         """
         Test get primitive structure functionality.
@@ -124,7 +136,7 @@ class TestOrbitList(unittest.TestCase):
         ----
         Test fails
         """
-        self.assertNotEqual(
+        self.assertEqual(
             self.orbit_list.get_primitive_structure(), self.prim_structure)
 
     def test_len(self):
