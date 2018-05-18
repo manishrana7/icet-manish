@@ -197,8 +197,8 @@ class StructureContainer(object):
             object are required to have an attached ASE calculator object
             with a calculated potential energy
         allow_duplicate : bool
-             whether or not to added the structure if there there already
-             exists a structure with identical cluster-vector.
+             whether or not to add the structure if there already exists a
+             structure with identical cluster-vector
         """
         assert isinstance(atoms, Atoms), 'atoms has not ASE Atoms format'
 
@@ -225,7 +225,7 @@ class StructureContainer(object):
         if not allow_duplicate:
             for cv2 in [fs.cluster_vector for fs in self]:
                 if np.allclose(cv, cv2):
-                    print('Warning: Duplicate structure found.')
+                    print('Warning: Skipping duplicate structure')
                     return
 
         structure = FitStructure(atoms_copy, user_tag)
