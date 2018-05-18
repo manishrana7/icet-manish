@@ -62,7 +62,36 @@ def __translate_labelings(labeling, snf, nsites, include_self=False):
         yield labeling_trans
 
 
-def __get_labelings(snf, iter_elements, nsites):
+def __check_concentrations(labeling, concentrations, tol=1e-5):
+    """
+    Check whether a labeling fulfills given a concentration restriction.
+
+    Parameters
+    ----------
+    labeling : tuple
+        Labeling of atoms (with integers)
+    concentration_restriction : dict
+        Every key is an integer referring to an element, every value is a
+        tuple with two values, defining lower and upper limit of the
+        allowed concentration range
+    tol : float
+        Numeric tolerance for concentration comparison
+
+    Returns
+    -------
+    bool
+        True if labeling satisfies concentration restrictions, False if not
+    """
+    natoms = len(labeling)
+    for element, allowed_range in concentrations.items():
+        concentration = labeling.count(element) / natoms
+        if concentration < allowed_range[0] + tol or \
+           concentration > allowed_range[1] - tol:
+            return False
+    return True
+
+
+def __get_labelings(snf, iter_elements, nsites, concentrations=None):
     """
     Get all labelings corresponding to a Smith Normal Form matrix.
     Superperiodic labelings as well as labelings that are equivalent under
@@ -86,6 +115,9 @@ def __get_labelings(snf, iter_elements, nsites):
     """
     labelings = []
     for labeling in itertools.product(*iter_elements * snf.ncells):
+        if concentrations:
+            if not __check_concentrations(labeling, concentrations):
+                continue
         unique = True
         for labeling_trans in __translate_labelings(labeling, snf, nsites,
                                                     include_self=False):
@@ -336,7 +368,9 @@ def get_symmetry_operations(atoms, tol=1e-3):
     return symmetries
 
 
-def enumerate_structures(atoms, sizes, subelements, niggli_reduce=None):
+def enumerate_structures(atoms, sizes, subelements,
+                         concentration_restrictions=None,
+                         niggli_reduce=None):
     """
     Generate enumerated structures, i.e. all inequivalent structures up to a
     certain size.
@@ -360,6 +394,12 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduce=None):
         Maximum number of atoms in the returned structures.
     subelements : list of str
         Elements to decorate the structure, e.g. ['Au', 'Ag']
+    concentration_restrictions : dict
+        Defines allowed concentration for one or more element in subelements,
+        e.g. {'Au': (0, 0.2)} will only enumerate structures in which the Au
+        content is between 0 and 20 %. Concentration is here always defined
+        as the number of atoms of the specified kind divided by the number of
+        *all* atoms.
     niggli_reduction : bool
         If True perform a Niggli reduction with spglib for each structure.
         Default is True if `atoms` has all boundary conditions periodic,
@@ -392,9 +432,25 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduce=None):
         raise Exception('subelements needs to be a list of strings '
                         'or a list of list of strings.')
 
+    # Adapt concentration restrictions to iter_elements
+    if concentration_restrictions:
+        concentrations = {}
+        for key, concentration_range in concentration_restrictions.items():
+            assert len(concentration_range) == 2, \
+                ('Each concentration range' +
+                 ' needs to be specified as (c_low, c_high)')
+            if key not in elements:
+                raise ValueError('{} found in concentration_restrictions but'
+                                 ' not in subelements'.format(key))
+            concentrations[subelements.index(key)] = concentration_range
+    else:
+        concentrations = None
+
+    print(concentrations)
+    print(elements)
     # Niggli reduce by default if all directions have
     # periodic boundary conditions
-    if not niggli_reduce:
+    if niggli_reduce is None:
         niggli_reduce = (sum(atoms.pbc) == 3)
 
     symmetries = get_symmetry_operations(atoms)
@@ -408,7 +464,8 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduce=None):
         snfs = get_unique_snfs(hnfs)
 
         for snf in snfs:
-            labelings = __get_labelings(snf, iter_elements, nsites)
+            labelings = __get_labelings(snf, iter_elements, nsites,
+                                        concentrations=concentrations)
             for hnf in snf.hnfs:
                 if niggli_reduce:
                     new_cell = spg_nigg_red(np.dot(atoms.cell.T, hnf.H).T)
