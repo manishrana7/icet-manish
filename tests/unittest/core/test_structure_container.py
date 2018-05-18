@@ -155,7 +155,7 @@ class TestStructureContainer(unittest.TestCase):
         # check that duplicate structure is not added.
         self.sc.add_structure(atoms, tag, properties)
         n_structures = len(self.sc._structure_list)
-        self.sc.add_structure(atoms, tag, properties, check_for_duplicate=True)
+        self.sc.add_structure(atoms, tag, properties, allow_duplicate=False)
         self.assertEqual(len(self.sc._structure_list), n_structures)
 
     def test_get_fit_data(self):

@@ -182,7 +182,7 @@ class StructureContainer(object):
                                               print_minimum=print_minimum))
 
     def add_structure(self, atoms, user_tag=None, properties=None,
-                      check_for_duplicate=False):
+                      allow_duplicate=True):
         """
         Add a structure to the structure list.
 
@@ -196,9 +196,9 @@ class StructureContainer(object):
             scalar properties. If properties are not specified the atoms
             object are required to have an attached ASE calculator object
             with a calculated potential energy
-        check_for_duplicate : bool
-             whether or not to check if an identical structure already exists
-             in the StructureContainer (if yes atoms will be rejected)
+        allow_duplicate : bool
+             whether or not to added the structure if there there already
+             exists a structure with identical cluster-vector.
         """
         assert isinstance(atoms, Atoms), 'atoms has not ASE Atoms format'
 
@@ -222,7 +222,7 @@ class StructureContainer(object):
         assert properties, 'Calculator does not have energy as a property'
 
         cv = self._cluster_space.get_cluster_vector(atoms_copy)
-        if check_for_duplicate:
+        if not allow_duplicate:
             for cv2 in [fs.cluster_vector for fs in self]:
                 if np.allclose(cv, cv2):
                     print('Warning: Duplicate structure found.')
