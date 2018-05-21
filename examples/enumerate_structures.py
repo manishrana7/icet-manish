@@ -18,9 +18,9 @@ for structure in enumerate_structures(atoms, range(1, 7), ['Pd', 'Au']):
     db.write(structure)
 
 # Generate fcc structures in the dilute limit
-concentration_restrictions = {'Au': (0, 0.1)}
+conc_rest = {'Au': (0, 0.1)}
 for structure in enumerate_structures(atoms, range(10, 14), ['Pd', 'Au'],
-                    concentration_restrictions=concentration_restrictions):
+                                      concentration_restrictions=conc_rest):
     db.write(structure)
 
 # Enumerate all palladium hydride structures with up to 4 primitive

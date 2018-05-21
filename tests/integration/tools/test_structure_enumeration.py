@@ -9,7 +9,7 @@ from icet.tools import enumerate_structures
 
 
 def count_structures(atoms, sizes, species, correct_count, tag,
-                     concentration_restrictions=None):
+                     conc_rest=None):
     """
     Count structures given by structure enumeration and assert that the
     right number is given.
@@ -29,7 +29,7 @@ def count_structures(atoms, sizes, species, correct_count, tag,
     """
     count = 0
     for _ in enumerate_structures(atoms, sizes, species,
-                concentration_restrictions=concentration_restrictions):
+                                  concentration_restrictions=conc_rest):
         count += 1
     msg = 'Structure enumeration failed for {}'.format(tag)
     assert count == correct_count, msg
@@ -82,4 +82,4 @@ sizes = range(1, 9)
 concentration_restrictions = {'Au': [0.0, 0.36]}
 correct_count = 134
 count_structures(atoms, sizes, species, correct_count, tag,
-                 concentration_restrictions=concentration_restrictions)
+                 conc_rest=concentration_restrictions)
