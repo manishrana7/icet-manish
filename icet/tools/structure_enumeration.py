@@ -85,8 +85,8 @@ def __check_concentrations(labeling, concentrations, tol=1e-5):
     natoms = len(labeling)
     for element, allowed_range in concentrations.items():
         concentration = labeling.count(element) / natoms
-        if concentration < allowed_range[0] + tol or \
-           concentration > allowed_range[1] - tol:
+        if concentration < allowed_range[0] - tol or \
+           concentration > allowed_range[1] + tol:
             return False
     return True
 
