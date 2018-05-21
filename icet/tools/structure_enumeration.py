@@ -19,7 +19,7 @@ from .structure_enumeration_support.hermite_normal_form import get_reduced_hnfs
 from .structure_enumeration_support.smith_normal_form import get_unique_snfs
 
 
-def __translate_labelings(labeling, snf, nsites, include_self=False):
+def _translate_labelings(labeling, snf, nsites, include_self=False):
     """
     Yield labelings that are equivalent to original labeling
     under translations as dictated by snf.
@@ -62,7 +62,7 @@ def __translate_labelings(labeling, snf, nsites, include_self=False):
         yield labeling_trans
 
 
-def __check_concentrations(labeling, concentrations, tol=1e-5):
+def _check_concentrations(labeling, concentrations, tol=1e-5):
     """
     Check whether a labeling fulfills given a concentration restriction.
 
@@ -91,7 +91,7 @@ def __check_concentrations(labeling, concentrations, tol=1e-5):
     return True
 
 
-def __get_labelings(snf, iter_elements, nsites, concentrations=None):
+def _get_labelings(snf, iter_elements, nsites, concentrations=None):
     """
     Get all labelings corresponding to a Smith Normal Form matrix.
     Superperiodic labelings as well as labelings that are equivalent under
@@ -116,10 +116,10 @@ def __get_labelings(snf, iter_elements, nsites, concentrations=None):
     labelings = []
     for labeling in itertools.product(*iter_elements * snf.ncells):
         if concentrations:
-            if not __check_concentrations(labeling, concentrations):
+            if not _check_concentrations(labeling, concentrations):
                 continue
         unique = True
-        for labeling_trans in __translate_labelings(labeling, snf, nsites,
+        for labeling_trans in _translate_labelings(labeling, snf, nsites,
                                                     include_self=False):
             # Check whether it translates into itself. If so,
             # then it has been added with a smaller cell.
@@ -138,7 +138,7 @@ def __get_labelings(snf, iter_elements, nsites, concentrations=None):
     return labelings
 
 
-def __permute_labeling(labeling, snf, transformation, nsites):
+def _permute_labeling(labeling, snf, transformation, nsites):
     """
     Permute labeling according to transformations defined by transformation.
 
@@ -183,7 +183,7 @@ def __permute_labeling(labeling, snf, transformation, nsites):
     return tuple(labeling_new)
 
 
-def __yield_unique_labelings(labelings, snf, hnf, nsites):
+def _yield_unique_labelings(labelings, snf, hnf, nsites):
     """
     Yield labelings that are unique in every imaginable sense.
 
@@ -212,7 +212,7 @@ def __yield_unique_labelings(labelings, snf, hnf, nsites):
         unique = True
         for transformation in hnf.transformations:
 
-            labeling_rot = __permute_labeling(labeling, snf, transformation,
+            labeling_rot = _permute_labeling(labeling, snf, transformation,
                                               nsites)
 
             # Commonly, the transformation leaves the labeling
@@ -223,7 +223,7 @@ def __yield_unique_labelings(labelings, snf, hnf, nsites):
 
             # Translate in all possible ways
             for labeling_rot_trans in \
-                    __translate_labelings(labeling_rot, snf, nsites,
+                    _translate_labelings(labeling_rot, snf, nsites,
                                           include_self=True):
                 if labeling_rot_trans in saved_labelings:
                     # Then we have rotated and translated the labeling
@@ -239,7 +239,7 @@ def __yield_unique_labelings(labelings, snf, hnf, nsites):
             yield labeling
 
 
-def __labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements, pbc):
+def _labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements, pbc):
     """
     Get ASE Atoms object from labeling, HNF matrix and parent lattice.
 
@@ -462,15 +462,15 @@ def enumerate_structures(atoms, sizes, subelements,
         snfs = get_unique_snfs(hnfs)
 
         for snf in snfs:
-            labelings = __get_labelings(snf, iter_elements, nsites,
+            labelings = _get_labelings(snf, iter_elements, nsites,
                                         concentrations=concentrations)
             for hnf in snf.hnfs:
                 if niggli_reduce:
                     new_cell = spg_nigg_red(np.dot(atoms.cell.T, hnf.H).T)
                 else:
                     new_cell = np.dot(atoms.cell.T, hnf.H).T
-                for labeling in __yield_unique_labelings(labelings, snf, hnf,
+                for labeling in _yield_unique_labelings(labelings, snf, hnf,
                                                          nsites):
-                    yield __labeling_to_atoms(labeling, hnf, atoms.cell,
+                    yield _labeling_to_atoms(labeling, hnf, atoms.cell,
                                               new_cell, basis, elements,
                                               atoms.pbc)
