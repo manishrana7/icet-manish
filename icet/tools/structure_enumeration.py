@@ -439,10 +439,11 @@ def enumerate_structures(atoms, sizes, subelements,
             assert len(concentration_range) == 2, \
                 ('Each concentration range' +
                  ' needs to be specified as (c_low, c_high)')
+            print(elements)
             if key not in elements:
                 raise ValueError('{} found in concentration_restrictions but'
                                  ' not in subelements'.format(key))
-            concentrations[subelements.index(key)] = concentration_range
+            concentrations[elements.index(key)] = concentration_range
     else:
         concentrations = None
 
