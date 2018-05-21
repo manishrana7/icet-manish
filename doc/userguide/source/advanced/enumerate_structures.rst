@@ -45,7 +45,7 @@ supercell. It is thus not possible to enumerate too large cell sizes. When the
 number of structures grows, a larger and larger proportion of the structures
 will have equal amounts of the constituent elements (e.g., most structures
 will have concentrations close to 50 % in binary systems). Structures in the
-dilute limit are thus underrepresented. To overcome this problem, it is
+dilute limit may thus be underrepresented. To overcome this problem, it is
 possible to enumerate structures in a specified concentration regime by
 providing a dict in which the range of allowed concentrations is specified for
 one or more of the elements in the system. Concentration is here always
