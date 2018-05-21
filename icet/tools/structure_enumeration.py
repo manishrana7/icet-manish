@@ -120,7 +120,7 @@ def _get_labelings(snf, iter_elements, nsites, concentrations=None):
                 continue
         unique = True
         for labeling_trans in _translate_labelings(labeling, snf, nsites,
-                                                    include_self=False):
+                                                   include_self=False):
             # Check whether it translates into itself. If so,
             # then it has been added with a smaller cell.
             if labeling == labeling_trans:
@@ -213,7 +213,7 @@ def _yield_unique_labelings(labelings, snf, hnf, nsites):
         for transformation in hnf.transformations:
 
             labeling_rot = _permute_labeling(labeling, snf, transformation,
-                                              nsites)
+                                             nsites)
 
             # Commonly, the transformation leaves the labeling
             # unchanged, so check that first as a special case
@@ -224,7 +224,7 @@ def _yield_unique_labelings(labelings, snf, hnf, nsites):
             # Translate in all possible ways
             for labeling_rot_trans in \
                     _translate_labelings(labeling_rot, snf, nsites,
-                                          include_self=True):
+                                         include_self=True):
                 if labeling_rot_trans in saved_labelings:
                     # Then we have rotated and translated the labeling
                     # into one that was already yielded
@@ -463,14 +463,14 @@ def enumerate_structures(atoms, sizes, subelements,
 
         for snf in snfs:
             labelings = _get_labelings(snf, iter_elements, nsites,
-                                        concentrations=concentrations)
+                                       concentrations=concentrations)
             for hnf in snf.hnfs:
                 if niggli_reduce:
                     new_cell = spg_nigg_red(np.dot(atoms.cell.T, hnf.H).T)
                 else:
                     new_cell = np.dot(atoms.cell.T, hnf.H).T
                 for labeling in _yield_unique_labelings(labelings, snf, hnf,
-                                                         nsites):
+                                                        nsites):
                     yield _labeling_to_atoms(labeling, hnf, atoms.cell,
-                                              new_cell, basis, elements,
-                                              atoms.pbc)
+                                             new_cell, basis, elements,
+                                             atoms.pbc)
