@@ -17,6 +17,12 @@ db = connect('AuPd-fcc.db')
 for structure in enumerate_structures(atoms, range(1, 7), ['Pd', 'Au']):
     db.write(structure)
 
+# Generate fcc structures in the dilute limit
+concentration_restrictions = {'Au': (0, 0.1)}
+for structure in enumerate_structures(atoms, range(10, 14), ['Pd', 'Au'],
+                    concentration_restrictions=concentration_restrictions):
+    db.write(structure)
+
 # Enumerate all palladium hydride structures with up to 4 primitive
 # cells (= up to 4 Pd atoms and between 0 and 4 H atoms). We want to
 # specify that one site should always be Pd while the other can be
