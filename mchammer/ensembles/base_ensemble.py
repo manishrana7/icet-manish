@@ -48,13 +48,12 @@ class BaseEnsemble(ABC):
             self._random_seed = random_seed
         random.seed(a=self._random_seed)
 
-        self._data_container_filename = None
+        self._data_container_filename = data_container
 
-        if data_container is not None:
+        if self._data_container_filename is not None:
             try:
                 self._data_container = DataContainer.read(data_container)
             except FileNotFoundError:
-                self._data_container_filename = data_container + ".dc"
                 data_container = None
 
         if data_container is None:

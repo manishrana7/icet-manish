@@ -199,7 +199,7 @@ class TestEnsemble(unittest.TestCase):
         ensemble = ConcreteEnsemble(calculator=self.calculator,
                                     atoms=self.atoms,
                                     name='this-ensemble',
-                                    data_container='my-precious',
+                                    data_container='my-datacontainer',
                                     data_container_write_period=1e-4)
 
         # attach an observer
@@ -211,7 +211,7 @@ class TestEnsemble(unittest.TestCase):
         ensemble.run(n_iters)
 
         # check data container file
-        dc_read = DataContainer.read('my-precious.dc')
+        dc_read = DataContainer.read('my-datacontainer')
         dc_data = dc_read.get_data(tags=['Parakeet2'])
         self.assertEqual(
             len(dc_data[0]),
@@ -222,7 +222,7 @@ class TestEnsemble(unittest.TestCase):
             ConcreteEnsemble(calculator=self.calculator,
                              atoms=self.atoms,
                              name='this-ensemble',
-                             data_container='my-precious.dc')
+                             data_container='my-datacontainer')
 
         # check loaded data container of new ensemble
         data_dc_reloaded = \
@@ -232,7 +232,7 @@ class TestEnsemble(unittest.TestCase):
         self.assertListEqual(data_dc[0], data_dc_reloaded[0])
 
         # remove file
-        os.remove('my-precious.dc')
+        os.remove('my-datacontainer')
 
     def test_internal_run(self):
         """Test the _run method."""
