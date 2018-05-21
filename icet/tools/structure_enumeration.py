@@ -446,8 +446,6 @@ def enumerate_structures(atoms, sizes, subelements,
     else:
         concentrations = None
 
-    print(concentrations)
-    print(elements)
     # Niggli reduce by default if all directions have
     # periodic boundary conditions
     if niggli_reduce is None:
