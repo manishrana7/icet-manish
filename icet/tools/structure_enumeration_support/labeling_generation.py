@@ -84,22 +84,24 @@ class LabelingGenerator():
                    counts[element] / natoms < conc_range[1] + self.tol:
                     yield product
 
-    def yield_unique_permutations(self, unique_elements, permutation, position):
+    def yield_unique_permutations(self, unique_elements, permutation,
+                                  position):
         """
-        Recursively generate all _unique_ permutations of a set of elements with
-        given multiplicites. The algorithm is inspired by the one given at
-        https://stackoverflow.com/a/6285203/6729551
+        Recursively generate all _unique_ permutations of a set of elements
+        with given multiplicites. The algorithm is inspired by the one given
+        at https://stackoverflow.com/a/6285203/6729551
 
         Parameters
         ----------
         unique_elements : dict
-            The keys are elements, the values the multiplicity for that element.
+            The keys are elements, the values the multiplicity for that
+            element.
         permutation : list of ints
             Permutation in process, should have length equal to the sum of all
             multiplicites.
         position : int
-            Position currently processed. Should be the index of the last element
-            of `permutation` upon initialization.
+            Position currently processed. Should be the index of the last
+            element of `permutation` upon initialization.
 
         Yields
         ------
@@ -233,7 +235,8 @@ class SiteGroup():
             Size of supercell
         """
         self.combinations = []
+        natoms = self.multiplicity * ncells
         for combination in \
-            itertools.combinations_with_replacement(self.iter_element,
-                                                    self.multiplicity * ncells):
+                itertools.combinations_with_replacement(self.iter_element,
+                                                        natoms):
             self.combinations.append(combination)
