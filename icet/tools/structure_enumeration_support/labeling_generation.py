@@ -3,6 +3,21 @@ from collections import OrderedDict
 
 
 class LabelingGenerator():
+    """
+
+    Object used to generate all possible permutations of elements on a given
+    set of sites. If concentration restrictions are not specified, the
+    generation will be a simple itertools.product loop.
+
+    Parameters
+    ----------
+    iter_elements : list of tuples of ints
+        Specifies the allowed elements on each site
+    concentrations : dict
+        Keys are elements (integers), values specify concentration ranges.
+    tol : float
+        Tolerance parameter used when comparing concentrations
+    """
 
     def __init__(self, iter_elements, concentrations, tol=1e-5):
         self.concentrations = concentrations
@@ -148,6 +163,18 @@ class LabelingGenerator():
         and the second corresponding to the `(2)` site group and with 2
         elements in total. Now, we reorder it so that the elements are ordered
         according to `[(0, 1), (2), (0, 1), (0, 1), (2), (0, 1)]`
+
+        Parameters
+        ----------
+        labeling : list of tuple of ints
+            As given by yield_permutations
+        ncells : int
+            Size of supercell
+
+        Returns
+        -------
+        tuple of ints
+            Labeling properly sorted, ready to be given to the enumeration code
         """
         sorted_labeling = [0] * len(self.iter_elements * ncells)
         count = 0
@@ -176,12 +203,36 @@ class LabelingGenerator():
 class SiteGroup():
 
     def __init__(self, iter_element, position):
+        """
+
+        Keeps track of a group of sites that have the same allowed elements.
+        I.e. a site group could correspond to all sites on which element 0 and
+        1 are allowed, and the number of such sites is stored in the `
+        multiplicity`.
+
+        Parameters
+        ----------
+        iter_element : tuple of ints
+            The allowed elements on these sites
+        position : int
+            Helps to keep track of when the first group occured; the first
+            site group encountered will have position = 0, the next 1 etc.
+        """
         self.iter_element = iter_element
         self.position = position
         self.multiplicity = 1
         self.next_to_add = 0  # Will keep count when reordering elements
 
     def compute_all_combinations(self, ncells):
+        """
+        Compute all combinations (without considering order) of the elements
+        in the group.
+
+        Parameters
+        ----------
+        ncells : int
+            Size of supercell
+        """
         self.combinations = []
         for combination in \
             itertools.combinations_with_replacement(self.iter_element,

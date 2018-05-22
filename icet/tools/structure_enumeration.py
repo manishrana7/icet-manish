@@ -10,7 +10,6 @@ The algorithm was developed by Gus L. W Hart and Rodney W. Forcade in
 """
 
 from itertools import product
-import itertools
 import numpy as np
 from spglib import get_symmetry
 from spglib import niggli_reduce as spg_nigg_red
@@ -64,7 +63,7 @@ def _translate_labelings(labeling, snf, nsites, include_self=False):
         yield labeling_trans
 
 
-def _get_all_labelings(snf, labeling_generator, nsites, concentrations=None):
+def _get_all_labelings(snf, labeling_generator, nsites):
     """
     Get all labelings corresponding to a Smith Normal Form matrix.
     Superperiodic labelings as well as labelings that are equivalent under
@@ -76,8 +75,7 @@ def _get_all_labelings(snf, labeling_generator, nsites, concentrations=None):
     Parameters
     ----------
     snf : SmithNormalForm object
-    nelements : int
-        Number of elements in enumeration.
+    labeling_generator : LabelingGenerator object
     nsites : int
         Number of sites per primtive cell.
 
