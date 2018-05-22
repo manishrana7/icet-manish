@@ -198,7 +198,7 @@ class LabelingGenerator():
         for site_group in self.site_groups.values():
             assert site_group.next_to_add == len(labeling[site_group.position])
             site_group.next_to_add = 0
-
+        print(sorted_labeling)
         return tuple(sorted_labeling)
 
 
@@ -206,8 +206,8 @@ class SiteGroup():
     """
     Keeps track of a group of sites that have the same allowed elements.
     I.e. a site group could correspond to all sites on which element 0 and
-    1 are allowed, and the number of such sites is stored in the `
-    multiplicity`.
+    1 are allowed, and the number of such sites is stored in the 
+    `multiplicity`.
 
     Parameters
     ----------
