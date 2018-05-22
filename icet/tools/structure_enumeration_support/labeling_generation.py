@@ -16,11 +16,17 @@ class LabelingGenerator():
         Keys are elements (integers), values specify concentration ranges.
     tol : float
         Tolerance parameter used when comparing concentrations
+
+    Attribtues
+    ----------
+    site_groups : OrderedDict
+        The keys are unique iter_elements, the values are SiteGroup objects
+        corresponding to that iter_element
     """
 
     def __init__(self, iter_elements, concentrations, tol=1e-5):
-        self.concentrations = concentrations
         self.iter_elements = iter_elements
+        self.concentrations = concentrations
         self.tol = tol
 
         if self.concentrations:
@@ -215,6 +221,15 @@ class SiteGroup():
     position : int
         Helps to keep track of when the first group occured; the first
         site group encountered will have position = 0, the next 1 etc.
+
+    Attributes
+    ----------
+    multiplicity : int
+        Multiplicity if the group, i.e., how many sites that have this
+        iter_element
+    next_to_add : int
+        Helper attribute that keeps track of which site in this group is the
+        next to be added when the elements of a labeling are to be sorted
     """
 
     def __init__(self, iter_element, position):
