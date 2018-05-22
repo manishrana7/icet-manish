@@ -17,6 +17,8 @@ from spglib import niggli_reduce as spg_nigg_red
 from ase import Atoms
 from .structure_enumeration_support.hermite_normal_form import get_reduced_hnfs
 from .structure_enumeration_support.smith_normal_form import get_unique_snfs
+from .structure_enumeration_support.labeling_generation \
+    import LabelingGenerator
 
 
 def _translate_labelings(labeling, snf, nsites, include_self=False):
@@ -62,43 +64,14 @@ def _translate_labelings(labeling, snf, nsites, include_self=False):
         yield labeling_trans
 
 
-def _check_concentrations(labeling, concentrations, tol=1e-5):
-    """
-    Check whether a labeling fulfills given a concentration restriction.
-
-    Parameters
-    ----------
-    labeling : tuple
-        Labeling of atoms (with integers)
-    concentration_restriction : dict
-        Every key is an integer referring to an element, every value is a
-        tuple with two values, defining lower and upper limit of the
-        allowed concentration range
-    tol : float
-        Numeric tolerance for concentration comparison
-
-    Returns
-    -------
-    bool
-        True if labeling satisfies concentration restrictions, False if not
-    """
-    natoms = len(labeling)
-    for element, allowed_range in concentrations.items():
-        concentration = labeling.count(element) / natoms
-        if concentration < allowed_range[0] - tol or \
-           concentration > allowed_range[1] + tol:
-            return False
-    return True
-
-
-def _get_labelings(snf, iter_elements, nsites, concentrations=None):
+def _get_all_labelings(snf, labeling_generator, nsites, concentrations=None):
     """
     Get all labelings corresponding to a Smith Normal Form matrix.
     Superperiodic labelings as well as labelings that are equivalent under
     translations for this particular SNF will not be included. However,
     labelings that are equivalent by rotations that leave the cell (but not
     the labeling) unchanged will still be included, since these have to be
-    removed for each HNF.
+    removed for each HNF separately.
 
     Parameters
     ----------
@@ -114,10 +87,7 @@ def _get_labelings(snf, iter_elements, nsites, concentrations=None):
         Inequivalent labelings.
     """
     labelings = []
-    for labeling in itertools.product(*iter_elements * snf.ncells):
-        if concentrations:
-            if not _check_concentrations(labeling, concentrations):
-                continue
+    for labeling in labeling_generator.yield_labelings(snf.ncells):
         unique = True
         for labeling_trans in _translate_labelings(labeling, snf, nsites,
                                                    include_self=False):
@@ -416,7 +386,7 @@ def enumerate_structures(atoms, sizes, subelements,
 
     # Construct descriptor of where species are allowed to be
     if isinstance(subelements[0], str):
-        iter_elements = [range(len(subelements))] * nsites
+        iter_elements = [tuple(range(len(subelements)))] * nsites
         elements = subelements
     elif len(subelements) == nsites:
         assert isinstance(subelements[0][0], str)
@@ -427,7 +397,7 @@ def enumerate_structures(atoms, sizes, subelements,
                     elements.append(element)
         iter_elements = []
         for site in subelements:
-            iter_elements.append([elements.index(i) for i in site])
+            iter_elements.append(tuple(elements.index(i) for i in site))
     else:
         raise Exception('subelements needs to be a list of strings '
                         'or a list of list of strings.')
@@ -439,13 +409,15 @@ def enumerate_structures(atoms, sizes, subelements,
             assert len(concentration_range) == 2, \
                 ('Each concentration range' +
                  ' needs to be specified as (c_low, c_high)')
-            print(elements)
             if key not in elements:
                 raise ValueError('{} found in concentration_restrictions but'
                                  ' not in subelements'.format(key))
             concentrations[elements.index(key)] = concentration_range
     else:
         concentrations = None
+
+    # Construct labeling generator
+    labeling_generator = LabelingGenerator(iter_elements, concentrations)
 
     # Niggli reduce by default if all directions have
     # periodic boundary conditions
@@ -463,8 +435,7 @@ def enumerate_structures(atoms, sizes, subelements,
         snfs = get_unique_snfs(hnfs)
 
         for snf in snfs:
-            labelings = _get_labelings(snf, iter_elements, nsites,
-                                       concentrations=concentrations)
+            labelings = _get_all_labelings(snf, labeling_generator, nsites)
             for hnf in snf.hnfs:
                 if niggli_reduce:
                     new_cell = spg_nigg_red(np.dot(atoms.cell.T, hnf.H).T)
