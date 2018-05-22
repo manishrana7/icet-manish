@@ -4,7 +4,6 @@ from collections import OrderedDict
 
 class LabelingGenerator():
     """
-
     Object used to generate all possible permutations of elements on a given
     set of sites. If concentration restrictions are not specified, the
     generation will be a simple itertools.product loop.
@@ -73,7 +72,7 @@ class LabelingGenerator():
             All unique combinations (products) of unordered iter element
             combinations,
         """
-        N = len(self.iter_elements) * ncells
+        natoms = len(self.iter_elements) * ncells
         combinations = [sg.combinations for sg in self.site_groups.values()]
         for product in itertools.product(*combinations):
             counts = {element: 0 for element in self.concentrations.keys()}
@@ -81,8 +80,8 @@ class LabelingGenerator():
                 for element in self.concentrations.keys():
                     counts[element] += element_group.count(element)
             for element, conc_range in self.concentrations.items():
-                if counts[element] / N > conc_range[0] - self.tol and \
-                   counts[element] / N < conc_range[1] + self.tol:
+                if counts[element] / natoms > conc_range[0] - self.tol and \
+                   counts[element] / natoms < conc_range[1] + self.tol:
                     yield product
 
     def yield_unique_permutations(self, unique_elements, permutation, position):
@@ -143,9 +142,10 @@ class LabelingGenerator():
         """
         unique_elements = {element: product[position].count(element)
                            for element in set(product[position])}
-        N = len(product[position])
+        natoms = len(product[position])
         for permutation in self.yield_unique_permutations(unique_elements,
-                                                          [0] * N, N - 1):
+                                                          [0] * natoms,
+                                                          natoms - 1):
             if position == len(product) - 1:
                 yield [permutation]
             else:
@@ -178,7 +178,7 @@ class LabelingGenerator():
         """
         sorted_labeling = [0] * len(self.iter_elements * ncells)
         count = 0
-        for cell in range(ncells):
+        for _ in range(ncells):
             for iter_element in self.iter_elements:
 
                 # Find the site group corresponding to the iter element
@@ -201,23 +201,22 @@ class LabelingGenerator():
 
 
 class SiteGroup():
+    """
+    Keeps track of a group of sites that have the same allowed elements.
+    I.e. a site group could correspond to all sites on which element 0 and
+    1 are allowed, and the number of such sites is stored in the `
+    multiplicity`.
+
+    Parameters
+    ----------
+    iter_element : tuple of ints
+        The allowed elements on these sites
+    position : int
+        Helps to keep track of when the first group occured; the first
+        site group encountered will have position = 0, the next 1 etc.
+    """
 
     def __init__(self, iter_element, position):
-        """
-
-        Keeps track of a group of sites that have the same allowed elements.
-        I.e. a site group could correspond to all sites on which element 0 and
-        1 are allowed, and the number of such sites is stored in the `
-        multiplicity`.
-
-        Parameters
-        ----------
-        iter_element : tuple of ints
-            The allowed elements on these sites
-        position : int
-            Helps to keep track of when the first group occured; the first
-            site group encountered will have position = 0, the next 1 etc.
-        """
         self.iter_element = iter_element
         self.position = position
         self.multiplicity = 1
