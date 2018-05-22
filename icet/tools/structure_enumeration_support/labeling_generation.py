@@ -205,7 +205,7 @@ class SiteGroup():
     """
     Keeps track of a group of sites that have the same allowed elements.
     I.e. a site group could correspond to all sites on which element 0 and
-    1 are allowed, and the number of such sites is stored in the 
+    1 are allowed, and the number of such sites is stored in the
     `multiplicity`.
 
     Parameters
