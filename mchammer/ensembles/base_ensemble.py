@@ -3,7 +3,7 @@ from time import time
 from abc import ABC, abstractmethod
 from math import gcd
 
-from mchammer.data_container import DataContainer
+from mchammer.data_container import DataContainer, FileTypeError
 from mchammer.configuration_manager import ConfigurationManager
 from mchammer.observers.base_observer import BaseObserver
 
@@ -48,19 +48,22 @@ class BaseEnsemble(ABC):
             self._random_seed = random_seed
         random.seed(a=self._random_seed)
 
-        self._data_container_filename = data_container
+        self._data_container_filename = None
 
-        if self._data_container_filename is not None:
+        self._data_container = \
+            DataContainer(atoms=atoms,
+                          ensemble_name=name,
+                          random_seed=self._random_seed)
+
+        if data_container is not None:
             try:
                 self._data_container = DataContainer.read(data_container)
+            except FileTypeError:
+                raise
             except FileNotFoundError:
-                data_container = None
-
-        if data_container is None:
-            self._data_container = \
-                DataContainer(atoms=atoms,
-                              ensemble_name=name,
-                              random_seed=self._random_seed)
+                self._data_container_filename = data_container
+            else:
+                self._data_container_filename = data_container
 
         strict_constraints = self.calculator.occupation_constraints
         sublattices = [[i for i in range(len(self.calculator.atoms))]]

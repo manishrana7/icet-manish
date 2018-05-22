@@ -1,11 +1,15 @@
 import unittest
 import tempfile
+import tarfile
+import json
 from collections import OrderedDict
 import numpy as np
 import pandas as pd
 from ase.build import bulk
+from ase.io import write as ase_write
 from mchammer import DataContainer
 from mchammer.observers.base_observer import BaseObserver
+from mchammer.data_container import FileTypeError
 
 # Create concrete child of BaseObserver for testing
 
@@ -178,7 +182,7 @@ class TestDataContainer(unittest.TestCase):
         """Test write and read functionalities of data container."""
         # append data for testing
         for mctrial in range(10, 101, 10):
-            self.dc.append(mctrial, dict([('temperature', 100.0)]))
+            self.dc.append(mctrial, dict([('obs1', 64)]))
 
         # save to file
         temp_file = tempfile.NamedTemporaryFile()
@@ -196,12 +200,64 @@ class TestDataContainer(unittest.TestCase):
         # check data
         self.assertEqual(self.dc.get_number_of_entries(),
                          dc_read.get_number_of_entries())
-        self.assertListEqual(self.dc.get_data(['temperature']),
-                             dc_read.get_data(['temperature']))
+        self.assertListEqual(self.dc.get_data(['obs1']),
+                             dc_read.get_data(['obs1']))
 
         # check exception raises when file does not exist
         with self.assertRaises(FileNotFoundError):
             dc_read = self.dc.read("not_found")
+
+    def test_read_errors(self):
+        """Test errors when files have non-expected formats."""
+
+        # set of empty non-formated files
+        temp_tar_file = tempfile.NamedTemporaryFile()
+        temp_atoms_file = tempfile.NamedTemporaryFile()
+        temp_json_file = tempfile.NamedTemporaryFile()
+        temp_csv_file = tempfile.NamedTemporaryFile()
+
+        # test non-tar file
+        with self.assertRaises(FileTypeError) as context:
+            self.dc.read(temp_tar_file.name)
+        self.assertTrue("DataContainer file is not a tar file"
+                        in str(context.exception))
+
+        # test a non-valid atom file
+        with tarfile.open(temp_tar_file.name, mode='w') as handle:
+            handle.add(temp_atoms_file.name, arcname='atoms')
+
+        with self.assertRaises(FileTypeError) as context:
+            self.dc.read(temp_tar_file.name)
+        self.assertTrue("Failed to load atoms from file"
+                        in str(context.exception))
+
+        # add a valid atom file then test a non-valid file for reference data
+        ase_write(temp_atoms_file.name, self.atoms, format='json')
+
+        with tarfile.open(temp_tar_file.name, mode='w') as handle:
+            handle.add(temp_atoms_file.name, arcname='atoms')
+            handle.add(temp_json_file.name, arcname='reference_data')
+
+        with self.assertRaises(FileTypeError) as context:
+            self.dc.read(temp_tar_file.name)
+        self.assertTrue("Failed to load reference data from file"
+                        in str(context.exception))
+
+        # now add a reference data file and a non-valid test runtime data file
+        reference_data = {'parameters': self.dc.parameters,
+                          'metadata': self.dc.metadata}
+        with open(temp_json_file.name, 'w') as handle:
+            json.dump(reference_data, handle)
+
+        pd.DataFrame().to_csv(temp_csv_file.name)
+
+        with tarfile.open(temp_tar_file.name, mode='w') as handle:
+            handle.add(temp_atoms_file.name, arcname='atoms')
+            handle.add(temp_json_file.name, arcname='reference_data')
+            handle.add(temp_csv_file.name, arcname='runtime_data')
+
+        with self.assertRaises(FileTypeError) as context:
+            self.dc.read(temp_csv_file.name)
 
 
 if __name__ == '__main__':
