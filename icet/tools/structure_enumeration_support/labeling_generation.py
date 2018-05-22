@@ -198,7 +198,6 @@ class LabelingGenerator():
         for site_group in self.site_groups.values():
             assert site_group.next_to_add == len(labeling[site_group.position])
             site_group.next_to_add = 0
-        print(sorted_labeling)
         return tuple(sorted_labeling)
 
 
