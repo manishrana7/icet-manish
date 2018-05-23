@@ -3,7 +3,7 @@ from time import time
 from abc import ABC, abstractmethod
 from math import gcd
 
-from mchammer.data_container import DataContainer, LoadFileError
+from mchammer.data_container import DataContainer
 from mchammer.configuration_manager import ConfigurationManager
 from mchammer.observers.base_observer import BaseObserver
 
@@ -59,10 +59,8 @@ class BaseEnsemble(ABC):
             try:
                 self._data_container = DataContainer.read(data_container)
             except FileNotFoundError:
-                self._data_container_filename = data_container
-            except LoadFileError:
-                raise
-            else:
+                pass
+            finally:
                 self._data_container_filename = data_container
 
         strict_constraints = self.calculator.occupation_constraints

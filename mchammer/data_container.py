@@ -10,14 +10,14 @@ from ase.io import write as ase_write, read as ase_read
 from icet import __version__ as icet_version
 
 
-class LoadFileError(Exception):
+class InvalidFileError(Exception):
     """
-    Raises an error with the format of the untar files are not the expected
-    ones.
+    Raises an error with the format of the DataContainer file is not
+    the expected one.
     """
     def __init__(self, err_msg):
-        self.err_msg = err_msg
         super().__init__(err_msg)
+        self.err_msg = err_msg
 
     def __str__(self):
         return str(self.err_msg)
@@ -244,50 +244,58 @@ class DataContainer:
         pass
 
     @staticmethod
-    def read(infile):
+    def read(filename):
         """
         Read DataContainer object from file.
 
         Parameters
         ----------
-        infile : str or FileObj
+        filename : str or FileObj
             file from which to read
 
         Raises
         ------
-        LoadFileError : if tar or any of the its files has not an expected
+        InvalidFileError : if tar or any of the its files has not an expected
                         type.
         """
         import os
 
-        if not os.path.isfile(infile):
-            raise FileNotFoundError
+        if isinstance(filename, str):
+            if not os.path.isfile(filename):
+                raise FileNotFoundError
+            else:
+                filename = str(filename)
 
-        if not tarfile.is_tarfile(infile):
-            err_msg = "DataContainer file is not a tar file"
-            raise LoadFileError(err_msg)
+        if not tarfile.is_tarfile(filename):
+            raise InvalidFileError('{} is not a tar file'.format(filename))
 
         temp_atoms_file = tempfile.NamedTemporaryFile()
         temp_json_file = tempfile.NamedTemporaryFile()
         temp_csv_file = tempfile.NamedTemporaryFile()
 
-        with tarfile.open(mode='r', name=infile) as tar_file:
-            temp_atoms_file.write(tar_file.extractfile('atoms').read())
-            temp_atoms_file.seek(0)
+        with tarfile.open(mode='r', name=filename) as tar_file:
+            # file with atoms
             try:
+                temp_atoms_file.write(tar_file.extractfile('atoms').read())
+            except KeyError:
+                raise InvalidFileError(
+                    'atoms not found in {}'.format(filename))
+            else:
+                temp_atoms_file.seek(0)
                 atoms = ase_read(temp_atoms_file.name, format='json')
-            except Exception:
-                err_msg = "Failed to load atoms from file"
-                raise LoadFileError(err_msg)
 
-            temp_json_file.write(tar_file.extractfile('reference_data').read())
-            temp_json_file.seek(0)
+            # file with reference data
             try:
+                temp_json_file.write(
+                    tar_file.extractfile('reference_data').read())
+            except KeyError:
+                raise InvalidFileError(
+                    'reference data not found in {}'.format(filename))
+            else:
+                temp_json_file.seek(0)
                 reference_data = json.load(temp_json_file)
-            except Exception:
-                err_msg = "Failed to load reference data from file"
-                raise LoadFileError(err_msg)
 
+            # init DataContainer
             dc = DataContainer(atoms,
                                reference_data['metadata']['ensemble_name'],
                                reference_data['parameters']['seed'])
@@ -306,18 +314,18 @@ class DataContainer:
                     for value in reference_data[key]:
                         dc.add_observable(value)
 
-            temp_csv_file.write(tar_file.extractfile('runtime_data').read())
-            temp_csv_file.seek(0)
-
+            # add runtime data from file
             try:
-                with open(temp_csv_file.name) as csvfile:
-                    runtime_data = \
-                        pd.read_csv(csvfile, index_col=False,
-                                    usecols=['mctrial']+dc.observables)
-            except Exception:
-                err_msg = "Failed to load runtime data from file"
-                raise LoadFileError(err_msg)
+                temp_csv_file.write(
+                    tar_file.extractfile('runtime_data').read())
+            except KeyError:
+                raise InvalidFileError(
+                    'runtime data not found in {}'.format(filename))
             else:
+                temp_csv_file.seek(0)
+                runtime_data = \
+                    pd.read_csv(temp_csv_file, index_col=False,
+                                usecols=['mctrial']+dc.observables)
                 dc._data = runtime_data
 
         return dc
