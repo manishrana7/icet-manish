@@ -47,6 +47,9 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
                     element_number = atomic_numbers[key]
                     self.chemical_potentials[element_number] =\
                         kwargs['chemical_potentials'][key]
+                elif isinstance(key, int):
+                    self.chemical_potentials[key] =\
+                        kwargs['chemical_potentials'][key]
 
     def do_trial_step(self):
         """Do a trial step."""
