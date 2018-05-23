@@ -28,10 +28,10 @@ class DictObserver(BaseObserver):
     def __init__(self, interval, tag='Ayaymama'):
         super().__init__(interval=interval, return_type=dict, tag=tag)
 
-    def get_observable(self, atoms): # noqa
+    def get_observable(self, atoms):
         return {'value_1': 1.0, 'value_2': 2.0}
 
-    def get_keys(self): # noqa
+    def get_keys(self):
         return ['value_1', 'value_2']
 
 
