@@ -3,7 +3,7 @@ from time import time
 from abc import ABC, abstractmethod
 from math import gcd
 
-from mchammer.data_container import DataContainer, FileTypeError
+from mchammer.data_container import DataContainer, LoadFileError
 from mchammer.configuration_manager import ConfigurationManager
 from mchammer.observers.base_observer import BaseObserver
 
@@ -58,10 +58,10 @@ class BaseEnsemble(ABC):
         if data_container is not None:
             try:
                 self._data_container = DataContainer.read(data_container)
-            except FileTypeError:
-                raise
             except FileNotFoundError:
                 self._data_container_filename = data_container
+            except LoadFileError:
+                raise
             else:
                 self._data_container_filename = data_container
 

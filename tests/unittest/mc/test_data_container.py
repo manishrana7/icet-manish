@@ -9,7 +9,7 @@ from ase.build import bulk
 from ase.io import write as ase_write
 from mchammer import DataContainer
 from mchammer.observers.base_observer import BaseObserver
-from mchammer.data_container import FileTypeError
+from mchammer.data_container import LoadFileError
 
 # Create concrete child of BaseObserver for testing
 
@@ -217,7 +217,7 @@ class TestDataContainer(unittest.TestCase):
         temp_csv_file = tempfile.NamedTemporaryFile()
 
         # test non-tar file
-        with self.assertRaises(FileTypeError) as context:
+        with self.assertRaises(LoadFileError) as context:
             self.dc.read(temp_tar_file.name)
         self.assertTrue("DataContainer file is not a tar file"
                         in str(context.exception))
@@ -226,7 +226,7 @@ class TestDataContainer(unittest.TestCase):
         with tarfile.open(temp_tar_file.name, mode='w') as handle:
             handle.add(temp_atoms_file.name, arcname='atoms')
 
-        with self.assertRaises(FileTypeError) as context:
+        with self.assertRaises(LoadFileError) as context:
             self.dc.read(temp_tar_file.name)
         self.assertTrue("Failed to load atoms from file"
                         in str(context.exception))
@@ -238,7 +238,7 @@ class TestDataContainer(unittest.TestCase):
             handle.add(temp_atoms_file.name, arcname='atoms')
             handle.add(temp_json_file.name, arcname='reference_data')
 
-        with self.assertRaises(FileTypeError) as context:
+        with self.assertRaises(LoadFileError) as context:
             self.dc.read(temp_tar_file.name)
         self.assertTrue("Failed to load reference data from file"
                         in str(context.exception))
@@ -249,15 +249,17 @@ class TestDataContainer(unittest.TestCase):
         with open(temp_json_file.name, 'w') as handle:
             json.dump(reference_data, handle)
 
-        pd.DataFrame().to_csv(temp_csv_file.name)
+        pd.DataFrame(columns=['a']).to_csv(temp_csv_file.name)
 
         with tarfile.open(temp_tar_file.name, mode='w') as handle:
             handle.add(temp_atoms_file.name, arcname='atoms')
             handle.add(temp_json_file.name, arcname='reference_data')
             handle.add(temp_csv_file.name, arcname='runtime_data')
 
-        with self.assertRaises(FileTypeError) as context:
-            self.dc.read(temp_csv_file.name)
+        with self.assertRaises(LoadFileError) as context:
+            self.dc.read(temp_tar_file.name)
+        self.assertTrue("Failed to load runtime data from file"
+                        in str(context.exception))
 
 
 if __name__ == '__main__':

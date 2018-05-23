@@ -1,6 +1,7 @@
 import unittest
 
 import os
+import tempfile
 import numpy as np
 from ase.build import bulk
 
@@ -94,6 +95,13 @@ class TestEnsemble(unittest.TestCase):
 
         self.assertTrue("Missing required keyword argument: calculator"
                         in str(context.exception))
+
+        # with a non tar file to read DataContainer
+        temp_file = tempfile.NamedTemporaryFile()
+        with self.assertRaises(Exception) as context:
+            ConcreteEnsemble(calculator=self.calculator, atoms=self.atoms,
+                             data_container=temp_file.name)
+        self.assertTrue("DataContainer file is not a tar file")
 
     def test_property_name(self):
         """Test name property."""
