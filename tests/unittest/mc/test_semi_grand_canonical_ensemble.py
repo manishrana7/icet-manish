@@ -21,7 +21,7 @@ class TestEnsemble(unittest.TestCase):
                 atom.symbol = 'Ga'
         cutoffs = [5, 5, 4]
         elements = ['Al', 'Ga']
-        self.chemical_potentials = {'Al': 5, 'Ga':0}
+        self.chemical_potentials = {'Al': 5, 'Ga': 0}
         self.cs = ClusterSpace(self.atoms, cutoffs, elements)
         parameters = parameters = np.array([1.2]*len(self.cs))
         self.ce = ClusterExpansion(self.cs, parameters)
@@ -33,7 +33,8 @@ class TestEnsemble(unittest.TestCase):
 
         self.ensemble = SemiGrandCanonicalEnsemble(
             calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
-            random_seed=42, temperature=self.temperature, chemical_potentials=self.chemical_potentials)
+            random_seed=42, temperature=self.temperature,
+            chemical_potentials=self.chemical_potentials)
 
     def test_temperature_attribute(self):
         """Test temperature attribute."""

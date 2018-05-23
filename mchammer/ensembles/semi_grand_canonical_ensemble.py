@@ -5,6 +5,7 @@ import numpy as np
 from ase.units import kB
 from ase.data import atomic_numbers
 
+
 class SemiGrandCanonicalEnsemble(BaseEnsemble):
     """
     Semi-grand canonical ensemble.
@@ -44,7 +45,8 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
             for key in kwargs['chemical_potentials']:
                 if isinstance(key, str):
                     element_number = atomic_numbers[key]
-                    self.chemical_potentials[element_number] = kwargs['chemical_potentials'][key]
+                    self.chemical_potentials[element_number] =\
+                        kwargs['chemical_potentials'][key]
 
     def do_trial_step(self):
         """Do a trial step."""
@@ -55,7 +57,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
             self.configuration.get_flip_state(sublattice_index)
 
         energy_diff = self.get_property_change([index], [element])
-        
+
         old_element = self.configuration.occupations[index]
         chemical_potential_diff = self.chemical_potentials[old_element] - \
             self.chemical_potentials[element]
