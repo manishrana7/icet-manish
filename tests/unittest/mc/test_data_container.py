@@ -160,7 +160,9 @@ class TestDataContainer(unittest.TestCase):
 
     def test_get_average(self):
         """ Test functionality. """
-        pass
+        mean, std = self.get_average('obs', start=40, stop=80)
+        self.assertEqual(mean, 64.0)
+
 
     def test_read_write_data(self):
         """ Test write and read functionalities of data container. """

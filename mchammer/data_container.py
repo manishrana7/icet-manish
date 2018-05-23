@@ -226,20 +226,30 @@ class DataContainer:
                 'observable is not part of DataContainer: {}'.format(tag)
             return self._data[tag].count()
 
-    def get_average(self, start: int, stop: int, tag: str):
+    def get_average(self, tag: str, start=None, stop=None)
         """
         Return average of an observable over an interval of trial steps.
 
         Parameters
         ----------
+        tag : str
+            tag of field over which to average
         start : int
             lower limit of trial step interval
         stop : int
             upper limit of trial step interval
-        tag : str
-            tag of field over which to average
         """
-        pass
+        assert tag in self._data, \
+            'observable is not part of DataContainer: {}'.format(tag)
+        # start, stop = None
+        if start is None and stop is None
+            data = self._data.loc[:, list(tag)]
+        else:
+            data = self._data.set_index(self._data.mctrial)
+            data = data.loc[start:stop, list(tag)]
+        
+        return tuple(data.mean(), data.std())
+
 
     @staticmethod
     def read(infile):
