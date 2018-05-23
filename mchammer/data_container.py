@@ -255,8 +255,7 @@ class DataContainer:
 
         Raises
         ------
-        InvalidFileError : if tar or any of the its files has not an expected
-                        type.
+        InvalidFileError : if filename has an invalid type
         """
         import os
 

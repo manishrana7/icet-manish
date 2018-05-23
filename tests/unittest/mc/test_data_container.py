@@ -206,7 +206,7 @@ class TestDataContainer(unittest.TestCase):
             dc_read = self.dc.read("not_found")
 
     def test_invalid_files(self):
-        """Test errors when files have non-expected formats."""
+        """Test invalid tar file raises exception."""
 
         # test non-tar file
         tar_file = tempfile.NamedTemporaryFile()
