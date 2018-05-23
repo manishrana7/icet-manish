@@ -8,6 +8,41 @@ class LabelingGenerator():
     set of sites. If concentration restrictions are not specified, the
     generation will be a simple itertools.product loop.
 
+    If concentrations are specified, the approach is a bit more elaborate.
+    Take as an example a system with three sites, where Pd and Au are allowed
+    on two and H and V on the other. `iter_elements` will then look something
+    like this: `[(0, 1), (0, 1), (2, 3), (2, 3)]`. The algorithm proceeds as
+    follows:
+
+    (1) Identify all unique elements of `iter_elements`, hereafter called
+    `site_groups`. In this example they will be `(0, 1)` and `(2, 3)`. These
+    unqiue elements are saved in `site_groups`.
+
+    (2) For each unique `site_group` and a given cell size, construct all
+    (combinations of the elements in the site group. If the cell size is 2,
+    i.e. a supercell twice as big as the primitive cell, the possible
+    (combinations for the `(0, 1)`-`site_group` will be `(0, 0, 0, 0)`, `(0,
+    0, 0, 1)`, `(0, 0, 1, 1)` and `(1, 1, 1, 1)`. Order does not matter and
+    concentration restrictions are not respected at this point.
+
+    (3) Construct all "products" of the combinations of the unique site
+    groups. In our example, the first ones are `[(0, 0, 0, 0), (2, 2, 2,
+    2)]`, `[(0, 0, 0, 1), (2, 2, 2, 2)]` etc. Products that do not respect the
+    concentration restrictions are discarded at this point.
+
+    (4) For each "product", construct the permutations for each constituent
+    `site_group`. For `[(0, 0, 0, 1), (2, 2, 2, 2)]` these would be
+    `[(0, 0, 0, 1), (2, 2, 2, 2)]`, `[(0, 0, 1, 0), (2, 2, 2, 2)]`,
+    `[(0, 1, 0, 0), (2, 2, 2, 2)]` and `[(1, 0, 0, 0), (2, 2, 2, 2)]`.
+    If the second group was not all 2, there would of course be many more
+    such permutations.
+
+    (5) Sort the result according to the expectations of the structure
+    enumeration (if we call the site group (0, 1) "A" and site group
+    (2, 3) "B", the labeling should be AABBAABBAABB etc, i.e., one cell
+    at a time). In the first permutation of (4), the resulting labeling
+    will thus be `(0, 0, 2, 2, 0, 1, 2, 2)`.
+
     Parameters
     ----------
     iter_elements : list of tuples of ints
