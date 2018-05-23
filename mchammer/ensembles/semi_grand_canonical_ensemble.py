@@ -3,7 +3,7 @@
 from mchammer.ensembles.base_ensemble import BaseEnsemble
 import numpy as np
 from ase.units import kB
-
+from ase.data import atomic_numbers
 
 class SemiGrandCanonicalEnsemble(BaseEnsemble):
     """
@@ -40,8 +40,12 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
         if 'chemical_potentials' not in kwargs.keys():
             raise KeyError("Missing required keyword: chemical_potentials")
         else:
-            self.chemical_potentials = kwargs['chemical_potentials']
-        
+            self.chemical_potentials = {}
+            for key in kwargs['chemical_potentials']:
+                if isinstance(key, str):
+                    element_number = atomic_numbers[key]
+                    self.chemical_potentials[element_number] = kwargs['chemical_potentials'][key]
+
     def do_trial_step(self):
         """Do a trial step."""
         self.total_trials += 1
