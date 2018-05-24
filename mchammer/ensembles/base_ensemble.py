@@ -39,7 +39,7 @@ class BaseEnsemble(ABC):
         self.total_trials = 0
         self._observers = {}
         self._step = 0
-
+        self._minimum_observation_interval = np.inf
         if atoms is None:
             raise TypeError("Missing required keyword argument: atoms")
         if random_seed is None:
