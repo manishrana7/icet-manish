@@ -38,6 +38,7 @@ class ConfigurationManager(object):
     def __init__(self, atoms, strict_constraints, sublattices,
                  occupation_constraints=None):
 
+        self._atoms = atoms
         self._occupations = atoms.numbers
         self._sublattices = sublattices
 
@@ -118,8 +119,9 @@ class ConfigurationManager(object):
     @property
     def atoms(self):
         """The atoms object."""
-        self.atoms.set_atomic_numbers(self.occupations)
-        return self.atoms.copy()
+        atoms = self._atoms.copy()
+        atoms.set_atomic_numbers(self.occupations)
+        return atoms
 
     def get_swapped_state(self, sublattice: int) -> Tuple[List[int],
                                                           List[int]]:
@@ -150,7 +152,7 @@ class ConfigurationManager(object):
             total_number_of_indices += len(
                 self._element_occupation[sublattice][element])
         try:
-            index = random.randint(0, total_number_of_indices-1)
+            index = random.randint(0, total_number_of_indices - 1)
         except ValueError:
             raise SwapNotPossibleError
         for element in possible_swap_elements:
