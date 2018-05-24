@@ -6,10 +6,21 @@ import json
 from datetime import datetime
 from collections import OrderedDict
 import pandas as pd
-from ase import Atoms
-from ase.io import write as ase_write
-from ase.io import read as ase_read
+from ase.io import write as ase_write, read as ase_read
 from icet import __version__ as icet_version
+
+
+class InvalidFileError(Exception):
+    """
+    Raises an error with the format of the DataContainer file is not
+    the expected one.
+    """
+    def __init__(self, err_msg):
+        super().__init__(err_msg)
+        self.err_msg = err_msg
+
+    def __str__(self):
+        return str(self.err_msg)
 
 
 class DataContainer:
@@ -42,12 +53,6 @@ class DataContainer:
 
     data : Pandas data frame object
         Runtime data collected during the Monte Carlo simulation.
-
-    Todo
-    ----
-    atoms is always expected to be given among the arguments so stop
-    querying whether atoms is None once it has been fixed in BaseEnsemble
-    class.
     """
 
     def __init__(self, atoms, ensemble_name: str, random_seed: int):
@@ -55,10 +60,7 @@ class DataContainer:
         Initialize a DataContainer object.
         """
 
-        if atoms is not None:
-            assert isinstance(atoms, Atoms), \
-                'Structure must be provided as ASE Atoms object'
-            self.structure = atoms.copy()
+        self.structure = atoms.copy()
 
         self._observables = []
         self._parameters = OrderedDict()
@@ -69,12 +71,11 @@ class DataContainer:
         self.add_parameter('seed', random_seed)
 
         self._metadata['ensemble_name'] = ensemble_name
-
         self._metadata['date_created'] = \
             datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
         self._metadata['username'] = getpass.getuser()
         self._metadata['hostname'] = socket.gethostname()
-        self.metadata['icet_version'] = icet_version
+        self._metadata['icet_version'] = icet_version
 
     def add_observable(self, tag: str):
         """
@@ -87,7 +88,8 @@ class DataContainer:
         """
         assert isinstance(tag, str), \
             'Observable tag has wrong type (str)'
-        self._observables.append(tag)
+        if tag not in self._observables:
+            self._observables.append(tag)
 
     def add_parameter(self, tag: str, value):
         """
@@ -268,28 +270,53 @@ class DataContainer:
         ----------
         infile : str or FileObj
             file from which to read
+
+        Raises
+        ------
+        InvalidFileError : if infile has an invalid type
         """
         import os
 
-        if not os.path.isfile(infile):
-            raise Exception("File cannot be found")
+        if isinstance(infile, str):
+            filename = infile
+            if not os.path.isfile(filename):
+                raise FileNotFoundError
+        else:
+            filename = infile.name
+
+        if not tarfile.is_tarfile(filename):
+            raise InvalidFileError('{} is not a tar file'.format(filename))
 
         temp_atoms_file = tempfile.NamedTemporaryFile()
         temp_json_file = tempfile.NamedTemporaryFile()
-        temp_cvs_file = tempfile.NamedTemporaryFile()
+        temp_csv_file = tempfile.NamedTemporaryFile()
 
-        with tarfile.open(mode='r', name=infile) as tar_file:
-            temp_atoms_file.write(tar_file.extractfile('atoms').read())
-            atoms = ase_read(temp_atoms_file.name, format='xyz')
+        with tarfile.open(mode='r', name=filename) as tar_file:
+            # file with atoms
+            try:
+                temp_atoms_file.write(tar_file.extractfile('atoms').read())
+            except KeyError:
+                raise InvalidFileError(
+                    'atoms not found in {}'.format(infile))
+            else:
+                temp_atoms_file.seek(0)
+                atoms = ase_read(temp_atoms_file.name, format='json')
 
-            temp_json_file.write(tar_file.extractfile('reference_data').read())
-            temp_json_file.seek(0)
-            reference_data = json.load(temp_json_file)
+            # file with reference data
+            try:
+                temp_json_file.write(
+                    tar_file.extractfile('reference_data').read())
+            except KeyError:
+                raise InvalidFileError(
+                    'reference data not found in {}'.format(infile))
+            else:
+                temp_json_file.seek(0)
+                reference_data = json.load(temp_json_file)
 
+            # init DataContainer
             dc = DataContainer(atoms,
                                reference_data['metadata']['ensemble_name'],
                                reference_data['parameters']['seed'])
-
             for key in reference_data:
                 if key == 'metadata':
                     for tag, value in reference_data[key].items():
@@ -305,10 +332,19 @@ class DataContainer:
                     for value in reference_data[key]:
                         dc.add_observable(value)
 
-            temp_cvs_file.write(tar_file.extractfile('runtime_data').read())
-            temp_cvs_file.seek(0)
-            runtime_data = pd.read_csv(temp_cvs_file)
-            dc._data = runtime_data
+            # add runtime data from file
+            try:
+                temp_csv_file.write(
+                    tar_file.extractfile('runtime_data').read())
+            except KeyError:
+                raise InvalidFileError(
+                    'runtime data not found in {}'.format(infile))
+            else:
+                temp_csv_file.seek(0)
+                runtime_data = \
+                    pd.read_csv(temp_csv_file, index_col=False,
+                                usecols=['mctrial']+dc.observables)
+                dc._data = runtime_data
 
         return dc
 
@@ -326,7 +362,7 @@ class DataContainer:
 
         # Save reference atomic structure
         temp_atoms_file = tempfile.NamedTemporaryFile()
-        ase_write(temp_atoms_file.name, self.structure, format='xyz')
+        ase_write(temp_atoms_file.name, self.structure, format='json')
 
         # Save reference data to a json tempfile
         reference_data = {'observables': self._observables,

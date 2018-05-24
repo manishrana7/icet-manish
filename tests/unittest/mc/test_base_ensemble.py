@@ -1,5 +1,6 @@
 import unittest
 
+import os
 import numpy as np
 from ase.build import bulk
 
@@ -8,6 +9,7 @@ from mchammer.calculators.cluster_expansion_calculator import \
     ClusterExpansionCalculator
 from mchammer.ensembles.base_ensemble import BaseEnsemble
 from mchammer.observers.base_observer import BaseObserver
+from mchammer import DataContainer
 
 
 class ParakeetObserver(BaseObserver):
@@ -20,14 +22,30 @@ class ParakeetObserver(BaseObserver):
         """Say 2.63323e+20."""
         return 2.63323e+20
 
+
+class DictObserver(BaseObserver):
+
+    def __init__(self, interval, tag='Ayaymama'):
+        super().__init__(interval=interval, return_type=dict, tag=tag)
+
+    def get_observable(self, atoms):
+        return {'value_1': 1.0, 'value_2': 2.0}
+
+    def get_keys(self):
+        return ['value_1', 'value_2']
+
+
 # Create a concrete child of Ensemble for testing
 
 
 class ConcreteEnsemble(BaseEnsemble):
 
-    def __init__(self, calculator, atoms, name=None, random_seed=None):
-        super().__init__(calculator, atoms=atoms, name=name,
-                         random_seed=random_seed)
+    def __init__(self, calculator, atoms=None, name=None, data_container=None,
+                 data_container_write_period=np.inf, random_seed=None):
+        super().__init__(
+            calculator, atoms=atoms, name=name, data_container=data_container,
+            data_container_write_period=data_container_write_period,
+            random_seed=random_seed)
 
     def do_trial_step(self):
         pass
@@ -59,6 +77,24 @@ class TestEnsemble(unittest.TestCase):
         observer = ParakeetObserver(interval=14, tag='Parakeet2')
         self.ensemble.attach_observer(observer)
 
+    def test_init(self):
+        """Test exceptions are raised in initialisation."""
+        # without atoms parameters
+        with self.assertRaises(Exception) as context:
+            ConcreteEnsemble(calculator=self.calculator, atoms=None,
+                             name='test-ensemble', random_seed=42)
+
+        self.assertTrue("Missing required keyword argument: atoms"
+                        in str(context.exception))
+
+        # without calculator
+        with self.assertRaises(Exception) as context:
+            ConcreteEnsemble(calculator=None, atoms=self.atoms,
+                             name='test-ensemble', random_seed=42)
+
+        self.assertTrue("Missing required keyword argument: calculator"
+                        in str(context.exception))
+
     def test_property_name(self):
         """Test name property."""
         self.assertEqual('test-ensemble', self.ensemble.name)
@@ -78,6 +114,12 @@ class TestEnsemble(unittest.TestCase):
         self.assertEqual(self.ensemble.total_trials, 0)
         self.ensemble.total_trials += 1
         self.assertEqual(self.ensemble.total_trials, 1)
+
+    def test_property_acceptance_ratio(self):
+        """Test property acceptance ratio."""
+        self.ensemble.total_trials = 30
+        self.ensemble.accepted_trials = 15
+        self.assertEqual(self.ensemble.acceptance_ratio, 0.5)
 
     def test_property_calculator(self):
         """Test the calculator property."""
@@ -102,12 +144,12 @@ class TestEnsemble(unittest.TestCase):
             number_of_observations,
             n_iters // self.ensemble.observers['Parakeet2'].interval + 1)
 
-        # runt it again to check that step is the same
+        # run it again to check that step is the same
         n_iters = 50
         self.ensemble.run(n_iters, reset_step=True)
         self.assertEqual(self.ensemble.step, 50)
 
-        # runt it yet again to check that step accumulates
+        # run it yet again to check that step accumulates
         n_iters = 10
         self.ensemble.run(n_iters, reset_step=False)
         self.ensemble.run(n_iters, reset_step=False)
@@ -132,6 +174,66 @@ class TestEnsemble(unittest.TestCase):
                 total_iters //
                 self.ensemble.observers['Parakeet2'].interval + 1)
 
+    def test_run_with_dict_observer(self):
+        """Test the run method with a dict observer."""
+        observer = DictObserver(interval=28)
+        self.ensemble.attach_observer(observer)
+
+        n_iters = 364
+        self.ensemble.run(n_iters)
+        self.assertEqual(self.ensemble.step, n_iters)
+        dc_data = \
+            self.ensemble.data_container.get_data(tags=['value_1', 'value_2'])
+
+        self.assertEqual(len(dc_data[0]), len(dc_data[1]))
+
+        number_of_observations = len([x for x in dc_data[0] if x is not None])
+        # plus one since we also count step 0
+        self.assertEqual(
+            number_of_observations,
+            n_iters // self.ensemble.observers['Ayaymama'].interval + 1)
+
+    def test_backup_file(self):
+        """Test data is being saved and can be read by the ensemble."""
+        # set up ensemble with non-inf write period
+        ensemble = ConcreteEnsemble(calculator=self.calculator,
+                                    atoms=self.atoms,
+                                    name='this-ensemble',
+                                    data_container='my-datacontainer',
+                                    data_container_write_period=1e-4)
+
+        # attach an observer
+        observer = ParakeetObserver(interval=14, tag='Parakeet2')
+        ensemble.attach_observer(observer)
+
+        # run ensemble
+        n_iters = 364
+        ensemble.run(n_iters)
+
+        # check data container file
+        dc_read = DataContainer.read('my-datacontainer')
+        dc_data = dc_read.get_data(tags=['Parakeet2'])
+        self.assertEqual(
+            len(dc_data[0]),
+            n_iters // observer.interval + 1)
+
+        # initialise a new ensemble with dc file
+        ensemble_reloaded = \
+            ConcreteEnsemble(calculator=self.calculator,
+                             atoms=self.atoms,
+                             name='this-ensemble',
+                             data_container='my-datacontainer')
+
+        # check loaded data container of new ensemble
+        data_dc_reloaded = \
+            ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
+        data_dc = \
+            ensemble.data_container.get_data(tags=['Parakeet2'])
+        self.assertListEqual(data_dc[0], data_dc_reloaded[0])
+
+        # remove file
+        os.remove('my-datacontainer')
+
     def test_internal_run(self):
         """Test the _run method."""
         pass
@@ -155,7 +257,7 @@ class TestEnsemble(unittest.TestCase):
 
         # test no duplicates, this should overwrite the last Parakeet
         self.ensemble.attach_observer(
-            ParakeetObserver(interval=15, tag='test_Parakeet'))
+            ParakeetObserver(interval=15), tag='test_Parakeet')
         self.assertEqual(len(self.ensemble.observers), 3)
         self.assertEqual(self.ensemble.observers['test_Parakeet'].interval, 15)
         self.assertEqual(
@@ -163,7 +265,7 @@ class TestEnsemble(unittest.TestCase):
 
     def test_property_data_container(self):
         """Test the data container property."""
-        pass
+        self.assertIsInstance(self.ensemble.data_container, DataContainer)
 
     def test_find_minimum_observation_interval(self):
         """Test the method to find the minimum observation interval."""
@@ -183,17 +285,6 @@ class TestEnsemble(unittest.TestCase):
         target = 5
         self.assertEqual(self.ensemble._get_gcd(input), target)
 
-    def test_init_without_atoms(self):
-        """Test ensemble init without atoms parameter."""
-
-        with self.assertRaises(Exception) as context:
-            ensemble = ConcreteEnsemble(  # noqa
-            calculator=self.calculator, atoms=None,
-            name='test-ensemble', random_seed=42)
-
-        self.assertTrue("Missing required keyword argument: atoms"
-                        in str(context.exception))
-
     def test_get_property_change(self):
         """Test the get property change method."""
 
@@ -208,6 +299,13 @@ class TestEnsemble(unittest.TestCase):
         # Test that the method doesn't change the occupation.
         self.assertListEqual(list(initial_occupations),
                              list(self.ensemble.configuration.occupations))
+
+        with self.assertRaises(ValueError) as context:
+            self.ensemble.update_occupations(indices, elements+[31])
+
+        self.assertTrue(
+            "List of sites and list of elements are not the same size."
+            in str(context.exception))
 
 
 if __name__ == '__main__':
