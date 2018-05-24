@@ -34,7 +34,7 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble = SemiGrandCanonicalEnsemble(
             calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
             random_seed=42, temperature=self.temperature,
-            chemical_potentials=self.chemical_potentials)
+            chemical_potentials=self.chemical_potentials, boltzmann_constant=1e-5)
 
     def test_temperature_attribute(self):
         """Test temperature attribute."""
@@ -45,9 +45,12 @@ class TestEnsemble(unittest.TestCase):
 
     def test_do_trial_step(self):
         """Test the do trial step."""
-        self.ensemble.do_trial_step()
 
-        self.assertEqual(self.ensemble.total_trials, 1)
+        # Do it many times and hopefully get both a reject and an accept
+        for _ in range(10):
+            self.ensemble.do_trial_step()
+
+        self.assertEqual(self.ensemble.total_trials, 10)
 
     def test_acceptance_condition(self):
         """ Test the acceptance condition method."""
@@ -66,6 +69,35 @@ class TestEnsemble(unittest.TestCase):
         self.assertTrue(
             "Temperature needs to be set in canonical "
             "ensemble" in str(context.exception))
+
+    def test_init_without_chemical_potential(self):
+        """ Test init chemical potentials."""
+        with self.assertRaises(KeyError) as context:
+            SemiGrandCanonicalEnsemble(
+                calculator=self.calculator, atoms=self.atoms,
+                name='test-ensemble', temperature=self.temperature, random_seed=42)
+        self.assertTrue(
+            "Missing required keyword: chemical_potentials" in str(context.exception))
+
+    def test_init_with_integer_chemical_potentials(self):
+        """ Test init with integer chemical potentials."""
+
+        chemical_potentials = {13: 5, 31: 0}
+        ensemble = SemiGrandCanonicalEnsemble(
+            calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
+            random_seed=42, temperature=self.temperature,
+            chemical_potentials=chemical_potentials)
+        ensemble.do_trial_step()
+
+
+        # Test both int and str
+
+        chemical_potentials = {'Al': 5, 31: 0}
+        ensemble = SemiGrandCanonicalEnsemble(
+            calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
+            random_seed=42, temperature=self.temperature,
+            chemical_potentials=chemical_potentials)
+        ensemble.do_trial_step()
 
 
 if __name__ == '__main__':
