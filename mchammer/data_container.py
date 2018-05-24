@@ -244,26 +244,27 @@ class DataContainer:
         pass
 
     @staticmethod
-    def read(filename):
+    def read(infile):
         """
         Read DataContainer object from file.
 
         Parameters
         ----------
-        filename : str or FileObj
+        infile : str or FileObj
             file from which to read
 
         Raises
         ------
-        InvalidFileError : if filename has an invalid type
+        InvalidFileError : if infile has an invalid type
         """
         import os
 
-        if isinstance(filename, str):
+        if isinstance(infile, str):
+            filename = infile
             if not os.path.isfile(filename):
                 raise FileNotFoundError
-            else:
-                filename = str(filename)
+        else:
+            filename = infile.name
 
         if not tarfile.is_tarfile(filename):
             raise InvalidFileError('{} is not a tar file'.format(filename))
@@ -278,7 +279,7 @@ class DataContainer:
                 temp_atoms_file.write(tar_file.extractfile('atoms').read())
             except KeyError:
                 raise InvalidFileError(
-                    'atoms not found in {}'.format(filename))
+                    'atoms not found in {}'.format(infile))
             else:
                 temp_atoms_file.seek(0)
                 atoms = ase_read(temp_atoms_file.name, format='json')
@@ -289,7 +290,7 @@ class DataContainer:
                     tar_file.extractfile('reference_data').read())
             except KeyError:
                 raise InvalidFileError(
-                    'reference data not found in {}'.format(filename))
+                    'reference data not found in {}'.format(infile))
             else:
                 temp_json_file.seek(0)
                 reference_data = json.load(temp_json_file)
@@ -319,7 +320,7 @@ class DataContainer:
                     tar_file.extractfile('runtime_data').read())
             except KeyError:
                 raise InvalidFileError(
-                    'runtime data not found in {}'.format(filename))
+                    'runtime data not found in {}'.format(infile))
             else:
                 temp_csv_file.seek(0)
                 runtime_data = \

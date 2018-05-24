@@ -187,7 +187,7 @@ class TestDataContainer(unittest.TestCase):
         self.dc.write(temp_file.name)
 
         # read from file
-        dc_read = self.dc.read(temp_file.name)
+        dc_read = self.dc.read(temp_file)
 
         # check properties
         self.assertEqual(self.atoms, dc_read.structure)
@@ -205,6 +205,8 @@ class TestDataContainer(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             dc_read = self.dc.read("not_found")
 
+        temp_file.close()
+
     def test_invalid_files(self):
         """Test invalid tar file raises exception."""
 
@@ -212,7 +214,7 @@ class TestDataContainer(unittest.TestCase):
         tar_file = tempfile.NamedTemporaryFile()
         with self.assertRaises(InvalidFileError) as context:
             self.dc.read(tar_file.name)
-        self.assertTrue('{} is not a tar file'.format(tar_file.name)
+        self.assertTrue('{} is not a tar file'.format(str(tar_file.name))
                         in str(context.exception))
 
         # test tar file with invalid files
@@ -220,10 +222,14 @@ class TestDataContainer(unittest.TestCase):
         with tarfile.open(tar_file.name, mode='w') as handle:
             handle.add(temp_file.name, arcname='tempfile')
 
+        temp_file.close()
+
         with self.assertRaises(InvalidFileError) as context:
             self.dc.read(tar_file.name)
         self.assertTrue('atoms not found in {}'.format(tar_file.name)
                         in str(context.exception))
+        
+        tar_file.close()
 
 
 if __name__ == '__main__':
