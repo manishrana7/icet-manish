@@ -32,9 +32,11 @@ class TestEnsemble(unittest.TestCase):
         self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
 
         self.ensemble = SemiGrandCanonicalEnsemble(
-            calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
+            calculator=self.calculator, atoms=self.atoms,
+            name='test-ensemble',
             random_seed=42, temperature=self.temperature,
-            chemical_potentials=self.chemical_potentials, boltzmann_constant=1e-5)
+            chemical_potentials=self.chemical_potentials,
+            boltzmann_constant=1e-5)
 
     def test_temperature_attribute(self):
         """Test temperature attribute."""
@@ -75,9 +77,11 @@ class TestEnsemble(unittest.TestCase):
         with self.assertRaises(KeyError) as context:
             SemiGrandCanonicalEnsemble(
                 calculator=self.calculator, atoms=self.atoms,
-                name='test-ensemble', temperature=self.temperature, random_seed=42)
+                name='test-ensemble', temperature=self.temperature,
+                random_seed=42)
         self.assertTrue(
-            "Missing required keyword: chemical_potentials" in str(context.exception))
+            "Missing required keyword:"
+            " chemical_potentials" in str(context.exception))
 
     def test_init_with_integer_chemical_potentials(self):
         """ Test init with integer chemical potentials."""
@@ -88,7 +92,6 @@ class TestEnsemble(unittest.TestCase):
             random_seed=42, temperature=self.temperature,
             chemical_potentials=chemical_potentials)
         ensemble.do_trial_step()
-
 
         # Test both int and str
 
