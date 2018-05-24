@@ -1,3 +1,4 @@
+import os
 import random
 from time import time
 from abc import ABC, abstractmethod
@@ -46,15 +47,17 @@ class BaseEnsemble(ABC):
             self._random_seed = random.randint(0, 1e16)
         else:
             self._random_seed = random_seed
-        random.seed(a=self.random_seed)
+        random.seed(a=self._random_seed)
 
-        if data_container is None:
-            self._data_container = DataContainer(atoms=None,
-                                                 ensemble_name=name,
-                                                 random_seed=random_seed)
+        self._data_container_filename = data_container
+
+        if data_container is not None and os.path.isfile(data_container):
+            self._data_container = DataContainer.read(data_container)
         else:
-            raise NotImplementedError
-        self._data_container_filename = None
+            self._data_container = \
+                DataContainer(atoms=atoms,
+                              ensemble_name=name,
+                              random_seed=self._random_seed)
 
         strict_constraints = self.calculator.occupation_constraints
         sublattices = [[i for i in range(len(self.calculator.atoms))]]
@@ -72,7 +75,7 @@ class BaseEnsemble(ABC):
     @property
     def step(self) -> int:
         """
-        int : current MC trial step.
+        int : current MC trial step
         """
         return self._step
 
@@ -147,7 +150,8 @@ class BaseEnsemble(ABC):
             if self._data_container_filename is not None and \
                     time() - last_write_time > \
                     self.data_container_write_period:
-                self.data_container.write(self._data_container_filename)
+                        self.data_container.write(
+                            self._data_container_filename)
 
             self._run(uninterrupted_steps)
             step += uninterrupted_steps
@@ -272,7 +276,7 @@ class BaseEnsemble(ABC):
             self.observers[observer.tag] = observer
 
         if observer.return_type is dict:
-            for key in observer:
+            for key in observer.get_keys():
                 self._data_container.add_observable(key)
         else:
             self._data_container.add_observable(observer.tag)
@@ -293,7 +297,7 @@ class BaseEnsemble(ABC):
         This will change the state in both the configuration in the calculator
         and the state of configuration manager.
 
-        parameters
+        Parameters
         ----------
         list_of_sites : list of int
             list of indices of the configuration to change.
@@ -301,7 +305,7 @@ class BaseEnsemble(ABC):
             list of elements to put on the lattice sites the
             indices refer to.
 
-        raises
+        Raises
         ------
         ValueError : if list_of_sites are not the same length
                      as list_of_elements
