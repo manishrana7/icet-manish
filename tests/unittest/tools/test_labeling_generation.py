@@ -27,9 +27,7 @@ from icet.tools.structure_enumeration_support.labeling_generation \
 
 
 class TestLabelingGenerator(unittest.TestCase):
-    """
-    Container for tests of the LabelingGenerator class
-    """
+    """Container for tests of the LabelingGenerator class."""
 
     def __init__(self, *args, **kwargs):
         super(TestLabelingGenerator, self).__init__(*args, **kwargs)
@@ -37,16 +35,14 @@ class TestLabelingGenerator(unittest.TestCase):
         self.concentrations = {0: (0, 0.15), 2: (0, 0.3)}
 
     def setUp(self):
-        """
-        Instantiate class before each test.
-        """
+        """Instantiate class before each test."""
         self.lg = LabelingGenerator(self.iter_elements,
                                     self.concentrations)
 
     def test_init(self):
         """
         Testing that the setup
-        (initialization) of tested class work
+        (initialization) of tested class work.
         """
         lg = LabelingGenerator(self.iter_elements,
                                self.concentrations)
@@ -62,9 +58,7 @@ class TestLabelingGenerator(unittest.TestCase):
         self.assertIsInstance(lg, LabelingGenerator)
 
     def test_yield_products(self):
-        """
-        Testing that yield_products works
-        """
+        """Testing that yield_products works."""
 
         for site_group in self.lg.site_groups.values():
             site_group.compute_all_combinations(2)
@@ -80,9 +74,7 @@ class TestLabelingGenerator(unittest.TestCase):
             self.assertEqual(product, target_product)
 
     def test_yield_permutations(self):
-        """
-        Testing that yield_permutations works
-        """
+        """Testing that yield_permutations works."""
         target_permutations = [((1, 1, 1, 0), (2, 2, 2, 2, 2, 2), (2, 0)),
                                ((1, 1, 1, 0), (2, 2, 2, 2, 2, 2), (0, 2)),
                                ((1, 1, 0, 1), (2, 2, 2, 2, 2, 2), (2, 0)),
@@ -103,18 +95,14 @@ class TestLabelingGenerator(unittest.TestCase):
             self.assertEqual(per, target_per)
 
     def test_sort_labeling(self):
-        """
-        Testing that sort_labeling works
-        """
+        """Testing that sort_labeling works."""
         labeling = [(0, 1, 1, 1), (2, 2, 2, 2, 2, 2), (0, 2)]
         target_sorted_labeling = (0, 2, 2, 2, 1, 0, 1, 2, 2, 2, 1, 2)
         sorted_labeling = self.lg.sort_labeling(labeling, 2)
         self.assertEqual(target_sorted_labeling, sorted_labeling)
 
     def test_yield_labeling(self):
-        """
-        Testing that yield_labeling works
-        """
+        """Testing that yield_labeling works."""
         target_labeling = (1, 2, 2, 2, 1, 2)
         for labeling in self.lg.yield_labelings(1):
             # there should be only one of these
@@ -141,9 +129,7 @@ class TestLabelingGenerator(unittest.TestCase):
 
 
 class TestSiteGroup(unittest.TestCase):
-    """
-    Container for tests of the SiteGroup class
-    """
+    """Container for tests of the SiteGroup class."""
 
     def __init__(self, *args, **kwargs):
         super(TestSiteGroup, self).__init__(*args, **kwargs)
@@ -152,9 +138,7 @@ class TestSiteGroup(unittest.TestCase):
         self.multiplicity = 7
 
     def setUp(self):
-        """
-        Instantiate class before each test.
-        """
+        """Instantiate class before each test."""
         self.sg = SiteGroup(self.iter_element,
                             self.position)
 
@@ -170,9 +154,7 @@ class TestSiteGroup(unittest.TestCase):
         self.assertEqual(sg.position, self.position)
 
     def test_compute_all_combinations(self):
-        """
-        Testing that compute_all_combinations works
-        """
+        """Testing that compute_all_combinations works."""
         target_combinations = [(0, 0, 0), (0, 0, 1), (0, 0, 3),
                                (0, 1, 1), (0, 1, 3), (0, 3, 3),
                                (1, 1, 1), (1, 1, 3), (1, 3, 3),
