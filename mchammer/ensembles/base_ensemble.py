@@ -1,3 +1,4 @@
+import os
 import random
 from time import time
 from abc import ABC, abstractmethod
@@ -48,20 +49,15 @@ class BaseEnsemble(ABC):
             self._random_seed = random_seed
         random.seed(a=self._random_seed)
 
-        self._data_container_filename = None
+        self._data_container_filename = data_container
 
-        self._data_container = \
-            DataContainer(atoms=atoms,
-                          ensemble_name=name,
-                          random_seed=self._random_seed)
-
-        if data_container is not None:
-            try:
-                self._data_container = DataContainer.read(data_container)
-            except FileNotFoundError:
-                pass
-            finally:
-                self._data_container_filename = data_container
+        if data_container is not None and os.path.isfile(data_container):
+            self._data_container = DataContainer.read(data_container)
+        else:
+            self._data_container = \
+                DataContainer(atoms=atoms,
+                              ensemble_name=name,
+                              random_seed=self._random_seed)
 
         strict_constraints = self.calculator.occupation_constraints
         sublattices = [[i for i in range(len(self.calculator.atoms))]]

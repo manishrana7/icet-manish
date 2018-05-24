@@ -228,7 +228,6 @@ class TestDataContainer(unittest.TestCase):
             self.dc.read(tar_file.name)
         self.assertTrue('atoms not found in {}'.format(tar_file.name)
                         in str(context.exception))
-        
         tar_file.close()
 
 
