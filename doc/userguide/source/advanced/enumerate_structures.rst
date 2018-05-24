@@ -35,6 +35,28 @@ are subsequently generated and stored in this database.
 
 .. literalinclude:: ../../../../examples/enumerate_structures.py
    :start-after: # and save them
+   :end-before: # Generate fcc structures
+
+Generate binary Au/Pd structures in the dilute limit
+----------------------------------------------------
+
+The number of distinct structures grows extremely quickly with the size of the
+supercell. It is thus not possible to enumerate too large cell sizes. When the
+number of structures grows, a larger and larger proportion of the structures
+will have equal amounts of the constituent elements (e.g., most structures
+will have concentrations close to 50 % in binary systems). Structures in the
+dilute limit may thus be underrepresented. To overcome this problem, it is
+possible to enumerate structures in a specified concentration regime by
+providing a dict in which the range of allowed concentrations is specified for
+one or more of the elements in the system. Concentration is here always
+defined as the number of atoms of the specified element divided by the total
+number of atoms in the structure, without respect to site restrictions. Please
+note that for very large systems, concentration restricted enumeration may
+still be prohibitively time or memory consuming even if the number of
+structures in the specified concentration regime is small.
+
+.. literalinclude:: ../../../../examples/enumerate_structures.py
+   :start-after: # Generate fcc structures
    :end-before: # Enumerate all palladium
 
 Generate PdH structures with vacancies

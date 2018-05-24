@@ -10,16 +10,17 @@ The algorithm was developed by Gus L. W Hart and Rodney W. Forcade in
 """
 
 from itertools import product
-import itertools
 import numpy as np
 from spglib import get_symmetry
 from spglib import niggli_reduce as spg_nigg_red
 from ase import Atoms
 from .structure_enumeration_support.hermite_normal_form import get_reduced_hnfs
 from .structure_enumeration_support.smith_normal_form import get_unique_snfs
+from .structure_enumeration_support.labeling_generation \
+    import LabelingGenerator
 
 
-def __translate_labelings(labeling, snf, nsites, include_self=False):
+def _translate_labelings(labeling, snf, nsites, include_self=False):
     """
     Yield labelings that are equivalent to original labeling
     under translations as dictated by snf.
@@ -62,20 +63,19 @@ def __translate_labelings(labeling, snf, nsites, include_self=False):
         yield labeling_trans
 
 
-def __get_labelings(snf, iter_elements, nsites):
+def _get_all_labelings(snf, labeling_generator, nsites):
     """
     Get all labelings corresponding to a Smith Normal Form matrix.
     Superperiodic labelings as well as labelings that are equivalent under
     translations for this particular SNF will not be included. However,
     labelings that are equivalent by rotations that leave the cell (but not
     the labeling) unchanged will still be included, since these have to be
-    removed for each HNF.
+    removed for each HNF separately.
 
     Parameters
     ----------
     snf : SmithNormalForm object
-    nelements : int
-        Number of elements in enumeration.
+    labeling_generator : LabelingGenerator object
     nsites : int
         Number of sites per primtive cell.
 
@@ -85,10 +85,10 @@ def __get_labelings(snf, iter_elements, nsites):
         Inequivalent labelings.
     """
     labelings = []
-    for labeling in itertools.product(*iter_elements * snf.ncells):
+    for labeling in labeling_generator.yield_labelings(snf.ncells):
         unique = True
-        for labeling_trans in __translate_labelings(labeling, snf, nsites,
-                                                    include_self=False):
+        for labeling_trans in _translate_labelings(labeling, snf, nsites,
+                                                   include_self=False):
             # Check whether it translates into itself. If so,
             # then it has been added with a smaller cell.
             if labeling == labeling_trans:
@@ -106,7 +106,7 @@ def __get_labelings(snf, iter_elements, nsites):
     return labelings
 
 
-def __permute_labeling(labeling, snf, transformation, nsites):
+def _permute_labeling(labeling, snf, transformation, nsites):
     """
     Permute labeling according to transformations defined by transformation.
 
@@ -151,7 +151,7 @@ def __permute_labeling(labeling, snf, transformation, nsites):
     return tuple(labeling_new)
 
 
-def __yield_unique_labelings(labelings, snf, hnf, nsites):
+def _yield_unique_labelings(labelings, snf, hnf, nsites):
     """
     Yield labelings that are unique in every imaginable sense.
 
@@ -180,8 +180,8 @@ def __yield_unique_labelings(labelings, snf, hnf, nsites):
         unique = True
         for transformation in hnf.transformations:
 
-            labeling_rot = __permute_labeling(labeling, snf, transformation,
-                                              nsites)
+            labeling_rot = _permute_labeling(labeling, snf, transformation,
+                                             nsites)
 
             # Commonly, the transformation leaves the labeling
             # unchanged, so check that first as a special case
@@ -191,8 +191,8 @@ def __yield_unique_labelings(labelings, snf, hnf, nsites):
 
             # Translate in all possible ways
             for labeling_rot_trans in \
-                    __translate_labelings(labeling_rot, snf, nsites,
-                                          include_self=True):
+                    _translate_labelings(labeling_rot, snf, nsites,
+                                         include_self=True):
                 if labeling_rot_trans in saved_labelings:
                     # Then we have rotated and translated the labeling
                     # into one that was already yielded
@@ -207,7 +207,7 @@ def __yield_unique_labelings(labelings, snf, hnf, nsites):
             yield labeling
 
 
-def __labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements, pbc):
+def _labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements, pbc):
     """
     Get ASE Atoms object from labeling, HNF matrix and parent lattice.
 
@@ -336,7 +336,9 @@ def get_symmetry_operations(atoms, tol=1e-3):
     return symmetries
 
 
-def enumerate_structures(atoms, sizes, subelements, niggli_reduce=None):
+def enumerate_structures(atoms, sizes, subelements,
+                         concentration_restrictions=None,
+                         niggli_reduce=None):
     """
     Generate enumerated structures, i.e. all inequivalent structures up to a
     certain size.
@@ -360,6 +362,12 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduce=None):
         Maximum number of atoms in the returned structures.
     subelements : list of str
         Elements to decorate the structure, e.g. ['Au', 'Ag']
+    concentration_restrictions : dict
+        Defines allowed concentration for one or more element in subelements,
+        e.g. {'Au': (0, 0.2)} will only enumerate structures in which the Au
+        content is between 0 and 20 %. Concentration is here always defined
+        as the number of atoms of the specified kind divided by the number of
+        *all* atoms.
     niggli_reduction : bool
         If True perform a Niggli reduction with spglib for each structure.
         Default is True if `atoms` has all boundary conditions periodic,
@@ -376,7 +384,7 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduce=None):
 
     # Construct descriptor of where species are allowed to be
     if isinstance(subelements[0], str):
-        iter_elements = [range(len(subelements))] * nsites
+        iter_elements = [tuple(range(len(subelements)))] * nsites
         elements = subelements
     elif len(subelements) == nsites:
         assert isinstance(subelements[0][0], str)
@@ -387,14 +395,31 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduce=None):
                     elements.append(element)
         iter_elements = []
         for site in subelements:
-            iter_elements.append([elements.index(i) for i in site])
+            iter_elements.append(tuple(elements.index(i) for i in site))
     else:
         raise Exception('subelements needs to be a list of strings '
                         'or a list of list of strings.')
 
+    # Adapt concentration restrictions to iter_elements
+    if concentration_restrictions:
+        concentrations = {}
+        for key, concentration_range in concentration_restrictions.items():
+            assert len(concentration_range) == 2, \
+                ('Each concentration range' +
+                 ' needs to be specified as (c_low, c_high)')
+            if key not in elements:
+                raise ValueError('{} found in concentration_restrictions but'
+                                 ' not in subelements'.format(key))
+            concentrations[elements.index(key)] = concentration_range
+    else:
+        concentrations = None
+
+    # Construct labeling generator
+    labeling_generator = LabelingGenerator(iter_elements, concentrations)
+
     # Niggli reduce by default if all directions have
     # periodic boundary conditions
-    if not niggli_reduce:
+    if niggli_reduce is None:
         niggli_reduce = (sum(atoms.pbc) == 3)
 
     symmetries = get_symmetry_operations(atoms)
@@ -408,14 +433,14 @@ def enumerate_structures(atoms, sizes, subelements, niggli_reduce=None):
         snfs = get_unique_snfs(hnfs)
 
         for snf in snfs:
-            labelings = __get_labelings(snf, iter_elements, nsites)
+            labelings = _get_all_labelings(snf, labeling_generator, nsites)
             for hnf in snf.hnfs:
                 if niggli_reduce:
                     new_cell = spg_nigg_red(np.dot(atoms.cell.T, hnf.H).T)
                 else:
                     new_cell = np.dot(atoms.cell.T, hnf.H).T
-                for labeling in __yield_unique_labelings(labelings, snf, hnf,
-                                                         nsites):
-                    yield __labeling_to_atoms(labeling, hnf, atoms.cell,
-                                              new_cell, basis, elements,
-                                              atoms.pbc)
+                for labeling in _yield_unique_labelings(labelings, snf, hnf,
+                                                        nsites):
+                    yield _labeling_to_atoms(labeling, hnf, atoms.cell,
+                                             new_cell, basis, elements,
+                                             atoms.pbc)
