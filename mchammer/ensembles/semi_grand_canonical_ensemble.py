@@ -19,8 +19,6 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
         units, i.e. units that are consistent
         with the underlying cluster expansion
         and the temperature [default: eV/K]
-    chemical_potentials : dict
-       Maps element to chemical potential
     """
 
     def __init__(self, atoms=None, calculator=None, name='Canonical Ensemble',
@@ -41,15 +39,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
         if 'chemical_potentials' not in kwargs.keys():
             raise KeyError("Missing required keyword: chemical_potentials")
         else:
-            self.chemical_potentials = {}
-            for key in kwargs['chemical_potentials']:
-                if isinstance(key, str):
-                    element_number = atomic_numbers[key]
-                    self.chemical_potentials[element_number] =\
-                        kwargs['chemical_potentials'][key]
-                elif isinstance(key, int):
-                    self.chemical_potentials[key] =\
-                        kwargs['chemical_potentials'][key]
+            self.chemical_potentials = kwargs['chemical_potentials']
 
     def do_trial_step(self):
         """Do a trial step."""
@@ -87,3 +77,20 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
             return np.exp(-energy_diff/(
                 self.boltzmann_constant * self.temperature)) > \
                 self.next_random_number()
+
+    @property
+    def chemical_potentials(self):
+        """ dict : maps element to chemical potential."""
+        return self._chemical_potentials
+
+    @chemical_potentials.setter
+    def chemical_potentials(self, chemical_potentials):
+        self._chemical_potentials = {}
+        for key in chemical_potentials.keys():
+            if isinstance(key, str):
+                element_number = atomic_numbers[key]
+                self._chemical_potentials[element_number] =\
+                    chemical_potentials[key]
+            elif isinstance(key, int):
+                self._chemical_potentials[key] =\
+                    chemical_potentials[key]
