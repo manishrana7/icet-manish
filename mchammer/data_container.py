@@ -132,7 +132,12 @@ class DataContainer:
 
         row_data = OrderedDict()
         row_data['mctrial'] = mctrial
-        row_data.update(record)
+        for key, value in record.items():
+            if isinstance(value, list):
+                row_data[key] = [value]
+            else:
+                row_data[key] = value
+
         # dict to DataFrame to avoid dtype conversion when appending data
         temp_data = pd.DataFrame(row_data, index=[0])
         self._data = self._data.append(temp_data,

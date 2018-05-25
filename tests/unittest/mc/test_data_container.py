@@ -14,7 +14,7 @@ from mchammer.data_container import InvalidFileError
 
 class ConcreteObserver(BaseObserver):
     def __init__(self, interval, tag='ConcreteObserver'):
-        super().__init__(interval, tag=tag, return_type=int)
+        super().__init__(interval, return_type=int, tag=tag)
 
     def get_observable(self, atoms):
         """ Return number of Al atoms. """
@@ -75,10 +75,10 @@ class TestDataContainer(unittest.TestCase):
                      ConcreteObserver(interval=20, tag='obs2')]
         min_interval = min([obs.interval for obs in observers])
 
-        # appending data from observers
+        # append data from observers
         for mctrial in range(1, 101):
             if mctrial % min_interval == 0:
-                row_data = OrderedDict()
+                row_data = {}
                 for obs in observers:
                     if mctrial % obs.interval == 0:
                         observable = obs.get_observable(self.atoms)
@@ -86,6 +86,11 @@ class TestDataContainer(unittest.TestCase):
                 self.dc.append(mctrial, row_data)
 
         self.assertEqual(self.dc.get_number_of_entries(), 10)
+
+        # append list type data
+        row_data = {}
+        row_data['sro'] = [1.0, 1.2, 1.25, 1.125]
+        self.dc.append(10, row_data)
 
     def test_property_data(self):
         """ Test data property."""
