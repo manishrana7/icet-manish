@@ -150,7 +150,8 @@ class DataContainer:
             frame will be returned in lexigraphical order
 
         interval : tuple
-            range of trial steps values from which data frame will be returned
+            range of trial steps values from which data frame will be returned.
+            If None, returns all the accumulated data.
 
         fill_missing : bool
             If True fill missing values backward
@@ -228,20 +229,37 @@ class DataContainer:
                 'observable is not part of DataContainer: {}'.format(tag)
             return self._data[tag].count()
 
-    def get_average(self, start: int, stop: int, tag: str):
+    def get_average(self, tag: str, start=None, stop=None):
         """
-        Return average of an observable over an interval of trial steps.
+        Return average and standard deviation of an observable over an
+        interval of trial steps.
 
         Parameters
         ----------
-        start : int
-            lower limit of trial step interval
-        stop : int
-            upper limit of trial step interval
         tag : str
             tag of field over which to average
+        start : int
+            lower limit of trial step interval. If None, first value
+            in trial step column will be used.
+        stop : int
+            upper limit of trial step interval. If None, last value
+            of trial step column will be used.
         """
-        pass
+        assert tag in self._data, \
+            'observable is not part of DataContainer: {}'.format(tag)
+
+        if start is None and stop is None:
+            return self._data[tag].mean(), self._data[tag].std()
+        else:
+            data = self._data.set_index(self._data.mctrial)
+            if start is None:
+                data = data.loc[:stop, [tag]]
+            elif stop is None:
+                data = data.loc[start:, [tag]]
+            else:
+                data = data.loc[start:stop, [tag]]
+
+            return data[tag].mean(), data[tag].std()
 
     @staticmethod
     def read(infile):

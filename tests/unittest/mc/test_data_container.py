@@ -173,11 +173,36 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(self.dc.get_number_of_entries(), 4)
 
     def test_get_average(self):
-        """ Test functionality. """
-        pass
+        """Test get average functionality."""
+        n_iter, mu, sigma = 100, 1.0, 0.1
+        np.random.seed(12)
+        obs_val = np.random.normal(mu, sigma, n_iter).tolist()
+
+        # append data for testing
+        for step in range(n_iter):
+            self.dc.append(step*2, dict([('obs1', obs_val[step])]))
+
+        # get average over all steps
+        mean, std = self.dc.get_average('obs1')
+        self.assertAlmostEqual(mean, 0.9855693, places=7)
+        self.assertAlmostEqual(std, 0.1051220, places=7)
+
+        # get average over slice of data
+        mean, std = self.dc.get_average('obs1', start=120)
+        self.assertAlmostEqual(mean, 0.9851106, places=7)
+        self.assertAlmostEqual(std, 0.0993846, places=7)
+
+        mean, std = self.dc.get_average('obs1', stop=120)
+        self.assertAlmostEqual(mean, 0.9876534, places=7)
+        self.assertAlmostEqual(std, 0.1095718, places=7)
+
+        mean, std = self.dc.get_average('obs1', start=80, stop=120)
+        self.assertAlmostEqual(mean, 1.0137074, places=7)
+        self.assertAlmostEqual(std, 0.1152604, places=7)
 
     def test_read_and_write(self):
         """Test write and read functionalities of data container."""
+
         # append data for testing
         for mctrial in range(10, 101, 10):
             self.dc.append(mctrial, dict([('obs1', 64)]))
