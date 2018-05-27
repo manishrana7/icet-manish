@@ -293,7 +293,7 @@ class BaseEnsemble(ABC):
         This will change the state in both the configuration in the calculator
         and the state of configuration manager.
 
-        parameters
+        Parameters
         ----------
         list_of_sites : list of int
             list of indices of the configuration to change.
@@ -301,7 +301,7 @@ class BaseEnsemble(ABC):
             list of elements to put on the lattice sites the
             indices refer to.
 
-        raises
+        Raises
         ------
         ValueError : if list_of_sites are not the same length
                      as list_of_elements
@@ -327,7 +327,7 @@ class BaseEnsemble(ABC):
 
         Returns
         -------
-        change in property value
+        change in property value : float
         """
         current_elements = [self.configuration.occupations[i] for i in indices]
 

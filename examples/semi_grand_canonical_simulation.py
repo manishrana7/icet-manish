@@ -1,9 +1,8 @@
 import numpy as np
-from ase.build import bulk
 
+from ase.build import bulk
 from icet import ClusterExpansion, ClusterSpace
 from mchammer.calculators import ClusterExpansionCalculator
-
 from mchammer.ensembles import SemiGrandCanonicalEnsemble
 
 
@@ -13,7 +12,6 @@ for i, atom in enumerate(atoms):
     if i % 2 == 0:
         atom.symbol = 'Ga'
 
-
 # create a cluster space
 cutoffs = [5, 5, 4]
 elements = ['Al', 'Ga']
@@ -21,7 +19,7 @@ chemical_potentials = {'Al': 5, 'Ga': 0}
 cs = ClusterSpace(atoms, cutoffs, elements)
 
 # Create some parameters and make a cluster expansion
-parameters = np.array([1.2]*len(cs))
+parameters = np.array([1.2] * len(cs))
 ce = ClusterExpansion(cs, parameters)
 
 # Set up a calculator
@@ -33,9 +31,7 @@ ensemble = SemiGrandCanonicalEnsemble(
     random_seed=42, temperature=100.0,
     chemical_potentials=chemical_potentials)
 
-
 # Let's take it for a spin
-
 ensemble.run(100)
 
 print("Acceptance ratio {}".format(ensemble.acceptance_ratio))
