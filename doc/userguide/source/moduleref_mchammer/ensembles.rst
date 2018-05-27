@@ -24,10 +24,10 @@ CanonicalEnsemble
    single: Class reference; SGCEnsemble
    single: Monte Carlo; Semi-grand canonical ensemble
 
-SGC
----
+SemiGrandCanonicalEnsemble
+--------------------------
 
-.. autoclass:: SGCEnsemble
+.. autoclass:: SemiGrandCanonicalEnsemble
    :members:
    :undoc-members:
    :inherited-members:
