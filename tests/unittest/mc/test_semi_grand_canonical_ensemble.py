@@ -69,8 +69,8 @@ class TestEnsemble(unittest.TestCase):
                 calculator=self.calculator, atoms=self.atoms,
                 name='test-ensemble', random_seed=42)
         self.assertTrue(
-            "Temperature needs to be set in canonical "
-            "ensemble" in str(context.exception))
+            "Missing required keyword:"
+            " temperature" in str(context.exception))
 
     def test_init_without_chemical_potential(self):
         """ Test init chemical potentials."""
