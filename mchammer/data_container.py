@@ -122,7 +122,7 @@ class DataContainer:
             dictionary of tag-value pairs representing observations
 
         Todo
-        ----import numpy as np
+        ----
         This might be a quite expensive way to add data to the data
         frame. Testing and profiling to be carried out later.
         """
