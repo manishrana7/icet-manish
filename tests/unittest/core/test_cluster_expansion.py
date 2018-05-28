@@ -20,6 +20,17 @@ class TestClusterExpansion(unittest.TestCase):
         self.subelements = ['H', 'He', 'Pb']
         self.cutoffs = [1.4] * 3
 
+    def test_init(self):
+        """Test that initialization works."""
+        atoms = bulk('Au')
+        cutoffs = [3.0]
+        cs = ClusterSpace(atoms, cutoffs, ['Au', 'Pd'])
+        with self.assertRaises(ValueError) as context:
+            ClusterExpansion(cs, [0.0])
+        msg = 'cluster_space and parameters must have the same' + \
+            ' length (3 != 1)'
+        self.assertEqual(str(context.exception), msg)
+
     def test_all_systems_in_database(self):
         """
         Test all structures in database
