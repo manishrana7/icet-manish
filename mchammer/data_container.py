@@ -5,6 +5,7 @@ import socket
 import json
 from datetime import datetime
 from collections import OrderedDict
+import numpy as np
 import pandas as pd
 from ase.io import write as ase_write, read as ase_read
 from icet import __version__ as icet_version
@@ -121,7 +122,7 @@ class DataContainer:
             dictionary of tag-value pairs representing observations
 
         Todo
-        ----
+        ----import numpy as np
         This might be a quite expensive way to add data to the data
         frame. Testing and profiling to be carried out later.
         """
@@ -161,8 +162,6 @@ class DataContainer:
         fill_missing : bool
             If True fill missing values backward
         """
-        import math
-
         if tags is None:
             tags = self._data.columns.tolist()
         else:
@@ -186,8 +185,8 @@ class DataContainer:
 
         data_list = []
         for tag in tags:
-            data_column = data.get(tag).tolist()
-            data_column = [None if math.isnan(x) else x for x in data_column]
+            data_column = [None if np.isnan(x).all() else x
+                           for x in data.get(tag).tolist()]
             data_list.append(data_column)
 
         return data_list

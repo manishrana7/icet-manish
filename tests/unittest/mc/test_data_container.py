@@ -76,21 +76,23 @@ class TestDataContainer(unittest.TestCase):
         min_interval = min([obs.interval for obs in observers])
 
         # append data from observers
-        for mctrial in range(1, 101):
-            if mctrial % min_interval == 0:
+        n_steps = 100
+        for steps in range(n_steps):
+            if steps % min_interval == 0:
                 row_data = {}
                 for obs in observers:
-                    if mctrial % obs.interval == 0:
+                    if steps % obs.interval == 0:
                         observable = obs.get_observable(self.atoms)
                         row_data[obs.tag] = observable
-                self.dc.append(mctrial, row_data)
+                self.dc.append(steps, row_data)
 
         self.assertEqual(self.dc.get_number_of_entries(), 10)
 
         # append list type data
         row_data = {}
-        row_data['sro'] = [1.0, 1.2, 1.25, 1.125]
-        self.dc.append(10, row_data)
+        row_data['sro'] = [0.1, 0.2, 0.25, 0.125]
+        self.dc.append(n_steps, row_data)
+        self.assertEqual(self.dc.get_number_of_entries('sro'), 1)
 
     def test_property_data(self):
         """ Test data property."""
@@ -124,9 +126,10 @@ class TestDataContainer(unittest.TestCase):
                   [None, 64.0, None, 64.0, None, 64.0, None, 64.0, None, 64.0]]
 
         min_interval = min([obs.interval for obs in observers])
-        for mctrial in range(1, 101):
+        n_steps = 100
+        for mctrial in range(1, n_steps+1):
             if mctrial % min_interval == 0:
-                row_data = OrderedDict()
+                row_data = {}
                 for obs in observers:
                     if mctrial % obs.interval == 0:
                         observable = obs.get_observable(self.atoms)
@@ -156,6 +159,20 @@ class TestDataContainer(unittest.TestCase):
         # test fails for non-stock data
         with self.assertRaises(AssertionError):
             self.dc.get_data(['temperature'])
+
+        # append list type data
+        row_data = {}
+        row_data['sro'] = [0.1, 0.2, 0.25, 0.125]
+        self.dc.append(n_steps, row_data)
+
+        # get data should return None for all previous steps
+        # before appending list type data
+        target = [None for i in range(10)]
+        target.append(row_data['sro'])
+
+        retval = self.dc.get_data(['sro'])[0]
+
+        self.assertEqual(retval, target)
 
     def test_reset(self):
         """Test appended data is cleared."""
