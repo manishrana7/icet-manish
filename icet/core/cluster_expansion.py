@@ -26,6 +26,8 @@ class ClusterExpansion(object):
         parameters : list of floats
             effective cluster interactions (ECIs)
         '''
+        assert len(cluster_space) == len(parameters), \
+            'cluster_space and parameters must have the same length'
         self._cluster_space = cluster_space
         self._parameters = parameters
 
