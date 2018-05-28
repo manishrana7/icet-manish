@@ -165,14 +165,10 @@ class TestDataContainer(unittest.TestCase):
         row_data['sro'] = [0.1, 0.2, 0.25, 0.125]
         self.dc.append(n_steps, row_data)
 
-        # get data should return None for all previous steps
-        # before appending list type data
-        target = [None for i in range(10)]
-        target.append(row_data['sro'])
-
-        retval = self.dc.get_data(['sro'])[0]
-
-        self.assertEqual(retval, target)
+        # check append data
+        retval = [x for x in self.dc.get_data(['sro'])[0] if x is not None]
+        for el in retval:
+            self.assertIsInstance(el, list)
 
     def test_reset(self):
         """Test appended data is cleared."""
