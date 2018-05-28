@@ -124,7 +124,7 @@ class DataContainer:
         self._data = self._data.append(row_data,
                                        ignore_index=True)
 
-    def get_data(self, tags=None, interval=None, fill_missing=False):
+    def get_data(self, tags=None, interval=1, start=None, stop=None, fill_missing=False):
         """
         Returns a list of lists representing the accumulated data for
         the observables specified via tags.
@@ -135,9 +135,17 @@ class DataContainer:
             tags of the required properties; if None all columns of the data
             frame will be returned in lexigraphical order
 
-        interval : tuple
+        interval : int
             range of trial steps values from which data frame will be returned.
             If None, returns all the accumulated data.
+
+        start : int
+            lower limit of trial step interval. If None, first value
+            in trial step column will be used.
+
+        stop : int
+            upper limit of trial step interval. If None, last value
+            of trial step column will be used.
 
         fill_missing : bool
             If True fill missing values backward
@@ -152,10 +160,6 @@ class DataContainer:
         if interval is None:
             data = self._data.loc[:, tags]
         else:
-            assert isinstance(interval, tuple), \
-                'interval must be a tuple: {}'.format(type(interval))
-            assert len(interval) == 2, \
-                'interval must contain only a lower and an upper value'
             data = self._data.set_index(self._data.mctrial)
             lower, upper = interval
             data = data.loc[lower:upper, tags]
