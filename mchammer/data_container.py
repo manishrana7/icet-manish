@@ -124,7 +124,8 @@ class DataContainer:
         self._data = self._data.append(row_data,
                                        ignore_index=True)
 
-    def get_data(self, tags=None, interval=1, start=None, stop=None, fill_missing=False):
+    def get_data(self, tags=None, interval=1, start=None, stop=None,
+                 fill_missing=False):
         """
         Returns a list of lists representing the accumulated data for
         the observables specified via tags.
@@ -141,11 +142,11 @@ class DataContainer:
 
         start : int
             lower limit of trial step interval. If None, first value
-            in trial step column will be used.
+            in mctrial step column will be used.
 
         stop : int
             upper limit of trial step interval. If None, last value
-            of trial step column will be used.
+            of mctrial step column will be used.
 
         fill_missing : bool
             If True fill missing values backward
@@ -155,14 +156,19 @@ class DataContainer:
         else:
             for tag in tags:
                 assert tag in self._data, \
-                    'observable is not part of DataContainer: {}'.format(tag)
+                    'Observable is not part of DataContainer: {}'.format(tag)
 
-        if interval is None:
-            data = self._data.loc[:, tags]
+        if start is None and stop is None:
+            data = self._data.loc[::interval, tags]
         else:
             data = self._data.set_index(self._data.mctrial)
-            lower, upper = interval
-            data = data.loc[lower:upper, tags]
+
+            if start is None:
+                data = data.loc[:stop:interval, tags]
+            elif stop is None:
+                data = data.loc[start::interval, tags]
+            else:
+                data = data.loc[start:stop:interval, tags]
 
         if fill_missing:
             data = data.fillna(method='bfill')

@@ -135,24 +135,27 @@ class TestDataContainer(unittest.TestCase):
                 self.dc.append(mctrial, row_data)
 
         retval = self.dc.get_data()
-        self.assertListEqual(target, retval)
+        self.assertEqual(target, retval)
 
         # with filling_missing = True
         target = [[10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
                   [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0],
                   [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0]]
 
-        retval = self.dc.get_data(['mctrial', 'obs1', 'obs2'],
-                                  fill_missing=True)
-        self.assertListEqual(target, retval)
+        retval = self.dc.get_data(fill_missing=True)
+        self.assertEqual(target, retval)
 
-        # passing an interval
+        # with a given start and stop
         target = [[40, 50, 60, 70], [64.0, 64.0, 64.0, 64.0],
                   [64.0, None, 64.0, None]]
 
-        retval = self.dc.get_data(['mctrial', 'obs1', 'obs2'],
-                                  interval=(40, 70))
-        self.assertListEqual(target, retval)
+        retval = self.dc.get_data(start=40, stop=70)
+        self.assertEqual(target, retval)
+
+        # with an interval
+        target = [[10, 30, 50, 70, 90]]
+        retval = self.dc.get_data(['mctrial'], interval=2)
+        self.assertEqual(target, retval)
 
         # test fails for non-stock data
         with self.assertRaises(AssertionError):
