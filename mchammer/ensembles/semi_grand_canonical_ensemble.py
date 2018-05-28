@@ -4,7 +4,7 @@ Definition of the semi-grand canonical ensemble class.
 
 import numpy as np
 
-from ase.data import atomic_numbers
+from ase.data import atomic_numbers, chemical_symbols
 from ase.units import kB
 from mchammer.ensembles.base_ensemble import BaseEnsemble
 
@@ -37,11 +37,13 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
 
     def __init__(self, atoms=None, calculator=None,
                  name='Semi-grand canonical ensemble',
-                 data_container=None, random_seed=None, **kwargs):
+                 data_container=None, random_seed=None,
+                 ensemble_data_write_interval=None, **kwargs):
 
         super().__init__(atoms=atoms, calculator=calculator, name=name,
                          data_container=data_container,
-                         random_seed=random_seed)
+                         random_seed=random_seed,
+                         ensemble_data_write_interval=ensemble_data_write_interval)
         if 'temperature' not in kwargs.keys():
             raise KeyError('Missing required keyword: temperature')
         else:
@@ -113,3 +115,29 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
             elif isinstance(key, int):
                 self._chemical_potentials[key] =\
                     chemical_potentials[key]
+
+    def get_default_data(self):
+        """ 
+        Returns a dict with the default data of 
+        the ensemble.
+
+        Here the element counts are added to
+        the default data.
+        """
+        default_data = super().get_default_data()
+
+        possible_elements = self.configuration._possible_elements
+        atoms = self.configuration.atoms
+        unique, counts = np.unique(atoms.numbers, return_counts=True)
+
+        for Z, count in zip(unique, counts):
+            str_element = chemical_symbols[Z]
+            default_data["{} count".format(str_element)] = count
+
+        # Add the "empty" elements also
+        for possible_element in possible_elements:
+            if possible_element not in unique:
+                str_element = chemical_symbols[possible_element]
+                default_data["{} count".format(str_element)] = 0
+
+        return default_data

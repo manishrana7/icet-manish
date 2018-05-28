@@ -28,11 +28,12 @@ class BaseEnsemble(ABC):
     """
 
     def __init__(self, calculator=None, atoms=None, name='BaseEnsemble',
-                 data_container=None, data_container_write_period=np.inf,
+                 data_container=None, ensemble_data_write_interval=None, data_container_write_period=np.inf,
                  random_seed=None):
 
         if calculator is None:
             raise TypeError("Missing required keyword argument: calculator")
+
         self._calculator = calculator
         self._name = name
         self.data_container_write_period = data_container_write_period
@@ -40,7 +41,6 @@ class BaseEnsemble(ABC):
         self.total_trials = 0
         self._observers = {}
         self._step = 0
-        self._minimum_observation_interval = np.inf
         if atoms is None:
             raise TypeError("Missing required keyword argument: atoms")
         if random_seed is None:
@@ -63,6 +63,14 @@ class BaseEnsemble(ABC):
         sublattices = [[i for i in range(len(self.calculator.atoms))]]
         self.configuration = ConfigurationManager(
             atoms, strict_constraints, sublattices)
+
+        # Handle ensemble data writing
+        if ensemble_data_write_interval is None:
+            self._ensemble_data_write_interval = len(atoms)
+        else:
+            self._ensemble_data_write_interval = ensemble_data_write_interval
+        self._data_container.add_observable('energy')
+        self._find_minimum_observation_interval()
 
     @property
     def structure(self):
@@ -150,8 +158,8 @@ class BaseEnsemble(ABC):
             if self._data_container_filename is not None and \
                     time() - last_write_time > \
                     self.data_container_write_period:
-                        self.data_container.write(
-                            self._data_container_filename)
+                self.data_container.write(
+                    self._data_container_filename)
 
             self._run(uninterrupted_steps)
             step += uninterrupted_steps
@@ -187,6 +195,15 @@ class BaseEnsemble(ABC):
         """
         row_dict = {}
         new_observations = False
+
+        # Ensemble specific data
+        if step % self._ensemble_data_write_interval == 0:
+            ensemble_data = self.get_default_data()
+            for key, value in ensemble_data.items():
+                row_dict[key] = value
+            new_observations = True
+
+        # Observer data
         for observer in self.observers.values():
             if step % observer.interval == 0:
                 new_observations = True
@@ -238,6 +255,8 @@ class BaseEnsemble(ABC):
         """
 
         intervals = [obs.interval for _, obs in self.observers.items()]
+        intervals.append(self._ensemble_data_write_interval)
+
         self._minimum_observation_interval = self._get_gcd(intervals)
 
     def _get_gcd(self, interval_list):
@@ -346,6 +365,10 @@ class BaseEnsemble(ABC):
         # Set elements back to what they were
         self.update_occupations(indices, current_elements)
         return property_change
+
+    def get_default_data(self):
+        """Get current calculator property."""
+        return {'energy': self.calculator.calculate_total(occupations=self.configuration.occupations)}
 
     def get_random_sublattice_index(self) -> int:
         """
