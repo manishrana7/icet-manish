@@ -30,7 +30,7 @@ class ClusterExpansion(object):
             raise ValueError('cluster_space and parameters must have the same'
                              ' length ({} != {})'.format(len(cluster_space),
                                                          len(parameters)))
-        self._cluster_space = _cluster_space
+        self._cluster_space = cluster_space
         self._parameters = parameters
 
     def predict(self, structure):
