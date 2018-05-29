@@ -33,7 +33,7 @@ ensemble = SemiGrandCanonicalEnsemble(
     ensemble_data_write_interval=2)
 
 # Let's take it for a spin
-ensemble.run(1000)
+ensemble.run(100)
 
 print("Acceptance ratio {}".format(ensemble.acceptance_ratio))
 
