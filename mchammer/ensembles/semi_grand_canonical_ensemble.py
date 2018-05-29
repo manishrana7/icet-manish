@@ -122,10 +122,11 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
         Returns a dict with the default data of
         the ensemble.
 
-        Here the element counts are added to
-        the default data.
+        Here the temperature and element counts
+        are added to the default data.
         """
         default_data = super().get_ensemble_data()
+        default_data['temperature'] = self.temperature
 
         possible_elements = self.configuration._possible_elements
         atoms = self.configuration.atoms

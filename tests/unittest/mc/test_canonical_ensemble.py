@@ -64,6 +64,15 @@ class TestEnsemble(unittest.TestCase):
             "Temperature needs to be set in canonical "
             "ensemble" in str(context.exception))
 
+    def test_get_ensemble_data(self):
+        """Test the get ensemble data method."""
+        data = self.ensemble.get_ensemble_data()
+
+        self.assertIn('energy', data.keys())
+        self.assertIn('temperature', data.keys())
+
+        self.assertEqual(data['temperature'], 100.0)
+
 
 if __name__ == '__main__':
     unittest.main()

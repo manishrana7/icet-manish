@@ -68,3 +68,16 @@ class CanonicalEnsemble(BaseEnsemble):
             return np.exp(-energy_diff/(
                 self.boltzmann_constant * self.temperature)) > \
                 self.next_random_number()
+
+    def get_ensemble_data(self):
+        """
+        Returns a dict with the default data of
+        the ensemble.
+
+        Here the temperature are added to
+        the default data.
+        """
+        default_data = super().get_ensemble_data()
+
+        default_data['temperature'] = self.temperature
+        return default_data

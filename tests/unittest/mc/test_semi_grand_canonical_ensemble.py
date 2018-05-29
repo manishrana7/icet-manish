@@ -109,9 +109,11 @@ class TestEnsemble(unittest.TestCase):
         self.assertIn('energy', data.keys())
         self.assertIn('Al count', data.keys())
         self.assertIn('Ga count', data.keys())
+        self.assertIn('temperature', data.keys())
 
         self.assertEqual(data['Al count'], 13)
         self.assertEqual(data['Ga count'], 14)
+        self.assertEqual(data['temperature'], 100.0)
 
 
 if __name__ == '__main__':
