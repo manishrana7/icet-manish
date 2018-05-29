@@ -116,7 +116,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
                 self._chemical_potentials[key] =\
                     chemical_potentials[key]
 
-    def get_default_data(self):
+    def get_ensemble_data(self):
         """ 
         Returns a dict with the default data of 
         the ensemble.
@@ -124,7 +124,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
         Here the element counts are added to
         the default data.
         """
-        default_data = super().get_default_data()
+        default_data = super().get_ensemble_data()
 
         possible_elements = self.configuration._possible_elements
         atoms = self.configuration.atoms

@@ -41,11 +41,11 @@ class DictObserver(BaseObserver):
 class ConcreteEnsemble(BaseEnsemble):
 
     def __init__(self, calculator, atoms=None, name=None, data_container=None,
-                 data_container_write_period=np.inf, random_seed=None):
+                 data_container_write_period=np.inf, random_seed=None,ensemble_data_write_interval=None):
         super().__init__(
             calculator, atoms=atoms, name=name, data_container=data_container,
             data_container_write_period=data_container_write_period,
-            random_seed=random_seed)
+            random_seed=random_seed,ensemble_data_write_interval=ensemble_data_write_interval)
 
     def do_trial_step(self):
         pass
@@ -200,7 +200,8 @@ class TestEnsemble(unittest.TestCase):
                                     atoms=self.atoms,
                                     name='this-ensemble',
                                     data_container='my-datacontainer',
-                                    data_container_write_period=1e-4)
+                                    data_container_write_period=1e-4,
+                                    ensemble_data_write_interval=np.inf)
 
         # attach an observer
         observer = ParakeetObserver(interval=14, tag='Parakeet2')
@@ -307,6 +308,11 @@ class TestEnsemble(unittest.TestCase):
             "List of sites and list of elements are not the same size."
             in str(context.exception))
 
+    def test_get_ensemble_data(self):
+        """Test the get ensemble data method."""
+        data = self.ensemble.get_ensemble_data()
+
+        self.assertIn('energy',data.keys())
 
 if __name__ == '__main__':
     unittest.main()

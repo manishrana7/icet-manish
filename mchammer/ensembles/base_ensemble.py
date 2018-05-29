@@ -70,7 +70,8 @@ class BaseEnsemble(ABC):
         else:
             self._ensemble_data_write_interval = ensemble_data_write_interval
         self._data_container.add_observable('energy')
-        self._find_minimum_observation_interval()
+        if ensemble_data_write_interval is not np.inf:
+            self._find_minimum_observation_interval()
 
     @property
     def structure(self):
@@ -198,7 +199,7 @@ class BaseEnsemble(ABC):
 
         # Ensemble specific data
         if step % self._ensemble_data_write_interval == 0:
-            ensemble_data = self.get_default_data()
+            ensemble_data = self.get_ensemble_data()
             for key, value in ensemble_data.items():
                 row_dict[key] = value
             new_observations = True
@@ -255,7 +256,8 @@ class BaseEnsemble(ABC):
         """
 
         intervals = [obs.interval for _, obs in self.observers.items()]
-        intervals.append(self._ensemble_data_write_interval)
+        if self._ensemble_data_write_interval is not np.inf:
+            intervals.append(self._ensemble_data_write_interval)
 
         self._minimum_observation_interval = self._get_gcd(intervals)
 
@@ -366,7 +368,7 @@ class BaseEnsemble(ABC):
         self.update_occupations(indices, current_elements)
         return property_change
 
-    def get_default_data(self):
+    def get_ensemble_data(self):
         """Get current calculator property."""
         return {'energy': self.calculator.calculate_total(occupations=self.configuration.occupations)}
 
