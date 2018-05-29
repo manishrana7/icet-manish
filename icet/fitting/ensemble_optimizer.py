@@ -154,6 +154,8 @@ class EnsembleOptimizer(BaseOptimizer):
                             target values and `M` is the number of fits
                             (i.e., the size of the ensemble)
         """
+        if self.parameter_vectors is None:
+            return None
         error_matrix = np.zeros((self._Nrows, self.ensemble_size))
         for i, parameters in enumerate(self.parameter_vectors):
             error_matrix[:, i] = np.dot(self._A, parameters) - self._y
