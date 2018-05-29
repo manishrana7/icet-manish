@@ -28,7 +28,8 @@ class BaseEnsemble(ABC):
     """
 
     def __init__(self, calculator=None, atoms=None, name='BaseEnsemble',
-                 data_container=None, ensemble_data_write_interval=None, data_container_write_period=np.inf,
+                 data_container=None, ensemble_data_write_interval=None,
+                 data_container_write_period=np.inf,
                  random_seed=None):
 
         if calculator is None:
@@ -370,7 +371,8 @@ class BaseEnsemble(ABC):
 
     def get_ensemble_data(self):
         """Get current calculator property."""
-        return {'energy': self.calculator.calculate_total(occupations=self.configuration.occupations)}
+        return {'energy': self.calculator.calculate_total(
+            occupations=self.configuration.occupations)}
 
     def get_random_sublattice_index(self) -> int:
         """

@@ -41,11 +41,13 @@ class DictObserver(BaseObserver):
 class ConcreteEnsemble(BaseEnsemble):
 
     def __init__(self, calculator, atoms=None, name=None, data_container=None,
-                 data_container_write_period=np.inf, random_seed=None,ensemble_data_write_interval=None):
+                 data_container_write_period=np.inf, random_seed=None,
+                 ensemble_data_write_interval=None):
         super().__init__(
             calculator, atoms=atoms, name=name, data_container=data_container,
             data_container_write_period=data_container_write_period,
-            random_seed=random_seed,ensemble_data_write_interval=ensemble_data_write_interval)
+            random_seed=random_seed,
+            ensemble_data_write_interval=ensemble_data_write_interval)
 
     def do_trial_step(self):
         pass
@@ -312,7 +314,8 @@ class TestEnsemble(unittest.TestCase):
         """Test the get ensemble data method."""
         data = self.ensemble.get_ensemble_data()
 
-        self.assertIn('energy',data.keys())
+        self.assertIn('energy', data.keys())
+
 
 if __name__ == '__main__':
     unittest.main()

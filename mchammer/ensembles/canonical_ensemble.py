@@ -21,12 +21,14 @@ class CanonicalEnsemble(BaseEnsemble):
     """
 
     def __init__(self, atoms=None, calculator=None, name='Canonical Ensemble',
-                 data_container=None, random_seed=None,ensemble_data_write_interval=None, **kwargs):
+                 data_container=None, random_seed=None,
+                 ensemble_data_write_interval=None, **kwargs):
 
-        super().__init__(atoms=atoms, calculator=calculator, name=name,
-                         data_container=data_container,
-                         random_seed=random_seed,
-                         ensemble_data_write_interval=ensemble_data_write_interval)
+        super().__init__(
+            atoms=atoms, calculator=calculator, name=name,
+            data_container=data_container,
+            random_seed=random_seed,
+            ensemble_data_write_interval=ensemble_data_write_interval)
         if 'temperature' not in kwargs.keys():
             raise KeyError("Temperature needs to be set in canonical ensemble")
         else:
