@@ -158,10 +158,8 @@ class BaseEnsemble(ABC):
             if self._step % self.minimum_observation_interval == 0:
                 self._observe_configuration(self._step)
             if self._data_container_filename is not None and \
-                    time() - last_write_time > \
-                    self.data_container_write_period:
-                self.data_container.write(
-                    self._data_container_filename)
+                    time()-last_write_time > self.data_container_write_period:
+                self.data_container.write(self._data_container_filename)
 
             self._run(uninterrupted_steps)
             step += uninterrupted_steps
