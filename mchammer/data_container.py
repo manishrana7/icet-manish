@@ -185,8 +185,8 @@ class DataContainer:
 
         data_list = []
         for tag in tags:
-            data_column = [None if np.isnan(x).all() else x
-                           for x in data.get(tag).tolist()]
+            data_column = [None if np.isnan(x).any() else x
+                           for x in data[tag].tolist()]
             data_list.append(data_column)
 
         return data_list
