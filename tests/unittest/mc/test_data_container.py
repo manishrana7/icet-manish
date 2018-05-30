@@ -74,14 +74,14 @@ class TestDataContainer(unittest.TestCase):
         min_interval = min([obs.interval for obs in observers])
 
         # append data from observers
-        for steps in range(100):
-            if steps % min_interval == 0:
+        for mctrial in range(100):
+            if mctrial % min_interval == 0:
                 row_data = {}
                 for obs in observers:
-                    if steps % obs.interval == 0:
+                    if mctrial % obs.interval == 0:
                         observable = obs.get_observable(self.atoms)
                         row_data[obs.tag] = observable
-                self.dc.append(steps, row_data)
+                self.dc.append(mctrial, row_data)
 
         self.assertEqual(self.dc.get_number_of_entries(), 10)
 
@@ -195,24 +195,24 @@ class TestDataContainer(unittest.TestCase):
         obs_val = np.random.normal(mu, sigma, n_iter).tolist()
 
         # append data for testing
-        for step in range(n_iter):
-            self.dc.append(step*2, dict([('obs1', obs_val[step])]))
+        for mctrial in range(n_iter):
+            self.dc.append(mctrial, record={'obs1':obs_val[mctrial]})
 
-        # get average over all steps
+        # get average over all mctrials
         mean, std = self.dc.get_average('obs1')
         self.assertAlmostEqual(mean, 0.9855693, places=7)
         self.assertAlmostEqual(std, 0.1051220, places=7)
 
         # get average over slice of data
-        mean, std = self.dc.get_average('obs1', start=120)
+        mean, std = self.dc.get_average('obs1', start=60)
         self.assertAlmostEqual(mean, 0.9851106, places=7)
         self.assertAlmostEqual(std, 0.0993846, places=7)
 
-        mean, std = self.dc.get_average('obs1', stop=120)
+        mean, std = self.dc.get_average('obs1', stop=60)
         self.assertAlmostEqual(mean, 0.9876534, places=7)
         self.assertAlmostEqual(std, 0.1095718, places=7)
 
-        mean, std = self.dc.get_average('obs1', start=80, stop=120)
+        mean, std = self.dc.get_average('obs1', start=40, stop=60)
         self.assertAlmostEqual(mean, 1.0137074, places=7)
         self.assertAlmostEqual(std, 0.1152604, places=7)
 
