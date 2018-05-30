@@ -229,7 +229,10 @@ class TestEnsemble(unittest.TestCase):
             ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
         data_dc = \
             ensemble.data_container.get_data(tags=['Parakeet2'])
-        self.assertListEqual(data_dc[0], data_dc_reloaded[0])
+        self.assertEqual(len(data_dc[0]), len(data_dc_reloaded[0]))
+        for i in range(len(data_dc[0])):
+            np.testing.assert_approx_equal(
+                data_dc_reloaded[0][i], data_dc[0][i], significant=20)
 
         # remove file
         os.remove('my-datacontainer')

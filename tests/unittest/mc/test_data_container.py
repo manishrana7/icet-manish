@@ -1,13 +1,11 @@
 import unittest
 import tempfile
-import tarfile
 from collections import OrderedDict
 import numpy as np
 import pandas as pd
 from ase.build import bulk
 from mchammer import DataContainer
 from mchammer.observers.base_observer import BaseObserver
-from mchammer.data_container import InvalidFileError
 
 # Create concrete child of BaseObserver for testing
 
@@ -76,8 +74,7 @@ class TestDataContainer(unittest.TestCase):
         min_interval = min([obs.interval for obs in observers])
 
         # append data from observers
-        n_steps = 100
-        for steps in range(n_steps):
+        for steps in range(100):
             if steps % min_interval == 0:
                 row_data = {}
                 for obs in observers:
@@ -90,9 +87,10 @@ class TestDataContainer(unittest.TestCase):
 
         # append list type data
         row_data = {}
-        row_data['sro'] = [0.1, 0.2, 0.25, 0.125]
-        self.dc.append(n_steps, row_data)
-        self.assertEqual(self.dc.get_number_of_entries('sro'), 1)
+        row_data['occupation_vector'] = [1, 3, 7, 11]
+        self.dc.append(100, row_data)
+        self.assertEqual(
+            self.dc.get_number_of_entries('occupation_vector'), 1)
 
     def test_property_data(self):
         """ Test data property."""
@@ -126,8 +124,8 @@ class TestDataContainer(unittest.TestCase):
                   [None, 64.0, None, 64.0, None, 64.0, None, 64.0, None, 64.0]]
 
         min_interval = min([obs.interval for obs in observers])
-        n_steps = 100
-        for mctrial in range(1, n_steps+1):
+
+        for mctrial in range(1, 110):
             if mctrial % min_interval == 0:
                 row_data = {}
                 for obs in observers:
@@ -162,13 +160,13 @@ class TestDataContainer(unittest.TestCase):
 
         # append list type data
         row_data = {}
-        row_data['sro'] = [0.1, 0.2, 0.25, 0.125]
-        self.dc.append(n_steps, row_data)
+        row_data['occupation_vector'] = [1, 3, 7, 11]
+        self.dc.append(200, row_data)
 
         # check append data
-        retval = [x for x in self.dc.get_data(['sro'])[0] if x is not None]
-        for el in retval:
-            self.assertIsInstance(el, list)
+        retval = \
+            self.dc.get_data(['occupation_vector'], interval=(200, 200))[0][0]
+        self.assertEqual(retval, row_data['occupation_vector'])
 
     def test_reset(self):
         """Test appended data is cleared."""
@@ -225,15 +223,22 @@ class TestDataContainer(unittest.TestCase):
         self.dc.add_observable('sro')
         row_data = {}
         row_data['obs1'] = 64
-        row_data['sro'] = [1, 2, 2]
-        for mctrial in range(100):
+        row_data['occupation_vector'] = [1, 3, 7, 11]
+        for mctrial in range(1, 101):
             self.dc.append(mctrial, row_data)
 
-        # save to file
         temp_file = tempfile.NamedTemporaryFile()
+
+        # check before a non-tar file
+        with self.assertRaises(ValueError) as context:
+            self.dc.read(temp_file.name)
+        self.assertTrue('{} is not a tar file'.format(str(temp_file.name))
+                        in str(context.exception))
+
+        # save to file
         self.dc.write(temp_file.name)
 
-        # read from file
+        # read from file object
         dc_read = self.dc.read(temp_file)
 
         # check properties and metadata
@@ -242,40 +247,14 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(self.dc.parameters, dc_read.parameters)
         self.assertEqual(self.dc.observables, dc_read.observables)
 
-        # check data (***failed***)
-        #pd.testing.assert_frame_equal(self.dc.data, dc_read.data)
-        print(dc_read.data)
-        print(dc_read.get_data(['sro']))
-        #self.assertEqual(self.dc.get_data(['sro'])[0],
-        #                 dc_read.get_data(['sro'])[0])
+        # check data
+        pd.testing.assert_frame_equal(
+            self.dc.data, dc_read.data, check_dtype=False)
 
         # check exception raises when file does not exist
         with self.assertRaises(FileNotFoundError):
             dc_read = self.dc.read("not_found")
-
         temp_file.close()
-
-    def test_invalid_files(self):
-        """Test invalid tar file raises exception."""
-
-        # test non-tar file
-        tar_file = tempfile.NamedTemporaryFile()
-        with self.assertRaises(InvalidFileError) as context:
-            self.dc.read(tar_file.name)
-        self.assertTrue('{} is not a tar file'.format(str(tar_file.name))
-                        in str(context.exception))
-
-        # test tar file with invalid files
-        temp_file = tempfile.NamedTemporaryFile()
-        with tarfile.open(tar_file.name, mode='w') as handle:
-            handle.add(temp_file.name, arcname='tempfile')
-        temp_file.close()
-
-        with self.assertRaises(InvalidFileError) as context:
-            self.dc.read(tar_file.name)
-        self.assertTrue('atoms not found in {}'.format(tar_file.name)
-                        in str(context.exception))
-        tar_file.close()
 
 
 if __name__ == '__main__':
