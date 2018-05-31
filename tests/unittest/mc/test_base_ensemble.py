@@ -1,6 +1,7 @@
 import unittest
 
 import os
+import tempfile
 import numpy as np
 from ase.build import bulk
 
@@ -198,8 +199,7 @@ class TestEnsemble(unittest.TestCase):
         # set up ensemble with non-inf write period
         ensemble = ConcreteEnsemble(calculator=self.calculator,
                                     atoms=self.atoms,
-                                    name='this-ensemble',
-                                    data_container='my-datacontainer',
+                                    data_container='mycontainer.dc',
                                     data_container_write_period=1e-4)
 
         # attach an observer
@@ -210,29 +210,34 @@ class TestEnsemble(unittest.TestCase):
         n_iters = 364
         ensemble.run(n_iters)
 
-        # check data container file
-        dc_read = DataContainer.read('my-datacontainer')
+        # read data container from file
+        try:
+            dc_read = DataContainer.read('mycontainer.dc')
+        finally:
+            os.remove('mycontainer.dc')
+
+        # check data container
         dc_data = dc_read.get_data(tags=['Parakeet2'])
         self.assertEqual(
             len(dc_data[0]),
             n_iters // observer.interval + 1)
 
+        # write data container to tempfile
+        temp_container_file = tempfile.NamedTemporaryFile()
+        dc_read.write(temp_container_file.name)
+
         # initialise a new ensemble with dc file
         ensemble_reloaded = \
             ConcreteEnsemble(calculator=self.calculator,
                              atoms=self.atoms,
-                             name='this-ensemble',
-                             data_container='my-datacontainer')
+                             data_container=temp_container_file.name)
 
         # check loaded data container of new ensemble
         data_dc_reloaded = \
             ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
         data_dc = \
             ensemble.data_container.get_data(tags=['Parakeet2'])
-        self.assertListEqual(data_dc[0], data_dc_reloaded[0])
-
-        # remove file
-        os.remove('my-datacontainer')
+        self.assertEqual(data_dc[0], data_dc_reloaded[0])
 
     def test_internal_run(self):
         """Test the _run method."""
