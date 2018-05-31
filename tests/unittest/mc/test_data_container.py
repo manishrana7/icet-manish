@@ -119,13 +119,11 @@ class TestDataContainer(unittest.TestCase):
         observers = [ConcreteObserver(interval=10, tag='obs1'),
                      ConcreteObserver(interval=20, tag='obs2')]
 
-        target = [[10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0],
-                  [None, 64.0, None, 64.0, None, 64.0, None, 64.0, None, 64.0]]
-
+        mctrials = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        
+        # append data
         min_interval = min([obs.interval for obs in observers])
-
-        for mctrial in range(1, 110):
+        for mctrial in mctrials:
             if mctrial % min_interval == 0:
                 row_data = {}
                 for obs in observers:
@@ -134,8 +132,13 @@ class TestDataContainer(unittest.TestCase):
                         row_data[obs.tag] = observable
                 self.dc.append(mctrial, row_data)
 
+        obs1_vals = \
+            [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0] 
+        obs2_vals = \ 
+            [None, 64.0, None, 64.0, None, 64.0, None, 64.0, None, 64.0]
+
         retval = self.dc.get_data()
-        self.assertEqual(target, retval)
+        self.assertEqual(retval, (mctrials, obs1_vals, obs2_vals))
 
         # with filling_missing = True
         target = [[10, 20, 30, 40, 50, 60, 70, 80, 90, 100],

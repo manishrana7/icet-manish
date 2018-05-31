@@ -127,7 +127,7 @@ class DataContainer:
     def get_data(self, tags=None, interval=1, start=None, stop=None,
                  fill_missing=False):
         """
-        Returns a list of lists representing the accumulated data for
+        Returns a tuple with lists representing the accumulated data for
         the observables specified via tags.
 
         Parameters
@@ -151,6 +151,8 @@ class DataContainer:
         fill_missing : bool
             If True fill missing values backward
         """
+        import numpy as np
+
         if tags is None:
             tags = self._data.columns.tolist()
         else:
@@ -173,13 +175,12 @@ class DataContainer:
         if fill_missing:
             data = data.fillna(method='bfill')
 
-        data_list = []
+        data_list = ()
         for tag in tags:
-            data_column = [None if np.isnan(x).any() else x
-                           for x in data[tag].tolist()]
-            data_list.append(data_column)
-
-        return data_list
+            data_list.append(
+                [None if np.isnan(x) else x for x in data_column])
+            
+        return tuple(data_list)
 
     @property
     def data(self):
