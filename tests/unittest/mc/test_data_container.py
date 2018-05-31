@@ -196,7 +196,7 @@ class TestDataContainer(unittest.TestCase):
 
         # append data for testing
         for mctrial in range(n_iter):
-            self.dc.append(mctrial, record={'obs1':obs_val[mctrial]})
+            self.dc.append(mctrial, record={'obs1': obs_val[mctrial]})
 
         # get average over all mctrials
         mean, std = self.dc.get_average('obs1')
