@@ -5,22 +5,10 @@ import socket
 import json
 from datetime import datetime
 from collections import OrderedDict
+import numpy as np
 import pandas as pd
 from ase.io import write as ase_write, read as ase_read
 from icet import __version__ as icet_version
-
-
-class InvalidFileError(Exception):
-    """
-    Raises an error with the format of the DataContainer file is not
-    the expected one.
-    """
-    def __init__(self, err_msg):
-        super().__init__(err_msg)
-        self.err_msg = err_msg
-
-    def __str__(self):
-        return str(self.err_msg)
 
 
 class DataContainer:
@@ -133,9 +121,7 @@ class DataContainer:
         row_data = OrderedDict()
         row_data['mctrial'] = mctrial
         row_data.update(record)
-        # dict to DataFrame to avoid dtype conversion when appending data
-        temp_data = pd.DataFrame(row_data, index=[0])
-        self._data = self._data.append(temp_data,
+        self._data = self._data.append(row_data,
                                        ignore_index=True)
 
     def get_data(self, tags=None, interval=None, fill_missing=False):
@@ -156,8 +142,6 @@ class DataContainer:
         fill_missing : bool
             If True fill missing values backward
         """
-        import math
-
         if tags is None:
             tags = self._data.columns.tolist()
         else:
@@ -181,8 +165,8 @@ class DataContainer:
 
         data_list = []
         for tag in tags:
-            data_column = data.get(tag).tolist()
-            data_column = [None if math.isnan(x) else x for x in data_column]
+            data_column = [None if np.isnan(x).any() else x
+                           for x in data[tag].tolist()]
             data_list.append(data_column)
 
         return data_list
@@ -270,10 +254,6 @@ class DataContainer:
         ----------
         infile : str or FileObj
             file from which to read
-
-        Raises
-        ------
-        InvalidFileError : if infile has an invalid type
         """
         import os
 
@@ -285,33 +265,24 @@ class DataContainer:
             filename = infile.name
 
         if not tarfile.is_tarfile(filename):
-            raise InvalidFileError('{} is not a tar file'.format(filename))
+            raise ValueError('{} is not a tar file'.format(filename))
 
-        temp_atoms_file = tempfile.NamedTemporaryFile()
-        temp_json_file = tempfile.NamedTemporaryFile()
-        temp_csv_file = tempfile.NamedTemporaryFile()
+        reference_atoms_file = tempfile.NamedTemporaryFile()
+        reference_data_file = tempfile.NamedTemporaryFile()
+        runtime_data_file = tempfile.NamedTemporaryFile()
 
         with tarfile.open(mode='r', name=filename) as tar_file:
             # file with atoms
-            try:
-                temp_atoms_file.write(tar_file.extractfile('atoms').read())
-            except KeyError:
-                raise InvalidFileError(
-                    'atoms not found in {}'.format(infile))
-            else:
-                temp_atoms_file.seek(0)
-                atoms = ase_read(temp_atoms_file.name, format='json')
+            reference_atoms_file.write(tar_file.extractfile('atoms').read())
+
+            reference_atoms_file.seek(0)
+            atoms = ase_read(reference_atoms_file.name, format='json')
 
             # file with reference data
-            try:
-                temp_json_file.write(
-                    tar_file.extractfile('reference_data').read())
-            except KeyError:
-                raise InvalidFileError(
-                    'reference data not found in {}'.format(infile))
-            else:
-                temp_json_file.seek(0)
-                reference_data = json.load(temp_json_file)
+            reference_data_file.write(
+                tar_file.extractfile('reference_data').read())
+            reference_data_file.seek(0)
+            reference_data = json.load(reference_data_file)
 
             # init DataContainer
             dc = DataContainer(atoms,
@@ -333,18 +304,12 @@ class DataContainer:
                         dc.add_observable(value)
 
             # add runtime data from file
-            try:
-                temp_csv_file.write(
-                    tar_file.extractfile('runtime_data').read())
-            except KeyError:
-                raise InvalidFileError(
-                    'runtime data not found in {}'.format(infile))
-            else:
-                temp_csv_file.seek(0)
-                runtime_data = \
-                    pd.read_csv(temp_csv_file, index_col=False,
-                                usecols=['mctrial']+dc.observables)
-                dc._data = runtime_data
+            runtime_data_file.write(
+                tar_file.extractfile('runtime_data').read())
+
+            runtime_data_file.seek(0)
+            runtime_data = pd.read_json(runtime_data_file)
+            dc._data = runtime_data.sort_index(ascending=True)
 
         return dc
 
@@ -361,23 +326,24 @@ class DataContainer:
             datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 
         # Save reference atomic structure
-        temp_atoms_file = tempfile.NamedTemporaryFile()
-        ase_write(temp_atoms_file.name, self.structure, format='json')
+        reference_atoms_file = tempfile.NamedTemporaryFile()
+        ase_write(reference_atoms_file.name, self.structure, format='json')
 
-        # Save reference data to a json tempfile
+        # Save reference data
         reference_data = {'observables': self._observables,
                           'parameters': self._parameters,
                           'metadata': self._metadata}
 
-        temp_json_file = tempfile.NamedTemporaryFile()
-        with open(temp_json_file.name, 'w') as handle:
+        reference_data_file = tempfile.NamedTemporaryFile()
+        with open(reference_data_file.name, 'w') as handle:
             json.dump(reference_data, handle)
 
-        # Save Pandas data frame as a csv tempfile
-        temp_csv_file = tempfile.NamedTemporaryFile()
-        self._data.to_csv(temp_csv_file.name)
+        # Save Pandas'DataFrame
+        runtime_data_file = tempfile.NamedTemporaryFile()
+        self._data.to_json(runtime_data_file.name, double_precision=15)
 
         with tarfile.open(outfile, mode='w') as handle:
-            handle.add(temp_csv_file.name, arcname='runtime_data')
-            handle.add(temp_json_file.name, arcname='reference_data')
-            handle.add(temp_atoms_file.name, arcname='atoms')
+            handle.add(reference_atoms_file.name, arcname='atoms')
+            handle.add(reference_data_file.name, arcname='reference_data')
+            handle.add(runtime_data_file.name, arcname='runtime_data')
+        runtime_data_file.close()
