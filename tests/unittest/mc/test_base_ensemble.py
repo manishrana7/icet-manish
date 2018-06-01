@@ -196,23 +196,22 @@ class TestEnsemble(unittest.TestCase):
 
     def test_backup_file(self):
         """Test data is being saved and can be read by the ensemble."""
-        # set up ensemble with non-inf write period
+        # set-up ensemble with a non-inf write period
         ensemble = ConcreteEnsemble(calculator=self.calculator,
                                     atoms=self.atoms,
                                     data_container='mycontainer.dc',
                                     data_container_write_period=1e-4)
 
-        # attach an observer
+        # attach observer
         observer = ParakeetObserver(interval=14, tag='Parakeet2')
         ensemble.attach_observer(observer)
 
-        # run ensemble
-        n_iters = 364
-        ensemble.run(n_iters)
-
-        # read data container from file
+        # back-up data while run ensemble and then read the file
         try:
+            n_iters = 364
+            ensemble.run(n_iters)
             dc_read = DataContainer.read('mycontainer.dc')
+
         finally:
             os.remove('mycontainer.dc')
 
