@@ -140,25 +140,40 @@ class TestDataContainer(unittest.TestCase):
                 self.dc.append(mctrial, row_data)
 
         obs1_vals = \
-            [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0] 
+            [64, 64, 64, 64, 64, 64, 64, 64, 64, 64]
         obs2_vals = \
-            [None, 64.0, None, 64.0, None, 64.0, None, 64.0, None, 64.0]
+            [None, 64, None, 64, None, 64, None, 64, None, 64]
 
         retval = self.dc.get_data(tags=['mctrial', 'obs1', 'obs2'])
         self.assertEqual(retval, (mctrials, obs1_vals, obs2_vals))
 
-        # with filling_missing = True
-        retval = self.dc.get_data(tags=['obs2'], fill_missing=True)
-        self.assertEqual(retval, obs1_vals)
+        # using skip_none
+        retval1, retval2 = \
+            self.dc.get_data(tags=['mctrial', 'obs2'], fill_method='skip_none')
+        self.assertEqual(retval1, [20, 40, 60, 80, 100])
+        self.assertEqual(retval2, [64, 64, 64, 64, 64])
 
-        # with a given start and stop
-        retval = self.dc.get_data(tags=['obs2'], start=40, stop=70)
-        self.assertEqual(retval, [64.0, None, 64.0, None])
+        # using fill_backward
+        retval = \
+            self.dc.get_data(tags=['obs2'], fill_method='fill_backward')
+        self.assertEqual(retval, [64, 64, 64, 64, 64, 64, 64, 64, 64, 64])
 
-        # with an interval
-        retval1, retval2  = self.dc.get_data(['mctrial', 'obs2'], interval=2)
-        self.assertEqual(retval1, [10, 30, 50, 70, 90])
-        self.assertEqual(retval2, [None, None, None, None, None])
+        # using fill_forward
+        retval1, retval2 = \
+            self.dc.get_data(tags=['mctrial', 'obs2'],
+                             fill_method='fill_forward')
+        self.assertEqual(retval1, [20, 30, 40, 50, 60, 70, 80, 90, 100])
+        self.assertEqual(retval2, [64, 64, 64, 64, 64, 64, 64, 64, 64])
+
+        # Todo:
+        # using linear_interpolation
+
+        # with a given start, stop and interval
+        retval1, retval2 = \
+            self.dc.get_data(tags=['mctrial', 'obs2'],
+                             start=20, stop=90, interval=3)
+        self.assertEqual(retval1, [20, 50, 80])
+        self.assertEqual(retval2, [64, None, 64])
 
         # check append data
         retval = \

@@ -138,7 +138,7 @@ class TestEnsemble(unittest.TestCase):
         self.assertEqual(self.ensemble.step, n_iters)
         dc_data = self.ensemble.data_container.get_data(tags=['Parakeet2'])
 
-        number_of_observations = len([x for x in dc_data[0] if x is not None])
+        number_of_observations = len([x for x in dc_data if x is not None])
         # plus one since we also count step 0
         self.assertEqual(
             number_of_observations,
@@ -167,7 +167,7 @@ class TestEnsemble(unittest.TestCase):
             self.assertEqual(self.ensemble.step, total_iters)
             dc_data = self.ensemble.data_container.get_data(tags=['Parakeet2'])
             number_of_observations = len(
-                [x for x in dc_data[0] if x is not None])
+                [x for x in dc_data if x is not None])
             # plus one since we also count step 0
             self.assertEqual(
                 number_of_observations,
@@ -214,7 +214,7 @@ class TestEnsemble(unittest.TestCase):
         dc_read = DataContainer.read('my-datacontainer')
         dc_data = dc_read.get_data(tags=['Parakeet2'])
         self.assertEqual(
-            len(dc_data[0]),
+            len(dc_data),
             n_iters // observer.interval + 1)
 
         # initialise a new ensemble with dc file
@@ -229,10 +229,10 @@ class TestEnsemble(unittest.TestCase):
             ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
         data_dc = \
             ensemble.data_container.get_data(tags=['Parakeet2'])
-        self.assertEqual(len(data_dc[0]), len(data_dc_reloaded[0]))
-        for i in range(len(data_dc[0])):
+        self.assertEqual(len(data_dc), len(data_dc_reloaded))
+        for i in range(len(data_dc)):
             np.testing.assert_approx_equal(
-                data_dc_reloaded[0][i], data_dc[0][i], significant=20)
+                data_dc_reloaded[i], data_dc[i], significant=20)
 
         # remove file
         os.remove('my-datacontainer')

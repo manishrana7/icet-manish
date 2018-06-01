@@ -125,7 +125,7 @@ class DataContainer:
                                        ignore_index=True)
 
     def get_data(self, tags=None, interval=1, start=None, stop=None,
-                 fill_missing=False):
+                 fill_method=None):
         """
         Returns a tuple with lists representing the accumulated data for
         the observables specified via tags.
@@ -148,10 +148,13 @@ class DataContainer:
             upper limit of trial step interval. If None, last value
             of mctrial step column will be used.
 
-        fill_missing : bool
-            If True fill missing values backward
+        fill_missing : str
+            method to use to fill missing values. Default is None.
         """
-        import numpy as np
+        fill_methods = ['skip_none',
+                        'fill_backward',
+                        'fill_forward',
+                        'linear_interpolation']
 
         if tags is None:
             tags = self._data.columns.tolist()
@@ -172,8 +175,23 @@ class DataContainer:
             else:
                 data = data.loc[start:stop:interval, tags]
 
-        if fill_missing:
-            data = data.fillna(method='bfill')
+        if fill_method is not None:
+            assert fill_method in fill_methods, \
+                'Unknown fill method: {}'.format(fill_method)
+
+            if fill_method is 'skip_none':
+                data.dropna(inplace=True)
+
+            elif fill_method is 'fill_backward':
+                data.fillna(method='bfill', inplace=True)
+                data.dropna(inplace=True)
+
+            elif fill_method is 'fill_forward':
+                data.fillna(method='ffill', inplace=True)
+                data.dropna(inplace=True)
+
+            elif fill_method is 'linear_interpolation':
+                data = data.interpolate()
 
         data_list = []
         for tag in tags:
