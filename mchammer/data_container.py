@@ -178,7 +178,7 @@ class DataContainer:
         data_list = []
         for tag in tags:
             data_list.append(
-                [None if np.isnan(x) else x for x in data[tag]])
+                [None if np.isnan(x).any() else x for x in data[tag]])
         if len(tags) > 1:
             return tuple(data_list)
         else:

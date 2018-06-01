@@ -120,16 +120,23 @@ class TestDataContainer(unittest.TestCase):
                      ConcreteObserver(interval=20, tag='obs2')]
 
         mctrials = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-        
+        dump_interval = 50
+
         # append data
-        min_interval = min([obs.interval for obs in observers])
+        observal_interval = min([obs.interval for obs in observers])
         for mctrial in mctrials:
-            if mctrial % min_interval == 0:
-                row_data = {}
+            row_data = {}
+            flush_data = False
+            if mctrial % observal_interval == 0:
+                flush_data = True
                 for obs in observers:
                     if mctrial % obs.interval == 0:
                         observable = obs.get_observable(self.atoms)
                         row_data[obs.tag] = observable
+            if mctrial % dump_interval == 0:
+                flush_data = True
+                row_data['occupation_vector'] = [1, 3, 7, 11]
+            if flush_data:
                 self.dc.append(mctrial, row_data)
 
         obs1_vals = \
@@ -137,7 +144,7 @@ class TestDataContainer(unittest.TestCase):
         obs2_vals = \
             [None, 64.0, None, 64.0, None, 64.0, None, 64.0, None, 64.0]
 
-        retval = self.dc.get_data()
+        retval = self.dc.get_data(tags=['mctrial', 'obs1', 'obs2'])
         self.assertEqual(retval, (mctrials, obs1_vals, obs2_vals))
 
         # with filling_missing = True
@@ -153,19 +160,14 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(retval1, [10, 30, 50, 70, 90])
         self.assertEqual(retval2, [None, None, None, None, None])
 
+        # check append data
+        retval = \
+            self.dc.get_data(tags=['occupation_vector'], start=50, interval=5)
+        self.assertEqual(retval, [[1, 3, 7, 11], [1, 3, 7, 11]])
+
         # test fails for non-stock data
         with self.assertRaises(AssertionError):
             self.dc.get_data(['temperature'])
-
-        # append list type data
-        row_data = {}
-        row_data['occupation_vector'] = [1, 3, 7, 11]
-        self.dc.append(200, row_data)
-
-        # check append data
-        retval = \
-            self.dc.get_data(tags=['occupation_vector'], interval=(200, 200))
-        self.assertEqual(retval, row_data['occupation_vector'])
 
     def test_reset(self):
         """Test appended data is cleared."""
