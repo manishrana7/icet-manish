@@ -142,11 +142,11 @@ class TestDataContainer(unittest.TestCase):
 
         # with filling_missing = True
         retval = self.dc.get_data(tags=['obs2'], fill_missing=True)
-        self.assertEqual(retval, [64.0])
+        self.assertEqual(retval, obs1_vals)
 
         # with a given start and stop
-        retval = self.dc.get_data(tag=['obs2'], start=40, stop=70)
-        self.assertEqual(retval, [64.0, None, 64.0])
+        retval = self.dc.get_data(tags=['obs2'], start=40, stop=70)
+        self.assertEqual(retval, [64.0, None, 64.0, None])
 
         # with an interval
         retval1, retval2  = self.dc.get_data(['mctrial', 'obs2'], interval=2)
@@ -164,7 +164,7 @@ class TestDataContainer(unittest.TestCase):
 
         # check append data
         retval = \
-            self.dc.get_data(['occupation_vector'], interval=(200, 200))[0][0]
+            self.dc.get_data(tags=['occupation_vector'], interval=(200, 200))
         self.assertEqual(retval, row_data['occupation_vector'])
 
     def test_reset(self):
