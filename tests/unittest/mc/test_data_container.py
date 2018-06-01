@@ -134,31 +134,24 @@ class TestDataContainer(unittest.TestCase):
 
         obs1_vals = \
             [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0] 
-        obs2_vals = \ 
+        obs2_vals = \
             [None, 64.0, None, 64.0, None, 64.0, None, 64.0, None, 64.0]
 
         retval = self.dc.get_data()
         self.assertEqual(retval, (mctrials, obs1_vals, obs2_vals))
 
         # with filling_missing = True
-        target = [[10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0],
-                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0]]
-
-        retval = self.dc.get_data(fill_missing=True)
-        self.assertEqual(target, retval)
+        retval = self.dc.get_data(tags=['obs2'], fill_missing=True)
+        self.assertEqual(retval, [64.0])
 
         # with a given start and stop
-        target = [[40, 50, 60, 70], [64.0, 64.0, 64.0, 64.0],
-                  [64.0, None, 64.0, None]]
-
-        retval = self.dc.get_data(start=40, stop=70)
-        self.assertEqual(target, retval)
+        retval = self.dc.get_data(tag=['obs2'], start=40, stop=70)
+        self.assertEqual(retval, [64.0, None, 64.0])
 
         # with an interval
-        target = [[10, 30, 50, 70, 90]]
-        retval = self.dc.get_data(['mctrial'], interval=2)
-        self.assertEqual(target, retval)
+        retval1, retval2  = self.dc.get_data(['mctrial', 'obs2'], interval=2)
+        self.assertEqual(retval1, [10, 30, 50, 70, 90])
+        self.assertEqual(retval2, [None, None, None, None, None])
 
         # test fails for non-stock data
         with self.assertRaises(AssertionError):

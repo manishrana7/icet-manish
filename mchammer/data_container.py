@@ -175,10 +175,10 @@ class DataContainer:
         if fill_missing:
             data = data.fillna(method='bfill')
 
-        data_list = ()
+        data_list = []
         for tag in tags:
             data_list.append(
-                [None if np.isnan(x) else x for x in data_column])
+                [None if np.isnan(x) else x for x in ])
             
         return tuple(data_list)
 
