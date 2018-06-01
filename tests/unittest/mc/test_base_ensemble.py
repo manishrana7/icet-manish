@@ -241,9 +241,6 @@ class TestEnsemble(unittest.TestCase):
             np.testing.assert_approx_equal(
                 data_dc_reloaded[0][i], data_dc[0][i], significant=20)
 
-        # remove file
-        os.remove('my-datacontainer')
-
     def test_internal_run(self):
         """Test the _run method."""
         pass
