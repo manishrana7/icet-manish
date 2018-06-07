@@ -261,7 +261,10 @@ class DataContainer:
             of trial step column will be used.
         """
         assert tag in self._data, \
-            'observable is not part of DataContainer: {}'.format(tag)
+            'Observable is not part of DataContainer: {}'.format(tag)
+
+        assert self._data[tag].dtype in ['int64', 'float64'], \
+            'Requested column contains non-numerical data'
 
         if start is None and stop is None:
             return self._data[tag].mean(), self._data[tag].std()

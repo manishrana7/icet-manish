@@ -226,6 +226,25 @@ class TestDataContainer(unittest.TestCase):
         self.assertAlmostEqual(mean, 1.0137074, places=7)
         self.assertAlmostEqual(std, 0.1124826, places=7)
 
+        # test fails for non-existing data
+        with self.assertRaises(AssertionError) as context:
+            self.dc.get_average('temperature')
+
+        self.assertTrue("Observable is not part of DataContainer: temperature"
+                        in str(context.exception))
+
+        # test fails for non-numerical data like list type data
+        self.dc.reset()
+        for mctrial in range(10):
+            self.dc.append(
+                mctrial, record={'occupation_vector': [1, 3, 7, 11]})
+
+        with self.assertRaises(AssertionError) as context:
+            self.dc.get_average('occupation_vector')
+
+        self.assertTrue("Requested column contains non-numerical data"
+                        in str(context.exception))
+
     def test_read_and_write(self):
         """Test write and read functionalities of data container."""
 
