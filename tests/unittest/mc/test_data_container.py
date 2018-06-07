@@ -68,29 +68,34 @@ class TestDataContainer(unittest.TestCase):
 
     def test_append_data(self):
         """Test append data functionality."""
-        # list of observers for testing
         observers = [ConcreteObserver(interval=10, tag='obs1'),
                      ConcreteObserver(interval=20, tag='obs2')]
-        min_interval = min([obs.interval for obs in observers])
 
-        # append data from observers
-        for mctrial in range(100):
-            if mctrial % min_interval == 0:
-                row_data = {}
+        mctrials = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        dump_interval = 50
+
+        # append data
+        observal_interval = min([obs.interval for obs in observers])
+        for mctrial in mctrials:
+            row_data = {}
+            flush_data = False
+            if mctrial % observal_interval == 0:
+                flush_data = True
                 for obs in observers:
                     if mctrial % obs.interval == 0:
                         observable = obs.get_observable(self.atoms)
                         row_data[obs.tag] = observable
+            if mctrial % dump_interval == 0:
+                flush_data = True
+                row_data['occupation_vector'] = [1, 3, 7, 11]
+            if flush_data:
                 self.dc.append(mctrial, row_data)
 
+        # check number of entries
         self.assertEqual(self.dc.get_number_of_entries(), 10)
-
-        # append list type data
-        row_data = {}
-        row_data['occupation_vector'] = [1, 3, 7, 11]
-        self.dc.append(100, row_data)
+        self.assertEqual(self.dc.get_number_of_entries('obs2'), 5)
         self.assertEqual(
-            self.dc.get_number_of_entries('occupation_vector'), 1)
+            self.dc.get_number_of_entries('occupation_vector'), 2)
 
     def test_property_data(self):
         """ Test data property."""
@@ -116,69 +121,57 @@ class TestDataContainer(unittest.TestCase):
         Test the returned data is a list of list and the options provided by
         the method works as expected.
         """
-        observers = [ConcreteObserver(interval=10, tag='obs1'),
-                     ConcreteObserver(interval=20, tag='obs2')]
-
+        # lets suppose the following data was appended to the data container
+        # mctrials
         mctrials = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-        dump_interval = 50
+        # observable 1
+        obs1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        # observable 2
+        obs2 = [1, None, 3, None, 5, None, 7, None, 9, None]
+        # occupation vector
+        occupation_vector = [None, None, None, None, [1, 3, 7],
+                             None, None, None, None, [1, 3, 7]]
 
-        # append data
-        observal_interval = min([obs.interval for obs in observers])
-        for mctrial in mctrials:
-            row_data = {}
-            flush_data = False
-            if mctrial % observal_interval == 0:
-                flush_data = True
-                for obs in observers:
-                    if mctrial % obs.interval == 0:
-                        observable = obs.get_observable(self.atoms)
-                        row_data[obs.tag] = observable
-            if mctrial % dump_interval == 0:
-                flush_data = True
-                row_data['occupation_vector'] = [1, 3, 7, 11]
-            if flush_data:
-                self.dc.append(mctrial, row_data)
-
-        obs1_vals = \
-            [64, 64, 64, 64, 64, 64, 64, 64, 64, 64]
-        obs2_vals = \
-            [None, 64, None, 64, None, 64, None, 64, None, 64]
-
+        rows_data = {'mctrial': mctrials, 'obs1': obs1, 'obs2': obs2,
+                     'occupation_vector': occupation_vector}
+        
+        self.dc._data = \
+            pd.DataFrame(rows_data, 
+                         columns=['mctrial', 'obs1', 'obs2',
+                                  'occupation_vector'])
+        
         retval = self.dc.get_data(tags=['mctrial', 'obs1', 'obs2'])
-        self.assertEqual(retval, (mctrials, obs1_vals, obs2_vals))
+        self.assertEqual(retval, (mctrials, obs1, obs2))
 
         # using skip_none
         retval1, retval2 = \
             self.dc.get_data(tags=['mctrial', 'obs2'], fill_method='skip_none')
-        self.assertEqual(retval1, [20, 40, 60, 80, 100])
-        self.assertEqual(retval2, [64, 64, 64, 64, 64])
+        self.assertEqual(retval1, [10, 30, 50, 70, 90])
+        self.assertEqual(retval2, [1, 3, 5, 7, 9])
 
         # using fill_backward
-        retval = \
-            self.dc.get_data(tags=['obs2'], fill_method='fill_backward')
-        self.assertEqual(retval, [64, 64, 64, 64, 64, 64, 64, 64, 64, 64])
+        retval = self.dc.get_data(tags=['obs2'], fill_method='fill_backward')
+        self.assertEqual(retval, [1, 3, 3, 5, 5, 7, 7, 9, 9])
 
         # using fill_forward
-        retval1, retval2 = \
-            self.dc.get_data(tags=['mctrial', 'obs2'],
-                             fill_method='fill_forward')
-        self.assertEqual(retval1, [20, 30, 40, 50, 60, 70, 80, 90, 100])
-        self.assertEqual(retval2, [64, 64, 64, 64, 64, 64, 64, 64, 64])
+        retval = self.dc.get_data(tags=['obs2'], fill_method='fill_forward')
+        self.assertEqual(retval, [1, 1, 3, 3, 5, 5, 7, 7, 9, 9])
 
-        # Todo:
-        # using linear_interpolation
+        # using interpolation
+        retval = self.dc.get_data(tags=["obs2"], fill_method="linear_interpolation")
+        self.assertEqual(retval, [1, 2, 3, 4, 5, 6, 7, 8, 9])
 
         # with a given start, stop and interval
         retval1, retval2 = \
             self.dc.get_data(tags=['mctrial', 'obs2'],
                              start=20, stop=90, interval=3)
         self.assertEqual(retval1, [20, 50, 80])
-        self.assertEqual(retval2, [64, None, 64])
+        self.assertEqual(retval2, [None, 5, None])
 
-        # check append data
+        # check list type data
         retval = \
             self.dc.get_data(tags=['occupation_vector'], start=50, interval=5)
-        self.assertEqual(retval, [[1, 3, 7, 11], [1, 3, 7, 11]])
+        self.assertEqual(retval, [[1, 3, 7], [1, 3, 7]])
 
         # test fails for non-stock data
         with self.assertRaises(AssertionError):

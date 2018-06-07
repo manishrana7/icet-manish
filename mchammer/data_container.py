@@ -184,14 +184,14 @@ class DataContainer:
 
             elif fill_method is 'fill_backward':
                 data.fillna(method='bfill', inplace=True)
-                data.dropna(inplace=True)
 
             elif fill_method is 'fill_forward':
                 data.fillna(method='ffill', inplace=True)
-                data.dropna(inplace=True)
 
             elif fill_method is 'linear_interpolation':
-                data = data.interpolate()
+                data = data.interpolate(limit_area='inside')
+
+            data.dropna(inplace=True)
 
         data_list = []
         for tag in tags:
