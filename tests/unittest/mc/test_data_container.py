@@ -134,12 +134,12 @@ class TestDataContainer(unittest.TestCase):
 
         rows_data = {'mctrial': mctrials, 'obs1': obs1, 'obs2': obs2,
                      'occupation_vector': occupation_vector}
-        
+
         self.dc._data = \
-            pd.DataFrame(rows_data, 
+            pd.DataFrame(rows_data,
                          columns=['mctrial', 'obs1', 'obs2',
                                   'occupation_vector'])
-        
+
         retval = self.dc.get_data(tags=['mctrial', 'obs1', 'obs2'])
         self.assertEqual(retval, (mctrials, obs1, obs2))
 
@@ -158,7 +158,8 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(retval, [1, 1, 3, 3, 5, 5, 7, 7, 9, 9])
 
         # using interpolation
-        retval = self.dc.get_data(tags=["obs2"], fill_method="linear_interpolation")
+        retval = \
+            self.dc.get_data(tags=["obs2"], fill_method="linear_interpolation")
         self.assertEqual(retval, [1, 2, 3, 4, 5, 6, 7, 8, 9])
 
         # with a given start, stop and interval

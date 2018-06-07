@@ -266,7 +266,8 @@ class DataContainer:
         if start is None and stop is None:
             return self._data[tag].mean(), self._data[tag].std()
         else:
-            data = self.get_data(tags=[tag], start=start, stop=stop, fill_method='skip_none')
+            data = self.get_data(tags=[tag], start=start, stop=stop,
+                                 fill_method='skip_none')
             return np.mean(data), np.std(data)
 
     @staticmethod
