@@ -266,15 +266,8 @@ class DataContainer:
         if start is None and stop is None:
             return self._data[tag].mean(), self._data[tag].std()
         else:
-            data = self._data.set_index(self._data.mctrial)
-            if start is None:
-                data = data.loc[:stop, [tag]]
-            elif stop is None:
-                data = data.loc[start:, [tag]]
-            else:
-                data = data.loc[start:stop, [tag]]
-
-            return data[tag].mean(), data[tag].std()
+            data = self.get_data(tags=[tag], start=start, stop=stop, fill_method='skip_none')
+            return np.mean(data), np.std(data)
 
     @staticmethod
     def read(infile):

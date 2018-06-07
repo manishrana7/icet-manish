@@ -215,15 +215,15 @@ class TestDataContainer(unittest.TestCase):
         # get average over slice of data
         mean, std = self.dc.get_average('obs1', start=60)
         self.assertAlmostEqual(mean, 0.9851106, places=7)
-        self.assertAlmostEqual(std, 0.0993846, places=7)
+        self.assertAlmostEqual(std, 0.0981344, places=7)
 
         mean, std = self.dc.get_average('obs1', stop=60)
         self.assertAlmostEqual(mean, 0.9876534, places=7)
-        self.assertAlmostEqual(std, 0.1095718, places=7)
+        self.assertAlmostEqual(std, 0.1086700, places=7)
 
         mean, std = self.dc.get_average('obs1', start=40, stop=60)
         self.assertAlmostEqual(mean, 1.0137074, places=7)
-        self.assertAlmostEqual(std, 0.1152604, places=7)
+        self.assertAlmostEqual(std, 0.1124826, places=7)
 
     def test_read_and_write(self):
         """Test write and read functionalities of data container."""
