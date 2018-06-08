@@ -242,7 +242,7 @@ class TestDataContainer(unittest.TestCase):
         with self.assertRaises(AssertionError) as context:
             self.dc.get_average('occupation_vector')
 
-        self.assertTrue("Requested column contains non-numerical data"
+        self.assertTrue("Requested column contains non-numeric data"
                         in str(context.exception))
 
     def test_read_and_write(self):

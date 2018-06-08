@@ -124,32 +124,32 @@ class DataContainer:
         self._data = self._data.append(row_data,
                                        ignore_index=True)
 
-    def get_data(self, tags=None, interval=1, start=None, stop=None,
+    def get_data(self, tags=None, start=None, stop=None, interval=1,
                  fill_method=None):
         """
-        Returns a tuple with lists representing the accumulated data for
-        the observables specified via tags.
+        Returns a list or a tuple with lists representing the accumulated data
+        for the observables specified via tags.
 
         Parameters
         ----------
         tags : list of str
             tags of the required properties; if None all columns of the data
-            frame will be returned in lexigraphical order
-
-        interval : int
-            range of trial steps values from which data frame will be returned.
-            If None, returns all the accumulated data.
+            frame will be returned in lexigraphical order.
 
         start : int
-            lower limit of trial step interval. If None, first value
-            in mctrial step column will be used.
+            minimum value of trial step to consider. If None, lowest value
+            in the mctrial column will be used.
 
         stop : int
-            upper limit of trial step interval. If None, last value
-            of mctrial step column will be used.
+            maximum value of trial step to consider. If None, highest value
+            in the mctrial column will be used.
+
+        interval : int
+            incremental step for mctrial index. Default to lowest interval
+            between trial steps values.
 
         fill_missing : str
-            method to use to fill missing values. Default is None.
+            method to fill missing values. Default is None.
         """
         fill_methods = ['skip_none',
                         'fill_backward',
@@ -182,16 +182,18 @@ class DataContainer:
             if fill_method is 'skip_none':
                 data.dropna(inplace=True)
 
-            elif fill_method is 'fill_backward':
-                data.fillna(method='bfill', inplace=True)
+            else:
+                if fill_method is 'fill_backward':
+                    data.fillna(method='bfill', inplace=True)
 
-            elif fill_method is 'fill_forward':
-                data.fillna(method='ffill', inplace=True)
+                elif fill_method is 'fill_forward':
+                    data.fillna(method='ffill', inplace=True)
 
-            elif fill_method is 'linear_interpolation':
-                data = data.interpolate(limit_area='inside')
+                elif fill_method is 'linear_interpolation':
+                    data.interpolate(limit_area='inside', inplace=True)
 
-            data.dropna(inplace=True)
+                # drop any left nan value
+                data.dropna(inplace=True)
 
         data_list = []
         for tag in tags:
@@ -246,7 +248,7 @@ class DataContainer:
 
     def get_average(self, tag: str, start=None, stop=None):
         """
-        Return average and standard deviation of an observable over an
+        Return average and standard deviation of an scalar observable over an
         interval of trial steps.
 
         Parameters
@@ -264,7 +266,7 @@ class DataContainer:
             'Observable is not part of DataContainer: {}'.format(tag)
 
         assert self._data[tag].dtype in ['int64', 'float64'], \
-            'Requested column contains non-numerical data'
+            'Requested column contains non-numeric data'
 
         if start is None and stop is None:
             return self._data[tag].mean(), self._data[tag].std()
