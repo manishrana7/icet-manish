@@ -148,13 +148,14 @@ class DataContainer:
             incremental step for mctrial index. Default to lowest interval
             between trial steps values.
 
-        fill_missing : str
+        fill_method : {'skip_none', 'fill_backward', 'fill_forward',
+                       'linear_interpolate', None}
             method to fill missing values. Default is None.
         """
         fill_methods = ['skip_none',
                         'fill_backward',
                         'fill_forward',
-                        'linear_interpolation']
+                        'linear_interpolate']
 
         if tags is None:
             tags = self._data.columns.tolist()
@@ -189,7 +190,7 @@ class DataContainer:
                 elif fill_method is 'fill_forward':
                     data.fillna(method='ffill', inplace=True)
 
-                elif fill_method is 'linear_interpolation':
+                elif fill_method is 'linear_interpolate':
                     data.interpolate(limit_area='inside', inplace=True)
 
                 # drop any left nan value
@@ -256,17 +257,18 @@ class DataContainer:
         tag : str
             tag of field over which to average
         start : int
-            lower limit of trial step interval. If None, first value
-            in trial step column will be used.
+            minimum value of trial step to consider. If None, lowest value
+            in the mctrial column will be used.
+
         stop : int
-            upper limit of trial step interval. If None, last value
-            of trial step column will be used.
+            maximum value of trial step to consider. If None, highest value
+            in the mctrial column will be used.
         """
         assert tag in self._data, \
             'Observable is not part of DataContainer: {}'.format(tag)
 
         assert self._data[tag].dtype in ['int64', 'float64'], \
-            'Requested column contains non-numeric data'
+            'Data from requested column {} has not scalar type'.format(tag)
 
         if start is None and stop is None:
             return self._data[tag].mean(), self._data[tag].std()

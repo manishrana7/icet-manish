@@ -159,7 +159,7 @@ class TestDataContainer(unittest.TestCase):
 
         # using interpolation
         retval = \
-            self.dc.get_data(tags=["obs2"], fill_method="linear_interpolation")
+            self.dc.get_data(tags=["obs2"], fill_method="linear_interpolate")
         self.assertEqual(retval, [1, 2, 3, 4, 5, 6, 7, 8, 9])
 
         # with a given start, stop and interval
@@ -175,8 +175,11 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(retval, [[1, 3, 7], [1, 3, 7]])
 
         # test fails for non-stock data
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(AssertionError) as context:
             self.dc.get_data(['temperature'])
+
+        self.assertTrue("Observable is not part of DataContainer: temperature"
+                        in str(context.exception))
 
     def test_reset(self):
         """Test appended data is cleared."""
@@ -233,7 +236,7 @@ class TestDataContainer(unittest.TestCase):
         self.assertTrue("Observable is not part of DataContainer: temperature"
                         in str(context.exception))
 
-        # test fails for non-numerical data like list type data
+        # test fails for non-numeric data like list type data
         self.dc.reset()
         for mctrial in range(10):
             self.dc.append(
@@ -242,8 +245,9 @@ class TestDataContainer(unittest.TestCase):
         with self.assertRaises(AssertionError) as context:
             self.dc.get_average('occupation_vector')
 
-        self.assertTrue("Requested column contains non-numeric data"
-                        in str(context.exception))
+        self.assertTrue(
+            "Data from requested column occupation_vector has not scalar type"
+            in str(context.exception))
 
     def test_read_and_write(self):
         """Test write and read functionalities of data container."""
