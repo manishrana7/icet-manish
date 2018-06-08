@@ -248,6 +248,18 @@ class TestDataContainer(unittest.TestCase):
             "Data from requested column occupation_vector has not scalar type"
             in str(context.exception))
 
+    def test_get_trajectory(self):
+        """Test get_trajectory functionality."""
+        row_data = {}
+        row_data['occupations'] = [12, 14, 38]
+        for mctrial in range(10):
+            self.dc.append(mctrial, row_data)
+
+        atoms_list = self.dc.get_trajectory()
+        for atoms in atoms_list:
+            if atoms is not None:
+                self.assertIsInstance(atoms, list)
+
     def test_read_and_write(self):
         """Test write and read functionalities of data container."""
 

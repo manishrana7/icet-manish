@@ -286,6 +286,23 @@ class DataContainer:
                                  fill_method='skip_none')
             return np.mean(data), np.std(data)
 
+    def get_trajectory(self, start=None, stop=None, interval=1):
+        """
+        Returns a trajectory in the form of ASE Atoms object for an specific
+        interval of the simulation.
+
+        Parameters
+        ----------
+
+        start: int
+
+        stop: int
+
+        interval: int
+        """
+        list_atoms = self.get_data(tags=['occupations'])[0]
+        return list_atoms
+
     @staticmethod
     def read(infile):
         """
