@@ -33,6 +33,8 @@ class EnsembleOptimizer(BaseOptimizer):
     fit_method : string
         method to be used for training; possible choice are
         "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
+    standardize : bool
+        whether or not to standardize the fit matrix before fitting
     ensemble_size : int
         number of fits in the ensemble
     train_size : float or int
@@ -45,10 +47,11 @@ class EnsembleOptimizer(BaseOptimizer):
         seed for pseudo random number generator
     """
 
-    def __init__(self, fit_data, fit_method='least-squares', ensemble_size=50,
-                 train_size=1.0, bootstrap=True, seed=42, **kwargs):
+    def __init__(self, fit_data, fit_method='least-squares', standardize=True,
+                 ensemble_size=50, train_size=1.0, bootstrap=True, seed=42,
+                 **kwargs):
 
-        BaseOptimizer.__init__(self, fit_data, fit_method, seed)
+        super().__init__(fit_data, fit_method, standardize, seed)
 
         # set training size
         if isinstance(train_size, float):
@@ -156,7 +159,7 @@ class EnsembleOptimizer(BaseOptimizer):
         """
         if self.parameter_vectors is None:
             return None
-        error_matrix = np.zeros((self._Nrows, self.ensemble_size))
+        error_matrix = np.zeros((self._n_rows, self.ensemble_size))
         for i, parameters in enumerate(self.parameter_vectors):
             error_matrix[:, i] = np.dot(self._A, parameters) - self._y
         return error_matrix
@@ -247,7 +250,7 @@ class EnsembleOptimizer(BaseOptimizer):
         """ float : fraction of input data used for training; this value can
                     differ slightly from the value set during initialization
                     due to rounding. """
-        return self.train_set_size / self._Nrows
+        return self.train_set_size / self._n_rows
 
     @property
     def bootstrap(self):
