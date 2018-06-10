@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
 
-from icet.fitting import Optimizer
+from hiphive.fitting import Optimizer
 
 
 class TestOptimizer(unittest.TestCase):

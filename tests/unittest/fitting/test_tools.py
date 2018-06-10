@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
 
-from icet.fitting.tools import compute_correlation_matrix
+from hiphive.fitting.tools import compute_correlation_matrix
 
 
 class TestFittingTools(unittest.TestCase):

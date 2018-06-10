@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
 
-from icet.fitting import EnsembleOptimizer
+from hiphive.fitting import EnsembleOptimizer
 
 
 class TestEnsemble(unittest.TestCase):

@@ -16,8 +16,10 @@ ScatterData = namedtuple('ScatterData', ['target', 'predicted'])
 
 def compute_correlation_matrix(A):
     """
-    Computes correlation matrix for rows in input matrix.
+    Computes correlation matrix for rows in matrix.
 
+    Notes
+    -----
     Naive implementation.
 
     Parameters

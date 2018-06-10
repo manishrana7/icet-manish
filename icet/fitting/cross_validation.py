@@ -4,8 +4,9 @@ Optimizer with cross validation score
 
 import numpy as np
 from sklearn.model_selection import KFold, ShuffleSplit
-from .optimizer import Optimizer
 from .base_optimizer import BaseOptimizer
+from .optimizer import Optimizer
+from .fit_methods import fit
 from .tools import ScatterData
 
 
@@ -40,6 +41,8 @@ class CrossValidationEstimator(BaseOptimizer):
     fit_method : string
         method to be used for training; possible choice are
         "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
+    standardize : bool
+        whether or not to standardize the fit matrix before fitting
     validation_method : string
         method to use for cross-validation; possible choices are
         "shuffle-split", "k-fold"
@@ -58,11 +61,11 @@ class CrossValidationEstimator(BaseOptimizer):
         validation set in the cross-validation split
     """
 
-    def __init__(self, fit_data, fit_method='least-squares',
+    def __init__(self, fit_data, fit_method='least-squares', standardize=True,
                  validation_method='k-fold', number_of_splits=10,
                  seed=42, **kwargs):
 
-        BaseOptimizer.__init__(self, fit_data, fit_method, seed)
+        super().__init__(fit_data, fit_method, standardize, seed)
 
         if validation_method not in validation_methods.keys():
             msg = ['Validation method not available']
@@ -89,8 +92,8 @@ class CrossValidationEstimator(BaseOptimizer):
 
     def train(self):
         """ Construct the final model using all input data available. """
-        self._fit_results = self._optimizer_function(self._A, self._y,
-                                                     **self._fit_kwargs)
+        self._fit_results = fit(self._A, self._y, self.fit_method,
+                                self.standardize, **self._fit_kwargs)
         self._rmse_train_final = self.compute_rmse(self._A, self._y)
 
     def validate(self):

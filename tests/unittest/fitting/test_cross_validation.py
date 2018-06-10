@@ -1,8 +1,8 @@
 import numpy as np
 import unittest
 
-from icet.fitting import CrossValidationEstimator
-from icet.fitting.cross_validation import validation_methods
+from hiphive.fitting import CrossValidationEstimator
+from hiphive.fitting.cross_validation import validation_methods
 
 
 class TestCrossValidationEstimator(unittest.TestCase):
