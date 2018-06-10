@@ -1,8 +1,8 @@
 import numpy as np
 import unittest
 
-from hiphive.fitting import available_fit_methods
-from hiphive.fitting.base_optimizer import BaseOptimizer
+from icet.fitting import available_fit_methods
+from icet.fitting.base_optimizer import BaseOptimizer
 
 
 class TestBaseOptimizer(unittest.TestCase):
