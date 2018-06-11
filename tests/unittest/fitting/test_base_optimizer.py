@@ -1,7 +1,8 @@
 import numpy as np
 import unittest
 
-from icet.fitting.base_optimizer import BaseOptimizer, fit_methods
+from icet.fitting import available_fit_methods
+from icet.fitting.base_optimizer import BaseOptimizer
 
 
 class TestBaseOptimizer(unittest.TestCase):
@@ -30,7 +31,7 @@ class TestBaseOptimizer(unittest.TestCase):
         """
 
         # test init with all fit_methods
-        for fit_method in fit_methods.keys():
+        for fit_method in available_fit_methods:
             BaseOptimizer((self.A, self.y), fit_method)
 
         # test init with a fit_method not available

@@ -3,8 +3,9 @@ Optimizer
 """
 import numpy as np
 from sklearn.model_selection import train_test_split
-from .tools import ScatterData
 from .base_optimizer import BaseOptimizer
+from .fit_methods import fit
+from .tools import ScatterData
 
 
 class Optimizer(BaseOptimizer):
@@ -33,6 +34,8 @@ class Optimizer(BaseOptimizer):
     fit_method : string
         method to be used for training; possible choice are
         "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
+    standardize : bool
+        whether or not to standardize the fit matrix before fitting
     train_size : float or int
         If float represents the fraction of `fit_data` (rows) to be used for
         training. If int, represents the absolute number of rows to be used for
@@ -56,11 +59,11 @@ class Optimizer(BaseOptimizer):
         target and predicted value for each row in the test set
     """
 
-    def __init__(self, fit_data, fit_method='least-squares', train_size=0.75,
-                 test_size=None, train_set=None, test_set=None, seed=42,
-                 **kwargs):
+    def __init__(self, fit_data, fit_method='least-squares', standardize=True,
+                 train_size=0.75, test_size=None, train_set=None,
+                 test_set=None, seed=42, **kwargs):
 
-        super().__init__(fit_data, fit_method, seed)
+        super().__init__(fit_data, fit_method, standardize, seed)
 
         self._kwargs = kwargs
 
@@ -82,8 +85,8 @@ class Optimizer(BaseOptimizer):
         y_train = self._y[self.train_set]
 
         # perform training
-        self._fit_results = self._optimizer_function(A_train, y_train,
-                                                     **self._kwargs)
+        self._fit_results = fit(A_train, y_train, self.fit_method,
+                                self.standardize, **self._kwargs)
         self._rmse_train = self.compute_rmse(A_train, y_train)
         self.train_scatter_data = ScatterData(y_train, self.predict(A_train))
 
@@ -114,11 +117,11 @@ class Optimizer(BaseOptimizer):
                 train_set, test_set)
 
         if len(train_set) == 0:
-            raise ValueError('No training rows was selected from fit_data')
+            raise ValueError('No training rows selected from fit_data')
 
         if test_set is not None:  # then check overlap between train and test
             if len(np.intersect1d(train_set, test_set)):
-                raise ValueError('Overlap between train set and test set')
+                raise ValueError('Overlap between training and test set')
             if len(test_set) == 0:
                 test_set = None
 
@@ -130,32 +133,33 @@ class Optimizer(BaseOptimizer):
 
         # Handle special cases
         if test_size is None and train_size is None:
-            raise ValueError('Both train fraction and test fraction are None')
+            raise ValueError('Training and test set sizes are None (empty).')
         elif train_size is None and abs(test_size - 1.0) < 1e-10:
-            raise ValueError('train rows is empty for these fractions')
+            raise ValueError('Traininig set is empty.')
 
         elif test_size is None:
-            if train_size == self._Nrows or abs(train_size-1.0) < 1e-10:
-                train_set = np.arange(self._Nrows)
+            if train_size == self._n_rows or abs(train_size-1.0) < 1e-10:
+                train_set = np.arange(self._n_rows)
                 test_set = None
                 return train_set, test_set
 
         # split
-        train_set, test_set = train_test_split(
-            np.arange(self._Nrows), train_size=train_size, test_size=test_size,
-            random_state=self.seed)
+        train_set, test_set = train_test_split(np.arange(self._n_rows),
+                                               train_size=train_size,
+                                               test_size=test_size,
+                                               random_state=self.seed)
 
         return train_set, test_set
 
     def _get_rows_from_indices(self, train_set, test_set):
         """ Gets row via indices. """
         if train_set is None and test_set is None:
-            raise ValueError('Both train and test set are None')
+            raise ValueError('Training and test sets are None (empty)')
         elif test_set is None:
-            test_set = [i for i in range(self._Nrows)
+            test_set = [i for i in range(self._n_rows)
                         if i not in train_set]
         elif train_set is None:
-            train_set = [i for i in range(self._Nrows)
+            train_set = [i for i in range(self._n_rows)
                          if i not in test_set]
         return np.array(train_set), np.array(test_set)
 
@@ -218,7 +222,7 @@ class Optimizer(BaseOptimizer):
     @property
     def train_fraction(self):
         """ float : fraction of rows included in training set. """
-        return self.train_size / self._Nrows
+        return self.train_size / self._n_rows
 
     @property
     def test_size(self):
@@ -232,4 +236,4 @@ class Optimizer(BaseOptimizer):
         """ float : fraction of rows included in test set. """
         if self.test_set is None:
             return 0.0
-        return self.test_size / self._Nrows
+        return self.test_size / self._n_rows

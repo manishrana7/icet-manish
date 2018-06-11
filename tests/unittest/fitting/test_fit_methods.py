@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
 
-from icet.fitting.base_optimizer import fit_methods
+from icet.fitting import fit, available_fit_methods
 
 
 class TestOptimizer(unittest.TestCase):
@@ -25,21 +25,21 @@ class TestOptimizer(unittest.TestCase):
         """
         Test all available fit_methods
         """
-        for fit_function in fit_methods.values():
-            res = fit_function(self.A, self.y)
+        for fit_method in available_fit_methods:
+            res = fit(self.A, self.y, fit_method=fit_method)
             self.assertLess(np.linalg.norm(self.x - res['parameters']), 0.2)
 
     def test_other_fit_methods(self):
         """
-        Test fit methods which are not run via avaiable_fit_methods
+        Test fit methods which are not run via available_fit_methods
         """
 
         # lasso with alpha
-        res = fit_methods['lasso'](self.A, self.y, alpha=1e-5)
+        res = fit(self.A, self.y, fit_method='lasso', alpha=1e-5)
         self.assertIsNotNone(res['parameters'])
 
         # elasticnet with alpha
-        res = fit_methods['elasticnet'](self.A, self.y, alpha=1e-5)
+        res = fit(self.A, self.y, fit_method='elasticnet', alpha=1e-5)
         self.assertIsNotNone(res['parameters'])
 
 

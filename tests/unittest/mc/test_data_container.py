@@ -1,20 +1,18 @@
 import unittest
 import tempfile
-import tarfile
 from collections import OrderedDict
 import numpy as np
 import pandas as pd
 from ase.build import bulk
 from mchammer import DataContainer
 from mchammer.observers.base_observer import BaseObserver
-from mchammer.data_container import InvalidFileError
 
 # Create concrete child of BaseObserver for testing
 
 
 class ConcreteObserver(BaseObserver):
     def __init__(self, interval, tag='ConcreteObserver'):
-        super().__init__(interval, tag=tag, return_type=int)
+        super().__init__(interval, return_type=int, tag=tag)
 
     def get_observable(self, atoms):
         """ Return number of Al atoms. """
@@ -75,10 +73,10 @@ class TestDataContainer(unittest.TestCase):
                      ConcreteObserver(interval=20, tag='obs2')]
         min_interval = min([obs.interval for obs in observers])
 
-        # appending data from observers
-        for mctrial in range(1, 101):
+        # append data from observers
+        for mctrial in range(100):
             if mctrial % min_interval == 0:
-                row_data = OrderedDict()
+                row_data = {}
                 for obs in observers:
                     if mctrial % obs.interval == 0:
                         observable = obs.get_observable(self.atoms)
@@ -86,6 +84,13 @@ class TestDataContainer(unittest.TestCase):
                 self.dc.append(mctrial, row_data)
 
         self.assertEqual(self.dc.get_number_of_entries(), 10)
+
+        # append list type data
+        row_data = {}
+        row_data['occupation_vector'] = [1, 3, 7, 11]
+        self.dc.append(100, row_data)
+        self.assertEqual(
+            self.dc.get_number_of_entries('occupation_vector'), 1)
 
     def test_property_data(self):
         """ Test data property."""
@@ -119,9 +124,10 @@ class TestDataContainer(unittest.TestCase):
                   [None, 64.0, None, 64.0, None, 64.0, None, 64.0, None, 64.0]]
 
         min_interval = min([obs.interval for obs in observers])
-        for mctrial in range(1, 101):
+
+        for mctrial in range(1, 110):
             if mctrial % min_interval == 0:
-                row_data = OrderedDict()
+                row_data = {}
                 for obs in observers:
                     if mctrial % obs.interval == 0:
                         observable = obs.get_observable(self.atoms)
@@ -152,6 +158,16 @@ class TestDataContainer(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.dc.get_data(['temperature'])
 
+        # append list type data
+        row_data = {}
+        row_data['occupation_vector'] = [1, 3, 7, 11]
+        self.dc.append(200, row_data)
+
+        # check append data
+        retval = \
+            self.dc.get_data(['occupation_vector'], interval=(200, 200))[0][0]
+        self.assertEqual(retval, row_data['occupation_vector'])
+
     def test_reset(self):
         """Test appended data is cleared."""
         # add some data first
@@ -179,24 +195,24 @@ class TestDataContainer(unittest.TestCase):
         obs_val = np.random.normal(mu, sigma, n_iter).tolist()
 
         # append data for testing
-        for step in range(n_iter):
-            self.dc.append(step*2, dict([('obs1', obs_val[step])]))
+        for mctrial in range(n_iter):
+            self.dc.append(mctrial, record={'obs1': obs_val[mctrial]})
 
-        # get average over all steps
+        # get average over all mctrials
         mean, std = self.dc.get_average('obs1')
         self.assertAlmostEqual(mean, 0.9855693, places=7)
         self.assertAlmostEqual(std, 0.1051220, places=7)
 
         # get average over slice of data
-        mean, std = self.dc.get_average('obs1', start=120)
+        mean, std = self.dc.get_average('obs1', start=60)
         self.assertAlmostEqual(mean, 0.9851106, places=7)
         self.assertAlmostEqual(std, 0.0993846, places=7)
 
-        mean, std = self.dc.get_average('obs1', stop=120)
+        mean, std = self.dc.get_average('obs1', stop=60)
         self.assertAlmostEqual(mean, 0.9876534, places=7)
         self.assertAlmostEqual(std, 0.1095718, places=7)
 
-        mean, std = self.dc.get_average('obs1', start=80, stop=120)
+        mean, std = self.dc.get_average('obs1', start=40, stop=60)
         self.assertAlmostEqual(mean, 1.0137074, places=7)
         self.assertAlmostEqual(std, 0.1152604, places=7)
 
@@ -204,56 +220,41 @@ class TestDataContainer(unittest.TestCase):
         """Test write and read functionalities of data container."""
 
         # append data for testing
-        for mctrial in range(10, 101, 10):
-            self.dc.append(mctrial, dict([('obs1', 64)]))
+        self.dc.add_observable('sro')
+        row_data = {}
+        row_data['obs1'] = 64
+        row_data['occupation_vector'] = [1, 3, 7, 11]
+        for mctrial in range(1, 101):
+            self.dc.append(mctrial, row_data)
+
+        temp_file = tempfile.NamedTemporaryFile()
+
+        # check before a non-tar file
+        with self.assertRaises(ValueError) as context:
+            self.dc.read(temp_file.name)
+        self.assertTrue('{} is not a tar file'.format(str(temp_file.name))
+                        in str(context.exception))
 
         # save to file
-        temp_file = tempfile.NamedTemporaryFile()
         self.dc.write(temp_file.name)
 
-        # read from file
+        # read from file object
         dc_read = self.dc.read(temp_file)
 
-        # check properties
+        # check properties and metadata
         self.assertEqual(self.atoms, dc_read.structure)
-        self.assertDictEqual(self.dc.metadata, dc_read.metadata)
-        self.assertDictEqual(self.dc.parameters, dc_read.parameters)
+        self.assertEqual(self.dc.metadata, dc_read.metadata)
+        self.assertEqual(self.dc.parameters, dc_read.parameters)
         self.assertEqual(self.dc.observables, dc_read.observables)
 
         # check data
-        self.assertEqual(self.dc.get_number_of_entries(),
-                         dc_read.get_number_of_entries())
-        self.assertListEqual(self.dc.get_data(['obs1']),
-                             dc_read.get_data(['obs1']))
+        pd.testing.assert_frame_equal(
+            self.dc.data, dc_read.data, check_dtype=False)
 
         # check exception raises when file does not exist
         with self.assertRaises(FileNotFoundError):
             dc_read = self.dc.read("not_found")
-
         temp_file.close()
-
-    def test_invalid_files(self):
-        """Test invalid tar file raises exception."""
-
-        # test non-tar file
-        tar_file = tempfile.NamedTemporaryFile()
-        with self.assertRaises(InvalidFileError) as context:
-            self.dc.read(tar_file.name)
-        self.assertTrue('{} is not a tar file'.format(str(tar_file.name))
-                        in str(context.exception))
-
-        # test tar file with invalid files
-        temp_file = tempfile.NamedTemporaryFile()
-        with tarfile.open(tar_file.name, mode='w') as handle:
-            handle.add(temp_file.name, arcname='tempfile')
-
-        temp_file.close()
-
-        with self.assertRaises(InvalidFileError) as context:
-            self.dc.read(tar_file.name)
-        self.assertTrue('atoms not found in {}'.format(tar_file.name)
-                        in str(context.exception))
-        tar_file.close()
 
 
 if __name__ == '__main__':

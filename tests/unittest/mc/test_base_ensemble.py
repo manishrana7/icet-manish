@@ -1,6 +1,7 @@
 import unittest
 
 import os
+import tempfile
 import numpy as np
 from ase.build import bulk
 
@@ -197,45 +198,52 @@ class TestEnsemble(unittest.TestCase):
 
     def test_backup_file(self):
         """Test data is being saved and can be read by the ensemble."""
-        # set up ensemble with non-inf write period
+        # set-up ensemble with a non-inf write period
         ensemble = ConcreteEnsemble(calculator=self.calculator,
                                     atoms=self.atoms,
                                     name='this-ensemble',
-                                    data_container='my-datacontainer',
+                                    data_container='my-datacontainer.dc',
                                     data_container_write_period=1e-4,
                                     ensemble_data_write_interval=np.inf)
 
-        # attach an observer
+        # attach observer
         observer = ParakeetObserver(interval=14, tag='Parakeet2')
         ensemble.attach_observer(observer)
 
-        # run ensemble
-        n_iters = 364
-        ensemble.run(n_iters)
+        # back-up data while run ensemble and then read the file
+        try:
+            n_iters = 364
+            ensemble.run(n_iters)
+            dc_read = DataContainer.read('my-datacontainer.dc')
 
-        # check data container file
-        dc_read = DataContainer.read('my-datacontainer')
+        finally:
+            os.remove('my-datacontainer.dc')
+
+        # check data container
         dc_data = dc_read.get_data(tags=['Parakeet2'])
         self.assertEqual(
             len(dc_data[0]),
             n_iters // observer.interval + 1)
 
+        # write data container to tempfile
+        temp_container_file = tempfile.NamedTemporaryFile()
+        dc_read.write(temp_container_file.name)
+
         # initialise a new ensemble with dc file
         ensemble_reloaded = \
             ConcreteEnsemble(calculator=self.calculator,
                              atoms=self.atoms,
-                             name='this-ensemble',
-                             data_container='my-datacontainer')
+                             data_container=temp_container_file.name)
 
         # check loaded data container of new ensemble
         data_dc_reloaded = \
             ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
         data_dc = \
             ensemble.data_container.get_data(tags=['Parakeet2'])
-        self.assertListEqual(data_dc[0], data_dc_reloaded[0])
-
-        # remove file
-        os.remove('my-datacontainer')
+        self.assertEqual(len(data_dc[0]), len(data_dc_reloaded[0]))
+        for i in range(len(data_dc[0])):
+            np.testing.assert_approx_equal(
+                data_dc_reloaded[0][i], data_dc[0][i], significant=20)
 
     def test_internal_run(self):
         """Test the _run method."""
