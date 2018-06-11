@@ -1,9 +1,12 @@
 """Definition of the canonical ensemble class."""
 
-from mchammer.ensembles.base_ensemble import BaseEnsemble
-import numpy as np
-from ase.units import kB
 from typing import Dict
+
+import numpy as np
+
+from ase.units import kB
+from mchammer.ensembles.base_ensemble import BaseEnsemble
+
 
 class CanonicalEnsemble(BaseEnsemble):
     """
@@ -76,7 +79,7 @@ class CanonicalEnsemble(BaseEnsemble):
 
         Here the temperature are added to
         the default data.
-        
+
         Returns
         -------
         dict : ensemble data key pairs

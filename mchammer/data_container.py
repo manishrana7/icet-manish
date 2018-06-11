@@ -15,6 +15,7 @@ class InvalidFileError(Exception):
     Raises an error with the format of the DataContainer file is not
     the expected one.
     """
+
     def __init__(self, err_msg):
         super().__init__(err_msg)
         self.err_msg = err_msg

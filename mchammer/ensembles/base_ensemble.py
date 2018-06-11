@@ -36,14 +36,14 @@ class BaseEnsemble(ABC):
         in the datacontainer among other things.
     data_container : str
         this defines the filename that the ensemble
-        will write the data container to. If the file 
-        already exists then the data container will be 
-        read and data will be appended to 
+        will write the data container to. If the file
+        already exists then the data container will be
+        read and data will be appended to
         that data container and it will also overwrite
         that data container.
     ensemble_data_write_interval : int
         this sets the interval in which the ensemble
-        specific data is observed and saved to the 
+        specific data is observed and saved to the
         data container. This data can be temperature,
         current value of the calculator etc.
     data_container_write_period : float (default np.inf)
