@@ -8,6 +8,8 @@ from ase.data import atomic_numbers, chemical_symbols
 from ase.units import kB
 from mchammer.ensembles.base_ensemble import BaseEnsemble
 
+from typing import Dict
+
 
 class SemiGrandCanonicalEnsemble(BaseEnsemble):
     """Semi-grand canonical (SGC) ensemble.
@@ -117,18 +119,22 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
                 self._chemical_potentials[key] =\
                     chemical_potentials[key]
 
-    def get_ensemble_data(self):
+    def get_ensemble_data(self) -> Dict:
         """
         Returns a dict with the default data of
         the ensemble.
 
         Here the temperature and element counts
         are added to the default data.
+
+        Returns
+        -------
+        dict : ensemble data key pairs
+
         """
         default_data = super().get_ensemble_data()
         default_data['temperature'] = self.temperature
 
-        possible_elements = self.configuration._possible_elements
         atoms = self.configuration.atoms
         unique, counts = np.unique(atoms.numbers, return_counts=True)
 
@@ -137,7 +143,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
             default_data["{} count".format(str_element)] = count
 
         # Add the "empty" elements also
-        for possible_element in possible_elements:
+        for possible_element in self.configuration._possible_elements:
             if possible_element not in unique:
                 str_element = chemical_symbols[possible_element]
                 default_data["{} count".format(str_element)] = 0

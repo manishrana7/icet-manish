@@ -3,7 +3,7 @@
 from mchammer.ensembles.base_ensemble import BaseEnsemble
 import numpy as np
 from ase.units import kB
-
+from typing import Dict
 
 class CanonicalEnsemble(BaseEnsemble):
     """
@@ -69,13 +69,18 @@ class CanonicalEnsemble(BaseEnsemble):
                 self.boltzmann_constant * self.temperature)) > \
                 self.next_random_number()
 
-    def get_ensemble_data(self):
+    def get_ensemble_data(self) -> Dict:
         """
         Returns a dict with the default data of
         the ensemble.
 
         Here the temperature are added to
         the default data.
+        
+        Returns
+        -------
+        dict : ensemble data key pairs
+
         """
         default_data = super().get_ensemble_data()
 
