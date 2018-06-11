@@ -48,7 +48,7 @@ class DataContainer:
         Initialize a DataContainer object.
         """
 
-        self.structure = atoms.copy()
+        self.atoms = atoms.copy()
 
         self._observables = []
         self._parameters = OrderedDict()
@@ -294,18 +294,25 @@ class DataContainer:
         Parameters
         ----------
 
-        start: int
+        start : int
+            minimum value of trial step to consider. If None, lowest value
+            in the mctrial column will be used.
 
-        stop: int
+        stop : int
+            maximum value of trial step to consider. If None, highest value
+            in the mctrial column will be used.
 
-        interval: int
+        interval : int
+            incremental step for mctrial index. Default to lowest interval
+            between trial steps values.
         """
-        # fix this after merge #209
-        # rename structures to atoms
-        occupation_vectors = self.get_data(tags=['occupations'])[0]
+        occupation_vectors = \
+            self.get_data(tags=['occupations'], start=start, stop=stop, 
+                          interval=interval, fill_method='skip_none')
+
         atoms_list = []
         for i in range(len(occupation_vectors)):
-            atoms_copy = self.structure.copy()
+            atoms_copy = self.atoms.copy()
             atoms_copy.set_chemical_symbols(occupation_vectors[i])
             atoms_list.append(atoms_copy)
         
@@ -393,7 +400,7 @@ class DataContainer:
 
         # Save reference atomic structure
         reference_atoms_file = tempfile.NamedTemporaryFile()
-        ase_write(reference_atoms_file.name, self.structure, format='json')
+        ase_write(reference_atoms_file.name, self.atoms, format='json')
 
         # Save reference data
         reference_data = {'observables': self._observables,

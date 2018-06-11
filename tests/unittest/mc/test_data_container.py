@@ -4,6 +4,7 @@ from collections import OrderedDict
 import numpy as np
 import pandas as pd
 from ase.build import bulk
+from ase import Atoms
 from mchammer import DataContainer
 from mchammer.observers.base_observer import BaseObserver
 
@@ -45,7 +46,7 @@ class TestDataContainer(unittest.TestCase):
 
     def test_structure(self):
         """Test reference structure property."""
-        self.assertEqual(self.dc.structure, self.atoms)
+        self.assertEqual(self.dc.atoms, self.atoms)
 
     def test_add_observable(self):
         """Test add observable functionality."""
@@ -250,17 +251,15 @@ class TestDataContainer(unittest.TestCase):
 
     def test_get_trajectory(self):
         """Test get_trajectory functionality."""
-        from ase import Atoms
+        
         row_data = {}
         row_data['occupations'] = [14] * len(self.atoms)
         for mctrial in range(len(self.atoms)):
             self.dc.append(mctrial, row_data)
 
-        # remove if None after merge 209
         atoms_list = self.dc.get_trajectory()
         for atoms in atoms_list:
-            if atoms is not None:
-                self.assertIsInstance(atoms, Atoms)
+            self.assertIsInstance(atoms, Atoms)
 
     def test_read_and_write(self):
         """Test write and read functionalities of data container."""
@@ -288,7 +287,7 @@ class TestDataContainer(unittest.TestCase):
         dc_read = self.dc.read(temp_file)
 
         # check properties and metadata
-        self.assertEqual(self.atoms, dc_read.structure)
+        self.assertEqual(self.atoms, dc_read.atoms)
         self.assertEqual(self.dc.metadata, dc_read.metadata)
         self.assertEqual(self.dc.parameters, dc_read.parameters)
         self.assertEqual(self.dc.observables, dc_read.observables)
