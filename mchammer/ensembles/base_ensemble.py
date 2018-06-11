@@ -10,7 +10,7 @@ from mchammer.observers.base_observer import BaseObserver
 
 import numpy as np
 
-from typing import List
+from typing import List, Dict
 
 
 class BaseEnsemble(ABC):
@@ -295,7 +295,7 @@ class BaseEnsemble(ABC):
         Find the greatest common denominator from the observation intervals.
         """
 
-        intervals = [obs.interval for _, obs in self.observers.items()]
+        intervals = [obs.interval for obs in self.observers.values()]
         if self._ensemble_data_write_interval is not np.inf:
             intervals.append(self._ensemble_data_write_interval)
 
@@ -408,8 +408,15 @@ class BaseEnsemble(ABC):
         self.update_occupations(indices, current_elements)
         return property_change
 
-    def get_ensemble_data(self):
-        """Get current calculator property."""
+    def get_ensemble_data(self) -> Dict:
+        """
+        Get current calculator property.
+
+        Returns
+        -------
+        dict : ensemble data key pairs
+
+        """
         return {'energy': self.calculator.calculate_total(
             occupations=self.configuration.occupations)}
 
