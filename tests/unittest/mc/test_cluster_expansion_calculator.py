@@ -45,7 +45,7 @@ class TestCECalculator(unittest.TestCase):
         self.assertEqual(self.calculator.calculate_total(
             occupations=self.atoms.numbers), 7641.0)
         self.assertEqual(self.calculator.cluster_expansion.predict(
-            self.calculator.atoms),283.0)
+            self.calculator.atoms), 283.0)
 
         # set some elements
         indices = [10, 2, 4, 2]
