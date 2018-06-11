@@ -235,19 +235,16 @@ class BaseEnsemble(ABC):
             the current trial step
         """
         row_dict = {}
-        new_observations = False
 
         # Ensemble specific data
         if step % self._ensemble_data_write_interval == 0:
             ensemble_data = self.get_ensemble_data()
             for key, value in ensemble_data.items():
                 row_dict[key] = value
-            new_observations = True
 
         # Observer data
         for observer in self.observers.values():
             if step % observer.interval == 0:
-                new_observations = True
                 if observer.return_type is dict:
                     for key, value in observer.get_observable(
                             self.calculator.atoms).items():
@@ -255,7 +252,7 @@ class BaseEnsemble(ABC):
                 else:
                     row_dict[observer.tag] = observer.get_observable(
                         self.calculator.atoms)
-        if new_observations:
+        if len(row_dict) > 0:
             self._data_container.append(mctrial=step, record=row_dict)
 
     @abstractmethod
