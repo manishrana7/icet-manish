@@ -132,20 +132,20 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
         dict : ensemble data key pairs
 
         """
-        default_data = super().get_ensemble_data()
-        default_data['temperature'] = self.temperature
+        data = super().get_ensemble_data()
+        data['temperature'] = self.temperature
 
         atoms = self.configuration.atoms
         unique, counts = np.unique(atoms.numbers, return_counts=True)
 
         for Z, count in zip(unique, counts):
             str_element = chemical_symbols[Z]
-            default_data["{} count".format(str_element)] = count
+            data["{} count".format(str_element)] = count
 
         # Add the "empty" elements also
         for possible_element in self.configuration._possible_elements:
             if possible_element not in unique:
                 str_element = chemical_symbols[possible_element]
-                default_data["{} count".format(str_element)] = 0
+                data["{} count".format(str_element)] = 0
 
-        return default_data
+        return data
