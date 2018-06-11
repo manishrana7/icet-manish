@@ -10,12 +10,53 @@ from mchammer.observers.base_observer import BaseObserver
 
 import numpy as np
 
-from typing import List
+from typing import List, Dict
 
 
 class BaseEnsemble(ABC):
     """
     Base ensemble abstract class.
+
+
+    Parameters
+    ----------
+    calculator : mchammer calculator
+        this is the calculator that will be used
+        to calculate potential energy differences
+        that goes into the Boltzmann factor used
+        to calculate the probability ratio between
+        two states when doing a trial move.
+    atoms : ASE Atoms
+        this defines the underlying lattice
+        that will be used in the monte carlo
+        simulation and also defines the
+        initial occupation vector.
+    name : str (default BaseEnsemble)
+        name of the ensemble which will show up
+        in the datacontainer among other things.
+    data_container : str
+        this defines the filename that the ensemble
+        will write the data container to. If the file
+        already exists then the data container will be
+        read and data will be appended to
+        that data container and it will also overwrite
+        that data container.
+    ensemble_data_write_interval : int
+        this sets the interval in which the ensemble
+        specific data is observed and saved to the
+        data container. This data can be temperature,
+        current value of the calculator etc.
+    data_container_write_period : float (default np.inf)
+        this sets the period in units of seconds
+        which the data container should be written to file.
+        Writing often to file is both a way to examine
+        the currently observed values and also to backup
+        your data.
+    random_seed : int
+        this set the random seed to the random number generator
+        that is used in the Monte Carlo trial moves. Setting
+        the seed can be used to reproduce earlier
+        simulations.
 
     Attributes
     ----------
@@ -28,11 +69,13 @@ class BaseEnsemble(ABC):
     """
 
     def __init__(self, calculator=None, atoms=None, name='BaseEnsemble',
-                 data_container=None, data_container_write_period=np.inf,
+                 data_container=None, ensemble_data_write_interval=None,
+                 data_container_write_period=np.inf,
                  random_seed=None):
 
         if calculator is None:
             raise TypeError("Missing required keyword argument: calculator")
+
         self._calculator = calculator
         self._name = name
         self.data_container_write_period = data_container_write_period
@@ -40,7 +83,6 @@ class BaseEnsemble(ABC):
         self.total_trials = 0
         self._observers = {}
         self._step = 0
-        self._minimum_observation_interval = np.inf
         if atoms is None:
             raise TypeError("Missing required keyword argument: atoms")
         if random_seed is None:
@@ -63,6 +105,15 @@ class BaseEnsemble(ABC):
         sublattices = [[i for i in range(len(self.calculator.atoms))]]
         self.configuration = ConfigurationManager(
             atoms, strict_constraints, sublattices)
+
+        # Handle ensemble data writing
+        if ensemble_data_write_interval is None:
+            self._ensemble_data_write_interval = len(atoms)
+        else:
+            self._ensemble_data_write_interval = ensemble_data_write_interval
+        self._data_container.add_observable('energy')
+        if ensemble_data_write_interval is not np.inf:
+            self._find_observer_interval()
 
     @property
     def structure(self):
@@ -131,10 +182,10 @@ class BaseEnsemble(ABC):
             # run mc so that we start at an interval which lands
             # on the observers interval
             if not initial_step == 0:
-                first_run_interval = self.minimum_observation_interval -\
+                first_run_interval = self.observer_interval -\
                     (initial_step -
-                     (initial_step // self.minimum_observation_interval) *
-                        self.minimum_observation_interval)
+                     (initial_step // self.observer_interval) *
+                        self.observer_interval)
                 first_run_interval = min(
                     first_run_interval, number_of_trial_steps)
                 self._run(first_run_interval)
@@ -144,21 +195,19 @@ class BaseEnsemble(ABC):
         step = initial_step
         while step < final_step:
             uninterrupted_steps = min(
-                self.minimum_observation_interval, final_step - step)
-            if self._step % self.minimum_observation_interval == 0:
+                self.observer_interval, final_step - step)
+            if self._step % self.observer_interval == 0:
                 self._observe_configuration(self._step)
             if self._data_container_filename is not None and \
-                    time() - last_write_time > \
-                    self.data_container_write_period:
-                        self.data_container.write(
-                            self._data_container_filename)
+                    time()-last_write_time > self.data_container_write_period:
+                self.data_container.write(self._data_container_filename)
 
             self._run(uninterrupted_steps)
             step += uninterrupted_steps
             self._step += uninterrupted_steps
 
         # If we end on an observation interval we also observe
-        if self._step % self.minimum_observation_interval == 0:
+        if self._step % self.observer_interval == 0:
             self._observe_configuration(self._step)
 
         if self._data_container_filename is not None:
@@ -186,10 +235,16 @@ class BaseEnsemble(ABC):
             the current trial step
         """
         row_dict = {}
-        new_observations = False
+
+        # Ensemble specific data
+        if step % self._ensemble_data_write_interval == 0:
+            ensemble_data = self.get_ensemble_data()
+            for key, value in ensemble_data.items():
+                row_dict[key] = value
+
+        # Observer data
         for observer in self.observers.values():
             if step % observer.interval == 0:
-                new_observations = True
                 if observer.return_type is dict:
                     for key, value in observer.get_observable(
                             self.calculator.atoms).items():
@@ -197,7 +252,7 @@ class BaseEnsemble(ABC):
                 else:
                     row_dict[observer.tag] = observer.get_observable(
                         self.calculator.atoms)
-        if new_observations:
+        if len(row_dict) > 0:
             self._data_container.append(mctrial=step, record=row_dict)
 
     @abstractmethod
@@ -225,20 +280,23 @@ class BaseEnsemble(ABC):
         return random.random()
 
     @property
-    def minimum_observation_interval(self):
+    def observer_interval(self):
         """
         int : minimum number of steps to run
         Monte Carlo simulation without observation interruptions.
         """
-        return self._minimum_observation_interval
+        return self._observer_interval
 
-    def _find_minimum_observation_interval(self):
+    def _find_observer_interval(self):
         """
         Find the greatest common denominator from the observation intervals.
         """
 
-        intervals = [obs.interval for _, obs in self.observers.items()]
-        self._minimum_observation_interval = self._get_gcd(intervals)
+        intervals = [obs.interval for obs in self.observers.values()]
+        if self._ensemble_data_write_interval is not np.inf:
+            intervals.append(self._ensemble_data_write_interval)
+
+        self._observer_interval = self._get_gcd(intervals)
 
     def _get_gcd(self, interval_list):
         """
@@ -281,7 +339,7 @@ class BaseEnsemble(ABC):
         else:
             self._data_container.add_observable(observer.tag)
 
-        self._find_minimum_observation_interval()
+        self._find_observer_interval()
 
     def reset_data_container(self):
         """Resets the data container and the internal step attribute."""
@@ -346,6 +404,18 @@ class BaseEnsemble(ABC):
         # Set elements back to what they were
         self.update_occupations(indices, current_elements)
         return property_change
+
+    def get_ensemble_data(self) -> Dict:
+        """
+        Get current calculator property.
+
+        Returns
+        -------
+        dict : ensemble data key pairs
+
+        """
+        return {'energy': self.calculator.calculate_total(
+            occupations=self.configuration.occupations)}
 
     def get_random_sublattice_index(self) -> int:
         """

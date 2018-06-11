@@ -42,11 +42,13 @@ class DictObserver(BaseObserver):
 class ConcreteEnsemble(BaseEnsemble):
 
     def __init__(self, calculator, atoms=None, name=None, data_container=None,
-                 data_container_write_period=np.inf, random_seed=None):
+                 data_container_write_period=np.inf, random_seed=None,
+                 ensemble_data_write_interval=None):
         super().__init__(
             calculator, atoms=atoms, name=name, data_container=data_container,
             data_container_write_period=data_container_write_period,
-            random_seed=random_seed)
+            random_seed=random_seed,
+            ensemble_data_write_interval=ensemble_data_write_interval)
 
     def do_trial_step(self):
         pass
@@ -199,8 +201,10 @@ class TestEnsemble(unittest.TestCase):
         # set-up ensemble with a non-inf write period
         ensemble = ConcreteEnsemble(calculator=self.calculator,
                                     atoms=self.atoms,
-                                    data_container='mycontainer.dc',
-                                    data_container_write_period=1e-4)
+                                    name='this-ensemble',
+                                    data_container='my-datacontainer.dc',
+                                    data_container_write_period=1e-4,
+                                    ensemble_data_write_interval=np.inf)
 
         # attach observer
         observer = ParakeetObserver(interval=14, tag='Parakeet2')
@@ -210,10 +214,10 @@ class TestEnsemble(unittest.TestCase):
         try:
             n_iters = 364
             ensemble.run(n_iters)
-            dc_read = DataContainer.read('mycontainer.dc')
+            dc_read = DataContainer.read('my-datacontainer.dc')
 
         finally:
-            os.remove('mycontainer.dc')
+            os.remove('my-datacontainer.dc')
 
         # check data container
         dc_data = dc_read.get_data(tags=['Parakeet2'])
@@ -313,6 +317,12 @@ class TestEnsemble(unittest.TestCase):
         self.assertTrue(
             "List of sites and list of elements are not the same size."
             in str(context.exception))
+
+    def test_get_ensemble_data(self):
+        """Test the get ensemble data method."""
+        data = self.ensemble.get_ensemble_data()
+
+        self.assertIn('energy', data.keys())
 
 
 if __name__ == '__main__':

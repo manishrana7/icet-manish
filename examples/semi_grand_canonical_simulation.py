@@ -13,7 +13,7 @@ for i, atom in enumerate(atoms):
         atom.symbol = 'Ga'
 
 # create a cluster space
-cutoffs = [5, 5, 4]
+cutoffs = [5, 3]
 elements = ['Al', 'Ga']
 chemical_potentials = {'Al': 5, 'Ga': 0}
 cs = ClusterSpace(atoms, cutoffs, elements)
@@ -29,9 +29,12 @@ calculator = ClusterExpansionCalculator(atoms, ce)
 ensemble = SemiGrandCanonicalEnsemble(
     calculator=calculator, atoms=atoms,
     random_seed=42, temperature=100.0,
-    chemical_potentials=chemical_potentials)
+    chemical_potentials=chemical_potentials,
+    ensemble_data_write_interval=2)
 
 # Let's take it for a spin
 ensemble.run(100)
 
 print("Acceptance ratio {}".format(ensemble.acceptance_ratio))
+
+print(ensemble.data_container.data)

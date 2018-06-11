@@ -102,6 +102,19 @@ class TestEnsemble(unittest.TestCase):
             chemical_potentials=chemical_potentials)
         ensemble.do_trial_step()
 
+    def test_get_ensemble_data(self):
+        """Test the get ensemble data method."""
+        data = self.ensemble.get_ensemble_data()
+
+        self.assertIn('energy', data.keys())
+        self.assertIn('Al count', data.keys())
+        self.assertIn('Ga count', data.keys())
+        self.assertIn('temperature', data.keys())
+
+        self.assertEqual(data['Al count'], 13)
+        self.assertEqual(data['Ga count'], 14)
+        self.assertEqual(data['temperature'], 100.0)
+
 
 if __name__ == '__main__':
     unittest.main()
