@@ -72,7 +72,7 @@ class BaseEnsemble(ABC):
             self._ensemble_data_write_interval = ensemble_data_write_interval
         self._data_container.add_observable('energy')
         if ensemble_data_write_interval is not np.inf:
-            self._find_minimum_observation_interval()
+            self._find_observer_interval()
 
     @property
     def structure(self):
@@ -141,10 +141,10 @@ class BaseEnsemble(ABC):
             # run mc so that we start at an interval which lands
             # on the observers interval
             if not initial_step == 0:
-                first_run_interval = self.minimum_observation_interval -\
+                first_run_interval = self.observer_interval -\
                     (initial_step -
-                     (initial_step // self.minimum_observation_interval) *
-                        self.minimum_observation_interval)
+                     (initial_step // self.observer_interval) *
+                        self.observer_interval)
                 first_run_interval = min(
                     first_run_interval, number_of_trial_steps)
                 self._run(first_run_interval)
@@ -154,8 +154,8 @@ class BaseEnsemble(ABC):
         step = initial_step
         while step < final_step:
             uninterrupted_steps = min(
-                self.minimum_observation_interval, final_step - step)
-            if self._step % self.minimum_observation_interval == 0:
+                self.observer_interval, final_step - step)
+            if self._step % self.observer_interval == 0:
                 self._observe_configuration(self._step)
             if self._data_container_filename is not None and \
                     time()-last_write_time > self.data_container_write_period:
@@ -166,7 +166,7 @@ class BaseEnsemble(ABC):
             self._step += uninterrupted_steps
 
         # If we end on an observation interval we also observe
-        if self._step % self.minimum_observation_interval == 0:
+        if self._step % self.observer_interval == 0:
             self._observe_configuration(self._step)
 
         if self._data_container_filename is not None:
@@ -242,14 +242,14 @@ class BaseEnsemble(ABC):
         return random.random()
 
     @property
-    def minimum_observation_interval(self):
+    def observer_interval(self):
         """
         int : minimum number of steps to run
         Monte Carlo simulation without observation interruptions.
         """
-        return self._minimum_observation_interval
+        return self._observer_interval
 
-    def _find_minimum_observation_interval(self):
+    def _find_observer_interval(self):
         """
         Find the greatest common denominator from the observation intervals.
         """
@@ -258,7 +258,7 @@ class BaseEnsemble(ABC):
         if self._ensemble_data_write_interval is not np.inf:
             intervals.append(self._ensemble_data_write_interval)
 
-        self._minimum_observation_interval = self._get_gcd(intervals)
+        self._observer_interval = self._get_gcd(intervals)
 
     def _get_gcd(self, interval_list):
         """
@@ -301,7 +301,7 @@ class BaseEnsemble(ABC):
         else:
             self._data_container.add_observable(observer.tag)
 
-        self._find_minimum_observation_interval()
+        self._find_observer_interval()
 
     def reset_data_container(self):
         """Resets the data container and the internal step attribute."""
