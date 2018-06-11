@@ -300,8 +300,16 @@ class DataContainer:
 
         interval: int
         """
-        list_atoms = self.get_data(tags=['occupations'])[0]
-        return list_atoms
+        # fix this after merge #209
+        # rename structures to atoms
+        occupation_vectors = self.get_data(tags=['occupations'])[0]
+        atoms_list = []
+        for i in range(len(occupation_vectors)):
+            atoms_copy = self.structure.copy()
+            atoms_copy.set_chemical_symbols(occupation_vectors[i])
+            atoms_list.append(atoms_copy)
+        
+        return atoms_list
 
     @staticmethod
     def read(infile):

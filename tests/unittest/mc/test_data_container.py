@@ -250,15 +250,17 @@ class TestDataContainer(unittest.TestCase):
 
     def test_get_trajectory(self):
         """Test get_trajectory functionality."""
+        from ase import Atoms
         row_data = {}
-        row_data['occupations'] = [12, 14, 38]
-        for mctrial in range(10):
+        row_data['occupations'] = [14] * len(self.atoms)
+        for mctrial in range(len(self.atoms)):
             self.dc.append(mctrial, row_data)
 
+        # remove if None after merge 209
         atoms_list = self.dc.get_trajectory()
         for atoms in atoms_list:
             if atoms is not None:
-                self.assertIsInstance(atoms, list)
+                self.assertIsInstance(atoms, Atoms)
 
     def test_read_and_write(self):
         """Test write and read functionalities of data container."""
