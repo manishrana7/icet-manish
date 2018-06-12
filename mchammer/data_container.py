@@ -121,8 +121,7 @@ class DataContainer:
         row_data = OrderedDict()
         row_data['mctrial'] = mctrial
         row_data.update(record)
-        self._data = self._data.append(row_data,
-                                       ignore_index=True)
+        self._data = self._data.append(row_data, ignore_index=True)
 
     def get_data(self, tags=None, start=None, stop=None, interval=1,
                  fill_method=None):
@@ -311,9 +310,9 @@ class DataContainer:
                           interval=interval, fill_method='skip_none')
 
         atoms_list = []
-        for i in range(len(occupation_vectors)):
+        for occupations in occupation_vectors:
             atoms_copy = self.atoms.copy()
-            atoms_copy.set_chemical_symbols(occupation_vectors[i])
+            atoms_copy.numbers = occupations
             atoms_list.append(atoms_copy)
         
         return atoms_list

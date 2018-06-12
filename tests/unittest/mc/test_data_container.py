@@ -79,7 +79,6 @@ class TestDataContainer(unittest.TestCase):
         observal_interval = min([obs.interval for obs in observers])
         for mctrial in mctrials:
             row_data = {}
-            flush_data = False
             if mctrial % observal_interval == 0:
                 flush_data = True
                 for obs in observers:
@@ -87,9 +86,8 @@ class TestDataContainer(unittest.TestCase):
                         observable = obs.get_observable(self.atoms)
                         row_data[obs.tag] = observable
             if mctrial % dump_interval == 0:
-                flush_data = True
-                row_data['occupation_vector'] = [1, 3, 7, 11]
-            if flush_data:
+                row_data['occupations'] = [1, 3, 7, 11]
+            if len(row_data)>0:
                 self.dc.append(mctrial, row_data)
 
         # check number of entries
@@ -268,7 +266,7 @@ class TestDataContainer(unittest.TestCase):
         self.dc.add_observable('sro')
         row_data = {}
         row_data['obs1'] = 64
-        row_data['occupation_vector'] = [1, 3, 7, 11]
+        row_data['occupations'] = [1, 3, 7, 11]
         for mctrial in range(1, 101):
             self.dc.append(mctrial, row_data)
 
