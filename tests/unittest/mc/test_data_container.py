@@ -4,7 +4,6 @@ from collections import OrderedDict
 import numpy as np
 import pandas as pd
 from ase.build import bulk
-from ase import Atoms
 from mchammer import DataContainer
 from mchammer.observers.base_observer import BaseObserver
 
@@ -73,28 +72,26 @@ class TestDataContainer(unittest.TestCase):
                      ConcreteObserver(interval=20, tag='obs2')]
 
         mctrials = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-        dump_interval = 50
+        trajectory_write_interval = 50
 
         # append data
         observal_interval = min([obs.interval for obs in observers])
         for mctrial in mctrials:
             row_data = {}
             if mctrial % observal_interval == 0:
-                flush_data = True
                 for obs in observers:
                     if mctrial % obs.interval == 0:
                         observable = obs.get_observable(self.atoms)
                         row_data[obs.tag] = observable
-            if mctrial % dump_interval == 0:
-                row_data['occupations'] = [1, 3, 7, 11]
-            if len(row_data)>0:
-                self.dc.append(mctrial, row_data)
+            if mctrial % trajectory_write_interval == 0:
+                row_data['occupations'] = [13, 13, 13]
+            self.dc.append(mctrial, row_data)
 
         # check number of entries
         self.assertEqual(self.dc.get_number_of_entries(), 10)
         self.assertEqual(self.dc.get_number_of_entries('obs2'), 5)
         self.assertEqual(
-            self.dc.get_number_of_entries('occupation_vector'), 2)
+            self.dc.get_number_of_entries('occupations'), 2)
 
     def test_property_data(self):
         """ Test data property."""
@@ -169,8 +166,8 @@ class TestDataContainer(unittest.TestCase):
         self.dc._data = \
             pd.DataFrame(rows_data, columns=['mctrial', 'occupations'])
         retval = \
-            self.dc.get_data(start=50, interval=5)
-        self.assertEqual(retval, ([50, 100], [[1, 3, 7], [1, 3, 7]]))
+            self.dc.get_data(tags=['occupation_vector'], start=50, interval=5)
+        self.assertEqual(retval, [[13, 13, 11], [13, 11, 11]])
 
         # test fails for non-stock data
         with self.assertRaises(AssertionError) as context:
@@ -238,26 +235,27 @@ class TestDataContainer(unittest.TestCase):
         self.dc.reset()
         for mctrial in range(10):
             self.dc.append(
-                mctrial, record={'occupation_vector': [1, 3, 7, 11]})
+                mctrial, record={'occupations': [14, 14, 14]})
 
         with self.assertRaises(AssertionError) as context:
-            self.dc.get_average('occupation_vector')
+            self.dc.get_average('occupations')
 
         self.assertTrue(
-            "Data from requested column occupation_vector has not scalar type"
+            "Data from requested column occupations has not scalar type"
             in str(context.exception))
 
     def test_get_trajectory(self):
         """Test get_trajectory functionality."""
-        
         row_data = {}
-        row_data['occupations'] = [14] * len(self.atoms)
+        occupation_vector = [14] * len(self.atoms)
+        row_data['occupations'] = occupation_vector
+
         for mctrial in range(len(self.atoms)):
             self.dc.append(mctrial, row_data)
 
         atoms_list = self.dc.get_trajectory()
         for atoms in atoms_list:
-            self.assertIsInstance(atoms, Atoms)
+            self.assertEqual(atoms.numbers.tolist(), occupation_vector)
 
     def test_read_and_write(self):
         """Test write and read functionalities of data container."""
@@ -266,7 +264,7 @@ class TestDataContainer(unittest.TestCase):
         self.dc.add_observable('sro')
         row_data = {}
         row_data['obs1'] = 64
-        row_data['occupations'] = [1, 3, 7, 11]
+        row_data['occupations'] = [13, 13, 13]
         for mctrial in range(1, 101):
             self.dc.append(mctrial, row_data)
 

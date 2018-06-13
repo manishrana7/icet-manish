@@ -306,7 +306,7 @@ class DataContainer:
             between trial steps values.
         """
         occupation_vectors = \
-            self.get_data(tags=['occupations'], start=start, stop=stop, 
+            self.get_data(tags=['occupations'], start=start, stop=stop,
                           interval=interval, fill_method='skip_none')
 
         atoms_list = []
@@ -314,7 +314,7 @@ class DataContainer:
             atoms_copy = self.atoms.copy()
             atoms_copy.numbers = occupations
             atoms_list.append(atoms_copy)
-        
+
         return atoms_list
 
     @staticmethod
