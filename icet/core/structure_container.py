@@ -468,6 +468,12 @@ class FitStructure:
         """dict : properties"""
         return self._properties
 
+    def __getattr__(self, key):
+        """ Acceses properties if possible and returns value """
+        if key not in self.properties.keys():
+            return super().__getattribute__(key)
+        return self.properties[key]
+
     def set_cluster_vector(self, cv):
         """
         Set the cluster vectors of the structure.
