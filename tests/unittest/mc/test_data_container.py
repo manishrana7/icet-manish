@@ -128,19 +128,13 @@ class TestDataContainer(unittest.TestCase):
         obs1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         # observable 2
         obs2 = [1, None, 3, None, 5, None, 7, None, 9, None]
-        # occupation vector
-        occupation_vector = [None, None, None, None, [1, 3, 7],
-                             None, None, None, None, [1, 3, 7]]
 
-        rows_data = {'mctrial': mctrials, 'obs1': obs1, 'obs2': obs2,
-                     'occupation_vector': occupation_vector}
+        rows_data = {'mctrial': mctrials, 'obs1': obs1, 'obs2': obs2}
 
         self.dc._data = \
-            pd.DataFrame(rows_data,
-                         columns=['mctrial', 'obs1', 'obs2',
-                                  'occupation_vector'])
+            pd.DataFrame(rows_data, columns=['mctrial', 'obs1', 'obs2'])
 
-        retval = self.dc.get_data(tags=['mctrial', 'obs1', 'obs2'])
+        retval = self.dc.get_data()
         self.assertEqual(retval, (mctrials, obs1, obs2))
 
         # using skip_none
@@ -169,10 +163,15 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(retval1, [20, 50, 80])
         self.assertEqual(retval2, [None, 5, None])
 
-        # check list type data
+        # check occupations
+        occupations = [np.nan, np.nan, np.nan, np.nan, [1, 3, 7],
+                       np.nan, np.nan, np.nan, np.nan, [1, 3, 7]]
+        rows_data = {'mctrial': mctrials, 'occupations': occupations}
+        self.dc._data = \
+            pd.DataFrame(rows_data, columns=['mctrial', 'occupations'])
         retval = \
-            self.dc.get_data(tags=['occupation_vector'], start=50, interval=5)
-        self.assertEqual(retval, [[1, 3, 7], [1, 3, 7]])
+            self.dc.get_data(start=50, interval=5)
+        self.assertEqual(retval, ([50, 100], [[1, 3, 7], [1, 3, 7]]))
 
         # test fails for non-stock data
         with self.assertRaises(AssertionError) as context:
