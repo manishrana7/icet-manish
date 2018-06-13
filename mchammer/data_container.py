@@ -151,6 +151,10 @@ class DataContainer:
         fill_method : {'skip_none', 'fill_backward', 'fill_forward',
                        'linear_interpolate', None}
             method to fill missing values. Default is None.
+
+        Returns
+        -------
+        values in the columns of the data frame : list or tuple with lists
         """
         fill_methods = ['skip_none',
                         'fill_backward',
@@ -179,17 +183,19 @@ class DataContainer:
         if fill_method is not None:
             assert fill_method in fill_methods, \
                 'Unknown fill method: {}'.format(fill_method)
-
+            # retrieve only valid observations 
             if fill_method is 'skip_none':
                 data.dropna(inplace=True)
 
             else:
+                # fill NaN with the next valid observation
                 if fill_method is 'fill_backward':
                     data.fillna(method='bfill', inplace=True)
-
+                # fill NaN with the last valid observation 
                 elif fill_method is 'fill_forward':
                     data.fillna(method='ffill', inplace=True)
-
+                # fill NaN by linear interpolating lower and higher valid
+                # observations
                 elif fill_method is 'linear_interpolate':
                     data.interpolate(limit_area='inside', inplace=True)
 
@@ -199,10 +205,13 @@ class DataContainer:
         data_list = []
         for tag in tags:
             data_list.append(
+                # convert NaN to None
                 [None if np.isnan(x).any() else x for x in data[tag]])
         if len(tags) > 1:
+            # return a tuple if more than one tag is given
             return tuple(data_list)
         else:
+            # return a list if only one tag is given
             return data_list[0]
 
     @property
