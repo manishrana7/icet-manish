@@ -469,7 +469,7 @@ class FitStructure:
         return self._properties
 
     def __getattr__(self, key):
-        """ Acceses properties if possible and returns value """
+        """ Accesses properties if possible and returns value """
         if key not in self.properties.keys():
             return super().__getattribute__(key)
         return self.properties[key]
