@@ -68,34 +68,29 @@ class TestDataContainer(unittest.TestCase):
 
     def test_append_data(self):
         """Test append data functionality."""
+        # list of observers for testing
         observers = [ConcreteObserver(interval=10, tag='obs1'),
                      ConcreteObserver(interval=20, tag='obs2')]
+        min_interval = min([obs.interval for obs in observers])
 
-        mctrials = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-        dump_interval = 50
-
-        # append data
-        observal_interval = min([obs.interval for obs in observers])
-        for mctrial in mctrials:
-            row_data = {}
-            flush_data = False
-            if mctrial % observal_interval == 0:
-                flush_data = True
+        # append data from observers
+        for mctrial in range(100):
+            if mctrial % min_interval == 0:
+                row_data = {}
                 for obs in observers:
                     if mctrial % obs.interval == 0:
                         observable = obs.get_observable(self.atoms)
                         row_data[obs.tag] = observable
-            if mctrial % dump_interval == 0:
-                flush_data = True
-                row_data['occupation_vector'] = [1, 3, 7, 11]
-            if flush_data:
                 self.dc.append(mctrial, row_data)
 
-        # check number of entries
         self.assertEqual(self.dc.get_number_of_entries(), 10)
-        self.assertEqual(self.dc.get_number_of_entries('obs2'), 5)
+
+        # append list type data
+        row_data = {}
+        row_data['occupation_vector'] = [1, 3, 7, 11]
+        self.dc.append(100, row_data)
         self.assertEqual(
-            self.dc.get_number_of_entries('occupation_vector'), 2)
+            self.dc.get_number_of_entries('occupation_vector'), 1)
 
     def test_property_data(self):
         """ Test data property."""
@@ -121,64 +116,57 @@ class TestDataContainer(unittest.TestCase):
         Test the returned data is a list of list and the options provided by
         the method works as expected.
         """
-        # lets suppose the following data was appended to the data container
-        # mctrials
-        mctrials = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-        # observable 1
-        obs1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        # observable 2
-        obs2 = [1, None, 3, None, 5, None, 7, None, 9, None]
+        observers = [ConcreteObserver(interval=10, tag='obs1'),
+                     ConcreteObserver(interval=20, tag='obs2')]
 
-        rows_data = {'mctrial': mctrials, 'obs1': obs1, 'obs2': obs2}
+        target = [[10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0],
+                  [None, 64.0, None, 64.0, None, 64.0, None, 64.0, None, 64.0]]
 
-        self.dc._data = \
-            pd.DataFrame(rows_data, columns=['mctrial', 'obs1', 'obs2'])
+        min_interval = min([obs.interval for obs in observers])
+
+        for mctrial in range(1, 110):
+            if mctrial % min_interval == 0:
+                row_data = {}
+                for obs in observers:
+                    if mctrial % obs.interval == 0:
+                        observable = obs.get_observable(self.atoms)
+                        row_data[obs.tag] = observable
+                self.dc.append(mctrial, row_data)
 
         retval = self.dc.get_data()
-        self.assertEqual(retval, (mctrials, obs1, obs2))
+        self.assertListEqual(target, retval)
 
-        # using skip_none
-        retval1, retval2 = \
-            self.dc.get_data(tags=['mctrial', 'obs2'], fill_method='skip_none')
-        self.assertEqual(retval1, [10, 30, 50, 70, 90])
-        self.assertEqual(retval2, [1, 3, 5, 7, 9])
+        # with filling_missing = True
+        target = [[10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0],
+                  [64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0]]
 
-        # using fill_backward
-        retval = self.dc.get_data(tags=['obs2'], fill_method='fill_backward')
-        self.assertEqual(retval, [1, 3, 3, 5, 5, 7, 7, 9, 9])
+        retval = self.dc.get_data(['mctrial', 'obs1', 'obs2'],
+                                  fill_missing=True)
+        self.assertListEqual(target, retval)
 
-        # using fill_forward
-        retval = self.dc.get_data(tags=['obs2'], fill_method='fill_forward')
-        self.assertEqual(retval, [1, 1, 3, 3, 5, 5, 7, 7, 9, 9])
+        # passing an interval
+        target = [[40, 50, 60, 70], [64.0, 64.0, 64.0, 64.0],
+                  [64.0, None, 64.0, None]]
 
-        # using interpolation
-        retval = \
-            self.dc.get_data(tags=["obs2"], fill_method="linear_interpolate")
-        self.assertEqual(retval, [1, 2, 3, 4, 5, 6, 7, 8, 9])
-
-        # with a given start, stop and interval
-        retval1, retval2 = \
-            self.dc.get_data(tags=['mctrial', 'obs2'],
-                             start=20, stop=90, interval=3)
-        self.assertEqual(retval1, [20, 50, 80])
-        self.assertEqual(retval2, [None, 5, None])
-
-        # check occupations
-        occupations = [np.nan, np.nan, np.nan, np.nan, [1, 3, 7],
-                       np.nan, np.nan, np.nan, np.nan, [1, 3, 7]]
-        rows_data = {'mctrial': mctrials, 'occupations': occupations}
-        self.dc._data = \
-            pd.DataFrame(rows_data, columns=['mctrial', 'occupations'])
-        retval = \
-            self.dc.get_data(start=50, interval=5)
-        self.assertEqual(retval, ([50, 100], [[1, 3, 7], [1, 3, 7]]))
+        retval = self.dc.get_data(['mctrial', 'obs1', 'obs2'],
+                                  interval=(40, 70))
+        self.assertListEqual(target, retval)
 
         # test fails for non-stock data
-        with self.assertRaises(AssertionError) as context:
+        with self.assertRaises(AssertionError):
             self.dc.get_data(['temperature'])
 
-        self.assertTrue("Observable is not part of DataContainer: temperature"
-                        in str(context.exception))
+        # append list type data
+        row_data = {}
+        row_data['occupation_vector'] = [1, 3, 7, 11]
+        self.dc.append(200, row_data)
+
+        # check append data
+        retval = \
+            self.dc.get_data(['occupation_vector'], interval=(200, 200))[0][0]
+        self.assertEqual(retval, row_data['occupation_vector'])
 
     def test_reset(self):
         """Test appended data is cleared."""
@@ -218,35 +206,15 @@ class TestDataContainer(unittest.TestCase):
         # get average over slice of data
         mean, std = self.dc.get_average('obs1', start=60)
         self.assertAlmostEqual(mean, 0.9851106, places=7)
-        self.assertAlmostEqual(std, 0.0981344, places=7)
+        self.assertAlmostEqual(std, 0.0993846, places=7)
 
         mean, std = self.dc.get_average('obs1', stop=60)
         self.assertAlmostEqual(mean, 0.9876534, places=7)
-        self.assertAlmostEqual(std, 0.1086700, places=7)
+        self.assertAlmostEqual(std, 0.1095718, places=7)
 
         mean, std = self.dc.get_average('obs1', start=40, stop=60)
         self.assertAlmostEqual(mean, 1.0137074, places=7)
-        self.assertAlmostEqual(std, 0.1124826, places=7)
-
-        # test fails for non-existing data
-        with self.assertRaises(AssertionError) as context:
-            self.dc.get_average('temperature')
-
-        self.assertTrue("Observable is not part of DataContainer: temperature"
-                        in str(context.exception))
-
-        # test fails for non-numeric data like list type data
-        self.dc.reset()
-        for mctrial in range(10):
-            self.dc.append(
-                mctrial, record={'occupation_vector': [1, 3, 7, 11]})
-
-        with self.assertRaises(AssertionError) as context:
-            self.dc.get_average('occupation_vector')
-
-        self.assertTrue(
-            "Data from requested column occupation_vector has not scalar type"
-            in str(context.exception))
+        self.assertAlmostEqual(std, 0.1152604, places=7)
 
     def test_read_and_write(self):
         """Test write and read functionalities of data container."""
