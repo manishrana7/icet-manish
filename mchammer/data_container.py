@@ -124,52 +124,95 @@ class DataContainer:
         self._data = self._data.append(row_data,
                                        ignore_index=True)
 
-    def get_data(self, tags=None, interval=None, fill_missing=False):
+    def get_data(self, tags=None, start=None, stop=None, interval=1,
+                 fill_method=None):
         """
-        Returns a list of lists representing the accumulated data for
-        the observables specified via tags.
+        Returns a list or a tuple with lists representing the accumulated data
+        for the observables specified via tags.
 
         Parameters
         ----------
         tags : list of str
             tags of the required properties; if None all columns of the data
-            frame will be returned in lexigraphical order
+            frame will be returned in lexigraphical order.
 
-        interval : tuple
-            range of trial steps values from which data frame will be returned.
-            If None, returns all the accumulated data.
+        start : int
+            minimum value of trial step to consider. If None, lowest value
+            in the mctrial column will be used.
 
-        fill_missing : bool
-            If True fill missing values backward
+        stop : int
+            maximum value of trial step to consider. If None, highest value
+            in the mctrial column will be used.
+
+        interval : int
+            incremental step for mctrial index. Default to lowest interval
+            between trial steps values.
+
+        fill_method : {'skip_none', 'fill_backward', 'fill_forward',
+                       'linear_interpolate', None}
+            method to fill missing values. Default is None.
+
+        Returns
+        -------
+        values in the columns of the data frame : list or tuple with lists
         """
+        fill_methods = ['skip_none',
+                        'fill_backward',
+                        'fill_forward',
+                        'linear_interpolate']
+
         if tags is None:
             tags = self._data.columns.tolist()
         else:
             for tag in tags:
                 assert tag in self._data, \
-                    'observable is not part of DataContainer: {}'.format(tag)
+                    'Observable is not part of DataContainer: {}'.format(tag)
 
-        if interval is None:
-            data = self._data.loc[:, tags]
+        if start is None and stop is None:
+            data = self._data.loc[::interval, tags]
         else:
-            assert isinstance(interval, tuple), \
-                'interval must be a tuple: {}'.format(type(interval))
-            assert len(interval) == 2, \
-                'interval must contain only a lower and an upper value'
             data = self._data.set_index(self._data.mctrial)
-            lower, upper = interval
-            data = data.loc[lower:upper, tags]
 
-        if fill_missing:
-            data = data.fillna(method='bfill')
+            if start is None:
+                data = data.loc[:stop:interval, tags]
+            elif stop is None:
+                data = data.loc[start::interval, tags]
+            else:
+                data = data.loc[start:stop:interval, tags]
+
+        if fill_method is not None:
+            assert fill_method in fill_methods, \
+                'Unknown fill method: {}'.format(fill_method)
+            # retrieve only valid observations
+            if fill_method is 'skip_none':
+                data.dropna(inplace=True)
+
+            else:
+                # fill NaN with the next valid observation
+                if fill_method is 'fill_backward':
+                    data.fillna(method='bfill', inplace=True)
+                # fill NaN with the last valid observation
+                elif fill_method is 'fill_forward':
+                    data.fillna(method='ffill', inplace=True)
+                # fill NaN with the linear interpolation
+                # of the last and next valid observations
+                elif fill_method is 'linear_interpolate':
+                    data.interpolate(limit_area='inside', inplace=True)
+
+                # drop any left nan value
+                data.dropna(inplace=True)
 
         data_list = []
         for tag in tags:
-            data_column = [None if np.isnan(x).any() else x
-                           for x in data[tag].tolist()]
-            data_list.append(data_column)
-
-        return data_list
+            data_list.append(
+                # convert NaN to None
+                [None if np.isnan(x).any() else x for x in data[tag]])
+        if len(tags) > 1:
+            # return a tuple if more than one tag is given
+            return tuple(data_list)
+        else:
+            # return a list if only one tag is given
+            return data_list[0]
 
     @property
     def data(self):
@@ -215,7 +258,7 @@ class DataContainer:
 
     def get_average(self, tag: str, start=None, stop=None):
         """
-        Return average and standard deviation of an observable over an
+        Return average and standard deviation of an scalar observable over an
         interval of trial steps.
 
         Parameters
@@ -223,27 +266,25 @@ class DataContainer:
         tag : str
             tag of field over which to average
         start : int
-            lower limit of trial step interval. If None, first value
-            in trial step column will be used.
+            minimum value of trial step to consider. If None, lowest value
+            in the mctrial column will be used.
+
         stop : int
-            upper limit of trial step interval. If None, last value
-            of trial step column will be used.
+            maximum value of trial step to consider. If None, highest value
+            in the mctrial column will be used.
         """
         assert tag in self._data, \
-            'observable is not part of DataContainer: {}'.format(tag)
+            'Observable is not part of DataContainer: {}'.format(tag)
+
+        assert self._data[tag].dtype in ['int64', 'float64'], \
+            'Data from requested column {} has not scalar type'.format(tag)
 
         if start is None and stop is None:
             return self._data[tag].mean(), self._data[tag].std()
         else:
-            data = self._data.set_index(self._data.mctrial)
-            if start is None:
-                data = data.loc[:stop, [tag]]
-            elif stop is None:
-                data = data.loc[start:, [tag]]
-            else:
-                data = data.loc[start:stop, [tag]]
-
-            return data[tag].mean(), data[tag].std()
+            data = self.get_data(tags=[tag], start=start, stop=stop,
+                                 fill_method='skip_none')
+            return np.mean(data), np.std(data)
 
     @staticmethod
     def read(infile):
