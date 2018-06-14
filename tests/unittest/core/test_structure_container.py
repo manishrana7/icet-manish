@@ -394,7 +394,7 @@ class TestFitStructure(unittest.TestCase):
 
     def test_getattr(self):
         """
-        Test custom getattr functíon.
+        Test custom getattr function.
         """
         properties = dict(energy=2.123, nvac=48, c=[0.5, 0.5], fname='asd.xml')
         self.fit_structure.set_properties(properties)
