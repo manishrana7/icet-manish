@@ -392,6 +392,29 @@ class TestFitStructure(unittest.TestCase):
         cv = self.fit_structure.cluster_vector
         self.assertTrue(cv is None)
 
+    def test_getattr(self):
+        """
+        Test custom getattr function.
+        """
+        properties = dict(energy=2.123, nvac=48, c=[0.5, 0.5], fname='asd.xml')
+        self.fit_structure.set_properties(properties)
+
+        # test the function call
+        for key, val in properties.items():
+            self.assertEqual(self.fit_structure.__getattr__(key), val)
+
+        # test the attributes
+        self.assertEqual(self.fit_structure.energy, properties['energy'])
+        self.assertEqual(self.fit_structure.nvac, properties['nvac'])
+        self.assertEqual(self.fit_structure.c, properties['c'])
+        self.assertEqual(self.fit_structure.fname, properties['fname'])
+
+        # test regular attribute call
+        self.fit_structure.properties
+        self.fit_structure.atoms
+        with self.assertRaises(AttributeError):
+            self.fit_structure.hello_world
+
 
 if __name__ == '__main__':
     unittest.main()
