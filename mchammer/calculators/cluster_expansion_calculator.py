@@ -19,6 +19,13 @@ class ClusterExpansionCalculator(BaseCalculator):
     cluster_expansion : icet ClusterExpansion object
     name : str
         human readable identifier for this calculator
+    scaling : float (default len(atoms))
+        this scales the property that is gotten from
+        cluster vector times ECIs. By default the
+        cluster vector times ECIs is assumed to give
+        property/atom and thus the default value is
+        multiplied by number of atoms.
+
 
     Todo
     ----
@@ -28,9 +35,13 @@ class ClusterExpansionCalculator(BaseCalculator):
     """
 
     def __init__(self, atoms, cluster_expansion,
-                 name='Cluster Expansion Calculator'):
+                 name='Cluster Expansion Calculator', scaling=None):
         super().__init__(atoms=atoms, name=name)
         self._cluster_expansion = cluster_expansion
+        if scaling is None:
+            self._property_scaling = len(atoms)
+        else:
+            self._property_scaling = scaling
 
     @property
     def cluster_expansion(self):
@@ -53,7 +64,8 @@ class ClusterExpansionCalculator(BaseCalculator):
         total value of the property
         """
         self.atoms.set_atomic_numbers(occupations)
-        return self.cluster_expansion.predict(self.atoms)
+        return self.cluster_expansion.predict(self.atoms) * \
+            self._property_scaling
 
     def calculate_local_contribution(self, local_indices: List[int] = None,
                                      occupations: List[int] = None) -> float:
@@ -78,7 +90,8 @@ class ClusterExpansionCalculator(BaseCalculator):
             raise TypeError("Missing required keyword argument: local_indices")
         if occupations is None:
             raise TypeError("Missing required keyword argument: occupations")
-        return self.calculate_total(occupations=occupations)
+        return self.calculate_total(occupations=occupations) * \
+            self._property_scaling
 
     @property
     def occupation_constraints(self):
