@@ -409,6 +409,12 @@ class TestFitStructure(unittest.TestCase):
         self.assertEqual(self.fit_structure.c, properties['c'])
         self.assertEqual(self.fit_structure.fname, properties['fname'])
 
+        # test regular attribute call
+        self.fit_structure.properties
+        self.fit_structure.atoms
+        with self.assertRaises(AttributeError):
+            self.fit_structure.hello_world
+
 
 if __name__ == '__main__':
     unittest.main()
