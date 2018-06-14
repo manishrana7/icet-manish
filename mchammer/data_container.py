@@ -183,7 +183,7 @@ class DataContainer:
         if fill_method is not None:
             assert fill_method in fill_methods, \
                 'Unknown fill method: {}'.format(fill_method)
-            # retrieve only valid observations 
+            # retrieve only valid observations
             if fill_method is 'skip_none':
                 data.dropna(inplace=True)
 
@@ -191,11 +191,11 @@ class DataContainer:
                 # fill NaN with the next valid observation
                 if fill_method is 'fill_backward':
                     data.fillna(method='bfill', inplace=True)
-                # fill NaN with the last valid observation 
+                # fill NaN with the last valid observation
                 elif fill_method is 'fill_forward':
                     data.fillna(method='ffill', inplace=True)
-                # fill NaN by linear interpolating lower and higher valid
-                # observations
+                # fill NaN with the linear interpolation
+                # of the last and next valid observations
                 elif fill_method is 'linear_interpolate':
                     data.interpolate(limit_area='inside', inplace=True)
 
