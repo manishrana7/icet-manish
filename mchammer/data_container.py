@@ -302,8 +302,7 @@ class DataContainer:
             in the mctrial column will be used.
 
         interval : int
-            incremental step for mctrial index. Default to lowest interval
-            between trial steps values.
+            interval between snapshots. Default to 1.
         """
         occupation_vectors = \
             self.get_data(tags=['occupations'], start=start, stop=stop,

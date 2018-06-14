@@ -147,7 +147,7 @@ class TestDataContainer(unittest.TestCase):
         retval = self.dc.get_data(tags=['obs2'], fill_method='fill_forward')
         self.assertEqual(retval, [1, 1, 3, 3, 5, 5, 7, 7, 9, 9])
 
-        # using interpolation
+        # using linear_interpolate
         retval = \
             self.dc.get_data(tags=["obs2"], fill_method="linear_interpolate")
         self.assertEqual(retval, [1, 2, 3, 4, 5, 6, 7, 8, 9])
@@ -198,11 +198,12 @@ class TestDataContainer(unittest.TestCase):
 
     def test_get_average(self):
         """Test get average functionality."""
+        # set up a random list of values with a normal distribution
         n_iter, mu, sigma = 100, 1.0, 0.1
         np.random.seed(12)
         obs_val = np.random.normal(mu, sigma, n_iter).tolist()
 
-        # append data for testing
+        # append above random data to data container
         for mctrial in range(n_iter):
             self.dc.append(mctrial, record={'obs1': obs_val[mctrial]})
 
@@ -231,7 +232,7 @@ class TestDataContainer(unittest.TestCase):
         self.assertTrue("Observable is not part of DataContainer: temperature"
                         in str(context.exception))
 
-        # test fails for non-numeric data like list type data
+        # test fails for non-scalar data like occupation vector
         self.dc.reset()
         for mctrial in range(10):
             self.dc.append(
