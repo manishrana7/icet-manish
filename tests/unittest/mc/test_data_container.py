@@ -160,13 +160,13 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(retval2, [None, 5, None])
 
         # check occupations
-        occupations = [np.nan, np.nan, np.nan, np.nan, [1, 3, 7],
-                       np.nan, np.nan, np.nan, np.nan, [1, 3, 7]]
+        occupations = [np.nan, np.nan, np.nan, np.nan, [13, 13, 11],
+                       np.nan, np.nan, np.nan, np.nan, [13, 11, 11]]
         rows_data = {'mctrial': mctrials, 'occupations': occupations}
         self.dc._data = \
             pd.DataFrame(rows_data, columns=['mctrial', 'occupations'])
         retval = \
-            self.dc.get_data(tags=['occupation_vector'], start=50, interval=5)
+            self.dc.get_data(tags=['occupations'], start=50, interval=5)
         self.assertEqual(retval, [[13, 13, 11], [13, 11, 11]])
 
         # test fails for non-stock data

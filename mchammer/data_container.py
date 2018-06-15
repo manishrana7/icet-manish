@@ -144,8 +144,7 @@ class DataContainer:
             in the mctrial column will be used.
 
         interval : int
-            incremental step for mctrial index. Default to lowest interval
-            between trial steps values.
+            interval between consecutive observations.
 
         fill_method : {'skip_none', 'fill_backward', 'fill_forward',
                        'linear_interpolate', None}
