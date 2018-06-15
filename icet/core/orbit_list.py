@@ -1,6 +1,5 @@
 import time
 import numpy as np
-from ase import Atoms
 from _icet import OrbitList
 from .neighbor_list import get_neighbor_lists
 from .permutation_map import permutation_matrix_from_atoms

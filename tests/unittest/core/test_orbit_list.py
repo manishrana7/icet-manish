@@ -111,7 +111,7 @@ class TestOrbitList(unittest.TestCase):
         row_indices = tuple([0, 1, 2])
         self.assertFalse(self.orbit_list.is_row_taken(
             taken_rows, row_indices))
-        
+
         taken_rows = set([row_indices])
         self.assertTrue(self.orbit_list.is_row_taken(
             taken_rows, row_indices))
