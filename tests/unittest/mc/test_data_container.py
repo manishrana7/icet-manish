@@ -179,22 +179,25 @@ class TestDataContainer(unittest.TestCase):
     def test_reset(self):
         """Test appended data is cleared."""
         # add some data first
-        for mctrial in range(100):
-            self.dc.append(mctrial, dict([('temperature', 100.0)]))
+        for mctrial in range(10):
+            self.dc.append(mctrial, dict(energy=2.123))
         # clears data
         self.dc.reset()
         self.assertEqual(self.dc.get_number_of_entries(), 0)
 
     def test_get_number_of_entries(self):
         """Test number of entries is returned from function."""
-        row_data = [100, np.nan, 1000, np.nan]
-        for mctrial, data in zip([1, 2, 3, 4], row_data):
-            self.dc.append(mctrial, dict([('temperature', data)]))
-
-        self.assertEqual(self.dc.get_number_of_entries('temperature'), 2)
+        for mctrial in range(10):
+            if mctrial % 2 == 0:
+                self.dc.append(
+                    mctrial, dict(energy=2.123, temperature=4.0))
+            else:
+                self.dc.append(mctrial, dict(energy=2.123))
 
         # test total number of entries
-        self.assertEqual(self.dc.get_number_of_entries(), 4)
+        self.assertEqual(self.dc.get_number_of_entries(), 10)
+        # test number of entries in the temperature column
+        self.assertEqual(self.dc.get_number_of_entries('temperature'), 5)
 
     def test_get_average(self):
         """Test get average functionality."""
@@ -262,7 +265,6 @@ class TestDataContainer(unittest.TestCase):
         """Test write and read functionalities of data container."""
 
         # append data for testing
-        self.dc.add_observable('sro')
         row_data = {}
         row_data['obs1'] = 64
         row_data['occupations'] = [13, 13, 13]
