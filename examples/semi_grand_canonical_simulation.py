@@ -12,7 +12,7 @@ for i, atom in enumerate(atoms):
     if i % 2 == 0:
         atom.symbol = 'Ga'
 
-# create a cluster space
+# Create a cluster space
 cutoffs = [5, 3]
 elements = ['Al', 'Ga']
 chemical_potentials = {'Al': 5, 'Ga': 0}
@@ -30,7 +30,8 @@ ensemble = SemiGrandCanonicalEnsemble(
     calculator=calculator, atoms=atoms,
     random_seed=42, temperature=100.0,
     chemical_potentials=chemical_potentials,
-    ensemble_data_write_interval=2)
+    ensemble_data_write_interval=2,
+    trajectory_write_interval=2)
 
 # Let's take it for a spin
 ensemble.run(100)

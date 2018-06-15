@@ -46,6 +46,11 @@ class BaseEnsemble(ABC):
         specific data is observed and saved to the
         data container. This data can be temperature,
         current value of the calculator etc.
+    trajectory_write_interval : int
+        this sets the interval in which the trajectory
+        or configuration of the species in the atomic
+        structure is observed and saved to the data
+        container.
     data_container_write_period : float (default np.inf)
         this sets the period in units of seconds
         which the data container should be written to file.
@@ -70,7 +75,7 @@ class BaseEnsemble(ABC):
 
     def __init__(self, calculator=None, atoms=None, name='BaseEnsemble',
                  data_container=None, ensemble_data_write_interval=None,
-                 data_container_write_period=np.inf,
+                 trajectory_write_interval=None, data_container_write_period=np.inf,
                  random_seed=None):
 
         if calculator is None:
@@ -112,8 +117,15 @@ class BaseEnsemble(ABC):
         else:
             self._ensemble_data_write_interval = ensemble_data_write_interval
         self._data_container.add_observable('energy')
-        if ensemble_data_write_interval is not np.inf:
-            self._find_observer_interval()
+        
+        # Handle trajectory writing
+        if trajectory_write_interval is None:
+            self._trajectory_write_interval = len(atoms)
+        else:
+            self._trajectory_write_interval = trajectory_write_interval
+        self._data_container.add_observable('energy')
+
+        self._find_observer_interval()
 
     @property
     def structure(self):
@@ -242,6 +254,10 @@ class BaseEnsemble(ABC):
             for key, value in ensemble_data.items():
                 row_dict[key] = value
 
+        # Trajectory data
+        if step % self._trajectory_write_interval == 0:
+            row_dict['occupations'] = self.configuration.occupations
+
         # Observer data
         for observer in self.observers.values():
             if step % observer.interval == 0:
@@ -252,6 +268,7 @@ class BaseEnsemble(ABC):
                 else:
                     row_dict[observer.tag] = observer.get_observable(
                         self.calculator.atoms)
+
         if len(row_dict) > 0:
             self._data_container.append(mctrial=step, record=row_dict)
 
@@ -295,6 +312,8 @@ class BaseEnsemble(ABC):
         intervals = [obs.interval for obs in self.observers.values()]
         if self._ensemble_data_write_interval is not np.inf:
             intervals.append(self._ensemble_data_write_interval)
+        if self._trajectory_write_interval is not np.inf:
+            intervals.append(self._trajectory_write_interval)
 
         self._observer_interval = self._get_gcd(intervals)
 
