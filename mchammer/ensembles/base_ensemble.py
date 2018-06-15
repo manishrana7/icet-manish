@@ -75,7 +75,8 @@ class BaseEnsemble(ABC):
 
     def __init__(self, calculator=None, atoms=None, name='BaseEnsemble',
                  data_container=None, ensemble_data_write_interval=None,
-                 trajectory_write_interval=None, data_container_write_period=np.inf,
+                 trajectory_write_interval=None,
+                 data_container_write_period=np.inf,
                  random_seed=None):
 
         if calculator is None:
@@ -117,15 +118,19 @@ class BaseEnsemble(ABC):
         else:
             self._ensemble_data_write_interval = ensemble_data_write_interval
         self._data_container.add_observable('energy')
-        
+
         # Handle trajectory writing
         if trajectory_write_interval is None:
             self._trajectory_write_interval = len(atoms)
         else:
             self._trajectory_write_interval = trajectory_write_interval
-        self._data_container.add_observable('energy')
+        self._data_container.add_observable('occupations')
 
-        self._find_observer_interval()
+        if self._ensemble_data_write_interval is not np.inf:
+            self._find_observer_interval()
+
+        if self._trajectory_write_interval is not np.inf:
+            self._find_observer_interval()
 
     @property
     def structure(self):
@@ -310,8 +315,10 @@ class BaseEnsemble(ABC):
         """
 
         intervals = [obs.interval for obs in self.observers.values()]
+
         if self._ensemble_data_write_interval is not np.inf:
             intervals.append(self._ensemble_data_write_interval)
+
         if self._trajectory_write_interval is not np.inf:
             intervals.append(self._trajectory_write_interval)
 
