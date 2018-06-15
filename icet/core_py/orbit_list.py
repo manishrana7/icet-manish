@@ -233,7 +233,7 @@ class OrbitList(object):
         The resulted list are all equivalent sites that
         the permutation matrix doesn't really catch on.
 
-        parameters
+        Parameters
         ----------
         sites : list of icet Lattice Sites object
         """
@@ -302,7 +302,7 @@ class OrbitList(object):
 
     def is_rows_taken(self, rows):
         """
-        Checks if these particual rows in the
+        Checks if these particular rows in the
         permutation matrix has been used for
         constructing an orbit.
 
