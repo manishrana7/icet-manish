@@ -126,11 +126,7 @@ class BaseEnsemble(ABC):
             self._trajectory_write_interval = trajectory_write_interval
         self._data_container.add_observable('occupations')
 
-        if self._ensemble_data_write_interval is not np.inf:
-            self._find_observer_interval()
-
-        if self._trajectory_write_interval is not np.inf:
-            self._find_observer_interval()
+        self._find_observer_interval()
 
     @property
     def structure(self):
@@ -322,7 +318,8 @@ class BaseEnsemble(ABC):
         if self._trajectory_write_interval is not np.inf:
             intervals.append(self._trajectory_write_interval)
 
-        self._observer_interval = self._get_gcd(intervals)
+        if intervals:
+            self._observer_interval = self._get_gcd(intervals)
 
     def _get_gcd(self, interval_list):
         """
