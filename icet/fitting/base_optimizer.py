@@ -136,7 +136,8 @@ class BaseOptimizer:
         width = 54
         s = []
         s.append(' {} '.format(self.__class__.__name__).center(width, '='))
-        for key, value in self.summary.items():
+        for key in sorted(self.summary.keys()):
+            value = self.summary[key]
             if isinstance(value, (str, int)):
                 s.append('{:30} : {}'.format(key, value))
             elif isinstance(value, (float)):
