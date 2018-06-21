@@ -1,6 +1,6 @@
-'''
+"""
 This example demonstrates how to count the number of clusters for a structure.
-'''
+"""
 
 # Start import
 from ase.build import bulk

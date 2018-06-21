@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division
 
-from .ensembles.base_ensemble import BaseEnsemble
-from .observers.base_observer import BaseObserver
 from .data_container import DataContainer
+from .configuration_manager import ConfigurationManager
 
 '''
 mchammer module of icet.
@@ -23,8 +22,7 @@ __credits__ = ['Mattias Ångqvist',
                'Paul Erhart']
 __version__ = '0.1'
 __all__ = ['DataContainer',
-           'BaseEnsemble',
-           'BaseObserver']
+           'ConfigurationManager']
 __maintainer__ = 'The icet developers team'
 __maintainer_email__ = 'icet@materialsmodeling.org'
 __status__ = 'alpha-version'

@@ -20,14 +20,16 @@ the structure_container.py file
 
 """
 
-import unittest
+import sys
 import tempfile
+import unittest
 
 from ase import Atoms
 from ase.build import bulk
 from ase.calculators.emt import EMT
 from icet import ClusterSpace, StructureContainer
 from icet.core.structure_container import FitStructure
+from io import StringIO
 
 
 def strip_surrounding_spaces(input_string):
@@ -40,12 +42,12 @@ def strip_surrounding_spaces(input_string):
     str
         original string minus surrounding spaces and empty lines
     """
-    from io import StringIO
     s = []
-    for line in StringIO(input_string):
-        if len(line.strip()) == 0:
-            continue
-        s += [line.strip()]
+    with StringIO(input_string) as data:
+        for line in data:
+            if len(line.strip()) == 0:
+                continue
+            s += [line.strip()]
     return '\n'.join(s)
 
 
@@ -150,6 +152,14 @@ class TestStructureContainer(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.sc.add_structure(atoms)
 
+        # check that duplicate structure is not added.
+        self.sc.add_structure(atoms, tag, properties)
+        with self.assertRaises(ValueError) as context:
+            self.sc.add_structure(atoms, tag, properties,
+                                  allow_duplicate=False)
+        self.assertIn('Atoms have identical cluster vector withstructure',
+                      str(context.exception))
+
     def test_get_fit_data(self):
         """
         Testing get_fit_data functionality
@@ -220,10 +230,11 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
         """
         Testing print_overview functionality
         """
-        # this runs the function but since the latter merely invokes another
-        # function to print some information to stdout there is not much to
-        # test here (other than the function not throwing an exception)
-        self.sc.print_overview()
+        with StringIO() as capturedOutput:
+            sys.stdout = capturedOutput  # redirect stdout
+            self.sc.print_overview()
+            sys.stdout = sys.__stdout__  # reset redirect
+            self.assertTrue('Structure Container' in capturedOutput.getvalue())
 
     def test_get_properties(self):
         """
@@ -270,6 +281,17 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
         """
         cs_onlyread = self.sc.cluster_space
         self.assertEqual(cs_onlyread, self.cs)
+
+    def test_available_properties(self):
+        """
+        Testing available_properties property
+        """
+        available_properties = sorted(self.properties_list[0])
+        self.sc.add_structure(self.structure_list[0],
+                              properties=self.properties_list[0])
+
+        self.assertSequenceEqual(available_properties,
+                                 self.sc.available_properties)
 
     def test_read_write(self):
         """
@@ -369,6 +391,29 @@ class TestFitStructure(unittest.TestCase):
         self.fit_structure.set_cluster_vector(None)
         cv = self.fit_structure.cluster_vector
         self.assertTrue(cv is None)
+
+    def test_getattr(self):
+        """
+        Test custom getattr function.
+        """
+        properties = dict(energy=2.123, nvac=48, c=[0.5, 0.5], fname='asd.xml')
+        self.fit_structure.set_properties(properties)
+
+        # test the function call
+        for key, val in properties.items():
+            self.assertEqual(self.fit_structure.__getattr__(key), val)
+
+        # test the attributes
+        self.assertEqual(self.fit_structure.energy, properties['energy'])
+        self.assertEqual(self.fit_structure.nvac, properties['nvac'])
+        self.assertEqual(self.fit_structure.c, properties['c'])
+        self.assertEqual(self.fit_structure.fname, properties['fname'])
+
+        # test regular attribute call
+        self.fit_structure.properties
+        self.fit_structure.atoms
+        with self.assertRaises(AttributeError):
+            self.fit_structure.hello_world
 
 
 if __name__ == '__main__':

@@ -20,6 +20,17 @@ class TestClusterExpansion(unittest.TestCase):
         self.subelements = ['H', 'He', 'Pb']
         self.cutoffs = [1.4] * 3
 
+    def test_init(self):
+        """Test that initialization works."""
+        atoms = bulk('Au')
+        cutoffs = [3.0]
+        cs = ClusterSpace(atoms, cutoffs, ['Au', 'Pd'])
+        with self.assertRaises(ValueError) as context:
+            ClusterExpansion(cs, [0.0])
+        msg = 'cluster_space and parameters must have the same' + \
+            ' length (3 != 1)'
+        self.assertEqual(str(context.exception), msg)
+
     def test_all_systems_in_database(self):
         """
         Test all structures in database
@@ -67,8 +78,8 @@ class TestClusterExpansion(unittest.TestCase):
         ce_read = ClusterExpansion.read(f.name)
 
         # Test clusterspace in cluster expansion
-        self.assertEqual(cluster_space._input_atoms,
-                         ce_read.cluster_space._input_atoms)
+        self.assertEqual(cluster_space._atoms,
+                         ce_read.cluster_space._atoms)
         self.assertEqual(list(cluster_space._cutoffs),
                          list(ce_read.cluster_space._cutoffs))
         self.assertEqual(cluster_space._chemical_symbols,

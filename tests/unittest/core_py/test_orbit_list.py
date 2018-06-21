@@ -50,9 +50,9 @@ class TestOrbitList(unittest.TestCase):
         self.assertEqual(len(self.orbit_list), 3)
 
     def test_sort(self):
-        """
-        Testing len functionality
-        """
+        '''
+        Testing sort functionality
+        '''
         self.orbit_list.sort()
         for i in range(len(self.orbit_list) - 1):
             self.assertLess(
@@ -208,7 +208,7 @@ class TestOrbitList(unittest.TestCase):
 
     def test_singlets_particle(self):
         """
-        Test that a particle get correct number of singlets.
+        Test that a particle gets correct number of singlets.
         """
         # Below is an explanation on how the particle looks like
         # and what its unique sites are:

@@ -1,3 +1,4 @@
+import os
 import random
 from time import time
 from abc import ABC, abstractmethod
@@ -9,10 +10,53 @@ from mchammer.observers.base_observer import BaseObserver
 
 import numpy as np
 
+from typing import List, Dict
+
 
 class BaseEnsemble(ABC):
     """
     Base ensemble abstract class.
+
+
+    Parameters
+    ----------
+    calculator : mchammer calculator
+        this is the calculator that will be used
+        to calculate potential energy differences
+        that goes into the Boltzmann factor used
+        to calculate the probability ratio between
+        two states when doing a trial move.
+    atoms : ASE Atoms
+        this defines the underlying lattice
+        that will be used in the monte carlo
+        simulation and also defines the
+        initial occupation vector.
+    name : str (default BaseEnsemble)
+        name of the ensemble which will show up
+        in the datacontainer among other things.
+    data_container : str
+        this defines the filename that the ensemble
+        will write the data container to. If the file
+        already exists then the data container will be
+        read and data will be appended to
+        that data container and it will also overwrite
+        that data container.
+    ensemble_data_write_interval : int
+        this sets the interval in which the ensemble
+        specific data is observed and saved to the
+        data container. This data can be temperature,
+        current value of the calculator etc.
+    data_container_write_period : float (default np.inf)
+        this sets the period in units of seconds
+        which the data container should be written to file.
+        Writing often to file is both a way to examine
+        the currently observed values and also to backup
+        your data.
+    random_seed : int
+        this set the random seed to the random number generator
+        that is used in the Monte Carlo trial moves. Setting
+        the seed can be used to reproduce earlier
+        simulations.
 
     Attributes
     ----------
@@ -24,9 +68,13 @@ class BaseEnsemble(ABC):
         number of total trial steps.
     """
 
-    def __init__(self, calculator, name='BaseEnsemble',
-                 data_container=None, data_container_write_period=np.inf,
+    def __init__(self, calculator=None, atoms=None, name='BaseEnsemble',
+                 data_container=None, ensemble_data_write_interval=None,
+                 data_container_write_period=np.inf,
                  random_seed=None):
+
+        if calculator is None:
+            raise TypeError("Missing required keyword argument: calculator")
 
         self._calculator = calculator
         self._name = name
@@ -35,25 +83,37 @@ class BaseEnsemble(ABC):
         self.total_trials = 0
         self._observers = {}
         self._step = 0
-
+        if atoms is None:
+            raise TypeError("Missing required keyword argument: atoms")
         if random_seed is None:
             self._random_seed = random.randint(0, 1e16)
         else:
             self._random_seed = random_seed
-        random.seed(a=self.random_seed)
+        random.seed(a=self._random_seed)
 
-        if data_container is None:
-            self._data_container = DataContainer(atoms=None,
-                                                 ensemble_name=name,
-                                                 random_seed=random_seed)
+        self._data_container_filename = data_container
+
+        if data_container is not None and os.path.isfile(data_container):
+            self._data_container = DataContainer.read(data_container)
         else:
-            raise NotImplementedError
-        self._data_container_filename = None
+            self._data_container = \
+                DataContainer(atoms=atoms,
+                              ensemble_name=name,
+                              random_seed=self._random_seed)
 
         strict_constraints = self.calculator.occupation_constraints
         sublattices = [[i for i in range(len(self.calculator.atoms))]]
         self.configuration = ConfigurationManager(
-            self._calculator.atoms.numbers, strict_constraints, sublattices)
+            atoms, strict_constraints, sublattices)
+
+        # Handle ensemble data writing
+        if ensemble_data_write_interval is None:
+            self._ensemble_data_write_interval = len(atoms)
+        else:
+            self._ensemble_data_write_interval = ensemble_data_write_interval
+        self._data_container.add_observable('energy')
+        if ensemble_data_write_interval is not np.inf:
+            self._find_observer_interval()
 
     @property
     def structure(self):
@@ -61,12 +121,12 @@ class BaseEnsemble(ABC):
         ASE Atoms object :
         The current state of the  structure being sampled in the ensemble.
         """
-        return self.calculator.atoms.copy()
+        return self.configuration.atoms.copy()
 
     @property
     def step(self) -> int:
         """
-        int : current MC trial step.
+        int : current MC trial step
         """
         return self._step
 
@@ -85,9 +145,9 @@ class BaseEnsemble(ABC):
         return self._observers
 
     @property
-    def acceptance_ratio(self):
+    def acceptance_ratio(self) -> float:
         """
-        float : the acceptance ratio,
+        acceptance ratio,
         i.e. accepted_trials / total_trials.
         """
         return self.accepted_trials / self.total_trials
@@ -101,10 +161,10 @@ class BaseEnsemble(ABC):
 
     def run(self, number_of_trial_steps: int, reset_step=False):
         """
-        Sample the ensemble for `number_of_trial_steps` steps.
+        Samples the ensemble for `number_of_trial_steps` steps.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         number_of_trial_steps: int
             number of steps to run in total
         reset_step : bool
@@ -122,10 +182,10 @@ class BaseEnsemble(ABC):
             # run mc so that we start at an interval which lands
             # on the observers interval
             if not initial_step == 0:
-                first_run_interval = self.minimum_observation_interval -\
+                first_run_interval = self.observer_interval -\
                     (initial_step -
-                     (initial_step // self.minimum_observation_interval) *
-                        self.minimum_observation_interval)
+                     (initial_step // self.observer_interval) *
+                        self.observer_interval)
                 first_run_interval = min(
                     first_run_interval, number_of_trial_steps)
                 self._run(first_run_interval)
@@ -135,12 +195,11 @@ class BaseEnsemble(ABC):
         step = initial_step
         while step < final_step:
             uninterrupted_steps = min(
-                self.minimum_observation_interval, final_step - step)
-            if self._step % self.minimum_observation_interval == 0:
+                self.observer_interval, final_step - step)
+            if self._step % self.observer_interval == 0:
                 self._observe_configuration(self._step)
             if self._data_container_filename is not None and \
-                    time() - last_write_time > \
-                    self.data_container_write_period:
+                    time()-last_write_time > self.data_container_write_period:
                 self.data_container.write(self._data_container_filename)
 
             self._run(uninterrupted_steps)
@@ -148,7 +207,7 @@ class BaseEnsemble(ABC):
             self._step += uninterrupted_steps
 
         # If we end on an observation interval we also observe
-        if self._step % self.minimum_observation_interval == 0:
+        if self._step % self.observer_interval == 0:
             self._observe_configuration(self._step)
 
         if self._data_container_filename is not None:
@@ -167,7 +226,7 @@ class BaseEnsemble(ABC):
 
     def _observe_configuration(self, step):
         """
-        Submit current configuration to observers and append observations to
+        Submits current configuration to observers and append observations to
         data container.
 
         Parameters
@@ -176,10 +235,16 @@ class BaseEnsemble(ABC):
             the current trial step
         """
         row_dict = {}
-        new_observations = False
+
+        # Ensemble specific data
+        if step % self._ensemble_data_write_interval == 0:
+            ensemble_data = self.get_ensemble_data()
+            for key, value in ensemble_data.items():
+                row_dict[key] = value
+
+        # Observer data
         for observer in self.observers.values():
             if step % observer.interval == 0:
-                new_observations = True
                 if observer.return_type is dict:
                     for key, value in observer.get_observable(
                             self.calculator.atoms).items():
@@ -187,7 +252,7 @@ class BaseEnsemble(ABC):
                 else:
                     row_dict[observer.tag] = observer.get_observable(
                         self.calculator.atoms)
-        if new_observations:
+        if len(row_dict) > 0:
             self._data_container.append(mctrial=step, record=row_dict)
 
     @abstractmethod
@@ -210,29 +275,32 @@ class BaseEnsemble(ABC):
 
     def next_random_number(self):
         """
-        Return the next random number from the RNG.
+        Returns the next random number from the RNG.
         """
         return random.random()
 
     @property
-    def minimum_observation_interval(self):
+    def observer_interval(self):
         """
         int : minimum number of steps to run
         Monte Carlo simulation without observation interruptions.
         """
-        return self._minimum_observation_interval
+        return self._observer_interval
 
-    def _find_minimum_observation_interval(self):
+    def _find_observer_interval(self):
         """
         Find the greatest common denominator from the observation intervals.
         """
 
-        intervals = [obs.interval for _, obs in self.observers.items()]
-        self._minimum_observation_interval = self._get_gcd(intervals)
+        intervals = [obs.interval for obs in self.observers.values()]
+        if self._ensemble_data_write_interval is not np.inf:
+            intervals.append(self._ensemble_data_write_interval)
+
+        self._observer_interval = self._get_gcd(intervals)
 
     def _get_gcd(self, interval_list):
         """
-        Find the gcd from the list of intervals.
+        Finds the gcd from the list of intervals.
 
         interval_list : list of int
         """
@@ -252,7 +320,7 @@ class BaseEnsemble(ABC):
         """
         Attaches an observer to the ensemble.
 
-        Parameters:
+        Parameters
         ----------
         observer : mchammer Observer object
         """
@@ -266,25 +334,28 @@ class BaseEnsemble(ABC):
             self.observers[observer.tag] = observer
 
         if observer.return_type is dict:
-            for key in observer:
+            for key in observer.get_keys():
                 self._data_container.add_observable(key)
         else:
             self._data_container.add_observable(observer.tag)
 
-        self._find_minimum_observation_interval()
+        self._find_observer_interval()
 
     def reset_data_container(self):
-        """Reset the data container and the internal step attribute."""
+        """Resets the data container and the internal step attribute."""
         self._step = 0
+        self.total_trials = 0
+        self.accepted_trials = 0
+
         self._data_container.reset()
 
     def update_occupations(self, list_of_sites, list_of_elements):
         """
-        Update the element occupation of the configuration being sampled.
+        Updates the element occupation of the configuration being sampled.
         This will change the state in both the configuration in the calculator
         and the state of configuration manager.
 
-        parameters
+        Parameters
         ----------
         list_of_sites : list of int
             list of indices of the configuration to change.
@@ -292,7 +363,7 @@ class BaseEnsemble(ABC):
             list of elements to put on the lattice sites the
             indices refer to.
 
-        raises
+        Raises
         ------
         ValueError : if list_of_sites are not the same length
                      as list_of_elements
@@ -301,5 +372,58 @@ class BaseEnsemble(ABC):
         if len(list_of_sites) != len(list_of_elements):
             raise ValueError(
                 "List of sites and list of elements are not the same size.")
-        self.calculator.update_occupations(list_of_sites, list_of_elements)
         self.configuration.update_occupations(list_of_sites, list_of_elements)
+
+    def get_property_change(self, indices: List[int],
+                            elements: List[int]) -> float:
+        """
+        Get the property change for a hypothetical change
+        of the input indices, elements.
+
+        Parameters
+        ----------
+        indices : list of int
+            refer to indices in the lattice
+        elements : list of int
+            refer to atomic species
+
+        Returns
+        -------
+        change in property value : float
+        """
+        current_elements = [self.configuration.occupations[i] for i in indices]
+
+        current_property = self.calculator.calculate_local_contribution(
+            indices, self.configuration.occupations)
+        self.update_occupations(list_of_sites=indices,
+                                list_of_elements=elements)
+        new_property = self.calculator.calculate_local_contribution(
+            indices, self.configuration.occupations)
+        property_change = new_property - current_property
+
+        # Set elements back to what they were
+        self.update_occupations(indices, current_elements)
+        return property_change
+
+    def get_ensemble_data(self) -> Dict:
+        """
+        Get current calculator property.
+
+        Returns
+        -------
+        dict : ensemble data key pairs
+
+        """
+        return {'energy': self.calculator.calculate_total(
+            occupations=self.configuration.occupations)}
+
+    def get_random_sublattice_index(self) -> int:
+        """
+        Get a random sublattice index based
+        on the weights of the sublattice.
+
+        Return
+        ------
+        sublattice_index : int
+        """
+        return 0

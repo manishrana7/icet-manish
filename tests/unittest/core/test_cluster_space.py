@@ -20,18 +20,20 @@ the cluster_space.py file
 
 """
 
+import numpy as np
+import sys
+import tempfile
 import unittest
 
+from ase import Atoms
+from ase.build import bulk, fcc111
+from ase.db import connect as db_connect
+from collections import OrderedDict
 from icet import ClusterSpace
 from icet.core.cluster_space import (get_singlet_info,
                                      get_singlet_configuration)
-from icet.core.structure import Structure
 from icet.core.lattice_site import LatticeSite
-from collections import OrderedDict
-
-import numpy as np
-import ase.db
-from ase.build import bulk
+from io import StringIO
 
 
 def strip_surrounding_spaces(input_string):
@@ -44,7 +46,6 @@ def strip_surrounding_spaces(input_string):
     str
         original string minus surrounding spaces and empty lines
     """
-    from io import StringIO
     s = []
     for line in StringIO(input_string):
         if len(line.strip()) == 0:
@@ -101,7 +102,6 @@ class TestClusterSpace(unittest.TestCase):
     """
 
     def __init__(self, *args, **kwargs):
-        from ase.build import bulk
         super(TestClusterSpace, self).__init__(*args, **kwargs)
         self.subelements = ['Ag', 'Au']
         self.cutoffs = [4.0] * 3
@@ -129,17 +129,6 @@ class TestClusterSpace(unittest.TestCase):
         cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
         self.assertIsInstance(cs, ClusterSpace)
         self.assertEqual(len(cs), len(self.cs))
-        # initialize from icet Structure
-        cs = ClusterSpace(Structure.from_atoms(self.atoms_prim), self.cutoffs,
-                          self.subelements)
-        self.assertIsInstance(cs, ClusterSpace)
-        self.assertEqual(len(cs), len(self.cs))
-        cs = ClusterSpace(Structure.from_atoms(self.atoms_prim), self.cutoffs,
-                          self.subelements)
-        # check that other types fail
-        with self.assertRaises(Exception) as context:
-            cs = ClusterSpace('something', self.cutoffs, self.subelements)
-        self.assertTrue('Unknown structure format' in str(context.exception))
         # check Mi as int
         cs = ClusterSpace(self.atoms_prim, self.cutoffs,
                           self.subelements, Mi=2)
@@ -238,17 +227,17 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         """
         Testing print_overview functionality
         """
-        # this runs the function but since the latter merely invokes another
-        # function to print some information to stdout there is not much to
-        # test here (other than the function not throwing an exception)
-        self.cs.print_overview()
+        with StringIO() as capturedOutput:
+            sys.stdout = capturedOutput  # redirect stdout
+            self.cs.print_overview()
+            sys.stdout = sys.__stdout__  # reset redirect
+            self.assertTrue('Cluster Space' in capturedOutput.getvalue())
 
     def test_get_number_of_orbits_by_order(self):
         """
         Testing get_number_of_orbits_by_order functionality
         """
         retval = self.cs.get_number_of_orbits_by_order()
-        print("retval\n", retval)
         target = OrderedDict([(0, 1), (1, 1), (2, 1), (3, 1), (4, 1)])
         self.assertEqual(target, retval)
 
@@ -269,19 +258,9 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         info = ' '.join(s)
         self.assertEqual(len(target_cluster_vectors), len(self.structure_list),
                          msg=info)
-        # use ASE Atoms
         for atoms, target in zip(self.structure_list, target_cluster_vectors):
             retval = list(self.cs.get_cluster_vector(atoms))
             self.assertAlmostEqual(retval, target, places=9)
-        # use icet Structure
-        for atoms, target in zip(self.structure_list, target_cluster_vectors):
-            retval = list(self.cs.get_cluster_vector(
-                Structure.from_atoms(atoms)))
-            self.assertAlmostEqual(retval, target, places=9)
-        # check that other types fail
-        with self.assertRaises(Exception) as context:
-            retval = self.cs.get_cluster_vector('something')
-        self.assertTrue('Unknown structure format' in str(context.exception))
 
     def test_get_singlet_info(self):
         """
@@ -302,7 +281,6 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         """
         Testing get_singlet_configuration functionality
         """
-        from ase import Atoms
         retval = get_singlet_configuration(self.atoms_prim)
         self.assertIsInstance(retval, Atoms)
         self.assertEqual(retval[0].symbol, 'H')
@@ -328,17 +306,12 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         """ Testing cutoffs property """
         self.assertEqual(self.cs.cutoffs, self.cutoffs)
 
-    def test_structure(self):
-        """ Testing structure property """
-        self.assertEqual(len(self.cs.structure),
-                         len(self.atoms_prim))
-
     def _test_cluster_vectors_in_database(self, db_name):
         """
         Tests the cluster vectors in the database.
         """
 
-        db = ase.db.connect(db_name)
+        db = db_connect(db_name)
 
         entry1 = db.get(id=1)
         atoms = entry1.toatoms()
@@ -377,12 +350,11 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         """
         Test read/write functionality.
         """
-        import tempfile
         f = tempfile.NamedTemporaryFile()
         self.cs.write(f.name)
         f.seek(0)
         cs_read = ClusterSpace.read(f.name)
-        self.assertEqual(self.cs._input_atoms, cs_read._input_atoms)
+        self.assertEqual(self.cs._atoms, cs_read._atoms)
         self.assertEqual(list(self.cs._cutoffs), list(cs_read._cutoffs))
         self.assertEqual(self.cs._chemical_symbols, cs_read._chemical_symbols)
         self.assertEqual(self.cs._mi, cs_read._mi)
@@ -400,7 +372,6 @@ class TestClusterSpaceSurface(unittest.TestCase):
     """
 
     def __init__(self, *args, **kwargs):
-        from ase.build import fcc111
         super(TestClusterSpaceSurface, self).__init__(*args, **kwargs)
         self.subelements = ['Ag', 'Au']
         self.cutoffs = [4.0] * 3
@@ -446,18 +417,9 @@ class TestClusterSpaceSurface(unittest.TestCase):
         info = ' '.join(s)
         self.assertEqual(len(target_cluster_vectors), len(self.structure_list),
                          msg=info)
-        # use ASE Atoms
         for atoms, target in zip(self.structure_list, target_cluster_vectors):
             retval = self.cs.get_cluster_vector(atoms)
             self.assertAlmostEqualList(retval, target, places=9)
-        # use icet Structure
-        for atoms, target in zip(self.structure_list, target_cluster_vectors):
-            retval = self.cs.get_cluster_vector(Structure.from_atoms(atoms))
-            self.assertAlmostEqualList(retval, target, places=9)
-        # check that other types fail
-        with self.assertRaises(Exception) as context:
-            retval = self.cs.get_cluster_vector('something')
-        self.assertTrue('Unknown structure format' in str(context.exception))
 
     def test_get_number_of_orbits_by_order(self):
         """
@@ -500,7 +462,6 @@ class TestClusterSpaceTernary(unittest.TestCase):
         Instantiate class before each test.
         """
         self.cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
-        print(self.cs)
 
     def _get_mc_vector(self, cluster_space, orbit_index):
         """
@@ -586,7 +547,6 @@ class TestClusterSpaceTernary(unittest.TestCase):
                                [[0, 1, 2, 3]]]
         permutation_retval = self.cs.get_mc_vector_permutations(
             mc_vector_target, orbit_index)
-        print(permutation_retval)
         self.assertEqual(permutations_target, permutation_retval)
 
 

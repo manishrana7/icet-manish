@@ -1,4 +1,5 @@
 from mchammer.calculators.base_calculator import BaseCalculator
+from typing import List
 
 
 class ClusterExpansionCalculator(BaseCalculator):
@@ -18,6 +19,13 @@ class ClusterExpansionCalculator(BaseCalculator):
     cluster_expansion : icet ClusterExpansion object
     name : str
         human readable identifier for this calculator
+    scaling : float (default len(atoms))
+        this scales the property that is gotten from
+        cluster vector times ECIs. By default the
+        cluster vector times ECIs is assumed to give
+        property/atom and thus the default value is
+        multiplied by number of atoms.
+
 
     Todo
     ----
@@ -27,10 +35,13 @@ class ClusterExpansionCalculator(BaseCalculator):
     """
 
     def __init__(self, atoms, cluster_expansion,
-                 name='Cluster Expansion Calculator'):
+                 name='Cluster Expansion Calculator', scaling=None):
         super().__init__(atoms=atoms, name=name)
-
         self._cluster_expansion = cluster_expansion
+        if scaling is None:
+            self._property_scaling = len(atoms)
+        else:
+            self._property_scaling = scaling
 
     @property
     def cluster_expansion(self):
@@ -39,46 +50,48 @@ class ClusterExpansionCalculator(BaseCalculator):
         """
         return self._cluster_expansion
 
-    def calculate_total(self):
+    def calculate_total(self, *, occupations: List[int]) -> float:
         """
-        Calculator the total property of the current configuration.
+        Calculates the total property of the current configuration.
 
-        Return
+        Parameters
+        ----------
+        occupations: list of int
+            the entire occupation vector (i.e. list of atomic species)
+
+        Returns
         -------
-            total_property : float
+        total value of the property
         """
-        return self.cluster_expansion.predict(self.atoms)
+        self.atoms.set_atomic_numbers(occupations)
+        return self.cluster_expansion.predict(self.atoms) * \
+            self._property_scaling
 
-    def calculate_local_contribution(self, indices):
+    def calculate_local_contribution(self, local_indices: List[int] = None,
+                                     occupations: List[int] = None) -> float:
         """
-        Return the sum of the contributions from the indices in the input list.
+        Returns the sum of the contributions from the indices in the input
+        list. `local_indices` refers to the lattice sites from which the local
+        contributions should be summed up from. Occupations is the entire
+        occupation vector.
 
         Parameters
         ----------
-        indices : list of ints
+        local_indices : list of int
+            the lattice indices for which to obtain the local contribution
+        occupations : list of int
+            the entire occupation vector
 
-        Return
-        ------
-        float : sum of contributions
+        Returns
+        -------
+        sum of contributions
         """
-        local_contribution = 0
-        for index in indices:
-            local_contribution += self._calculate_local_contribution(index)
-
-        return local_contribution
-
-    def _calculate_local_contribution(self, index):
-        """
-        Internal method to calculate the local contribution for one
-        index.
-
-        Parameters
-        ----------
-        index : int
-            lattice index
-
-        """
-        return self.calculate_total()
+        if local_indices is None:
+            raise TypeError("Missing required keyword argument: local_indices")
+        if occupations is None:
+            raise TypeError("Missing required keyword argument: occupations")
+        return self.calculate_total(occupations=occupations) * \
+            self._property_scaling
 
     @property
     def occupation_constraints(self):

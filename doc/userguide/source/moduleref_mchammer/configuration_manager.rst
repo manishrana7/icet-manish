@@ -1,12 +1,11 @@
 .. index::
-   single: Function reference; ConfigurationManager
    single: Class reference; ConfigurationManager
    single: Monte Carlo; Configuration manager
 
-Data container
-==============
+Configuration manager
+=====================
 
-.. autoclass:: mchammer.DataContainer
+.. autoclass:: mchammer.ConfigurationManager
    :members:
    :undoc-members:
    :inherited-members:

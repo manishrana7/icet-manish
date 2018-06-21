@@ -5,10 +5,9 @@ import socket
 import json
 from datetime import datetime
 from collections import OrderedDict
+import numpy as np
 import pandas as pd
-from ase import Atoms
-from ase.io import write as ase_write
-from ase.io import read as ase_read
+from ase.io import write as ase_write, read as ase_read
 from icet import __version__ as icet_version
 
 
@@ -42,12 +41,6 @@ class DataContainer:
 
     data : Pandas data frame object
         Runtime data collected during the Monte Carlo simulation.
-
-    Todo
-    ----
-    atoms is always expected to be given among the arguments so stop
-    querying whether atoms is None once it has been fixed in BaseEnsemble
-    class.
     """
 
     def __init__(self, atoms, ensemble_name: str, random_seed: int):
@@ -55,10 +48,7 @@ class DataContainer:
         Initialize a DataContainer object.
         """
 
-        if atoms is not None:
-            assert isinstance(atoms, Atoms), \
-                'Structure must be provided as ASE Atoms object'
-            self.structure = atoms.copy()
+        self.structure = atoms.copy()
 
         self._observables = []
         self._parameters = OrderedDict()
@@ -69,12 +59,11 @@ class DataContainer:
         self.add_parameter('seed', random_seed)
 
         self._metadata['ensemble_name'] = ensemble_name
-
         self._metadata['date_created'] = \
             datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
         self._metadata['username'] = getpass.getuser()
         self._metadata['hostname'] = socket.gethostname()
-        self.metadata['icet_version'] = icet_version
+        self._metadata['icet_version'] = icet_version
 
     def add_observable(self, tag: str):
         """
@@ -87,7 +76,8 @@ class DataContainer:
         """
         assert isinstance(tag, str), \
             'Observable tag has wrong type (str)'
-        self._observables.append(tag)
+        if tag not in self._observables:
+            self._observables.append(tag)
 
     def add_parameter(self, tag: str, value):
         """
@@ -131,58 +121,98 @@ class DataContainer:
         row_data = OrderedDict()
         row_data['mctrial'] = mctrial
         row_data.update(record)
-        # dict to DataFrame to avoid dtype conversion when appending data
-        temp_data = pd.DataFrame(row_data, index=[0])
-        self._data = self._data.append(temp_data,
+        self._data = self._data.append(row_data,
                                        ignore_index=True)
 
-    def get_data(self, tags=None, interval=None, fill_missing=False):
+    def get_data(self, tags=None, start=None, stop=None, interval=1,
+                 fill_method=None):
         """
-        Returns a list of lists representing the accumulated data for
-        the observables specified via tags.
+        Returns a list or a tuple with lists representing the accumulated data
+        for the observables specified via tags.
 
         Parameters
         ----------
         tags : list of str
             tags of the required properties; if None all columns of the data
-            frame will be returned in lexigraphical order
+            frame will be returned in lexigraphical order.
 
-        interval : tuple
-            range of trial steps values from which data frame will be returned
+        start : int
+            minimum value of trial step to consider. If None, lowest value
+            in the mctrial column will be used.
 
-        fill_missing : bool
-            If True fill missing values backward
+        stop : int
+            maximum value of trial step to consider. If None, highest value
+            in the mctrial column will be used.
+
+        interval : int
+            incremental step for mctrial index. Default to lowest interval
+            between trial steps values.
+
+        fill_method : {'skip_none', 'fill_backward', 'fill_forward',
+                       'linear_interpolate', None}
+            method to fill missing values. Default is None.
+
+        Returns
+        -------
+        values in the columns of the data frame : list or tuple with lists
         """
-        import math
+        fill_methods = ['skip_none',
+                        'fill_backward',
+                        'fill_forward',
+                        'linear_interpolate']
 
         if tags is None:
             tags = self._data.columns.tolist()
         else:
             for tag in tags:
                 assert tag in self._data, \
-                    'observable is not part of DataContainer: {}'.format(tag)
+                    'Observable is not part of DataContainer: {}'.format(tag)
 
-        if interval is None:
-            data = self._data.loc[:, tags]
+        if start is None and stop is None:
+            data = self._data.loc[::interval, tags]
         else:
-            assert isinstance(interval, tuple), \
-                'interval must be a tuple: {}'.format(type(interval))
-            assert len(interval) == 2, \
-                'interval must contain only a lower and an upper value'
             data = self._data.set_index(self._data.mctrial)
-            lower, upper = interval
-            data = data.loc[lower:upper, tags]
 
-        if fill_missing:
-            data = data.fillna(method='bfill')
+            if start is None:
+                data = data.loc[:stop:interval, tags]
+            elif stop is None:
+                data = data.loc[start::interval, tags]
+            else:
+                data = data.loc[start:stop:interval, tags]
+
+        if fill_method is not None:
+            assert fill_method in fill_methods, \
+                'Unknown fill method: {}'.format(fill_method)
+            # retrieve only valid observations
+            if fill_method is 'skip_none':
+                data.dropna(inplace=True)
+
+            else:
+                # fill NaN with the next valid observation
+                if fill_method is 'fill_backward':
+                    data.fillna(method='bfill', inplace=True)
+                # fill NaN with the last valid observation
+                elif fill_method is 'fill_forward':
+                    data.fillna(method='ffill', inplace=True)
+                # fill NaN with the linear interpolation
+                # of the last and next valid observations
+                elif fill_method is 'linear_interpolate':
+                    data.interpolate(limit_area='inside', inplace=True)
+
+                # drop any left nan value
+                data.dropna(inplace=True)
 
         data_list = []
         for tag in tags:
-            data_column = data.get(tag).tolist()
-            data_column = [None if math.isnan(x) else x for x in data_column]
-            data_list.append(data_column)
-
-        return data_list
+            data_list.append(
+                # convert NaN to None
+                [None if np.isnan(x).any() else x for x in data[tag]])
+        if len(tags) > 1:
+            # return a tuple if more than one tag is given
+            return tuple(data_list)
+        else:
+            # return a list if only one tag is given
+            return data_list[0]
 
     @property
     def data(self):
@@ -226,20 +256,35 @@ class DataContainer:
                 'observable is not part of DataContainer: {}'.format(tag)
             return self._data[tag].count()
 
-    def get_average(self, start: int, stop: int, tag: str):
+    def get_average(self, tag: str, start=None, stop=None):
         """
-        Return average of an observable over an interval of trial steps.
+        Return average and standard deviation of an scalar observable over an
+        interval of trial steps.
 
         Parameters
         ----------
-        start : int
-            lower limit of trial step interval
-        stop : int
-            upper limit of trial step interval
         tag : str
             tag of field over which to average
+        start : int
+            minimum value of trial step to consider. If None, lowest value
+            in the mctrial column will be used.
+
+        stop : int
+            maximum value of trial step to consider. If None, highest value
+            in the mctrial column will be used.
         """
-        pass
+        assert tag in self._data, \
+            'Observable is not part of DataContainer: {}'.format(tag)
+
+        assert self._data[tag].dtype in ['int64', 'float64'], \
+            'Data from requested column {} has not scalar type'.format(tag)
+
+        if start is None and stop is None:
+            return self._data[tag].mean(), self._data[tag].std()
+        else:
+            data = self.get_data(tags=[tag], start=start, stop=stop,
+                                 fill_method='skip_none')
+            return np.mean(data), np.std(data)
 
     @staticmethod
     def read(infile):
@@ -253,25 +298,37 @@ class DataContainer:
         """
         import os
 
-        if not os.path.isfile(infile):
-            raise Exception("File cannot be found")
+        if isinstance(infile, str):
+            filename = infile
+            if not os.path.isfile(filename):
+                raise FileNotFoundError
+        else:
+            filename = infile.name
 
-        temp_atoms_file = tempfile.NamedTemporaryFile()
-        temp_json_file = tempfile.NamedTemporaryFile()
-        temp_cvs_file = tempfile.NamedTemporaryFile()
+        if not tarfile.is_tarfile(filename):
+            raise ValueError('{} is not a tar file'.format(filename))
 
-        with tarfile.open(mode='r', name=infile) as tar_file:
-            temp_atoms_file.write(tar_file.extractfile('atoms').read())
-            atoms = ase_read(temp_atoms_file.name, format='xyz')
+        reference_atoms_file = tempfile.NamedTemporaryFile()
+        reference_data_file = tempfile.NamedTemporaryFile()
+        runtime_data_file = tempfile.NamedTemporaryFile()
 
-            temp_json_file.write(tar_file.extractfile('reference_data').read())
-            temp_json_file.seek(0)
-            reference_data = json.load(temp_json_file)
+        with tarfile.open(mode='r', name=filename) as tar_file:
+            # file with atoms
+            reference_atoms_file.write(tar_file.extractfile('atoms').read())
 
+            reference_atoms_file.seek(0)
+            atoms = ase_read(reference_atoms_file.name, format='json')
+
+            # file with reference data
+            reference_data_file.write(
+                tar_file.extractfile('reference_data').read())
+            reference_data_file.seek(0)
+            reference_data = json.load(reference_data_file)
+
+            # init DataContainer
             dc = DataContainer(atoms,
                                reference_data['metadata']['ensemble_name'],
                                reference_data['parameters']['seed'])
-
             for key in reference_data:
                 if key == 'metadata':
                     for tag, value in reference_data[key].items():
@@ -287,10 +344,13 @@ class DataContainer:
                     for value in reference_data[key]:
                         dc.add_observable(value)
 
-            temp_cvs_file.write(tar_file.extractfile('runtime_data').read())
-            temp_cvs_file.seek(0)
-            runtime_data = pd.read_csv(temp_cvs_file)
-            dc._data = runtime_data
+            # add runtime data from file
+            runtime_data_file.write(
+                tar_file.extractfile('runtime_data').read())
+
+            runtime_data_file.seek(0)
+            runtime_data = pd.read_json(runtime_data_file)
+            dc._data = runtime_data.sort_index(ascending=True)
 
         return dc
 
@@ -307,23 +367,24 @@ class DataContainer:
             datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 
         # Save reference atomic structure
-        temp_atoms_file = tempfile.NamedTemporaryFile()
-        ase_write(temp_atoms_file.name, self.structure, format='xyz')
+        reference_atoms_file = tempfile.NamedTemporaryFile()
+        ase_write(reference_atoms_file.name, self.structure, format='json')
 
-        # Save reference data to a json tempfile
+        # Save reference data
         reference_data = {'observables': self._observables,
                           'parameters': self._parameters,
                           'metadata': self._metadata}
 
-        temp_json_file = tempfile.NamedTemporaryFile()
-        with open(temp_json_file.name, 'w') as handle:
+        reference_data_file = tempfile.NamedTemporaryFile()
+        with open(reference_data_file.name, 'w') as handle:
             json.dump(reference_data, handle)
 
-        # Save Pandas data frame as a csv tempfile
-        temp_csv_file = tempfile.NamedTemporaryFile()
-        self._data.to_csv(temp_csv_file.name)
+        # Save Pandas'DataFrame
+        runtime_data_file = tempfile.NamedTemporaryFile()
+        self._data.to_json(runtime_data_file.name, double_precision=15)
 
         with tarfile.open(outfile, mode='w') as handle:
-            handle.add(temp_csv_file.name, arcname='runtime_data')
-            handle.add(temp_json_file.name, arcname='reference_data')
-            handle.add(temp_atoms_file.name, arcname='atoms')
+            handle.add(reference_atoms_file.name, arcname='atoms')
+            handle.add(reference_data_file.name, arcname='reference_data')
+            handle.add(runtime_data_file.name, arcname='runtime_data')
+        runtime_data_file.close()
