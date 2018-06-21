@@ -14,8 +14,7 @@ class StructureContainer(object):
     def __init__(self, cluster_space,
                  list_of_atoms=None,
                  list_of_properties=None):
-        """
-        Initializes a StructureContainer object
+        """Initializes a StructureContainer object
 
         This class serves as a container for structure objects, their fit
         properties and their cluster vectors.
@@ -26,12 +25,12 @@ class StructureContainer(object):
             the cluster space used for evaluating the cluster vectors
 
         list_of_atoms : list / list of tuples (bi-optional)
-            list of structures (ASE Atoms objects) or list of pairs
-            of structures and user tag (list of [ASE Atoms object, string]
-            tuples)
+            list of structures (ASE Atoms) or list of tuples of
+            structure (ASE Atoms) and user tag
 
         list_of_properties : list of dicts
             list of properties, which are provided in dicts
+
         """
 
         self._cluster_space = cluster_space
