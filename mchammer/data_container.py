@@ -368,7 +368,7 @@ class DataContainer:
             file to which write trajectory
 
         """
-        atoms_list, energies = self.dc.get_trajectory(scalar_property='energy')
+        atoms_list, energies = self.get_trajectory(scalar_property='energy')
 
         for atoms, energy in atoms_list, energies:
             traj = Trajectory(outfile, mode='a')
