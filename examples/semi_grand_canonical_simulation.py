@@ -36,9 +36,6 @@ ensemble = SemiGrandCanonicalEnsemble(
 # Let's take it for a spin
 ensemble.run(100)
 
-# Write trajectory in file
-#ensemble.data_container.write_trajectory("AlGa.traj")
-
 print("Acceptance ratio {}".format(ensemble.acceptance_ratio))
 
 print(ensemble.data_container.data)
