@@ -7,6 +7,7 @@ from datetime import datetime
 from collections import OrderedDict
 import numpy as np
 import pandas as pd
+from ase.io import Trajectory
 from ase.io import write as ase_write, read as ase_read
 from icet import __version__ as icet_version
 
@@ -124,9 +125,9 @@ class DataContainer:
         self._data = self._data.append(row_data, ignore_index=True)
 
     def get_data(self, tags=None, start=None, stop=None, interval=1,
-                 fill_method=None):
+                 fill_method=None, apply_to=None):
         """
-        Returns a list or a tuple with lists representing the accumulated data
+        Returns a list or a tuple of lists representing the accumulated data
         for the observables specified via tags.
 
         Parameters
@@ -144,15 +145,19 @@ class DataContainer:
             in the mctrial column will be used.
 
         interval : int
-            interval between consecutive observations.
+            interval between observations, default 1.
 
         fill_method : {'skip_none', 'fill_backward', 'fill_forward',
                        'linear_interpolate', None}
             method to fill missing values. Default is None.
 
+        apply_to : list of str
+            tags of columns where fill_method will be applied to. If None,
+            parse all the columns with fill_method.
+
         Returns
         -------
-        values in the columns of the data frame : list or tuple with lists
+        data stored in the data frame : list or tuple of lists
         """
         fill_methods = ['skip_none',
                         'fill_backward',
@@ -181,23 +186,33 @@ class DataContainer:
         if fill_method is not None:
             assert fill_method in fill_methods, \
                 'Unknown fill method: {}'.format(fill_method)
+
+            if apply_to is None:
+                apply_to = tags
+
             # retrieve only valid observations
             if fill_method is 'skip_none':
-                data.dropna(inplace=True)
+                data.dropna(inplace=True, subset=apply_to)
 
             else:
+                # if requested, drop NaN values in columns
+                subset = [tag for tag in tags if tag not in apply_to]
+                data.dropna(inplace=True, subset=subset)
+
                 # fill NaN with the next valid observation
                 if fill_method is 'fill_backward':
                     data.fillna(method='bfill', inplace=True)
+
                 # fill NaN with the last valid observation
                 elif fill_method is 'fill_forward':
                     data.fillna(method='ffill', inplace=True)
-                # fill NaN with the linear interpolation
-                # of the last and next valid observations
+
+                # fill NaN with the linear interpolation of the last and
+                # next valid observations
                 elif fill_method is 'linear_interpolate':
                     data.interpolate(limit_area='inside', inplace=True)
 
-                # drop any left nan value
+                # drop any left NaN value
                 data.dropna(inplace=True)
 
         data_list = []
@@ -256,20 +271,20 @@ class DataContainer:
 
     def get_average(self, tag: str, start=None, stop=None):
         """
-        Return average and standard deviation of an scalar observable over an
-        interval of trial steps.
+        Return average and standard deviation of a scalar observable with
+        the given tag, optionally over a specified interval of trial steps.
 
         Parameters
         ----------
         tag : str
             tag of field over which to average
         start : int
-            minimum value of trial step to consider. If None, lowest value
-            in the mctrial column will be used.
+            minimum value of trial step to consider. If None, lowest mctrial
+            with a valid value of the requested observable will be used.
 
         stop : int
-            maximum value of trial step to consider. If None, highest value
-            in the mctrial column will be used.
+            maximum value of trial step to consider. If None, highest mctrial
+            with a valid value of the requested observable will be used.
         """
         assert tag in self._data, \
             'Observable is not part of DataContainer: {}'.format(tag)
@@ -284,36 +299,80 @@ class DataContainer:
                                  fill_method='skip_none')
             return np.mean(data), np.std(data)
 
-    def get_trajectory(self, start=None, stop=None, interval=1):
+    def get_trajectory(self, start=None, stop=None, interval=1,
+                       scalar_property=None):
         """
-        Returns a trajectory in the form of ASE Atoms object for an specific
-        interval of the simulation.
+        Returns a trajectory in the form of a list of ASE Atoms and
+        optionally a corresponding list with values of the property
+        with the given label. Configurations with non properties will be
+        skipped in the trajectory if the property is requested.
 
         Parameters
         ----------
-
         start : int
-            minimum value of trial step to consider. If None, lowest value
-            in the mctrial column will be used.
+            minimum value of trial step to consider. If None, lowest
+            mctrial with a valid atomic configuration is considered.
 
         stop : int
-            maximum value of trial step to consider. If None, highest value
-            in the mctrial column will be used.
+            maximum value of trial step to consider.If None, lowest
+            mctrial with a valid atomic configuration is considered.
 
         interval : int
-            interval between snapshots. Default to 1.
+            interval between following snapshots, default 1.
+
+        scalar_property : str
+            tah of observable to be returned along with trajectory, optional.
+
         """
-        occupation_vectors = \
-            self.get_data(tags=['occupations'], start=start, stop=stop,
-                          interval=interval, fill_method='skip_none')
+        only_trajectory = True
+
+        if scalar_property is not None:
+            # check property is in data container
+            only_trajectory = False
+            this_column = None
+        else:
+            # default property to energy
+            scalar_property = 'energy'
+            # return all valid observations in observations column
+            # not matter what values are in energy column
+            this_column = ['occupations']
+
+        occupation_vectors, property_values = \
+            self.get_data(tags=['occupations', scalar_property],
+                          start=start, stop=stop, interval=interval,
+                          fill_method='skip_none', apply_to=this_column)
 
         atoms_list = []
-        for occupations in occupation_vectors:
+        scalars_list = []
+        for occupations, scalars in zip(occupation_vectors, property_values):
             atoms_copy = self.atoms.copy()
             atoms_copy.numbers = occupations
             atoms_list.append(atoms_copy)
+            if not only_trajectory:
+                scalars_list.append(scalars)
 
-        return atoms_list
+        if scalars_list:
+            return atoms_list, scalars_list
+        else:
+            return atoms_list
+
+    def write_trajectory(self, outfile):
+        """
+        Save trajectory to a file along with the respectives values of
+        energy for each configuration. If input file exists, trajectory
+        will be appended.
+
+        Parameters
+        ----------
+        outfile : str or FileObj
+            file to which write trajectory
+
+        """
+        atoms_list, energies = self.dc.get_trajectory(scalar_property='energy')
+
+        for atoms, energy in atoms_list, energies:
+            traj = Trajectory(outfile, mode='a')
+            traj.write(atoms=atoms, energy=energy)
 
     @staticmethod
     def read(infile):

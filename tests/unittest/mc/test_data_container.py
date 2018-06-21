@@ -120,41 +120,52 @@ class TestDataContainer(unittest.TestCase):
         # lets suppose the following data was appended to the data container
         # mctrials
         mctrials = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        # energies
+        energy = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         # observable 1
-        obs1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        obs1 = [1, None, 3, None, 5, None, 7, None, 9, None]
         # observable 2
-        obs2 = [1, None, 3, None, 5, None, 7, None, 9, None]
+        obs2 = [None, None, 3, None, None, None, 7, None, None, None]
 
-        rows_data = {'mctrial': mctrials, 'obs1': obs1, 'obs2': obs2}
+        rows_data = \
+            {'mctrial': mctrials, 'energy': energy, 'obs1': obs1, 'obs2': obs2}
 
         self.dc._data = \
-            pd.DataFrame(rows_data, columns=['mctrial', 'obs1', 'obs2'])
+            pd.DataFrame(rows_data,
+                         columns=['mctrial', 'energy', 'obs1', 'obs2'])
 
         retval = self.dc.get_data()
-        self.assertEqual(retval, (mctrials, obs1, obs2))
+        self.assertEqual(retval, (mctrials, energy, obs1, obs2))
 
         # using skip_none
         retval1, retval2 = \
-            self.dc.get_data(tags=['mctrial', 'obs2'], fill_method='skip_none')
+            self.dc.get_data(tags=['mctrial', 'obs1'], fill_method='skip_none')
         self.assertEqual(retval1, [10, 30, 50, 70, 90])
         self.assertEqual(retval2, [1, 3, 5, 7, 9])
 
         # using fill_backward
-        retval = self.dc.get_data(tags=['obs2'], fill_method='fill_backward')
+        retval = self.dc.get_data(tags=['obs1'], fill_method='fill_backward')
         self.assertEqual(retval, [1, 3, 3, 5, 5, 7, 7, 9, 9])
 
         # using fill_forward
-        retval = self.dc.get_data(tags=['obs2'], fill_method='fill_forward')
+        retval = self.dc.get_data(tags=['obs1'], fill_method='fill_forward')
         self.assertEqual(retval, [1, 1, 3, 3, 5, 5, 7, 7, 9, 9])
 
         # using linear_interpolate
         retval = \
-            self.dc.get_data(tags=["obs2"], fill_method="linear_interpolate")
+            self.dc.get_data(tags=["obs1"], fill_method="linear_interpolate")
         self.assertEqual(retval, [1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+        # skip_none only for obs1
+        retval1, retval2 = \
+            self.dc.get_data(tags=['obs1', 'obs2'],
+                             fill_method='skip_none', apply_to=['obs1'])
+        self.assertEqual(retval1, [1, 3, 5, 7, 9])
+        self.assertEqual(retval2, [None, 3, None, 7, None])
 
         # with a given start, stop and interval
         retval1, retval2 = \
-            self.dc.get_data(tags=['mctrial', 'obs2'],
+            self.dc.get_data(tags=['mctrial', 'obs1'],
                              start=20, stop=90, interval=3)
         self.assertEqual(retval1, [20, 50, 80])
         self.assertEqual(retval2, [None, 5, None])
@@ -250,16 +261,36 @@ class TestDataContainer(unittest.TestCase):
 
     def test_get_trajectory(self):
         """Test get_trajectory functionality."""
-        row_data = {}
         occupation_vector = [14] * len(self.atoms)
-        row_data['occupations'] = occupation_vector
+        row_data = dict(occupations=occupation_vector,
+                        energy=-0.120000001)
 
         for mctrial in range(len(self.atoms)):
             self.dc.append(mctrial, row_data)
 
-        atoms_list = self.dc.get_trajectory()
-        for atoms in atoms_list:
+        # only trajectory
+        for atoms in self.dc.get_trajectory():
             self.assertEqual(atoms.numbers.tolist(), occupation_vector)
+
+        # trajectory and energies
+        atoms_list, energies = self.dc.get_trajectory(scalar_property='energy')
+        for atoms, energy in zip(atoms_list, energies):
+            self.assertEqual(atoms.numbers.tolist(), occupation_vector)
+            self.assertEqual(energy, -0.120000001)
+
+    def test_write_trajectory(self):
+        """Test write trajectory functionality."""
+        # append data
+        occupation_vector = [14] * len(self.atoms)
+        row_data = dict(occupations=occupation_vector,
+                        energy=-0.120000001)
+
+        for mctrial in range(len(self.atoms)):
+            self.dc.append(mctrial, row_data)
+
+        temp_file = tempfile.NamedTemporaryFile()
+
+        self.dc.write(temp_file.name)
 
     def test_read_and_write(self):
         """Test write and read functionalities of data container."""
@@ -273,7 +304,7 @@ class TestDataContainer(unittest.TestCase):
 
         temp_file = tempfile.NamedTemporaryFile()
 
-        # check before a non-tar file
+        # check before with a non-tar file
         with self.assertRaises(ValueError) as context:
             self.dc.read(temp_file.name)
         self.assertTrue('{} is not a tar file'.format(str(temp_file.name))
