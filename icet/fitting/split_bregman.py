@@ -1,6 +1,6 @@
 """
-Split Bregman Algorithm as defined on p. 5 in
-Nelson, Hart (Compressive sensing as a new paradigm for model building)
+This module implements the split-Bregman algorithm described in
+T. Goldstein and S. Osher, SIAM J. Imaging Sci. 2, 323 (2009); doi:10.1137/080725891
 """
 import numpy as np
 from scipy.optimize import minimize
@@ -9,9 +9,8 @@ from scipy.optimize import minimize
 def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,
                       verbose=0):
     """
-    Split Bregman Algorithm as defined
-    on p. 5 in Nelson, Hart (Compressive
-    sensing as a new paradigm for model building)
+    Split-Bregman algorithm described in T. Goldstein and S. Osher,
+    SIAM J. Imaging Sci. 2, 323 (2009); doi:10.1137/080725891
 
     Parameters
     -----------
@@ -32,6 +31,7 @@ def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,
     ----------
     results : dict
         dict containing parameters
+
     """
     n_cols = A.shape[1]
     d = np.zeros(n_cols)
@@ -48,7 +48,7 @@ def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,
         if verbose:
             print('Iteration ', i)
         args = (A, y, mu, lmbda, d, b, AtA, ftA)
-        res = minimize(_objective_function, x, args, method="BFGS", options={
+        res = minimize(_objective_function, x, args, method='BFGS', options={
                        'disp': False}, jac=_objective_function_derivative)
         x = res.x
 
@@ -65,7 +65,7 @@ def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,
 
         old_norm = new_norm
     else:
-        print("Warning: Split Bregman ran for max iters")
+        print('Warning: Split Bregman ran for max iters')
 
     fit_results = {'parameters': x}
     return fit_results
@@ -100,7 +100,7 @@ def _objective_function(x, A, y, mu, lmbda, d, b, AtA, ftA):
 
     if obj_function.imag > 0.0:
         raise RuntimeError(
-            "Objective function contains non-zero imaginary part.)")
+            'Objective function contains non-zero imaginary part.)')
 
     sparseness_correction = d - b - mu*x
     obj_function += 0.5*lmbda * \
@@ -108,7 +108,7 @@ def _objective_function(x, A, y, mu, lmbda, d, b, AtA, ftA):
 
     if obj_function.imag > 0.0:
         raise RuntimeError(
-            "Objective function contains non-zero imaginary part.)")
+            'Objective function contains non-zero imaginary part.)')
 
     return obj_function
 
