@@ -21,39 +21,36 @@ class BaseEnsemble(ABC):
     Parameters
     ----------
     calculator : mchammer calculator
-        this is the calculator that will be used
-        to calculate potential energy differences
-        that goes into the Boltzmann factor used
-        to calculate the probability ratio between
-        two states when doing a trial move.
+        calculator to be used to compute the potential
+        energy differences that goes into the Boltzmann
+        factor used to estimate the probability ratio
+        between two states when doing a trial move.
     atoms : ASE Atoms
-        this defines the underlying lattice
-        that will be used in the monte carlo
-        simulation and also defines the
-        initial occupation vector.
+        lattice that will be used in the Monte Carlo
+        simulation that also defines the initial occupation
+        vector.
     name : str (default BaseEnsemble)
         name of the ensemble which will show up
         in the datacontainer among other things.
     data_container : str
-        this defines the filename that the ensemble
-        will write the data container to. If the file
-        already exists then the data container will be
-        read and data will be appended to
-        that data container and it will also overwrite
-        that data container.
-    ensemble_data_write_interval : int
-        this sets the interval in which the ensemble
-        specific data is observed and saved to the
-        data container. This data can be temperature,
-        current value of the calculator etc.
-    trajectory_write_interval : int
-        this sets the interval in which the trajectory
-        or configuration of the species in the atomic
-        structure is observed and saved to the data
+        filename that the ensemble will write the data
+        container to. If the file already exists then the
+        data container will be read and data will be
+        appended to that data container and it will also
+        overwrite that data container.
+    ensemble_data_write_interval : int (default len(atoms))
+        interval in which the ensemble specific data is
+        observed and saved to the data container. This
+        data can be temperature, current value of the
+        calculator etc.
+    trajectory_write_interval : int (default len(atoms))
+        interval in which the trajectory or
+        configuration of the atomic species in the
+        lattice is observed and saved to the data
         container.
     data_container_write_period : float (default np.inf)
-        this sets the period in units of seconds
-        which the data container should be written to file.
+        period in units of seconds which the data container
+        should be written to file.
         Writing often to file is both a way to examine
         the currently observed values and also to backup
         your data.
