@@ -74,6 +74,8 @@ class Optimizer(BaseOptimizer):
         # will be populate once running train
         self._rmse_train = None
         self._rmse_test = None
+        self._contributions_train = None
+        self._contributions_test = None
         self.train_scatter_data = None
         self.test_scatter_data = None
 
@@ -88,6 +90,7 @@ class Optimizer(BaseOptimizer):
         self._fit_results = fit(A_train, y_train, self.fit_method,
                                 self.standardize, **self._kwargs)
         self._rmse_train = self.compute_rmse(A_train, y_train)
+        self._contributions_train = self.get_contributions(A_train)
         self.train_scatter_data = ScatterData(y_train, self.predict(A_train))
 
         # perform testing
@@ -95,6 +98,7 @@ class Optimizer(BaseOptimizer):
             A_test = self._A[self.test_set, :]
             y_test = self._y[self.test_set]
             self._rmse_test = self.compute_rmse(A_test, y_test)
+            self._contributions_test = self.get_contributions(A_test)
             self.test_scatter_data = ScatterData(y_test, self.predict(A_test))
         else:
             self._rmse_test = None
@@ -175,6 +179,8 @@ class Optimizer(BaseOptimizer):
         info['train_set'] = self.train_set
         info['test_size'] = self.test_size
         info['test_set'] = self.test_set
+        info['contributions_train'] = self.contributions_train
+        info['contributions_test'] = self.contributions_test
         info['train_scatter_data'] = self.train_scatter_data
         info['test_scatter_data'] = self.test_scatter_data
 
@@ -203,6 +209,18 @@ class Optimizer(BaseOptimizer):
     def rmse_test(self):
         """ float : root mean squared error for test set. """
         return self._rmse_test
+
+    @property
+    def contributions_train(self):
+        """ NumPy array : the average contribution to the predicted values for
+                          the train set from each parameter."""
+        return self._contributions_train
+
+    @property
+    def contributions_test(self):
+        """ NumPy array : the average contribution to the predicted values for
+                          the test set from each parameter."""
+        return self._contributions_test
 
     @property
     def train_set(self):
