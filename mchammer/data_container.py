@@ -177,11 +177,7 @@ class DataContainer:
 
         fill_method : {'skip_none', 'fill_backward', 'fill_forward',
                        'linear_interpolate', None}
-            method emplpoyed for dealing with missing values
-
-        Returns
-        -------
-        values in the requested columns of the data frame
+            method employed for dealing with missing values
 
         Raises
         ------
@@ -298,7 +294,8 @@ class DataContainer:
                                  ' container'.format(self.__class__, tag))
             return self._data[tag].count()
 
-    def get_average(self, tag: str, start: int=None, stop: int=None) -> Tuple[float, float]:
+    def get_average(self, tag: str,
+                    start: int=None, stop: int=None) -> Tuple[float, float]:
         """
         Returns average and standard deviation of a scalar observable.
 
@@ -312,10 +309,6 @@ class DataContainer:
         stop
             maximum value of trial step to consider. If None, highest value
             in the mctrial column will be used.
-
-        Returns
-        -------
-        average and standard deviation of observable
 
         Raises
         ------
@@ -340,7 +333,7 @@ class DataContainer:
             return np.mean(data), np.std(data)
 
     @staticmethod
-    def read(infile: Union[str, TextIO, BinaryIO]):
+    def read(infile: Union[str, BinaryIO, TextIO]):
         """
         Reads DataContainer object from file.
 

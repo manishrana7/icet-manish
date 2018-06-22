@@ -1,6 +1,7 @@
 import copy
 import random
-from typing import Dict, List, Tuple
+from ase import Atoms
+from typing import Dict, List, Tuple, Union
 
 
 class SwapNotPossibleError(Exception):
@@ -8,35 +9,39 @@ class SwapNotPossibleError(Exception):
 
 
 class ConfigurationManager(object):
-    """
-    ConfigurationManager store its own state of the
-    configuration that are being sampled in the ensemble.
+    """The ConfigurationManager store its own state of the
+    configuration that is being sampled in the ensemble.
 
     ConfigurationManager is responsible for all information and
     handling of the configuration.
 
     Parameters
     ----------
-    occupations : list of int
-        The occupation of the configurations. The integers
-        refer to elements via their number in the periodic table
+    atoms : ASE Atoms
+        configuration to be handled
     strict_constraints : list of list of int
-        the strictest form of the allowed occupations.
+        strictest form of the allowed occupations
+    sublattices : list of list of int
+        the integers refer to lattice site indices in the configuration.
     occupation_constraints : list of list of int
         optional occupation constraint to enfore a more stricter species
         occupation than what is allowed from the Calculator.
-    sublattices : list of list of int
-        the integers refer to lattice site indices in the configuration.
 
     Todo
     ----
     * occupation constraint not implemented
     * add check that all sites in the different sublattices all have the same
       occupation constraint.
+    * swap "element" for "species"
+    * revise docstrings
+    * clarify "sublattices" and "occupation_constraints";
+      the OccupationConstraints class should help here
     """
 
-    def __init__(self, atoms, strict_constraints, sublattices,
-                 occupation_constraints=None):
+    def __init__(self, atoms: Atoms,
+                 strict_constraints: Union[List[list], List[int]],
+                 sublattices: Union[List[list], List[int]],
+                 occupation_constraints: List[List[int]]=None):
 
         self._atoms = atoms
         self._occupations = atoms.numbers
@@ -53,7 +58,7 @@ class ConfigurationManager(object):
 
     def _set_up_possible_elements(self)->List[int]:
         """
-        Return a list of the possible elements in
+        Returns a list of the possible elements in
         the entire configuration.
         """
         possible_element = set()
@@ -173,11 +178,12 @@ class ConfigurationManager(object):
 
         Parameters
         ----------
-        sublattice : int
-            The sublattice to pick indices from.
+        sublattice
+            sublattice from which to pick indices
 
-        return : (list[int], list[int])
-
+        Todo
+        ----
+        * improve description of "list of the element to flip it to"
         """
 
         index = random.choice(self._sublattices[sublattice])
@@ -186,21 +192,21 @@ class ConfigurationManager(object):
                 [self._occupations[index]])))
         return index, element
 
-    def update_occupations(self, list_of_sites, list_of_elements):
+    def update_occupations(self, list_of_sites: List[int],
+                           list_of_elements: List[int]):
         """
-        Update the element occupation of the configuration being sampled.
+        Updates the element occupation of the configuration being sampled.
         This will change the state in both the configuration in the calculator
-        and the state of configuration manager.
+        and the configuration manager.
 
-        parameters
+        Parameters
         ----------
-        list_of_sites : list of int
-            list of indices of the configuration to change.
-        list_of_elements : list of int
-            list of elements to put on the lattice sites the
-            indices refer to.
+        list_of_sites
+            list of indices to be changed in the configuration
+        list_of_elements
+            list of species to be assigned to lattice sites
 
-        todo
+        Todo
         ----
         * change occupation
         * change the element occupation

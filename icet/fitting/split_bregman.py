@@ -1,7 +1,9 @@
 """
 This module implements the split-Bregman algorithm described in
-T. Goldstein and S. Osher, SIAM J. Imaging Sci. 2, 323 (2009); doi:10.1137/080725891
+T. Goldstein and S. Osher, SIAM J. Imaging Sci. 2, 323 (2009);
+doi:10.1137/080725891
 """
+
 import numpy as np
 from scipy.optimize import minimize
 
