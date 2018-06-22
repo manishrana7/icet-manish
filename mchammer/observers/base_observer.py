@@ -1,6 +1,7 @@
 """
 Definition of the base observer class.
 """
+
 from abc import ABC, abstractmethod
 
 
@@ -46,7 +47,7 @@ class BaseObserver(ABC):
         following types of data:
 
         ASE atoms object : `atoms`.
-        list of chemical elements : `elements`.
+        list of chemical species : `species`.
         icet structure object : `structure`.
         icet cluster expansion : `cluster_expansion`.
         mchammer calculator : `calculator`.

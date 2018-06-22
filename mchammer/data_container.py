@@ -29,20 +29,6 @@ class DataContainer:
 
     random_seed : int
         seed used in random number generator
-
-    Attributes
-    ----------
-    observables : list
-        names of observables available in container
-
-    parameters : dict
-        dictionary of tag-value pairs of parameters
-
-    metadata : dict
-        dictionary of tag-value pairs of metadata
-
-    data : Pandas.DataFrame object
-        data collected during Monte Carlo simulation
     """
 
     def __init__(self, atoms: Atoms, ensemble_name: str, random_seed: int):
@@ -51,10 +37,9 @@ class DataContainer:
         """
 
         if not isinstance(atoms, Atoms):
-            raise TypeError('{}: atoms is not an ASE Atoms object'
-                            .format(self.__class__))
+            raise TypeError('atoms is not an ASE Atoms object')
 
-        self.structure = atoms.copy()
+        self.atoms = atoms.copy()
 
         self._observables = []
         self._parameters = OrderedDict()
@@ -86,8 +71,7 @@ class DataContainer:
             if input parameter has the wrong type
         """
         if not isinstance(tag, str):
-            raise TypeError('{}: tag has wrong type {}'
-                            .format(self.__class__, type(tag)))
+            raise TypeError(f'tag has the wrong type: {type(tag)}')
         if tag not in self._observables:
             self._observables.append(tag)
 
@@ -110,11 +94,9 @@ class DataContainer:
         """
         import copy
         if not isinstance(tag, str):
-            raise TypeError('{}: tag has wrong type {}'
-                            .format(self.__class__, type(tag)))
+            raise TypeError(f'tag has the wrong type: {type(tag)}')
         if not isinstance(value, (int, float, list)):
-            raise TypeError('{}: value has wrong type {}'
-                            .format(self.__class__, type(value)))
+            raise TypeError(f'value has the wrong type: {type(value)}')
         self._parameters[tag] = copy.deepcopy(value)
 
     def append(self, mctrial: int,
@@ -138,14 +120,11 @@ class DataContainer:
         ----
         * This might be a quite expensive way to add data to the data
           frame. Testing and profiling to be carried out later.
-        * Check whether type hinting is correct and sufficient.
         """
         if not isinstance(mctrial, int):
-            raise TypeError('{}: mctrial has wrong type {}'
-                            .format(self.__class__, type(mctrial)))
+            raise TypeError(f'mctrial has the wrong type: {type(mctrial)}')
         if not isinstance(record, dict):
-            raise TypeError('{}: record has wrong type {}'
-                            .format(self.__class__, type(record)))
+            raise TypeError(f'record has the wrong type: {type(record)}')
         row_data = OrderedDict()
         row_data['mctrial'] = mctrial
         row_data.update(record)
@@ -196,8 +175,8 @@ class DataContainer:
         else:
             for tag in tags:
                 if tag not in self._data:
-                    raise ValueError('{}: no observable named {} in data'
-                                     ' container'.format(self.__class__, tag))
+                    raise ValueError(f'No observable named {tag} in data'
+                                     ' container')
 
         if start is None and stop is None:
             data = self._data.loc[::interval, tags]
@@ -213,8 +192,7 @@ class DataContainer:
 
         if fill_method is not None:
             if fill_method not in fill_methods:
-                raise ValueError('{}: unknown fill method {}'
-                                 .format(self.__class__, fill_method))
+                raise ValueError(f'Unknown fill method: {fill_method}')
 
             # retrieve only valid observations
             if fill_method is 'skip_none':
@@ -249,7 +227,7 @@ class DataContainer:
 
     @property
     def data(self) -> pd.DataFrame:
-        """ Pandas data frame """
+        """ pandas data frame (see :class:`pandas.DataFrame`) """
         return self._data
 
     @property
@@ -290,8 +268,8 @@ class DataContainer:
             return len(self._data)
         else:
             if tag not in self._data:
-                raise ValueError('{}: no observable named {} in data'
-                                 ' container'.format(self.__class__, tag))
+                raise ValueError(f'No observable named {tag}'
+                                 ' in data container')
             return self._data[tag].count()
 
     def get_average(self, tag: str,
@@ -318,12 +296,10 @@ class DataContainer:
             if requested observable is not of a scalar data type
         """
         if tag not in self._data:
-            raise ValueError('{}: no observable named {} in data'
-                             ' container'.format(self.__class__, tag))
+            raise ValueError(f'No observable named {tag} in data container')
 
         if self._data[tag].dtype not in ['int64', 'float64']:
-            raise TypeError('{}: data for {} is not scalar'
-                            .format(self.__class__, tag))
+            raise TypeError(f'Data for {tag} is not scalar')
 
         if start is None and stop is None:
             return self._data[tag].mean(), self._data[tag].std()
@@ -359,7 +335,7 @@ class DataContainer:
             filename = infile.name
 
         if not tarfile.is_tarfile(filename):
-            raise ValueError('{} is not a tar file'.format(filename))
+            raise ValueError(f'{filename} is not a tar file')
 
         reference_atoms_file = tempfile.NamedTemporaryFile()
         reference_data_file = tempfile.NamedTemporaryFile()
@@ -421,7 +397,7 @@ class DataContainer:
 
         # Save reference atomic structure
         reference_atoms_file = tempfile.NamedTemporaryFile()
-        ase_write(reference_atoms_file.name, self.structure, format='json')
+        ase_write(reference_atoms_file.name, self.atoms, format='json')
 
         # Save reference data
         reference_data = {'observables': self._observables,
@@ -432,7 +408,7 @@ class DataContainer:
         with open(reference_data_file.name, 'w') as handle:
             json.dump(reference_data, handle)
 
-        # Save Pandas DataFrame
+        # Save pandas DataFrame
         runtime_data_file = tempfile.NamedTemporaryFile()
         self._data.to_json(runtime_data_file.name, double_precision=15)
 

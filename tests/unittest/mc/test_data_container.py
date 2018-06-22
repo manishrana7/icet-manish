@@ -47,7 +47,7 @@ class TestDataContainer(unittest.TestCase):
 
     def test_structure(self):
         """Test reference structure property."""
-        self.assertEqual(self.dc.structure, self.atoms)
+        self.assertEqual(self.dc.atoms, self.atoms)
 
     def test_add_observable(self):
         """Test add observable functionality."""
@@ -62,7 +62,7 @@ class TestDataContainer(unittest.TestCase):
         # test whether method raises Exception
         with self.assertRaises(TypeError) as context:
             self.dc.add_observable(1)
-        self.assertTrue('tag has wrong type'
+        self.assertTrue('tag has the wrong type'
                         in str(context.exception))
 
     def test_add_parameter(self):
@@ -77,11 +77,11 @@ class TestDataContainer(unittest.TestCase):
         # test whether method raises Exceptions
         with self.assertRaises(TypeError) as context:
             self.dc.add_parameter(1, 'tst')
-        self.assertTrue('tag has wrong type'
+        self.assertTrue('tag has the wrong type'
                         in str(context.exception))
         with self.assertRaises(TypeError) as context:
             self.dc.add_parameter('tst', 'tst')
-        self.assertTrue('value has wrong type'
+        self.assertTrue('value has the wrong type'
                         in str(context.exception))
 
     def test_append_data(self):
@@ -118,12 +118,12 @@ class TestDataContainer(unittest.TestCase):
         # test whether method raises correct Exceptions
         with self.assertRaises(TypeError) as context:
             self.dc.append(5.0, 1.0)
-        self.assertTrue('mctrial has wrong type'
+        self.assertTrue('mctrial has the wrong type'
                         in str(context.exception))
 
         with self.assertRaises(TypeError) as context:
             self.dc.append(1, 'tst')
-        self.assertTrue('record has wrong type'
+        self.assertTrue('record has the wrong type'
                         in str(context.exception))
 
     def test_property_data(self):
@@ -205,12 +205,12 @@ class TestDataContainer(unittest.TestCase):
         # test fails for non-stock data
         with self.assertRaises(ValueError) as context:
             self.dc.get_data(['temperature'])
-        self.assertTrue('no observable named temperature'
+        self.assertTrue('No observable named temperature'
                         in str(context.exception))
 
         with self.assertRaises(ValueError) as context:
             self.dc.get_data(fill_method='xyz')
-        self.assertTrue('unknown fill method xyz'
+        self.assertTrue('Unknown fill method'
                         in str(context.exception))
 
     def test_reset(self):
@@ -236,7 +236,7 @@ class TestDataContainer(unittest.TestCase):
         # test that the correct Exceptions are raised
         with self.assertRaises(ValueError) as context:
             self.dc.get_number_of_entries('xyz')
-        self.assertTrue('no observable named xyz'
+        self.assertTrue('No observable named xyz'
                         in str(context.exception))
 
     def test_get_average(self):
@@ -270,7 +270,7 @@ class TestDataContainer(unittest.TestCase):
         # test fails for non-existing data
         with self.assertRaises(ValueError) as context:
             self.dc.get_average('temperature')
-        self.assertTrue('no observable named temperature'
+        self.assertTrue('No observable named temperature'
                         in str(context.exception))
 
         # test fails for non-numeric data like list type data
@@ -310,7 +310,7 @@ class TestDataContainer(unittest.TestCase):
         dc_read = self.dc.read(temp_file)
 
         # check properties and metadata
-        self.assertEqual(self.atoms, dc_read.structure)
+        self.assertEqual(self.atoms, dc_read.atoms)
         self.assertEqual(self.dc.metadata, dc_read.metadata)
         self.assertEqual(self.dc.parameters, dc_read.parameters)
         self.assertEqual(self.dc.observables, dc_read.observables)
@@ -321,7 +321,7 @@ class TestDataContainer(unittest.TestCase):
 
         # check exception raises when file does not exist
         with self.assertRaises(FileNotFoundError):
-            dc_read = self.dc.read("not_found")
+            dc_read = self.dc.read('not_found')
         temp_file.close()
 
 

@@ -72,31 +72,19 @@ class TestCECalculator(unittest.TestCase):
         # test exceptions
         with self.assertRaises(TypeError) as context:
             self.calculator.calculate_local_contribution()
-        self.assertTrue('missing required argument: local_indices'
+        self.assertTrue('Missing required argument: local_indices'
                         in str(context.exception))
 
         with self.assertRaises(TypeError) as context:
             self.calculator.calculate_local_contribution(indices)
-        self.assertTrue('missing required argument: occupations'
+        self.assertTrue('Missing required argument: occupations'
                         in str(context.exception))
 
-    def test_calculate_local_contribution(self):
-        """Test calculate local contribution."""
-        indices = [1, 2, 3]
-        local_contribution = self.calculator.calculate_local_contribution(
-            indices, self.atoms.numbers)
-        self.assertIsInstance(local_contribution, float)
-
-        # test exceptions
-        with self.assertRaises(TypeError) as context:
-            self.calculator.calculate_local_contribution()
-        self.assertTrue('missing required argument: local_indices'
-                        in str(context.exception))
-
-        with self.assertRaises(TypeError) as context:
-            self.calculator.calculate_local_contribution(indices)
-        self.assertTrue('missing required argument: occupations'
-                        in str(context.exception))
+    def test_property_occupation_constraints(self):
+        """ Test property occupation_constraints. """
+        retval = self.calculator.occupation_constraints
+        target = [[13, 32]] * 27
+        self.assertEqual(retval, target)
 
 
 if __name__ == '__main__':

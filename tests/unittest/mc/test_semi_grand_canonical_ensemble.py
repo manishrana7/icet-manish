@@ -38,9 +38,40 @@ class TestEnsemble(unittest.TestCase):
             chemical_potentials=self.chemical_potentials,
             boltzmann_constant=1e-5)
 
+    def test_property_chemical_potentials(self):
+        """Test property chemical_potentials."""
+        retval = self.ensemble.chemical_potentials
+        target = {13: 5, 31: 0}
+        self.assertEqual(retval, target)
+
+        self.ensemble.chemical_potentials = {'Al': 4, 'Ga': 1}
+        retval = self.ensemble.chemical_potentials
+        target = {13: 4, 31: 1}
+        self.assertEqual(retval, target)
+
+        self.ensemble.chemical_potentials = {13: 10, 31: -1}
+        retval = self.ensemble.chemical_potentials
+        target = {13: 10, 31: -1}
+        self.assertEqual(retval, target)
+
+        self.ensemble.chemical_potentials = {13: 16}
+        retval = self.ensemble.chemical_potentials
+        target = {13: 16, 31: -1}
+        self.assertEqual(retval, target)
+
+        # test exceptions
+        with self.assertRaises(TypeError) as context:
+            self.ensemble.chemical_potentials = 'xyz'
+        self.assertTrue('chemical_potentials has the wrong type'
+                        in str(context.exception))
+
+        with self.assertRaises(ValueError) as context:
+            self.ensemble.chemical_potentials = {'Ni': 3}
+        self.assertTrue('Unknown species'
+                        in str(context.exception))
+
     def test_temperature_attribute(self):
         """Test temperature attribute."""
-
         self.assertEqual(self.ensemble.temperature, self.temperature)
         self.ensemble.temperature = 300
         self.assertEqual(self.ensemble.temperature, 300)
@@ -106,7 +137,7 @@ class TestEnsemble(unittest.TestCase):
         """Test the get ensemble data method."""
         data = self.ensemble.get_ensemble_data()
 
-        self.assertIn('energy', data.keys())
+        self.assertIn('potential', data.keys())
         self.assertIn('Al count', data.keys())
         self.assertIn('Ga count', data.keys())
         self.assertIn('temperature', data.keys())

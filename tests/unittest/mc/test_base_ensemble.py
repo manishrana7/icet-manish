@@ -60,9 +60,9 @@ class TestEnsemble(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEnsemble, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al").repeat(3)
+        self.atoms = bulk('Al').repeat(3)
         cutoffs = [5, 5, 4]
-        elements = ["Al", "Ga"]
+        elements = ['Al', 'Ga']
         self.cs = ClusterSpace(self.atoms, cutoffs, elements)
         parameters = np.array([1.2 for _ in range(len(self.cs))])
         self.ce = ClusterExpansion(self.cs, parameters)
@@ -81,7 +81,7 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble.attach_observer(observer)
 
     def test_init(self):
-        """Test exceptions are raised in initialisation."""
+        """Test exceptions are raised in initialization."""
         # without atoms parameters
         with self.assertRaises(Exception) as context:
             ConcreteEnsemble(calculator=self.calculator, atoms=None,
@@ -101,6 +101,10 @@ class TestEnsemble(unittest.TestCase):
     def test_property_name(self):
         """Test name property."""
         self.assertEqual('test-ensemble', self.ensemble.name)
+
+    def test_property_atoms(self):
+        """Test atoms property."""
+        self.assertEqual(self.atoms, self.ensemble.atoms)
 
     def test_property_random_seed(self):
         """Test random seed property."""
@@ -249,12 +253,6 @@ class TestEnsemble(unittest.TestCase):
         """Test the _run method."""
         pass
 
-    def test_property_structure(self):
-        """Test the get current structure method."""
-        # need calculator for structure
-        pass
-        # self.assertEqual(self.ensemble.structure, self.atoms)
-
     def test_attach_observer(self):
         """Test the attach method."""
         self.assertEqual(len(self.ensemble.observers), 2)
@@ -273,6 +271,12 @@ class TestEnsemble(unittest.TestCase):
         self.assertEqual(self.ensemble.observers['test_Parakeet'].interval, 15)
         self.assertEqual(
             self.ensemble.observers['test_Parakeet'].tag, 'test_Parakeet')
+
+        # check that correct exceptions are raised
+        with self.assertRaises(TypeError) as context:
+            self.ensemble.attach_observer('xyz')
+        self.assertTrue('observer has the wrong type'
+                        in str(context.exception))
 
     def test_property_data_container(self):
         """Test the data container property."""
@@ -314,15 +318,14 @@ class TestEnsemble(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             self.ensemble.update_occupations(indices, elements+[31])
 
-        self.assertTrue(
-            "List of sites and list of elements are not the same size."
-            in str(context.exception))
+        self.assertTrue('sites and species must have the same length.'
+                        in str(context.exception))
 
     def test_get_ensemble_data(self):
         """Test the get ensemble data method."""
         data = self.ensemble.get_ensemble_data()
 
-        self.assertIn('energy', data.keys())
+        self.assertIn('potential', data.keys())
 
 
 if __name__ == '__main__':

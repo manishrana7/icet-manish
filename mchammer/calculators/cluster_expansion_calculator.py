@@ -79,10 +79,15 @@ class ClusterExpansionCalculator(BaseCalculator):
             entire occupation vector
         """
         if local_indices is None:
-            raise TypeError('{}: missing required argument: local_indices'
-                            .format(self.__class__))
+            raise TypeError('Missing required argument: local_indices')
         if occupations is None:
-            raise TypeError('{}: missing required argument: occupations'
-                            .format(self.__class__))
+            raise TypeError('Missing required argument: occupations')
         return self.calculate_total(occupations=occupations) * \
             self._property_scaling
+
+    @property
+    def occupation_constraints(self) -> List[List[int]]:
+        """ map from site to allowed species """
+        species = list(
+            self.cluster_expansion.cluster_space.element_map.keys())
+        return [species] * len(self.atoms)

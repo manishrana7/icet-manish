@@ -42,9 +42,12 @@ class TestEnsemble(unittest.TestCase):
 
     def test_do_trial_step(self):
         """Test the do trial step."""
-        self.ensemble.do_trial_step()
 
-        self.assertEqual(self.ensemble.total_trials, 1)
+        # Do it many times and hopefully get both a reject and an accept
+        for _ in range(10):
+            self.ensemble.do_trial_step()
+
+        self.assertEqual(self.ensemble.total_trials, 10)
 
     def test_acceptance_condition(self):
         """ Test the acceptance condition method."""
@@ -60,15 +63,27 @@ class TestEnsemble(unittest.TestCase):
             CanonicalEnsemble(
                 calculator=self.calculator, atoms=self.atoms,
                 name='test-ensemble', random_seed=42)
-        self.assertTrue(
-            "Temperature needs to be set in canonical "
-            "ensemble" in str(context.exception))
+        self.assertTrue('Missing required keyword: temperature'
+                        in str(context.exception))
+
+    def test_property_boltzmann(self):
+        """ Test init with explicit Boltzmann constant."""
+        from ase.units import kB
+        ens = CanonicalEnsemble(
+            calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
+            random_seed=42, temperature=100.0)
+        self.assertAlmostEqual(kB, ens.boltzmann_constant)
+
+        ens = CanonicalEnsemble(
+            calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
+            random_seed=42, temperature=100.0, boltzmann_constant=1.0)
+        self.assertAlmostEqual(1.0, ens.boltzmann_constant)
 
     def test_get_ensemble_data(self):
         """Test the get ensemble data method."""
         data = self.ensemble.get_ensemble_data()
 
-        self.assertIn('energy', data.keys())
+        self.assertIn('potential', data.keys())
         self.assertIn('temperature', data.keys())
 
         self.assertEqual(data['temperature'], 100.0)
