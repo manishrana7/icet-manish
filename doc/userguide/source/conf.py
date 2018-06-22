@@ -16,8 +16,8 @@ extensions = [
     'cloud_sptheme.ext.table_styling',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
-    'sphinx.ext.doctest',
     'sphinx.ext.coverage',
+    'sphinx.ext.doctest',
     'sphinx.ext.graphviz',
     'sphinx.ext.ifconfig',
     'sphinx.ext.intersphinx',
@@ -80,9 +80,10 @@ html_context = {
           'Monte Carlo simulations with lammps'),
          ]}
 htmlhelp_basename = 'icetdoc'
-intersphinx_mapping = {'ase':    ('https://wiki.fysik.dtu.dk/ase', None),
-                       'python': ('https://docs.python.org/3.6', None)}
-
+intersphinx_mapping = \
+    {'ase':    ('https://wiki.fysik.dtu.dk/ase', None),
+     'python': ('https://docs.python.org/3.6', None),
+     'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None)}
 
 # Options for doxygen incorporation
 breathe_projects = {'icet': '../../apidoc/xml/'}

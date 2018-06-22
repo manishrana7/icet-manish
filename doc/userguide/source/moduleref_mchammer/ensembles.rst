@@ -3,6 +3,8 @@
 
 .. module:: mchammer.ensembles
 
+.. _ensembles:
+
 Ensembles
 =========
 
