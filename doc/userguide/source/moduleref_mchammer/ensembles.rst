@@ -31,16 +31,3 @@ SemiGrandCanonicalEnsemble
    :members:
    :undoc-members:
    :inherited-members:
-
-
-.. index::
-   single: Class reference; VCSGCEnsemble
-   single: Monte Carlo; Variance constrained semi-grand canonical ensemble
-
-VCSGC
------
-
-.. autoclass:: VCSGCEnsemble
-   :members:
-   :undoc-members:
-   :inherited-members:

@@ -12,16 +12,21 @@ sys.path.insert(0, os.path.abspath('../../../tutorial'))
 sys.path.insert(0, os.path.abspath('../../../examples'))
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx_autodoc_typehints',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.todo',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.graphviz',
-    'sphinx_sitemap',
     'breathe',
+    'cloud_sptheme.ext.table_styling',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.doctest',
+    'sphinx.ext.coverage',
+    'sphinx.ext.graphviz',
+    'sphinx.ext.ifconfig',
     'sphinx.ext.intersphinx',
-]
+    'sphinx.ext.mathjax',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.todo',
+    'sphinx_autodoc_typehints',
+    'sphinx_sitemap',
+    ]
 
 # To be put back upon public code release
 #     'sphinx.ext.viewcode',
