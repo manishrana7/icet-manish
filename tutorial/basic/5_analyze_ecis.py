@@ -21,7 +21,7 @@ for k, (order, data) in enumerate(ecis.items()):
         continue
     ax = axs[k-2]
     ax.set_xlim((1.2, 3.2))
-    #ax.set_ylim((-0.5, 7.5))
+    ax.set_ylim((-0.5, 7.5))
     ax.set_xlabel(r'Cluster radius (A)')
     if order == 2:
         ax.set_ylabel(r'Effective cluster interaction (meV)')
