@@ -42,9 +42,9 @@ class BaseCalculator(ABC):
             new occupations (species) by atomic number
         """
         if not isinstance(indices, list) and not isinstance(species, list):
-            raise ValueError('indices and species must be of type list')
+            raise TypeError('sites and species must be of type list')
         if len(indices) != len(species):
-            raise ValueError('indices and species must have the same length')
+            raise ValueError('sites and species must have the same length')
         self.atoms.numbers[indices] = species
 
     @property

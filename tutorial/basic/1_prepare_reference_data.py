@@ -6,7 +6,7 @@ from icet.tools import enumerate_structures
 
 # step 1: Prepare database and set up basic structure
 db = connect('structures.db')
-prim = bulk('Au')
+prim = bulk('Ag')
 subelements = ['Ag', 'Au']
 
 # step 2: Enumerate structures, then relax and add them to the database
@@ -15,7 +15,8 @@ for k, atoms in enumerate(enumerate_structures(prim, sizes, subelements)):
     # skip if structure is already present in database
     if any(db.select(structure_id=k)):
         continue
-    # remember the original (unrelaxed) positions
+    # remember the original (unrelaxed) cell metric and positions
+    original_cell = atoms.get_cell()
     original_positions = atoms.get_positions()
     # relax the structure
     atoms.calc = EMT()
@@ -23,7 +24,8 @@ for k, atoms in enumerate(enumerate_structures(prim, sizes, subelements)):
     dyn.run(fmax=0.01)
     # store energy
     relaxed_energy = atoms.get_potential_energy()
-    # restore ideal positions
+    # restore ideal cell metric and positions
+    atoms.set_cell(original_cell)
     atoms.set_positions(original_positions)
     # add the structure to the database
     db.write(atoms, structure_id=k, relaxed_energy=relaxed_energy)

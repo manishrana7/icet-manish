@@ -12,7 +12,7 @@ for order in range(len(ce.cluster_space.cutoffs)+2):
             continue
         if order not in ecis:
             ecis[order] = []
-        ecis[order].append([orbit['size'], ce.parameters[orbit['index']]])
+        ecis[order].append([orbit['radius'], ce.parameters[orbit['index']]])
 
 # step 2: Plot ECIs
 fig, axs = plt.subplots(1, 2, sharey=True, figsize=(5, 3))
@@ -21,7 +21,7 @@ for k, (order, data) in enumerate(ecis.items()):
         continue
     ax = axs[k-2]
     ax.set_xlim((1.2, 3.2))
-    ax.set_ylim((-0.5, 7.5))
+    #ax.set_ylim((-0.5, 7.5))
     ax.set_xlabel(r'Cluster radius (A)')
     if order == 2:
         ax.set_ylabel(r'Effective cluster interaction (meV)')

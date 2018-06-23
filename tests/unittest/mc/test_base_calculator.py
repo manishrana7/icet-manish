@@ -56,7 +56,7 @@ class TestBaseCalculator(unittest.TestCase):
         self.assertEqual(self.atoms[3].symbol, 'He')
 
         # test that correct exceptions are raised
-        with self.assertRaises(ValueError) as context:
+        with self.assertRaises(TypeError) as context:
             self.calculator.update_occupations(0, 0)
         self.assertTrue('must be of type list'
                         in str(context.exception))
