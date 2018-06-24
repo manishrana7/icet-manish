@@ -132,8 +132,8 @@ class DataContainer:
 
     def get_data(self, tags: List[str]=None,
                  start: int=None, stop: int=None, interval: int=1,
-                 fill_method: str=None, apply_to: List[str]=None)
-            -> Union[list, Tuple[list, list]]:
+                 fill_method: str=None,
+                 apply_to: List[str]=None) -> Union[list, Tuple[list, list]]:
         """Returns the accumulated data for the requested observables.
 
         Parameters
