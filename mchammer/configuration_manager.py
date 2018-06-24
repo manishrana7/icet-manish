@@ -155,7 +155,8 @@ class ConfigurationManager(object):
         try:
             site1 = random.choice(self._sites_by_sublattice[sublattice])
         except IndexError:
-            raise SwapNotPossibleError(f'Sublattice {sublattice} is empty.')
+            raise SwapNotPossibleError('Sublattice {} is empty.'
+                                       .format(sublattice))
 
         # TODO: The current implementation assumes all sites in this
         # sublattice to have the same allowed occupations.
@@ -212,7 +213,7 @@ class ConfigurationManager(object):
                     break
             else:
                 raise ValueError(
-                    f'Site {site} is not present in any sublattice.')
+                    'Site {} is not present in any sublattice.'.format(site))
 
             # Remove site from list of sites for old species
             self._sites_by_species[isub][old_Z].remove(site)
@@ -220,7 +221,8 @@ class ConfigurationManager(object):
             try:
                 self._sites_by_species[isub][new_Z].append(site)
             except KeyError:
-                raise ValueError(f'Invalid new species {new_Z} on site {site}')
+                raise ValueError('Invalid new species {} on site {}'
+                                 .format(new_Z, site))
 
         # Update occupation vector itself
         self._occupations[sites] = species

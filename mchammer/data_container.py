@@ -71,7 +71,7 @@ class DataContainer:
             if input parameter has the wrong type
         """
         if not isinstance(tag, str):
-            raise TypeError(f'tag has the wrong type: {type(tag)}')
+            raise TypeError('tag has the wrong type: {}'.format(type(tag)))
         if tag not in self._observables:
             self._observables.append(tag)
 
@@ -94,9 +94,11 @@ class DataContainer:
         """
         import copy
         if not isinstance(tag, str):
-            raise TypeError(f'tag has the wrong type: {type(tag)}')
+            raise TypeError('tag has the wrong type: {}'
+                            .format(type(tag)))
         if not isinstance(value, (int, float, list)):
-            raise TypeError(f'value has the wrong type: {type(value)}')
+            raise TypeError('value has the wrong type: {}'
+                            .format(type(value)))
         self._parameters[tag] = copy.deepcopy(value)
 
     def append(self, mctrial: int,
@@ -122,9 +124,11 @@ class DataContainer:
           frame. Testing and profiling to be carried out later.
         """
         if not isinstance(mctrial, int):
-            raise TypeError(f'mctrial has the wrong type: {type(mctrial)}')
+            raise TypeError('mctrial has the wrong type: {}'
+                            .format(type(mctrial)))
         if not isinstance(record, dict):
-            raise TypeError(f'record has the wrong type: {type(record)}')
+            raise TypeError('record has the wrong type: {}'
+                            .format(type(record)))
         row_data = OrderedDict()
         row_data['mctrial'] = mctrial
         row_data.update(record)
@@ -175,8 +179,8 @@ class DataContainer:
         else:
             for tag in tags:
                 if tag not in self._data:
-                    raise ValueError(f'No observable named {tag} in data'
-                                     ' container')
+                    raise ValueError('No observable named {} in data'
+                                     ' container'.format(tag))
 
         if start is None and stop is None:
             data = self._data.loc[::interval, tags]
@@ -192,7 +196,8 @@ class DataContainer:
 
         if fill_method is not None:
             if fill_method not in fill_methods:
-                raise ValueError(f'Unknown fill method: {fill_method}')
+                raise ValueError('Unknown fill method: {}'
+                                 .format(fill_method))
 
             # retrieve only valid observations
             if fill_method is 'skip_none':
@@ -268,8 +273,8 @@ class DataContainer:
             return len(self._data)
         else:
             if tag not in self._data:
-                raise ValueError(f'No observable named {tag}'
-                                 ' in data container')
+                raise ValueError('No observable named {}'
+                                 ' in data container'.format(tag))
             return self._data[tag].count()
 
     def get_average(self, tag: str,
@@ -296,10 +301,11 @@ class DataContainer:
             if requested observable is not of a scalar data type
         """
         if tag not in self._data:
-            raise ValueError(f'No observable named {tag} in data container')
+            raise ValueError('No observable named {} in data container'
+                             .format(tag))
 
         if self._data[tag].dtype not in ['int64', 'float64']:
-            raise TypeError(f'Data for {tag} is not scalar')
+            raise TypeError('Data for {} is not scalar'.format(tag))
 
         if start is None and stop is None:
             return self._data[tag].mean(), self._data[tag].std()
@@ -335,7 +341,7 @@ class DataContainer:
             filename = infile.name
 
         if not tarfile.is_tarfile(filename):
-            raise ValueError(f'{filename} is not a tar file')
+            raise ValueError('{} is not a tar file'.format(filename))
 
         reference_atoms_file = tempfile.NamedTemporaryFile()
         reference_data_file = tempfile.NamedTemporaryFile()
