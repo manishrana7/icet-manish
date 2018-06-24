@@ -149,7 +149,7 @@ class DataContainer:
 
         stop
             maximum value of trial step to consider; by default the
-            largesst value in the mctrial column will be used.
+            largest value in the mctrial column will be used.
 
         interval
             increment for mctrial; by default the smallest available
@@ -160,8 +160,8 @@ class DataContainer:
             method employed for dealing with missing values
 
         apply_to
-            tags of columns where fill_method will be applied to. If None,
-            parse all the columns with fill_method.
+            tags of columns for which fill_method will be employed;
+            by default parse all columns with fill_method.
 
         Raises
         ------
@@ -297,11 +297,11 @@ class DataContainer:
         tag
             tag of field over which to average
         start
-            minimum value of trial step to consider. If None, lowest value
-            in the mctrial column will be used.
+            minimum value of trial step to consider; by default the
+            smallest value in the mctrial column will be used.
         stop
-            maximum value of trial step to consider. If None, highest value
-            in the mctrial column will be used.
+            maximum value of trial step to consider; by default the
+            largest value in the mctrial column will be used.
 
         Raises
         ------
@@ -323,8 +323,9 @@ class DataContainer:
                                  fill_method='skip_none')
             return np.mean(data), np.std(data)
 
-    def get_trajectory(self, start=None, stop=None, interval=1,
-                       scalar_property=None):
+    def get_trajectory(self, start: int=None, stop: int=None, interval: int=1,
+                       scalar_property: str=None) \
+            -> Union[List[Atoms], Tuple[List[Atoms], list]]:
         """
         Returns a trajectory in the form of a list of ASE Atoms and
         optionally a corresponding list with values of the property
@@ -333,20 +334,17 @@ class DataContainer:
 
         Parameters
         ----------
-        start : int
-            minimum value of trial step to consider. If None, lowest
-            mctrial with a valid atomic configuration is considered.
-
-        stop : int
-            maximum value of trial step to consider.If None, lowest
-            mctrial with a valid atomic configuration is considered.
-
-        interval : int
-            interval between following snapshots, default 1.
-
-        scalar_property : str
-            tah of observable to be returned along with trajectory, optional.
-
+        start
+            minimum value of trial step to consider; by default the
+            smallest value in the mctrial column will be used.
+        stop
+            maximum value of trial step to consider; by default the
+            largest value in the mctrial column will be used.
+        interval
+            increment for mctrial; by default the smallest available
+            interval will be used.
+        scalar_property
+            tag of observable to be returned along with trajectory
         """
         only_trajectory = True
 
@@ -355,10 +353,10 @@ class DataContainer:
             only_trajectory = False
             this_column = None
         else:
-            # default property to energy
-            scalar_property = 'energy'
+            # default property to potential
+            scalar_property = 'potential'
             # return all valid observations in observations column
-            # not matter what values are in energy column
+            # not matter what values are in potential column
             this_column = ['occupations']
 
         occupation_vectors, property_values = \
@@ -366,34 +364,31 @@ class DataContainer:
                           start=start, stop=stop, interval=interval,
                           fill_method='skip_none', apply_to=this_column)
 
-        atoms_list = []
-        scalars_list = []
-        for occupations, scalars in zip(occupation_vectors, property_values):
-            atoms_copy = self.atoms.copy()
-            atoms_copy.numbers = occupations
-            atoms_list.append(atoms_copy)
+        atoms_list, property_list = [], []
+        for occupation_vector, property_value in zip(occupation_vectors,
+                                                     property_values):
+            atoms = self.atoms.copy()
+            atoms.numbers = occupation_vector
+            atoms_list.append(atoms)
             if not only_trajectory:
-                scalars_list.append(scalars)
+                property_list.append(property_value)
 
-        if scalars_list:
-            return atoms_list, scalars_list
+        if property_list:
+            return atoms_list, property_list
         else:
             return atoms_list
 
-    def write_trajectory(self, outfile):
-        """
-        Save trajectory to a file along with the respectives values of
-        energy for each configuration. If input file exists, trajectory
-        will be appended.
+    def write_trajectory(self, outfile: Union[str, BinaryIO, TextIO]):
+        """Save trajectory to a file along with the respectives values of the
+        potential field for each configuration. If the file exists the
+        trajectory will be appended.
 
         Parameters
         ----------
-        outfile : str or FileObj
-            file to which write trajectory
-
+        outfile
+            output file name or file object
         """
-        atoms_list, energies = self.get_trajectory(scalar_property='energy')
-
+        atoms_list, energies = self.get_trajectory(scalar_property='potential')
         for atoms, energy in atoms_list, energies:
             traj = Trajectory(outfile, mode='a')
             traj.write(atoms=atoms, energy=energy)

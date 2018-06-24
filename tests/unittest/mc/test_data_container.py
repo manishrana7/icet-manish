@@ -157,11 +157,12 @@ class TestDataContainer(unittest.TestCase):
         obs2 = [None, None, 3, None, None, None, 7, None, None, None]
 
         rows_data = \
-            {'mctrial': mctrials, 'energy': energy, 'obs1': obs1, 'obs2': obs2}
+            {'mctrial': mctrials, 'potential': energy,
+             'obs1': obs1, 'obs2': obs2}
 
         self.dc._data = \
             pd.DataFrame(rows_data,
-                         columns=['mctrial', 'energy', 'obs1', 'obs2'])
+                         columns=['mctrial', 'potential', 'obs1', 'obs2'])
 
         retval = self.dc.get_data()
         self.assertEqual(retval, (mctrials, energy, obs1, obs2))
@@ -291,15 +292,15 @@ class TestDataContainer(unittest.TestCase):
                 mctrial, record={'occupations': [14, 14, 14]})
 
         with self.assertRaises(TypeError) as context:
-            self.dc.get_average('occupation_vector')
-        self.assertTrue('occupation_vector is not scalar'
+            self.dc.get_average('occupations')
+        self.assertTrue('occupations is not scalar'
                         in str(context.exception))
 
     def test_get_trajectory(self):
         """Test get_trajectory functionality."""
         occupation_vector = [14] * len(self.atoms)
         row_data = dict(occupations=occupation_vector,
-                        energy=-0.120000001)
+                        potential=-0.120000001)
 
         for mctrial in range(len(self.atoms)):
             self.dc.append(mctrial, row_data)
@@ -309,7 +310,8 @@ class TestDataContainer(unittest.TestCase):
             self.assertEqual(atoms.numbers.tolist(), occupation_vector)
 
         # trajectory and energies
-        atoms_list, energies = self.dc.get_trajectory(scalar_property='energy')
+        atoms_list, energies \
+            = self.dc.get_trajectory(scalar_property='potential')
         for atoms, energy in zip(atoms_list, energies):
             self.assertEqual(atoms.numbers.tolist(), occupation_vector)
             self.assertEqual(energy, -0.120000001)
