@@ -140,11 +140,15 @@ class TestEnsemble(unittest.TestCase):
         self.assertIn('potential', data.keys())
         self.assertIn('Al count', data.keys())
         self.assertIn('Ga count', data.keys())
+        self.assertIn('mu_Al', data.keys())
+        self.assertIn('mu_Ga', data.keys())
         self.assertIn('temperature', data.keys())
 
         self.assertEqual(data['Al count'], 13)
         self.assertEqual(data['Ga count'], 14)
         self.assertEqual(data['temperature'], 100.0)
+        self.assertEqual(data['mu_Al'], 5)
+        self.assertEqual(data['mu_Ga'], 0)
 
 
 if __name__ == '__main__':

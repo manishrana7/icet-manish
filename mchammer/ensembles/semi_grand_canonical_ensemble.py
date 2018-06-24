@@ -133,7 +133,8 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
             for num in cps:
                 if num not in self._chemical_potentials:
                     raise ValueError(
-                        f'Unknown species {num} in chemical_potentials')
+                        'Unknown species {} in chemical_potentials'.
+                        format(num))
             self._chemical_potentials.update(cps)
 
     def get_ensemble_data(self) -> Dict:
@@ -147,12 +148,16 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
         # temperature
         data['temperature'] = self.temperature
 
+        # chemical potentials
+        for Z, mu in self.chemical_potentials.items():
+            data['mu_{}'.format(chemical_symbols[Z])] = mu
+
         # species counts
         atoms = self.configuration.atoms
         unique, counts = np.unique(atoms.numbers, return_counts=True)
         for Z in self.configuration._allowed_species:
-            data[f'{chemical_symbols[Z]} count'] = 0
+            data['{} count'.format(chemical_symbols[Z])] = 0
         for Z, count in zip(unique, counts):
-            data[f'{chemical_symbols[Z]} count'] = count
+            data['{} count'.format(chemical_symbols[Z])] = count
 
         return data
