@@ -131,7 +131,11 @@ class CrossValidationEstimator(BaseOptimizer):
         self._split_kwargs = {}
 
         if self.validation_method == 'k-fold':
-            self._fit_kwargs = kwargs
+            for key, val in kwargs.items():
+                if key in ['shuffle']:
+                    self._split_kwargs[key] = val
+                else:
+                    self._fit_kwargs[key] = val
         elif self.validation_method == 'shuffle-split':
             for key, val in kwargs.items():
                 if key in ['test_size', 'train_size']:

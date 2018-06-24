@@ -6,7 +6,7 @@ from icet import (ClusterSpace,
                   ClusterExpansion)
 
 # step 1: Set up the basic structure and a cluster space
-prim = bulk('Au')
+prim = bulk('Ag')
 cutoffs = [6.0, 5.0, 4.0]
 subelements = ['Ag', 'Au']
 cs = ClusterSpace(prim, cutoffs, subelements)

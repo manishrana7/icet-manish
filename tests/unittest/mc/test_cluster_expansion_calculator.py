@@ -42,9 +42,9 @@ class TestCECalculator(unittest.TestCase):
     def test_calculate_total(self):
         """Test calculating total property."""
 
-        self.assertEqual(self.calculator.calculate_total(
+        self.assertAlmostEqual(self.calculator.calculate_total(
             occupations=self.atoms.numbers), 7641.0)
-        self.assertEqual(self.calculator.cluster_expansion.predict(
+        self.assertAlmostEqual(self.calculator.cluster_expansion.predict(
             self.calculator.atoms), 283.0)
 
         # set some elements
@@ -54,7 +54,13 @@ class TestCECalculator(unittest.TestCase):
         self.assertAlmostEqual(self.calculator.calculate_total(
             occupations=self.atoms.numbers), 1808.0)
         self.assertAlmostEqual(self.calculator.cluster_expansion.predict(
-            self.calculator.atoms),  66.96296296)
+            self.calculator.atoms), 66.96296296)
+
+        # test scaling
+        calc = ClusterExpansionCalculator(
+            self.atoms, self.ce, name='Test scaling', scaling=1.0)
+        self.assertAlmostEqual(calc.calculate_total(
+            occupations=self.atoms.numbers), 1808.0 / len(self.atoms))
 
     def test_calculate_local_contribution(self):
         """Test calculate local contribution."""
@@ -62,6 +68,23 @@ class TestCECalculator(unittest.TestCase):
         local_contribution = self.calculator.calculate_local_contribution(
             indices, self.atoms.numbers)
         self.assertIsInstance(local_contribution, float)
+
+        # test exceptions
+        with self.assertRaises(TypeError) as context:
+            self.calculator.calculate_local_contribution()
+        self.assertTrue('Missing required argument: local_indices'
+                        in str(context.exception))
+
+        with self.assertRaises(TypeError) as context:
+            self.calculator.calculate_local_contribution(indices)
+        self.assertTrue('Missing required argument: occupations'
+                        in str(context.exception))
+
+    def test_property_occupation_constraints(self):
+        """ Test property occupation_constraints. """
+        retval = self.calculator.occupation_constraints
+        target = [[13, 32]] * 27
+        self.assertEqual(retval, target)
 
 
 if __name__ == '__main__':

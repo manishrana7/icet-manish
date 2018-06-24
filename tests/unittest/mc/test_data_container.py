@@ -40,8 +40,10 @@ class TestDataContainer(unittest.TestCase):
         self.assertIsInstance(self.dc, DataContainer)
 
         # test fails with a non ASE Atoms type
-        with self.assertRaises(Exception):
+        with self.assertRaises(TypeError) as context:
             DataContainer('atoms', 'test-ensemble', 44)
+        self.assertTrue('atoms is not an ASE Atoms object'
+                        in str(context.exception))
 
     def test_structure(self):
         """Test reference structure property."""
@@ -57,6 +59,12 @@ class TestDataContainer(unittest.TestCase):
         self.dc.add_observable(test_observer.tag)
         self.assertEqual(len(self.dc.observables), 2)
 
+        # test whether method raises Exception
+        with self.assertRaises(TypeError) as context:
+            self.dc.add_observable(1)
+        self.assertTrue('tag has the wrong type'
+                        in str(context.exception))
+
     def test_add_parameter(self):
         """Test add parameter functionality."""
         self.dc.add_parameter('sro', -0.1)
@@ -65,6 +73,16 @@ class TestDataContainer(unittest.TestCase):
         index_atoms = [i for i in range(len(self.atoms))]
         self.dc.add_parameter('index_atoms', index_atoms)
         self.assertEqual(len(self.dc.parameters), 4)
+
+        # test whether method raises Exceptions
+        with self.assertRaises(TypeError) as context:
+            self.dc.add_parameter(1, 'tst')
+        self.assertTrue('tag has the wrong type'
+                        in str(context.exception))
+        with self.assertRaises(TypeError) as context:
+            self.dc.add_parameter('tst', 'tst')
+        self.assertTrue('value has the wrong type'
+                        in str(context.exception))
 
     def test_append_data(self):
         """Test append data functionality."""
@@ -92,6 +110,17 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(self.dc.get_number_of_entries('obs2'), 5)
         self.assertEqual(
             self.dc.get_number_of_entries('occupations'), 2)
+
+        # test whether method raises correct Exceptions
+        with self.assertRaises(TypeError) as context:
+            self.dc.append(5.0, 1.0)
+        self.assertTrue('mctrial has the wrong type'
+                        in str(context.exception))
+
+        with self.assertRaises(TypeError) as context:
+            self.dc.append(1, 'tst')
+        self.assertTrue('record has the wrong type'
+                        in str(context.exception))
 
     def test_property_data(self):
         """ Test data property."""
@@ -153,7 +182,7 @@ class TestDataContainer(unittest.TestCase):
 
         # using linear_interpolate
         retval = \
-            self.dc.get_data(tags=["obs1"], fill_method="linear_interpolate")
+            self.dc.get_data(tags=['obs1'], fill_method='linear_interpolate')
         self.assertEqual(retval, [1, 2, 3, 4, 5, 6, 7, 8, 9])
 
         # skip_none only for obs1
@@ -181,10 +210,14 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(retval, [[13, 13, 11], [13, 11, 11]])
 
         # test fails for non-stock data
-        with self.assertRaises(AssertionError) as context:
+        with self.assertRaises(ValueError) as context:
             self.dc.get_data(['temperature'])
+        self.assertTrue('No observable named temperature'
+                        in str(context.exception))
 
-        self.assertTrue("Observable is not part of DataContainer: temperature"
+        with self.assertRaises(ValueError) as context:
+            self.dc.get_data(fill_method='xyz')
+        self.assertTrue('Unknown fill method'
                         in str(context.exception))
 
     def test_reset(self):
@@ -209,6 +242,12 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(self.dc.get_number_of_entries(), 10)
         # test number of entries in the temperature column
         self.assertEqual(self.dc.get_number_of_entries('temperature'), 5)
+
+        # test that the correct Exceptions are raised
+        with self.assertRaises(ValueError) as context:
+            self.dc.get_number_of_entries('xyz')
+        self.assertTrue('No observable named xyz'
+                        in str(context.exception))
 
     def test_get_average(self):
         """Test get average functionality."""
@@ -240,10 +279,9 @@ class TestDataContainer(unittest.TestCase):
         self.assertAlmostEqual(std, 0.1124826, places=7)
 
         # test fails for non-existing data
-        with self.assertRaises(AssertionError) as context:
+        with self.assertRaises(ValueError) as context:
             self.dc.get_average('temperature')
-
-        self.assertTrue("Observable is not part of DataContainer: temperature"
+        self.assertTrue('No observable named temperature'
                         in str(context.exception))
 
         # test fails for non-scalar data like occupation vector
@@ -252,12 +290,10 @@ class TestDataContainer(unittest.TestCase):
             self.dc.append(
                 mctrial, record={'occupations': [14, 14, 14]})
 
-        with self.assertRaises(AssertionError) as context:
-            self.dc.get_average('occupations')
-
-        self.assertTrue(
-            "Data from requested column occupations has not scalar type"
-            in str(context.exception))
+        with self.assertRaises(TypeError) as context:
+            self.dc.get_average('occupation_vector')
+        self.assertTrue('occupation_vector is not scalar'
+                        in str(context.exception))
 
     def test_get_trajectory(self):
         """Test get_trajectory functionality."""
@@ -328,7 +364,7 @@ class TestDataContainer(unittest.TestCase):
 
         # check exception raises when file does not exist
         with self.assertRaises(FileNotFoundError):
-            dc_read = self.dc.read("not_found")
+            dc_read = self.dc.read('not_found')
         temp_file.close()
 
 

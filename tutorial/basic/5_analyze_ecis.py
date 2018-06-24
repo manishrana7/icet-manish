@@ -12,7 +12,7 @@ for order in range(len(ce.cluster_space.cutoffs)+2):
             continue
         if order not in ecis:
             ecis[order] = []
-        ecis[order].append([orbit['size'], ce.parameters[orbit['index']]])
+        ecis[order].append([orbit['radius'], ce.parameters[orbit['index']]])
 
 # step 2: Plot ECIs
 fig, axs = plt.subplots(1, 2, sharey=True, figsize=(5, 3))
