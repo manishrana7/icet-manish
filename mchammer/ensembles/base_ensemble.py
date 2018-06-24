@@ -295,7 +295,8 @@ class BaseEnsemble(ABC):
             name used in data container
         """
         if not isinstance(observer, BaseObserver):
-            raise TypeError(f'observer has the wrong type: {type(observer)}')
+            raise TypeError('observer has the wrong type: {}'
+                            .format(type(observer)))
 
         if tag is not None:
             observer.tag = tag
