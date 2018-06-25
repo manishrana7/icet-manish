@@ -6,6 +6,7 @@ __pycache__/
 *.pyc
 *.swp
 *.db
+!tests/equivalent_structure_pairs.db
 *.png
 *.eps
 *.so
