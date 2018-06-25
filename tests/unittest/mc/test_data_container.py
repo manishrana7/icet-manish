@@ -321,14 +321,12 @@ class TestDataContainer(unittest.TestCase):
         # append data
         occupation_vector = [14] * len(self.atoms)
         row_data = dict(occupations=occupation_vector,
-                        energy=-0.120000001)
-
+                        potential=-0.120000001)
         for mctrial in range(len(self.atoms)):
             self.dc.append(mctrial, row_data)
-
+        # save to file
         temp_file = tempfile.NamedTemporaryFile()
-
-        self.dc.write(temp_file.name)
+        self.dc.write_trajectory(temp_file.name)
 
     def test_read_and_write(self):
         """Test write and read functionalities of data container."""

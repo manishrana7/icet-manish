@@ -389,9 +389,10 @@ class DataContainer:
             output file name or file object
         """
         atoms_list, energies = self.get_trajectory(scalar_property='potential')
-        for atoms, energy in atoms_list, energies:
-            traj = Trajectory(outfile, mode='a')
+        traj = Trajectory(outfile, mode='a')
+        for atoms, energy in zip(atoms_list, energies):
             traj.write(atoms=atoms, energy=energy)
+        traj.close()
 
     @staticmethod
     def read(infile: Union[str, BinaryIO, TextIO]):
