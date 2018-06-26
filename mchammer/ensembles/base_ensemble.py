@@ -101,14 +101,14 @@ class BaseEnsemble(ABC):
 
         # interval for writing data and further preparation of data container
         if ensemble_data_write_interval is None:
-            self._ensemble_data_write_interval = len(atoms)
+            self._ensemble_data_write_interval = 10*round(len(atoms)/10)
         else:
             self._ensemble_data_write_interval = ensemble_data_write_interval
         self._data_container.add_observable('potential')
 
         # Handle trajectory writing
         if trajectory_write_interval is None:
-            self._trajectory_write_interval = len(atoms)
+            self._trajectory_write_interval = 10*round(len(atoms)/10)
         else:
             self._trajectory_write_interval = trajectory_write_interval
         self._data_container.add_observable('occupations')
