@@ -9,7 +9,8 @@ cutoffs = [7.0, 7.0, 7.0]
 subelements = ['Au', 'Pd']
 cs = ClusterSpace(prim, cutoffs, subelements)
 
-db = connect(os.path.dirname(__file__) + '/equivalent_structure_pairs.db')
+db = connect(os.path.join(os.path.dirname(__file__),
+                          'equivalent_structure_pairs.db'))
 
 # Loop over all pairs
 for structure in db.select():
