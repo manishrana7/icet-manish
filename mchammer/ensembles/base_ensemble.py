@@ -42,6 +42,9 @@ class BaseEnsemble(ABC):
         written to file; writing periodically to file provides both
         a way to examine the progress of the simulation and to back up
         the data
+    trajectory_write_interval : int
+        interval at which the current occupation vector of the atomic
+        configuration is written to the data container.
     random_seed : int
         seed for the random number generator used in the Monte Carlo
         simulation
