@@ -1,4 +1,6 @@
 from mchammer.observers.base_observer import BaseObserver
+from typing import List
+
 
 class ClusterExpansionObserver(BaseObserver):
     """
@@ -27,13 +29,10 @@ class ClusterExpansionObserver(BaseObserver):
         the observation interval
     """
 
-    def __init__(self, atoms, cluster_expansion, interval, tag, return_type):
+    def __init__(self,  cluster_expansion, interval, tag, return_type):
         super().__init__(interval=interval, return_type=return_type,
                          tag=tag)
         self._cluster_expansion = cluster_expansion
-        self.atoms = atoms
-    
-    def get_observable(self):
-        pass
-        
 
+    def get_observable(self, occupations: List[int]) -> float:
+        pass
