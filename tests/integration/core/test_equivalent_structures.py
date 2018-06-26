@@ -2,17 +2,17 @@ from icet import ClusterSpace
 from ase.build import bulk
 from ase.db import connect
 import numpy as np
+import os
 
 prim = bulk('Au', a=4.0, crystalstructure='hcp')
 cutoffs = [7.0, 7.0, 7.0]
 subelements = ['Au', 'Pd']
 cs = ClusterSpace(prim, cutoffs, subelements)
 
-db = connect('../../equivalent_structure_pairs.db')
+db = connect(os.path.dirname(__file__) + '/equivalent_structure_pairs.db')
 
 # Loop over all pairs
 for structure in db.select():
-
     # Do not check the pair that was just checked
     if structure.equivalent_structure < structure.id:
         continue
