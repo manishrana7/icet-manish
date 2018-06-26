@@ -3,14 +3,17 @@ from ase.build import bulk
 from ase.db import connect
 import numpy as np
 import os
+import inspect
+import os
 
 prim = bulk('Au', a=4.0, crystalstructure='hcp')
 cutoffs = [7.0, 7.0, 7.0]
 subelements = ['Au', 'Pd']
 cs = ClusterSpace(prim, cutoffs, subelements)
 
-db = connect(os.path.join(os.path.dirname(__file__),
-                          'equivalent_structure_pairs.db'))
+filename = inspect.getframeinfo(inspect.currentframe()).filename
+path = os.path.dirname(os.path.abspath(filename))
+db = connect(os.path.join(path, 'equivalent_structure_pairs.db'))
 
 # Loop over all pairs
 for structure in db.select():
