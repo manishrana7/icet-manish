@@ -4,7 +4,6 @@ from ase.db import connect
 import numpy as np
 import os
 import inspect
-import os
 
 prim = bulk('Au', a=4.0, crystalstructure='hcp')
 cutoffs = [7.0, 7.0, 7.0]
