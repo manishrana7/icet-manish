@@ -103,15 +103,17 @@ class BaseEnsemble(ABC):
                               random_seed=self._random_seed)
 
         # interval for writing data and further preparation of data container
+        default_interval = max(1, 10*round(len(atoms)))
+
         if ensemble_data_write_interval is None:
-            self._ensemble_data_write_interval = 10*round(len(atoms)/10)
+            self._ensemble_data_write_interval = default_interval
         else:
             self._ensemble_data_write_interval = ensemble_data_write_interval
         self._data_container.add_observable('potential')
 
         # Handle trajectory writing
         if trajectory_write_interval is None:
-            self._trajectory_write_interval = 10*round(len(atoms)/10)
+            self._trajectory_write_interval = default_interval
         else:
             self._trajectory_write_interval = trajectory_write_interval
         self._data_container.add_observable('occupations')
