@@ -1,3 +1,5 @@
+.. _data_container:
+
 .. index::
    single: Function reference; DataContainer
    single: Class reference; DataContainer

@@ -21,6 +21,7 @@ CanonicalEnsemble
    :undoc-members:
    :inherited-members:
 
+.. _sgc:
 
 .. index::
    single: Class reference; SGCEnsemble
