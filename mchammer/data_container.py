@@ -349,7 +349,6 @@ class DataContainer:
         only_trajectory = True
 
         if scalar_property is not None:
-            # check property is in data container
             only_trajectory = False
             this_column = None
         else:
@@ -381,7 +380,8 @@ class DataContainer:
     def write_trajectory(self, outfile: Union[str, BinaryIO, TextIO]):
         """Save trajectory to a file along with the respectives values of the
         potential field for each configuration. If the file exists the
-        trajectory will be appended.
+        trajectory will be appended. Use ase gui to visualize the trajectory
+        with values of the potential for each frame.
 
         Parameters
         ----------
