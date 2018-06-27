@@ -103,7 +103,7 @@ class BaseEnsemble(ABC):
                               random_seed=self._random_seed)
 
         # interval for writing data and further preparation of data container
-        default_interval = max(1, 10*round(len(atoms)))
+        default_interval = max(1, 10*round(len(atoms)/10))
 
         if ensemble_data_write_interval is None:
             self._ensemble_data_write_interval = default_interval
