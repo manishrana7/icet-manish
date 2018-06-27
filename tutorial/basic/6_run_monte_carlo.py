@@ -1,7 +1,7 @@
 from icet import ClusterExpansion
 from mchammer.calculators import ClusterExpansionCalculator
 from mchammer.ensembles import SemiGrandCanonicalEnsemble
-from numpy import arange, array
+from numpy import arange
 
 # step 1: set up the structure to simulate
 ce = ClusterExpansion.read('cluster_expansion.icet')
