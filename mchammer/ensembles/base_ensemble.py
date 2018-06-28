@@ -42,6 +42,9 @@ class BaseEnsemble(ABC):
         written to file; writing periodically to file provides both
         a way to examine the progress of the simulation and to back up
         the data
+    trajectory_write_interval : int
+        interval at which the current occupation vector of the atomic
+        configuration is written to the data container.
     random_seed : int
         seed for the random number generator used in the Monte Carlo
         simulation
@@ -60,6 +63,7 @@ class BaseEnsemble(ABC):
     def __init__(self, calculator=None, atoms=None, name='BaseEnsemble',
                  data_container=None, data_container_write_period=np.inf,
                  ensemble_data_write_interval=None,
+                 trajectory_write_interval=None,
                  random_seed=None):
 
         if calculator is None:
@@ -99,13 +103,22 @@ class BaseEnsemble(ABC):
                               random_seed=self._random_seed)
 
         # interval for writing data and further preparation of data container
+        default_interval = max(1, 10*round(len(atoms)/10))
+
         if ensemble_data_write_interval is None:
-            self._ensemble_data_write_interval = len(atoms)
+            self._ensemble_data_write_interval = default_interval
         else:
             self._ensemble_data_write_interval = ensemble_data_write_interval
         self._data_container.add_observable('potential')
-        if ensemble_data_write_interval is not np.inf:
-            self._find_observer_interval()
+
+        # Handle trajectory writing
+        if trajectory_write_interval is None:
+            self._trajectory_write_interval = default_interval
+        else:
+            self._trajectory_write_interval = trajectory_write_interval
+        self._data_container.add_observable('occupations')
+
+        self._find_observer_interval()
 
     @property
     def atoms(self) -> Atoms:
@@ -220,6 +233,10 @@ class BaseEnsemble(ABC):
             for key, value in ensemble_data.items():
                 row_dict[key] = value
 
+        # Trajectory data
+        if step % self._trajectory_write_interval == 0:
+            row_dict['occupations'] = self.configuration.occupations
+
         # Observer data
         for observer in self.observers.values():
             if step % observer.interval == 0:
@@ -230,6 +247,7 @@ class BaseEnsemble(ABC):
                 else:
                     row_dict[observer.tag] = observer.get_observable(
                         self.calculator.atoms)
+
         if len(row_dict) > 0:
             self._data_container.append(mctrial=step, record=row_dict)
 
@@ -263,9 +281,13 @@ class BaseEnsemble(ABC):
         Finds the greatest common denominator from the observation intervals.
         """
         intervals = [obs.interval for obs in self.observers.values()]
+
         if self._ensemble_data_write_interval is not np.inf:
             intervals.append(self._ensemble_data_write_interval)
-        self._observer_interval = self._get_gcd(intervals)
+        if self._trajectory_write_interval is not np.inf:
+            intervals.append(self._trajectory_write_interval)
+        if intervals:
+            self._observer_interval = self._get_gcd(intervals)
 
     def _get_gcd(self, values: List[int]) -> int:
         """

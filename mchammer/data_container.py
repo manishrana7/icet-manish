@@ -7,6 +7,7 @@ import tarfile
 import tempfile
 
 from ase import Atoms
+from ase.io import Trajectory
 from ase.io import write as ase_write, read as ase_read
 from collections import OrderedDict
 from datetime import datetime
@@ -35,7 +36,6 @@ class DataContainer:
         """
         Initializes a DataContainer object.
         """
-
         if not isinstance(atoms, Atoms):
             raise TypeError('atoms is not an ASE Atoms object')
 
@@ -136,7 +136,8 @@ class DataContainer:
 
     def get_data(self, tags: List[str]=None,
                  start: int=None, stop: int=None, interval: int=1,
-                 fill_method: str=None) -> Union[list, Tuple[list, list]]:
+                 fill_method: str=None,
+                 apply_to: List[str]=None) -> Union[list, Tuple[list, list]]:
         """Returns the accumulated data for the requested observables.
 
         Parameters
@@ -152,7 +153,7 @@ class DataContainer:
 
         stop
             maximum value of trial step to consider; by default the
-            largesst value in the mctrial column will be used.
+            largest value in the mctrial column will be used.
 
         interval
             increment for mctrial; by default the smallest available
@@ -161,6 +162,10 @@ class DataContainer:
         fill_method : {'skip_none', 'fill_backward', 'fill_forward',
                        'linear_interpolate', None}
             method employed for dealing with missing values
+
+        apply_to
+            tags of columns for which fill_method will be employed;
+            by default parse all columns with fill_method.
 
         Raises
         ------
@@ -195,27 +200,37 @@ class DataContainer:
                 data = data.loc[start:stop:interval, tags]
 
         if fill_method is not None:
+
             if fill_method not in fill_methods:
                 raise ValueError('Unknown fill method: {}'
                                  .format(fill_method))
 
+            if apply_to is None:
+                apply_to = tags
+
             # retrieve only valid observations
             if fill_method is 'skip_none':
-                data.dropna(inplace=True)
+                data.dropna(inplace=True, subset=apply_to)
 
             else:
+                # if requested, drop NaN values in columns
+                subset = [tag for tag in tags if tag not in apply_to]
+                data.dropna(inplace=True, subset=subset)
+
                 # fill NaN with the next valid observation
                 if fill_method is 'fill_backward':
                     data.fillna(method='bfill', inplace=True)
+
                 # fill NaN with the last valid observation
                 elif fill_method is 'fill_forward':
                     data.fillna(method='ffill', inplace=True)
-                # fill NaN with the linear interpolation
-                # of the last and next valid observations
+
+                # fill NaN with the linear interpolation of the last and
+                # next valid observations
                 elif fill_method is 'linear_interpolate':
                     data.interpolate(limit_area='inside', inplace=True)
 
-                # drop any left-over nan value
+                # drop any left-over nan values
                 data.dropna(inplace=True)
 
         data_list = []
@@ -287,11 +302,11 @@ class DataContainer:
         tag
             tag of field over which to average
         start
-            minimum value of trial step to consider. If None, lowest value
-            in the mctrial column will be used.
+            minimum value of trial step to consider; by default the
+            smallest value in the mctrial column will be used.
         stop
-            maximum value of trial step to consider. If None, highest value
-            in the mctrial column will be used.
+            maximum value of trial step to consider; by default the
+            largest value in the mctrial column will be used.
 
         Raises
         ------
@@ -313,6 +328,77 @@ class DataContainer:
             data = self.get_data(tags=[tag], start=start, stop=stop,
                                  fill_method='skip_none')
             return np.mean(data), np.std(data)
+
+    def get_trajectory(self, start: int=None, stop: int=None, interval: int=1,
+                       scalar_property: str=None) \
+            -> Union[List[Atoms], Tuple[List[Atoms], list]]:
+        """
+        Returns a trajectory in the form of a list of ASE Atoms and
+        optionally a corresponding list with values of the property
+        with the given label. Configurations with non properties will be
+        skipped in the trajectory if the property is requested.
+
+        Parameters
+        ----------
+        start
+            minimum value of trial step to consider; by default the
+            smallest value in the mctrial column will be used.
+        stop
+            maximum value of trial step to consider; by default the
+            largest value in the mctrial column will be used.
+        interval
+            increment for mctrial; by default the smallest available
+            interval will be used.
+        scalar_property
+            tag of observable to be returned along with trajectory
+        """
+        only_trajectory = True
+
+        if scalar_property is not None:
+            only_trajectory = False
+            this_column = None
+        else:
+            # default property to potential
+            scalar_property = 'potential'
+            # return all valid observations in observations column
+            # not matter what values are in potential column
+            this_column = ['occupations']
+
+        occupation_vectors, property_values = \
+            self.get_data(tags=['occupations', scalar_property],
+                          start=start, stop=stop, interval=interval,
+                          fill_method='skip_none', apply_to=this_column)
+
+        atoms_list, property_list = [], []
+        for occupation_vector, property_value in zip(occupation_vectors,
+                                                     property_values):
+            atoms = self.atoms.copy()
+            atoms.numbers = occupation_vector
+            atoms_list.append(atoms)
+            if not only_trajectory:
+                property_list.append(property_value)
+
+        if property_list:
+            return atoms_list, property_list
+        else:
+            return atoms_list
+
+    def write_trajectory(self, outfile: Union[str, BinaryIO, TextIO]):
+        """Save trajectory to a file along with the respectives values of the
+        potential field for each configuration. If the file exists the
+        trajectory will be appended. Use ase gui to visualize the trajectory
+        with values of the potential for each frame.
+
+        Parameters
+        ----------
+        outfile
+            output file name or file object
+        """
+        atoms_list, energies = self.get_trajectory(scalar_property='potential')
+        traj = Trajectory(outfile, mode='a')
+        for atoms, energy in zip(atoms_list, energies):
+            traj.write(atoms=atoms, energy=energy)
+        traj.close()
 
     @staticmethod
     def read(infile: Union[str, BinaryIO, TextIO]):

@@ -43,12 +43,14 @@ class ConcreteEnsemble(BaseEnsemble):
 
     def __init__(self, calculator, atoms=None, name=None, data_container=None,
                  data_container_write_period=np.inf, random_seed=None,
-                 ensemble_data_write_interval=None):
+                 ensemble_data_write_interval=None,
+                 trajectory_write_interval=None):
         super().__init__(
             calculator, atoms=atoms, name=name, data_container=data_container,
             data_container_write_period=data_container_write_period,
             random_seed=random_seed,
-            ensemble_data_write_interval=ensemble_data_write_interval)
+            ensemble_data_write_interval=ensemble_data_write_interval,
+            trajectory_write_interval=trajectory_write_interval)
 
     def do_trial_step(self):
         pass
@@ -208,7 +210,8 @@ class TestEnsemble(unittest.TestCase):
                                     name='this-ensemble',
                                     data_container='my-datacontainer.dc',
                                     data_container_write_period=1e-4,
-                                    ensemble_data_write_interval=np.inf)
+                                    ensemble_data_write_interval=np.inf,
+                                    trajectory_write_interval=np.inf)
 
         # attach observer
         observer = ParakeetObserver(interval=14, tag='Parakeet2')

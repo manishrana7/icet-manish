@@ -50,13 +50,16 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
     def __init__(self, atoms: Atoms=None, calculator: BaseCalculator=None,
                  name: str='Semi-grand canonical ensemble',
                  data_container: DataContainer=None, random_seed: int=None,
-                 ensemble_data_write_interval: int=None, **kwargs):
+                 ensemble_data_write_interval: int=None,
+                 trajectory_write_interval: int=None, **kwargs):
 
         super().__init__(
             atoms=atoms, calculator=calculator, name=name,
             data_container=data_container,
             random_seed=random_seed,
-            ensemble_data_write_interval=ensemble_data_write_interval)
+            ensemble_data_write_interval=ensemble_data_write_interval,
+            trajectory_write_interval=trajectory_write_interval)
+
         if 'temperature' not in kwargs.keys():
             raise KeyError('Missing required keyword: temperature')
         else:
