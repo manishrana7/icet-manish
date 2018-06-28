@@ -10,29 +10,32 @@ class ClusterExpansionObserver(BaseObserver):
 
     Parameters
     ----------
-    atoms : ASE atoms object
-
-    cluster_expansion : icet cluster expansion
-
-    interval : int
-
-    tag : str
+    atoms : :class:`ase:Atoms`
+        atomic structure to be used as a reference by the observer.
+    cluster_expansion :class:`icet:ClusterExpansion` 
+        
+    tag : str (default: `ClusterExpansionObserver`)
+        human readable observer name
 
     Attributes
     ----------
-    cluster_expansion : icet cluster expansion
-
     tag : str
-        human readable tag used for identifying the observer
-
+        name of observer
     interval : int
-        the observation interval
+        observation interval
     """
 
-    def __init__(self,  cluster_expansion, interval, tag, return_type):
-        super().__init__(interval=interval, return_type=return_type,
-                         tag=tag)
+    def __init__(self, atoms, cluster_expansion,
+                 tag='ClusterExpansionObserver', interva),
+                 atoms, cluster_expansion):
+        super().__init__(interval=interval, return_type=return_type, tag=tag)
         self._cluster_expansion = cluster_expansion
+        self.atom = atom
 
     def get_observable(self, occupations: List[int]) -> float:
-        pass
+        """
+        Returns an observation.
+        """
+        self.atoms.set_atomic_numbers(occupations)
+        return self.cluster_expansion.predict(self.atoms) * \
+            self._property_scaling
