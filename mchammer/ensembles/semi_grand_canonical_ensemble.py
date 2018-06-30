@@ -29,8 +29,8 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
 
     .. math::
 
-        \\rho_{\text{SGC}} = \exp\\Big[ - \big( E
-        + \sum_{i>1}^m \Delta\mu_i N_i \big) / k_B T \\Big]
+        \\rho_{\\text{SGC}} = \exp\\Big[ - \\big( E
+        + \sum_{i>1}^m \Delta\mu_i N_i \\big) / k_B T \\Big]
 
     with the *relative* chemical potentials :math:`\Delta\mu_i =
     \mu_i - \mu_1` and species counts :math:`N_i`.
