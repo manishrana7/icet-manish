@@ -23,7 +23,7 @@ the reference data is provided in the form of an `ASE
 :class:`StructureContainer <icet.StructureContainer>`,
 :class:`CrossValidationEstimator <icet.CrossValidationEstimator>` and
 :class:`ClusterExpansion <icet.ClusterExpansion>` are
-used, :ref:`in sequence <worflow>`, during preparation, compilation and
+used, :ref:`in sequence <workflow>`, during preparation, compilation and
 training of the cluster expansion followed by the extraction of information in
 the form of predicted energies from the latter.
 
