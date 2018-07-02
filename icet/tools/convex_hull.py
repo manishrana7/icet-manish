@@ -1,6 +1,5 @@
 import itertools
 import numpy as np
-from ase import Atoms
 from scipy.interpolate import griddata
 from scipy.spatial import ConvexHull as ConvexHullSciPy
 from scipy.spatial.qhull import QhullError
@@ -16,7 +15,7 @@ generated/scipy.spatial.ConvexHull.html>`_.
 
     Parameters
     ----------
-    concentrations : list of lists of floats
+    concentrations : list of floats / list of lists of floats
         concentrations for each structure listed as ``[[c1, c2], [c1, c2],
         ...]``; for binaries, in which case there is only one independent
         concentration, the format ``[c1, c2, c3, ...]`` works as well.
@@ -48,7 +47,7 @@ generated/scipy.spatial.ConvexHull.html>`_.
     matplotlib axis object ``ax``)::
 
         ax.plot(hull.concentrations, hull.energies)
-    
+
     or extract structures at or close to the convex hull::
 
         low_energy_structures = hull.extract_low_energy_structures(
@@ -60,12 +59,13 @@ generated/scipy.spatial.ConvexHull.html>`_.
 
     """
 
-    def __init__(self, concentrations: Union[List[float], List[List[float]]],
+    def __init__(self,
+                 concentrations: Union[List[float], List[List[float]]],
                  energies: List[float]):
         assert len(concentrations) == len(energies)
         # Prepare data in format suitable for SciPy-ConvexHull
-        concentrations = np.ndarray(concentrations)
-        energies = np.ndarray(energies)
+        concentrations = np.array(concentrations)
+        energies = np.array(energies)
         points = np.column_stack((concentrations, energies))
         self.dimensions = len(points[0]) - 1
 
@@ -81,17 +81,17 @@ generated/scipy.spatial.ConvexHull.html>`_.
             else:
                 concentrations.append(points[vertex][0:-1])
             energies.append(points[vertex][-1])
-        concentrations = np.ndarray(concentrations)
-        energies = np.ndarray(energies)
+        concentrations = np.array(concentrations)
+        energies = np.array(energies)
 
         structures = hull.vertices
         # If there is just one independent concentration, we'd better sort
         # according to it
         if self.dimensions == 1:
             ces = list(zip(*sorted(zip(concentrations, energies, structures))))
-            self.concentrations = np.ndarray(ces[0])
-            self.energies = np.ndarray(ces[1])
-            self.structures = np.ndarray(ces[2])
+            self.concentrations = np.array(ces[0])
+            self.energies = np.array(ces[1])
+            self.structures = np.array(ces[2])
         else:
             self.concentrations = concentrations
             self.energies = energies
@@ -120,7 +120,7 @@ generated/scipy.spatial.ConvexHull.html>`_.
             vertices = []
             vertices.append(np.argmin(self.concentrations))
             vertices.append(np.argmax(self.concentrations))
-            vertices = np.ndarray(vertices)
+            vertices = np.array(vertices)
         else:
             concentration_hull = ConvexHullSciPy(self.concentrations)
             vertices = concentration_hull.vertices
@@ -148,8 +148,8 @@ generated/scipy.spatial.ConvexHull.html>`_.
                                                     self.dimensions + 1)):
                 # Calculate energy that would be gotten with pure elements
                 # with ascribed concentration.
-                energy_pure = griddata(self.concentrations[np.ndarray(plane)],
-                                       self.energies[np.ndarray(plane)],
+                energy_pure = griddata(self.concentrations[np.array(plane)],
+                                       self.energies[np.array(plane)],
                                        concentration,
                                        method='linear')
 
@@ -166,8 +166,9 @@ generated/scipy.spatial.ConvexHull.html>`_.
         self.energies = np.delete(self.energies, to_delete, 0)
         self.structures = list(np.delete(self.structures, to_delete, 0))
 
-    def get_energy_at_convex_hull(self,
-            target_concentrations: Union[List[float], List[list]]) -> np.ndarray:
+    def get_energy_at_convex_hull(self, target_concentrations:
+                                  Union[List[float],
+                                        List[List[float]]]) -> np.ndarray:
         """Returns the energy of the convex hull at specified concentrations.
         If any concentration is outside the allowed range, NaN is
         returned.
@@ -195,7 +196,7 @@ generated/scipy.spatial.ConvexHull.html>`_.
             try:
                 plane_energies = griddata(self.concentrations[list(plane)],
                                           self.energies[list(plane)],
-                                          np.ndarray(target_concentrations),
+                                          np.array(target_concentrations),
                                           method='linear')
             except QhullError:
                 # If the points lie on a line, the convex hull will fail, but
@@ -207,11 +208,12 @@ generated/scipy.spatial.ConvexHull.html>`_.
         hull_energies = np.nanmin(hull_candidate_energies, axis=0)
         return hull_energies
 
-    def extract_low_energy_structures(self,
-                                      concentrations: Union[List[float], List[List[float]]],
+    def extract_low_energy_structures(self, concentrations:
+                                      Union[List[float],
+                                            List[List[float]]],
                                       energies: List[float],
-                                      energy_tolerance:float,
-                                      structures: list=None):
+                                      energy_tolerance: float, structures:
+                                      list=None):
         """Returns structures that lie within a certain tolerance of the convex
         hull.
 
