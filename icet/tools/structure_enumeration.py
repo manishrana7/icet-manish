@@ -9,11 +9,11 @@ The algorithm was developed by Gus L. W Hart and Rodney W. Forcade in
 * Hart, G. L. W. and Forcade, R. W., Phys. Rev. B 80, 014120 (2009)
 """
 
-from itertools import product
 import numpy as np
+from ase import Atoms
+from itertools import product
 from spglib import get_symmetry
 from spglib import niggli_reduce as spg_nigg_red
-from ase import Atoms
 from .structure_enumeration_support.hermite_normal_form import get_reduced_hnfs
 from .structure_enumeration_support.smith_normal_form import get_unique_snfs
 from .structure_enumeration_support.labeling_generation \
@@ -336,7 +336,7 @@ def get_symmetry_operations(atoms, tol=1e-3):
     return symmetries
 
 
-def enumerate_structures(atoms, sizes, subelements,
+def enumerate_structures(atoms, sizes, chemical_symbols,
                          concentration_restrictions=None,
                          niggli_reduce=None):
     """
@@ -360,14 +360,14 @@ def enumerate_structures(atoms, sizes, subelements,
         generated.
     sizes : list of ints
         Maximum number of atoms in the returned structures.
-    subelements : list of str
+    chemical_symbols : list of str
         Elements to decorate the structure, e.g. ['Au', 'Ag']
     concentration_restrictions : dict
-        Defines allowed concentration for one or more element in subelements,
-        e.g. {'Au': (0, 0.2)} will only enumerate structures in which the Au
-        content is between 0 and 20 %. Concentration is here always defined
-        as the number of atoms of the specified kind divided by the number of
-        *all* atoms.
+        Defines allowed concentration for one or more element in
+        chemical_symbols, e.g. {'Au': (0, 0.2)} will only enumerate structures
+        in which the Au content is between 0 and 20 %. Concentration is here
+        always defined as the number of atoms of the specified kind divided by
+        the number of *all* atoms.
     niggli_reduction : bool
         If True perform a Niggli reduction with spglib for each structure.
         Default is True if `atoms` has all boundary conditions periodic,
@@ -383,21 +383,21 @@ def enumerate_structures(atoms, sizes, subelements,
     basis = atoms.get_scaled_positions()
 
     # Construct descriptor of where species are allowed to be
-    if isinstance(subelements[0], str):
-        iter_elements = [tuple(range(len(subelements)))] * nsites
-        elements = subelements
-    elif len(subelements) == nsites:
-        assert isinstance(subelements[0][0], str)
+    if isinstance(chemical_symbols[0], str):
+        iter_elements = [tuple(range(len(chemical_symbols)))] * nsites
+        elements = chemical_symbols
+    elif len(chemical_symbols) == nsites:
+        assert isinstance(chemical_symbols[0][0], str)
         elements = []
-        for site in subelements:
+        for site in chemical_symbols:
             for element in site:
                 if element not in elements:
                     elements.append(element)
         iter_elements = []
-        for site in subelements:
+        for site in chemical_symbols:
             iter_elements.append(tuple(elements.index(i) for i in site))
     else:
-        raise Exception('subelements needs to be a list of strings '
+        raise Exception('chemical_symbols needs to be a list of strings '
                         'or a list of list of strings.')
 
     # Adapt concentration restrictions to iter_elements
@@ -409,7 +409,7 @@ def enumerate_structures(atoms, sizes, subelements,
                  ' needs to be specified as (c_low, c_high)')
             if key not in elements:
                 raise ValueError('{} found in concentration_restrictions but'
-                                 ' not in subelements'.format(key))
+                                 ' not in chemical_symbols'.format(key))
             concentrations[elements.index(key)] = concentration_range
     else:
         concentrations = None
