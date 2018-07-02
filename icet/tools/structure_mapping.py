@@ -1,59 +1,64 @@
-from ase.build import cut
 import numpy as np
+from ase import Atoms
+from ase.build import cut
+from typing import List, Tuple
 
 
-def map_structure_to_reference(input_structure,
-                               reference_structure,
-                               tolerance_mapping,
-                               vacancy_type=None,
-                               inert_species=None,
-                               tolerance_cell=0.05,
-                               tolerance_positions=0.01,
-                               verbose=False):
-    """
-    Map a relaxed structure onto a reference structure.
+def map_structure_to_reference(input_structure: Atoms,
+                               reference_structure: Atoms,
+                               tolerance_mapping: float,
+                               vacancy_type: str=None,
+                               inert_species: List[str]=None,
+                               tolerance_cell: float=0.05,
+                               tolerance_positions: float=0.01,
+                               verbose: bool=False) \
+                               -> Tuple[Atoms, float, float]:
+    """Maps a relaxed structure onto a reference structure.
+    The function returns a tuple comprising
+
+    * the ideal supercell most closely matching the input structure,
+    * the largest deviation of any input coordinate from its ideal
+      coordinate, and
+    * the average deviation of the input coordinates from the ideal
+      coordinates.
 
     Parameters
     ----------
-    input_structure :  ASE Atoms object
+    input_structure
         relaxed input structure
-    reference_structure : ASE Atoms object
+    reference_structure
         reference structure, which can but need not represent the primitive
         cell
-    tolerance_mapping : float
+    tolerance_mapping
         maximum allowed displacement for mapping an atom in the relaxed (but
-        rescaled) structure to the reference supercell *Note*: A reasonable
-        choice is up to 20-30% of the first nearest neighbor distance (`r1`).
-        A value above 50% of `r1` will most likely lead to atoms being
-        multiply assigned, whereby the mapping fails.
-    vacancy_type : str
+        rescaled) structure to the reference supercell
+
+        *Note*: A reasonable choice is up to 20-30% of the first
+        nearest neighbor distance (`r1`).  A value above 50% of `r1`
+        will most likely lead to atoms being multiply assigned,
+        whereby the mapping fails.
+    vacancy_type
         If this parameter is set to a non-zero string unassigned sites in the
-        reference structure will be assigned to this type. *Note 1*: By
-        default (``None``) the method will fail if there are *any* unassigned
-        sites in the reference structure. *Note 2*: `vacancy_type` must be a
-        valid element type as enforced by the ASE Atoms class.
-    inert_species : list of str
-        List of chemical symbols (e.g., `['Au', 'Pd']`) that are never
+        reference structure will be assigned to this type.
+
+        *Note 1*: By default (``None``) the method will fail if there
+        are *any* unassigned sites in the reference structure.
+
+        *Note 2*: ``vacancy_type`` must be a valid element type as
+        enforced by the :class:`ase.Atoms` class.
+    inert_species
+        List of chemical symbols (e.g., ``['Au', 'Pd']``) that are never
         substituted for a vacancy. Used to make an initial rescale of the cell
         and thus increases the probability for a successful mapping. Need not
-        be specified if `vacancy_type` is None.
-    tolerance_cell : float
+        be specified if ``vacancy_type`` is ``None``.
+    tolerance_cell
         tolerance factor applied when computing permutation matrix to generate
-        supercell (h = P h_p)
-    tolerance_positions : float
+        supercell
+    tolerance_positions
         tolerance factor applied when scanning for overlapping positions in
-        Angstrom (forwarded to `ase.build.cut`)
-    verbose : bool
+        Angstrom (forwarded to :func:`ase.build.cut`)
+    verbose
         turn on verbose output
-
-    Returns
-    -------
-    ASE Atoms, float, float
-        - the ideal supercell most closely matching the input structure
-        - the largets deviation of any input coordinate from its ideal
-          coordinate
-        - the average deviation of the input coordinates from the ideal
-          coordinates
 
     Example
     -------
