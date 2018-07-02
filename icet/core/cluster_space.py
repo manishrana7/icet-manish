@@ -155,7 +155,8 @@ class ClusterSpace(_ClusterSpace):
         width = len(repr_orbit(prototype_orbit))
         s = []
         s += ['{s:=^{n}}'.format(s=' Cluster Space ', n=width)]
-        s += [' subelements: {}'.format(' '.join(self.get_atomic_numbers()))]
+        s += [' chemical species: {}'
+              .format(' '.join(self.get_atomic_numbers()))]
         s += [' cutoffs: {}'.format(' '.join(['{:.4f}'.format(co)
                                               for co in self._cutoffs]))]
         s += [' total number of orbits: {}'.format(len(self))]
@@ -367,10 +368,10 @@ def get_singlet_info(atoms, return_cluster_space=False):
         'input configuration must be an ASE Atoms object'
 
     # create dummy elements and cutoffs
-    subelements = ['H', 'He']
+    chemical_symbols = ['H', 'He']
     cutoffs = [0.0]
 
-    cs = ClusterSpace(atoms, cutoffs, subelements)
+    cs = ClusterSpace(atoms, cutoffs, chemical_symbols)
 
     singlet_data = []
 
