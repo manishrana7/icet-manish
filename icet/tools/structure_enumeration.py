@@ -95,7 +95,7 @@ def _get_all_labelings(snf: SmithNormalForm,
 
 
 def _permute_labeling(labeling: tuple, snf: SmithNormalForm,
-                      transformation: List[np.array],
+                      transformation: List[np.ndarray],
                       nsites: int) -> Tuple[int]:
     """
     Returns permute labeling according to transformations defined by
@@ -192,8 +192,8 @@ def _yield_unique_labelings(labelings: List[int], snf: SmithNormalForm,
             yield labeling
 
 
-def _labeling_to_atoms(labeling: tuple, hnf: np.array, cell: np.array,
-                       new_cell: np.array, basis: np.array, species: List[str],
+def _labeling_to_atoms(labeling: tuple, hnf: np.ndarray, cell: np.ndarray,
+                       new_cell: np.ndarray, basis: np.ndarray, species: List[str],
                        pbc: List[bool]) -> Atoms:
     """
     Returns structure object corresponding to the given labeling using
@@ -311,7 +311,7 @@ def get_symmetry_operations(atoms: Atoms,
                     found = True
             assert found
 
-        sites_translations.append(np.array(site_translations))
+        sites_translations.append(np.ndarray(site_translations))
 
     symmetries['translations'] = sites_translations
     symmetries['basis_shifts'] = basis_shifts

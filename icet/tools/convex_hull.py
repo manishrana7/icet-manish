@@ -1,50 +1,71 @@
 import itertools
 import numpy as np
+from ase import Atoms
+from scipy.interpolate import griddata
 from scipy.spatial import ConvexHull as ConvexHullSciPy
 from scipy.spatial.qhull import QhullError
-from scipy.interpolate import griddata
+from typing import List, Union
 
 
 class ConvexHull(object):
-    '''
-    Convex hull of concentration and energies.
+    """This class provides functionality for extracting the convex hull
+    of the (free) energy of mixing. It is based on the `convex hull
+    calculator in SciPy
+    <http://docs.scipy.org/doc/scipy-dev/reference/\
+generated/scipy.spatial.ConvexHull.html>`_.
+
+    Parameters
+    ----------
+    concentrations : list of lists of floats
+        concentrations for each structure listed as ``[[c1, c2], [c1, c2],
+        ...]``; for binaries, in which case there is only one independent
+        concentration, the format ``[c1, c2, c3, ...]`` works as well.
+    energies : list of floats
+        energy (or energy of mixing) for each structure
 
     Attributes
     ----------
-    dimensions : int
-        Number of independent concentrations needed to specify a point in
-        concentration space (1 for binaries, 2 for ternaries etc)
     concentrations : NumPy array (N, dimensions)
-        Concentration of the N structures on the convex hull.
+        concentrations of the `N` structures on the convex hull
     energies : NumPy array
-        Energy of the N structures on the convex hull.
+        energies of the `N` structures on the convex hull
+    dimensions : int
+        number of independent concentrations needed to specify a point in
+        concentration space (1 for binaries, 2 for ternaries etc.)
     structures : list of ints
-        Indices of structures that constitute the convex hull (indices are
+        indices of structures that constitute the convex hull (indices are
         defined by the order their concentrations and energies are fed when
-        initializing the ConvexHull object).
-    '''
+        initializing the ConvexHull object)
 
-    def __init__(self, concentrations, energies):
-        '''
-        Construct convex hull for (free) energy of mixing. The core function
-        the Convex Hull calculator in SciPy, see
-         http://docs.scipy.org/doc/scipy-dev/reference/\
-            generated/scipy.spatial.ConvexHull.html
+    Examples
+    --------
+    A `ConvexHull` object is easily initialized by providing lists of
+    concentrations and energies::
 
-        Parameters
-        ----------
-        concentrations : list of lists of floats
-            Concentrations for each structure listed as [[c1, c2], [c1, c2],
-            ...]. For binaries, in which case there is only one independent
-            concentration, the format [c1, c2, c3, ...] works fine.
-        energies : list of floats
-            Energy/energy of mixing for each structure.
-        '''
+        hull = ConvexHull(data['concentration'], data['mixing_energy'])
 
+    after which one can for example plot the data (assuming a
+    matplotlib axis object ``ax``)::
+
+        ax.plot(hull.concentrations, hull.energies)
+    
+    or extract structures at or close to the convex hull::
+
+        low_energy_structures = hull.extract_low_energy_structures(
+            data['concentration'], data['mixing_energy'],
+            tolerance=0.005, structures=list_of_structures)
+
+    A complete example can be found in the :ref:`basic tutorial
+    <tutorial_enumerate_structures>`.
+
+    """
+
+    def __init__(self, concentrations: Union[List[float], List[List[float]]],
+                 energies: List[float]):
         assert len(concentrations) == len(energies)
         # Prepare data in format suitable for SciPy-ConvexHull
-        concentrations = np.array(concentrations)
-        energies = np.array(energies)
+        concentrations = np.ndarray(concentrations)
+        energies = np.ndarray(energies)
         points = np.column_stack((concentrations, energies))
         self.dimensions = len(points[0]) - 1
 
@@ -60,17 +81,17 @@ class ConvexHull(object):
             else:
                 concentrations.append(points[vertex][0:-1])
             energies.append(points[vertex][-1])
-        concentrations = np.array(concentrations)
-        energies = np.array(energies)
+        concentrations = np.ndarray(concentrations)
+        energies = np.ndarray(energies)
 
         structures = hull.vertices
         # If there is just one independent concentration, we'd better sort
         # according to it
         if self.dimensions == 1:
             ces = list(zip(*sorted(zip(concentrations, energies, structures))))
-            self.concentrations = np.array(ces[0])
-            self.energies = np.array(ces[1])
-            self.structures = np.array(ces[2])
+            self.concentrations = np.ndarray(ces[0])
+            self.energies = np.ndarray(ces[1])
+            self.structures = np.ndarray(ces[2])
         else:
             self.concentrations = concentrations
             self.energies = energies
@@ -79,16 +100,16 @@ class ConvexHull(object):
         # Remove points that are above "pure element plane"
         self._remove_points_above_tie_plane()
 
-    def _remove_points_above_tie_plane(self, tol=1e-6):
-        '''
+    def _remove_points_above_tie_plane(self, tol: float=1e-6):
+        """
         Remove all points on the convex hull that correspond to maximum rather
         than minimum energy.
 
         Parameters
         ----------
-        tol : float
+        tol
             Tolerance for what energy constitutes a lower one.
-        '''
+        """
 
         # Identify the "complex concentration hull", i.e. the extremum
         # concentrations. In the simplest case, these should simply be the
@@ -99,7 +120,7 @@ class ConvexHull(object):
             vertices = []
             vertices.append(np.argmin(self.concentrations))
             vertices.append(np.argmax(self.concentrations))
-            vertices = np.array(vertices)
+            vertices = np.ndarray(vertices)
         else:
             concentration_hull = ConvexHullSciPy(self.concentrations)
             vertices = concentration_hull.vertices
@@ -127,8 +148,8 @@ class ConvexHull(object):
                                                     self.dimensions + 1)):
                 # Calculate energy that would be gotten with pure elements
                 # with ascribed concentration.
-                energy_pure = griddata(self.concentrations[np.array(plane)],
-                                       self.energies[np.array(plane)],
+                energy_pure = griddata(self.concentrations[np.ndarray(plane)],
+                                       self.energies[np.ndarray(plane)],
                                        concentration,
                                        method='linear')
 
@@ -145,24 +166,22 @@ class ConvexHull(object):
         self.energies = np.delete(self.energies, to_delete, 0)
         self.structures = list(np.delete(self.structures, to_delete, 0))
 
-    def get_energy_at_convex_hull(self, target_concentrations):
-        '''
-        Get energy of convex hull at specified concentrations.
+    def get_energy_at_convex_hull(self,
+            target_concentrations: Union[List[float], List[list]]) -> np.ndarray:
+        """Returns the energy of the convex hull at specified concentrations.
+        If any concentration is outside the allowed range, NaN is
+        returned.
 
         Parameters
         ----------
-        target_concentrations : list of lists
-            Concentrations at target points. If there is one independent
-            concentration, a list of floats is fine. Otherwise, the
-            concentrations are given as a list of lists, such as [[0.1, 0.2],
-            [0.3, 0.1], ...]
+        target_concentrations
+            concentrations at target points
 
-        Returns
-        -------
-        NumPy array
-            Energies at the specified target_concentrations. If any
-            concentration is outside the allowed range, NaN is returned.
-        '''
+            If there is one independent concentration, a list of
+            floats is sufficient. Otherwise, the concentrations ought
+            to be provided as a list of lists, such as ``[[0.1, 0.2],
+            [0.3, 0.1], ...]``.
+        """
         if self.dimensions > 1:
             assert len(target_concentrations[0]) == self.dimensions
 
@@ -176,7 +195,7 @@ class ConvexHull(object):
             try:
                 plane_energies = griddata(self.concentrations[list(plane)],
                                           self.energies[list(plane)],
-                                          np.array(target_concentrations),
+                                          np.ndarray(target_concentrations),
                                           method='linear')
             except QhullError:
                 # If the points lie on a line, the convex hull will fail, but
@@ -188,39 +207,38 @@ class ConvexHull(object):
         hull_energies = np.nanmin(hull_candidate_energies, axis=0)
         return hull_energies
 
-    def extract_low_energy_structures(self, concentrations, energies,
-                                      energy_tolerance, structures=None):
-        '''
-
-        Extract structures that are sufficiently close in energy to the convex
+    def extract_low_energy_structures(self,
+                                      concentrations: Union[List[float], List[List[float]]],
+                                      energies: List[float],
+                                      energy_tolerance:float,
+                                      structures: list=None):
+        """Returns structures that lie within a certain tolerance of the convex
         hull.
 
         Parameters
         ----------
-        concentrations : list of lists
-            Concentrations of candidate structures. If there is one
-            independent concentration, a list of floats is fine. Otherwise,
-            the concentrations are given as a list of lists, such as `[[0.1,
-            0.2], [0.3, 0.1], ...]`
-        energies : list of floats
-            Energies of candidate structures.
-        energy_tolerance : float
-            Every structure that has an energy within `energy_tolerance` from
-            the convex hull at its concentration will be returned.
-        structures : list
-            List of candidate `ASE Atoms` or other objects corresponding to
-            the `concentrations` and `energies`. The same list will be
-            returned, but with the objects too far from the convex hull
-            removed. If `None`, a list of indices is returned instead.
+        concentrations
+            concentrations of candidate structures
 
-        Returns
-        -------
-        list
-            The members of structures whose energy is within `energy_tolerance`
-            from the convex hull. If `structures` is left empty, a list of
-            indices corresponding to the order in `concentrations`/`energies`
-            is returned instead.
-        '''
+            If there is one independent concentration, a list of
+            floats is sufficient. Otherwise, the concentrations must
+            be provided as a list of lists, such as ``[[0.1, 0.2],
+            [0.3, 0.1], ...]``.
+        energies
+            energies of candidate structures
+        energy_tolerance
+            include structures with an energy that is at most this far
+            from the convex hull
+        structures
+            list of candidate structures, e.g., :class:`ASE Atoms
+            <ase.Atoms>` objects, corresponding to ``concentrations``
+            and ``energies``
+
+            The list will be returned, but with the objects too
+            far from the convex hull removed. If `None`, a list of
+            indices is returned instead.
+
+        """
         number_of_candidates = len(concentrations)
         assert len(energies) == number_of_candidates
         if structures is None:
