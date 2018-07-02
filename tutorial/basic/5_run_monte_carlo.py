@@ -4,7 +4,7 @@ from mchammer.ensembles import SemiGrandCanonicalEnsemble
 from numpy import arange
 
 # step 1: set up the structure to simulate
-ce = ClusterExpansion.read('mixing-energy.ce')
+ce = ClusterExpansion.read('mixing_energy.ce')
 chemical_symbols = ce.cluster_space.chemical_symbols
 atoms = ce.cluster_space.primitive_structure.repeat(3)
 calculator = ClusterExpansionCalculator(atoms, ce)
