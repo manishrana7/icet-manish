@@ -13,7 +13,7 @@ construct a supercell and then create a calculator by combining
 :ref:`our cluster expansion model
 <tutorial_construct_cluster_expansion>` with the supercell.
 
-.. literalinclude:: ../../../../tutorial/basic/6_run_monte_carlo.py
+.. literalinclude:: ../../../../tutorial/basic/5_run_monte_carlo.py
    :end-before: # step 2
 
 In this example the sampling will be carried out in the semi-grand
@@ -24,7 +24,7 @@ the two nested loops we instantiate a :ref:`SGC ensemble object <sgc>`
 using the calculator configured before and then run a MC simulation
 for a number of trial steps.
 
-.. literalinclude:: ../../../../tutorial/basic/6_run_monte_carlo.py
+.. literalinclude:: ../../../../tutorial/basic/5_run_monte_carlo.py
    :start-after: # step 2
 
 Here, the results of the simulation are stored in a :ref:`data
@@ -41,6 +41,6 @@ Source code
     .. container:: header
 
        The complete source code is available in
-       ``tutorial/basic/6_run_monte_carlo.py``
+       ``tutorial/basic/5_run_monte_carlo.py``
 
-    .. literalinclude:: ../../../../tutorial/basic/6_run_monte_carlo.py
+    .. literalinclude:: ../../../../tutorial/basic/5_run_monte_carlo.py

@@ -3,126 +3,151 @@
 .. index::
    single: Tutorial; Constructing a cluster expansion
 
-Construction of a cluster expansion
-===================================
+Constructing a cluster expansion
+================================
 
-In this step we will construct a cluster expansion using the structures
-generated :ref:`previously <tutorial_prepare_reference_data>` that will be
-analyzed in the following steps.
+In this step we will construct a cluster expansion using a dataset of Ag-Pd
+structures, which have been relaxed using density functional theory
+calculations. The construction of such a data set will be discussed in the
+advanced section of the tutorial.
 
 General preparations
 --------------------
 
 A number of `ASE <https://wiki.fysik.dtu.dk/ase>`_ and :program:`icet`
-functions are needed in order to set up and train the cluster expansion.
-Specifically, :func:`ase.build.bulk` and :func:`ase.db.connect()
-<ase.db.core.connect>` are required to build a primitive structure and import
-relaxed configurations from the database that was generated :ref:`previously
-<tutorial_prepare_reference_data>`. The :program:`icet` classes
-:class:`ClusterSpace <icet.ClusterSpace>`, :class:`StructureContainer
-<icet.StructureContainer>`, :class:`Optimizer <icet.Optimizer>` and
-:class:`ClusterExpansion <icet.ClusterExpansion>` are used, in sequence, during
-preparation, compilation and training of the cluster expansion followed by the
-extraction of information in the form of predicted energies from the latter. In
-the final step, the function :func:`enumerate_structures()
-<icet.tools.structure_enumeration.enumerate_structures>` is employed to
-generate a large pool of structures for which the mixing energies can be
-calculated with help of the finalized cluster expansion. These data are plotted
-using the `matplotlib <https://matplotlib.org>`_ library.
+functions are needed in order to set up and train the cluster expansion. Since
+the reference data is provided in the form of an `ASE
+<https://wiki.fysik.dtu.dk/ase>`_ database we require the
+:func:`ase.db.connect() <ase.db.core.connect>` function. Furthermore, the
+:program:`icet` classes :class:`ClusterSpace <icet.ClusterSpace>`,
+:class:`StructureContainer <icet.StructureContainer>`,
+:class:`CrossValidationEstimator <icet.CrossValidationEstimator>` and
+:class:`ClusterExpansion <icet.ClusterExpansion>` are
+used, :ref:`in sequence <workflow>`, during preparation, compilation and
+training of the cluster expansion followed by the extraction of information in
+the form of predicted energies from the latter.
 
-.. literalinclude:: ../../../../tutorial/basic/2_construct_cluster_expansion.py
+.. literalinclude:: ../../../../tutorial/basic/1_construct_cluster_expansion.py
    :end-before: # step 1
 
-Preparation of cluster space
-----------------------------
+Then we open a connection to the reference database and use the first structure
+in the database as the primitive structure as we happen to have prepared the
+database in this way.
+
+.. literalinclude:: ../../../../tutorial/basic/1_construct_cluster_expansion.py
+   :start-after: # step 1
+   :end-before: # step 2
+
+Preparing a cluster space
+-------------------------
 
 In order to be able to build a cluster expansion, it is first necessary to
 create a :class:`ClusterSpace <icet.ClusterSpace>` object based on a prototype
-structure, here in the form of a bulk gold unit cell. When initiating the
-former, one must also provide cutoffs and a list of elements that should be
-considered, in this case gold and silver. Here, the cutoffs are set to 6, 5,
-and 4 Å for pairs, triplets and quadruplets.
+structure. When initiating the former, one must also provide cutoffs and a list
+of elements that should be considered.
 
-.. literalinclude:: ../../../../tutorial/basic/2_construct_cluster_expansion.py
-   :start-after: # step 1
-   :end-before: # step 2
+.. literalinclude:: ../../../../tutorial/basic/1_construct_cluster_expansion.py
+   :start-after: # step 2
+   :end-before: # step 3
+
+.. note::
+
+  Here, we include *all* structures from the database with six or less atoms in
+  the unit cell. This approach has been adopted in this basic tutorial for the
+  sake of simplicity. In general this is *not* the preferred approach to
+  assembling a data set. The role of structure selection is discussed in more
+  detail in the advanced section of the tutorial.
 
 As with many other :program:`icet` objects, it is possible to print core
 information in a tabular format by simply calling the :func:`print` function
 with the instance of interest as input argument. For the case at hand, the
-output should be the following::
+output should look as follows::
 
-  ========================== Cluster Space ===========================
-   subelements: Ag Au
-   cutoffs: 6.0000 5.0000 4.0000
-   total number of orbits: 14
-   number of orbits by order: 0= 1  1= 1  2= 4  3= 7  4= 1
-  --------------------------------------------------------------------
-  index | order |   size   | multiplicity | orbit index |  MC vector
-  --------------------------------------------------------------------
+  =============================== Cluster Space ================================
+   chemical species: Pd Ag
+   cutoffs: 8.5000 8.5000 7.5000
+   total number of orbits: 173
+   number of orbits by order: 0= 1  1= 1  2= 8  3= 50  4= 113
+  ------------------------------------------------------------------------------
+  index | order |  radius  | multiplicity | orbit_index | multi_component_vector
+  ------------------------------------------------------------------------------
      0  |   0   |   0.0000 |        1     |      -1
-     1  |   1   |   0.0000 |        1     |       0     |    [0]
-     2  |   2   |   1.4425 |        6     |       1     |  [0, 0]
-     3  |   2   |   2.0400 |        3     |       2     |  [0, 0]
-     4  |   2   |   2.4985 |       12     |       3     |  [0, 0]
-     5  |   2   |   2.8850 |        6     |       4     |  [0, 0]
-     6  |   3   |   1.6657 |        8     |       5     | [0, 0, 0]
-     7  |   3   |   1.8869 |       12     |       6     | [0, 0, 0]
-     8  |   3   |   2.0168 |       24     |       7     | [0, 0, 0]
-     9  |   3   |   2.3021 |       24     |       8     | [0, 0, 0]
-    10  |   3   |   2.4967 |       24     |       9     | [0, 0, 0]
-    11  |   3   |   2.7099 |       24     |      10     | [0, 0, 0]
-    12  |   3   |   2.8850 |        8     |      11     | [0, 0, 0]
-    13  |   4   |   1.7667 |        2     |      12     | [0, 0, 0, 0]
-  ====================================================================
+     1  |   1   |   0.0000 |        1     |       0     |          [0]
+     2  |   2   |   1.4460 |        6     |       1     |         [0, 0]
+     3  |   2   |   2.0450 |        3     |       2     |         [0, 0]
+     4  |   2   |   2.5046 |       12     |       3     |         [0, 0]
+     5  |   2   |   2.8921 |        6     |       4     |         [0, 0]
+     6  |   2   |   3.2334 |       12     |       5     |         [0, 0]
+     7  |   2   |   3.5420 |        4     |       6     |         [0, 0]
+     8  |   2   |   3.8258 |       24     |       7     |         [0, 0]
+     9  |   2   |   4.0900 |        3     |       8     |         [0, 0]
+   ...
+   163  |   4   |   3.4222 |       48     |     162     |      [0, 0, 0, 0]
+   164  |   4   |   3.4327 |       48     |     163     |      [0, 0, 0, 0]
+   165  |   4   |   3.4642 |       24     |     164     |      [0, 0, 0, 0]
+   166  |   4   |   3.5420 |        2     |     165     |      [0, 0, 0, 0]
+   167  |   4   |   3.5420 |        6     |     166     |      [0, 0, 0, 0]
+   168  |   4   |   3.5886 |       48     |     167     |      [0, 0, 0, 0]
+   169  |   4   |   3.6056 |       24     |     168     |      [0, 0, 0, 0]
+   170  |   4   |   3.6056 |       48     |     169     |      [0, 0, 0, 0]
+   171  |   4   |   3.6577 |       24     |     170     |      [0, 0, 0, 0]
+   172  |   4   |   3.8258 |       12     |     171     |      [0, 0, 0, 0]
+  ==============================================================================
 
-Compilation of structure container
-----------------------------------
+Compiling a structure container
+-------------------------------
 
 Once a :class:`ClusterSpace <icet.ClusterSpace>` has been prepared, the next
 step is to compile a :class:`StructureContainer <icet.StructureContainer>`. To
 this end, we first initialize an empty :class:`StructureContainer
-<icet.StructureContainer>` and then add the tructures from the database
+<icet.StructureContainer>` and then add the structures from the database
 prepared previously including for each structure the mixing energy in the
 property dictionary.
 
-.. literalinclude:: ../../../../tutorial/basic/2_construct_cluster_expansion.py
-   :start-after: # step 2
-   :end-before: # step 3
+.. literalinclude:: ../../../../tutorial/basic/1_construct_cluster_expansion.py
+   :start-after: # step 3
+   :end-before: # step 4
+
+.. note::
+
+  While here we add only *one* property, the :class:`StructureContainer
+  <icet.StructureContainer>` allows the addition of *several* properties. This
+  can be useful e.g., when constructing (and sampling) CEs for a couple of
+  different properties.
 
 By calling the :func:`print` function with the :class:`StructureContainer
 <icet.StructureContainer>` as input argument, one obtains the following
 result::
 
-  ====================== Structure Container ========================
-  otal number of structures: 137
-  -------------------------------------------------------------------
-  ndex |       user_tag        | natoms | chemical formula |  energy
-  -------------------------------------------------------------------
-    0  | 0                     |     1  | Ag               |    0.000
-    1  | 1                     |     1  | Au               |    0.000
-    2  | 2                     |     2  | AgAu             |   -0.010
-    3  | 3                     |     2  | AgAu             |   -0.011
-    4  | 4                     |     3  | Ag2Au            |   -0.008
-    5  | 5                     |     3  | AgAu2            |   -0.008
-    6  | 6                     |     3  | Ag2Au            |   -0.009
-    7  | 7                     |     3  | AgAu2            |   -0.011
-    8  | 8                     |     3  | Ag2Au            |   -0.011
-    9  | 9                     |     3  | AgAu2            |   -0.010
-  ...
-  127  | 127                   |     6  | Ag2Au4           |   -0.010
-  128  | 128                   |     6  | AgAu5            |   -0.006
-  129  | 129                   |     6  | Ag5Au            |   -0.006
-  130  | 130                   |     6  | Ag4Au2           |   -0.009
-  131  | 131                   |     6  | Ag4Au2           |   -0.009
-  132  | 132                   |     6  | Ag3Au3           |   -0.011
-  133  | 133                   |     6  | Ag3Au3           |   -0.012
-  134  | 134                   |     6  | Ag2Au4           |   -0.011
-  135  | 135                   |     6  | Ag2Au4           |   -0.011
-  136  | 136                   |     6  | AgAu5            |   -0.007
-  ===================================================================
+  ========================== Structure Container ==========================
+  Total number of structures: 137
+  -------------------------------------------------------------------------
+  index |       user_tag        | natoms | chemical formula | mixing-energy
+  -------------------------------------------------------------------------
+     0  | Ag                    |     1  | Ag               |      0.000
+     1  | Pd                    |     1  | Pd               |      0.000
+     2  | AgPd_0002             |     2  | AgPd             |     -0.040
+     3  | AgPd_0003             |     3  | AgPd2            |     -0.029
+     4  | AgPd_0004             |     3  | Ag2Pd            |     -0.049
+     5  | AgPd_0005             |     3  | AgPd2            |     -0.018
+     6  | AgPd_0006             |     3  | Ag2Pd            |     -0.056
+     7  | AgPd_0007             |     3  | AgPd2            |     -0.030
+     8  | AgPd_0008             |     3  | Ag2Pd            |     -0.048
+     9  | AgPd_0009             |     4  | AgPd3            |     -0.017
+   ...
+   127  | AgPd_0127             |     6  | Ag5Pd            |     -0.032
+   128  | AgPd_0128             |     6  | AgPd5            |     -0.012
+   129  | AgPd_0129             |     6  | Ag2Pd4           |     -0.026
+   130  | AgPd_0130             |     6  | Ag2Pd4           |     -0.024
+   131  | AgPd_0131             |     6  | Ag4Pd2           |     -0.059
+   132  | AgPd_0132             |     6  | Ag4Pd2           |     -0.054
+   133  | AgPd_0133             |     6  | Ag3Pd3           |     -0.046
+   134  | AgPd_0134             |     6  | Ag3Pd3           |     -0.048
+   135  | AgPd_0135             |     6  | Ag5Pd            |     -0.040
+   136  | AgPd_0001             |     2  | AgPd             |     -0.063
+  =========================================================================
 
-Training of parameters
+Training CE parameters
 ----------------------
 
 Since the :class:`StructureContainer <icet.StructureContainer>` object created
@@ -132,46 +157,85 @@ a cluster expansion, the next step is to train the parameters, i.e. to fit the
 the goal is to achieve the best possible agreement with set of training
 structures, which represent a subset of all the structures in the
 :class:`StructureContainer <icet.StructureContainer>`. In practice, this is a
-two step process that involves the initiation of an :class:`Optimizer
-<icet.Optimizer>` object with the a list of target properties produced by the
-:func:`StructureContainer.get_fit_data()
-<icet.StructureContainer.get_fit_data>` method as input argument.
+two step process that involves the initiation of an optimizer object (here a
+:class:`CrossValidationEstimator <icet.CrossValidationEstimator>`) with a list
+of target properties produced by the :func:`get_fit_data()
+<icet.StructureContainer.get_fit_data>` method of the
+:class:`StructureContainer <icet.StructureContainer>` as input argument.
 
-.. literalinclude:: ../../../../tutorial/basic/2_construct_cluster_expansion.py
-   :start-after: # step 3
-   :end-before: # step 4
+.. literalinclude:: ../../../../tutorial/basic/1_construct_cluster_expansion.py
+   :start-after: # step 4
+   :end-before: # step 5
 
-The training process is started by calling the :func:`Optimizer.train
-<icet.Optimizer.train>` method. Once it is finished, the results can be
-displayed by providing the :class:`Optimizer <icet.Optimizer>` object to the
+The :class:`CrossValidationEstimator <icet.CrossValidationEstimator>` optimizer
+used here is intended to provide a reliable estimate for the cross validation
+(:term:`CV`) score. This is achieved by calling the :func:`validate
+<icet.CrossValidationEstimator.validate>` method. With the current (default)
+settings the :class:`CrossValidationEstimator <icet.CrossValidationEstimator>`
+then randomly splits the available data into a training and a validation set.
+The effective cluster interactions (:term:`ECIs`) are then found using the
+:term:`LASSO` method (``fit_method``). This procedure is repeated 10 times
+(``number_of_splits``). (*You will likely see a few "Convergence errors" when
+executing this command. For the present purpose these can be ignored.*)
+
+.. note::
+
+  The :term:`LASSO` method is particular suitable for (strongly)
+  under-determined systems while the present case is only "slightly"
+  under-determined. The performance and application area of different
+  optimization algorithms are analyzed and compared in the advanced tutorial
+  section.
+
+The "final" CE is ultimately constructed using *all* available data by calling
+the :func:`train <icet.CrossValidationEstimator.train>` method. Once it is
+finished, the results can be displayed by providing the
+:class:`CrossValidationEstimator <icet.CrossValidationEstimator>` object to the
 :func:`print` function, which gives the output shown below::
 
-  ===================== Optimizer ======================
-  fit_method                : least-squares
-  number_of_target_values   : 137
-  number_of_parameters      : 14
-  rmse_train                : 0.000177534
-  rmse_test                 : 0.000216184
-  train_size                : 102
-  test_size                 : 35
+  ============== CrossValidationEstimator ==============
+  alpha_optimal                  : 4.524343e-05
+  fit_method                     : lasso
+  number_of_nonzero_parameters   : 54
+  number_of_parameters           : 173
+  number_of_splits               : 10
+  number_of_target_values        : 137
+  rmse_train                     : 0.00121032
+  rmse_train_final               : 0.001247321
+  rmse_validation                : 0.002371993
+  standardize                    : True
+  validation_method              : k-fold
   ======================================================
 
+We have thus constructed a CE with an average root mean square error (RMSE,
+``rmse_validation``) for the validation set of only 2.4 meV/atom. The original
+cluster space included 173 parameters (``number_of_parameters``), 54 of which
+are non-zero (``number_of_nonzero_parameters``) in the final CE. The efficiency
+of the :term:`LASSO` method for finding sparse solutions is evident from the
+number of non-zero parameters (54) being much smaller than the total number of
+parameters (173).
 
-Finalize cluster expansion.
----------------------------
+.. note::
+
+  Here we have used the :class:`CrossValidationEstimator
+  <icet.CrossValidationEstimator>` as it is probably the most common optimizer
+  used in practice. There are, however, :ref:`other optimizers <optimizers>`
+  that can be highly useful for certain applications.
+
+Finalizing the cluster expansion
+--------------------------------
 
 At this point, the task of constructing the cluster expansion is almost
 complete. The only step that remains is to tie the parameter values obtained
 from the optimization to the cluster space. This is achieved through the
-initiation of a :class:`ClusterExpansion <icet.ClusterExpansion>` object with
-the previously created :class:`ClusterSpace <icet.ClusterSpace>` instance
-together with the list of parameters, available via the
-:class:`Optimizer.parameters <icet.Optimizer.parameters>` attribute, as input
-arguments. The final CE is finally written to file in order to be reused in the
-next steps of the tutorial.
+initiation of a :class:`ClusterExpansion <icet.ClusterExpansion>` object using
+the previously created :class:`ClusterSpace <icet.ClusterSpace>` instance and
+the list of parameters, available via the :class:`parameters
+<icet.Optimizer.parameters>` attribute of the optimizer, as input arguments.
+The CE is written to file in order to be reused in the following steps of the
+tutorial.
 
-.. literalinclude:: ../../../../tutorial/basic/2_construct_cluster_expansion.py
-   :start-after: # step 4
+.. literalinclude:: ../../../../tutorial/basic/1_construct_cluster_expansion.py
+   :start-after: # step 5
 
 
 Source code
@@ -182,6 +246,6 @@ Source code
     .. container:: header
 
        The complete source code is available in
-       ``tutorial/basic/2_construct_cluster_expansion.py``
+       ``tutorial/basic/1_construct_cluster_expansion.py``
 
-    .. literalinclude:: ../../../../tutorial/basic/2_construct_cluster_expansion.py
+    .. literalinclude:: ../../../../tutorial/basic/1_construct_cluster_expansion.py

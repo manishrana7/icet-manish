@@ -1,44 +1,33 @@
-"""
-This module has the purpose of enumerating structures. Given a lattice
-(possibly with as basis) and a number of elements, the code generates all
-the derivative superstructures having a certain size defined by the user.
-
-The algorithm was developed by Gus L. W Hart and Rodney W. Forcade in
-
-* Hart, G. L. W. and Forcade, R. W., Phys. Rev. B 77, 224115 (2008)
-* Hart, G. L. W. and Forcade, R. W., Phys. Rev. B 80, 014120 (2009)
-"""
-
-from itertools import product
 import numpy as np
+from ase import Atoms
+from itertools import product
 from spglib import get_symmetry
 from spglib import niggli_reduce as spg_nigg_red
-from ase import Atoms
-from .structure_enumeration_support.hermite_normal_form import get_reduced_hnfs
-from .structure_enumeration_support.smith_normal_form import get_unique_snfs
+from .structure_enumeration_support.hermite_normal_form \
+    import get_reduced_hnfs, HermiteNormalForm
+from .structure_enumeration_support.smith_normal_form \
+    import get_unique_snfs, SmithNormalForm
 from .structure_enumeration_support.labeling_generation \
     import LabelingGenerator
+from typing import Dict, List, Tuple
 
 
-def _translate_labelings(labeling, snf, nsites, include_self=False):
+def _translate_labelings(labeling: tuple, snf: SmithNormalForm,
+                         nsites: int, include_self: bool=False) -> Tuple[int]:
     """
-    Yield labelings that are equivalent to original labeling
+    Yields labelings that are equivalent to the original labeling
     under translations as dictated by snf.
 
     Parameters
     ----------
-    labeling : tuple
+    labeling
         labeling to be translated
-    snf : SmithNormalForm object
-    nsites : int
-        Number of sites in the primtive cell.
-    include_self : bool
-        Inlcude original labeling or not.
-
-    Yields
-    ------
-    tuple of ints
-        Translated labeling.
+    snf
+        SmithNormalForm object
+    nsites
+        number of sites in the primtive cell
+    include_self
+        if True original labeling will be included
     """
 
     # Compute size of each block within which translations occur
@@ -63,26 +52,25 @@ def _translate_labelings(labeling, snf, nsites, include_self=False):
         yield labeling_trans
 
 
-def _get_all_labelings(snf, labeling_generator, nsites):
+def _get_all_labelings(snf: SmithNormalForm,
+                       labeling_generator: LabelingGenerator,
+                       nsites: int) -> List[tuple]:
     """
-    Get all labelings corresponding to a Smith Normal Form matrix.
-    Superperiodic labelings as well as labelings that are equivalent under
-    translations for this particular SNF will not be included. However,
-    labelings that are equivalent by rotations that leave the cell (but not
-    the labeling) unchanged will still be included, since these have to be
-    removed for each HNF separately.
+    Returns of inequivalent labelings corresponding to a Smith Normal
+    Form matrix.  Superperiodic labelings as well as labelings that
+    are equivalent under translations for this particular SNF will not
+    be included. However, labelings that are equivalent by rotations
+    that leave the cell (but not the labeling) unchanged will still be
+    included, since these have to be removed for each HNF separately.
 
     Parameters
     ----------
-    snf : SmithNormalForm object
-    labeling_generator : LabelingGenerator object
-    nsites : int
-        Number of sites per primtive cell.
-
-    Returns
-    -------
-    list of tuples
-        Inequivalent labelings.
+    snf
+        SmithNormalForm object
+    labeling_generator
+        LabelingGenerator object
+    nsites
+        number of sites per primtive cell
     """
     labelings = []
     for labeling in labeling_generator.yield_labelings(snf.ncells):
@@ -106,24 +94,23 @@ def _get_all_labelings(snf, labeling_generator, nsites):
     return labelings
 
 
-def _permute_labeling(labeling, snf, transformation, nsites):
+def _permute_labeling(labeling: tuple, snf: SmithNormalForm,
+                      transformation: List[np.ndarray],
+                      nsites: int) -> Tuple[int]:
     """
-    Permute labeling according to transformations defined by transformation.
+    Returns permute labeling according to transformations defined by
+    transformation.
 
     Parameters
     ----------
-    labeling : tuple
-        Labeling to be rotated
-    snf : SmithNormalForm object
-    transformation : list of ndarrays
-        Transformations consisting of rotation, translation and basis shift
-    nsites : int
-        Number of sites in the primtive cell.
-
-    Returns
-    -------
-    tuple of ints
-        Permuted labeling.
+    labeling
+        labeling to be rotated
+    snf
+        SmithNormalForm object
+    transformation
+        transformations consisting of rotation, translation and basis shift
+    nsites
+        number of sites in the primtive cell
     """
 
     # Calculate transformation imposed by LRL multiplication
@@ -151,25 +138,23 @@ def _permute_labeling(labeling, snf, transformation, nsites):
     return tuple(labeling_new)
 
 
-def _yield_unique_labelings(labelings, snf, hnf, nsites):
+def _yield_unique_labelings(labelings: List[int], snf: SmithNormalForm,
+                            hnf: HermiteNormalForm, nsites: int) -> tuple:
     """
-    Yield labelings that are unique in every imaginable sense.
+    Yields labelings that are unique in every imaginable sense.
 
     Parameters
     ----------
-    labelkeys : list of ints
+    labelkeys
         List of hash keys to labelings that may still contain labelings that
         are equivalent under rotations that leaves the supercell shape
         unchanged.
-    snf : SmithNormalForm object
-    hnf : HermiteNormalForm object
-    nsites : int
+    snf
+        SmithNormalForm object
+    hnf
+        HermiteNormalForm object
+    nsites
         Number of sites in the primitive cell.
-
-    Yields
-    ------
-    tuple
-        Labeling, each and every one unique.
     """
     saved_labelings = []
     for labeling in labelings:
@@ -207,31 +192,30 @@ def _yield_unique_labelings(labelings, snf, hnf, nsites):
             yield labeling
 
 
-def _labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements, pbc):
+def _labeling_to_atoms(labeling: tuple, hnf: np.ndarray, cell: np.ndarray,
+                       new_cell: np.ndarray,
+                       basis: np.ndarray, species: List[str],
+                       pbc: List[bool]) -> Atoms:
     """
-    Get ASE Atoms object from labeling, HNF matrix and parent lattice.
+    Returns structure object corresponding to the given labeling using
+    labeling, HNF matrix and parent lattice.
 
     Parameters
     ---------
-    labeling : tuple
-        Permutation of index of elements.
-    hnf : ndarray
-        HNF object defining the supercell.
-    cell : ndarray
-        Basis vectors of primtive cell listed row-wise.
-    new_cell : ndarray
-        New cell shape.
-    basis : ndarray
-        Scaled coordinates to all sites in the primitive cell.
-    elements : list of str
-        List of elements, e.g. ['Au', 'Ag']
-    pbc : list of bools
-        Periodic boundary conditions of the primitive structure
-
-    Returns
-    -------
-    ASE Atoms
-        Atoms object corresponding to the given labeling.
+    labeling
+        permutation of index of elements
+    hnf
+        HNF object defining the supercell
+    cell
+        basis vectors of primtive cell listed row-wise
+    new_cell
+        new cell shape
+    basis
+        scaled coordinates to all sites in the primitive cell
+    species
+        list of elements, e.g. ``['Au', 'Ag']``
+    pbc
+        periodic boundary conditions of the primitive structure
     """
     symbols = []
     positions = []
@@ -250,7 +234,7 @@ def _labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements, pbc):
                                      (j + offset10) * cell[1] +
                                      (k + offset20 + offset21) * cell[2] +
                                      np.dot(cell.T, basis_vector))
-                    symbols.append(elements[labeling[count]])
+                    symbols.append(species[labeling[count]])
                     count += 1
     atoms = Atoms(symbols, positions, cell=new_cell, pbc=(True, True, True))
     atoms.wrap()
@@ -258,22 +242,21 @@ def _labeling_to_atoms(labeling, hnf, cell, new_cell, basis, elements, pbc):
     return atoms
 
 
-def get_symmetry_operations(atoms, tol=1e-3):
+def get_symmetry_operations(atoms: Atoms,
+                            tolerance: float=1e-3) -> Dict[str, list]:
     """
-    Use spglib to calculate the symmetry operations of atoms. The
+    Returns symmetry operations permissable for a given structure as
+    obtained using `spglib <https://atztogo.github.io/spglib/>`_. The
     symmetry operations consist of three parts: rotations, translation
     and "basis_shifts". The latter define the way that the sublattices
     shift upon rotation (correponds to `d_Nd` in [HarFor09]_).
 
     Parameters
     ----------
-    atoms : ASE Atoms
-        Structure for which the symmetry operations are sought.
-
-    Returns
-    -------
-    dict of lists
-        Containing rotations, translations and basis_shifts.
+    atoms
+        structure for which the symmetry operations are sought
+    tolerance
+        numerical tolerance imposed during symmetry analysis
     """
 
     symmetries = get_symmetry(atoms)
@@ -305,10 +288,10 @@ def get_symmetry_operations(atoms, tol=1e-3):
             # site_translation to t_Nd)
             site_translation = [0, 0, 0]
             for index in range(3):
-                while site_rot_trans[index] < -tol:
+                while site_rot_trans[index] < -tolerance:
                     site_rot_trans[index] += 1
                     site_translation[index] -= 1
-                while site_rot_trans[index] > 1 - tol:
+                while site_rot_trans[index] > 1 - tolerance:
                     site_rot_trans[index] -= 1
                     site_translation[index] += 1
             site_translations.append(site_translation)
@@ -320,10 +303,10 @@ def get_symmetry_operations(atoms, tol=1e-3):
 
                 # Make sure that they do not differ with a basis vector
                 for dist_comp_i, dist_comp in enumerate(distance):
-                    if abs(abs(dist_comp) - 1) < tol:
+                    if abs(abs(dist_comp) - 1) < tolerance:
                         distance[dist_comp_i] = 0
 
-                if (abs(distance) < tol).all():
+                if (abs(distance) < tolerance).all():
                     assert not found
                     basis_shifts[i, j] = basis_index
                     found = True
@@ -336,68 +319,93 @@ def get_symmetry_operations(atoms, tol=1e-3):
     return symmetries
 
 
-def enumerate_structures(atoms, sizes, subelements,
-                         concentration_restrictions=None,
-                         niggli_reduce=None):
+def enumerate_structures(atoms: Atoms, sizes: List[int], species: list,
+                         concentration_restrictions: dict=None,
+                         niggli_reduce: bool=None) -> Atoms:
     """
-    Generate enumerated structures, i.e. all inequivalent structures up to a
-    certain size.
-
-    The algorithm implemented here was developed by Gus L. W. Hart and Rodney
-    W. Forcade in
-
-    * Phys. Rev. B 77, 224115 (2008) [HarFor08]_
-    * Phys. Rev. B 80, 014120 (2009) [HarFor09]_
+    Yields a sequence of enumerated structures. The function generates
+    *all* inequivalent structures that are permissible given a certain
+    lattice. Using the ``species`` and ``concentration_restrictions``
+    keyword arguments it is possible to specify which species are to
+    be included on which site and in which concentration range.
 
     The function is sensitive to the boundary conditions of the input
     structure. An enumeration of, for example, a surface can thus be performed
-    by setting `atoms.pbc = [True, True, False]`.
+    by setting ``atoms.pbc = [True, True, False]``.
+
+    The algorithm implemented here was developed by Gus L. W. Hart and
+    Rodney W. Forcade in Phys. Rev. B **77**, 224115 (2008)
+    [HarFor08]_ and Phys. Rev. B **80**, 014120 (2009) [HarFor09]_.
 
     Parameters
     ----------
-    atoms : ASE Atoms
-        Primitive structure from which derivative superstructures should be
-        generated.
-    sizes : list of ints
-        Maximum number of atoms in the returned structures.
-    subelements : list of str
-        Elements to decorate the structure, e.g. ['Au', 'Ag']
-    concentration_restrictions : dict
-        Defines allowed concentration for one or more element in subelements,
-        e.g. {'Au': (0, 0.2)} will only enumerate structures in which the Au
-        content is between 0 and 20 %. Concentration is here always defined
-        as the number of atoms of the specified kind divided by the number of
-        *all* atoms.
-    niggli_reduction : bool
-        If True perform a Niggli reduction with spglib for each structure.
-        Default is True if `atoms` has all boundary conditions periodic,
-        otherwise False.
+    atoms
+        primitive structure from which derivative superstructures should be
+        generated
+    sizes
+        number of sites (included in the enumeration)
+    species
+        species with which to decorate the structure, e.g., ``['Au',
+        'Ag']``; see below for more examples
+    concentration_restrictions
+        allowed concentration range for one or more element in
+        species, e.g., ``{'Au': (0, 0.2)}`` will only enumerate structures
+        in which the Au content is between 0 and 20 %; here, concentration is
+        always defined as the number of atoms of the specified kind divided by
+        the number of *all* atoms.
+    niggli_reduction
+        if True perform a Niggli reduction with spglib for each structure;
+        the default is ``True`` if ``atoms`` is periodic in all directions,
+        ``False`` otherwise.
 
-    Yields
-    ------
-    ASE Atoms
-        Enumerated structure, each and every one of which is unique.
+    Examples
+    --------
+
+    The following code snippet illustrates how to enumerate structures
+    with up to 6 atoms in the unit cell for a binary alloy without any
+    constraints::
+
+        from ase.build import bulk
+        prim = bulk('Ag')
+        enumerate_structures(atoms=prim, sizes=range(1, 7),
+                             species=['Ag', 'Au'])
+
+    To limit the concentration range to 10 to 40 % Au the code should
+    be modified as follows::
+
+        enumerate_structures(atoms=prim, sizes=range(1, 7),
+                             species=['Ag', 'Au'],
+                             concentration_restrictions={'Au': (0.1, 0.4)})
+
+    Often one would like to consider mixing on only one
+    sublattice. This can be achieved as illustrated for a
+    Ga(1-x)Al(x)As alloy as follows::
+
+        prim = bulk('GaAs', crystalstructure='zincblende', a=5.65)
+        enumerate_structures(atoms=prim, sizes=range(1, 9),
+                             species=[['Ga', 'Al'], ['As']])
+
     """
 
     nsites = len(atoms)
     basis = atoms.get_scaled_positions()
 
     # Construct descriptor of where species are allowed to be
-    if isinstance(subelements[0], str):
-        iter_elements = [tuple(range(len(subelements)))] * nsites
-        elements = subelements
-    elif len(subelements) == nsites:
-        assert isinstance(subelements[0][0], str)
+    if isinstance(species[0], str):
+        iter_elements = [tuple(range(len(species)))] * nsites
+        elements = species
+    elif len(species) == nsites:
+        assert isinstance(species[0][0], str)
         elements = []
-        for site in subelements:
+        for site in species:
             for element in site:
                 if element not in elements:
                     elements.append(element)
         iter_elements = []
-        for site in subelements:
+        for site in species:
             iter_elements.append(tuple(elements.index(i) for i in site))
     else:
-        raise Exception('subelements needs to be a list of strings '
+        raise Exception('species needs to be a list of strings '
                         'or a list of list of strings.')
 
     # Adapt concentration restrictions to iter_elements
@@ -409,7 +417,7 @@ def enumerate_structures(atoms, sizes, subelements,
                  ' needs to be specified as (c_low, c_high)')
             if key not in elements:
                 raise ValueError('{} found in concentration_restrictions but'
-                                 ' not in subelements'.format(key))
+                                 ' not in species'.format(key))
             concentrations[elements.index(key)] = concentration_range
     else:
         concentrations = None
