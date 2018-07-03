@@ -6,7 +6,7 @@ from scipy.spatial.qhull import QhullError
 from typing import List, Union
 
 
-class ConvexHull(object):
+class ConvexHull:
     """This class provides functionality for extracting the convex hull
     of the (free) energy of mixing. It is based on the `convex hull
     calculator in SciPy
@@ -31,9 +31,9 @@ generated/scipy.spatial.ConvexHull.html>`_.
     dimensions : int
         number of independent concentrations needed to specify a point in
         concentration space (1 for binaries, 2 for ternaries etc.)
-    structures : list of ints
+    structures : list of int
         indices of structures that constitute the convex hull (indices are
-        defined by the order their concentrations and energies are fed when
+        defined by the order of their concentrations and energies are fed when
         initializing the ConvexHull object)
 
     Examples
@@ -111,7 +111,7 @@ generated/scipy.spatial.ConvexHull.html>`_.
             Tolerance for what energy constitutes a lower one.
         """
 
-        # Identify the "complex concentration hull", i.e. the extremum
+        # Identify the "complex concentration hull", i.e. the extremal
         # concentrations. In the simplest case, these should simply be the
         # pure elements.
         if self.dimensions == 1:

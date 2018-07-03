@@ -16,7 +16,7 @@ loading the CE from file, we loop over all structures with up 12 atoms in the
 unit cell and compile silver concentrations and predicted mixing energy into a
 list, which is calculated by calling the :func:`predict
 <icet.ClusterExpansion.predict>` method of the :class:`ClusterExpansion
-<icet.ClusterExpansion>` obejct with the :class:`ASE Atoms <ase.Atoms>` object
+<icet.ClusterExpansion>` object with the :class:`ASE Atoms <ase.Atoms>` object
 that represents the present structure as input argument.
 
 .. literalinclude:: ../../../../tutorial/basic/3_enumerate_structures.py
