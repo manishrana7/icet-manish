@@ -13,7 +13,7 @@ structures = []
 for atoms in enumerate_structures(
         atoms=ce.cluster_space.primitive_structure,
         sizes=range(1, 13),
-        chemical_symbols=ce.cluster_space.chemical_symbols):
+        species=ce.cluster_space.chemical_symbols):
     conc = atoms.get_chemical_symbols().count(subelements[1]) / len(atoms)
     data['concentration'].append(conc)
     data['mixing_energy'].append(ce.predict(atoms))
