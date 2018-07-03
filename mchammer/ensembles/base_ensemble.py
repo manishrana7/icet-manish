@@ -159,14 +159,15 @@ class BaseEnsemble(ABC):
         number_of_trial_steps
             number of MC trial steps to run in total
         reset_step
-            if True the MC trial step counter will be reset to zero
+            if True the MC trial step counter and data container will be reset
+            to zero and empty respectively.
         """
 
         last_write_time = time()
         if reset_step:
             initial_step = 0
             final_step = number_of_trial_steps
-            self._step = 0
+            self.reset_data_container()
         else:
             initial_step = self._step
             final_step = self._step + number_of_trial_steps

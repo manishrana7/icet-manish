@@ -126,6 +126,11 @@ class DataContainer:
         if not isinstance(mctrial, int):
             raise TypeError('mctrial has the wrong type: {}'
                             .format(type(mctrial)))
+        if not self._data.mctrial.empty:
+            if self._data.mctrial.iloc[-1] > mctrial:
+                raise ValueError('mctrial values should be given in'
+                                 + ' ascending order')
+
         if not isinstance(record, dict):
             raise TypeError('record has the wrong type: {}'
                             .format(type(record)))
@@ -267,7 +272,8 @@ class DataContainer:
 
     def reset(self):
         """ Resets (clears) data frame of data container. """
-        self._data = pd.DataFrame()
+        self._data = pd.DataFrame(columns=['mctrial'])
+        self._data = self._data.astype({'mctrial': int})
 
     def get_number_of_entries(self, tag: str=None) -> int:
         """
