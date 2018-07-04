@@ -129,7 +129,7 @@ class DataContainer:
         if not self._data.mctrial.empty:
             if self._data.mctrial.iloc[-1] > mctrial:
                 raise ValueError('mctrial values should be given in'
-                                 + ' ascending order')
+                                 ' ascending order')
 
         if not isinstance(record, dict):
             raise TypeError('record has the wrong type: {}'
