@@ -117,8 +117,13 @@ class TestDataContainer(unittest.TestCase):
         self.assertTrue('mctrial has the wrong type'
                         in str(context.exception))
 
+        with self.assertRaises(ValueError) as context:
+            self.dc.append(10, 1.0)
+        self.assertTrue('mctrial values should be given in ascending order'
+                        in str(context.exception))
+
         with self.assertRaises(TypeError) as context:
-            self.dc.append(1, 'tst')
+            self.dc.append(110, 'tst')
         self.assertTrue('record has the wrong type'
                         in str(context.exception))
 
@@ -216,6 +221,7 @@ class TestDataContainer(unittest.TestCase):
         self.assertTrue('No observable named temperature'
                         in str(context.exception))
 
+        # test fails with unkown method
         with self.assertRaises(ValueError) as context:
             self.dc.get_data(fill_method='xyz')
         self.assertTrue('Unknown fill method'
