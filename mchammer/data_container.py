@@ -390,7 +390,8 @@ class DataContainer:
             return atoms_list
 
     def write_trajectory(self, outfile: Union[str, BinaryIO, TextIO]):
-        """Save trajectory to a file along with the respectives values of the
+        """
+        Save trajectory to a file along with the respectives values of the
         potential field for each configuration. If the file exists the
         trajectory will be appended. Use ase gui to visualize the trajectory
         with values of the potential for each frame.
