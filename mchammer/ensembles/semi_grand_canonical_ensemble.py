@@ -116,7 +116,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
 
     @property
     def chemical_potentials(self) -> Dict[int, float]:
-        """ chemical potentials :math:`\mu_i` """
+        """ chemical potentials :math:`\\mu_i` """
         return self._chemical_potentials
 
     @chemical_potentials.setter
@@ -152,15 +152,16 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
         data['temperature'] = self.temperature
 
         # chemical potentials
-        for Z, mu in self.chemical_potentials.items():
-            data['mu_{}'.format(chemical_symbols[Z])] = mu
+        for atnum, chempot in self.chemical_potentials.items():
+            data['mu_{}'.format(chemical_symbols[atnum])] = chempot
 
         # species counts
         atoms = self.configuration.atoms
         unique, counts = np.unique(atoms.numbers, return_counts=True)
-        for Z in self.configuration._allowed_species:
-            data['{} count'.format(chemical_symbols[Z])] = 0
-        for Z, count in zip(unique, counts):
-            data['{} count'.format(chemical_symbols[Z])] = count
+        # TODO: avoid accessing a protected member of a client class
+        for atnum in self.configuration._allowed_species:
+            data['{} count'.format(chemical_symbols[atnum])] = 0
+        for atnum, count in zip(unique, counts):
+            data['{} count'.format(chemical_symbols[atnum])] = count
 
         return data

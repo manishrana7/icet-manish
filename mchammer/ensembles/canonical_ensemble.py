@@ -1,9 +1,10 @@
 """Definition of the canonical ensemble class."""
 
+from typing import Dict
 import numpy as np
+
 from ase import Atoms
 from ase.units import kB
-from typing import Dict
 
 from .. import DataContainer
 from .base_ensemble import BaseEnsemble
@@ -64,8 +65,7 @@ class CanonicalEnsemble(BaseEnsemble):
             self.update_occupations(sites, species)
 
     def _acceptance_condition(self, potential_diff: float) -> bool:
-        """
-        Evaluates Metropolis acceptance criterion.
+        """Evaluates Metropolis acceptance criterion.
 
         Parameters
         ----------
