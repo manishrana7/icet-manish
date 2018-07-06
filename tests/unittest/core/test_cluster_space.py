@@ -348,9 +348,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
             'tests/unittest/core/hcp_quaternary.db')
 
     def test_read_write(self):
-        """
-        Test read/write functionality.
-        """
+        """ Tests read/write functionality. """
         f = tempfile.NamedTemporaryFile()
         self.cs.write(f.name)
         f.seek(0)
@@ -362,7 +360,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         self.assertEqual(self.cs._verbosity, cs_read._verbosity)
 
     def test_chemical_symbols(self):
-        """Test chemical_symbols functionality."""
+        """ Tests chemical_symbols property. """
         target = ['Ag', 'Au']
         self.assertEqual(self.cs.chemical_symbols, target)
 
@@ -478,9 +476,10 @@ class TestClusterSpaceTernary(unittest.TestCase):
             The orbit which the mc vectors should be returned from.
         """
         orbit = cluster_space.get_orbit(orbit_index)
-        local_Mi = cluster_space.get_allowed_occupations(
-            cluster_space._get_primitive_structure(),
-            orbit.representative_sites)
+        local_Mi = \
+            cluster_space.get_number_of_allowed_species_by_site(
+                cluster_space._get_primitive_structure(),
+                orbit.representative_sites)
 
         mc_vectors = orbit.get_mc_vectors(local_Mi)
         return mc_vectors
@@ -498,7 +497,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
         permutations_target = [[[0, 1]],
                                [[0, 1], [1, 0]],
                                [[0, 1]]]
-        permutation_retval = self.cs.get_mc_vector_permutations(
+        permutation_retval = self.cs.get_multi_component_vector_permutations(
             mc_vector_target, orbit_index)
         self.assertEqual(permutations_target, permutation_retval)
 
@@ -519,7 +518,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
                                [[0, 1, 2], [1, 2, 0], [2, 1, 0]],
                                [[0, 1, 2], [2, 0, 1], [2, 1, 0]],
                                [[0, 1, 2]]]
-        permutation_retval = self.cs.get_mc_vector_permutations(
+        permutation_retval = self.cs.get_multi_component_vector_permutations(
             mc_vector_target, orbit_index)
         self.assertEqual(permutations_target, permutation_retval)
 
@@ -548,7 +547,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
                                    2, 3, 1, 0],
                                 [3, 2, 0, 1]],
                                [[0, 1, 2, 3]]]
-        permutation_retval = self.cs.get_mc_vector_permutations(
+        permutation_retval = self.cs.get_multi_component_vector_permutations(
             mc_vector_target, orbit_index)
         self.assertEqual(permutations_target, permutation_retval)
 

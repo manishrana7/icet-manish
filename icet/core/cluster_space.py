@@ -156,7 +156,7 @@ class ClusterSpace(_ClusterSpace):
         s = []
         s += ['{s:=^{n}}'.format(s=' Cluster Space ', n=width)]
         s += [' chemical species: {}'
-              .format(' '.join(self.get_atomic_numbers()))]
+              .format(' '.join(self.get_chemical_symbols()))]
         s += [' cutoffs: {}'.format(' '.join(['{:.4f}'.format(co)
                                               for co in self._cutoffs]))]
         s += [' total number of orbits: {}'.format(len(self))]
@@ -225,10 +225,10 @@ class ClusterSpace(_ClusterSpace):
             orbit_index = cluster_space_info[0]
             mc_vector = cluster_space_info[1]
             orbit = self.get_orbit(orbit_index)
-            local_Mi = self.get_allowed_occupations(
+            local_Mi = self.get_number_of_allowed_species_by_site(
                 self._get_primitive_structure(), orbit.representative_sites)
             mc_vectors = orbit.get_mc_vectors(local_Mi)
-            mc_permutations = self.get_mc_vector_permutations(
+            mc_permutations = self.get_multi_component_vector_permutations(
                 mc_vectors, orbit_index)
             mc_index = mc_vectors.index(mc_vector)
             mc_permutations_multiplicity = len(mc_permutations[mc_index])

@@ -89,5 +89,5 @@ class ClusterExpansionCalculator(BaseCalculator):
     def occupation_constraints(self) -> List[List[int]]:
         """ map from site to allowed species """
         species = list(
-            self.cluster_expansion.cluster_space.element_map.keys())
+            self.cluster_expansion.cluster_space.species_map.keys())
         return [species] * len(self.atoms)

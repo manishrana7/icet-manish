@@ -81,23 +81,17 @@ void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> 
 
 
 /**
-    Count the clusters of the sites in each orbit of the orbit list
-
-    Parameters
-    ----------
-    structure:
-        icet structure object to be counted on
-
-    orbitList:
-        OrbitList object
+ @brief Counts the clusters in the input structure.
+ @param structure input configuration
+ @param orbitList orbit list
+ @param orderIntact if True do not reorder clusters before comparison (i.e., ABC != ACB)
 */
 void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &orbitList, bool orderIntact)
 {
-
     for (int i = 0; i < orbitList.size(); i++)
     {
         Cluster repr_cluster = orbitList.getOrbit(i).getRepresentativeCluster();
-        repr_cluster.setClusterTag(i);
+        repr_cluster.setTag(i);
         if(orderIntact && repr_cluster.order()!= 1)
         {
             count(structure, orbitList.getOrbit(i).getPermutedEquivalentSites(), repr_cluster, orderIntact);
@@ -107,7 +101,6 @@ void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &
             count(structure, orbitList.getOrbit(i).getEquivalentSites(), repr_cluster, orderIntact);
         }
     }
-
 }
 
 // Return clusters count information (elements and count) per cluster
@@ -129,7 +122,7 @@ void ClusterCounts::setupClusterCountsInfo()
       }
     }
     std::sort(
-        _clusterCountsInfo.begin(), 
+        _clusterCountsInfo.begin(),
         _clusterCountsInfo.end(),
         [](const std::pair<std::vector<std::string>, int> &a, const std::pair<std::vector<std::string>, int> &b){
             return a.first.size() < b.first.size();
