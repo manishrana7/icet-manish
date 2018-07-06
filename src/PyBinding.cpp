@@ -748,7 +748,7 @@ PYBIND11_MODULE(_icet, m)
         })
         .def("get_orbit_list", &ClusterSpace::getOrbitList)
         .def("get_orbit", &ClusterSpace::getOrbit)
-        .def_property_readonly("element_map", &ClusterSpace::getElementMap)
+        .def_property_readonly("species_map", &ClusterSpace::getSpeciesMap)
         .def("get_cluster_space_info", &ClusterSpace::getClusterSpaceInfo)
         .def("get_cluster_space_size", &ClusterSpace::getClusterSpaceSize)
         .def("get_chemical_symbols",

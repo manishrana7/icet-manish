@@ -11,7 +11,6 @@
 /**
 @brief This class handles the cluster space.
 @details It provides functionality for setting up a cluster space, calculating cluster vectors as well as retrieving various types of associated information.
-@todo Add mathematical definitions.
 */
 
 class ClusterSpace
@@ -53,13 +52,13 @@ class ClusterSpace
     /// Returns the number of allowed components for each site.
     std::vector<int> getNumberOfAllowedSpeciesBySite(const Structure &, const std::vector<LatticeSite> &) const;
 
-    /// Returns a list of elements associated with cluster space as chemical symbols.
+    /// Returns a list of species associated with cluster space as chemical symbols.
     std::vector<std::string> getChemicalSymbols() const
     {
-        std::vector<std::string> elements;
-        for (const auto &elem : _elements)
-            elements.push_back(PeriodicTable::intStr[elem]);
-        return elements;
+        std::vector<std::string> species;
+        for (const auto &s : _species)
+            species.push_back(PeriodicTable::intStr[s]);
+        return species;
     }
 
     /// Returns the cluster space size, i.e. the length of a cluster vector.
@@ -71,20 +70,20 @@ class ClusterSpace
     }
 
     /// Returns the mapping between atomic numbers and the internal species enumeration scheme.
-    std::map<int, int> getElementMap() const { return _elementMap; }
+    std::map<int, int> getSpeciesMap() const { return _speciesMap; }
 
 
   private:
 
     /// Returns the cluster product.
     /// @todo This function computes a specific term in the cluster vector. Can we find a more telling name?
-    double getClusterProduct(const std::vector<int> &mcVector, const std::vector<int> &numberOfAllowedSpecies, const std::vector<int> &elements) const;
+    double evaluateClusterProduct(const std::vector<int> &, const std::vector<int> &, const std::vector<int> &) const;
 
     /// Collect information about the cluster space.
     void collectClusterSpaceInfo();
 
     /// Returns the default cluster function.
-    double evaluateClusterFunction(const int numberOfAllowedSpecies, const int clusterFunction, const int element) const;
+    double evaluateClusterFunction(const int, const int, const int) const;
 
 
   private:
@@ -110,11 +109,11 @@ class ClusterSpace
     /// Radial cutoffs by cluster order starting with pairs.
     std::vector<double> _clusterCutoffs;
 
-    /// Elements identified by atomic number considered in this cluster space.
-    std::vector<int> _elements;
+    /// Species considered in this cluster space identified by atomic number.
+    std::vector<int> _species;
 
     /// Map between atomic numbers and the internal species enumeration scheme.
-    std::map<int, int> _elementMap;
+    std::map<int, int> _speciesMap;
 
 };
 

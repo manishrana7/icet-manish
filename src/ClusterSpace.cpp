@@ -17,15 +17,15 @@ ClusterSpace::ClusterSpace(std::vector<int> numberOfAllowedSpecies,
     _primitiveStructure = orbitList.getPrimitiveStructure();
     _primitiveStructure.setNumberOfAllowedSpecies(_numberOfAllowedSpeciesPerSite);
 
-    // Set up a map between chemical elements and the internal species enumeration scheme.
+    // Set up a map between chemical species and the internal species enumeration scheme.
     for (const auto el : chemicalSymbols)
     {
-        _elements.push_back(PeriodicTable::strInt[el]);
+        _species.push_back(PeriodicTable::strInt[el]);
     }
-    sort(_elements.begin(), _elements.end());
-    for (size_t i = 0; i < _elements.size(); i++)
+    sort(_species.begin(), _species.end());
+    for (size_t i = 0; i < _species.size(); i++)
     {
-        _elementMap[_elements[i]] = i;
+        _speciesMap[_species[i]] = i;
     }
 
     /// @todo Why is the collectClusterSpaceInfo function not executed
@@ -110,23 +110,23 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
         // Depending on the symmetry of the cluster one might also obtain [1, 0] (e.g., in a clathrate or for some clusters on a HCP lattice).
         auto multiComponentVectors = _orbitList.getOrbit(i).getMultiComponentVectors(numberOfAllowedSpeciesBySite);
         // @todo Make getMultiComponentVectorPermutations take an Orbit rather than an index. Then swap the loop over int for a loop over Orbit above.
-        auto elementPermutations = getMultiComponentVectorPermutations(multiComponentVectors, i);
+        auto speciesPermutations = getMultiComponentVectorPermutations(multiComponentVectors, i);
         int currentMultiComponentVectorIndex = 0;
         for (const auto &multiComponentVector : multiComponentVectors)
         {
             double clusterVectorElement = 0;
             int multiplicity = 0;
 
-            for (const auto &elementsCountPair : clusterMap.at(representativeCluster))
+            for (const auto &speciesCountPair : clusterMap.at(representativeCluster))
             {
 
                 /// @todo Check if numberOfAllowedSpecies should be permuted as well. Is this todo still relevant?
-                for (const auto &perm : elementPermutations[currentMultiComponentVectorIndex])
+                for (const auto &perm : speciesPermutations[currentMultiComponentVectorIndex])
                 {
                     auto permutedMultiComponentVector = icet::getPermutedVector(multiComponentVector, perm);
                     auto permutedNumberOfAllowedSpeciesBySite = icet::getPermutedVector(numberOfAllowedSpeciesBySite, perm);
-                    clusterVectorElement += getClusterProduct(permutedMultiComponentVector, permutedNumberOfAllowedSpeciesBySite, elementsCountPair.first) * elementsCountPair.second;
-                    multiplicity += elementsCountPair.second;
+                    clusterVectorElement += evaluateClusterProduct(permutedMultiComponentVector, permutedNumberOfAllowedSpeciesBySite, speciesCountPair.first) * speciesCountPair.second;
+                    multiplicity += speciesCountPair.second;
                 }
             }
             clusterVectorElement /= ((double)multiplicity);
@@ -169,23 +169,22 @@ ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
                     continue;
                 }
                 repr_cluster.setTag(j);
+                std::vector<int> species(sites.size());
                 if (repr_cluster.order() != 1)
                 {
-                    std::vector<int> elements(sites.size());
                     for (size_t i = 0; i < sites.size(); i++)
                     {
-                        elements[i] = structure.getAtomicNumber(sites[i].index());
+                        species[i] = structure.getAtomicNumber(sites[i].index());
                     }
-                    clusterCounts.countCluster(repr_cluster, elements, orderIntact);
+                    clusterCounts.countCluster(repr_cluster, species, orderIntact);
                 }
                 else
                 {
-                    std::vector<int> elements(sites.size());
                     for (size_t i = 0; i < sites.size(); i++)
                     {
-                        elements[i] = structure.getAtomicNumber(sites[i].index());
+                        species[i] = structure.getAtomicNumber(sites[i].index());
                     }
-                    clusterCounts.countCluster(repr_cluster, elements, orderIntact);
+                    clusterCounts.countCluster(repr_cluster, species, orderIntact);
                 }
             }
         }
@@ -249,9 +248,9 @@ std::vector<std::vector<std::vector<int>>> ClusterSpace::getMultiComponentVector
 }
 
 /**
-@details Evaluate the cluster function using the specified parameters.
+@details Evaluates the cluster function using the specified parameters.
 
-The cluster function (also "orthogonal point function") is defined as
+The cluster functions (also "orthogonal point functions") are defined as
 
 .. math::
 
@@ -266,8 +265,6 @@ The cluster function (also "orthogonal point function") is defined as
 @param species index of species
 
 @returns the value of the cluster function
-
-@todo add mathematical definition of function defined here
 */
 double ClusterSpace::evaluateClusterFunction(const int numberOfAllowedSpecies, const int clusterFunction, const int species) const
 {
@@ -282,7 +279,7 @@ double ClusterSpace::evaluateClusterFunction(const int numberOfAllowedSpecies, c
 }
 
 /**
-@details Evaluates the full cluster product of the entire cluster
+@details Evaluates the full cluster product of the entire cluster.
 
 @param multiComponentVector multi-component vector, each element of the vector gives the index of a cluster function
 @param numberOfAllowedSpecies number of species allowed on the sites in this cluster (all sites involved are assumed to have the same number of allowed species)
@@ -290,12 +287,12 @@ double ClusterSpace::evaluateClusterFunction(const int numberOfAllowedSpecies, c
 
 @returns the cluster product
 **/
-double ClusterSpace::getClusterProduct(const std::vector<int> &multiComponentVector, const std::vector<int> &numberOfAllowedSpecies, const std::vector<int> &species) const
+double ClusterSpace::evaluateClusterProduct(const std::vector<int> &multiComponentVector, const std::vector<int> &numberOfAllowedSpecies, const std::vector<int> &species) const
 {
     double clusterProduct = 1;
     for (int i = 0; i < species.size(); i++)
     {
-        clusterProduct *= evaluateClusterFunction(numberOfAllowedSpecies[i], multiComponentVector[i], _elementMap.at(species[i]));
+        clusterProduct *= evaluateClusterFunction(numberOfAllowedSpecies[i], multiComponentVector[i], _speciesMap.at(species[i]));
     }
     return clusterProduct;
 }
@@ -304,7 +301,7 @@ double ClusterSpace::getClusterProduct(const std::vector<int> &multiComponentVec
 @details Returns the number of species allowed on each site of the provided structure.
 
 @param structure an atomic configuration
-@param latticeSites a list of sites (points)
+@param latticeSites a list of sites
 
 @returns the number of allowed species for each site
 **/
