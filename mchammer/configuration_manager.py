@@ -10,11 +10,9 @@ class SwapNotPossibleError(Exception):
 
 
 class ConfigurationManager(object):
-    """The ConfigurationManager store its own state of the
-    configuration that is being sampled in the ensemble.
-
-    ConfigurationManager is responsible for all information and
-    handling of the configuration.
+    """
+    The ConfigurationManager owns and handles information pertaining to a
+    configuration being sampled in a Monte Carlo simulation.
 
     Parameters
     ----------
@@ -56,7 +54,7 @@ class ConfigurationManager(object):
         self._allowed_species = self._set_up_allowed_species()
         self._sites_by_species = self._get_sites_by_species()
 
-    def _set_up_allowed_species(self)->List[int]:
+    def _set_up_allowed_species(self) -> List[int]:
         """ Returns a list of allowed species. """
         allowed_species = set()
         for occ in self._occupation_constraints:
@@ -150,6 +148,8 @@ class ConfigurationManager(object):
         ----
         * profile this method as it is called frequently
         * look for speed up opportunities
+        * The current implementation assumes all sites in this sublattice to
+          have the same allowed occupations.
         """
         # pick the first site
         try:
@@ -157,9 +157,6 @@ class ConfigurationManager(object):
         except IndexError:
             raise SwapNotPossibleError('Sublattice {} is empty.'
                                        .format(sublattice))
-
-        # TODO: The current implementation assumes all sites in this
-        # sublattice to have the same allowed occupations.
 
         # pick the second site
         possible_swap_species = \
