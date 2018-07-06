@@ -20,45 +20,45 @@ Overview
 
 The following figure illustrates the :program:`icet` *workflow*. Here, classes
 are shown in :blue:`blue`, input parameters and data in :orange:`orange`, and
-functionalities invoked via external libraries are indicated in
-:green:`green`.
+functionalities invoked via external libraries are indicated in :green:`green`.
 
 .. graphviz:: _static/workflow.dot
 
 The typical workflow involves the following steps:
 
-#. initialize a :ref:`cluster space <cluster_space>` (via :class:`ClusterSpace
-   <icet.ClusterSpace>`) by providing a :orange:`prototype structure`
-   (typically a primitive cell), the species that are allowed on each site
-   as well as :orange:`cutoff radii for clusters of different orders`
+#. initialize a :ref:`cluster space <worflow_cluster_space>`
+   (via :class:`ClusterSpace <icet.ClusterSpace>`) by providing a
+   :orange:`prototype structure` (typically a primitive cell), the species that
+   are allowed on each site as well as :orange:`cutoff radii for clusters of
+   different orders`
 
-#. initialize a :ref:`structure container <structure_container>` (via
+#. initialize a :ref:`structure container <worflow_structure_container>` (via
    :class:`StructureContainer <icet.StructureContainer>`)
    using the cluster space created previously and add a :orange:`set of input
    structures with reference data` for the property or properties of interest
 
-#. fit the parameters using an :ref:`optimizer <optimizers>` (e.g.,
+#. fit the parameters using an :ref:`optimizer <worflow_optimizers>` (e.g.,
    :class:`Optimizer <icet.Optimizer>`,
    :class:`EnsembleOptimizer <icet.EnsembleOptimizer>`, or
    :class:`CrossValidationEstimator <icet.CrossValidationEstimator>`)
 
-#. construct a :ref:`cluster expansion <cluster_expansion>`
+#. construct a :ref:`cluster expansion <worflow_cluster_expansion>`
    (via :class:`ClusterExpansion <icet.ClusterExpansion>`)
    by combining the cluster space with a set of parameters obtained by
    optimization
 
 The final cluster expansion can be used in a number of ways. Most commonly one
-creates a :ref:`cluster expansion calculator <cluster_expansion_calculator>`
-(via :class:`ClusterExpansionCalculator
+creates a :ref:`cluster expansion calculator
+<worflow_cluster_expansion_calculator>` (via :class:`ClusterExpansionCalculator
 <mchammer.calculators.ClusterExpansionCalculator>`) for a specific
 :orange:`supercell structure` and subsequently carries out Monte Carlo
 simulations via the :ref:`mchammer <moduleref_mchammer>` module
 
-It is also possible to use a :ref:`cluster expansion <cluster_expansion>` (via
-:class:`ClusterExpansion <icet.ClusterExpansion>`) directly to make
-predictions for :orange:`arbitrary supercells` of the primitive prototype
-structure, obtained e.g., by :ref:`structure enumeration
-<structure_enumeration>`.
+It is also possible to use a :ref:`cluster expansion
+<worflow_cluster_expansion>` (via :class:`ClusterExpansion
+<icet.ClusterExpansion>`) directly to make predictions for :orange:`arbitrary
+supercells` of the primitive prototype structure, obtained e.g., by
+:ref:`structure enumeration <structure_enumeration>`.
 
 This basic workflow is illustrated in detail in the :ref:`tutorial section
 <tutorial_basics>`. Further applications are discussed in the :ref:`advanced
@@ -68,7 +68,7 @@ topics <tutorial_advanced_topics>` section.
 Key concepts
 ============
 
-.. _cluster_space:
+.. _worflow_cluster_space:
 
 Cluster spaces
 --------------
@@ -84,32 +84,33 @@ symmetry equivalent clusters, see Figure below).
 
 .. todo:: insert figure that schematically shows clusters and orbits (and symmetry operations)
 
-.. _structure_container:
+.. _worflow_structure_container:
 
 Structure containers
 --------------------
 
 A structure container (represented by the :class:`StructureContainer
 <icet.StructureContainer>` class) is a collection of structures along with
-their decomposition into a specific :ref:`cluster space <cluster_space>`.
-Structure containers allow one to easily compile structures for training and
-validation, as demonstrated in the tutorial on :ref:`basic construction of a
-cluster expansion <tutorial_construct_cluster_expansion>`. They can also be
-written to file for later use.
+their decomposition into a specific :ref:`cluster space
+<worflow_cluster_space>`. Structure containers allow one to easily compile
+structures for training and validation, as demonstrated in the tutorial on
+:ref:`basic construction of a cluster expansion
+<tutorial_construct_cluster_expansion>`. They can also be written to file for
+later use.
 
-.. _optimizers:
+.. _worflow_optimizers:
 
 Optimizers
 ----------
 
 Optimizers allow one to train the effective cluster interaction (ECI)
 parameters associated with each :term:`orbit` in the :ref:`cluster space
-<cluster_space>`. They are available in the form of optimizer classes such as
-:class:`Optimizer <icet.Optimizer>`, :class:`EnsembleOptimizer
+<worflow_cluster_space>`. They are available in the form of optimizer classes
+such as :class:`Optimizer <icet.Optimizer>`, :class:`EnsembleOptimizer
 <icet.EnsembleOptimizer>`, or :class:`CrossValidationEstimator
 <icet.CrossValidationEstimator>`.
 
-.. _cluster_expansion:
+.. _worflow_cluster_expansion:
 
 Cluster expansions
 ------------------
@@ -122,7 +123,7 @@ main output of the :program:`icet` model construction cycle. While they are
 specific for a given prototype structure and cluster space they are *not* tied
 to a specific supercell structure. CEs can be written to file for later use.
 
-.. _cluster_expansion_calculator:
+.. _worflow_cluster_expansion_calculator:
 
 Cluster expansion calculators
 -----------------------------

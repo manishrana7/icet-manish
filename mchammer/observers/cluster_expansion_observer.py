@@ -5,21 +5,21 @@ from mchammer.observers.base_observer import BaseObserver
 
 class ClusterExpansionObserver(BaseObserver):
     """
-    This class represents a cluster expansion observer.
+    This class represents a cluster expansion (CE) observer.
 
-    A cluster expansion (CE) observer allows to compute a property described by
-    a CE along the trajectory sampled by a Monte Carlo (MC) simulation. In
-    general this CE differs from the CE that is used to generate the
-    trajectory. For example in a canonical MC simulation the latter would
-    usually represent an energy (total or mixing energy) whereas the former
-    CE(s) could map lattice constant or band gap.
+    A CE observer allows to compute a property described by a CE along the
+    trajectory sampled by a Monte Carlo (MC) simulation. In general this CE
+    differs from the CE that is used to generate the trajectory. For example in
+    a canonical MC simulation the latter would usually represent an energy
+    (total or mixing energy) whereas the former CE(s) could map lattice
+    constant or band gap.
 
     Parameters
     ----------
-    cluster_expansion : :class:`icet:ClusterExpansion`
-        cluster expansion model to be used for observation
-    tag : str (default: `ClusterExpansionObserver`)
-        human readable observer name
+    cluster_expansion : :class:`icet.ClusterExpansion` cluster expansion model
+        to be used for observation
+    tag : str
+        human readable observer name (default: `ClusterExpansionObserver`)
     interval : int
         observation interval during the Monte Carlo simulation
 
