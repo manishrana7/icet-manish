@@ -11,7 +11,7 @@ from typing import BinaryIO, Dict, List, TextIO, Tuple, Union
 from numpy import array as Array
 
 
-class StructureContainer(object):
+class StructureContainer:
 
     def __init__(self, cluster_space,
                  list_of_atoms: List[Tuple[Atoms, str]]=None,
@@ -39,20 +39,17 @@ class StructureContainer(object):
 
         # Add atomic structures
         if list_of_atoms is not None:
-            assert isinstance(list_of_atoms, (list, tuple)), \
-                'list_of_atoms must be list or tuple or None'
-
-            assert len(list_of_atoms) > 0, \
-                'list_of_atoms must contain at least one element'
+            if not isinstance(list_of_atoms, list):
+                raise TypeError('atoms must be given as a list') 
 
             if list_of_properties is not None:
-                msg = 'len(list_of_properties) not equal len(list_of_atoms)'
-                assert(len(list_of_properties) == len(list_of_atoms)), msg
+                if not len(list_of_properties) == len(list_of_atoms):
+                    raise ValueError('list of atoms and list of properties'
+                                     ' must have the same length')
             else:
                 list_of_properties = [None] * len(list_of_atoms)
-
-            # transform list to tuple
-            if not isinstance(list_of_atoms[0], tuple):
+ 
+            if not all(isinstance(x, tuple) for x in list_of_atoms):
                 list_of_atoms = [(atoms, None) for atoms in list_of_atoms]
 
             for (atoms, user_tag), properties in zip(list_of_atoms,
@@ -209,25 +206,22 @@ class StructureContainer(object):
         atoms_copy = atoms.copy()
         if properties is None:
             properties = {}
-            assert atoms.calc is not None, \
-                'Neither property or calculator could be found'
-            msg = 'Not relaxed structure, calculation required'
-            assert len(atoms.calc.check_state(atoms)) == 0, msg
-            try:
-                energy = atoms.get_potential_energy()
-            except PropertyNotImplementedError:
-                pass
-            else:
-                properties['energy'] = energy / len(atoms)
-
-        assert properties, 'Calculator does not have energy as a property'
+            # check if there is a calculator
+            if atoms.calc:
+                if len(atoms.calc.check_state(atoms)) == 0:
+                    try:
+                        energy = atoms.get_potential_energy()
+                    except PropertyNotImplementedError:
+                        pass
+                    else:
+                        properties['energy'] = energy / len(atoms)
 
         cv = self._cluster_space.get_cluster_vector(atoms_copy)
         if not allow_duplicate:
             for i, fs in enumerate(self):
                 if np.allclose(cv, fs.cluster_vector):
                     raise ValueError('Atoms have identical cluster vector with'
-                                     'structure {}'.format(i))
+                                     ' structure {}'.format(i))
 
         structure = FitStructure(atoms_copy, user_tag)
         structure.set_properties(properties)

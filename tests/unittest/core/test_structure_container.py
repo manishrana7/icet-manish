@@ -58,20 +58,21 @@ class TestStructureContainer(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestStructureContainer, self).__init__(*args, **kwargs)
-        self.subelements = ['Ag', 'Au']
-        self.cutoffs = [4.0] * 3
-        self.atoms_prim = bulk('Ag', a=4.09)
+        prim = bulk('Ag', a=4.09)
+        chemical_species = ['Ag', 'Au']
+        self.cs = ClusterSpace(atoms=prim,
+                               cutoffs=[4.0, 4.0, 4.0],
+                               chemical_symbols = chemical_species)
         self.structure_list = []
         self.user_tags = []
         for k in range(4):
-            atoms = self.atoms_prim.repeat(2)
-            symbols = [self.subelements[0]] * len(atoms)
-            symbols[:k] = [self.subelements[1]] * k
+            atoms = prim.repeat(2)
+            symbols = [chemical_species[0]] * len(atoms)
+            symbols[:k] = [chemical_species[1]] * k
             atoms.set_chemical_symbols(symbols)
             self.structure_list.append(atoms)
             self.user_tags.append('Structure {}'.format(k))
 
-        self.cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
         self.properties_list = []
         self.add_properties_list = []
         for k, atoms in enumerate(self.structure_list):
@@ -96,12 +97,19 @@ class TestStructureContainer(unittest.TestCase):
         Just testing that the setup
         (initialization) of tested class work
         """
+         # check empty initialization
+        self.assertIsInstance(StructureContainer(self.cs), 
+                              StructureContainer)
+
+        # with atoms without tags and properties
         sc = StructureContainer(self.cs, self.structure_list,
                                 self.properties_list)
         self.assertIsInstance(sc, StructureContainer)
-        # with only list of atoms (properties read from calc)
+
+        # with only atoms (properties read from calc)
         sc = StructureContainer(self.cs, self.structure_list)
         self.assertIsInstance(sc, StructureContainer)
+
         # add atoms along with tags
         structure_list_with_tags = []
         for k, atoms in enumerate(self.structure_list, start=1):
@@ -109,14 +117,20 @@ class TestStructureContainer(unittest.TestCase):
         sc = StructureContainer(self.cs, structure_list_with_tags,
                                 self.properties_list)
         self.assertIsInstance(sc, StructureContainer)
-        # check that other types fails
-        with self.assertRaises(AssertionError) as context:
-            sc = StructureContainer(self.cs, ['something'])
-        msg = 'atoms has not ASE Atoms format'
-        self.assertTrue(msg in str(context.exception))
-        # check empty initialization
-        sc = StructureContainer(self.cs)
-        self.assertIsInstance(sc, StructureContainer)
+
+        # check whether method raises Exceptions
+        with self.assertRaises(TypeError) as cm:
+            StructureContainer(self.cs, 'atoms')
+        self.assertTrue('atoms must be given as a list' in str(cm.exception))
+
+        with self.assertRaises(ValueError) as cm:
+            StructureContainer(self.cs, self.structure_list, [1.2])
+        self.assertTrue('list of atoms and list of properties'
+                        ' must have the same length' in str(cm.exception))
+
+        with self.assertRaises(AssertionError) as cm:
+            StructureContainer(self.cs, ['atoms'])
+        self.assertTrue('atoms has not ASE Atoms format' in str(cm.exception))
 
     def test_len(self):
         """
@@ -143,21 +157,24 @@ class TestStructureContainer(unittest.TestCase):
         """
         Testing add_structure functionality
         """
+        # add atoms with tag and propery
         atoms = self.structure_list[0].copy()
         properties = self.properties_list[0]
         tag = "struct5"
         self.sc.add_structure(atoms, tag, properties)
-        self.assertEqual(self.sc.__len__(), len(self.structure_list)+1)
-        # check that adding structures without properties fails
-        with self.assertRaises(AssertionError):
-            self.sc.add_structure(atoms)
+        self.assertEqual(len(self.sc), len(self.structure_list)+1)
+        
+        # add only atoms (without tag and property)
+        atoms = self.cs.primitive_structure.repeat(2)
+        self.sc.add_structure(atoms)
+        self.assertEqual(len(self.sc), len(self.structure_list)+2)
 
         # check that duplicate structure is not added.
         self.sc.add_structure(atoms, tag, properties)
         with self.assertRaises(ValueError) as context:
             self.sc.add_structure(atoms, tag, properties,
                                   allow_duplicate=False)
-        self.assertIn('Atoms have identical cluster vector withstructure',
+        self.assertIn('Atoms have identical cluster vector with structure',
                       str(context.exception))
 
     def test_get_fit_data(self):
@@ -319,16 +336,15 @@ class TestFitStructure(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestFitStructure, self).__init__(*args, **kwargs)
-        self.subelements = ['Ag', 'Au']
-        self.cutoffs = [4.0] * 3
-        self.atoms_prim = bulk('Ag', a=4.09)
-        self.cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
-
+        self.prim = bulk('Ag', a=4.09)
+        self.cs = ClusterSpace(atoms=self.prim, cutoffs=[4.0, 4.0, 4.0],
+                               chemical_symbols=['Ag', 'Au'])
+        
     def setUp(self):
         """
         Instantiate class before each test
         """
-        atoms = self.atoms_prim.repeat(2)
+        atoms = self.prim.repeat(2)
         prop = {'energy': 0.0126746}
         cv = self.cs.get_cluster_vector(atoms)
         tag = "struct1"
@@ -339,7 +355,7 @@ class TestFitStructure(unittest.TestCase):
         Just testing that the setup
         (initialization) of tested class work
         """
-        atoms = self.atoms_prim.repeat(2)
+        atoms = self.prim.repeat(2)
         tag = "struct1"
         self.fit_structure = FitStructure(atoms, tag)
 
@@ -347,7 +363,7 @@ class TestFitStructure(unittest.TestCase):
         """
         Testing cluster vector attribute
         """
-        atoms = self.atoms_prim.repeat(2)
+        atoms = self.prim.repeat(2)
         cv_from_cluster_space = list(self.cs.get_cluster_vector(atoms))
         cv = list(self.fit_structure.cluster_vector)
         self.assertEqual(cv, cv_from_cluster_space)
