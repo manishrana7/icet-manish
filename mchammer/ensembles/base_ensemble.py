@@ -1,12 +1,12 @@
-import numpy as np
 import os
 import random
-
 from abc import ABC, abstractmethod
-from ase import Atoms
 from math import gcd
 from time import time
 from typing import List, Dict
+import numpy as np
+
+from ase import Atoms
 
 from ..data_container import DataContainer
 from ..calculators.base_calculator import BaseCalculator
@@ -25,8 +25,8 @@ class BaseEnsemble(ABC):
     atoms : :class:`ase:Atoms`
         atomic configuration to be used in the Monte Carlo simulation;
         also defines the initial occupation vector
-    name : str (default: `BaseEnsemble`)
-        human-readable ensemble name
+    name : str
+        human-readable ensemble name [default: `BaseEnsemble`]
     data_container : str
         name of file the data container associated with the ensemble
         will be written to; if the file exists it will be read, the
@@ -37,11 +37,11 @@ class BaseEnsemble(ABC):
         includes for example the current value of the calculator
         (i.e. usually the energy) as well as ensembles specific fields
         such as temperature or the number of atoms of different species
-    data_container_write_period : float (default np.inf)
+    data_container_write_period : float
         period in units of seconds at which the data container is
         written to file; writing periodically to file provides both
         a way to examine the progress of the simulation and to back up
-        the data
+        the data [default: np.inf]
     trajectory_write_interval : int
         interval at which the current occupation vector of the atomic
         configuration is written to the data container.

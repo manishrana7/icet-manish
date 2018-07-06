@@ -1,8 +1,8 @@
 import copy
 import random
-from ase import Atoms
 from numpy import array
 from typing import Dict, List, Tuple, Union
+from ase import Atoms
 
 
 class SwapNotPossibleError(Exception):
