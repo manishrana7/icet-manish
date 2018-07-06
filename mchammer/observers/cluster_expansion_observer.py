@@ -49,4 +49,4 @@ class ClusterExpansionObserver(BaseObserver):
         atoms
             input atomic structure.
         """
-        return self._cluster_expansion.predict(atoms) * len(atoms)
+        return self._cluster_expansion.predict(atoms)

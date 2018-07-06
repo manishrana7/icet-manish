@@ -34,7 +34,7 @@ class TestCEObserver(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             ClusterExpansionObserver(self.ce)
 
-        self.assertTrue("The value of interval must be specified" in
+        self.assertTrue('The value of interval must be specified' in
                         str(context.exception))
 
     def test_property_tag(self):
@@ -48,14 +48,15 @@ class TestCEObserver(unittest.TestCase):
     def test_get_observable(self):
         """Test observable is returned accordingly."""
         self.assertEqual(self.observer.get_observable(
-            atoms=self.atoms), 7641.0)
+            atoms=self.atoms), 283.0)
 
         # updated occupation using calculator
         indices = [10, 2, 4, 2]
         elements = [32] * 4
         self.calculator.update_occupations(indices, elements)
         self.assertAlmostEqual(self.observer.get_observable(
-            atoms=self.calculator.atoms), 1808.0)
+            atoms=self.calculator.atoms), 1808.0 / 27)
 
-    if __name__ == '__main__':
-        unittest.main()
+
+if __name__ == '__main__':
+    unittest.main()
