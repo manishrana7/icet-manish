@@ -40,7 +40,7 @@ class StructureContainer:
         # Add atomic structures
         if list_of_atoms is not None:
             if not isinstance(list_of_atoms, list):
-                raise TypeError('atoms must be given as a list') 
+                raise TypeError('atoms must be given as a list')
 
             if list_of_properties is not None:
                 if not len(list_of_properties) == len(list_of_atoms):
@@ -48,7 +48,7 @@ class StructureContainer:
                                      ' must have the same length')
             else:
                 list_of_properties = [None] * len(list_of_atoms)
- 
+
             if not all(isinstance(x, tuple) for x in list_of_atoms):
                 list_of_atoms = [(atoms, None) for atoms in list_of_atoms]
 

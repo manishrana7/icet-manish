@@ -62,7 +62,7 @@ class TestStructureContainer(unittest.TestCase):
         chemical_species = ['Ag', 'Au']
         self.cs = ClusterSpace(atoms=prim,
                                cutoffs=[4.0, 4.0, 4.0],
-                               chemical_symbols = chemical_species)
+                               chemical_symbols=chemical_species)
         self.structure_list = []
         self.user_tags = []
         for k in range(4):
@@ -97,8 +97,8 @@ class TestStructureContainer(unittest.TestCase):
         Just testing that the setup
         (initialization) of tested class work
         """
-         # check empty initialization
-        self.assertIsInstance(StructureContainer(self.cs), 
+        # check empty initialization
+        self.assertIsInstance(StructureContainer(self.cs),
                               StructureContainer)
 
         # with atoms without tags and properties
@@ -163,7 +163,7 @@ class TestStructureContainer(unittest.TestCase):
         tag = "struct5"
         self.sc.add_structure(atoms, tag, properties)
         self.assertEqual(len(self.sc), len(self.structure_list)+1)
-        
+
         # add only atoms (without tag and property)
         atoms = self.cs.primitive_structure.repeat(2)
         self.sc.add_structure(atoms)
@@ -339,7 +339,7 @@ class TestFitStructure(unittest.TestCase):
         self.prim = bulk('Ag', a=4.09)
         self.cs = ClusterSpace(atoms=self.prim, cutoffs=[4.0, 4.0, 4.0],
                                chemical_symbols=['Ag', 'Au'])
-        
+
     def setUp(self):
         """
         Instantiate class before each test
