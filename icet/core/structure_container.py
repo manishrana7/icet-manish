@@ -12,28 +12,28 @@ from numpy import array as Array
 
 
 class StructureContainer:
+    """
+    This class serves as a container for structure objects, their fit
+    properties and their cluster vectors.
+
+    Attributes:
+    -----------
+    cluster_space : :class:`ClusterSpace`
+        cluster space used for evaluating the cluster vectors
+
+    list_of_atoms : list / list of tuples (bi-optional)
+        list of atoms or list of tuples (atoms, tag)
+
+    list_of_properties : list of dicts
+        list of properties, which are provided in dicts
+    """
 
     def __init__(self, cluster_space,
-                 list_of_atoms: List[Tuple[Atoms, str]]=None,
-                 list_of_properties: List[Dict[str, float]]=None):
-        """Initializes a StructureContainer object
-
-        This class serves as a container for structure objects, their fit
-        properties and their cluster vectors.
-
-        Attributes:
-        -----------
-        cluster_space : :class:`ClusterSpace`
-            the cluster space used for evaluating the cluster vectors
-
-        list_of_atoms : list / list of tuples (bi-optional)
-            list of atoms or list of tuples with atoms and user tag
-
-        list_of_properties : list of dicts
-            list of properties, which are provided in dicts
-
+                 list_of_atoms=None,
+                 list_of_properties=None):
         """
-
+        Initializes a StructureContainer object
+        """
         self._cluster_space = cluster_space
         self._structure_list = []
 
@@ -454,7 +454,6 @@ class FitStructure:
         calculated cluster vector for actual structure
     properties : dict
         the properties dictionary
-
     """
 
     def __init__(self, atoms, user_tag, cv=None, properties=None):
@@ -466,22 +465,22 @@ class FitStructure:
 
     @property
     def cluster_vector(self) -> Array:
-        """NumPy array : the cluster vector"""
+        """calculated cluster vector"""
         return self._cluster_vector
 
     @property
     def atoms(self) -> Atoms:
-        """ASE Atoms object : supercell structure"""
+        """supercell structure"""
         return self._atoms
 
     @property
     def user_tag(self) -> str:
-        """string : structure label"""
+        """structure label"""
         return str(self._user_tag)
 
     @property
     def properties(self) -> Dict[str, float]:
-        """dict : properties"""
+        """scalar properties of structure"""
         return self._properties
 
     def __getattr__(self, key) -> float:
@@ -492,14 +491,9 @@ class FitStructure:
 
     def set_cluster_vector(self, cv: Array):
         """
-        Set the cluster vectors of the structure.
+        Sets the cluster vectors of the structure.
 
         ***Expert function: Use with caution***
-
-        Parameters
-        ----------
-        cv
-            cluster vector
         """
         if cv is not None:
             self._cluster_vector = cv
@@ -507,17 +501,10 @@ class FitStructure:
             self._cluster_vector = None
 
     def set_properties(self, properties: Dict[str, float]):
-        """
-        Set the properties to structure.
-
-        Parameters
-        ----------
-        properties
-            the properties dictionary
-
-        """
+        """Sets the properties to structure."""
         if properties is not None:
             self._properties.update(properties)
 
     def __len__(self) -> int:
+        """Number of elements in structure."""
         return len(self._atoms)
