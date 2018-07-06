@@ -14,8 +14,7 @@ class StructureContainer(object):
     def __init__(self, cluster_space,
                  list_of_atoms=None,
                  list_of_properties=None):
-        """
-        Initializes a StructureContainer object
+        """Initializes a StructureContainer object
 
         This class serves as a container for structure objects, their fit
         properties and their cluster vectors.
@@ -26,12 +25,12 @@ class StructureContainer(object):
             the cluster space used for evaluating the cluster vectors
 
         list_of_atoms : list / list of tuples (bi-optional)
-            list of structures (ASE Atoms objects) or list of pairs
-            of structures and user tag (list of [ASE Atoms object, string]
-            tuples)
+            list of structures (ASE Atoms) or list of tuples of
+            structure (ASE Atoms) and user tag
 
         list_of_properties : list of dicts
             list of properties, which are provided in dicts
+
         """
 
         self._cluster_space = cluster_space
@@ -117,6 +116,8 @@ class StructureContainer(object):
             for key, value in fields.items():
                 if isinstance(value, float):
                     fields[key] = '{:8.3f}'.format(value)
+                if isinstance(value, int):
+                    fields[key] = '{:8}'.format(value)
             s = []
             for name, value in fields.items():
                 n = max(len(name), len(value))
@@ -128,6 +129,9 @@ class StructureContainer(object):
                         value = '{:{padding}}'.format(value, padding=n - 1)
                     s += ['{s:^{n}}'.format(s=value, n=n)]
             return ' | '.join(s)
+
+        if len(self) == 0:
+            return 'Empty StructureContainer'
 
         # basic information
         # (use last structure in list to obtain maximum line length)
@@ -176,8 +180,8 @@ class StructureContainer(object):
         print(self._get_string_representation(print_threshold=print_threshold,
                                               print_minimum=print_minimum))
 
-    def add_structure(self, atoms, user_tag=None,
-                      properties=None):
+    def add_structure(self, atoms, user_tag=None, properties=None,
+                      allow_duplicate=True):
         """
         Add a structure to the structure list.
 
@@ -191,7 +195,9 @@ class StructureContainer(object):
             scalar properties. If properties are not specified the atoms
             object are required to have an attached ASE calculator object
             with a calculated potential energy
-
+        allow_duplicate : bool
+             whether or not to add the structure if there already exists a
+             structure with identical cluster-vector
         """
         assert isinstance(atoms, Atoms), 'atoms has not ASE Atoms format'
 
@@ -214,13 +220,16 @@ class StructureContainer(object):
 
         assert properties, 'Calculator does not have energy as a property'
 
-        structure = FitStructure(atoms_copy, user_tag)
-
-        structure.set_properties(properties)
-
         cv = self._cluster_space.get_cluster_vector(atoms_copy)
-        structure.set_cluster_vector(cv)
+        if not allow_duplicate:
+            for i, fs in enumerate(self):
+                if np.allclose(cv, fs.cluster_vector):
+                    raise ValueError('Atoms have identical cluster vector with'
+                                     'structure {}'.format(i))
 
+        structure = FitStructure(atoms_copy, user_tag)
+        structure.set_properties(properties)
+        structure.set_cluster_vector(cv)
         self._structure_list.append(structure)
 
     def get_fit_data(self, structure_indices=None, key='energy'):
@@ -359,6 +368,11 @@ class StructureContainer(object):
         """
         return self._structure_list
 
+    @property
+    def available_properties(self):
+        """ List : List of the available properties. """
+        return sorted(set([p for fs in self for p in fs.properties.keys()]))
+
     def write(self, filename):
         """
         Write structure container to a file.
@@ -452,6 +466,12 @@ class FitStructure:
     def properties(self):
         """dict : properties"""
         return self._properties
+
+    def __getattr__(self, key):
+        """ Accesses properties if possible and returns value """
+        if key not in self.properties.keys():
+            return super().__getattribute__(key)
+        return self.properties[key]
 
     def set_cluster_vector(self, cv):
         """

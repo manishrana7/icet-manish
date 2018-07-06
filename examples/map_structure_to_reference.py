@@ -1,7 +1,7 @@
-'''
+"""
 This example demonstrates how to map a structure in which the cell has
 been scaled and/or the atoms displaced onto an ideal (primitive) structure
-'''
+"""
 
 # Import modules
 from icet.tools import map_structure_to_reference

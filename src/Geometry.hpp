@@ -6,7 +6,7 @@
 
 namespace icet {
 
-/// Returns the geometrical radius of a cluster.
-double getGeometricalRadius(const std::vector<LatticeSite> &, const Structure &);
+    /// Returns the geometrical radius of a cluster.
+    double getGeometricalRadius(const std::vector<LatticeSite> &, const Structure &);
 
 }

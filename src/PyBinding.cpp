@@ -111,19 +111,10 @@ PYBIND11_MODULE(_icet, m)
              also holds information pertaining to the components that are
              allowed on each site and provides functionality for computing
              distances between sites.
-         )pbdoc")
-        .def(py::init<>())
-        .def(py::init<const Eigen::Matrix<double, Dynamic, 3, Eigen::RowMajor> &,
-                      const std::vector<std::string> &,
-                      const Eigen::Matrix3d &,
-                      const std::vector<bool> &,
-                      double>(),
-             R"pbdoc(
-             Initializes an icet Structure instance.
 
              Parameters
              ----------
-             positions : list of vector
+             positions : list of vectors
                  list of positions in Cartesian coordinates
              chemical_symbols : list of strings
                  chemical symbol of each case
@@ -134,6 +125,15 @@ PYBIND11_MODULE(_icet, m)
              tolerance : float
                  numerical tolerance imposed when testing for equality of
                  positions and distances
+         )pbdoc")
+        .def(py::init<>())
+        .def(py::init<const Eigen::Matrix<double, Dynamic, 3, Eigen::RowMajor> &,
+                      const std::vector<std::string> &,
+                      const Eigen::Matrix3d &,
+                      const std::vector<bool> &,
+                      double>(),
+             R"pbdoc(
+             Initializes an icet Structure instance.
          )pbdoc",
              py::arg("positions"),
              py::arg("chemical_symbols"),
@@ -173,7 +173,7 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             positions : list of NumPy arrays\
+             positions : list of NumPy arrays
                  new positions in Cartesian coordinates
          )pbdoc")
         .def_property("positions",
@@ -447,9 +447,9 @@ PYBIND11_MODULE(_icet, m)
         .def_property_readonly("tag",
                                &Cluster::tag,
                                "int : cluster tag (defined for sorted cluster)")
-        .def_property_readonly("geometrical_size",
-                               &Cluster::geometricalSize,
-                               "float : the geometrical size of the cluster")
+        .def_property_readonly("radius",
+                               &Cluster::radius,
+                               "float : the radius of the cluster")
         .def_property_readonly("order",
                                &Cluster::order,
                                "int : order of the cluster (= number of sites)")
@@ -464,7 +464,7 @@ PYBIND11_MODULE(_icet, m)
                       const std::vector<Matrix3d> &>())
         .def("build", &PermutationMap::build)
         .def("get_permuted_positions", &PermutationMap::getPermutedPositions)
-        .def("get_indiced_positions", &PermutationMap::getIndicedPermutedPositions)
+        .def("get_indexed_positions", &PermutationMap::getIndexedPermutedPositions)
 
         ;
 
@@ -572,8 +572,8 @@ PYBIND11_MODULE(_icet, m)
         or the number of lattice sites per element
         in equivalent_sites.
         )pbdoc")
-        .def_property_readonly("geometrical_size", [](const Orbit &orbit) { return orbit.getRepresentativeCluster().geometricalSize(); },
-        R"pbdoc(        Returns the geometrical size of the
+        .def_property_readonly("radius", [](const Orbit &orbit) { return orbit.getRepresentativeCluster().radius(); },
+        R"pbdoc(        Returns the radius of the
         representative cluster.
         )pbdoc")
         .def_property_readonly("permuted_sites", &Orbit::getPermutedEquivalentSites,
@@ -674,16 +674,55 @@ PYBIND11_MODULE(_icet, m)
 
     py::class_<OrbitList>(m, "OrbitList")
         .def(py::init<>())
-        .def(py::init<const std::vector<NeighborList> &, const Structure &>())
-        .def(py::init<const Structure &, const std::vector<std::vector<LatticeSite>> &, const std::vector<NeighborList> &>())
-        .def("add_orbit", &OrbitList::addOrbit)
-        .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters)
-        .def("get_orbit", &OrbitList::getOrbit)
-        .def("clear", &OrbitList::clear)
-        .def("sort", &OrbitList::sort)
-        .def("get_orbit_list", &OrbitList::getOrbitList)
-        .def("get_primitive_structure", &OrbitList::getPrimitiveStructure)
-        .def("__len__", &OrbitList::size)
+        .def(py::init<const std::vector<NeighborList> &, const Structure &>(),
+             R"pbdoc(
+             Initializes an OrbitList instance from a list of NeighborList and an icet Structure instance.
+
+             Parameters
+             ----------
+             neighborg_lists : list of NeighborList objects
+                list of neighbor list for the atomic configuration under different cutoffs.
+             structure : icet Structure object
+                primitive atomic structure
+        )pbdoc",
+             py::arg("neigbor_lists"),
+             py::arg("structure"))
+        .def(py::init<const Structure &, const std::vector<std::vector<LatticeSite>> &, const std::vector<NeighborList> &>(),
+             R"pbdoc(
+                Construct an OrbitList object from a permutation matrix with LatticeSite type entries and
+                a Structure instance.
+
+             Parameters
+             ----------
+             permutation_matrix : vector of vector of LatticeSite objects
+                 permutation matrix with lattice sites
+             structure : icet Structure object
+                 primitive atomic structure
+        )pbdoc",
+             py::arg("structure"),
+             py::arg("permutation_matrix"),
+             py::arg("neighbor_lists"))
+        .def("add_orbit", &OrbitList::addOrbit,
+             "Add an Orbit object to the OrbitList")
+        .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters,
+             "Returns the number of orbits in the OrbitList")
+        .def("get_orbit", &OrbitList::getOrbit,
+             "Returns a copy of the orbit at the position i in the OrbitList")
+        .def("clear", &OrbitList::clear,
+             "Clears the OrbitList")
+        .def("sort", &OrbitList::sort,
+             "Sort the orbits by orbit comparison")
+        .def("find_orbit", (int(OrbitList::*)(const Cluster &) const) &OrbitList::findOrbit,
+             "Return the index of the orbit with the given representative cluster")
+        //.def("find_orbit", (int (OrbitList::*)(const Cluster &, const std::unordered_map<Cluster, int> &) const) & OrbitList::findOrbit)
+        .def("is_row_taken", &OrbitList::isRowsTaken,
+             "Some random description")
+        .def("get_orbit_list", &OrbitList::getOrbitList,
+             "Returns a list of Orbit objects from OrbitList")
+        .def("get_primitive_structure", &OrbitList::getPrimitiveStructure,
+             "Returns the primitive atomic structure used to construct the OrbitList instance")
+        .def("__len__", &OrbitList::size,
+             "Returns the total number of orbits counted in the OrbitList instance")
         .def("print", &OrbitList::print, py::arg("verbosity") = 0)
         // .def("get_supercell_orbit_list", &OrbitList::getSupercellOrbitList)
         ;
@@ -699,7 +738,7 @@ PYBIND11_MODULE(_icet, m)
         .def("get_unique_primcell_offsets", &LocalOrbitListGenerator::getUniquePrimitiveCellOffsets);
 
     /// @todo Check which of the following members must actually be exposed.
-    /// @todo Turn getters into properties as possible. (Some might require massaging in cluster_space.py.)
+    /// @todo Turn getters into properties if possible. (Some might require massaging in cluster_space.py.)
     py::class_<ClusterSpace>(m, "ClusterSpace", py::dynamic_attr())
         .def(py::init<std::vector<int>, std::vector<std::string>, const OrbitList &>())
         .def("get_cluster_vector", [](const ClusterSpace &ClusterSpace, const Structure &structure) {
@@ -716,8 +755,7 @@ PYBIND11_MODULE(_icet, m)
              "Returns list of species associated with cluster space as chemical symbols.")
         .def("get_cutoffs", &ClusterSpace::getCutoffs)
         .def("_get_primitive_structure", &ClusterSpace::getPrimitiveStructure)
-        .def("get_native_clusters", &ClusterSpace::getNativeClusters)
-        .def("get_mc_vector_permutations",&ClusterSpace::getMultiComponentVectorPermutations)
-        .def("get_allowed_occupations",&ClusterSpace::getNumberOfAllowedSpeciesForEachSite)
+        .def("get_multi_component_vector_permutations",&ClusterSpace::getMultiComponentVectorPermutations)
+        .def("get_number_of_allowed_occupations_for_each_site",&ClusterSpace::getNumberOfAllowedSpeciesForEachSite)
         .def("__len__", &ClusterSpace::getClusterSpaceSize);
 }

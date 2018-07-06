@@ -3,47 +3,34 @@
 
 .. module:: mchammer.ensembles
 
+.. _ensembles:
+
 Ensembles
 =========
 
 
 .. index::
-   single: Function reference; Canonical
-   single: Class reference; Canonical
+   single: Class reference; CanonicalEnsemble
    single: Monte Carlo; Canonical ensemble
 
 CanonicalEnsemble
 -----------------
 
-.. autoclass:: Canonical
+.. autoclass:: CanonicalEnsemble
    :members:
    :undoc-members:
    :inherited-members:
 
+.. _sgc:
 
 .. index::
-   single: Function reference; SGC
-   single: Class reference; SGC
+   single: Class reference; SGCEnsemble
    single: Monte Carlo; Semi-grand canonical ensemble
 
-SGC
----
+SemiGrandCanonicalEnsemble
+--------------------------
 
-.. autoclass:: SGC
-   :members:
-   :undoc-members:
-   :inherited-members:
-
-
-.. index::
-   single: Function reference; VCSGC
-   single: Class reference; VCSGC
-   single: Monte Carlo; Variance constrained semi-grand canonical ensemble
-
-VCSGC
------
-
-.. autoclass:: VCSGC
+.. autoclass:: SemiGrandCanonicalEnsemble
    :members:
    :undoc-members:
    :inherited-members:

@@ -61,8 +61,6 @@ class TestLatticeSite(unittest.TestCase):
         """
         Test printing a LatticeSite.
         """
-        print(self.lattice_sites[0])
-
         self.assertEqual(self.lattice_sites[0].__str__(
         ), self.lattice_sites_cpp[0].__str__())
         self.assertEqual(self.lattice_sites[-1].__str__(

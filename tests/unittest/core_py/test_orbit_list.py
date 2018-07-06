@@ -14,9 +14,9 @@ from ase.build import fcc111
 
 
 class TestOrbitList(unittest.TestCase):
-    '''
+    """
     Container for tests of the class functionality
-    '''
+    """
 
     def __init__(self, *args, **kwargs):
         super(TestOrbitList, self).__init__(*args, **kwargs)
@@ -24,9 +24,9 @@ class TestOrbitList(unittest.TestCase):
         self.atoms = bulk('Ag', a=4.09)
 
     def setUp(self):
-        '''
+        """
         Instantiate class before each test.
-        '''
+        """
         self.orbit_list = OrbitList(self.atoms, self.cutoffs)
         # self._structure = Structure.from_atoms(self.atoms)
 
@@ -34,10 +34,10 @@ class TestOrbitList(unittest.TestCase):
             self.atoms, self.cutoffs, ["Al", "H"])
 
     def test_init(self):
-        '''
+        """
         Just testing that the setup
         (initialization) of tested class work
-        '''
+        """
         # initialize from ASE Atoms
         orbit_list = OrbitList(self.atoms, self.cutoffs)
         self.assertIsInstance(orbit_list, OrbitList)
@@ -51,7 +51,7 @@ class TestOrbitList(unittest.TestCase):
 
     def test_sort(self):
         '''
-        Testing len functionality
+        Testing sort functionality
         '''
         self.orbit_list.sort()
         for i in range(len(self.orbit_list) - 1):
@@ -59,9 +59,7 @@ class TestOrbitList(unittest.TestCase):
                 self.orbit_list.orbits[i], self.orbit_list.orbits[i + 1])
 
     def test_property_primitive_structure(self):
-        '''
-        Testing get_orbit_list_info functionality
-        '''
+        """ Tests the primitive_structure property. """
         self.orbit_list.primitive_structure
         self.assertEqual(
             self.orbit_list.primitive_structure,
@@ -194,9 +192,7 @@ class TestOrbitList(unittest.TestCase):
                     self.assertNotEqual(sorted(site_i), sorted(site_j))
 
     def test_property_permutation_matrix(self):
-        '''
-        Test the permutation matrix property.
-        '''
+        """ Tests the permutation_matrix property. """
         self.assertIsInstance(
             self.orbit_list.permutation_matrix, PermutationMatrix)
         self.assertEqual(
@@ -212,7 +208,7 @@ class TestOrbitList(unittest.TestCase):
 
     def test_singlets_particle(self):
         """
-        Test that a particle get correct number of singlets.
+        Test that a particle gets correct number of singlets.
         """
         # Below is an explanation on how the particle looks like
         # and what its unique sites are:

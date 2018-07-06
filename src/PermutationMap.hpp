@@ -39,7 +39,7 @@ class PermutationMap
      Returns indices for unique positions as well as the representative positions,
      same indices share the same position
     */
-    std::pair<std::vector<std::vector<int>>, std::vector<Vector3d>> getIndicedPermutedPositions()
+    std::pair<std::vector<std::vector<int>>, std::vector<Vector3d>> getIndexedPermutedPositions()
     {
         std::vector<Vector3d> uniquePositions;
         std::vector<std::vector<int>> indicePositions(_permutedPositions.size(), std::vector<int>(_permutedPositions[0].size()));

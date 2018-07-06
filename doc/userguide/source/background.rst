@@ -44,7 +44,7 @@ functions  themselves are obtained as a product over basis functions
 :math:`\Theta` as described in the :ref:`section detailing the  construction of
 cluster functions <cluster-functions>`.
 
-.. todo:
+.. todo::
 
    insert section on cluster functions
 

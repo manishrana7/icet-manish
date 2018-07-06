@@ -17,7 +17,7 @@ permutation_map, prim_structure, neighbor_list = \
 
 # Extract the permuted, indexed and unique positions.
 perm_pos = permutation_map.get_permuted_positions()
-ind_pos, unique_pos = permutation_map.get_indiced_positions()
+ind_pos, unique_pos = permutation_map.get_indexed_positions()
 
 # Print the permuted, indexed and unique positions.
 print('Permutated fractional coordinates')

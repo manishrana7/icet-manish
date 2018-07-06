@@ -1,5 +1,4 @@
 import spglib
-
 from _icet import PermutationMap
 from .neighbor_list import NeighborList
 from .structure import Structure
@@ -42,15 +41,15 @@ def permutation_matrix_from_atoms(atoms, cutoff,
         atoms_prim = get_primitive_structure(atoms)
 
     if verbosity >= 3:
-        print('size of atoms_prim {}'.format(len(atoms_prim)))
-    # Get symmetry information and load into a permutation map object
+        print('size of primitive structure: {}'.format(len(atoms_prim)))
+    # get symmetry information and load into a permutation map object
     symmetry = spglib.get_symmetry(atoms_prim)
     translations = symmetry['translations']
     rotations = symmetry['rotations']
 
     permutation_matrix = PermutationMap(translations, rotations)
 
-    # Create neighbor_lists from the different cutoffs
+    # create neighbor_lists from the different cutoffs
     prim_structure = Structure.from_atoms(atoms_prim)
     neighbor_list = NeighborList(cutoff)
     neighbor_list.build(prim_structure)

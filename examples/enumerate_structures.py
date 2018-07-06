@@ -1,8 +1,8 @@
-'''
+"""
 This example demonstrates how to enumerate structures, i.e. how to
 generate all inequivalent structures derived from a primitive
 structure up to a certain size.
-'''
+"""
 
 # Import modules
 from ase import Atom
@@ -15,6 +15,12 @@ from icet.tools import enumerate_structures
 atoms = bulk('Au')
 db = connect('AuPd-fcc.db')
 for structure in enumerate_structures(atoms, range(1, 7), ['Pd', 'Au']):
+    db.write(structure)
+
+# Generate fcc structures in the dilute limit
+conc_rest = {'Au': (0, 0.1)}
+for structure in enumerate_structures(atoms, range(10, 14), ['Pd', 'Au'],
+                                      concentration_restrictions=conc_rest):
     db.write(structure)
 
 # Enumerate all palladium hydride structures with up to 4 primitive
