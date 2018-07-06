@@ -35,7 +35,7 @@ Cluster::Cluster(const Structure &structure,
     _sites = sites;
     _distances = distances;
     _tag = tag;
-    _radius = icet::getClusterRadius(latticeSites, structure);
+    _radius = icet::getGeometricalRadius(latticeSites, structure);
     _sorted = sorted;
     if (_sorted) sort();
 }
