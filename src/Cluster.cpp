@@ -154,7 +154,7 @@ void Cluster::sort()
 
 
 /// Brute force attempt to find minimum clusters
-std::tuple<std::vector<int>, std::vector<double>, std::vector<int>> Cluster::getNumberOfAllowedSpeciesForEachSitenimumStateBruteForce()
+std::tuple<std::vector<int>, std::vector<double>, std::vector<int>> Cluster::findMinimumClusterByBruteForce()
 {
 
     std::vector<int> atomic_order(_sites.size());
@@ -190,7 +190,7 @@ combinations of sites and sees if there is a lower state of the cluster.
 void Cluster::validateSorting()
 {
 
-    auto minBruteForce = getNumberOfAllowedSpeciesForEachSitenimumStateBruteForce();
+    auto minBruteForce = findMinimumClusterByBruteForce();
     auto bruteforce_order = std::get<0>(minBruteForce);
     auto bruteForceDists = std::get<1>(minBruteForce);
     auto bruteForceSites = std::get<2>(minBruteForce);

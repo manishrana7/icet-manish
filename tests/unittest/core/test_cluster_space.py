@@ -349,7 +349,6 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 
     def test_read_write(self):
         """ Tests read/write functionality. """
-        import tempfile
         f = tempfile.NamedTemporaryFile()
         self.cs.write(f.name)
         f.seek(0)
@@ -477,9 +476,10 @@ class TestClusterSpaceTernary(unittest.TestCase):
             The orbit which the mc vectors should be returned from.
         """
         orbit = cluster_space.get_orbit(orbit_index)
-        local_Mi = cluster_space.get_number_of_allowed_occupations_for_each_site(
-            cluster_space._get_primitive_structure(),
-            orbit.representative_sites)
+        local_Mi = \
+            cluster_space.get_number_of_allowed_species_by_site(
+                cluster_space._get_primitive_structure(),
+                orbit.representative_sites)
 
         mc_vectors = orbit.get_mc_vectors(local_Mi)
         return mc_vectors

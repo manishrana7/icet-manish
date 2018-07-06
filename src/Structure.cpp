@@ -297,14 +297,14 @@ void Structure::setNumberOfAllowedSpecies(const int numberOfAllowedSpecies)
   @param i index of the site
   @returns the number of the allowed components
 **/
-int Structure::getNumberOfAllowedSpeciesForEachSite(const unsigned int i) const
+int Structure::getNumberOfAllowedSpeciesBySite(const unsigned int i) const
 {
     if (i >= _numbersOfAllowedSpecies.size())
     {
         std::string errorMessage = "Site index out of bounds";
         errorMessage += " i: " + std::to_string(i);
         errorMessage += " nsites: " + std::to_string(_numbersOfAllowedSpecies.size());
-        errorMessage += " (Structure::getNumberOfAllowedSpeciesForEachSite)";
+        errorMessage += " (Structure::getNumberOfAllowedSpeciesBySite)";
         throw std::out_of_range(errorMessage);
     }
     return _numbersOfAllowedSpecies[i];

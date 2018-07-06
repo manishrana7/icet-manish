@@ -84,7 +84,7 @@ class Cluster
 // CONTINUE CLEAN UP HERE
 
     /// Brute force attempt to find minimum clusters
-    std::tuple<std::vector<int>, std::vector<double>, std::vector<int>> getNumberOfAllowedSpeciesForEachSitenimumStateBruteForce();
+    std::tuple<std::vector<int>, std::vector<double>, std::vector<int>> findMinimumClusterByBruteForce();
 
     /// Find all equal nearestNeighborDistances that are identical to the minimum one.
     std::vector<LocalEnvironment> getEqualMinimumFirstSites(const std::vector<LocalEnvironment> &i_neighbors) const;

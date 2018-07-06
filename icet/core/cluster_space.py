@@ -225,7 +225,7 @@ class ClusterSpace(_ClusterSpace):
             orbit_index = cluster_space_info[0]
             mc_vector = cluster_space_info[1]
             orbit = self.get_orbit(orbit_index)
-            local_Mi = self.get_number_of_allowed_occupations_for_each_site(
+            local_Mi = self.get_number_of_allowed_species_by_site(
                 self._get_primitive_structure(), orbit.representative_sites)
             mc_vectors = orbit.get_mc_vectors(local_Mi)
             mc_permutations = self.get_multi_component_vector_permutations(

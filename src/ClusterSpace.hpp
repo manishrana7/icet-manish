@@ -37,7 +37,7 @@ class ClusterSpace
     /// @todo What is a native cluster? Partial answer: clusters within the unit cell?
     ClusterCounts getNativeClusters(const Structure &structure) const;
 
-    /// Returns the multi-component (MC) vector permutations for each MC vector in the set of MC vectors.
+    /// Returns the multi-component (MC) vector permutations for each MC vector in the set of input vectors.
     /// @todo Clean up this description.
     std::vector<std::vector<std::vector<int>>> getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &, const int ) const;
 
@@ -51,7 +51,7 @@ class ClusterSpace
     Structure getPrimitiveStructure() const { return _primitiveStructure; }
 
     /// Returns the number of allowed components for each site.
-    std::vector<int> getNumberOfAllowedSpeciesForEachSite(const Structure &, const std::vector<LatticeSite> &) const;
+    std::vector<int> getNumberOfAllowedSpeciesBySite(const Structure &, const std::vector<LatticeSite> &) const;
 
     /// Returns a list of elements associated with cluster space as chemical symbols.
     std::vector<std::string> getChemicalSymbols() const
@@ -84,7 +84,7 @@ class ClusterSpace
     void collectClusterSpaceInfo();
 
     /// Returns the default cluster function.
-    double defaultClusterFunction(const int numberOfAllowedSpecies, const int clusterFunction, const int element) const;
+    double evaluateClusterFunction(const int numberOfAllowedSpecies, const int clusterFunction, const int element) const;
 
 
   private:
