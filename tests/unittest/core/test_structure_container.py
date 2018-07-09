@@ -315,9 +315,19 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
         Test the read write functionality.
         """
         temp_file = tempfile.NamedTemporaryFile()
+
+        # check before with a non-tar file
+        with self.assertRaises(TypeError) as context:
+            self.sc.read(temp_file)
+        self.assertTrue('{} is not a tar file'.format(str(temp_file.name))
+                        in str(context.exception))
+        # save to file
         self.sc.write(temp_file.name)
+
+        # read from file object
         sc_read = self.sc.read(temp_file.name)
 
+        # check data
         self.assertEqual(len(self.sc), len(sc_read))
         self.assertEqual(self.sc.__str__(), sc_read.__str__())
 
@@ -327,6 +337,7 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
             self.assertEqual(fs.atoms, fs_read.atoms)
             self.assertEqual(fs.user_tag, fs_read.user_tag)
             self.assertEqual(fs.properties, fs_read.properties)
+        temp_file.close()
 
 
 class TestFitStructure(unittest.TestCase):

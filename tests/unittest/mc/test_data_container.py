@@ -347,7 +347,7 @@ class TestDataContainer(unittest.TestCase):
         temp_file = tempfile.NamedTemporaryFile()
 
         # check before with a non-tar file
-        with self.assertRaises(ValueError) as context:
+        with self.assertRaises(TypeError) as context:
             self.dc.read(temp_file.name)
         self.assertTrue('{} is not a tar file'.format(str(temp_file.name))
                         in str(context.exception))
@@ -367,11 +367,6 @@ class TestDataContainer(unittest.TestCase):
         # check data
         pd.testing.assert_frame_equal(
             self.dc.data, dc_read.data, check_dtype=False)
-
-        # check exception raises when file does not exist
-        with self.assertRaises(FileNotFoundError):
-            dc_read = self.dc.read('not_found')
-        temp_file.close()
 
 
 if __name__ == '__main__':

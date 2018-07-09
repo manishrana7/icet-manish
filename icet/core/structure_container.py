@@ -1,6 +1,5 @@
 import tarfile
 import tempfile
-import os
 
 import numpy as np
 import ase.db
@@ -393,8 +392,7 @@ class StructureContainer:
 
         with tarfile.open(outfile, mode='w') as handle:
             handle.add(temp_db_file.name, arcname='database')
-            handle.add(temp_cs_file.name,
-                       arcname='cluster_space')
+            handle.add(temp_cs_file.name, arcname='cluster_space')
 
     @staticmethod
     def read(infile: Union[str, BinaryIO, TextIO]):
@@ -406,17 +404,14 @@ class StructureContainer:
         infile
             file from which to read
 
-        Raises
-        ------
-        FileNotFoundError
-            if file is not found (str)
         """
         if isinstance(infile, str):
             filename = infile
-            if not os.path.isfile(filename):
-                raise FileNotFoundError
         else:
             filename = infile.name
+
+        if not tarfile.is_tarfile(filename):
+            raise TypeError('{} is not a tar file'.format(filename))
 
         temp_db_file = tempfile.NamedTemporaryFile()
         with tarfile.open(mode='r', name=filename) as tar_file:
@@ -436,6 +431,7 @@ class StructureContainer:
                                              properties=data['properties'])
                 fit_structures.append(fit_structure)
             structure_container._structure_list = fit_structures
+
         return structure_container
 
 
