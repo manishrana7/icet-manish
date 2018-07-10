@@ -30,9 +30,7 @@ class StructureContainer:
     def __init__(self, cluster_space,
                  list_of_atoms=None,
                  list_of_properties=None):
-        """
-        Initializes a StructureContainer object
-        """
+
         self._cluster_space = cluster_space
         self._structure_list = []
 
