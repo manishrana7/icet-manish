@@ -61,7 +61,7 @@ class StructureContainer:
     def __len__(self) -> int:
         return len(self._structure_list)
 
-    def __getitem__(self, ind: int) -> Atoms:
+    def __getitem__(self, ind: int):
         return self._structure_list[ind]
 
     def get_structure_indices(self, user_tag: str=None) -> List[int]:
@@ -362,7 +362,7 @@ class StructureContainer:
         return self._structure_list
 
     @property
-    def available_properties(self):
+    def available_properties(self) -> List[str]:
         """List of the available properties."""
         return sorted(set([p for fs in self for p in fs.properties.keys()]))
 
@@ -474,11 +474,11 @@ class FitStructure:
         return str(self._user_tag)
 
     @property
-    def properties(self) -> Dict[str, float]:
+    def properties(self) -> Dict[str, Union[float, int]]:
         """scalar properties of structure"""
         return self._properties
 
-    def __getattr__(self, key) -> float:
+    def __getattr__(self, key) -> Union[float, int]:
         """Accesses properties if possible and returns value"""
         if key not in self.properties.keys():
             return super().__getattribute__(key)
