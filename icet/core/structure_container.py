@@ -20,8 +20,9 @@ class StructureContainer:
     cluster_space : :class:`ClusterSpace`
         cluster space used for evaluating the cluster vectors
 
-    list_of_atoms : list / list of tuples (bi-optional)
-        list of atoms or list of tuples (atoms, tag)
+    list_of_atoms : list, tuple or list of tuples
+        list of atoms. If list contains tuples, second element of the tuple
+        will be used as a tag of the structure
 
     list_of_properties : list of dicts
         list of properties, which are provided in dicts
@@ -36,8 +37,8 @@ class StructureContainer:
 
         # Add atomic structures
         if list_of_atoms is not None:
-            if not isinstance(list_of_atoms, list):
-                raise TypeError('atoms must be given as a list')
+            if not isinstance(list_of_atoms, (list, tuple)):
+                raise TypeError('atoms must be given as a list or a tuple')
 
             if list_of_properties is not None:
                 if not len(list_of_properties) == len(list_of_atoms):
