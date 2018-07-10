@@ -390,7 +390,8 @@ class DataContainer:
             return atoms_list
 
     def write_trajectory(self, outfile: Union[str, BinaryIO, TextIO]):
-        """Save trajectory to a file along with the respectives values of the
+        """
+        Save trajectory to a file along with the respectives values of the
         potential field for each configuration. If the file exists the
         trajectory will be appended. Use ase gui to visualize the trajectory
         with values of the potential for each frame.
@@ -423,17 +424,13 @@ class DataContainer:
         ValueError
             if file is of incorrect type (not a tarball)
         """
-        import os
-
         if isinstance(infile, str):
             filename = infile
-            if not os.path.isfile(filename):
-                raise FileNotFoundError
         else:
             filename = infile.name
 
         if not tarfile.is_tarfile(filename):
-            raise ValueError('{} is not a tar file'.format(filename))
+            raise TypeError('{} is not a tar file'.format(filename))
 
         reference_atoms_file = tempfile.NamedTemporaryFile()
         reference_data_file = tempfile.NamedTemporaryFile()
