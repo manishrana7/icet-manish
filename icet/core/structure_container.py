@@ -17,7 +17,7 @@ class StructureContainer:
 
     Attributes:
     -----------
-    cluster_space : :class:`ClusterSpace`
+    cluster_space : ClusterSpace
         cluster space used for evaluating the cluster vectors
 
     list_of_atoms : list, tuple or list of tuples
@@ -441,7 +441,7 @@ class FitStructure:
 
     Attributes
     ----------
-    atoms : :class:`ase:Atoms`
+    atoms : ASE Atoms
         supercell structure
     user_tag : str
         custom user tag
@@ -478,7 +478,7 @@ class FitStructure:
         """scalar properties of structure"""
         return self._properties
 
-    def __getattr__(self, key) -> Union[float, int]:
+    def __getattr__(self, key):
         """Accesses properties if possible and returns value"""
         if key not in self.properties.keys():
             return super().__getattribute__(key)
