@@ -2,11 +2,32 @@
 This test checks that a cluster expansion model can be initialized
 with any structure in the test database and can predict a property.
 """
+import sys
+import unittest
+import tempfile
 
 from ase.db import connect
 from icet import ClusterSpace, ClusterExpansion
-import unittest
 from ase.build import bulk
+from io import StringIO
+
+
+def strip_surrounding_spaces(input_string):
+    """
+    Helper function that removes both leading and trailing spaces from a
+    multi-line string.
+
+    Returns
+    -------
+    str
+        original string minus surrounding spaces and empty lines
+    """
+    s = []
+    for line in StringIO(input_string):
+        if len(line.strip()) == 0:
+            continue
+        s += [line.strip()]
+    return '\n'.join(s)
 
 
 class TestClusterExpansion(unittest.TestCase):
@@ -44,7 +65,7 @@ class TestClusterExpansion(unittest.TestCase):
 
     def _test_clusterexpansion_model(self, atoms, cutoffs, subelements):
         """
-        Test clusterexpansion init and prediction
+        Test cluster expansion init and prediction
 
         Parameters
         ----------
@@ -71,7 +92,6 @@ class TestClusterExpansion(unittest.TestCase):
         params = list(range(len(cluster_space)))
         ce = ClusterExpansion(cluster_space, params)
 
-        import tempfile
         f = tempfile.NamedTemporaryFile()
         ce.write(f.name)
         f.seek(0)
@@ -90,6 +110,83 @@ class TestClusterExpansion(unittest.TestCase):
 
         # Test equal parameters
         self.assertEqual(ce_read.parameters, params)
+
+    def test_repr(self):
+        """
+        Testing repr functionality
+        """
+        atoms = bulk("Al")
+        cutoffs = [3.0] * 3
+        subelements = ['Al', 'Pd']
+        cluster_space = ClusterSpace(atoms, cutoffs, subelements)
+        params = list(range(len(cluster_space)))
+        ce = ClusterExpansion(cluster_space, params)
+
+        retval = ce.__repr__()
+        target = """
+================================= Cluster Expansion =================================
+ chemical species: Al Pd
+ cutoffs: 3.0000 3.0000 3.0000
+ total number of orbits: 5
+ number of orbits by order: 0= 1  1= 1  2= 1  3= 1  4= 1
+-------------------------------------------------------------------------------------
+index | order |  radius  | multiplicity | orbit_index | multi_component_vector | ECI 
+-------------------------------------------------------------------------------------
+   0  |   0   |   0.0000 |        1     |      -1     |           .            |  0  
+   1  |   1   |   0.0000 |        1     |       0     |          [0]           |  1  
+   2  |   2   |   1.4319 |        6     |       1     |         [0, 0]         |  2  
+   3  |   3   |   1.6534 |        8     |       2     |       [0, 0, 0]        |  3  
+   4  |   4   |   1.7537 |        2     |       3     |      [0, 0, 0, 0]      |  4  
+=====================================================================================
+""" # noqa
+        self.assertEqual(strip_surrounding_spaces(target),
+                         strip_surrounding_spaces(retval))
+
+    def test_get_string_representation(self):
+        """
+        Testing _get_string_representation functionality.
+        """
+        atoms = bulk("Al")
+        cutoffs = [3.0] * 3
+        subelements = ['Al', 'Pd']
+        cluster_space = ClusterSpace(atoms, cutoffs, subelements)
+        params = list(range(len(cluster_space)))
+        ce = ClusterExpansion(cluster_space, params)
+
+        retval = ce._get_string_representation(print_threshold=2,
+                                               print_minimum=1)
+        target = """
+================================= Cluster Expansion =================================
+ chemical species: Al Pd
+ cutoffs: 3.0000 3.0000 3.0000
+ total number of orbits: 5
+ number of orbits by order: 0= 1  1= 1  2= 1  3= 1  4= 1
+-------------------------------------------------------------------------------------
+index | order |  radius  | multiplicity | orbit_index | multi_component_vector | ECI 
+-------------------------------------------------------------------------------------
+   0  |   0   |   0.0000 |        1     |      -1     |           .            |  0  
+ ...
+   4  |   4   |   1.7537 |        2     |       3     |      [0, 0, 0, 0]      |  4  
+=====================================================================================
+""" # noqa
+        self.assertEqual(strip_surrounding_spaces(target),
+                         strip_surrounding_spaces(retval))
+
+    def test_print_overview(self):
+        """
+        Testing print_overview functionality
+        """
+        atoms = bulk("Al")
+        cutoffs = [3.0] * 3
+        subelements = ['Al', 'Pd']
+        cluster_space = ClusterSpace(atoms, cutoffs, subelements)
+        params = list(range(len(cluster_space)))
+        ce = ClusterExpansion(cluster_space, params)
+        with StringIO() as capturedOutput:
+            sys.stdout = capturedOutput  # redirect stdout
+            ce.print_overview()
+            sys.stdout = sys.__stdout__  # reset redirect
+            self.assertTrue('Cluster Expansion' in capturedOutput.getvalue())
 
 
 if __name__ == '__main__':

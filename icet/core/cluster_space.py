@@ -179,7 +179,7 @@ class ClusterSpace(_ClusterSpace):
                     index <= len(self) - print_minimum):
                 index = len(self) - print_minimum
                 s += [' ...']
-            s += [repr_orbit(orbit_list_info[index]).rstrip()]
+            s += [repr_orbit(orbit_list_info[index])]
             index += 1
         s += [''.center(width, '=')]
 
@@ -216,7 +216,8 @@ class ClusterSpace(_ClusterSpace):
                                ('order', 0),
                                ('radius', 0),
                                ('multiplicity', 1),
-                               ('orbit_index', -1)])
+                               ('orbit_index', -1),
+                               ('multi_component_vector', '.')])
 
         data.append(zerolet)
         index = 1
