@@ -1,11 +1,15 @@
 import numpy as np
 import pickle
 import re
+
 from icet import ClusterSpace
+from icet.core.structure import Structure
+from typing import List, Union, BinaryIO
+from ase import Atoms
 
 
-class ClusterExpansion(object):
-    '''
+class ClusterExpansion:
+    """
     Cluster expansion model
 
     Attributes
@@ -14,19 +18,24 @@ class ClusterExpansion(object):
         cluster space that was used for constructing the cluster expansion
     parameters : list of floats
         effective cluster interactions (ECIs)
-    '''
+    """
 
-    def __init__(self, cluster_space, parameters):
-        '''
-        Initialize a ClusterExpansion object.
+    def __init__(self, cluster_space: ClusterSpace, parameters: List[float]):
+        """
+        Initializes a ClusterExpansion object.
 
         Parameters
         ----------
-        cluster_space : ClusterSpace object
-            the cluster space to be used for constructing the cluster expansion
-        parameters : list of floats
+        cluster_space
+            cluster space to be used for constructing the cluster expansion
+        parameters
             effective cluster interactions (ECIs)
-        '''
+
+        Raises
+        ------
+        ValueError
+            if cluster space and parameters has both different length
+        """
         if len(cluster_space) != len(parameters):
             raise ValueError('cluster_space and parameters must have the same'
                              ' length ({} != {})'.format(len(cluster_space),
@@ -34,82 +43,40 @@ class ClusterExpansion(object):
         self._cluster_space = cluster_space
         self._parameters = parameters
 
-    def predict(self, structure):
-        '''
-        Predict the property of interest (e.g., the energy) for the input
+    def predict(self, structure: Union[Atoms, Structure]) -> float:
+        """
+        Predicts the property of interest (e.g., the energy) for the input
         structure using the cluster expansion.
 
         Parameters
         ----------
-        structure : ASE Atoms object / icet Structure (bi-optional)
+        structure
             atomic configuration
 
         Returns
         -------
         float
-            property value predicted by the cluster expansion
-        '''
+            value of the predicted property by the cluster expansion
+        """
         cluster_vector = self.cluster_space.get_cluster_vector(structure)
         prop = np.dot(cluster_vector, self.parameters)
         return prop
 
     @property
-    def cluster_space(self):
-        '''ClusterSpace object : cluster space the cluster expansion is
-        based on'''
+    def cluster_space(self) -> ClusterSpace:
+        """ cluster space on which the cluster expansion is based upon """
         return self._cluster_space
 
     @property
-    def parameters(self):
-        '''list of floats : effective cluster interactions (ECIs)'''
+    def parameters(self) -> List[float]:
+        """ effective cluster interactions (ECIs) """
         return self._parameters
-
-    def write(self, filename):
-        """
-        Write Cluster expansion to file.
-
-        Parameters
-        ---------
-        filename : str with filename to saved
-        cluster space.
-        """
-
-        self.cluster_space.write(filename)
-
-        with open(filename, 'rb') as handle:
-            data = pickle.load(handle)
-
-        data['parameters'] = self.parameters
-
-        with open(filename, "wb") as handle:
-            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    @staticmethod
-    def read(filename):
-        """
-        Read cluster expansion from file.
-
-        Parameters
-        ---------
-        filename : str with filename to saved
-        cluster space.
-        """
-        cs = ClusterSpace.read(filename)
-        if isinstance(filename, str):
-            with open(filename, 'rb') as handle:
-                data = pickle.load(handle)
-        else:
-            with open(filename) as handle:
-                data = pickle.load(handle)
-        parameters = data['parameters']
-
-        return ClusterExpansion(cs, parameters)
 
     def __len__(self) -> int:
         return len(self._parameters)
 
-    def _get_string_representation(self, print_threshold=None,
-                                   print_minimum=10):
+    def _get_string_representation(self, print_threshold: int=None,
+                                   print_minimum: int=10):
         """
         String representation of the cluster expansion.
         """
@@ -151,21 +118,45 @@ class ClusterExpansion(object):
         return '\n'.join(s)
 
     def __repr__(self) -> str:
-        """String representation."""
+        """ String representation """
         return self._get_string_representation(print_threshold=50)
 
-    def print_overview(self, print_threshold=None, print_minimum=10):
+    def write(self, filename: str):
         """
-        Print an overview of the cluster space in terms of the orbits (order,
-        radius, multiplicity etc).
+        Writes ClusterExpansion object to file.
 
         Parameters
-        ----------
-        print_threshold : int
-            if the number of orbits exceeds this number print dots
-        print_minimum : int
-            number of lines printed from the top and the bottom of the orbit
-            list if `print_threshold` is exceeded
+        ---------
+        filename
+            filename to which to write.
         """
-        print(self._get_string_representation(print_threshold=print_threshold,
-                                              print_minimum=print_minimum))
+        self.cluster_space.write(filename)
+
+        with open(filename, 'rb') as handle:
+            data = pickle.load(handle)
+
+        data['parameters'] = self.parameters
+
+        with open(filename, "wb") as handle:
+            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    @staticmethod
+    def read(filename: Union[str, BinaryIO]):
+        """
+        Reads ClusterExpansion object from file.
+
+        Parameters
+        ---------
+        filename
+            file from which to read
+        """
+        cs = ClusterSpace.read(filename)
+        if isinstance(filename, str):
+            with open(filename, 'rb') as handle:
+                data = pickle.load(handle)
+        else:
+            with open(filename) as handle:
+                data = pickle.load(handle)
+        parameters = data['parameters']
+
+        return ClusterExpansion(cs, parameters)

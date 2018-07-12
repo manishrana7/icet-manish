@@ -331,7 +331,7 @@ class ClusterSpace(_ClusterSpace):
 
         Parameters
         ---------
-        filename : str with filename to saved
+        filename : str with filename to read
         cluster space.
         """
         if isinstance(filename, str):

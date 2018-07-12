@@ -2,7 +2,6 @@
 This test checks that a cluster expansion model can be initialized
 with any structure in the test database and can predict a property.
 """
-import sys
 import unittest
 import tempfile
 
@@ -171,22 +170,6 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
 """ # noqa
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
-
-    def test_print_overview(self):
-        """
-        Testing print_overview functionality
-        """
-        atoms = bulk("Al")
-        cutoffs = [3.0] * 3
-        subelements = ['Al', 'Pd']
-        cluster_space = ClusterSpace(atoms, cutoffs, subelements)
-        params = list(range(len(cluster_space)))
-        ce = ClusterExpansion(cluster_space, params)
-        with StringIO() as capturedOutput:
-            sys.stdout = capturedOutput  # redirect stdout
-            ce.print_overview()
-            sys.stdout = sys.__stdout__  # reset redirect
-            self.assertTrue('Cluster Expansion' in capturedOutput.getvalue())
 
 
 if __name__ == '__main__':
