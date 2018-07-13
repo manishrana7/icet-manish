@@ -2,6 +2,8 @@
 This example demonstrates how to obtain the list of neighbors for a structure.
 '''
 
+# TODO: Why do we need this example?
+
 # Import modules
 from ase.build import bulk
 from icet import Structure

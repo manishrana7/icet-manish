@@ -48,7 +48,7 @@ class Cluster
     /// Swap two sites.
     void swapSites(const int, const int);
 
-    /// Print the cluster to standard out.
+    /// Print the cluster to stdout.
     void print() const;
 
   public:
@@ -56,8 +56,8 @@ class Cluster
     /// Returns the order (i.e., the number of sites) of the cluster.
     unsigned int order() const { return _sites.size(); }
 
-    /// Returns the geometrical size of the cluster.
-    double geometricalSize() const { return _geometricalSize; }
+    /// Returns the radius of the cluster.
+    double radius() const { return _radius; }
 
     // Returns the sites in the cluster.
     std::vector<int> sites() const { return _sites; }
@@ -75,7 +75,7 @@ class Cluster
     int tag() const { return _tag; }
 
     /// Set the cluster tag and mark the cluster as unsorted.
-    void setClusterTag(const int tag)
+    void setTag(const int tag)
     {
         _sorted = false;
         _tag = tag;
@@ -83,18 +83,11 @@ class Cluster
 
 // CONTINUE CLEAN UP HERE
 
-    /// The following "count" functions were deactivated since they were not used anywhere and their function is unclear.
-    // counts the elements
-    //void count(const std::vector<int> &elements) { _element_counts[elements]++; }
-
-    // get count of a specific element vector
-    //int getCount(const std::vector<int> &) const;
-
     /// Brute force attempt to find minimum clusters
-    std::tuple<std::vector<int>, std::vector<double>, std::vector<int>> getNumberOfAllowedComponentsnimumStateBruteForce();
+    std::tuple<std::vector<int>, std::vector<double>, std::vector<int>> findMinimumClusterByBruteForce();
 
     /// Find all equal nearestNeighborDistances that are identical to the minimum one.
-    std::vector<LocalEnvironment> getEqual_minimum_first_sites(const std::vector<LocalEnvironment> &i_neighbors) const;
+    std::vector<LocalEnvironment> getEqualMinimumFirstSites(const std::vector<LocalEnvironment> &i_neighbors) const;
 
     /// Returns true if dist_index1 is equal to dist_index2
     bool isEqualFirstDists(const std::vector<std::pair<double, int>> &, const std::vector<std::pair<double, int>> &) const;
@@ -229,8 +222,8 @@ private:
     /// @todo what is this? The _element_counts member was deactivated since it is not in use.
     // std::map<std::vector<int>, int> _element_counts;
 
-    /// Geometrical size of cluster.
-    double _geometricalSize;
+    /// Cluster radius.
+    double _radius;
 
     /// True/False if this is a sorted/unsorted cluster.
     bool _sorted;

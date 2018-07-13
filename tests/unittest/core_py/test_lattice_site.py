@@ -1,6 +1,7 @@
 from icet.core.lattice_site import LatticeSite as LatticeSite_cpp
 from icet.core_py.lattice_site import LatticeSite as LatticeSite
-
+from icet.core_py.lattice_site import (cmp_mbnl_lattice_site_list,
+                                       cmp_list_of_lattice_sites)
 
 import numpy as np
 
@@ -60,8 +61,6 @@ class TestLatticeSite(unittest.TestCase):
         """
         Test printing a LatticeSite.
         """
-        print(self.lattice_sites[0])
-
         self.assertEqual(self.lattice_sites[0].__str__(
         ), self.lattice_sites_cpp[0].__str__())
         self.assertEqual(self.lattice_sites[-1].__str__(
@@ -135,6 +134,66 @@ class TestLatticeSite(unittest.TestCase):
         lattice_site2 = LatticeSite(0, [-1, -1, 3])
         lattice_site2.unitcell_offset += [1, 1, -3]
         self.assertEqual(lattice_site, lattice_site2)
+
+    def test_sub_property(self):
+        """
+        Tests changing the property.
+        """
+        lattice_site = LatticeSite_cpp(0, [0, 0, 0])
+        lattice_site2 = LatticeSite_cpp(0, [1, 1, -3])
+        lattice_site2.unitcell_offset -= [1, 1, -3]
+        self.assertEqual(lattice_site, lattice_site2)
+
+        lattice_site = LatticeSite(0, [0, 0, 0])
+        lattice_site2 = LatticeSite(0, [1, 1, -3])
+        lattice_site2.unitcell_offset -= [1, 1, -3]
+        self.assertEqual(lattice_site, lattice_site2)
+
+    def test_cmp_mbnl_lattice_site_list(self):
+        """
+        Test the comparer of list of lattice site.
+        """
+        indices = range(10)
+        offsets = [[x, y, z]
+                   for x, y, z in zip(range(10), range(10), range(10))]
+        sites = []
+        for index, offset in zip(indices, offsets):
+            sites.append(LatticeSite(index, offset))
+        sites = [sites, []]
+        indices = range(5)
+        offsets = [[x, y, z] for x, y, z in zip(range(5), range(5), range(5))]
+        sites2 = []
+        for index, offset in zip(indices, offsets):
+            sites2.append(LatticeSite(index, offset))
+        sites2 = [sites2, []]
+        # Test that a smaller list is considered smaller
+        self.assertTrue(cmp_mbnl_lattice_site_list(sites2, sites))
+
+        # Test that equality is not less than
+        self.assertFalse(cmp_mbnl_lattice_site_list(sites, sites))
+
+    def test_cmp_lattice_site_list(self):
+        """
+        Test the comparer of list of lattice site.
+        """
+        indices = range(10)
+        offsets = [[x, y, z]
+                   for x, y, z in zip(range(10), range(10), range(10))]
+        sites = []
+        for index, offset in zip(indices, offsets):
+            sites.append(LatticeSite(index + 1, offset))
+        sites = [sites]
+        indices = range(10)
+        offsets = [[x, y, z] for x, y, z in zip(range(5), range(5), range(5))]
+        sites2 = []
+        for index, offset in zip(indices, offsets):
+            sites2.append(LatticeSite(index, offset))
+        sites2 = [sites2]
+        # Test that a smaller list is considered smaller
+        self.assertTrue(cmp_list_of_lattice_sites(sites2, sites))
+
+        # Test that equality is not less than
+        self.assertFalse(cmp_list_of_lattice_sites(sites, sites))
 
 
 if __name__ == '__main__':

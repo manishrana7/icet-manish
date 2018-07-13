@@ -49,12 +49,12 @@ class Orbit
     {
         return _equivalentSites.size();
     }
-    ///Returns the geometric size of the orbit defines as the mean distance to the center of the
-    double geometricalSize() const
+    ///Returns the radius of the orbit defines as the mean distance to the center of the
+    double radius() const
     {
-        return _representativeCluster.geometricalSize();
+        return _representativeCluster.radius();
     }
-    ///Return the sorted, reprasentative cluster for this orbit
+    ///Return the sorted, representative cluster for this orbit
     Cluster getRepresentativeCluster() const
     {
         return _representativeCluster;
@@ -67,14 +67,14 @@ class Orbit
     }
 
     ///Returns equivalent sites
-    std::vector<std::vector<LatticeSite>> getPermutatedEquivalentSites() const
+    std::vector<std::vector<LatticeSite>> getPermutedEquivalentSites() const
     {
-        std::vector<std::vector<LatticeSite>> permutatedSites(_equivalentSites.size());
+        std::vector<std::vector<LatticeSite>> permutedSites(_equivalentSites.size());
         for(size_t i =0; i < _equivalentSites.size(); i++)
         {
-            permutatedSites[i] = getSitesWithPermutation(i);
+            permutedSites[i] = getSitesWithPermutation(i);
         }
-        return permutatedSites;
+        return permutedSites;
     }
 
 
@@ -103,7 +103,7 @@ class Orbit
             throw std::out_of_range(errMSG);
         }
 
-        return icet::getPermutatedVector<LatticeSite>( _equivalentSites[index],_equivalentSitesPermutations[index]);
+        return icet::getPermutedVector<LatticeSite>( _equivalentSites[index],_equivalentSitesPermutations[index]);
     }
 
         ///This sets the equivalent sites
@@ -130,8 +130,8 @@ class Orbit
             {
                 return false;
             }
-            ///not equal size: compare by geometrical size
-            if (fabs(orbit1.geometricalSize() - orbit2.geometricalSize()) > 1e-5) // @TODO: remove 1e-4 and add tunable parameter
+            ///not equal size: compare by radius
+            if (fabs(orbit1.radius() - orbit2.radius()) > 1e-5) // @TODO: remove hard-coded tolerance and add tunable parameter
             {
                 return false;
             }
@@ -155,10 +155,10 @@ class Orbit
             {
                 return orbit1.getRepresentativeCluster().order() < orbit2.getRepresentativeCluster().order();
             }
-            ///not equal size: compare by geometrical size
-            if (fabs(orbit1.geometricalSize() - orbit2.geometricalSize()) > 1e-5) // @TODO: remove 1e-4 and add tunable parameter
+            ///not equal size: compare by radius
+            if (fabs(orbit1.radius() - orbit2.radius()) > 1e-5) // @TODO: remove 1e-4 and add tunable parameter
             {
-                return orbit1.geometricalSize() < orbit2.geometricalSize();
+                return orbit1.radius() < orbit2.radius();
             }
 
             // check size of vector of equivalent sites
@@ -259,7 +259,7 @@ class Orbit
 
             for (size_t i = 0; i < rep_sites_this.size(); i++)
             {
-                // 
+                //
                 // if (rep_sites_this[i].index() != rep_sites_rhs[i].index())
                 // {
                 //     std::cout<< rep_sites_this[i].index()<< " "<< rep_sites_rhs[i].index()<<std::endl;
@@ -296,9 +296,9 @@ class Orbit
         }
 
         ///Mi_local are the same size as representative sites and details the allowed occupations on the representative sites
-        std::vector<std::vector<int>> getMCVectors(const std::vector<int> & Mi_local) const;
+        std::vector<std::vector<int>> getMultiComponentVectors(const std::vector<int> & Mi_local) const;
 
-        std::vector<std::vector<int>> getAllPossibleMCVectorPermutations(const std::vector<int> &Mi_local) const;
+        std::vector<std::vector<int>> getAllPossibleMultiComponentVectorPermutations(const std::vector<int> &Mi_local) const;
 
       private:
         ///Representative sorted cluster for this orbit

@@ -2,6 +2,8 @@ import numpy as np
 
 from icet.core_py.lattice_site import LatticeSite
 import copy
+from ase.neighborlist import NeighborList
+from icet.core_py.lattice_site import cmp_mbnl_lattice_site_list, cmp_to_key
 
 
 class ManyBodyNeighborList(object):
@@ -24,12 +26,29 @@ class ManyBodyNeighborList(object):
     an index.  However, it will not return both `i,j,k` and
     `i,k,j`. In contrast to `bothways=False` the following is allowed:
     `i>j`, `i>k` etc.. (but always `j<k`).
+
+    Parameters
+    ----------
+    atoms : ASE Atoms object
+            This atoms object will be used
+            to construct a primitive structure
+            on which all the lattice sites in the orbits
+            are based on.
+    cutoffs : list of float
+              cutoffs[i] is the cutoff for
+              orbits with order i+2.
+
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, atoms, cutoffs):
+        self.neighbor_lists = []
+        for co in cutoffs:
+            ase_nl = NeighborList(len(atoms) * [co / 2], skin=1e-8,
+                                  bothways=True, self_interaction=False)
+            ase_nl.update(atoms)
+            self.neighbor_lists.append(ase_nl)
 
-    def build(self, neighbor_lists, index, bothways=False):
+    def build(self, index, bothways=False):
         """
         Will take the take each neighor_list, neighbor_list[i],
         in neighbor lists and combine the neighbors of `index` up
@@ -38,44 +57,38 @@ class ManyBodyNeighborList(object):
 
         Parameters
         ----------
-        neighbor_lists : list of ASE NeighborList objects
-            ASE neighbor lists
         index : int
             index of site for which to return neighbors
         bothways : boolean
             `False` will return all indices that are bigger than `index`;
             `True` will also return indices that are smaller.
         """
-        if not isinstance(neighbor_lists, list):
-            neighbor_lists = [neighbor_lists]
-
-        if not neighbor_lists:
-            raise RuntimeError(
-                'neighbor_lists empty in TestManyBodyNeighborList::build')
 
         many_body_neighbor_indices = []
 
         self.add_singlet(index, many_body_neighbor_indices)
 
-        self.add_pairs(index, neighbor_lists[0],
+        self.add_pairs(index, self.neighbor_lists[0],
                        many_body_neighbor_indices, bothways)
 
         """ Add neighbors of higher order (k>=2) """
-        for k in range(2, len(neighbor_lists) + 2):
+        for k in range(2, len(self.neighbor_lists) + 2):
 
             """ Get neighbors of index in icet format """
-            neighbor = self.get_neighbor_from_nl(neighbor_lists[k - 2], index)
+            neighbor = self.get_neighbor_from_nl(
+                self.neighbor_lists[k - 2], index)
 
             zero_vector = np.array([0., 0., 0., ])
 
             current_original_neighbors = [LatticeSite(index, zero_vector)]
 
             self.combine_to_higher_order(
-                neighbor_lists[k - 2], many_body_neighbor_indices, neighbor,
+                self.neighbor_lists[k -
+                                    2], many_body_neighbor_indices, neighbor,
                 current_original_neighbors, bothways, k)
 
         return sorted(many_body_neighbor_indices,
-                      key=self.cmp_to_key(self.cmp_list_of_lattice_sites))
+                      key=cmp_to_key(cmp_mbnl_lattice_site_list))
 
     def combine_to_higher_order(self, nl, many_body_neighbor_indices,
                                 neighbor_i, current_original_neighbors,
@@ -199,38 +212,35 @@ class ManyBodyNeighborList(object):
             neighbor.append(LatticeSite(ind, offs))
         return neighbor
 
-    def cmp_list_of_lattice_sites(self, first, second):
+    def unzip(self, compressed_sites):
         """
-        Comparer for list of lattice sites.
-        First compare len of lists then do the normal,
-        lexicographical comparing.
+        Return a list of list of lattice sites
+        from the compresed sites.
+
+        the unzip will do the following:
+        unzipped_sits = []
+        for site in sites2
+            unzipped_sites.append(sites1+site)
+        return unzipped sites
+
+        i.e. if sites1=[ls1, ls2]
+        and sites2= [ls3,ls4,ls5]
+        unzipped will return
+        [[ls1,ls2,ls3],
+        [ls1,ls2,ls4],
+        [ls1,sl2,ls5]]
+
+        parameters
+        ----------
+        compressed_sites : tuple of list of lattice sites
         """
-        if len(first[0]) != len(second[0]):
-            return len(first[0]) < len(second[0])
+        unzipped_sites = []
+        # return  [ [compressed_sites[0] + site]
+        #  for site in compressed_sites[1]]
+
+        if len(compressed_sites[1]) == 0:
+            return [compressed_sites[0]]
         else:
-            return first < second
-
-    def cmp_to_key(self, mycmp):
-        'Convert a cmp= function into a key= function'
-        class K:
-            def __init__(self, obj, *args):
-                self.obj = obj
-
-            def __lt__(self, other):
-                return mycmp(self.obj, other.obj)
-
-            def __gt__(self, other):
-                return mycmp(self.obj, other.obj)
-
-            def __eq__(self, other):
-                return mycmp(self.obj, other.obj)
-
-            def __le__(self, other):
-                return mycmp(self.obj, other.obj)
-
-            def __ge__(self, other):
-                return mycmp(self.obj, other.obj)
-
-            def __ne__(self, other):
-                return mycmp(self.obj, other.obj)
-        return K
+            for site in compressed_sites[1]:
+                unzipped_sites.append(list(compressed_sites[0]) + [site])
+            return unzipped_sites

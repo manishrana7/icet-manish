@@ -88,9 +88,19 @@ def init_python_orbit(number_of_sites):
         index + 3, unitcell_offset)]
         for index, unitcell_offset in
         zip(indices, unitcell_offsets)]
-    orbit_pair = Orbit()
+    lattice_site_for_cluster = [
+        LatticeSite(0, [i, 0, 0]) for i in range(3)]
+    atoms = bulk("Al")
+
+    pair_cluster = Cluster.from_python(
+        atoms, [lattice_site_for_cluster[0],
+                lattice_site_for_cluster[1]], True)
+    triplet_cluster = Cluster.from_python(
+        atoms, lattice_site_for_cluster, True)
+
+    orbit_pair = Orbit(pair_cluster)
     orbit_pair.equivalent_sites = lattice_sites_pairs
-    orbit_triplet = Orbit()
+    orbit_triplet = Orbit(triplet_cluster)
     orbit_triplet.equivalent_sites = lattice_sites_triplets
     return orbit_pair, orbit_triplet
 
@@ -123,7 +133,7 @@ def time_orbit_sites_permutations(orbit, iterations=5000):
 
     t = time.process_time()
     for i in range(iterations):
-        orbit.permutated_sites
+        orbit.permuted_sites
 
     total_time = time.process_time() - t
     return total_time / iterations
@@ -138,7 +148,7 @@ if __name__ == '__main__':
     cpp_timing = time_orbit_translating(orbit_pair_cpp)
     try:
         cpp_speedup = py_timing / cpp_timing
-    except: # noqa
+    except:  # noqa
         cpp_speedup = np.inf
     print("Time for python pair orbit translating: {:.8f}s".format(py_timing))
     print("Time for C++ pair orbit translating: {:.8f}s".format(cpp_timing))
@@ -150,7 +160,7 @@ if __name__ == '__main__':
     cpp_timing = time_orbit_translating(orbit_pair_cpp)
     try:
         cpp_speedup = py_timing / cpp_timing
-    except: # noqa
+    except:  # noqa
         cpp_speedup = np.inf
     print("Time for python pair orbit translating: {:.8f}s".format(py_timing))
     print("Time for C++ pair orbit translating: {:.8f}s".format(cpp_timing))
@@ -162,7 +172,7 @@ if __name__ == '__main__':
     cpp_timing = time_orbit_sites_permutations(orbit_pair_cpp)
     try:
         cpp_speedup = py_timing / cpp_timing
-    except: # noqa
+    except:  # noqa
         cpp_speedup = np.inf
     print("Time for python pair orbit permutation: {:.8f}s".format(py_timing))
     print("Time for C++ pair orbit permutation: {:.8f}s".format(cpp_timing))
@@ -174,7 +184,7 @@ if __name__ == '__main__':
     cpp_timing = time_orbit_sites_permutations(orbit_triplet_cpp)
     try:
         cpp_speedup = py_timing / cpp_timing
-    except: # noqa
+    except:  # noqa
         cpp_speedup = np.inf
     print('''Time for python triplet orbit permutation:
      {:.8f}s'''.format(py_timing))

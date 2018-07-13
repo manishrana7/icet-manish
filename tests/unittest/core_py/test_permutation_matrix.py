@@ -18,7 +18,7 @@ class TestPermutationMatrix(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestPermutationMatrix, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al")
+        self.atoms = bulk("Al").repeat(2)
         self.cutoff = 5.0
 
     def setUp(self):
@@ -43,7 +43,7 @@ class TestPermutationMatrix(unittest.TestCase):
         # Test pm with find_prim = False
         pm_prim_false = PermutationMatrix(self.atoms, self.cutoff,
                                           find_prim=False, verbosity=10)
-        pm_cpp, prim_structure_cpp, _ = permutation_matrix_from_atoms(
+        pm_cpp, _, _ = permutation_matrix_from_atoms(
             self.atoms, self.cutoff)
         self.assertIsInstance(pm, PermutationMatrix)
         self.assertIsInstance(pm_prim_false, PermutationMatrix)
@@ -133,6 +133,15 @@ class TestPermutationMatrix(unittest.TestCase):
 
         self.assertEqual(self.pm.primitive_structure.cell.all(),
                          self.prim_structure_cpp.cell.all())
+
+    def test_property_column1(self):
+        """
+        Test the column1 property of permutation matrix.
+        """
+
+        matrix = self.pm.pm_lattice_sites
+        for col1, row in zip(self.pm.column1, matrix):
+            self.assertEqual(col1, row[0])
 
 
 if __name__ == '__main__':

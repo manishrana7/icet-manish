@@ -54,24 +54,24 @@ int Orbit::getNumberOfDuplicates(int verbosity) const
         Mi_local : Vector of the number of allowed sites
 
  */
-std::vector<std::vector<int>> Orbit::getMCVectors(const std::vector<int> &Mi_local) const
+std::vector<std::vector<int>> Orbit::getMultiComponentVectors(const std::vector<int> &Mi_local) const
 {
     if( std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i){ return  i<2; }))
     {
         std::vector<std::vector<int>> emptyVector;
         return emptyVector;
     }
-    auto allMCVectors = getAllPossibleMCVectorPermutations(Mi_local);
+    auto allMCVectors = getAllPossibleMultiComponentVectorPermutations(Mi_local);
     std::sort(allMCVectors.begin(), allMCVectors.end());
     std::vector<std::vector<int>> distinctMCVectors;
     for(const auto &mcVector : allMCVectors)
     {
-        std::vector<std::vector<int>> permutatedMCVectors;
+        std::vector<std::vector<int>> permutedMCVectors;
         for(const auto &allowedPermutation : _allowedSitesPermutations )
         {
-            permutatedMCVectors.push_back(icet::getPermutatedVector<int>(mcVector, allowedPermutation));
+            permutedMCVectors.push_back(icet::getPermutedVector<int>(mcVector, allowedPermutation));
         }
-        if(! std::any_of(permutatedMCVectors.begin(), permutatedMCVectors.end(),[&](const std::vector<int> &permMcVector){
+        if(! std::any_of(permutedMCVectors.begin(), permutedMCVectors.end(),[&](const std::vector<int> &permMcVector){
                  return !(std::find(distinctMCVectors.begin(),distinctMCVectors.end(),permMcVector) == distinctMCVectors.end()); }  ))
         {
             distinctMCVectors.push_back(mcVector);
@@ -81,7 +81,7 @@ std::vector<std::vector<int>> Orbit::getMCVectors(const std::vector<int> &Mi_loc
 }
 
 ///Similar to get all permutations but needs to be filtered through the number of allowed elements
-std::vector<std::vector<int>> Orbit::getAllPossibleMCVectorPermutations(const std::vector<int> &Mi_local) const
+std::vector<std::vector<int>> Orbit::getAllPossibleMultiComponentVectorPermutations(const std::vector<int> &Mi_local) const
 {
 
     std::vector<std::vector<int>> cartesianFactors(Mi_local.size());

@@ -468,7 +468,7 @@ std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromRow(const std:
 }
 
 /**
-This will take the latticeneigbhors, and for each site outside the unitcell will translate it inside the unitcell
+This will take the latticeneighbors, and for each site outside the unitcell will translate it inside the unitcell
 and translate the other sites with the same translation.
 
 This translation will give rise to equivalent sites that sometimes are not found by using the set of crystal symmetries given
@@ -564,7 +564,7 @@ void OrbitList::checkEquivalentClusters() const
 
                 throw std::runtime_error("found a \"equivalent\" cluster that were not equal representative cluster");
             }
-            if (fabs(equivalentCluster.geometricalSize() - representative_cluster.geometricalSize()) > 1e-3)
+            if (fabs(equivalentCluster.radius() - representative_cluster.radius()) > 1e-3)
             {
                 std::cout << " found an 'equivalent' cluster that does not equal the representative cluster" << std::endl;
                 std::cout << "representative_cluster:" << std::endl;

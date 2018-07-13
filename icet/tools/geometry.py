@@ -27,32 +27,6 @@ def get_scaled_positions(positions, cell, wrap=True, pbc=[True, True, True]):
     return fractional
 
 
-def find_lattice_site_from_position_python(structure, position):
-    '''
-    Get lattice neighbor from position.
-
-    This is the Python version of
-    `structure.findLatticeSiteFromPosition(position)`
-
-    It is slower but kept for debugging and if further development is needed.
-    '''
-
-    fractional = np.linalg.solve(structure.cell.T, np.array(position).T).T
-    unit_cell_offset = [int(round(x)) for x in fractional]
-
-    residual = np.dot(fractional - unit_cell_offset, structure.cell)
-    try:
-        index = structure.find_index_of_position(residual)
-    except Exception:
-        msg = ['error did not find index with pos: {}'.format(residual)]
-        msg += ['position in structure are:']
-        msg += ['\n' + str(structure.positions)]
-        raise Exception(' '.join(msg))
-
-    latNbr = LatticeSite(index, unit_cell_offset)
-    return latNbr
-
-
 def add_vacuum_in_non_pbc(atoms):
     '''
     Add vacuum in non-periodic directions.
@@ -131,42 +105,6 @@ def get_fractional_positions_from_neighbor_list(structure, neighbor_list):
     return fractional_positions
 
 
-def get_permutation_matrix(input_configuration,
-                           reference_structure,
-                           tolerance_cell=0.05,
-                           ):
-    '''
-    Computes and returns the permutation
-    matrix that takes the reference cell to the input cell,
-    i.e. permutation_matrix * reference_cell = input_cell
-    '''
-
-    input_cell = input_configuration.cell
-
-    # obtain the (in general non-integer) transformation matrix
-    # connecting the input configuration to the reference structure
-    # L = L_p.P --> P = L_p^-1.L
-    P = np.dot(input_cell, np.linalg.inv(reference_structure.cell))
-
-    # assert that the transformation matrix does not deviate too
-    # strongly from the nearest integer matrix
-    if np.linalg.norm(P - np.around(P)) / 9 > tolerance_cell:
-        s = 'Failed to map configuration to reference'
-        s += 'structure (tolerance_cell exceeded).\n'
-        s += 'reference:\n {}\n'.format(reference_structure.cell)
-        s += 'input:\n {}\n'.format(input_configuration.cell)
-        s += 'input_cell:\n {}\n'.format(input_cell)
-        s += 'P:\n {}\n'.format(P)
-        s += 'P_round:\n {}\n'.format(np.around(P))
-        s += 'Deviation: {}\n'.format(np.linalg.norm(P - np.around(P)) / 9)
-        s += 'You can try raising `tolerance_cell`.'
-        raise Exception(s)
-
-    # reduce the (real) transformation matrix to the nearest integer one
-    P = np.around(P)
-    return P
-
-
 def get_fractional_positions_from_ase_neighbor_list(atoms, neighbor_list):
     '''
     Returns the fractional positions in structure from the neighbors in the
@@ -223,7 +161,7 @@ def find_lattice_site_by_position(atoms, position, tol=1e-4):
         pos = position - atom.position
         # Direct match
         if np.linalg.norm(pos) < tol:
-            return LatticeSite_py(i, np.array((0, 0, 0)))
+            return LatticeSite_py(i, np.array((0., 0., 0.)))
 
         fractional = np.linalg.solve(atoms.cell.T, np.array(pos).T).T
         unit_cell_offset = [np.floor(round(x)) for x in fractional]
@@ -231,6 +169,9 @@ def find_lattice_site_by_position(atoms, position, tol=1e-4):
         if np.linalg.norm(residual) < tol:
             latNbr = LatticeSite_py(i, unit_cell_offset)
             return latNbr
+
+    # found nothing, raise error
+    raise RuntimeError("Did not find site in find_lattice_site_by_position")
 
 
 def fractional_to_cartesian(atoms, frac_positions):
@@ -242,10 +183,35 @@ def fractional_to_cartesian(atoms, frac_positions):
 
 def get_permutation(container, permutation):
     """
-    Return the permutated version of container.
+    Return the permuted version of container.
     """
     if len(permutation) != len(container):
-        raise Exception
+        raise RuntimeError("Container and permutation"
+                           " not of same size {} != {}".format(
+                               len(container), len(permutation)))
     if len(set(permutation)) != len(permutation):
         raise Exception
     return [container[s] for s in permutation]
+
+
+def find_permutation(target, permutated):
+    """
+    Returns the permutation vector that takes
+    permutated to target
+
+    parameters
+    ----------
+    target : some container
+        container should allow .index and the
+    containers elements should contain objects
+    with __eq__ method
+    permutated : some container
+        container should allow .index and the
+    containers elements should contain objects
+    with __eq__ method
+    """
+    permutation = []
+    for element in target:
+        index = permutated.index(element)
+        permutation.append(index)
+    return permutation

@@ -1,59 +1,64 @@
-from ase.build import cut
 import numpy as np
+from ase import Atoms
+from ase.build import cut
+from typing import List, Tuple
 
 
-def map_structure_to_reference(input_structure,
-                               reference_structure,
-                               tolerance_mapping,
-                               vacancy_type=None,
-                               inert_species=None,
-                               tolerance_cell=0.05,
-                               tolerance_positions=0.01,
-                               verbose=False):
-    '''
-    Map a relaxed structure onto a reference structure.
+def map_structure_to_reference(input_structure: Atoms,
+                               reference_structure: Atoms,
+                               tolerance_mapping: float,
+                               vacancy_type: str=None,
+                               inert_species: List[str]=None,
+                               tolerance_cell: float=0.05,
+                               tolerance_positions: float=0.01,
+                               verbose: bool=False) \
+                               -> Tuple[Atoms, float, float]:
+    """Maps a relaxed structure onto a reference structure.
+    The function returns a tuple comprising
+
+    * the ideal supercell most closely matching the input structure,
+    * the largest deviation of any input coordinate from its ideal
+      coordinate, and
+    * the average deviation of the input coordinates from the ideal
+      coordinates.
 
     Parameters
     ----------
-    input_structure :  ASE Atoms object
+    input_structure
         relaxed input structure
-    reference_structure : ASE Atoms object
+    reference_structure
         reference structure, which can but need not represent the primitive
         cell
-    tolerance_mapping : float
+    tolerance_mapping
         maximum allowed displacement for mapping an atom in the relaxed (but
-        rescaled) structure to the reference supercell *Note*: A reasonable
-        choice is up to 20-30% of the first nearest neighbor distance (`r1`).
-        A value above 50% of `r1` will most likely lead to atoms being
-        multiply assigned, whereby the mapping fails.
-    vacancy_type : str
+        rescaled) structure to the reference supercell
+
+        *Note*: A reasonable choice is up to 20-30% of the first
+        nearest neighbor distance (`r1`).  A value above 50% of `r1`
+        will most likely lead to atoms being multiply assigned,
+        whereby the mapping fails.
+    vacancy_type
         If this parameter is set to a non-zero string unassigned sites in the
-        reference structure will be assigned to this type. *Note 1*: By
-        default (``None``) the method will fail if there are *any* unassigned
-        sites in the reference structure. *Note 2*: `vacancy_type` must be a
-        valid element type as enforced by the ASE Atoms class.
-    inert_species : list of str
-        List of chemical symbols (e.g., `['Au', 'Pd']`) that are never
+        reference structure will be assigned to this type.
+
+        *Note 1*: By default (``None``) the method will fail if there
+        are *any* unassigned sites in the reference structure.
+
+        *Note 2*: ``vacancy_type`` must be a valid element type as
+        enforced by the :class:`ase.Atoms` class.
+    inert_species
+        List of chemical symbols (e.g., ``['Au', 'Pd']``) that are never
         substituted for a vacancy. Used to make an initial rescale of the cell
         and thus increases the probability for a successful mapping. Need not
-        be specified if `vacancy_type` is None.
-    tolerance_cell : float
+        be specified if ``vacancy_type`` is ``None``.
+    tolerance_cell
         tolerance factor applied when computing permutation matrix to generate
-        supercell (h = P h_p)
-    tolerance_positions : float
+        supercell
+    tolerance_positions
         tolerance factor applied when scanning for overlapping positions in
-        Angstrom (forwarded to `ase.build.cut`)
-    verbose : bool
+        Angstrom (forwarded to :func:`ase.build.cut`)
+    verbose
         turn on verbose output
-
-    Returns
-    -------
-    ASE Atoms, float, float
-        - the ideal supercell most closely matching the input structure
-        - the largets deviation of any input coordinate from its ideal
-          coordinate
-        - the average deviation of the input coordinates from the ideal
-          coordinates
 
     Example
     -------
@@ -73,7 +78,7 @@ def map_structure_to_reference(input_structure,
         atoms.rattle(0.1)
         mapped_atoms = map_structure_to_reference(atoms, reference, 1.0)
 
-    '''
+    """
     assert np.all(input_structure.pbc == reference_structure.pbc), \
         ('The periodic boundary conditions differ'
          ' between input and reference structure')
@@ -170,8 +175,8 @@ def map_structure_to_reference(input_structure,
         n1 = input_structure.get_chemical_symbols().count(element)
         n2 = ideal_supercell.get_chemical_symbols().count(element)
         assert n1 == n2, ('Number of atoms of type {} differs between'
-                          ' input structure({}) and ideal'
-                          ' supercell ({}).\n'.format(element, n1, n2))
+                          ' input structure ({}) and ideal'
+                          ' supercell ({}).'.format(element, n1, n2))
 
     if verbose:
         print('Maximum, average and standard deviation of atomic'
@@ -210,7 +215,7 @@ def map_structure_to_reference(input_structure,
 
 def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
                      inert_species=None):
-    '''
+    """
     The input structure needs to be scaled in order to match the lattice
     structure of the reference structure. The reference structure can be a
     primitive cell, in which case the input structure would usually be a
@@ -230,7 +235,7 @@ def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
     inert_species: list of str
         List of chemical symbols(e.g., `['Au', 'Pd']`) that are never
         substituted for a vacancy. Needless if `vacancy_type` is `None`.
-    '''
+    """
     modcell = input_structure.get_cell()
     if vacancy_type is None:
         # Without scale factor we can just rescale with number of atoms
@@ -260,7 +265,7 @@ def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
 
 def _get_transformation_matrix(input_cell, reference_cell,
                                tolerance_cell=0.05):
-    '''
+    """
     Obtain the(in general non - integer) transformation matrix connecting the
     input structure to the reference structure L=L_p.P - -> P=L_p ^ -1.L
 
@@ -278,7 +283,7 @@ def _get_transformation_matrix(input_cell, reference_cell,
     - ------
     NumPy array(3, 3)
         Transformation matrix P of integers.
-    '''
+    """
     P = np.dot(input_cell, np.linalg.inv(reference_cell))
 
     # assert that the transformation matrix does not deviate too
@@ -289,6 +294,7 @@ def _get_transformation_matrix(input_cell, reference_cell,
          'reference:\n {}\n'.format(reference_cell) +
          'input:\n {}\n'.format(input_cell) +
          'P:\n {}\n'.format(P) +
+         'det P = {}\n'.format(np.linalg.det(P)) +
          'P_round:\n {}\n'.format(np.around(P)) +
          'Deviation: {}\n'.format(np.linalg.norm(P - np.around(P)) / 9) +
          'If there are vacancies, you can try specifying `inert_species`.' +
@@ -301,7 +307,7 @@ def _get_transformation_matrix(input_cell, reference_cell,
 
 def _rescale_structures(input_structure, reference_structure, P,
                         tolerance_positions=0.01):
-    '''
+    """
     Rescale `input_structure` with `P` so that it matches
     `reference_structure`, and make a supercell of `reference_structure` using
     `P`
@@ -326,7 +332,7 @@ def _rescale_structures(input_structure, reference_structure, P,
     ASE Atoms object
         Supercell of `reference_structure` matching cell metric of
         `scaled_structure`
-    '''
+    """
     scaled_structure = input_structure.copy()
     scaled_structure.set_cell(np.dot(P, reference_structure.cell),
                               scale_atoms=True)

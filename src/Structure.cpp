@@ -26,7 +26,7 @@ Structure::Structure(const Eigen::Matrix<double, Dynamic, 3, RowMajor> &position
     _pbc = pbc;
     _tolerance = tolerance;
     _uniqueSites.resize(chemicalSymbols.size());
-    _numbersOfAllowedComponents.resize(positions.rows());
+    _numbersOfAllowedSpecies.resize(positions.rows());
 }
 
 /**
@@ -261,21 +261,21 @@ std::vector<LatticeSite> Structure::findLatticeSitesByPositions(const std::vecto
   that are allowed on each lattice site via a vector. This can be employed to
   construct "parallel" cluster expansions such as in (A,B) on site #1 with
   (C,D) on site #2.
-  @param numbersOfAllowedComponents list with the number of components
+  @param numbersOfAllowedSpecies list with the number of components
   allowed on each site
 **/
-void Structure::setNumberOfAllowedComponents(const std::vector<int> &numbersOfAllowedComponents)
+void Structure::setNumberOfAllowedSpecies(const std::vector<int> &numbersOfAllowedSpecies)
 {
-    if (numbersOfAllowedComponents.size() != size())
+    if (numbersOfAllowedSpecies.size() != size())
     {
         std::string errorMessage;
         errorMessage += "Size of input list incompatible with structure";
-        errorMessage += " length: " + std::to_string(numbersOfAllowedComponents.size());
+        errorMessage += " length: " + std::to_string(numbersOfAllowedSpecies.size());
         errorMessage += " nsites: " + std::to_string(size());
-        errorMessage += " (Structure::setNumberOfAllowedComponents)";
+        errorMessage += " (Structure::setNumberOfAllowedSpecies)";
         throw std::out_of_range(errorMessage);
     }
-    _numbersOfAllowedComponents = numbersOfAllowedComponents;
+    _numbersOfAllowedSpecies = numbersOfAllowedSpecies;
 }
 
 /**
@@ -283,12 +283,12 @@ void Structure::setNumberOfAllowedComponents(const std::vector<int> &numbersOfAl
   that are allowed on each lattice site via a scalar. This can be employed to
   construct "parallel" cluster expansions such as in (A,B) on site #1 with
   (C,D) on site #2.
-  @param numberOfAllowedComponents number of components allowed
+  @param numberOfAllowedSpecies number of components allowed
 **/
-void Structure::setNumberOfAllowedComponents(const int numberOfAllowedComponents)
+void Structure::setNumberOfAllowedSpecies(const int numberOfAllowedSpecies)
 {
-    std::vector<int> numbersOfAllowedComponents(_atomicNumbers.size(), numberOfAllowedComponents);
-    _numbersOfAllowedComponents = numbersOfAllowedComponents;
+    std::vector<int> numbersOfAllowedSpecies(_atomicNumbers.size(), numberOfAllowedSpecies);
+    _numbersOfAllowedSpecies = numbersOfAllowedSpecies;
 }
 
 /**
@@ -297,17 +297,17 @@ void Structure::setNumberOfAllowedComponents(const int numberOfAllowedComponents
   @param i index of the site
   @returns the number of the allowed components
 **/
-int Structure::getNumberOfAllowedComponents(const unsigned int i) const
+int Structure::getNumberOfAllowedSpeciesBySite(const unsigned int i) const
 {
-    if (i >= _numbersOfAllowedComponents.size())
+    if (i >= _numbersOfAllowedSpecies.size())
     {
         std::string errorMessage = "Site index out of bounds";
         errorMessage += " i: " + std::to_string(i);
-        errorMessage += " nsites: " + std::to_string(_numbersOfAllowedComponents.size());
-        errorMessage += " (Structure::getNumberOfAllowedComponents)";
+        errorMessage += " nsites: " + std::to_string(_numbersOfAllowedSpecies.size());
+        errorMessage += " (Structure::getNumberOfAllowedSpeciesBySite)";
         throw std::out_of_range(errorMessage);
     }
-    return _numbersOfAllowedComponents[i];
+    return _numbersOfAllowedSpecies[i];
 }
 
 /**

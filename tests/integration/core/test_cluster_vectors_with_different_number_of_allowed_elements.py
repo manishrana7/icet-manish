@@ -22,12 +22,12 @@ def test_mi_int_list_and_dict(atoms, subelements, cutoffs, allowed_sites):
 
     singlet_data = get_singlet_info(atoms.copy())
     for singlet in singlet_data:
-        Mi_dict[singlet['orbit index']] = allowed_sites
+        Mi_dict[singlet['orbit_index']] = allowed_sites
 
     cluster_space_int = ClusterSpace(atoms, cutoffs, subelements,  Mi=Mi_int)
     cluster_space_list = ClusterSpace(atoms, cutoffs, subelements, Mi=Mi_list)
     cluster_space_dict = ClusterSpace(atoms, cutoffs, subelements, Mi=Mi_dict)
-    atoms_prim = cluster_space_int.get_primitive_structure().to_atoms()
+    atoms_prim = cluster_space_int.primitive_structure
 
     # create and populate a supercell and get cluster vector
     repeat = [1] * 3

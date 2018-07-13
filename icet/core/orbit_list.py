@@ -1,24 +1,24 @@
-import numpy as np
 import time
-
+import numpy as np
 from _icet import OrbitList
+from .local_orbit_list_generator import LocalOrbitListGenerator
 from .neighbor_list import get_neighbor_lists
 from .permutation_map import permutation_matrix_from_atoms
-from .local_orbit_list_generator import LocalOrbitListGenerator
 from .structure import Structure
 
 
 def __fractional_to_cartesian(fractional_coordinates, cell):
-    '''
+    """
     Convert from fractional to Cartesian coordinates.
 
     Parameters
     ----------
     fractional_coordinates : list of 3d-vectors
         list fractional coordinates
+
     cell : 3x3 matrix
         cell metric
-    '''
+    """
     cartesian_coordinates = [np.dot(frac, cell)
                              for frac in fractional_coordinates]
     return cartesian_coordinates
@@ -26,13 +26,27 @@ def __fractional_to_cartesian(fractional_coordinates, cell):
 
 def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
                                           prune=True, verbosity=0):
-    '''
+    """
     Return a transformed permutation matrix with lattice sites instead of
     fractional coordinates.
 
+    Parameters
+    ----------
+    structure : icet Structure object
+        primitive atomic structure
+
+    permutation_matrix : icet PermutatioMap object
+        permutation matrix
+
+    prune : bool
+        if True prune the permutation matrix. Default to True
+
+    verbosity : int
+        set verbosity level. Default to 0
+
     Permutation matrix is in row major format which we will keep
-    '''
-    pm_frac = permutation_matrix.get_permutated_positions()
+    """
+    pm_frac = permutation_matrix.get_permuted_positions()
 
     pm_lattice_sites = []
     for row in pm_frac:
@@ -55,7 +69,7 @@ def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
         if verbosity > 2:
             print('size before pruning {} '.format(len(pm_lattice_sites)))
         pm_lattice_sites = __prune_permutation_matrix(pm_lattice_sites,
-                                                      verbosity=0)
+                                                      verbosity=verbosity)
         if verbosity > 2:
             print('size after pruning {} '.format(len(pm_lattice_sites)))
 
@@ -63,9 +77,17 @@ def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
 
 
 def __prune_permutation_matrix(permutation_matrix, verbosity=0):
-    '''
+    """
     Prunes the matrix so that the first column only contains unique elements.
-    '''
+
+    Parameters
+    ----------
+    permutation_matrix : matrix
+        permutation matrix with LatticeSite type entries
+
+    verbosity : int
+        set verbosity level. Default to 0
+    """
     for i in range(len(permutation_matrix)):
         for j in reversed(range(len(permutation_matrix))):
             if j <= i:
@@ -76,14 +98,18 @@ def __prune_permutation_matrix(permutation_matrix, verbosity=0):
                     msg = ['Removing duplicate in permutation matrix']
                     msg += ['i: {} j: {}'.format(i, j)]
                     print(' '.join(msg))
+
     return permutation_matrix
 
 
 def _get_supercell_orbit_list(self, atoms):
     """
-    Returns a orbit list for a supercell structure
+    Returns an orbit list for a supercell structure
 
+    Parameters
+    ----------
     atoms: ASE Atoms object
+        supercell atomic structure
     """
     structure = Structure.from_atoms(atoms)
     log = LocalOrbitListGenerator(self, structure)
@@ -102,7 +128,7 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
 
     Parameters
     ----------
-    structure: icet Structure object
+    structure: icet Structure or ASE Atoms object (bioptional)
         input configuration used to initialize mbnl and permutation matrix
     cutoffs : list of float
         cutoff radii for each order
@@ -113,12 +139,17 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
     -------
     OrbitList object
     '''
+    if isinstance(structure, Structure):
+        atoms = Structure.to_atoms(structure)
+    else:
+        atoms = structure.copy()
+
     max_cutoff = np.max(cutoffs)
     total_time_spent = 0
 
     t0 = time.time()
     permutation_matrix, prim_structure, neighbor_list \
-        = permutation_matrix_from_atoms(structure.to_atoms(), max_cutoff)
+        = permutation_matrix_from_atoms(atoms, max_cutoff)
     t1 = time.time()
     time_spent = t1 - t0
     total_time_spent += time_spent

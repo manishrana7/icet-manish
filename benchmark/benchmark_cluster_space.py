@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     atoms = bulk("Al")
 
-    cutoff = [15, 10]
+    cutoff = [10, 7, 6]
     elements = ["Al", "Ti"]
     python_time = setup_cluster_space_py(atoms, cutoff, elements)
 

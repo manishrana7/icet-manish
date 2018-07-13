@@ -29,19 +29,17 @@ class TestManyBodyNeighborList(unittest.TestCase):
         """
         Setup before each test.
         """
-        self.mbnl = ManyBodyNeighborList()
+        self.mbnl = ManyBodyNeighborList(self.atoms, self.cutoffs)
         self.mbnl_cpp = ManyBodyNeighborList_cpp()
         self.neighbor_lists = []
         self.neighbor_lists_cpp = []
         for co in self.cutoffs:
-            ase_nl = NeighborList(len(self.atoms) * [co / 2], skin=1e-8,
-                                  bothways=True, self_interaction=False)
-
-            ase_nl.update(self.atoms)
-
             structure = Structure.from_atoms(self.atoms)
             nl = NeighborList_cpp(co)
             nl.build(structure)
+            ase_nl = NeighborList(len(self.atoms) * [co / 2], skin=1e-8,
+                                  bothways=True, self_interaction=False)
+            ase_nl.update(self.atoms)
 
             self.neighbor_lists.append(ase_nl)
             self.neighbor_lists_cpp.append(nl)
@@ -51,8 +49,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
         Test that a simple build works
         """
         for index in range(len(self.atoms)):
-            mbnl_py = self.mbnl.build(
-                self.neighbor_lists, index, bothways=False)
+            mbnl_py = self.mbnl.build(index, bothways=False)
             mbnl_cpp = self.mbnl_cpp.build(
                 self.neighbor_lists_cpp, index, False)
             self.assertEqual(len(mbnl_py), len(mbnl_cpp))
@@ -64,13 +61,13 @@ class TestManyBodyNeighborList(unittest.TestCase):
         have the same number of neighbors
         """
 
-        mbnl_size = len(self.mbnl.build(self.neighbor_lists, 0, bothways=True))
+        mbnl_size = len(self.mbnl.build(0, bothways=True))
         mbnl_size_cpp = len(self.mbnl_cpp.build(
             self.neighbor_lists_cpp, 0, True))
 
         for index in range(len(self.atoms)):
             self.assertEqual(mbnl_size, len(self.mbnl.build(
-                self.neighbor_lists, index, bothways=True)))
+                index, bothways=True)))
             self.assertEqual(mbnl_size_cpp, len(self.mbnl_cpp.build(
                 self.neighbor_lists_cpp, index,
                 True)))
@@ -84,12 +81,12 @@ class TestManyBodyNeighborList(unittest.TestCase):
         the other atoms.
         """
         mbnl_size = len(self.mbnl.build(
-            self.neighbor_lists, 0, bothways=False))
+            0, bothways=False))
         mbnl_size_cpp = len(self.mbnl_cpp.build(
             self.neighbor_lists_cpp, 0, False))
         for index in range(1, len(self.atoms)):
             self.assertNotEqual(mbnl_size, len(self.mbnl.build(
-                                self.neighbor_lists, index,
+                                index,
                                 bothways=False)))
             self.assertNotEqual(mbnl_size_cpp, len(self.mbnl_cpp.build(
                                 self.neighbor_lists_cpp, index,
@@ -98,7 +95,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
         # compare to cpp
         for index in range(len(self.atoms)):
             mbnl_py = self.mbnl.build(
-                self.neighbor_lists, index, bothways=False)
+                index, bothways=False)
             mbnl_cpp = self.mbnl_cpp.build(
                 self.neighbor_lists_cpp, index, False)
             for lat_site_cpp, lat_site in zip(mbnl_py, mbnl_cpp):
@@ -204,28 +201,71 @@ class TestManyBodyNeighborList(unittest.TestCase):
             index, self.neighbor_lists[0], mbn_indices, bothways=False)
         self.assertEqual(mbn_indices, target)
 
-    def test_cmp_list_of_lattice_sites(self):
+    def test_unzip(self):
         """
-        Test the comparer of list of lattice site.
-        """
-        indices = range(10)
-        offsets = [[x, y, z]
-                   for x, y, z in zip(range(10), range(10), range(10))]
-        sites = []
-        for index, offset in zip(indices, offsets):
-            sites.append(LatticeSite(index, offset))
-        sites = [sites, []]
-        indices = range(5)
-        offsets = [[x, y, z] for x, y, z in zip(range(5), range(5), range(5))]
-        sites2 = []
-        for index, offset in zip(indices, offsets):
-            sites2.append(LatticeSite(index, offset))
-        sites2 = [sites2, []]
-        # Test that a smaller list is considered smaller
-        self.assertTrue(self.mbnl.cmp_list_of_lattice_sites(sites2, sites))
+        Test the unzip functionality.
 
-        # Test that equality is not less than
-        self.assertFalse(self.mbnl.cmp_list_of_lattice_sites(sites, sites))
+        sites are in the format:
+        list( list(lattice_sites), list_of_lattice_sites)
+        call it list(sites1, sites2)
+        the unzip will do the following:
+        unzipped_sits = []
+        for site in sites2
+            unzipped_sites.append(sites1+site)
+        return unzipped sites
+
+        i.e. if sites1=[ls1, ls2]
+        and sites2= [ls3,ls4,ls5]
+        unzipped will return
+        [[ls1,ls2,ls3],
+        [ls1,ls2,ls4],
+        [ls1,sl2,ls5]]
+
+        """
+
+        ls = LatticeSite(0, [1, 2, 3])
+        # Should get one triplet
+        sites = [[ls, ls], [ls]]
+        unzipped_sites = self.mbnl.unzip(sites)
+        target = [[ls, ls, ls]]
+        self.assertEqual(len(unzipped_sites), 1)
+        self.assertListEqual(target, unzipped_sites)
+
+        # Should get two triplets
+        sites = [[ls, ls], [ls, ls]]
+        unzipped_sites = self.mbnl.unzip(sites)
+        target = [[ls, ls, ls], [ls, ls, ls]]
+        self.assertEqual(len(unzipped_sites), 2)
+        self.assertListEqual(target, unzipped_sites)
+
+        ls2 = LatticeSite(1, [3, 2, 1])
+        # should get 4 triplets
+        sites = [[ls, ls2], [ls, ls, ls2, ls]]
+        unzipped_sites = self.mbnl.unzip(sites)
+        target = [
+            [ls, ls2, ls],
+            [ls, ls2, ls],
+            [ls, ls2, ls2],
+            [ls, ls2, ls]]
+        self.assertListEqual(target, unzipped_sites)
+
+        sites = [[ls], []]
+        unzipped_sites = self.mbnl.unzip(sites)
+        target = [[ls]]
+        self.assertEqual(len(unzipped_sites), 1)
+        self.assertListEqual(target, unzipped_sites)
+        # Test unzipping entire mbnl
+        for index in range(len(self.atoms)):
+            mbnl_py = self.mbnl.build(index, bothways=False)
+            for compressed_sites in mbnl_py:
+                for unzipped in self.mbnl.unzip(compressed_sites):
+                    # If singlet len of unzip is the len of sites1
+                    if len(compressed_sites[1]) == 0:
+                        self.assertEqual(
+                            len(unzipped), len(compressed_sites[0]))
+                    else:  # else len of unzip is the len of sites1 + 1
+                        self.assertEqual(len(unzipped), len(
+                            compressed_sites[0]) + 1)
 
 
 if __name__ == '__main__':

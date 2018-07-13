@@ -39,14 +39,14 @@ std::vector<int> getPermutation(const std::vector<T> &v_original, const std::vec
 ///Return the permutation of v using the permutation in indices
 template <typename T>
 std::vector<T>
-getPermutatedVector(
+getPermutedVector(
     const std::vector<T> &v,
     const std::vector<int> &indices)
 {
 
     if (v.size() != indices.size())
     {
-        throw std::runtime_error("Error: vectors are not of the same size in function getPermutatedVector in Symmetry.hpp");
+        throw std::runtime_error("Error: vectors are not of the same size in function getPermutedVector in Symmetry.hpp");
     }
 
     std::vector<T> v2(v.size());
