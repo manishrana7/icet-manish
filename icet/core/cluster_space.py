@@ -2,6 +2,7 @@ import pickle
 
 from ase import Atoms
 from collections import OrderedDict
+from typing import List, Union
 
 from _icet import ClusterSpace as _ClusterSpace
 from icet.tools.geometry import get_primitive_structure, add_vacuum_in_non_pbc
@@ -35,8 +36,9 @@ class ClusterSpace(_ClusterSpace):
         verbosity level
     """
 
-    def __init__(self, atoms, cutoffs, chemical_symbols,
-                 Mi=None, verbosity=0):
+    def __init__(self, atoms: Union[Atoms, Structure], cutoffs: List[float],
+                 chemical_symbols: List[str], Mi: Union[list, dict, int]=None,
+                 verbosity: int=0):
         assert isinstance(atoms, Atoms), \
             'input configuration must be an ASE Atoms object'
 
@@ -65,7 +67,7 @@ class ClusterSpace(_ClusterSpace):
                 raise Exception('Mi has wrong type (ClusterSpace)')
         assert len(Mi) == len(orbit_list.get_primitive_structure()), \
             'len(Mi) does not equal the number of sites' \
-            + ' in the primitive structure'
+            ' in the primitive structure'
 
         # call (base) C++ constructor
         _ClusterSpace.__init__(self, Mi, chemical_symbols, orbit_list)
@@ -179,7 +181,7 @@ class ClusterSpace(_ClusterSpace):
                     index <= len(self) - print_minimum):
                 index = len(self) - print_minimum
                 s += [' ...']
-            s += [repr_orbit(orbit_list_info[index]).rstrip()]
+            s += [repr_orbit(orbit_list_info[index])]
             index += 1
         s += [''.center(width, '=')]
 
@@ -216,7 +218,8 @@ class ClusterSpace(_ClusterSpace):
                                ('order', 0),
                                ('radius', 0),
                                ('multiplicity', 1),
-                               ('orbit_index', -1)])
+                               ('orbit_index', -1),
+                               ('multi_component_vector', '.')])
 
         data.append(zerolet)
         index = 1
@@ -305,14 +308,14 @@ class ClusterSpace(_ClusterSpace):
         """ list : cutoffs used for initializing the cluster space """
         return self._cutoffs
 
-    def write(self, filename):
+    def write(self, filename: str):
         """
-        Save cluster space to a file.
+        Saves cluster space to a file.
 
         Parameters
         ---------
-        filename : str
-        filename for file
+        filename
+            name of file to which to write
         """
 
         parameters = {'atoms': self._atoms.copy(),
@@ -324,14 +327,14 @@ class ClusterSpace(_ClusterSpace):
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
-    def read(filename):
+    def read(filename: str):
         """
-        Read cluster space from filename.
+        Reads cluster space from filename.
 
         Parameters
         ---------
-        filename : str with filename to saved
-        cluster space.
+        filename
+            name of file from which to read cluster space
         """
         if isinstance(filename, str):
             with open(filename, 'rb') as handle:
@@ -346,16 +349,16 @@ class ClusterSpace(_ClusterSpace):
                             parameters['verbosity'])
 
 
-def get_singlet_info(atoms, return_cluster_space=False):
+def get_singlet_info(atoms: Atoms, return_cluster_space: bool=False):
     """
-    Retrieve information concerning the singlets in the input structure.
+    Retrieves information concerning the singlets in the input structure.
 
     Parameters
     ----------
-    atoms : ASE Atoms object
+    atoms
         atomic configuration
-    return_cluster_space : boolean
-        return the cluster space created during the process
+    return_cluster_space
+        if True return the cluster space created during the process
 
     Returns
     -------
