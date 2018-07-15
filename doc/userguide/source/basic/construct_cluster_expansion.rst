@@ -231,9 +231,9 @@ initiation of a :class:`ClusterExpansion <icet.ClusterExpansion>` object using
 the previously created :class:`ClusterSpace <icet.ClusterSpace>` instance and
 the list of parameters, available via the :class:`parameters
 <icet.Optimizer.parameters>` attribute of the optimizer, as input arguments.
-Information regarding the load parameters and associated cluster space
-will be displayed together by using :func:`print` function with the
-:class:`ClusterExpansion <icet.ClusterExpansion>` as input argument::
+Information regarding the parameters and associated cluster space
+can be displayed by using :func:`print` function with the
+:class:`ClusterExpansion <icet.ClusterExpansion>` object as input argument::
 
   =================================== Cluster Expansion ===================================
    chemical species: Pd Ag
