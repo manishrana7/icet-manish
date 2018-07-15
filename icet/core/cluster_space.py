@@ -327,7 +327,7 @@ class ClusterSpace(_ClusterSpace):
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
-    def read(filename: str) -> ClusterSpace:
+    def read(filename: str):
         """
         Reads cluster space from filename.
 
