@@ -46,11 +46,11 @@ class TestClusterExpansion(unittest.TestCase):
         # test whether method raises Exception
         with self.assertRaises(ValueError) as context:
             ClusterExpansion(self.cs, [0.0])
-        self.assertTrue('cluster_space and parameters must have the same'
-                        ' length (5 != 1)' in str(context.exception))
+        self.assertTrue('cluster_space (5) and parameters (1) must have the'
+                        ' same length' in str(context.exception))
 
     def test_predict(self):
-        """ Test predict function"""
+        """ Test predict function."""
         predicted_val = self.ce.predict(self.atoms)
         self.assertEqual(predicted_val, 10.0)
 
@@ -97,7 +97,7 @@ class TestClusterExpansion(unittest.TestCase):
  total number of orbits: 5
  number of orbits by order: 0= 1  1= 1  2= 1  3= 1  4= 1
 -----------------------------------------------------------------------------------------
-index | order |  radius  | multiplicity | orbit_index | multi_component_vector |   ECI   
+index | order |  radius  | multiplicity | orbit_index | multi_component_vector |   ECI
 -----------------------------------------------------------------------------------------
    0  |   0   |   0.0000 |        1     |      -1     |           .            |    0.000
    1  |   1   |   0.0000 |        1     |       0     |          [0]           |    1.000
@@ -121,7 +121,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
  total number of orbits: 5
  number of orbits by order: 0= 1  1= 1  2= 1  3= 1  4= 1
 -----------------------------------------------------------------------------------------
-index | order |  radius  | multiplicity | orbit_index | multi_component_vector |   ECI   
+index | order |  radius  | multiplicity | orbit_index | multi_component_vector |   ECI
 -----------------------------------------------------------------------------------------
    0  |   0   |   0.0000 |        1     |      -1     |           .            |    0.000
  ...

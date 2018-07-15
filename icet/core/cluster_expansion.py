@@ -34,12 +34,12 @@ class ClusterExpansion:
         Raises
         ------
         ValueError
-            if cluster space and parameters has both different length
+            if cluster space and parameters differ in length
         """
         if len(cluster_space) != len(parameters):
-            raise ValueError('cluster_space and parameters must have the same'
-                             ' length ({} != {})'.format(len(cluster_space),
-                                                         len(parameters)))
+            raise ValueError('cluster_space ({}) and parameters ({}) must have'
+                             ' the same length'.format(len(cluster_space),
+                                                       len(parameters)))
         self._cluster_space = cluster_space
         self._parameters = parameters
 
@@ -56,7 +56,7 @@ class ClusterExpansion:
         Returns
         -------
         float
-            value of the predicted property by the cluster expansion
+            property value of predicted by the cluster expansion
         """
         cluster_vector = self.cluster_space.get_cluster_vector(structure)
         prop = np.dot(cluster_vector, self.parameters)
@@ -64,7 +64,7 @@ class ClusterExpansion:
 
     @property
     def cluster_space(self) -> ClusterSpace:
-        """ cluster space on which the cluster expansion is based upon """
+        """ cluster space on which the cluster expansion is based """
         return self._cluster_space
 
     @property
@@ -118,7 +118,7 @@ class ClusterExpansion:
         return '\n'.join(s)
 
     def __repr__(self) -> str:
-        """ String representation """
+        """ string representation """
         return self._get_string_representation(print_threshold=50)
 
     def write(self, filename: str):
@@ -128,7 +128,7 @@ class ClusterExpansion:
         Parameters
         ---------
         filename
-            filename to which to write.
+            name of file to which to write
         """
         self.cluster_space.write(filename)
 
