@@ -236,7 +236,7 @@ the list of parameters, available via the :class:`parameters
    :start-after: # step 5
 
 Information regarding the parameters and associated cluster space
-can be displayed by using :func:`print` function with the
+can be displayed by using the :func:`print` function with the
 :class:`ClusterExpansion <icet.ClusterExpansion>` object as input argument::
 
   =================================== Cluster Expansion ====================================
