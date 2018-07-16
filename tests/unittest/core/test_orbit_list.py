@@ -1,11 +1,5 @@
 import unittest
 from ase.build import bulk
-from icet.core.orbit_list import create_orbit_list
-from icet.core.cluster import Cluster
-from icet import Structure
-from icet.tools.geometry import get_permutation
-
-from ase.build import bulk
 from icet.core.lattice_site import LatticeSite
 from icet.core.cluster import Cluster
 from icet.core.orbit import Orbit
@@ -16,6 +10,7 @@ from icet.core.orbit_list import (
 from icet.core.neighbor_list import get_neighbor_lists
 from icet.core.permutation_map import permutation_matrix_from_atoms
 from icet.core.structure import Structure
+from icet.tools.geometry import get_permutation
 
 
 class TestOrbitList(unittest.TestCase):
@@ -180,28 +175,34 @@ class TestOrbitList(unittest.TestCase):
 
     def test_equivalent_sites_size(self):
         """
-        Test that all the equivalent sites have the same geometrical size
+        Test that all the equivalent sites have the same radius.
         """
         atoms = bulk("Al")
         cutoffs = [10, 10]
         orbit_list = create_orbit_list(atoms, cutoffs)
-        for orbit in self.orbit_list.orbits:
-            size = orbit.geometrical_size
+        for orbit in orbit_list.orbits:
+            size = orbit.radius
             for eq_sites in orbit.equivalent_sites:
-                cluster = Cluster(self.structure, eq_sites, True)
+                structure = Structure.from_atoms(atoms)
+                cluster = Cluster(structure, eq_sites, True)
                 self.assertAlmostEqual(
-                    cluster.geometrical_size, size, places=5)
+                    cluster.radius, size, places=5)
 
+    #@unittest.expectedFailure
     def test_allowed_permutations(self):
         """
         Test allowed permutations of orbit.
+
+        Todo
+        ----
+        Test fails
         """
         atoms = bulk("Al")
         cutoffs = [10, 10]
         orbit_list = create_orbit_list(atoms, cutoffs)
-        for orbit in self.orbit_list.orbits:
+        for orbit in orbit_list.orbits:
             rep_sites = orbit.representative_sites
-            translated_sites = self.orbit_list.get_sites_translated_to_unit_cell(
+            translated_sites = orbit_list.get_sites_translated_to_unit_cell(
                 rep_sites, False)
             permutations = orbit.allowed_permutations
             for perm in permutations:

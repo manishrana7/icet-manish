@@ -720,6 +720,8 @@ PYBIND11_MODULE(_icet, m)
              "Some random description")
         .def("get_orbit_list", &OrbitList::getOrbitList,
              "Returns a list of Orbit objects from OrbitList")
+        .def("get_sites_translated_to_unit_cell", &OrbitList::getSitesTranslatedToUnitcell)
+        .def_property_readonly("orbits", &OrbitList::getOrbitList)
         .def("get_primitive_structure", &OrbitList::getPrimitiveStructure,
              "Returns the primitive atomic structure used to construct the OrbitList instance")
         .def("__len__", &OrbitList::size,
