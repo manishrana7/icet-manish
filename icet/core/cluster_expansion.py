@@ -84,7 +84,7 @@ class ClusterExpansion:
             print_threshold, print_minimum).split('\n')
         # rescale width
         eci_col_width = max(
-            len('{:8.3f}'.format(max(self._parameters, key=abs))), len('ECI'))
+            len('{:9.3g}'.format(max(self._parameters, key=abs))), len('ECI'))
         width = len(cluster_space_repr[0]) + len(' | ') + eci_col_width
 
         s = []
@@ -109,7 +109,7 @@ class ClusterExpansion:
                 s += [' ...']
             pattern = r'^{:4}'.format(index)
             t = [t for t in cluster_space_repr if re.match(pattern, t)]
-            eci_value = '{:8.3f}'.format(self._parameters[index])
+            eci_value = '{:9.3g}'.format(self._parameters[index])
             t += ['{s:^{n}}'.format(s=eci_value, n=eci_col_width)]
             s += [' | '.join(t)]
             index += 1
