@@ -186,7 +186,7 @@ def test_no_symmetry_vs_symmetry_count(atoms_primitive, atoms_tag,
     cluster_map_no_symmetry = clusterCount_no_symmetry.get_cluster_counts()
 
     ''' Get orbit list symmetry case '''
-    orbit_list_symmetry = orbit_list.create_orbit_list(structure, cutoffs,
+    orbit_list_symmetry = orbit_list.create_orbit_list(atoms, cutoffs,
                                                        verbosity=0)
     orbit_list_symmetry.sort()
 
