@@ -1,3 +1,4 @@
+from typing import Tuple
 import numpy as np
 from ase import Atoms
 import spglib
@@ -215,3 +216,13 @@ def find_permutation(target, permutated):
         index = permutated.index(element)
         permutation.append(index)
     return permutation
+
+
+def ase_atoms_to_spglib_cell(atoms: Atoms) -> Tuple[list, list, list]:
+    """
+    Returns a tuple of three components: cell metric, atomic positions, and
+    chemical symbols.
+    """
+    return (atoms.get_cell(),
+            atoms.get_scaled_positions(),
+            atoms.get_atomic_numbers())

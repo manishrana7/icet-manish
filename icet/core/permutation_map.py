@@ -3,7 +3,8 @@ from _icet import PermutationMap
 from .neighbor_list import NeighborList
 from .structure import Structure
 from ..tools.geometry import (get_primitive_structure,
-                              get_fractional_positions_from_neighbor_list)
+                              get_fractional_positions_from_neighbor_list,
+                              ase_atoms_to_spglib_cell)
 
 
 def permutation_matrix_from_atoms(atoms, cutoff,
@@ -42,8 +43,11 @@ def permutation_matrix_from_atoms(atoms, cutoff,
 
     if verbosity >= 3:
         print('size of primitive structure: {}'.format(len(atoms_prim)))
+
     # get symmetry information and load into a permutation map object
-    symmetry = spglib.get_symmetry(atoms_prim)
+    atoms_tuple = ase_atoms_to_spglib_cell(atoms_prim)
+
+    symmetry = spglib.get_symmetry(atoms_tuple)
     translations = symmetry['translations']
     rotations = symmetry['rotations']
 

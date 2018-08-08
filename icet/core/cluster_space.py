@@ -49,8 +49,7 @@ class ClusterSpace(_ClusterSpace):
         self._verbosity = verbosity
 
         # set up orbit list
-        orbit_list = create_orbit_list(Structure.from_atoms(atoms),
-                                       self._cutoffs,
+        orbit_list = create_orbit_list(atoms, self._cutoffs,
                                        verbosity=verbosity)
         orbit_list.sort()
 
