@@ -45,9 +45,9 @@ def permutation_matrix_from_atoms(atoms, cutoff,
         print('size of primitive structure: {}'.format(len(atoms_prim)))
 
     # get symmetry information and load into a permutation map object
-    atoms_tuple = ase_atoms_to_spglib_cell(atoms_prim)
+    atoms_as_tuple = ase_atoms_to_spglib_cell(atoms_prim)
 
-    symmetry = spglib.get_symmetry(atoms_tuple)
+    symmetry = spglib.get_symmetry(atoms_as_tuple)
     translations = symmetry['translations']
     rotations = symmetry['rotations']
 
