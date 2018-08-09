@@ -215,14 +215,17 @@ class TestGeometry(unittest.TestCase):
         Test that function returns the right tuple from the provided ASE
         Atoms object.
         """
-        cell, positions, chemical_symbols \
+        atoms = bulk('Al').repeat(3)
+        atoms[1].symbol = 'Ag'
+
+        cell, positions, atomic_numbers \
             = ase_atoms_to_spglib_cell(self.atoms)
 
         self.assertTrue((cell == self.atoms.get_cell()).all())
         self.assertTrue(
             (positions == self.atoms.get_scaled_positions()).all())
         self.assertTrue(
-            (chemical_symbols == self.atoms.get_atomic_numbers()).all())
+            (atomic_numbers == self.atoms.get_atomic_numbers()).all())
 
 
 if __name__ == '__main__':
