@@ -1,6 +1,5 @@
 from typing import Tuple, List, Sequence, TypeVar
 import numpy as np
-from numpy import array as Array
 from ase import Atoms
 import spglib
 
@@ -14,8 +13,11 @@ Vector = List[float]
 T = TypeVar('T')
 
 
-def get_scaled_positions(positions: Array, cell: Array, wrap: bool=True,
-                         pbc: List[bool]=[True, True, True]):
+def get_scaled_positions(positions: np.ndarray,
+                         cell: np.ndarray,
+                         wrap: bool=True,
+                         pbc: List[bool]=[True, True, True]) \
+                         -> np.ndarray:
     """
     Returns the positions in reduced (or scaled) coordinates.
 
@@ -53,12 +55,12 @@ def add_vacuum_in_non_pbc(atoms: Atoms) -> Atoms:
     Parameters
     ----------
     atoms
-        an atomic structure
+        input atomic structur
 
     Returns
     -------
     atoms
-        an atomic structure with vacuum in non-pbc directions
+        input atomic structure with vacuum in non-pbc directions
     """
 
     vacuum_axis = []
@@ -80,7 +82,7 @@ def get_primitive_structure(atoms: Atoms, no_idealize: bool=True) -> Atoms:
     Parameters
     ----------
     atoms
-        an atomic structure
+        input atomic structure
     no_idealize
         If True, disable to idealize length and angles
 
@@ -115,7 +117,7 @@ def get_fractional_positions_from_neighbor_list(
     Parameters
     ----------
     atoms
-        an atomic structure
+        input atomic structure
     neighbor_list
         list of lattice neighbors of the input structure
     """
@@ -149,7 +151,7 @@ def get_fractional_positions_from_ase_neighbor_list(
     Parameters
     ----------
     atoms
-        an atomic structure
+        input atomic structure
     neighbor_list
         list of neighbors of the input structure
     """
@@ -180,9 +182,9 @@ def get_position_from_lattice_site(atoms: Atoms, lattice_site: LatticeSite):
     Parameters
     ---------
     atoms
-        an atomic structure
+        input atomic structure
     lattice_site
-        a specific lattice site of the input structure
+        specific lattice site of the input structure
     """
     return atoms[lattice_site.index].position + \
         np.dot(lattice_site.unitcell_offset, atoms.get_cell())
@@ -195,7 +197,7 @@ def find_lattice_site_by_position(atoms: Atoms, position: List[float],
     position in reference to the atoms object.
 
     atoms
-        an atomic structure
+        input atomic structure
     position
         pressumed cartesian coordinates of a lattice site
     """
@@ -225,7 +227,7 @@ def fractional_to_cartesian(atoms: Atoms,
     Parameters
     ----------
     atoms
-        an atomic structure
+        input atomic structure
     frac_positions
         fractional positions
     """
@@ -267,10 +269,11 @@ def find_permutation(target: Sequence[T],
     return permutation
 
 
-def ase_atoms_to_spglib_cell(atoms: Atoms) -> Tuple[Array]:
+def ase_atoms_to_spglib_cell(atoms: Atoms) \
+                             -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Returns a tuple of three components: cell metric, atomic positions, and
-    chemical symbols of an ASE Atoms object.
+    atomic species of the input ASE Atoms object.
     """
     return (atoms.get_cell(),
             atoms.get_scaled_positions(),

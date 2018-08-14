@@ -218,14 +218,14 @@ class TestGeometry(unittest.TestCase):
         atoms = bulk('Al').repeat(3)
         atoms[1].symbol = 'Ag'
 
-        cell, positions, atomic_numbers \
+        cell, positions, species \
             = ase_atoms_to_spglib_cell(self.atoms)
 
         self.assertTrue((cell == self.atoms.get_cell()).all())
         self.assertTrue(
             (positions == self.atoms.get_scaled_positions()).all())
         self.assertTrue(
-            (atomic_numbers == self.atoms.get_atomic_numbers()).all())
+            (species == self.atoms.get_atomic_numbers()).all())
 
 
 if __name__ == '__main__':
