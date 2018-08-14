@@ -158,8 +158,7 @@ class TestPermutationMap(unittest.TestCase):
     def test_permutation_matrix_from_atoms(self):
         """ Test permutation matrix from atoms functionality. """
         pm, _, _ = \
-            permutation_matrix_from_atoms(
-                self.atoms, self.cutoff, verbosity=3)
+            permutation_matrix_from_atoms(self.atoms, self.cutoff)
 
         matrix = pm.get_permuted_positions()
         matrix2 = self.pm.get_permuted_positions()
