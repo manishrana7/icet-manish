@@ -6,6 +6,9 @@ from .neighbor_list import get_neighbor_lists
 from .permutation_map import permutation_matrix_from_atoms
 from .structure import Structure
 
+from icet.io.logging import logger
+logger = logger.getChild('orbit_list')
+
 
 def __fractional_to_cartesian(fractional_coordinates, cell):
     """
@@ -25,7 +28,7 @@ def __fractional_to_cartesian(fractional_coordinates, cell):
 
 
 def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
-                                          prune=True, verbosity=0):
+                                          prune=True):
     """
     Return a transformed permutation matrix with lattice sites instead of
     fractional coordinates.
@@ -40,9 +43,6 @@ def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
 
     prune : bool
         if True prune the permutation matrix. Default to True
-
-    verbosity : int
-        set verbosity level. Default to 0
 
     Permutation matrix is in row major format which we will keep
     """
@@ -64,14 +64,13 @@ def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
         if len(lat_nbrs) > 0:
             pm_lattice_sites.append(lat_nbrs)
         else:
-            print('lat nbrs are zero')
+            logger.warning('lat nbrs are zero')
     if prune:
-        if verbosity > 2:
-            print('size before pruning {} '.format(len(pm_lattice_sites)))
-        pm_lattice_sites = __prune_permutation_matrix(pm_lattice_sites,
-                                                      verbosity=verbosity)
-        if verbosity > 2:
-            print('size after pruning {} '.format(len(pm_lattice_sites)))
+        logger.debug('size before pruning {}'.format(len(pm_lattice_sites)))
+
+        pm_lattice_sites = __prune_permutation_matrix(pm_lattice_sites)
+
+        logger.debug('size after pruning {}'.format(len(pm_lattice_sites)))
 
     return pm_lattice_sites
 
@@ -84,9 +83,6 @@ def __prune_permutation_matrix(permutation_matrix, verbosity=0):
     ----------
     permutation_matrix : matrix
         permutation matrix with LatticeSite type entries
-
-    verbosity : int
-        set verbosity level. Default to 0
     """
     for i in range(len(permutation_matrix)):
         for j in reversed(range(len(permutation_matrix))):
@@ -97,7 +93,7 @@ def __prune_permutation_matrix(permutation_matrix, verbosity=0):
                 if verbosity > 2:
                     msg = ['Removing duplicate in permutation matrix']
                     msg += ['i: {} j: {}'.format(i, j)]
-                    print(' '.join(msg))
+                    logger.debug(' '.join(msg))
 
     return permutation_matrix
 
@@ -132,8 +128,6 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
         input configuration used to initialize mbnl and permutation matrix
     cutoffs : list of float
         cutoff radii for each order
-    verbosity : int
-        verbosity level
 
     Returns
     -------
@@ -154,8 +148,9 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
     time_spent = t1 - t0
     total_time_spent += time_spent
 
-    if verbosity > 3:
-        print('Done getting permutation_matrix. Time {} s'.format(time_spent))
+    msg = 'Done getting permutation_matrix. Time {}s'.format(time_spent)
+    logger.debug(msg)
+
     total_time_spent += time_spent
 
     t0 = time.time()
@@ -164,8 +159,7 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
     time_spent = t1 - t0
     total_time_spent += time_spent
 
-    if verbosity > 3:
-        print('Done getting neighbor_lists. Time {} s'.format(time_spent))
+    logger.debug('Done getting neighbor_lists. Time {} s'.format(time_spent))
 
     t0 = time.time()
     # transform permutation_matrix to be in lattice site format
@@ -178,10 +172,9 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
     time_spent = t1 - t0
     total_time_spent += time_spent
 
-    if verbosity > 3:
-        msg = ['Transformation of permutation matrix to lattice neighbor']
-        msg += ['format completed (time: {} s)'.format(time_spent)]
-        print(' '.join(msg))
+    msg = ['Transformation of permutation matrix to lattice neighbor']
+    msg += ['format completed (time: {} s)'.format(time_spent)]
+    logger.debug(' '.join(msg))
 
     t0 = time.time()
     orbit_list = OrbitList(prim_structure, pm_lattice_sites, neighbor_lists)
@@ -189,11 +182,9 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
     time_spent = t1 - t0
     total_time_spent += time_spent
 
-    if verbosity > 3:
-        print('Finished construction of orbit list.'
-              ' Time {} s'.format(time_spent))
+    logger.debug('Finished construction of orbit list.'
+                 ' Time {} s'.format(time_spent))
 
-    if verbosity > 3:
-        print('Total time {} s'.format(total_time_spent))
+    logger.debug('Total time {} s'.format(total_time_spent))
 
     return orbit_list
