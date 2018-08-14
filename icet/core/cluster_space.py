@@ -3,7 +3,7 @@ import pickle
 from ase import Atoms
 from collections import OrderedDict
 from typing import List, Union
-from numpy import array as Array
+import numpy as np
 
 from _icet import ClusterSpace as _ClusterSpace
 from icet.tools.geometry import get_primitive_structure, add_vacuum_in_non_pbc
@@ -33,13 +33,11 @@ class ClusterSpace(_ClusterSpace):
           the value the number of allowed components
         * if a single `int` is provided each site the number of allowed
           components will be set to `Mi` for sites in the structure
-    verbosity : int
-        verbosity level
     """
 
     def __init__(self, atoms: Union[Atoms, Structure], cutoffs: List[float],
-                 chemical_symbols: List[str], Mi: Union[list, dict, int]=None,
-                 verbosity: int=0):
+                 chemical_symbols: List[str], Mi: Union[list, dict, int]=None):
+
         assert isinstance(atoms, Atoms), \
             'input configuration must be an ASE Atoms object'
 
@@ -47,12 +45,10 @@ class ClusterSpace(_ClusterSpace):
         self._cutoffs = cutoffs
         self._chemical_symbols = chemical_symbols
         self._mi = Mi
-        self._verbosity = verbosity
 
         # set up orbit list
         orbit_list = create_orbit_list(Structure.from_atoms(atoms),
-                                       self._cutoffs,
-                                       verbosity=verbosity)
+                                       self._cutoffs)
         orbit_list.sort()
 
         # handle occupations
@@ -266,7 +262,7 @@ class ClusterSpace(_ClusterSpace):
             count_orbits[k] = count_orbits.get(k, 0) + 1
         return OrderedDict(sorted(count_orbits.items()))
 
-    def get_cluster_vector(self, atoms: Atoms) -> Array:
+    def get_cluster_vector(self, atoms: Atoms) -> np.ndarray:
         """
         Returns the cluster vector for a structure.
 
@@ -277,8 +273,7 @@ class ClusterSpace(_ClusterSpace):
 
         Returns
         -------
-        NumPy array
-            the cluster vector
+        the cluster vector
         """
         assert isinstance(atoms, Atoms), \
             'input configuration must be an ASE Atoms object'
@@ -324,8 +319,7 @@ class ClusterSpace(_ClusterSpace):
         parameters = {'atoms': self._atoms.copy(),
                       'cutoffs': self._cutoffs,
                       'chemical_symbols': self._chemical_symbols,
-                      'Mi': self._mi,
-                      'verbosity': self._verbosity}
+                      'Mi': self._mi}
         with open(filename, 'wb') as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -348,8 +342,7 @@ class ClusterSpace(_ClusterSpace):
         return ClusterSpace(parameters['atoms'],
                             parameters['cutoffs'],
                             parameters['chemical_symbols'],
-                            parameters['Mi'],
-                            parameters['verbosity'])
+                            parameters['Mi'])
 
 
 def get_singlet_info(atoms: Atoms, return_cluster_space: bool=False):

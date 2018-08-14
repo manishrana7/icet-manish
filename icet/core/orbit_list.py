@@ -118,7 +118,7 @@ def _get_supercell_orbit_list(self, atoms):
 OrbitList.get_supercell_orbit_list = _get_supercell_orbit_list
 
 
-def create_orbit_list(structure, cutoffs, verbosity=0):
+def create_orbit_list(structure, cutoffs):
     '''
     Build an orbit list.
 
@@ -166,8 +166,7 @@ def create_orbit_list(structure, cutoffs, verbosity=0):
     pm_lattice_sites \
         = __get_lattice_site_permutation_matrix(prim_structure,
                                                 permutation_matrix,
-                                                prune=True,
-                                                verbosity=verbosity)
+                                                prune=True)
     t1 = time.time()
     time_spent = t1 - t0
     total_time_spent += time_spent

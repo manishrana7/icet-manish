@@ -4,8 +4,6 @@ import tempfile
 from typing import BinaryIO, Dict, List, TextIO, Tuple, Union
 
 import numpy as np
-from numpy import array as Array
-
 import ase.db
 from ase import Atoms
 from ase.calculators.calculator import PropertyNotImplementedError
@@ -236,7 +234,7 @@ class StructureContainer:
         self._structure_list.append(structure)
 
     def get_fit_data(self, structure_indices: List[int]=None,
-                     key: str='energy') -> Tuple[Array, Array]:
+                     key: str='energy') -> Tuple[np.ndarray, np.ndarray]:
         """
         Returns fit data for all structures. The cluster vectors and
         target properties for all structures are stacked into NumPy arrays.
@@ -251,8 +249,7 @@ class StructureContainer:
 
         Returns
         -------
-        NumPy array, NumPy array
-            cluster vectors and target properties for desired structures
+        cluster vectors and target properties for desired structures
         """
         if structure_indices is None:
             cv_list = [s.cluster_vector
@@ -460,7 +457,7 @@ class FitStructure:
     """
 
     def __init__(self, atoms: Atoms, user_tag: str,
-                 cv: Array=None, properties: dict=None):
+                 cv: np.ndarray=None, properties: dict=None):
         self._atoms = atoms
         self._user_tag = user_tag
         self._properties = {}
@@ -468,7 +465,7 @@ class FitStructure:
         self.set_properties(properties)
 
     @property
-    def cluster_vector(self) -> Array:
+    def cluster_vector(self) -> np.ndarray:
         """calculated cluster vector"""
         return self._cluster_vector
 
@@ -493,7 +490,7 @@ class FitStructure:
             return super().__getattribute__(key)
         return self.properties[key]
 
-    def set_cluster_vector(self, cv: Array):
+    def set_cluster_vector(self, cv: np.ndarray):
         """
         Sets the cluster vectors of the structure.
 
