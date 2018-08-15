@@ -1,31 +1,18 @@
-'''
+"""
 This scripts checks the computation of cluster vectors for three body centerd
 cubic based structures.
-'''
+"""
 
 import numpy as np
 from ase.build import bulk, make_supercell
-from icet import ClusterSpace, get_singlet_info
+from icet import ClusterSpace
 
 cutoffs = [8.0, 7.0]
-subelements = ['W', 'Ti']
-
-print('')
+species = ['W', 'Ti']
 prototype = bulk('W')
-cs = ClusterSpace(prototype, cutoffs, subelements)
-
-# testing info functionality
-try:
-    print(cs)
-except:  # NOQA
-    assert False, '__repr__ function fails for ClusterSpace'
-try:
-    print(get_singlet_info(prototype))
-except:  # NOQA
-    assert False, 'get_singlet_info function fails for ClusterSpace'
+cs = ClusterSpace(prototype, cutoffs, species)
 
 # structure #1
-print(' structure #1')
 cv = cs.get_cluster_vector(prototype)
 cv_target = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                       1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
@@ -36,7 +23,6 @@ cv_target = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 assert np.all(np.abs(cv_target - cv) < 1e-6)
 
 # structure #2
-print(' structure #2')
 conf = make_supercell(prototype, [[2, 0, 1],
                                   [0, 1, 0],
                                   [0, 1, 2]])
@@ -53,7 +39,6 @@ cv_target = np.array([1.0, 0.0, 0.0, -0.3333333333333333,
 assert np.all(np.abs(cv_target - cv) < 1e-6)
 
 # structure #3
-print(' structure #3')
 conf = make_supercell(prototype, [[1,  0, 1],
                                   [0,  1, 1],
                                   [0, -1, 3]])
