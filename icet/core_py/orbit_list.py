@@ -402,6 +402,7 @@ class OrbitList(object):
                 set(copy.deepcopy(p_all_with_translated_equivalent)))
 
             # Step six: Get the indice version of p_allowed_permutations
+            # TODO: find_permutation does not raise any exception
             allowed_permutations = set()
             for sites in p_allowed_permutations:
                 failed_loops = 0
@@ -409,10 +410,8 @@ class OrbitList(object):
                     try:
                         perm = find_permutation(translated_rep_sites, sites)
                         allowed_permutations.add(tuple(perm))
-                    except Exception as e:
-
+                    except Exception:
                         failed_loops += 1
-                        # print("Caught exception {}".format(str(e)))
                         if failed_loops == len(translated_eq_sites):
                             raise Exception(
                                 " did not find any integer permutation"

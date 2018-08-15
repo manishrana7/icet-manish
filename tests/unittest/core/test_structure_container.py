@@ -23,13 +23,14 @@ the structure_container.py file
 import sys
 import tempfile
 import unittest
+import logging
 
+from io import StringIO
 from ase import Atoms
 from ase.build import bulk
 from ase.calculators.emt import EMT
 from icet import ClusterSpace, StructureContainer
 from icet.core.structure_container import FitStructure
-from io import StringIO
 
 
 def strip_surrounding_spaces(input_string):
@@ -128,10 +129,6 @@ class TestStructureContainer(unittest.TestCase):
         self.assertTrue('list of atoms and list of properties'
                         ' must have the same length' in str(cm.exception))
 
-        with self.assertRaises(AssertionError) as cm:
-            StructureContainer(self.cs, ['atoms'])
-        self.assertTrue('atoms has not ASE Atoms format' in str(cm.exception))
-
     def test_len(self):
         """
         Testing len functionality
@@ -156,8 +153,9 @@ class TestStructureContainer(unittest.TestCase):
     def test_add_structure(self):
         """
         Testing add_structure functionality
+        # TODO: Revisit testing for logging
         """
-        # add atoms with tag and propery
+        # add atoms with tag and property
         atoms = self.structure_list[0].copy()
         properties = self.properties_list[0]
         tag = "struct5"
@@ -169,13 +167,17 @@ class TestStructureContainer(unittest.TestCase):
         self.sc.add_structure(atoms)
         self.assertEqual(len(self.sc), len(self.structure_list)+2)
 
-        # check that duplicate structure is not added.
-        self.sc.add_structure(atoms, tag, properties)
-        with self.assertRaises(ValueError) as context:
-            self.sc.add_structure(atoms, tag, properties,
-                                  allow_duplicate=False)
-        self.assertIn('Atoms have identical cluster vector with structure',
-                      str(context.exception))
+        with self.assertLogs('sc') as cm:
+            logging.getLogger('sc').warning(
+                'Skipping structure; atoms have identical cluster vector'
+                ' with structure')
+            logging.getLogger('sc').warning(
+                'Potential energy is not among properties in the calculator')
+        self.assertEqual(cm.output,
+                         ['WARNING:sc:Skipping structure; atoms have identical'
+                          ' cluster vector with structure',
+                          'WARNING:sc:Potential energy is not among properties'
+                          ' in the calculator'])
 
     def test_get_fit_data(self):
         """
