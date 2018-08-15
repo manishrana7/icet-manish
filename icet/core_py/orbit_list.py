@@ -8,6 +8,7 @@ from icet.core.cluster import Cluster
 from icet.tools.geometry import find_permutation, get_permutation
 
 from itertools import permutations
+from collections import OrderedDict
 import copy
 
 
@@ -295,10 +296,43 @@ class OrbitList(object):
                                "in orbit list")
 
     def __str__(self):
-        nice_str = ''
-        for i, orbit in enumerate(self.orbits):
-            nice_str += "orbit {} - Multiplicity {} '\n'".format(i, len(orbit))
-        return nice_str
+
+        def repr_orbit(index, orbit, header=False):
+            formats = {'index': '{:4}',
+                       'order': '{:2}',
+                       'radius': '{:8.4f}',
+                       'multiplicity': '{:4}'}
+
+            orbit_data = OrderedDict([('index', index),
+                                      ('order', orbit.order),
+                                      ('radius', orbit.radius),
+                                      ('multiplicity', len(orbit))])
+            s = []
+            for name, value in orbit_data.items():
+                str_repr = formats[name].format(value)
+                n = max(len(name), len(str_repr))
+                if header:
+                    s += ['{s:^{n}}'.format(s=name, n=n)]
+                else:
+                    s += ['{s:^{n}}'.format(s=str_repr, n=n)]
+            return ' | '.join(s)
+
+        # table header
+        prototype_orbit = self.orbits[-1]
+        width = len(repr_orbit(-1, prototype_orbit))
+        s = []
+        s += ['{s:=^{n}}'.format(s=' Orbit List ', n=width)]
+        s += [repr_orbit(-1, prototype_orbit, header=True)]
+        s += [''.center(width, '-')]
+
+        # table body
+        index = 0
+        while index < len(self):
+            s += [repr_orbit(index, self.orbits[index])]
+            index += 1
+        s += [''.center(width, '=')]
+
+        return '\n'.join(s)
 
     def is_rows_taken(self, rows):
         """

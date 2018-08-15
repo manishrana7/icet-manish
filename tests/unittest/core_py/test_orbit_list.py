@@ -11,6 +11,25 @@ from ase.build import bulk
 # from icet import Structure
 from icet import ClusterSpace
 from ase.build import fcc111
+from io import StringIO
+
+
+def strip_surrounding_spaces(input_string):
+    """
+    Helper function that removes both leading and trailing spaces from a
+    multi-line string.
+
+    Returns
+    -------
+    str
+        original string minus surrounding spaces and empty lines
+    """
+    s = []
+    for line in StringIO(input_string):
+        if len(line.strip()) == 0:
+            continue
+        s += [line.strip()]
+    return '\n'.join(s)
 
 
 class TestOrbitList(unittest.TestCase):
@@ -204,7 +223,18 @@ class TestOrbitList(unittest.TestCase):
 
         Just print the orbitlist and see that it works.
         """
-        print(self.orbit_list)
+        retval = self.orbit_list.__str__()
+        target = """
+============= Orbit List ==============
+index | order |  radius  | multiplicity
+---------------------------------------
+   0  |   1   |   0.0000 |        1
+   1  |   2   |   1.4460 |        6
+   2  |   2   |   2.0450 |        3
+=======================================
+"""
+        self.assertEqual(strip_surrounding_spaces(target),
+                         strip_surrounding_spaces(retval))
 
     def test_singlets_particle(self):
         """
