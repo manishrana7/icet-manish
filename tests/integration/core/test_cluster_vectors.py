@@ -10,7 +10,7 @@ from icet import ClusterSpace
 from icet.tools.geometry import add_vacuum_in_non_pbc
 
 
-def generate_mixed_structure(atoms_prim, species):
+def generate_mixed_structure(atoms_prim, atoms_species):
     """
     Generate a supercell structure based on the input structure and populate it
     randomly with the species specified.
@@ -22,7 +22,7 @@ def generate_mixed_structure(atoms_prim, species):
 
     atoms = atoms_prim.copy().repeat(repeat)
     for at in atoms:
-        element = random.choice(species)
+        element = random.choice(atoms_species)
         at.symbol = element
 
     return atoms
@@ -68,7 +68,6 @@ def assert_decorrelation(matrix, tolerance=0.99):
             assert corr < tolerance, msg
 
 
-print('')
 db = connect('structures_for_testing.db')
 species = ['H', 'He', 'Pb']
 for row in db.select():

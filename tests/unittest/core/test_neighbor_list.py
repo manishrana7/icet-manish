@@ -24,9 +24,7 @@ class TestNeighborList(unittest.TestCase):
         self.ase_indices, self.ase_offsets = self.ase_nl.get_neighbors(0)
 
     def setUp(self):
-        """
-        SetUp before each test.
-        """
+        """ SetUp before each test """
         self.nl = NeighborList(self.cutoff)
         self.nl.build(self.structure)
         neighbors = self.nl.get_neighbors(0)
@@ -37,35 +35,26 @@ class TestNeighborList(unittest.TestCase):
             self.offsets.append(ngb.unitcell_offset)
 
     def test_build(self):
-        """
-        Test build gives the same number of neighbors
-        as ASE neigborlist.
-        """
+        """Tests build gives the expected number of neighbors"""
         for index in range(len(self.atoms)):
             neighbors = self.nl.get_neighbors(index)
             ase_neighbors = self.ase_nl.get_neighbors(index)
             self.assertEqual(len(neighbors), len(ase_neighbors[0]))
 
     def test_indices(self):
-        """
-        Test indices are equal to those in ASE neighbor list.
-        """
+        """ Tests indices of the neighbor lattices are correct"""
         self.assertEqual(len(self.indices), len(self.ase_indices))
         for index in self.indices:
             self.assertIn(index, self.ase_indices)
 
     def test_offsets(self):
-        """
-        Test offsets are equal to those in ASE neighbor list.
-        """
+        """ Tests offsets of the neighbor lattices are correct """
         self.assertEqual(len(self.offsets), len(self.ase_offsets))
         for offset in self.offsets:
             self.assertIn(offset, self.ase_offsets)
 
     def test_equivalent_indices(self):
-        """
-        Test equivalent indices.
-        """
+        """ Tests equivalent indices """
         for index, offset in zip(self.indices, self.offsets):
             equiv_indices = [i for i, ase_offset in enumerate(self.ase_offsets)
                              if self.ase_indices[i] == index and
@@ -74,10 +63,7 @@ class TestNeighborList(unittest.TestCase):
             self.assertEqual(self.ase_indices[equiv_indices[0]], index)
 
     def test_neighbors_lists(self):
-        """
-        Test return neighbor positions from neighborlist
-        againts ASE neighborlist.
-        """
+        """Tests atoms positions obtained from elements of the neighbor list"""
         for i in range(len(self.atoms)):
             index = [ngb.index for ngb in self.nl.get_neighbors(i)]
             offset = [ngb.unitcell_offset for ngb in self.nl.get_neighbors(i)]
@@ -89,21 +75,19 @@ class TestNeighborList(unittest.TestCase):
             self.assertCountEqual(pos2.tolist(), pos.tolist())
 
     def test_get_neighbors_lists(self):
-        """
-        Test get_neighbor_lists functionality.
-        """
+        """ Tests get_neighbor_lists functionality """
         list_of_nl = get_neighbor_lists(self.structure, [self.cutoff] * 4)
         self.assertEqual(len(list_of_nl), 4)
         self.assertEqual(len(list_of_nl[0]), len(self.nl))
 
     def test_neighbors_non_pbc(self):
-        """
-        Test indices and offset of neighborlist for a
-        non-pbc structure under the same cutoff as above.
-        """
+        """Tests for atoms with non-periodic boundary conditions"""
         atoms = self.atoms.copy()
         atoms.pbc = [True, True, False]
         atoms.center(4.0, axis=[2])
+
+        self.ase_nl.update(atoms)
+        ase_indices, ase_offsets = self.ase_nl.get_neighbors(0)
 
         structure = Structure.from_atoms(atoms)
 
@@ -112,12 +96,8 @@ class TestNeighborList(unittest.TestCase):
         indices = [ngb.index for ngb in nl.get_neighbors(0)]
         offsets = [ngb.unitcell_offset for ngb in nl.get_neighbors(0)]
 
-        self.ase_nl.update(atoms)
-        ase_indices, ase_offsets = self.ase_nl.get_neighbors(0)
-
         for index in indices:
             self.assertIn(index, ase_indices)
-
         for offset in offsets:
             self.assertIn(offset, ase_offsets)
 

@@ -88,7 +88,6 @@ class TestClusterExpansion(unittest.TestCase):
 
     def test_repr(self):
         """Testing repr functionality."""
-
         retval = self.ce.__repr__()
         target = """
 =================================== Cluster Expansion ====================================

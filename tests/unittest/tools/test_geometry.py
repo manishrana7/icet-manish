@@ -15,9 +15,9 @@ from icet.tools.geometry import get_permutation
 
 
 class TestGeometry(unittest.TestCase):
-    '''
+    """
     Container for tests to the geometry module.
-    '''
+    """
 
     def __init__(self, *args, **kwargs):
         super(TestGeometry, self).__init__(*args, **kwargs)
@@ -147,9 +147,7 @@ class TestGeometry(unittest.TestCase):
             self.assertEqual(site, found_site)
 
     def test_fractional_to_cartesian(self):
-        """
-        Test the geometry function fractional_to_cartesian
-        """
+        """ Tests fractional coordinates are converted into cartesians """
         # Use the get frac positions from
         #  neighborlist to have something to work with
 
@@ -179,9 +177,7 @@ class TestGeometry(unittest.TestCase):
             self.assertEqual(target, list(pos))
 
     def test_get_permutation(self):
-        """
-        Test the get_permutation function.
-        """
+        """ Tests get_permutation functionality """
         value = ['a', 'b', 'c']
         target = ['a', 'b', 'c']
         permutation = [0, 1, 2]
