@@ -10,7 +10,7 @@ from ase.calculators.calculator import PropertyNotImplementedError
 
 from icet import ClusterSpace
 from icet.io.logging import logger
-logger = logger.getChild('sc')
+logger = logger.getChild('structure_container')
 
 
 class StructureContainer:
