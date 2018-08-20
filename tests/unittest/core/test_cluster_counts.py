@@ -48,14 +48,17 @@ class TestClusterCounts(unittest.TestCase):
                                     self.structure)
         self.orbit_list.sort()
 
+    def shortDescription(self):
+        doc = self._testMethodDoc
+        return doc
+
     def setUp(self):
-        """ Sets up an empty cluster counts object. """
+        """ Set up an empty cluster counts object. """
         self.cluster_counts = ClusterCounts()
 
     def test_count_lattice_neighbors(self):
         """
-        Tests singlet and pair counts given
-        many-body neighbor list.
+        Tests singlet and pair counts given many-body neighbor list.
         """
         mbnl = ManyBodyNeighborList()
         mbnl_pairs = mbnl.build(self.neighbor_lists, 0, False)
@@ -117,7 +120,9 @@ class TestClusterCounts(unittest.TestCase):
         self.assertEqual(count, {(28, 26): 1, (28, 28): 1})
 
     def test_count_orbit_list(self):
-        """ Tests cluster_counts given orbits in an orbit list. """
+        """
+        Tests cluster_counts given orbits in an orbit list.
+        """
         cluster_singlet = Cluster(self.structure, [], False, 0)
         cluster_pair = Cluster(self.structure, [], False, 1)
         clusters = [cluster_singlet, cluster_pair]
@@ -134,7 +139,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_count_orbit_list_non_pbc(self):
         """
-        Test cluster counts using orbit_list for a non-pbc structure.
+        Tests cluster counts using orbit_list for a non-pbc structure.
         """
         atoms_non_pbc = self.atoms.copy()
         atoms_non_pbc.set_pbc(False)
@@ -160,7 +165,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_len(self):
         """
-        Test total size of counts.
+        Tests total size of counts.
         """
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
@@ -169,7 +174,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_reset(self):
         """
-        Test reset.
+        Tests reset functionality.
         """
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
@@ -178,7 +183,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_get_cluster_counts_info(self):
         """
-        Test get_cluster_counts_info functionality.
+        Tests get_cluster_counts_info functionality.
         """
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
@@ -189,7 +194,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_repr(self):
         """
-        Test representation of cluster_counts.
+        Tests representation of cluster_counts.
         """
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
@@ -213,7 +218,7 @@ Ni   Ni    13
 
     def test_print_overview(self):
         """
-        Test print overview.
+        Tests print overview.
         """
         with StringIO() as capturedOutput:
             sys.stdout = capturedOutput  # redirect stdout

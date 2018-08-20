@@ -84,6 +84,10 @@ class TestStructureContainer(unittest.TestCase):
             add_properties = {'total_energy': atoms.get_total_energy()}
             self.add_properties_list.append(add_properties)
 
+    def shortDescription(self):
+        doc = self._testMethodDoc
+        return doc
+
     def setUp(self):
         """
         Instantiate class before each test.
@@ -131,29 +135,28 @@ class TestStructureContainer(unittest.TestCase):
 
     def test_len(self):
         """
-        Testing len functionality
+        Testing length functionality.
         """
         len_structure_container = self.sc.__len__()
         self.assertEqual(len_structure_container, len(self.structure_list))
 
     def test_getitem(self):
         """
-        Testing getitem functionality
+        Testing getitem functionality.
         """
         structure = self.sc.__getitem__(1)
         self.assertIsNotNone(structure)
 
     def test_get_structure_indices(self):
         """
-        Testing get_structure_indices functionality
+        Testing get_structure_indices functionality.
         """
         list_index = [x for x in range(len(self.structure_list))]
         self.assertEqual(self.sc.get_structure_indices(), list_index)
 
     def test_add_structure(self):
         """
-        Testing add_structure functionality
-        # TODO: Revisit testing for logging
+        Testing add_structure functionality.
         """
         # add atoms with tag and property
         atoms = self.structure_list[0].copy()
@@ -181,7 +184,7 @@ class TestStructureContainer(unittest.TestCase):
 
     def test_get_fit_data(self):
         """
-        Testing get_fit_data functionality
+        Testing get_fit_data functionality.
         """
         import numpy as np
         cluster_vectors, properties = self.sc.get_fit_data()
@@ -207,7 +210,7 @@ class TestStructureContainer(unittest.TestCase):
 
     def test_repr(self):
         """
-        Testing repr functionality
+        Testing repr functionality.
         """
         retval = self.sc.__repr__()
         target = """
@@ -227,7 +230,7 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
 
     def test_get_string_representation(self):
         """
-        Testing _get_string_representation functionality
+        Testing _get_string_representation functionality.
         """
         retval = self.sc._get_string_representation(print_threshold=2,
                                                     print_minimum=1)
@@ -247,7 +250,7 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
 
     def test_print_overview(self):
         """
-        Testing print_overview functionality
+        Testing print_overview functionality.
         """
         with StringIO() as capturedOutput:
             sys.stdout = capturedOutput  # redirect stdout
@@ -257,7 +260,7 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
 
     def test_get_properties(self):
         """
-        Testing get_properties functionality
+        Testing get_properties functionality.
         """
         p_list = self.sc.get_properties()
         self.assertTrue(isinstance(properties, float) for properties in p_list)
@@ -267,7 +270,7 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
 
     def test_add_properties(self):
         """
-        Testing load_properties functionality
+        Testing add_properties functionality.
         """
         self.sc.add_properties([0], properties=[self.add_properties_list[0]])
         p_list = self.sc.get_properties([0], key='total_energy')
@@ -279,7 +282,7 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
 
     def test_get_structures(self):
         """
-        Testing get_structures functionality
+        Testing get_structures functionality.
         """
         s_list = self.sc.get_structures()
         self.assertTrue(isinstance(atoms, Atoms) for atoms in s_list)
@@ -289,21 +292,21 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
 
     def test_get_user_tags(self):
         """
-        Testing get_user_tags function
+        Testing get_user_tags functionality.
         """
         target = ['Structure 0', 'Structure 1', 'Structure 2', 'Structure 3']
         self.assertEqual(target, self.sc.get_user_tags())
 
     def test_cluster_space(self):
         """
-        Testing cluster space functionality
+        Testing cluster space functionality.
         """
         cs_onlyread = self.sc.cluster_space
         self.assertEqual(cs_onlyread, self.cs)
 
     def test_available_properties(self):
         """
-        Testing available_properties property
+        Testing available_properties property.
         """
         available_properties = sorted(self.properties_list[0])
         self.sc.add_structure(self.structure_list[0],
@@ -314,7 +317,7 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
 
     def test_read_write(self):
         """
-        Test the read write functionality.
+        Test the read and write functionality.
         """
         temp_file = tempfile.NamedTemporaryFile()
 
@@ -344,7 +347,7 @@ index |       user_tag        | natoms | chemical formula |  energy  |  volume
 
 class TestFitStructure(unittest.TestCase):
     """
-    Container for tests of the class functionality
+    Container for tests of the class functionality.
     """
 
     def __init__(self, *args, **kwargs):
@@ -353,9 +356,13 @@ class TestFitStructure(unittest.TestCase):
         self.cs = ClusterSpace(atoms=self.prim, cutoffs=[4.0, 4.0, 4.0],
                                chemical_symbols=['Ag', 'Au'])
 
+    def shortDescription(self):
+        doc = self._testMethodDoc
+        return doc
+
     def setUp(self):
         """
-        Instantiate class before each test
+        Instantiate class before each test.
         """
         atoms = self.prim.repeat(2)
         prop = {'energy': 0.0126746}
@@ -366,7 +373,7 @@ class TestFitStructure(unittest.TestCase):
     def test_init(self):
         """
         Just testing that the setup
-        (initialization) of tested class work
+        (initialization) of tested class work.
         """
         atoms = self.prim.repeat(2)
         tag = "struct1"
@@ -374,7 +381,7 @@ class TestFitStructure(unittest.TestCase):
 
     def test_cluster_vector(self):
         """
-        Testing cluster vector attribute
+        Testing cluster vector attribute.
         """
         atoms = self.prim.repeat(2)
         cv_from_cluster_space = list(self.cs.get_cluster_vector(atoms))
@@ -383,28 +390,28 @@ class TestFitStructure(unittest.TestCase):
 
     def test_atoms(self):
         """
-        Testing atoms attribute
+        Testing atoms attribute.
         """
         atoms = self.fit_structure.atoms
         self.assertTrue(isinstance(atoms, Atoms))
 
     def test_user_tag(self):
         """
-        Testing user_tag attribute
+        Testing user_tag attribute.
         """
         user_tag = self.fit_structure.user_tag
         self.assertTrue(isinstance(user_tag, str))
 
     def test_properties(self):
         """
-        Testing properties attribute
+        Testing properties attribute.
         """
         properties = self.fit_structure.properties
         self.assertTrue(isinstance(properties, dict))
 
     def test_set_properties(self):
         """
-        Testing set_properties functionality
+        Testing set_properties functionality.
         """
         add_prop = {'total_energy': 0.0126746}
         self.fit_structure.set_properties(add_prop)
@@ -415,7 +422,7 @@ class TestFitStructure(unittest.TestCase):
 
     def test_set_cluster_vector(self):
         """
-        Testing set_cluster_vector functionality
+        Testing set_cluster_vector functionality.
         """
         self.fit_structure.set_cluster_vector(None)
         cv = self.fit_structure.cluster_vector

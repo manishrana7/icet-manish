@@ -98,7 +98,7 @@ unittest.TestCase.assertAlmostEqualList = _assertAlmostEqualList
 
 class TestClusterSpace(unittest.TestCase):
     """
-    Container for tests of the class functionality
+    Container for test of the class functionality
     """
 
     def __init__(self, *args, **kwargs):
@@ -114,6 +114,10 @@ class TestClusterSpace(unittest.TestCase):
             atoms.set_chemical_symbols(symbols)
             self.structure_list.append(atoms)
 
+    def shortDescription(self):
+        doc = self._testMethodDoc
+        return doc
+
     def setUp(self):
         """
         Instantiate class before each test.
@@ -124,7 +128,7 @@ class TestClusterSpace(unittest.TestCase):
     def test_init(self):
         """
         Just testing that the setup
-        (initialization) of tested class work
+        (initialization) of tested class work.
         """
         # initialize from ASE Atoms
         cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.chemical_symbols)
@@ -143,13 +147,15 @@ class TestClusterSpace(unittest.TestCase):
 
     def test_len(self):
         """
-        Testing len functionality
+        Testing len functionality.
         """
         number_orbits = self.cs.__len__()
         self.assertEqual(number_orbits, len(self.cs.get_orbit_list()) + 1)
 
     def test_orbit_data(self):
-        """ Tests orbit_data property. """
+        """
+        Tests orbit_data property.
+        """
         target = [OrderedDict([('index', 0),
                                ('order', 0),
                                ('radius', 0),
@@ -179,7 +185,7 @@ class TestClusterSpace(unittest.TestCase):
 
     def test_repr(self):
         """
-        Testing repr functionality
+        Testing repr functionality.
         """
         retval = self.cs.__repr__()
         target = """
@@ -203,7 +209,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 
     def test_get_string_representation(self):
         """
-        Testing _get_string_representation functionality
+        Testing _get_string_representation functionality.
         """
         retval = self.cs._get_string_representation(print_threshold=2,
                                                     print_minimum=1)
@@ -226,7 +232,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 
     def test_print_overview(self):
         """
-        Testing print_overview functionality
+        Testing print_overview functionality.
         """
         with StringIO() as capturedOutput:
             sys.stdout = capturedOutput  # redirect stdout
@@ -244,7 +250,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 
     def test_get_cluster_vector(self):
         """
-        Testing get_cluster_vector functionality
+        Testing get_cluster_vector functionality.
         """
         target_cluster_vectors = [
             [1.0, -1.0, 1.0, -1.0, 1.0],
@@ -265,7 +271,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 
     def test_get_singlet_info(self):
         """
-        Testing get_singlet_info functionality
+        Testing get_singlet_info functionality.
         """
         retval = get_singlet_info(self.structure_list[0])
         target = [{'orbit_index': 0,
@@ -280,7 +286,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 
     def test_get_singlet_configuration(self):
         """
-        Testing get_singlet_configuration functionality
+        Testing get_singlet_configuration functionality.
         """
         retval = get_singlet_configuration(self.atoms_prim)
         self.assertIsInstance(retval, Atoms)
@@ -292,7 +298,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 
     def test_get_Mi_from_dict(self):
         """
-        Testing get_Mi_from_dict functionality
+        Testing get_Mi_from_dict functionality.
         """
         d = {0: len(self.chemical_symbols)}
         Mi = ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
@@ -304,7 +310,9 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         self.assertTrue('missing from dictionary' in str(context.exception))
 
     def test_cutoffs(self):
-        """ Testing cutoffs property """
+        """
+        Testing cutoffs property.
+        """
         self.assertEqual(self.cs.cutoffs, self.cutoffs)
 
     def _test_cluster_vectors_in_database(self, db_name):
@@ -328,7 +336,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 
     def test_multi_component_cluster_vectors(self):
         """
-        Test the consistency of multi components cluster
+        Tests the consistency of multi components cluster
         vectors. Will test against ternary and quaternary cluster
         vectors with fcc, bcc and hcp.
         """
@@ -348,7 +356,9 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
             'tests/unittest/core/hcp_quaternary.db')
 
     def test_read_write(self):
-        """ Tests read/write functionality. """
+        """
+        Tests read/write functionality.
+        """
         f = tempfile.NamedTemporaryFile()
         self.cs.write(f.name)
         f.seek(0)
@@ -359,7 +369,9 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         self.assertEqual(self.cs._mi, cs_read._mi)
 
     def test_chemical_symbols(self):
-        """ Tests chemical_symbols property. """
+        """
+        Tests chemical_symbols property.
+        """
         target = ['Ag', 'Au']
         self.assertEqual(self.cs.chemical_symbols, target)
 
@@ -382,6 +394,10 @@ class TestClusterSpaceSurface(unittest.TestCase):
             symbols[:k] = [self.chemical_symbols[1]] * k
             atoms.set_chemical_symbols(symbols)
             self.structure_list.append(atoms)
+
+    def shortDescription(self):
+        doc = self._testMethodDoc
+        return doc
 
     def setUp(self):
         """
@@ -455,6 +471,10 @@ class TestClusterSpaceTernary(unittest.TestCase):
         self.chemical_symbols = ['Ag', 'Au', 'Pd']
         self.cutoffs = [4.0] * 3
         self.atoms_prim = bulk('Ag', 'fcc')
+
+    def shortDescription(self):
+        doc = self._testMethodDoc
+        return doc
 
     def setUp(self):
         """

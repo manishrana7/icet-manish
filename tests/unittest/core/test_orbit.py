@@ -39,6 +39,10 @@ class TestOrbit(unittest.TestCase):
                                        for index, unitcell_offset in
                                        zip(indices, unitcell_offsets)]
 
+    def shortDescription(self):
+        doc = self._testMethodDoc
+        return doc
+
     def setUp(self):
         """
         Instantiate class before each test.
@@ -59,7 +63,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_init(self):
         """
-        Test the initializer.
+        Tests the initializer.
         """
         orbit = Orbit(self.pair_cluster)
         self.assertIsInstance(orbit, Orbit)
@@ -69,7 +73,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_equivalent_sites(self):
         """
-        Test getting the equivalent sites of orbit.
+        Tests getting the equivalent sites of orbit.
         """
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
         self.assertEqual(self.orbit_pair.equivalent_sites,
@@ -77,7 +81,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_representative_cluster(self):
         """
-        Test getting the representative cluster of orbit.
+        Tests getting the representative cluster of orbit.
         """
         cluster = self.orbit_pair.get_representative_cluster()
         self.assertEqual(cluster, self.pair_cluster)
@@ -87,7 +91,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_representative_sites(self):
         """
-        Test getting the representative sites of orbit.
+        Tests getting the representative sites of orbit.
         """
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
         self.assertEqual(self.orbit_pair.representative_sites,
@@ -95,7 +99,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_order(self):
         """
-        Test getting the order of orbit.
+        Tests getting the order of orbit.
         """
         self.assertEqual(
             self.orbit_pair.order, 2)
@@ -104,7 +108,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_len(self):
         """
-        Test len of orbit.
+        Tests lenght of orbit.
         """
         self.assertEqual(len(self.orbit_pair), 0)
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
@@ -113,13 +117,13 @@ class TestOrbit(unittest.TestCase):
 
     def test_radius(self):
         """
-        Test geometrical size of orbit.
+        Tests geometrical size of orbit.
         """
         self.orbit_pair.radius
 
     def test_sort(self):
         """
-        Test sorting functionality of orbit.
+        Tests sorting functionality of orbit.
         """
         self.orbit_pair.equivalent_sites = sorted(
             self.lattice_sites_pairs, reverse=True)
@@ -129,7 +133,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_eq(self):
         """
-        Test equality functionality of orbit.
+        Tests equality functionality of orbit.
         """
         self.orbit_pair.equivalent_sites = \
             self.lattice_sites_pairs
@@ -148,7 +152,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_lt(self):
         """
-        Test less than functionality of orbit.
+        Tests less than functionality of orbit.
         """
         self.orbit_pair.equivalent_sites = \
             self.lattice_sites_pairs
@@ -162,7 +166,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_add(self):
         """
-        Test that offset is effectively added to orbit.
+        Tests that offset is effectively added to orbit.
         """
         added_offset = np.array((1., 1., 1.))
         self.orbit_pair.equivalent_sites =\
@@ -188,7 +192,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_permutations_to_representative(self):
         """
-        Test the permutations to representative property.
+        Tests the permutations to representative property.
         """
         allowed_permutations = [[1, 2, 3]]
 
@@ -202,7 +206,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_allowed_permutations(self):
         """
-        Test the allowed permutations property.
+        Tests the allowed permutations property.
         """
         allowed_permutations = [[1, 2, 3]]
         self.assertEqual(self.orbit_pair.allowed_permutations, [])
@@ -213,9 +217,8 @@ class TestOrbit(unittest.TestCase):
 
     def test_permuted_sites(self):
         """
-        Test the permuted sites property.
+        Tests the permuted sites property.
         """
-
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
         # Raises IndexError when permutations to primitive is not set
         with self.assertRaises(IndexError):
@@ -240,7 +243,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_get_sites_with_permutation(self):
         """
-        Test the get sites with permutation functionality.
+        Tests the get sites with permutation functionality.
         """
         target = [LatticeSite(0, [0., 0., 0.]), LatticeSite(1, [0., 0., 0.])]
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
@@ -253,9 +256,8 @@ class TestOrbit(unittest.TestCase):
 
     def test_get_mc_vectors_pairs(self):
         """
-        Test the get mc vectors functionality for a pair orbit
+        Tests the get mc vectors functionality for a pair orbit.
         """
-
         self.orbit_pair.equivalent_sites = \
             self.lattice_sites_pairs
         # Binary mc vectors
@@ -281,9 +283,8 @@ class TestOrbit(unittest.TestCase):
 
     def test_get_mc_vectors_triplets(self):
         """
-        Test  the get mc vectors functionality for a triplet orbit
+        Tests  the get mc vectors functionality for a triplet orbit.
         """
-        # Test C++ version, difference is tuples/list (python/C++)
         self.orbit_triplet.equivalent_sites = \
             self.lattice_sites_triplets
         # Binary mc vectors

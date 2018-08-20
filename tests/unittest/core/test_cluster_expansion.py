@@ -33,6 +33,10 @@ class TestClusterExpansion(unittest.TestCase):
         chemical_symbols = ['Au', 'Pd']
         self.cs = ClusterSpace(self.atoms, cutoffs, chemical_symbols)
 
+    def shortDescription(self):
+        doc = self._testMethodDoc
+        return doc
+
     def setUp(self):
         """Set up before each test."""
         params_len = self.cs.get_cluster_space_size()
@@ -40,7 +44,9 @@ class TestClusterExpansion(unittest.TestCase):
         self.ce = ClusterExpansion(self.cs, self.parameters)
 
     def test_init(self):
-        """Test that initialization works."""
+        """
+        Test that initialization works.
+        """
         self.assertIsInstance(self.ce, ClusterExpansion)
 
         # test whether method raises Exception
@@ -50,24 +56,34 @@ class TestClusterExpansion(unittest.TestCase):
                         ' same length' in str(context.exception))
 
     def test_predict(self):
-        """ Test predict function."""
+        """
+        Test predict function.
+        """
         predicted_val = self.ce.predict(self.atoms)
         self.assertEqual(predicted_val, 10.0)
 
     def test_property_clusterspace(self):
-        """Test cluster space property."""
+        """
+        Test cluster space property.
+        """
         self.assertEqual(self.ce.cluster_space, self.cs)
 
     def test_property_parameters(self):
-        """Test parameters properties."""
+        """
+        Test parameters properties.
+        """
         self.assertEqual(self.ce.parameters, self.parameters)
 
     def test_len(self):
-        """Test len functionality."""
+        """
+        Test len functionality.
+        """
         self.assertEqual(self.ce.__len__(), len(self.parameters))
 
     def test_read_write(self):
-        """Test read and write functionalities."""
+        """
+        Test read and write functionalities.
+        """
         # save to file
         temp_file = tempfile.NamedTemporaryFile()
         self.ce.write(temp_file.name)
@@ -87,7 +103,9 @@ class TestClusterExpansion(unittest.TestCase):
         self.assertEqual(ce_read.parameters, self.parameters)
 
     def test_repr(self):
-        """Testing repr functionality."""
+        """
+        Testing repr functionality.
+        """
 
         retval = self.ce.__repr__()
         target = """
@@ -110,7 +128,9 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
                          strip_surrounding_spaces(retval))
 
     def test_get_string_representation(self):
-        """Testing _get_string_representation functionality."""
+        """
+        Testing _get_string_representation functionality.
+        """
 
         retval = self.ce._get_string_representation(print_threshold=2,
                                                     print_minimum=1)

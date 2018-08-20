@@ -23,9 +23,13 @@ class TestNeighborList(unittest.TestCase):
         self.ase_nl.update(self.atoms)
         self.ase_indices, self.ase_offsets = self.ase_nl.get_neighbors(0)
 
+    def shortDescription(self):
+        doc = self._testMethodDoc
+        return doc
+
     def setUp(self):
         """
-        SetUp before each test.
+        Set up before each test.
         """
         self.nl = NeighborList(self.cutoff)
         self.nl.build(self.structure)
@@ -38,7 +42,7 @@ class TestNeighborList(unittest.TestCase):
 
     def test_build(self):
         """
-        Test build gives the same number of neighbors
+        Tests build gives the same number of neighbors
         as ASE neigborlist.
         """
         for index in range(len(self.atoms)):
@@ -48,7 +52,7 @@ class TestNeighborList(unittest.TestCase):
 
     def test_indices(self):
         """
-        Test indices are equal to those in ASE neighbor list.
+        Tests indices are equal to those in ASE neighbor list.
         """
         self.assertEqual(len(self.indices), len(self.ase_indices))
         for index in self.indices:
@@ -56,7 +60,7 @@ class TestNeighborList(unittest.TestCase):
 
     def test_offsets(self):
         """
-        Test offsets are equal to those in ASE neighbor list.
+        Tests offsets are equal to those in ASE neighbor list.
         """
         self.assertEqual(len(self.offsets), len(self.ase_offsets))
         for offset in self.offsets:
@@ -64,7 +68,7 @@ class TestNeighborList(unittest.TestCase):
 
     def test_equivalent_indices(self):
         """
-        Test equivalent indices.
+        Tests equivalent indices.
         """
         for index, offset in zip(self.indices, self.offsets):
             equiv_indices = [i for i, ase_offset in enumerate(self.ase_offsets)
@@ -75,7 +79,7 @@ class TestNeighborList(unittest.TestCase):
 
     def test_neighbors_lists(self):
         """
-        Test return neighbor positions from neighborlist
+        Tests return neighbor positions from neighborlist
         againts ASE neighborlist.
         """
         for i in range(len(self.atoms)):
@@ -90,7 +94,7 @@ class TestNeighborList(unittest.TestCase):
 
     def test_get_neighbors_lists(self):
         """
-        Test get_neighbor_lists functionality.
+        Tests get_neighbor_lists functionality.
         """
         list_of_nl = get_neighbor_lists(self.structure, [self.cutoff] * 4)
         self.assertEqual(len(list_of_nl), 4)
@@ -98,7 +102,7 @@ class TestNeighborList(unittest.TestCase):
 
     def test_neighbors_non_pbc(self):
         """
-        Test indices and offset of neighborlist for a
+        Tests indices and offset of neighborlist for a
         non-pbc structure under the same cutoff as above.
         """
         atoms = self.atoms.copy()

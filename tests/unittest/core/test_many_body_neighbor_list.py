@@ -11,7 +11,6 @@ from icet.core.many_body_neighbor_list import (
 class TestManyBodyNeighborList(unittest.TestCase):
     """
     Container for test of the module functionality.
-
     """
 
     def __init__(self, *args, **kwargs):
@@ -20,9 +19,13 @@ class TestManyBodyNeighborList(unittest.TestCase):
         self.atoms = bulk('Ni', 'hcp', a=3.0).repeat([2, 2, 1])
         self.cutoffs = [5.0, 5.0]
 
+    def shortDescription(self):
+        doc = self._testMethodDoc
+        return doc
+
     def setUp(self):
         """
-        SetUp
+        Instantiate class before each test
         """
         self.mbnl = ManyBodyNeighborList()
         structure = Structure.from_atoms(self.atoms)
@@ -30,7 +33,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_build(self):
         """
-        Test build.
+        Tests build.
         """
         for index in range(len(self.atoms)):
             self.mbnl.build(self.neighbor_lists, index, True)
@@ -48,9 +51,9 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_bothways_false(self):
         """
-        Build the mbnl with bothways = False and assert that
-        mbnl built on the first index in the atoms object do not
-        have the same number of neighbors as the other atoms.
+        Build the mbnl with bothways = False and assert that mbnl
+        built on the first index in the atoms object do not have
+        the same number of neighbors as the other atoms.
         """
         mbnl_size = len(self.mbnl.build(self.neighbor_lists, 0, False))
         for index in range(1, len(self.atoms)):
@@ -59,7 +62,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_singlets(self):
         """
-        Test that every singlet lattice site is listed
+        Tests that every singlet lattice site is listed
         in the many-body neighbor list.
         """
         for index in range(len(self.atoms)):
@@ -69,9 +72,8 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_pairs(self):
         """
-        Test that many-body_neighbor list includes
-        all the pairs returned by  neighbor_list for
-        a specific lattice site.
+        Tests that many-body_neighbor list includes all the pairs returned
+        by  neighbor_list for a specific lattice site.
         """
         index = 0
         nl_neighbors = self.neighbor_lists[0].get_neighbors(0)
@@ -81,8 +83,8 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_higher_order_neighbors(self):
         """
-        Test higher order neighbors in many-body
-        neighbor list for a specific lattice site.
+        Tests higher order neighbors in many-body neighbor list for a
+        specific lattice site.
         """
         index = 0
         high_order_neighbors = \
@@ -100,7 +102,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_calculate_intersections(self):
         """
-        Test intersection between two list of neighbors.
+        Tests intersection between two list of neighbors.
         """
         lattice_sites = []
         lattice_sites.append(LatticeSite(0, [0, 0, 0]))
@@ -120,7 +122,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_mbnl_non_pbc(self):
         """
-        Test many-body neighbor list for non-pbc structure.
+        Tests many-body neighbor list for non-pbc structure.
         """
         atoms = self.atoms.copy()
         atoms.set_pbc([False])
@@ -153,7 +155,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_mbnl_cubic_non_pbc(self):
         """
-        Test that corners sites in a large cubic cell have
+        Tests that corners sites in a large cubic cell have
         only three neighbors in many-body neighbor list.
         """
         atoms = bulk('Al', 'sc', a=4.0).repeat(4)
