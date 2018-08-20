@@ -34,7 +34,7 @@ class TestPermutationMap(unittest.TestCase):
             prim_structure, neighbor_list)
 
     def setUp(self):
-        """ Instantiate class before each test """
+        """ SetUp """
         symmetry = spglib.get_symmetry(self.atoms_prim)
         self.translations = symmetry['translations']
         self.rotations = symmetry['rotations']
@@ -44,12 +44,12 @@ class TestPermutationMap(unittest.TestCase):
         self.pm.build(self.frac_positions)
 
     def test_init(self):
-        """ Tests initializer """
+        """ Test initializer """
         self.assertIsInstance(self.pm, PermutationMap)
 
     def test_dimension_permutation_matrix(self):
         """
-        Tests dimensions of permutation matrix. Number of rows should
+        Test dimensions of permutation matrix. Number of rows should
         be equal to the number of symmetry operations while number of columns
         must correpond to the total number of fractional positions.
         """
@@ -59,7 +59,10 @@ class TestPermutationMap(unittest.TestCase):
         self.assertEqual(len(pm_frac), len(self.frac_positions))
 
     def test_get_permuted_positions(self):
-        """ Tests the first row and first column of permutation matrix """
+        """
+        Test that first row and first column of permutation matrix match
+        the target lists.
+        """
         pm_frac = self.pm.get_permuted_positions()
 
         target_row = [[0.0, 0.0, 0.0],
@@ -177,7 +180,9 @@ class TestPermutationMap(unittest.TestCase):
                 self.assertEqual(element.tolist(), element2.tolist())
 
     def test_fractional_to_cartesian(self):
-        """Test fractional coordinates are converted into cartesians"""
+        """
+        Test fractional coordinates are converted into cartesians coordinates.
+        """
         target = [[0.0, 0.0, 0.0],
                   [-1.5, -0.87, -2.45],
                   [-1.5, -0.87, -2.45],
@@ -213,10 +218,12 @@ class TestPermutationMap(unittest.TestCase):
         """
         Test lattice sites in permutation matrix by asserting the distances
         between r_ik and r_jk sites in the same column.
-        """
-        # TODO: Some part of the implementation cannot be covered as test
-        # fails for non-pbc structures.
 
+        Todo
+        ----
+        Some part of the implementation cannot be covered as test failed
+        for non-pbc structures.
+        """
         atoms = bulk('Al').repeat(2)
         cutoff = 4.2
         pm, prim_structure, _ = \
@@ -240,7 +247,7 @@ class TestPermutationMap(unittest.TestCase):
 
     def test_prune_permutation_matrix(self):
         """
-        Tests that first column of pruned permutation matrix
+        Test that first column of pruned permutation matrix
         containes unique elements.
         """
         pm, prim_structure, _ = \

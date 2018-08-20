@@ -3,9 +3,7 @@
 import sys
 import unittest
 
-from io import StringIO
 from ase.build import bulk
-
 from icet import Structure
 from icet.core.cluster import Cluster
 from icet.core.cluster_counts import ClusterCounts
@@ -13,6 +11,7 @@ from icet.core.lattice_site import LatticeSite
 from icet.core.many_body_neighbor_list import ManyBodyNeighborList
 from icet.core.neighbor_list import get_neighbor_lists
 from icet.core.orbit_list import OrbitList
+from io import StringIO
 
 
 def strip_surrounding_spaces(input_string):
@@ -50,11 +49,14 @@ class TestClusterCounts(unittest.TestCase):
         self.orbit_list.sort()
 
     def setUp(self):
-        """Set up before each test."""
+        """ Sets up an empty cluster counts object. """
         self.cluster_counts = ClusterCounts()
 
     def test_count_lattice_neighbors(self):
-        """Tests cluster counts for a given many-body neighbor list."""
+        """
+        Tests singlet and pair counts given
+        many-body neighbor list.
+        """
         mbnl = ManyBodyNeighborList()
         mbnl_pairs = mbnl.build(self.neighbor_lists, 0, False)
         self.cluster_counts.count_lattice_neighbors(self.structure, mbnl_pairs)
@@ -74,7 +76,10 @@ class TestClusterCounts(unittest.TestCase):
             self.assertEqual(count, expected_counts[k])
 
     def test_count_lattice_sites(self):
-        """Tests cluster counts for the given lattice neighbors."""
+        """
+        Tests cluster_counts counts a pair given a set of
+        lattice neighbors.
+        """
         lattice_sites = []
         lattice_sites.append(LatticeSite(0, [0., 0., 0.]))
         lattice_sites.append(LatticeSite(1, [0., 0., 0.]))
@@ -88,7 +93,10 @@ class TestClusterCounts(unittest.TestCase):
         self.assertEqual(count, {(26, 28): 1})
 
     def test_count_list_lattice_sites(self):
-        """Tests cluster counts for a given list of lattice neighbors."""
+        """
+        Tests whether cluster_counts returns the correct number of pairs
+        given a list of lattice neighbors.
+        """
         lattice_sites = []
         lattice_sites.append(LatticeSite(0, [0., 0., 0.]))
         lattice_sites.append(LatticeSite(1, [0., 0., 0.]))
@@ -109,7 +117,7 @@ class TestClusterCounts(unittest.TestCase):
         self.assertEqual(count, {(28, 26): 1, (28, 28): 1})
 
     def test_count_orbit_list(self):
-        """ Tests cluster_counts for a given orbit list. """
+        """ Tests cluster_counts given orbits in an orbit list. """
         cluster_singlet = Cluster(self.structure, [], False, 0)
         cluster_pair = Cluster(self.structure, [], False, 1)
         clusters = [cluster_singlet, cluster_pair]
@@ -125,7 +133,9 @@ class TestClusterCounts(unittest.TestCase):
             self.assertEqual(count, expected_counts[k])
 
     def test_count_orbit_list_non_pbc(self):
-        """Tests cluster counts using orbit_list for a non-pbc structure."""
+        """
+        Test cluster counts using orbit_list for a non-pbc structure.
+        """
         atoms_non_pbc = self.atoms.copy()
         atoms_non_pbc.set_pbc(False)
         structure = Structure.from_atoms(atoms_non_pbc)
@@ -149,21 +159,27 @@ class TestClusterCounts(unittest.TestCase):
             self.assertEqual(count, expected_counts[k])
 
     def test_len(self):
-        """ Tests total number of counts. """
+        """
+        Test total size of counts.
+        """
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
         self.assertEqual(len(self.cluster_counts),
                          len(self.orbit_list))
 
     def test_reset(self):
-        """Tests reset functionality."""
+        """
+        Test reset.
+        """
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
         self.cluster_counts.reset()
         self.assertEqual(len(self.cluster_counts), 0)
 
     def test_get_cluster_counts_info(self):
-        """ Tests that information can be gotten from cluster counts """
+        """
+        Test get_cluster_counts_info functionality.
+        """
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
         self.cluster_counts.setup_cluster_counts_info()
@@ -172,7 +188,9 @@ class TestClusterCounts(unittest.TestCase):
         self.assertEqual(count, 1)
 
     def test_repr(self):
-        """ Tests string representation """
+        """
+        Test representation of cluster_counts.
+        """
         self.cluster_counts.count_clusters(self.structure,
                                            self.orbit_list, False)
         retval = self.cluster_counts.repr()
@@ -194,7 +212,9 @@ Ni   Ni    13
                          strip_surrounding_spaces(retval))
 
     def test_print_overview(self):
-        """ Tests print overview functionality """
+        """
+        Test print overview.
+        """
         with StringIO() as capturedOutput:
             sys.stdout = capturedOutput  # redirect stdout
             self.cluster_counts.print_overview()  # call method

@@ -143,7 +143,10 @@ class TestSiteGroup(unittest.TestCase):
                             self.position)
 
     def test_init(self):
-        """Testing that the setup (initialization) of tested class work"""
+        """
+        Testing that the setup
+        (initialization) of tested class work
+        """
         sg = SiteGroup(self.iter_element,
                        self.position)
         self.assertIsInstance(sg, SiteGroup)

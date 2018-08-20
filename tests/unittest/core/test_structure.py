@@ -55,36 +55,50 @@ class TestStructure(unittest.TestCase):
         random.seed(113)
 
     def test_positions(self):
-        """ Tests positions of atoms in structure """
+        """
+        Test positions of atoms in structure.
+        """
         for i, vec in enumerate(self.structure.positions):
             self.assertListEqual(vec.tolist(), self.positions[i])
 
     def test_chemical_symbols(self):
-        """ Tests chemical symbols of atoms in structure """
+        """
+        Test chemical symbols of atoms in structure.
+        """
         self.assertListEqual(self.structure.chemical_symbols,
                              self.chemical_symbols)
 
     def test_atomic_numbers(self):
-        """ Tests atomic numbers """
+        """
+        Test atomic numbers.
+        """
         self.assertListEqual(self.structure.atomic_numbers,
                              [47, 47])
 
     def test_cell(self):
-        """ Tests cell """
+        """
+        Test cell.
+        """
         for i, vec in enumerate(self.structure.cell):
             self.assertListEqual(vec.tolist(), self.cell[i])
 
     def test_pbc(self):
-        """ Tests periodic boundary conditions """
+        """
+        Test periodic boundary conditions.
+        """
         self.assertListEqual(self.structure.pbc, [True, True, True])
 
     def test_unique_sites(self):
-        """ Tests unique sites """
+        """
+        Test unique sites.
+        """
         self.assertListEqual(self.structure.unique_sites,
                              [0, 0])
 
     def test_set_and_get_positions(self):
-        """ Tests set and get positions """
+        """
+        Test set and get positions.
+        """
         new_positions = [[0., 0., 0.001],
                          [0., 1.15470054, 1.63299316]]
         self.structure.set_positions(new_positions)
@@ -93,20 +107,26 @@ class TestStructure(unittest.TestCase):
             self.assertListEqual(vec.tolist(), new_positions[i])
 
     def test_set_and_get_chemical_symbols(self):
-        """ Tests set and get chemical symbols """
+        """
+        Test set and get chemical symbols.
+        """
         new_chemical_symbols = ['Au', 'Au']
         self.structure.set_chemical_symbols(new_chemical_symbols)
         retval = self.structure.get_chemical_symbols()
         self.assertListEqual(retval, new_chemical_symbols)
 
     def test_set_and_get_atomic_numbers(self):
-        """ Tests set and get atomic numbers """
+        """
+        Test set and get atomic numbers.
+        """
         self.structure.set_atomic_numbers([48, 47])
         retval = self.structure.get_atomic_numbers()
         self.assertListEqual(retval, [48, 47])
 
     def test_set_and_get_cell(self):
-        """ Tests set and get cell """
+        """
+        Test set and get cell.
+        """
         new_cell = [[2., 0., 0.],
                     [-1., 2., 0.],
                     [0., 0., 4.]]
@@ -116,24 +136,32 @@ class TestStructure(unittest.TestCase):
             self.assertListEqual(vec.tolist(), new_cell[i])
 
     def test_set_and_get_pbc(self):
-        """ Tests set and get pbc """
+        """
+        Test set and get pbc.
+        """
         self.structure.set_pbc([True, True, False])
         retval = self.structure.get_pbc()
         self.assertListEqual(retval, [True, True, False])
 
     def test_set_and_get_unique_sites(self):
-        """ Tests set and get pbc """
+        """
+        Test set and get pbc.
+        """
         self.structure.set_unique_sites([0, 1])
         retval = self.structure.get_unique_sites()
         self.assertListEqual(retval, [0, 1])
 
     def test_get_position(self):
-        """ Tests get_position functionality """
+        """
+        Test get_position functionality.
+        """
         retval = self.structure.get_position(LatticeSite(1, [0, 0, 0]))
         self.assertListEqual(retval.tolist(), self.positions[1])
 
     def test_get_distance(self):
-        """ Tests get_distance functionality """
+        """
+        Test get_distance functionality.
+        """
         retval = self.structure.get_distance(0, 1,
                                              [0., 0., 0.],
                                              [0., 0., 0.])
@@ -247,7 +275,9 @@ class TestStructure(unittest.TestCase):
             self.assertEqual(site, found_site)
 
     def test_structure_from_atoms(self):
-        """ Tests ASE Atoms-to-icet Structure conversion """
+        """
+        Test ASE Atoms-to-icet Structure conversion.
+        """
         structure = Structure.from_atoms(self.atoms)
 
         positions = structure.get_positions()
@@ -259,7 +289,9 @@ class TestStructure(unittest.TestCase):
         self.assertListEqual(chem_symbols, ['Ag', 'Ag'])
 
     def test_structure_to_atoms(self):
-        """ Tests icet Structure-to-ASE Atoms conversion """
+        """
+        Test icet Structure-to-ASE Atoms conversion.
+        """
         atoms = Structure.to_atoms(self.structure)
         positions = atoms.get_positions()
         struc_positions = self.structure.get_positions()
@@ -270,7 +302,9 @@ class TestStructure(unittest.TestCase):
         self.assertListEqual(chem_symbols, ['Ag', 'Ag'])
 
     def test_repr_function(self):
-        """Tests representation """
+        """
+        Test representation.
+        """
         retval = self.structure.__repr__()
         target = '''
 Cell:
