@@ -5,8 +5,8 @@ import sys
 # This is the root logger of icet
 logger = logging.getLogger('icet')
 
-# Will process all levels of INFO or higher
-logger.setLevel(logging.INFO)
+# Will process all levels of WARNING or higher
+logger.setLevel(logging.WARNING)
 
 # If you know what you are doing you may set this to True
 logger.propagate = False

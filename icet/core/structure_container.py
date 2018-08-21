@@ -60,8 +60,9 @@ class StructureContainer:
                     self.add_structure(atoms=atoms, user_tag=user_tag,
                                        properties=properties,
                                        allow_duplicate=allow_duplicate)
-                except ValueError as err:
-                    logger.warning('Skipping structure; ' + str(err))
+                except ValueError:
+                    logger.exception('Skipping structure {}; '.format(
+                        list_of_atoms.index((atoms, user_tag))))
 
     def __len__(self) -> int:
         return len(self._structure_list)
@@ -218,8 +219,9 @@ class StructureContainer:
                 if len(atoms.calc.check_state(atoms)) == 0:
                     try:
                         energy = atoms.get_potential_energy()
-                    except PropertyNotImplementedError as err:
-                        logger.warning(str(err))
+                    except PropertyNotImplementedError:
+                        logger.exception('Property cannot be added from the'
+                                         ' attached calculator')
                     else:
                         properties['energy'] = energy / len(atoms)
 

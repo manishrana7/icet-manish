@@ -131,13 +131,13 @@ class TestStructureContainer(unittest.TestCase):
         # check inputs with wrong format are skipped
         with self.assertLogs('icet.structure_container') as cm:
                 StructureContainer(self.cs, ['atoms'])
-        self.assertIn('Skipping structure; atoms has not ASE Atoms format',
-                      str(cm.output[0]))
+        self.assertTrue(x in cm.output[0] for x in [
+            'Skipping structure 0;', 'atoms has not ASE Atoms format'])
 
         with self.assertLogs('icet.structure_container') as cm:
             StructureContainer(self.cs, [(self.structure_list[0], 1)])
-        self.assertIn('Skipping structure; user_tag has wrong type (str)',
-                      str(cm.output[0]))
+        self.assertTrue(x in cm.output[0] for x in [
+            'Skipping structure 0;', 'user_tag has wrong type (str)'])
 
     def test_len(self):
         """
@@ -183,7 +183,6 @@ class TestStructureContainer(unittest.TestCase):
                                   allow_duplicate=False)
         self.assertIn('atoms have identical cluster vector with structure',
                       str(context.exception))
-        print(str(context.exception))
         self.assertEqual(len(self.sc), len(self.structure_list)+3)
 
     def test_get_fit_data(self):
