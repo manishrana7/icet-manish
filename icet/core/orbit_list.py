@@ -64,7 +64,7 @@ def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
         if len(lat_nbrs) > 0:
             pm_lattice_sites.append(lat_nbrs)
         else:
-            logger.warning('lat nbrs are zero')
+            logger.warning('Column of lattice neighbors is empty')
     if prune:
         logger.debug('size before pruning {}'.format(len(pm_lattice_sites)))
 

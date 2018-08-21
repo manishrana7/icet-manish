@@ -128,7 +128,7 @@ class TestStructureContainer(unittest.TestCase):
         self.assertTrue('list of atoms and list of properties'
                         ' must have the same length' in str(cm.exception))
 
-        # check inputs with wrong format are skkiped
+        # check inputs with wrong format are skipped
         with self.assertLogs('icet.structure_container') as cm:
                 StructureContainer(self.cs, ['atoms'])
         self.assertIn('Skipping structure; atoms has not ASE Atoms format',
@@ -163,7 +163,6 @@ class TestStructureContainer(unittest.TestCase):
     def test_add_structure(self):
         """
         Testing add_structure functionality
-        # TODO: Revisit testing for logging
         """
         # add atoms with tag and property
         atoms = self.structure_list[0].copy()
@@ -179,12 +178,12 @@ class TestStructureContainer(unittest.TestCase):
 
         # check that duplicates structure is not added.
         self.sc.add_structure(atoms, tag, properties)
-        with self.assertLogs('icet.structure_container') as cm:
-                self.sc.add_structure(atoms, tag, properties,
-                                      allow_duplicate=False)
-        self.assertIn('Skipping structure; atoms have identical'
-                      ' cluster vector with structure',
-                      str(cm.output[0]))
+        with self.assertRaises(ValueError) as context:
+            self.sc.add_structure(atoms, tag, properties,
+                                  allow_duplicate=False)
+        self.assertIn('atoms have identical cluster vector with structure',
+                      str(context.exception))
+        print(str(context.exception))
         self.assertEqual(len(self.sc), len(self.structure_list)+3)
 
     def test_get_fit_data(self):

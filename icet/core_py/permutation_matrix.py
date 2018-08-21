@@ -65,9 +65,6 @@ class PermutationMatrix(object):
 
         self.primitive_structure = atoms
 
-        msg = 'number of atoms {}'.format(len(self.primitive_structure))
-        logger.debug(msg)
-
         # Get symmetry information and load into a permutation map object
         symmetry = spglib.get_symmetry(self.primitive_structure)
         self.translations = symmetry['translations']
@@ -93,7 +90,6 @@ class PermutationMatrix(object):
             self.primitive_structure, neighbor_list)
 
         # frac_positions.sort()
-        logger.debug('number of positions: {}'.format(len(frac_positions)))
 
         permutation_matrix = []
         for frac_pos in frac_positions:

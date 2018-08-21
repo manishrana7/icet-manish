@@ -295,7 +295,7 @@ class ClusterSpace(_ClusterSpace):
     @property
     def chemical_symbols(self) -> List[str]:
         """
-        Returns the list of elements considered
+        Returns the list of species considered
         """
         return self._chemical_symbols.copy()
 
