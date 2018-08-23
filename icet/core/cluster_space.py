@@ -301,8 +301,8 @@ class ClusterSpace(_ClusterSpace):
     @property
     def cutoffs(self) -> List[float]:
         """
-        Cutoffs for the different n-body clusters. Each cutoff radii 
-        (in Angstroms) defines the largest inter-atomic distance  in each 
+        Cutoffs for the different n-body clusters. Each cutoff radii
+        (in Angstroms) defines the largest inter-atomic distance in each
         cluster
         """
         return self._cutoffs
