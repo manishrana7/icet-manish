@@ -131,13 +131,13 @@ class TestStructureContainer(unittest.TestCase):
         # check inputs with wrong format are skipped
         with self.assertLogs('icet.structure_container') as cm:
                 StructureContainer(self.cs, ['atoms'])
-        self.assertTrue(x in cm.output[0] for x in [
-            'Skipping structure 0;', 'atoms has not ASE Atoms format'])
+        self.assertIn('Skipping structure 0;', cm.output[0])
+        self.assertIn('atoms must be an ASE Atoms object', cm.output[0])
 
         with self.assertLogs('icet.structure_container') as cm:
             StructureContainer(self.cs, [(self.structure_list[0], 1)])
-        self.assertTrue(x in cm.output[0] for x in [
-            'Skipping structure 0;', 'user_tag has wrong type (str)'])
+        self.assertIn('Skipping structure 0;', cm.output[0])
+        self.assertIn('user_tag must be a string', cm.output[0])
 
     def test_len(self):
         """

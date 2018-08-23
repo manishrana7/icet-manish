@@ -287,22 +287,23 @@ class ClusterSpace(_ClusterSpace):
     @property
     def primitive_structure(self) -> Atoms:
         """
-        Returns the primitive structure on which the cluster space
-        is based
+        Primitive structure on which the cluster space is based
         """
         return self._get_primitive_structure().to_atoms()
 
     @property
     def chemical_symbols(self) -> List[str]:
         """
-        Returns the list of species considered
+        Chemical species considered
         """
         return self._chemical_symbols.copy()
 
     @property
     def cutoffs(self) -> List[float]:
         """
-        Returns the cutoffs used for initializing the cluster space
+        Cutoffs for the different n-body clusters. Each cutoff radii 
+        (in Angstroms) defines the largest inter-atomic distance  in each 
+        cluster
         """
         return self._cutoffs
 

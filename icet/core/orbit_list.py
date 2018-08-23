@@ -64,7 +64,8 @@ def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
         if len(lat_nbrs) > 0:
             pm_lattice_sites.append(lat_nbrs)
         else:
-            logger.warning('Column of lattice neighbors is empty')
+            logger.warning('Unable to translate any element of the'
+                           'permutation matrix into a lattice site format')
     if prune:
         logger.debug('size before pruning {}'.format(len(pm_lattice_sites)))
 
@@ -132,6 +133,7 @@ def create_orbit_list(structure, cutoffs):
     -------
     OrbitList object
     '''
+    # TODO: Is it necessary to print the profiling info?
     if isinstance(structure, Structure):
         atoms = Structure.to_atoms(structure)
     else:
