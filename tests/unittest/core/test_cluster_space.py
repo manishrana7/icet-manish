@@ -332,6 +332,8 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         of structures with known cluster vectors.
         """
         self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/fcc_binary.db')
+        self._test_cluster_vectors_in_database(
             'tests/unittest/core/structure_databases/fcc_skew_binary.db')
         self._test_cluster_vectors_in_database(
             'tests/unittest/core/structure_databases/fcc_ternary.db')
