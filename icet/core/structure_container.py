@@ -60,7 +60,7 @@ class StructureContainer:
                     self.add_structure(atoms=atoms, user_tag=user_tag,
                                        properties=properties,
                                        allow_duplicate=allow_duplicate)
-                except ValueError:
+                except (TypeError, ValueError):
                     logger.exception('Skipping structure {}; '.format(
                         list_of_atoms.index((atoms, user_tag))))
 
@@ -204,11 +204,13 @@ class StructureContainer:
         """
         # atoms must have a proper format and label
         if not isinstance(atoms, Atoms):
-            raise ValueError('atoms has not ASE Atoms format')
+            raise TypeError('atoms must be an ASE Atoms object. {} is'
+                            ' an invalid format'.format(type(atoms)))
 
         if user_tag is not None:
             if not isinstance(user_tag, str):
-                raise ValueError('user_tag has wrong type (str)')
+                raise TypeError('user_tag must be a string. {} is'
+                                ' an invalid type.'.format(type(user_tag)))
 
         atoms_copy = atoms.copy()
 
@@ -363,12 +365,12 @@ class StructureContainer:
 
     @property
     def cluster_space(self) -> ClusterSpace:
-        """Returns the cluster space object."""
+        """Cluster space used to calculate the cluster vectors."""
         return self._cluster_space
 
     @property
     def fit_structures(self):
-        """Returns the fit structures."""
+        """List of the fit structures."""
         return self._structure_list
 
     @property
