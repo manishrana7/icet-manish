@@ -10,6 +10,9 @@ from icet.tools.geometry import find_permutation, get_permutation
 from itertools import permutations
 import copy
 
+from icet.io.logging import logger
+logger = logger.getChild('orbit_list_py')
+
 
 class OrbitList(object):
     """
@@ -29,12 +32,9 @@ class OrbitList(object):
     cutoffs : list of float
               cutoffs[i] is the cutoff for
               orbits with order i+2.
-    verbosity : int
-                Set the verbosity for OrbitList and
-                all the methods it calls.
     """
 
-    def __init__(self, atoms, cutoffs, verbosity=False):
+    def __init__(self, atoms, cutoffs):
         self._permutation_matrix = PermutationMatrix(atoms, max(cutoffs))
 
         for i, row in enumerate(self.permutation_matrix.pm_lattice_sites):
@@ -410,8 +410,9 @@ class OrbitList(object):
                     try:
                         perm = find_permutation(translated_rep_sites, sites)
                         allowed_permutations.add(tuple(perm))
-                    except Exception:
+                    except Exception as e:
                         failed_loops += 1
+                        logger.debug("Caught exception {}".format(str(e)))
                         if failed_loops == len(translated_eq_sites):
                             raise Exception(
                                 " did not find any integer permutation"
