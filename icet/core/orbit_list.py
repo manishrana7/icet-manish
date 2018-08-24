@@ -64,8 +64,8 @@ def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
         if len(lat_nbrs) > 0:
             pm_lattice_sites.append(lat_nbrs)
         else:
-            logger.warning('Unable to translate any element of the'
-                           'permutation matrix into a lattice site format')
+            logger.warning('Unable to transform any element in a column of the'
+                           ' fractional permutation matrix to lattice site')
     if prune:
         logger.debug('size before pruning {}'.format(len(pm_lattice_sites)))
 
