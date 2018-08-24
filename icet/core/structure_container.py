@@ -204,17 +204,17 @@ class StructureContainer:
         """
         # atoms must have a proper format and label
         if not isinstance(atoms, Atoms):
-            raise TypeError('atoms must be an ASE Atoms object. {} is'
-                            ' an invalid format'.format(type(atoms)))
+            raise TypeError('atoms must be an ASE Atoms object.'
+                            ' Not {}'.format(type(atoms)))
 
         if user_tag is not None:
             if not isinstance(user_tag, str):
-                raise TypeError('user_tag must be a string. {} is'
-                                ' an invalid type.'.format(type(user_tag)))
+                raise TypeError('user_tag must be a string.'
+                                ' Not {}.'.format(type(user_tag)))
 
         atoms_copy = atoms.copy()
 
-        # check for properties in the attached calculator
+        # check for properties in attached calculator
         if properties is None:
             properties = {}
             if atoms.calc:
@@ -222,8 +222,8 @@ class StructureContainer:
                     try:
                         energy = atoms.get_potential_energy()
                     except PropertyNotImplementedError:
-                        logger.exception('Property cannot be added from the'
-                                         ' attached calculator')
+                        logger.exception('Potential energy cannot be added'
+                                         ' from attached calculator')
                     else:
                         properties['energy'] = energy / len(atoms)
 
@@ -232,8 +232,11 @@ class StructureContainer:
         if not allow_duplicate:
             for i, fs in enumerate(self):
                 if np.allclose(cv, fs.cluster_vector):
-                    raise ValueError('atoms have identical cluster'
-                                     ' vector with structure {}'.format(i))
+                    msg = 'atoms have identical cluster vector with' \
+                          ' structure at index {}'.format(i)
+                    if not fs.user_tag == 'None':
+                        msg += ' and with user_tag: {}'.format(fs.user_tag)
+                    raise ValueError(msg)
 
         structure = FitStructure(atoms_copy, user_tag)
         structure.set_properties(properties)
