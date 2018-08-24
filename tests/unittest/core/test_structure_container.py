@@ -178,11 +178,12 @@ class TestStructureContainer(unittest.TestCase):
 
         # check that duplicates structure is not added.
         self.sc.add_structure(atoms, tag, properties)
-        with self.assertRaises(ValueError) as context:
+        with self.assertRaises(ValueError) as cm:
             self.sc.add_structure(atoms, tag, properties,
                                   allow_duplicate=False)
-        self.assertIn('atoms have identical cluster vector with structure',
-                      str(context.exception))
+        self.assertEqual('atoms have identical cluster vector with structure'
+                         ' at index 0 and with user_tag: Structure 0', 
+                         str(cm.exception))
         self.assertEqual(len(self.sc), len(self.structure_list)+3)
 
     def test_get_fit_data(self):
