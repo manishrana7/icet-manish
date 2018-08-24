@@ -348,11 +348,18 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
             'tests/unittest/core/structure_databases/bcc_quaternary.db')
 
         self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/hcp_binary.db')
+        self._test_cluster_vectors_in_database(
             'tests/unittest/core/structure_databases/hcp_skew_binary.db')
         self._test_cluster_vectors_in_database(
             'tests/unittest/core/structure_databases/hcp_ternary.db')
         self._test_cluster_vectors_in_database(
             'tests/unittest/core/structure_databases/hcp_quaternary.db')
+
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/tetragonal_binary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/tetragonal_ternary.db')
 
     def test_read_write(self):
         """ Tests read/write functionality. """
