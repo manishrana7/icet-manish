@@ -50,7 +50,7 @@ def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,
     ftA = np.dot(y.conj().transpose(), A)
     ii = 0
     for i in range(n_iters):
-        logger.debug('iteration {}'.format(i))
+        logger.info('iteration {}'.format(i))
         args = (A, y, mu, lmbda, d, b, AtA, ftA)
         res = minimize(_objective_function, x, args, method='BFGS', options={
             'disp': False}, jac=_objective_function_derivative)
@@ -62,13 +62,13 @@ def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,
         new_norm = np.linalg.norm(x)
         ii = ii + 1
 
-        logger.debug('|new_norm-old_norm| = {}'.format(abs(new_norm-old_norm)))
+        logger.info('|new_norm-old_norm| = {}'.format(abs(new_norm-old_norm)))
         if abs(new_norm-old_norm) < tol:
             break
 
         old_norm = new_norm
     else:
-        logger.warning('Split-Bregman ran for max iters')
+        logger.warning('Split-Bregman ran to the maximum number of iterations')
 
     fit_results = {'parameters': x}
     return fit_results
