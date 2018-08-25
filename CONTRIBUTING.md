@@ -124,6 +124,42 @@ Good job, you are still reading! [Will you make it to the
 end?](https://xkcd.com/169/)
 
 
+Logging usage
+-------------
+We use the standard python logging library to write verbose warnings,
+information and debug messages. We strongly encourage the use of it,
+in particular to replace `print()` statements that displays on console
+debugging information.
+
+Adding a logger to a python module can be done easily by adding the following
+code snippet at the top the module:
+```python
+from icet.io.logging import logger
+logger = logger.getChild('icetmodulename')
+```
+Configuring logging is done in icet/io/logging.py file:
+```python
+import logging
+FORMAT = '%(name)s: %(levelname)s  %(message)s'
+logging.basicConfig(level=logging.WARNING, format=FORMAT)
+```
+Note that the default level is WARNING, which means that only events of this level or
+higher (ERROR , CRITICAL) will be tracked as follows:
+```
+icet.fit_methods: WARNING - Failed to import scitkit-learn; several optimizers will fail
+```
+In the same way, log messages with lower levels as DEBUG and INFO can be
+displayed by setting the logger configuration before calling a python module:
+```
+from icet.io.logging import set_config
+set_conf(level=10)
+```
+Then it will log a message like:
+```
+icet.orbit_list: INFO - Finished construction of orbit list
+```
+
+
 Please use spaces
 -----------------
 

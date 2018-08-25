@@ -5,8 +5,15 @@ import sys
 # This is the root logger of icet
 logger = logging.getLogger('icet')
 
+# Set a format for the logger messages
+FORMAT = '%(name)s: %(levelname)s  %(message)s'
+logging.basicConfig(level=logging.WARNING, format=FORMAT)
+
 # Will process all levels of WARNING or higher
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.WARNING)
+
+# Set the format which is simpler for the console
+formatter = logging.Formatter(FORMAT)
 
 # If you know what you are doing you may set this to True
 logger.propagate = False
@@ -14,12 +21,11 @@ logger.propagate = False
 # The logger will collect events from children and the default
 # behaviour is to print it directly to stdout
 ch = logging.StreamHandler(sys.stdout)
+ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 
-# continuous = True
-
-def set_config(filename=None, level=None, continuous=None):
+def set_config(filename=None, level=None):
 
     # If a filename is provided a logfile will be created
     if filename is not None:
@@ -28,6 +34,3 @@ def set_config(filename=None, level=None, continuous=None):
 
     if level is not None:
         logger.setLevel(level)
-
-#    if continuous is not None:
-#        sys.modules[__name__].continuous = continuous
