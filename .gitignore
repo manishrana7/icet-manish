@@ -7,6 +7,7 @@ __pycache__/
 *.swp
 *.db
 !tests/integration/core/equivalent_structure_pairs.db
+!tests/unittest/core/structure_databases/*.db
 *.png
 *.eps
 *.so
