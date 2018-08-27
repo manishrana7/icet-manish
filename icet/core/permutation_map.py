@@ -60,7 +60,8 @@ def permutation_matrix_from_atoms(atoms, cutoff, find_prim=True):
         prim_structure, neighbor_list)
     # frac_positions.sort()
 
-    logger.debug('Number of fractional positions: {}'.format(len(frac_positions)))
+    logger.debug('Number of fractional positions:'
+                 ' {}'.format(len(frac_positions)))
     if len(frac_positions) > 0:
         permutation_matrix.build(frac_positions)
 
