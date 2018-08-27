@@ -67,11 +67,13 @@ def __get_lattice_site_permutation_matrix(structure, permutation_matrix,
             logger.warning('Unable to transform any element in a column of the'
                            ' fractional permutation matrix to lattice site')
     if prune:
-        logger.debug('size before pruning {}'.format(len(pm_lattice_sites)))
+        logger.debug('Size of columns of the permutation matrix before'
+                    ' pruning {}'.format(len(pm_lattice_sites)))
 
         pm_lattice_sites = __prune_permutation_matrix(pm_lattice_sites)
 
-        logger.debug('size after pruning {}'.format(len(pm_lattice_sites)))
+        logger.debug('Size of columns of the permutation matrix after'
+                    ' pruning {}'.format(len(pm_lattice_sites)))
 
     return pm_lattice_sites
 
@@ -133,7 +135,6 @@ def create_orbit_list(structure, cutoffs):
     -------
     OrbitList object
     '''
-    # TODO: Is it necessary to print the profiling info?
     if isinstance(structure, Structure):
         atoms = Structure.to_atoms(structure)
     else:
@@ -145,14 +146,11 @@ def create_orbit_list(structure, cutoffs):
     t0 = time.time()
     permutation_matrix, prim_structure, neighbor_list \
         = permutation_matrix_from_atoms(atoms, max_cutoff)
-    t1 = time.time()
-    time_spent = t1 - t0
+    time_spent = time.time() - t0
     total_time_spent += time_spent
 
-    msg = 'Done getting permutation_matrix. Time {}s'.format(time_spent)
-    logger.debug(msg)
-
-    total_time_spent += time_spent
+    msg = 'Done getting permutation_matrix (time: {:.6f}s)'.format(time_spent)
+    logger.info(msg)
 
     t0 = time.time()
     neighbor_lists = get_neighbor_lists(prim_structure, cutoffs=cutoffs)
@@ -160,7 +158,7 @@ def create_orbit_list(structure, cutoffs):
     time_spent = t1 - t0
     total_time_spent += time_spent
 
-    logger.debug('Done getting neighbor_lists. Time {} s'.format(time_spent))
+    logger.info('Done getting neighbor_lists. (time: {:.6f}s)'.format(time_spent))
 
     t0 = time.time()
     # transform permutation_matrix to be in lattice site format
@@ -173,8 +171,8 @@ def create_orbit_list(structure, cutoffs):
     total_time_spent += time_spent
 
     msg = ['Transformation of permutation matrix to lattice neighbor']
-    msg += ['format completed (time: {} s)'.format(time_spent)]
-    logger.debug(' '.join(msg))
+    msg += ['format completed (time: {:.6f}s)'.format(time_spent)]
+    logger.info(' '.join(msg))
 
     t0 = time.time()
     orbit_list = OrbitList(prim_structure, pm_lattice_sites, neighbor_lists)
@@ -182,9 +180,9 @@ def create_orbit_list(structure, cutoffs):
     time_spent = t1 - t0
     total_time_spent += time_spent
 
-    logger.debug('Finished construction of orbit list.'
-                 ' Time {} s'.format(time_spent))
+    logger.info('Finished construction of orbit list.'
+                 ' (time: {:.6f}s)'.format(time_spent))
 
-    logger.debug('Total time {} s'.format(total_time_spent))
+    logger.info('Total time: {:.6f}s'.format(total_time_spent))
 
     return orbit_list

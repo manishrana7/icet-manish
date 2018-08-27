@@ -11,8 +11,7 @@ from icet.io.logging import logger
 logger = logger.getChild('split_bregman')
 
 
-def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,
-                      verbose=0):
+def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,):
     """
     Split-Bregman algorithm described in T. Goldstein and S. Osher,
     SIAM J. Imaging Sci. 2, 323 (2009); doi:10.1137/080725891
@@ -68,7 +67,7 @@ def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,
 
         old_norm = new_norm
     else:
-        logger.warning('Split-Bregman ran to the maximum number of iterations')
+        logger.warning('Maximum possible number of iterations exceeded')
 
     fit_results = {'parameters': x}
     return fit_results
