@@ -126,38 +126,44 @@ end?](https://xkcd.com/169/)
 
 Logging usage
 -------------
-We use the standard python logging library to write verbose warnings,
-information and debug messages. We strongly encourage the use of it,
-in particular to replace `print()` statements that displays on console
-debugging information.
+We use the [standard python logging
+library](https://docs.python.org/3/library/logging.html)
+to write verbose error, warnings, information and debug messages. We strongly
+encourage the use of it, in particular to replace `print()` statements that
+displays on console debugging information.
 
-Adding a logger to a python module can be done easily by adding the following
-code snippet at the top the module:
+Adding a logger to a python module can be done easily
+at the top the module following this example:
 ```python
 from icet.io.logging import logger
 logger = logger.getChild('icetmodulename')
 ```
-Configuring logging is done in icet/io/logging.py file:
+Configuring logging is done for the whole suite in icet/io/logging.py file:
 ```python
 import logging
-FORMAT = '%(name)s: %(levelname)s  %(message)s'
-logging.basicConfig(level=logging.WARNING, format=FORMAT)
+logger = logging.getLogger('icet')
+logger.setLevel(logging.WARNING)
 ```
-Note that the default level is WARNING, which means that only events of this level or
-higher (ERROR , CRITICAL) will be tracked as follows:
+Note that the default logging level is WARNING, which means that only events of this
+level or higher (like ERROR or CRITICAL) will be tracked displaying something
+like this:
 ```
-icet.fit_methods: WARNING - Failed to import scitkit-learn; several optimizers will fail
+icet.fit_methods: WARNING - Failed to import scikit-learn; several optimizers will fail
 ```
-In the same way, log messages with lower levels as DEBUG and INFO can be
-displayed by setting the logger configuration before calling a python module:
+To track log messages at DEBUG and INFO level you can set up the
+logger configurations either in the logging.py file or by using the following
+snippet code:
 ```
 from icet.io.logging import set_config
-set_conf(level=10)
+set_conf(level=20)
 ```
-Then it will log a message like:
+In this case the output will show an info messages like follows:
 ```
-icet.orbit_list: INFO - Finished construction of orbit list
+icet.orbit_list: INFO - Finished construction of orbit list. (time: 0.001853s)
 ```
+We use the numeric values given by default in the logging library to the
+different logging levels: NOSET: 0, DEBUG: 10, INFO: 20, WARNING: 30,
+ERROR: 40 and CRITICAL: 50.
 
 
 Please use spaces
