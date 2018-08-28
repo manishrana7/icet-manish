@@ -182,7 +182,7 @@ class TestStructureContainer(unittest.TestCase):
             self.sc.add_structure(atoms, tag, properties,
                                   allow_duplicate=False)
         self.assertEqual('atoms have identical cluster vector with structure'
-                         ' at index 0 and with user_tag: Structure 0', 
+                         ' at index 0 and with user_tag: Structure 0',
                          str(cm.exception))
         self.assertEqual(len(self.sc), len(self.structure_list)+3)
 
