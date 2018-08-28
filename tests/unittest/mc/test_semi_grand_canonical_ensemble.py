@@ -81,7 +81,7 @@ class TestEnsemble(unittest.TestCase):
 
         # Do it many times and hopefully get both a reject and an accept
         for _ in range(10):
-            self.ensemble.do_trial_step()
+            self.ensemble._do_trial_step()
 
         self.assertEqual(self.ensemble.total_trials, 10)
 
@@ -122,7 +122,7 @@ class TestEnsemble(unittest.TestCase):
             calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
             random_seed=42, temperature=self.temperature,
             chemical_potentials=chemical_potentials)
-        ensemble.do_trial_step()
+        ensemble._do_trial_step()
 
         # Test both int and str
 
@@ -131,7 +131,7 @@ class TestEnsemble(unittest.TestCase):
             calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
             random_seed=42, temperature=self.temperature,
             chemical_potentials=chemical_potentials)
-        ensemble.do_trial_step()
+        ensemble._do_trial_step()
 
     def test_get_ensemble_data(self):
         """Test the get ensemble data method."""

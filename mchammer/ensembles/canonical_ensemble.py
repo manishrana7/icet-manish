@@ -50,7 +50,7 @@ class CanonicalEnsemble(BaseEnsemble):
         else:
             self.boltzmann_constant = kB
 
-    def do_trial_step(self):
+    def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
         self.total_trials += 1
 
@@ -58,7 +58,7 @@ class CanonicalEnsemble(BaseEnsemble):
         sites, species = \
             self.configuration.get_swapped_state(sublattice_index)
 
-        potential_diff = self.get_property_change(sites, species)
+        potential_diff = self._get_property_change(sites, species)
 
         if self._acceptance_condition(potential_diff):
             self.accepted_trials += 1
@@ -78,7 +78,7 @@ class CanonicalEnsemble(BaseEnsemble):
         else:
             return np.exp(-potential_diff/(
                 self.boltzmann_constant * self.temperature)) > \
-                self.next_random_number()
+                self._next_random_number()
 
     def get_ensemble_data(self) -> Dict:
         """Returns the data associated with the ensemble. For the SGC
