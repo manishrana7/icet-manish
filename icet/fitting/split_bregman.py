@@ -49,7 +49,7 @@ def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,):
     ftA = np.dot(y.conj().transpose(), A)
     ii = 0
     for i in range(n_iters):
-        logger.info('iteration {}'.format(i))
+        logger.info('Iteration {} of {}'.format(i, n_iters))
         args = (A, y, mu, lmbda, d, b, AtA, ftA)
         res = minimize(_objective_function, x, args, method='BFGS', options={
             'disp': False}, jac=_objective_function_derivative)
