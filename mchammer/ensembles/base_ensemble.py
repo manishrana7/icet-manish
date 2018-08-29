@@ -215,7 +215,7 @@ class BaseEnsemble(ABC):
            number of trial steps to run without stopping
         """
         for _ in range(number_of_trial_steps):
-            self.do_trial_step()
+            self._do_trial_step()
 
     def _observe_configuration(self, step: int):
         """Submits current configuration to observers and appends
@@ -253,7 +253,7 @@ class BaseEnsemble(ABC):
             self._data_container.append(mctrial=step, record=row_dict)
 
     @abstractmethod
-    def do_trial_step(self):
+    def _do_trial_step(self):
         pass
 
     @property
@@ -266,7 +266,7 @@ class BaseEnsemble(ABC):
         """ seed used to initialize random number generator """
         return self._random_seed
 
-    def next_random_number(self) -> int:
+    def _next_random_number(self) -> int:
         """ Returns the next random number from the PRNG. """
         return random.random()
 
@@ -365,8 +365,8 @@ class BaseEnsemble(ABC):
             raise ValueError('sites and species must have the same length.')
         self.configuration.update_occupations(sites, species)
 
-    def get_property_change(self,
-                            sites: List[int], species: List[int]) -> float:
+    def _get_property_change(self,
+                             sites: List[int], species: List[int]) -> float:
         """Computes and returns the property change due to a change of the
         configuration.
 

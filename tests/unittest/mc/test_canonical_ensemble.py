@@ -45,7 +45,7 @@ class TestEnsemble(unittest.TestCase):
 
         # Do it many times and hopefully get both a reject and an accept
         for _ in range(10):
-            self.ensemble.do_trial_step()
+            self.ensemble._do_trial_step()
 
         self.assertEqual(self.ensemble.total_trials, 10)
 

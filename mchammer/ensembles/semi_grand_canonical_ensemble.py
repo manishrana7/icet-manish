@@ -76,7 +76,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
             self._chemical_potentials = None
             self.chemical_potentials = kwargs['chemical_potentials']
 
-    def do_trial_step(self):
+    def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
         self.total_trials += 1
 
@@ -84,7 +84,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
         sublattice_index = self.get_random_sublattice_index()
         index, species = \
             self.configuration.get_flip_state(sublattice_index)
-        potential_diff = self.get_property_change([index], [species])
+        potential_diff = self._get_property_change([index], [species])
 
         # change in chemical potential
         old_species = self.configuration.occupations[index]
@@ -112,7 +112,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
         else:
             return np.exp(-potential_diff/(
                 self.boltzmann_constant * self.temperature)) > \
-                self.next_random_number()
+                self._next_random_number()
 
     @property
     def chemical_potentials(self) -> Dict[int, float]:
