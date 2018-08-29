@@ -366,7 +366,7 @@ class BaseEnsemble(ABC):
         self.configuration.update_occupations(sites, species)
 
     def _get_property_change(self,
-                            sites: List[int], species: List[int]) -> float:
+                             sites: List[int], species: List[int]) -> float:
         """Computes and returns the property change due to a change of the
         configuration.
 
