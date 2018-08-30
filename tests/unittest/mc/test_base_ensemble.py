@@ -83,7 +83,9 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble.attach_observer(observer)
 
     def test_init(self):
-        """Test exceptions are raised in initialization."""
+        """
+        Test exceptions are raised in initialization.
+        """
         # without atoms parameters
         with self.assertRaises(Exception) as context:
             ConcreteEnsemble(calculator=self.calculator, atoms=None,
@@ -101,46 +103,64 @@ class TestEnsemble(unittest.TestCase):
                         in str(context.exception))
 
     def test_property_name(self):
-        """Test name property."""
+        """
+        Test name property.
+        """
         self.assertEqual('test-ensemble', self.ensemble.name)
 
     def test_property_atoms(self):
-        """Test atoms property."""
+        """
+        Test atoms property.
+        """
         self.assertEqual(self.atoms, self.ensemble.atoms)
 
     def test_property_random_seed(self):
-        """Test random seed property."""
+        """
+        Test random seed property.
+        """
         self.assertEqual(self.ensemble.random_seed, 42)
 
     def test_property_accepted_trials(self):
-        """Test property accepted trials."""
+        """
+        Test property accepted trials.
+        """
         self.assertEqual(self.ensemble.accepted_trials, 0)
         self.ensemble.accepted_trials += 1
         self.assertEqual(self.ensemble.accepted_trials, 1)
 
     def test_property_totals_trials(self):
-        """Test property accepted trials."""
+        """
+        Test property accepted trials.
+        """
         self.assertEqual(self.ensemble.total_trials, 0)
         self.ensemble.total_trials += 1
         self.assertEqual(self.ensemble.total_trials, 1)
 
     def test_property_acceptance_ratio(self):
-        """Test property acceptance ratio."""
+        """
+        Test property acceptance ratio.
+        """
         self.ensemble.total_trials = 30
         self.ensemble.accepted_trials = 15
         self.assertEqual(self.ensemble.acceptance_ratio, 0.5)
 
     def test_property_calculator(self):
-        """Test the calculator property."""
+        """
+        Test the calculator property.
+        """
         pass
 
     def test_get_next_random_number(self):
-        """Test the get_next_random_number method."""
+        """
+        Test the get_next_random_number method.
+        """
         self.assertAlmostEqual(
             self.ensemble.next_random_number(), 0.6394267984578837)
 
     def test_run(self):
-        """Test the run method."""
+        """
+        Test the run method.
+        """
 
         n_iters = 364
         self.ensemble.run(n_iters)
@@ -184,7 +204,9 @@ class TestEnsemble(unittest.TestCase):
                 self.ensemble.observers['Parakeet2'].interval + 1)
 
     def test_run_with_dict_observer(self):
-        """Test the run method with a dict observer."""
+        """
+        Test the run method with a dict observer.
+        """
         observer = DictObserver(interval=28)
         self.ensemble.attach_observer(observer)
 
@@ -203,7 +225,9 @@ class TestEnsemble(unittest.TestCase):
             n_iters // self.ensemble.observers['Ayaymama'].interval + 1)
 
     def test_backup_file(self):
-        """Test data is being saved and can be read by the ensemble."""
+        """
+        Test data is being saved and can be read by the ensemble.
+        """
         # set-up ensemble with a non-inf write period
         ensemble = ConcreteEnsemble(calculator=self.calculator,
                                     atoms=self.atoms,
@@ -253,11 +277,15 @@ class TestEnsemble(unittest.TestCase):
                 data_dc_reloaded[i], data_dc[i], significant=20)
 
     def test_internal_run(self):
-        """Test the _run method."""
+        """
+        Test the _run method.
+        """
         pass
 
     def test_attach_observer(self):
-        """Test the attach method."""
+        """
+        Test the attach method.
+        """
         self.assertEqual(len(self.ensemble.observers), 2)
 
         self.ensemble.attach_observer(
@@ -282,19 +310,27 @@ class TestEnsemble(unittest.TestCase):
                         in str(context.exception))
 
     def test_property_data_container(self):
-        """Test the data container property."""
+        """
+        Test the data container property.
+        """
         self.assertIsInstance(self.ensemble.data_container, DataContainer)
 
     def test_find_minimum_observation_interval(self):
-        """Test the method to find the minimum observation interval."""
+        """
+        Test the method to find the minimum observation interval.
+        """
         pass
 
     def test_property_minimum_observation_interval(self):
-        """Test property minimum observation interval."""
+        """
+        Test property minimum observation interval.
+        """
         pass
 
     def test_get_gcd(self):
-        """Test the get gcd method."""
+        """
+        Test the get gcd method.
+        """
         input = [2, 4, 6, 8]
         target = 2
         self.assertEqual(self.ensemble._get_gcd(input), target)
@@ -304,7 +340,9 @@ class TestEnsemble(unittest.TestCase):
         self.assertEqual(self.ensemble._get_gcd(input), target)
 
     def test_get_property_change(self):
-        """Test the get property change method."""
+        """
+        Test the get property change method.
+        """
 
         initial_occupations = self.ensemble.configuration.occupations
 
@@ -325,7 +363,9 @@ class TestEnsemble(unittest.TestCase):
                         in str(context.exception))
 
     def test_get_ensemble_data(self):
-        """Test the get ensemble data method."""
+        """
+        Test the get ensemble data method.
+        """
         data = self.ensemble.get_ensemble_data()
 
         self.assertIn('potential', data.keys())

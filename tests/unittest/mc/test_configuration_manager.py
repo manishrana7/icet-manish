@@ -23,7 +23,9 @@ class TestConfigurationManager(unittest.TestCase):
             self.constraints)
 
     def test_type(self):
-        """Test cm type."""
+        """
+        Test cm type.
+        """
         self.assertIsInstance(self.cm, ConfigurationManager)
 
     def test_init_alternative_constructors(self):
@@ -38,7 +40,9 @@ class TestConfigurationManager(unittest.TestCase):
         self.assertTrue(cm.occupation_constraints == constraints)
 
     def test_check_occupation_constraint(self):
-        """Test the check occupation constraint method."""
+        """
+        Test the check occupation constraint method.
+        """
 
         # Check that equal constraint is allowed
         constraint = [[1, 2], [1, 2], [1], [2]]
@@ -64,7 +68,9 @@ class TestConfigurationManager(unittest.TestCase):
                         ' must be equal length' in str(context.exception))
 
     def test_property_atoms(self):
-        """Test atoms property."""
+        """
+        Test atoms property.
+        """
         self.assertEqual(self.atoms, self.cm.atoms)
 
     def test_property_occupations(self):
@@ -129,7 +135,9 @@ class TestConfigurationManager(unittest.TestCase):
         self.assertNotEqual(list(sublattices), list(self.cm.sublattices))
 
     def test_get_swapped_state(self):
-        """Test the getting swap indices method."""
+        """
+        Test the getting swap indices method.
+        """
 
         for _ in range(1000):
             indices, elements = self.cm.get_swapped_state(0)
@@ -162,14 +170,18 @@ class TestConfigurationManager(unittest.TestCase):
         self.assertTrue("Sublattice 1 is empty" in str(context.exception))
 
     def test_get_flip_index(self):
-        """Test the getting flip indices method."""
+        """
+        Test the getting flip indices method.
+        """
 
         for _ in range(1000):
             index, element = self.cm.get_flip_state(0)
             self.assertNotEqual(self.cm.occupations[index], element)
 
     def test_update_occupations(self):
-        """Test the update occupation method."""
+        """
+        Test the update occupation method.
+        """
 
         indices = [0, 2, 3, 5, 7, 8]
         elements = [13, 13, 47, 47, 13, 47]
@@ -189,7 +201,9 @@ class TestConfigurationManager(unittest.TestCase):
         self.assertTrue('Invalid new species' in str(context.exception))
 
     def test_sites_by_species(self):
-        """Test the element occupation dict."""
+        """
+        Test the element occupation dict.
+        """
 
         # Initially consistent
         self.assertTrue(self._is_sites_by_species_dict_correct(self.cm))

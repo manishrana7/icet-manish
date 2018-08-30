@@ -39,7 +39,9 @@ class TestEnsemble(unittest.TestCase):
             boltzmann_constant=1e-5)
 
     def test_property_chemical_potentials(self):
-        """Test property chemical_potentials."""
+        """
+        Test property chemical_potentials.
+        """
         retval = self.ensemble.chemical_potentials
         target = {13: 5, 31: 0}
         self.assertEqual(retval, target)
@@ -71,13 +73,17 @@ class TestEnsemble(unittest.TestCase):
                         in str(context.exception))
 
     def test_temperature_attribute(self):
-        """Test temperature attribute."""
+        """
+        Test temperature attribute.
+        """
         self.assertEqual(self.ensemble.temperature, self.temperature)
         self.ensemble.temperature = 300
         self.assertEqual(self.ensemble.temperature, 300)
 
     def test_do_trial_step(self):
-        """Test the do trial step."""
+        """
+        Test the do trial step.
+        """
 
         # Do it many times and hopefully get both a reject and an accept
         for _ in range(10):
@@ -86,7 +92,9 @@ class TestEnsemble(unittest.TestCase):
         self.assertEqual(self.ensemble.total_trials, 10)
 
     def test_acceptance_condition(self):
-        """ Test the acceptance condition method."""
+        """
+        Test the acceptance condition method.
+        """
 
         self.assertTrue(self.ensemble._acceptance_condition(-10.0))
 
@@ -94,7 +102,9 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble._acceptance_condition(10.0)
 
     def test_init_without_temperature(self):
-        """ Test init without temperature."""
+        """
+        Test init without temperature.
+        """
         with self.assertRaises(KeyError) as context:
             SemiGrandCanonicalEnsemble(
                 calculator=self.calculator, atoms=self.atoms,
@@ -104,7 +114,9 @@ class TestEnsemble(unittest.TestCase):
             " temperature" in str(context.exception))
 
     def test_init_without_chemical_potential(self):
-        """ Test init chemical potentials."""
+        """
+        Test init chemical potentials.
+        """
         with self.assertRaises(KeyError) as context:
             SemiGrandCanonicalEnsemble(
                 calculator=self.calculator, atoms=self.atoms,
@@ -115,7 +127,9 @@ class TestEnsemble(unittest.TestCase):
             " chemical_potentials" in str(context.exception))
 
     def test_init_with_integer_chemical_potentials(self):
-        """ Test init with integer chemical potentials."""
+        """
+        Test init with integer chemical potentials.
+        """
 
         chemical_potentials = {13: 5, 31: 0}
         ensemble = SemiGrandCanonicalEnsemble(
@@ -134,7 +148,9 @@ class TestEnsemble(unittest.TestCase):
         ensemble.do_trial_step()
 
     def test_get_ensemble_data(self):
-        """Test the get ensemble data method."""
+        """
+        Test the get ensemble data method.
+        """
         data = self.ensemble.get_ensemble_data()
 
         self.assertIn('potential', data.keys())

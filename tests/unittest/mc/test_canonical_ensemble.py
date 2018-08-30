@@ -34,14 +34,18 @@ class TestEnsemble(unittest.TestCase):
             random_seed=42, temperature=self.temperature)
 
     def test_temperature_attribute(self):
-        """Test temperature attribute."""
+        """
+        Test temperature attribute.
+        """
 
         self.assertEqual(self.ensemble.temperature, self.temperature)
         self.ensemble.temperature = 300
         self.assertEqual(self.ensemble.temperature, 300)
 
     def test_do_trial_step(self):
-        """Test the do trial step."""
+        """
+        Test the do trial step.
+        """
 
         # Do it many times and hopefully get both a reject and an accept
         for _ in range(10):
@@ -50,7 +54,9 @@ class TestEnsemble(unittest.TestCase):
         self.assertEqual(self.ensemble.total_trials, 10)
 
     def test_acceptance_condition(self):
-        """ Test the acceptance condition method."""
+        """
+        Test the acceptance condition method.
+        """
 
         self.assertTrue(self.ensemble._acceptance_condition(-10.0))
 
@@ -58,7 +64,9 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble._acceptance_condition(10.0)
 
     def test_init_without_temperature(self):
-        """ Test init without temperature."""
+        """
+        Test init without temperature.
+        """
         with self.assertRaises(KeyError) as context:
             CanonicalEnsemble(
                 calculator=self.calculator, atoms=self.atoms,
@@ -67,7 +75,9 @@ class TestEnsemble(unittest.TestCase):
                         in str(context.exception))
 
     def test_property_boltzmann(self):
-        """ Test init with explicit Boltzmann constant."""
+        """
+        Test init with explicit Boltzmann constant.
+        """
         from ase.units import kB
         ens = CanonicalEnsemble(
             calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
@@ -80,7 +90,9 @@ class TestEnsemble(unittest.TestCase):
         self.assertAlmostEqual(1.0, ens.boltzmann_constant)
 
     def test_get_ensemble_data(self):
-        """Test the get ensemble data method."""
+        """
+        Test the get ensemble data method.
+        """
         data = self.ensemble.get_ensemble_data()
 
         self.assertIn('potential', data.keys())

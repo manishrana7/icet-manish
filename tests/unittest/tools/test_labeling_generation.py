@@ -58,7 +58,9 @@ class TestLabelingGenerator(unittest.TestCase):
         self.assertIsInstance(lg, LabelingGenerator)
 
     def test_yield_products(self):
-        """Testing that yield_products works."""
+        """
+        Testing that yield_products works.
+        """
 
         for site_group in self.lg.site_groups.values():
             site_group.compute_all_combinations(2)
@@ -74,7 +76,9 @@ class TestLabelingGenerator(unittest.TestCase):
             self.assertEqual(product, target_product)
 
     def test_yield_permutations(self):
-        """Testing that yield_permutations works."""
+        """
+        Testing that yield_permutations works.
+        """
         target_permutations = [((1, 1, 1, 0), (2, 2, 2, 2, 2, 2), (2, 0)),
                                ((1, 1, 1, 0), (2, 2, 2, 2, 2, 2), (0, 2)),
                                ((1, 1, 0, 1), (2, 2, 2, 2, 2, 2), (2, 0)),
@@ -95,14 +99,18 @@ class TestLabelingGenerator(unittest.TestCase):
             self.assertEqual(per, target_per)
 
     def test_sort_labeling(self):
-        """Testing that sort_labeling works."""
+        """
+        Testing that sort_labeling works.
+        """
         labeling = [(0, 1, 1, 1), (2, 2, 2, 2, 2, 2), (0, 2)]
         target_sorted_labeling = (0, 2, 2, 2, 1, 0, 1, 2, 2, 2, 1, 2)
         sorted_labeling = self.lg.sort_labeling(labeling, 2)
         self.assertEqual(target_sorted_labeling, sorted_labeling)
 
     def test_yield_labeling(self):
-        """Testing that yield_labeling works."""
+        """
+        Testing that yield_labeling works.
+        """
         target_labeling = (1, 2, 2, 2, 1, 2)
         for labeling in self.lg.yield_labelings(1):
             # there should be only one of these
@@ -154,7 +162,9 @@ class TestSiteGroup(unittest.TestCase):
         self.assertEqual(sg.position, self.position)
 
     def test_compute_all_combinations(self):
-        """Testing that compute_all_combinations works."""
+        """
+        Testing that compute_all_combinations works.
+        """
         target_combinations = [(0, 0, 0), (0, 0, 1), (0, 0, 3),
                                (0, 1, 1), (0, 1, 3), (0, 3, 3),
                                (1, 1, 1), (1, 1, 3), (1, 3, 3),

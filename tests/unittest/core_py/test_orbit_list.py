@@ -69,16 +69,18 @@ class TestOrbitList(unittest.TestCase):
         self.assertEqual(len(self.orbit_list), 3)
 
     def test_sort(self):
-        '''
+        """
         Testing sort functionality
-        '''
+        """
         self.orbit_list.sort()
         for i in range(len(self.orbit_list) - 1):
             self.assertLess(
                 self.orbit_list.orbits[i], self.orbit_list.orbits[i + 1])
 
     def test_property_primitive_structure(self):
-        """ Tests the primitive_structure property. """
+        """
+        Tests the primitive_structure property.
+        """
         self.orbit_list.primitive_structure
         self.assertEqual(
             self.orbit_list.primitive_structure,
@@ -211,7 +213,9 @@ class TestOrbitList(unittest.TestCase):
                     self.assertNotEqual(sorted(site_i), sorted(site_j))
 
     def test_property_permutation_matrix(self):
-        """ Tests the permutation_matrix property. """
+        """
+        Tests the permutation_matrix property.
+        """
         self.assertIsInstance(
             self.orbit_list.permutation_matrix, PermutationMatrix)
         self.assertEqual(
@@ -378,7 +382,7 @@ index | order |  radius  | multiplicity
         self.assertEqual(len(orbit_list), 1)
 
         # Gets two pairs
-        #  TODO think if this is the correct result for hcp
+        # TODO: Think if this is the correct result for hcp
         atoms = bulk("Al", 'hcp', a=3.0)
         cutoff = [3.1]
         orbit_list = OrbitList(atoms, cutoff)
@@ -405,7 +409,6 @@ index | order |  radius  | multiplicity
         These tests will simply create orbit list
         and see that the orbit list gets created
         without any errors thrown.
-
         """
         atoms = bulk("Al", 'hcp', a=3.01)
         cutoff = [5] * 3

@@ -35,12 +35,16 @@ class TestCECalculator(unittest.TestCase):
             self.atoms, self.ce, name='Test CE calc')
 
     def test_property_cluster_expansion(self):
-        """Test the cluster expansion property."""
+        """
+        Test the cluster expansion property.
+        """
         self.assertIsInstance(
             self.calculator.cluster_expansion, ClusterExpansion)
 
     def test_calculate_total(self):
-        """Test calculating total property."""
+        """
+        Test calculating total property.
+        """
 
         self.assertAlmostEqual(self.calculator.calculate_total(
             occupations=self.atoms.numbers), 7641.0)
@@ -63,7 +67,9 @@ class TestCECalculator(unittest.TestCase):
             occupations=self.atoms.numbers), 1808.0 / len(self.atoms))
 
     def test_calculate_local_contribution(self):
-        """Test calculate local contribution."""
+        """
+        Test calculate local contribution.
+        """
         indices = [1, 2, 3]
         local_contribution = self.calculator.calculate_local_contribution(
             indices, self.atoms.numbers)
@@ -81,7 +87,9 @@ class TestCECalculator(unittest.TestCase):
                         in str(context.exception))
 
     def test_property_occupation_constraints(self):
-        """ Test property occupation_constraints. """
+        """
+        Test property occupation_constraints.
+        """
         retval = self.calculator.occupation_constraints
         target = [[13, 32]] * 27
         self.assertEqual(retval, target)

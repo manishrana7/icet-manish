@@ -121,11 +121,15 @@ class TestClusterSpace(unittest.TestCase):
         self.assertIsInstance(cs, ClusterSpace)
 
     def test_len(self):
-        """ Tests len functionality. """
+        """
+        Tests len functionality.
+        """
         pass
 
     def test_orbit_data(self):
-        """ Tests orbit_data property. """
+        """
+        Tests orbit_data property.
+        """
         pass
 
     def test_repr(self):
@@ -177,16 +181,22 @@ class TestClusterSpace(unittest.TestCase):
         pass
 
     def test_cutoffs(self):
-        """ Testing cutoffs property """
+        """
+        Testing cutoffs property
+        """
         self.assertEqual(self.cs.cutoffs, self.cutoffs)
 
     def test_structure(self):
-        """ Testing structure property """
+        """
+        Testing structure property
+        """
         self.assertEqual(len(self.cs.structure),
                          len(self.atoms_prim))
 
     def test_chemical_symbols(self):
-        """ Testing chemical symbols property """
+        """
+        Testing chemical symbols property
+        """
         self.assertEqual(self.cs.chemical_symbols, self.subelements)
 
 

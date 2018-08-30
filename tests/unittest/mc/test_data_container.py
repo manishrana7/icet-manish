@@ -36,7 +36,9 @@ class TestDataContainer(unittest.TestCase):
         self.dc.add_parameter('temperature', 375.15)
 
     def test_init(self):
-        """Test initializing DataContainer."""
+        """
+        Test initializing DataContainer.
+        """
         self.assertIsInstance(self.dc, DataContainer)
 
         # test fails with a non ASE Atoms type
@@ -46,11 +48,15 @@ class TestDataContainer(unittest.TestCase):
                         in str(context.exception))
 
     def test_structure(self):
-        """Test reference structure property."""
+        """
+        Test reference structure property.
+        """
         self.assertEqual(self.dc.atoms, self.atoms)
 
     def test_add_observable(self):
-        """Test add observable functionality."""
+        """
+        Test add observable functionality.
+        """
         test_observer = ConcreteObserver(interval=20, tag='obs2')
         self.dc.add_observable(test_observer.tag)
         self.assertEqual(len(self.dc.observables), 2)
@@ -66,7 +72,9 @@ class TestDataContainer(unittest.TestCase):
                         in str(context.exception))
 
     def test_add_parameter(self):
-        """Test add parameter functionality."""
+        """
+        Test add parameter functionality.
+        """
         self.dc.add_parameter('sro', -0.1)
 
         # add a list as parameters
@@ -85,7 +93,9 @@ class TestDataContainer(unittest.TestCase):
                         in str(context.exception))
 
     def test_append_data(self):
-        """Test append data functionality."""
+        """
+        Test append data functionality.
+        """
         observers = [ConcreteObserver(interval=10, tag='obs1'),
                      ConcreteObserver(interval=20, tag='obs2')]
 
@@ -128,21 +138,29 @@ class TestDataContainer(unittest.TestCase):
                         in str(context.exception))
 
     def test_property_data(self):
-        """ Test data property."""
+        """
+        Test data property.
+        """
         self.assertIsInstance(self.dc.data, pd.DataFrame)
 
     def test_property_parameters(self):
-        """Test parameters property."""
+        """
+        Test parameters property.
+        """
         self.assertEqual(self.dc.parameters,
                          OrderedDict([('seed', 44),
                                       ('temperature', 375.15)]))
 
     def test_property_observables(self):
-        """Test observables property."""
+        """
+        Test observables property.
+        """
         self.assertListEqual(self.dc.observables, ['obs1'])
 
     def test_property_metadata(self):
-        """Test metadata property."""
+        """
+        Test metadata property.
+        """
         for key in self.dc.metadata:
             self.assertIsInstance(self.dc.metadata[key], str)
 
@@ -228,7 +246,9 @@ class TestDataContainer(unittest.TestCase):
                         in str(context.exception))
 
     def test_reset(self):
-        """Test appended data is cleared."""
+        """
+        Test appended data is cleared.
+        """
         # add some data first
         for mctrial in range(10):
             self.dc.append(mctrial, dict(energy=2.123))
@@ -237,7 +257,9 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(self.dc.get_number_of_entries(), 0)
 
     def test_get_number_of_entries(self):
-        """Test number of entries is returned from function."""
+        """
+        Test number of entries is returned from function.
+        """
         for mctrial in range(10):
             if mctrial % 2 == 0:
                 self.dc.append(
@@ -257,7 +279,9 @@ class TestDataContainer(unittest.TestCase):
                         in str(context.exception))
 
     def test_get_average(self):
-        """Test get average functionality."""
+        """
+        Test get average functionality.
+        """
         # set up a random list of values with a normal distribution
         n_iter, mu, sigma = 100, 1.0, 0.1
         np.random.seed(12)
@@ -303,7 +327,9 @@ class TestDataContainer(unittest.TestCase):
                         in str(context.exception))
 
     def test_get_trajectory(self):
-        """Test get_trajectory functionality."""
+        """
+        Test get_trajectory functionality.
+        """
         occupation_vector = [14] * len(self.atoms)
         row_data = dict(occupations=occupation_vector,
                         potential=-0.120000001)
@@ -323,7 +349,9 @@ class TestDataContainer(unittest.TestCase):
             self.assertEqual(energy, -0.120000001)
 
     def test_write_trajectory(self):
-        """Test write trajectory functionality."""
+        """
+        Test write trajectory functionality.
+        """
         # append data
         occupation_vector = [14] * len(self.atoms)
         row_data = dict(occupations=occupation_vector,
@@ -335,7 +363,9 @@ class TestDataContainer(unittest.TestCase):
         self.dc.write_trajectory(temp_file.name)
 
     def test_read_and_write(self):
-        """Test write and read functionalities of data container."""
+        """
+        Test write and read functionalities of data container.
+        """
 
         # append data for testing
         row_data = {}

@@ -90,8 +90,9 @@ class TestOrbit(unittest.TestCase):
         self.assertIsInstance(orbit, Orbit)
 
     def test_property_equivalent_sites(self):
-        """ Tests equivalent_sites property. """
-
+        """
+        Tests equivalent_sites property.
+        """
         self.assertEqual(self.orbit_pair.equivalent_sites, [])
         self.orbit_pair.equivalent_sites = self.lattice_sites_pairs
         self.assertEqual(self.orbit_pair.equivalent_sites,

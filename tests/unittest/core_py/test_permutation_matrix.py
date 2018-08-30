@@ -11,9 +11,9 @@ import numpy as np
 
 
 class TestPermutationMatrix(unittest.TestCase):
-    '''
+    """
     Test the python implementation of permutation matrix
-    '''
+    """
 
     def __init__(self, *args, **kwargs):
         super(TestPermutationMatrix, self).__init__(*args, **kwargs)
@@ -38,7 +38,6 @@ class TestPermutationMatrix(unittest.TestCase):
         """
         Test the initializer.
         """
-
         pm = PermutationMatrix(self.atoms, self.cutoff)
         # Test pm with find_prim = False
         pm_prim_false = PermutationMatrix(self.atoms, self.cutoff,
@@ -53,7 +52,6 @@ class TestPermutationMatrix(unittest.TestCase):
         """
         Test that the first column are the same for both matrices
         """
-
         matrix_py = self.pm.pm_lattice_sites
         matrix_cpp = sorted(self.pm_lattice_sites_cpp)
         col1_py = [row[0] for row in matrix_py]

@@ -15,9 +15,9 @@ from icet.tools.geometry import get_permutation
 
 
 class TestGeometry(unittest.TestCase):
-    '''
+    """
     Container for tests to the geometry module.
-    '''
+    """
 
     def __init__(self, *args, **kwargs):
         super(TestGeometry, self).__init__(*args, **kwargs)
