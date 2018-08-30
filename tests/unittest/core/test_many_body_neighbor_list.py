@@ -19,10 +19,6 @@ class TestManyBodyNeighborList(unittest.TestCase):
         self.atoms = bulk('Ni', 'hcp', a=3.0).repeat([2, 2, 1])
         self.cutoffs = [5.0, 5.0]
 
-    def shortDescription(self):
-        doc = self._testMethodDoc
-        return doc
-
     def setUp(self):
         """
         Instantiate class before each test

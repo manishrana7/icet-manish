@@ -33,10 +33,6 @@ class TestPermutationMap(unittest.TestCase):
         self.frac_positions = get_fractional_positions_from_neighbor_list(
             prim_structure, neighbor_list)
 
-    def shortDescription(self):
-        doc = self._testMethodDoc
-        return doc
-
     def setUp(self):
         """ Set up before each test. """
         symmetry = spglib.get_symmetry(self.atoms_prim)

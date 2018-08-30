@@ -39,10 +39,6 @@ class TestOrbit(unittest.TestCase):
                                        for index, unitcell_offset in
                                        zip(indices, unitcell_offsets)]
 
-    def shortDescription(self):
-        doc = self._testMethodDoc
-        return doc
-
     def setUp(self):
         """
         Instantiate class before each test.

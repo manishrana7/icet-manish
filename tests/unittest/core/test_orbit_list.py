@@ -30,10 +30,6 @@ class TestOrbitList(unittest.TestCase):
         self.cluster_pair = Cluster(
             structure, [lattice_sites[0], lattice_sites[1]], True)
 
-    def shortDescription(self):
-        doc = self._testMethodDoc
-        return doc
-
     def setUp(self):
         """ Instantiate class before each test. """
         permutation_matrix, self.prim_structure, _ = \

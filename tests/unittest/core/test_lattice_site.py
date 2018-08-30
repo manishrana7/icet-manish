@@ -18,10 +18,6 @@ class TestLatticeSite(unittest.TestCase):
         for element in itertools.product(*cartesian_product_lists):
             self.unitcell_offsets.append(list(element))
 
-    def shortDescription(self):
-        doc = self._testMethodDoc
-        return doc
-
     def setUp(self):
         """
         Set up before each test.

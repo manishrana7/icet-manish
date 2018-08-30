@@ -42,10 +42,6 @@ class TestStructure(unittest.TestCase):
                      [-1., 1.73205081, 0.],
                      [0., 0., 3.26598632]]
 
-    def shortDescription(self):
-        doc = self._testMethodDoc
-        return doc
-
     def setUp(self):
         """
         Set up before each test.

@@ -84,10 +84,6 @@ class TestStructureContainer(unittest.TestCase):
             add_properties = {'total_energy': atoms.get_total_energy()}
             self.add_properties_list.append(add_properties)
 
-    def shortDescription(self):
-        doc = self._testMethodDoc
-        return doc
-
     def setUp(self):
         """
         Instantiate class before each test.
@@ -355,10 +351,6 @@ class TestFitStructure(unittest.TestCase):
         self.prim = bulk('Ag', a=4.09)
         self.cs = ClusterSpace(atoms=self.prim, cutoffs=[4.0, 4.0, 4.0],
                                chemical_symbols=['Ag', 'Au'])
-
-    def shortDescription(self):
-        doc = self._testMethodDoc
-        return doc
 
     def setUp(self):
         """

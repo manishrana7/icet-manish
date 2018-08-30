@@ -48,10 +48,6 @@ class TestClusterCounts(unittest.TestCase):
                                     self.structure)
         self.orbit_list.sort()
 
-    def shortDescription(self):
-        doc = self._testMethodDoc
-        return doc
-
     def setUp(self):
         """ Set up an empty cluster counts object. """
         self.cluster_counts = ClusterCounts()

@@ -33,10 +33,6 @@ class TestClusterExpansion(unittest.TestCase):
         chemical_symbols = ['Au', 'Pd']
         self.cs = ClusterSpace(self.atoms, cutoffs, chemical_symbols)
 
-    def shortDescription(self):
-        doc = self._testMethodDoc
-        return doc
-
     def setUp(self):
         """Set up before each test."""
         params_len = self.cs.get_cluster_space_size()

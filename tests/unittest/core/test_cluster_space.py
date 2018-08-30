@@ -114,10 +114,6 @@ class TestClusterSpace(unittest.TestCase):
             atoms.set_chemical_symbols(symbols)
             self.structure_list.append(atoms)
 
-    def shortDescription(self):
-        doc = self._testMethodDoc
-        return doc
-
     def setUp(self):
         """
         Instantiate class before each test.
@@ -395,10 +391,6 @@ class TestClusterSpaceSurface(unittest.TestCase):
             atoms.set_chemical_symbols(symbols)
             self.structure_list.append(atoms)
 
-    def shortDescription(self):
-        doc = self._testMethodDoc
-        return doc
-
     def setUp(self):
         """
         Instantiate class before each test.
@@ -471,10 +463,6 @@ class TestClusterSpaceTernary(unittest.TestCase):
         self.chemical_symbols = ['Ag', 'Au', 'Pd']
         self.cutoffs = [4.0] * 3
         self.atoms_prim = bulk('Ag', 'fcc')
-
-    def shortDescription(self):
-        doc = self._testMethodDoc
-        return doc
 
     def setUp(self):
         """
