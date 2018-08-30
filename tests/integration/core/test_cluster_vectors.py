@@ -68,7 +68,6 @@ def assert_decorrelation(matrix, tolerance=0.99):
             assert corr < tolerance, msg
 
 
-print('')
 db = connect('structures_for_testing.db')
 species = ['H', 'He', 'Pb']
 for row in db.select():
