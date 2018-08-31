@@ -142,28 +142,31 @@ Configuring logging is done for the whole suite in icet/io/logging.py file:
 ```python
 import logging
 logger = logging.getLogger('icet')
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.DEBUG)
 ```
-Note that the default logging level is WARNING, which means that only events of this
-level or higher (like ERROR or CRITICAL) will be tracked displaying something
-like this:
+Note that logger's level is default to DEBUG. However, only
+log events with WARNING level or higher (like ERROR or CRITICAL)
+will be displayed on console like this:
 ```
 icet.fit_methods: WARNING - Failed to import scikit-learn; several optimizers will fail
 ```
-To track log messages at DEBUG and INFO level you can set up the
-logger configurations either in the logging.py file or by using the following
-snippet code:
-```
+Any logging customization can be done by setting up the
+logger's configuration either in the logging.py file or by using the
+`set_config()` function:
+```python
 from icet.io.logging import set_config
-set_conf(level=20)
+set_config(level='INFO')
 ```
-In this case the output will show an info messages like follows:
+In which case the output will show an info
+messages on console as follows:
 ```
 icet.orbit_list: INFO - Finished construction of orbit list. (time: 0.001853s)
 ```
-We use the numeric values given by default in the logging library to the
-different logging levels: NOSET: 0, DEBUG: 10, INFO: 20, WARNING: 30,
-ERROR: 40 and CRITICAL: 50.
+In the same way, log events above certain level can be written to a file by
+executing:
+```python
+set_config(filename='debug.log', level='DEBUG')
+```
 
 
 Please use spaces
