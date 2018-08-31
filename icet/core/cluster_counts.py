@@ -41,22 +41,28 @@ def __get_string_representation(self):
     of the clusters (cluster, elements and count).
     '''
     self.setup_cluster_counts_info()
-    s = ['Cluster Counts']
+    tuplets = {1: 'Singlet', 2: 'Pair', 3: 'Triplet', 4: 'Quadruplet'}
+    width = 50
+    s = ['{s:=^{n}}'.format(s=' Cluster Counts ', n=width)]
     cluster_counts = {key: len(values)
                       for key, values in self.get_cluster_counts().items()}
     m = 0
+    horizontal_line = '{s:-^{n}}'.format(s='', n=width)
     for cluster in sorted(cluster_counts.keys()):
-        horizontal_line = '{s:-^{n}}'.format(s='', n=30)
-        s += [horizontal_line]
-        s += ['{} {:} {:.4f}'.format(cluster.sites,
-                                     cluster.distances,
-                                     cluster.radius)]
-        s += [horizontal_line]
+        if m != 0:
+            s += ['']
+        tuplet_type = tuplets.get(len(cluster.sites),
+                                  '{}-tuplet'.format(len(cluster.sites)))
+        s += ['{}: {} {:} {:.4f}'.format(tuplet_type,
+                                         cluster.sites,
+                                         cluster.distances,
+                                         cluster.radius)]
         for k in range(cluster_counts[cluster]):
             elements, count = self.get_cluster_counts_info(m)
-            t = ['{} '.format(el) for el in elements]
-            s += ['{}   {}'.format('  '.join(t), count)]
+            t = ['{:3} '.format(el) for el in elements]
+            s += ['{} {}'.format(''.join(t), count)]
             m += 1
+    s += [''.center(width, '=')]
     return '\n'.join(s)
 
 
@@ -68,5 +74,5 @@ def __print_overview(self):
 
 
 ClusterCounts.count_clusters = __count_clusters
-ClusterCounts.repr = __get_string_representation
+ClusterCounts.__repr__ = __get_string_representation
 ClusterCounts.print_overview = __print_overview
