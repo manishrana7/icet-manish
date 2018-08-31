@@ -199,7 +199,7 @@ def find_lattice_site_by_position(atoms: Atoms, position: List[float],
     atoms
         input atomic structure
     position
-        pressumed cartesian coordinates of a lattice site
+        presumed cartesian coordinates of a lattice site
     """
 
     for i, atom in enumerate(atoms):
