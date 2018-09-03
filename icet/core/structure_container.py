@@ -6,7 +6,6 @@ from typing import BinaryIO, Dict, List, TextIO, Tuple, Union
 import numpy as np
 import ase.db
 from ase import Atoms
-from ase.calculators.calculator import PropertyNotImplementedError
 
 from icet import ClusterSpace
 from icet.io.logging import logger
@@ -217,15 +216,12 @@ class StructureContainer:
         # check for properties in attached calculator
         if properties is None:
             properties = {}
-            if atoms.calc:
-                if len(atoms.calc.check_state(atoms)) == 0:
-                    try:
-                        energy = atoms.get_potential_energy()
-                    except PropertyNotImplementedError:
-                        logger.exception('Potential energy cannot be added'
-                                         ' from attached calculator')
-                    else:
-                        properties['energy'] = energy / len(atoms)
+            try:
+                if not atoms.calc.calculation_required(atoms, ['energy']):
+                    energy = atoms.get_potential_energy()
+                    properties['energy'] = energy / len(atoms)
+            except AttributeError:
+                pass
 
         # check if there exists structures with identical cluster vector
         cv = self._cluster_space.get_cluster_vector(atoms_copy)
