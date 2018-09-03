@@ -22,13 +22,26 @@ sh.setLevel(logging.WARNING)
 logger.addHandler(sh)
 
 
-def set_config(filename=None, level=None):
+class MyFilter(logging.Filter):
+    def __init__(self, level):
+        self.__level = level
+
+    def filter(self, logRecord):
+        return logRecord.levelno == self.__level
+
+
+def set_log_config(filename=None, level=None, restricted=False):
 
     # If a filename is provided a logfile will be created
     if filename is not None:
         fh = logging.FileHandler(filename)
         fh.setFormatter(formatter)
         logger.addHandler(fh)
+
+        # Restrict file handler to only write out at the level specified
+        if restricted:
+            lvl = logging.getLevelName(level)
+            fh.addFilter(MyFilter(lvl))
 
         if level is not None:
             fh.setLevel(level)

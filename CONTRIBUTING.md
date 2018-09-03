@@ -152,20 +152,24 @@ icet.fit_methods: WARNING - Failed to import scikit-learn; several optimizers wi
 ```
 Any logging customization can be done by setting up the
 logger's configuration either in the logging.py file or by using the
-`set_config()` function:
+`set_log_config()` function:
 ```python
-from icet.io.logging import set_config
-set_config(level='INFO')
+from icet.io.logging import set_log_config
+set_log_config(level='INFO')
 ```
-In which case the output will show an info
-messages on console as follows:
+In which case the output will show an info messages on console as follows:
 ```
 icet.orbit_list: INFO - Finished construction of orbit list. (time: 0.001853s)
 ```
-In the same way, log events above certain level can be written to a file by
-executing:
+In the same way, log events above certain level can be written to a file:
 ```python
-set_config(filename='debug.log', level='DEBUG')
+set_log_config(filename='logger.log', level='DEBUG')
+```
+Most advanced features allow you to write different logging events to separate
+files as in the following example:
+```python
+set_log_config(filename='info.log', level='INFO', restricted=True)
+set_log_config(filename='debug.log', level='DEBUG', restricted=True)
 ```
 
 
