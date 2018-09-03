@@ -92,7 +92,7 @@ def get_primitive_structure(atoms: Atoms, no_idealize: bool=True) -> Atoms:
         primitive structure
     """
 
-    atoms_with_vacuum = add_vacuum_in_non_pbc(atoms)
+    atoms_with_vacuum = add_vacuum_in_non_pbc(atoms.copy())
 
     atoms_as_tuple = ase_atoms_to_spglib_cell(atoms_with_vacuum)
 
@@ -102,9 +102,7 @@ def get_primitive_structure(atoms: Atoms, no_idealize: bool=True) -> Atoms:
     atoms_prim = Atoms(scaled_positions=scaled_positions,
                        numbers=numbers, cell=lattice, pbc=atoms.pbc)
     atoms_prim.wrap()
-    # icet_wrap(atoms_prim)
-    # print(atoms_prim.positions)
-    # exit(1)
+
     return atoms_prim
 
 
