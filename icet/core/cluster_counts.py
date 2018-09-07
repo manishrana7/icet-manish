@@ -29,7 +29,7 @@ class ClusterCounts(_ClusterCounts):
         self.setup_cluster_counts_info()
 
     def _count_clusters(self, keep_order_intact=False):
-        '''
+        """
         Count all clusters in a structure by finding their local orbit list.
 
         Parameters
@@ -37,8 +37,7 @@ class ClusterCounts(_ClusterCounts):
         keep_order_intact: boolean
             count the clusters in the orbit with the same orientation as the
             prototype cluster
-        '''
-
+        """
         local_orbit_list_generator = LocalOrbitListGenerator(
             self._primitive_orbit_list, self._structure)
 
@@ -53,10 +52,10 @@ class ClusterCounts(_ClusterCounts):
                 keep_order_intact)
 
     def __repr__(self):
-        '''
+        """
         String representation of cluster counts that provides an overview
         of the clusters (cluster, elements and count).
-        '''
+        """
         tuplets = {1: 'Singlet', 2: 'Pair', 3: 'Triplet', 4: 'Quadruplet'}
         width = 60
         s = ['{s:=^{n}}'.format(s=' Cluster Counts ', n=width)]
