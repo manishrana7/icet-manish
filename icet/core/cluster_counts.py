@@ -1,78 +1,94 @@
-from _icet import ClusterCounts
+from ase import Atoms
+from icet.core.orbit_list import OrbitList
+from icet import Structure
+from _icet import ClusterCounts as _ClusterCounts
 from .local_orbit_list_generator import LocalOrbitListGenerator
 
 
-def __count_clusters(self, structure, prim_orbit_list,
-                     keep_order_intact=False):
-    '''
-    Count all clusters in a structure by finding their local orbit list.
-
-    Note that this requires creating the local_orbit_list_generator object for
-    generating the local orbit lists.
+class ClusterCounts(_ClusterCounts):
+    """
+    Provides an interface to inspect cluster counts.
 
     Parameters
     ----------
-    structure : Structure object
-        supercell of the structure `prim_orbit_list` is based on
-    prim_orbit_list : OrbitList object
-        orbit list based on a primitive of the input structure
-    keep_order_intact: boolean
-        count the clusters in the orbit with the same orientation as the
-        prototype cluster
-    '''
+    primitive_orbit_list : OrbitList object
+        orbit list for a primitive structure
+    atoms : ASE Atoms object
+        supercell of the primitive structure that `primitive_orbit_list` is
+        based on
+    """
 
-    local_orbit_list_generator = LocalOrbitListGenerator(prim_orbit_list,
-                                                         structure)
+    def __init__(self, primitive_orbit_list: OrbitList, atoms: Atoms):
+        self._primitive_orbit_list = primitive_orbit_list
+        self._structure = Structure.from_atoms(atoms)
 
-    for i in range(local_orbit_list_generator.get_unique_offsets_count()):
-        # sending local orbit list directly into function was about 10% faster
-        # than:
-        # local_orbit_list = \
-        #    local_orbit_list_generator.generate_local_orbit_list(i)
-        self.count_orbit_list(
-            structure,
-            local_orbit_list_generator.generate_local_orbit_list(i),
-            keep_order_intact)
+        # call (base) C++ constructor
+        _ClusterCounts.__init__(self)
 
+        self._count_clusters()
+        self.setup_cluster_counts_info()
 
-def __get_string_representation(self):
-    '''
-    String representation of cluster counts that provides an overview
-    of the clusters (cluster, elements and count).
-    '''
-    self.setup_cluster_counts_info()
-    tuplets = {1: 'Singlet', 2: 'Pair', 3: 'Triplet', 4: 'Quadruplet'}
-    width = 50
-    s = ['{s:=^{n}}'.format(s=' Cluster Counts ', n=width)]
-    cluster_counts = {key: len(values)
-                      for key, values in self.get_cluster_counts().items()}
-    m = 0
-    horizontal_line = '{s:-^{n}}'.format(s='', n=width)
-    for cluster in sorted(cluster_counts.keys()):
-        if m != 0:
-            s += ['']
-        tuplet_type = tuplets.get(len(cluster.sites),
-                                  '{}-tuplet'.format(len(cluster.sites)))
-        s += ['{}: {} {:} {:.4f}'.format(tuplet_type,
-                                         cluster.sites,
-                                         cluster.distances,
-                                         cluster.radius)]
-        for k in range(cluster_counts[cluster]):
-            elements, count = self.get_cluster_counts_info(m)
-            t = ['{:3} '.format(el) for el in elements]
-            s += ['{} {}'.format(''.join(t), count)]
-            m += 1
-    s += [''.center(width, '=')]
-    return '\n'.join(s)
+    def _count_clusters(self, keep_order_intact=False):
+        '''
+        Count all clusters in a structure by finding their local orbit list.
 
+        Parameters
+        ----------
+        keep_order_intact: boolean
+            count the clusters in the orbit with the same orientation as the
+            prototype cluster
+        '''
 
-def __print_overview(self):
-    '''
-    Print cluster counts representation
-    '''
-    print(__get_string_representation(self))
+        local_orbit_list_generator = LocalOrbitListGenerator(
+            self._primitive_orbit_list, self._structure)
 
+        for i in range(local_orbit_list_generator.get_unique_offsets_count()):
+            # sending local orbit list directly into function was about
+            # 10% faster than:
+            # local_orbit_list = \
+            #    local_orbit_list_generator.generate_local_orbit_list(i)
+            self.count_orbit_list(
+                self._structure,
+                local_orbit_list_generator.generate_local_orbit_list(i),
+                keep_order_intact)
 
-ClusterCounts.count_clusters = __count_clusters
-ClusterCounts.__repr__ = __get_string_representation
-ClusterCounts.print_overview = __print_overview
+    def __repr__(self):
+        '''
+        String representation of cluster counts that provides an overview
+        of the clusters (cluster, elements and count).
+        '''
+        tuplets = {1: 'Singlet', 2: 'Pair', 3: 'Triplet', 4: 'Quadruplet'}
+        width = 60
+        s = ['{s:=^{n}}'.format(s=' Cluster Counts ', n=width)]
+
+        # Put clusters in a list that we can sort according to
+        # (1) multiplet and (2) size of cluster
+        m = 0
+        cluster_counts = []
+        for cluster, cluster_info in self.get_cluster_counts().items():
+            cluster_counts.append(
+                (len(cluster.distances), cluster.radius, cluster,
+                 (m, m+len(cluster_info))))
+            m += len(cluster_info)
+
+        first = True
+        for cluster_data in sorted(cluster_counts):
+            # Add an empty line if it is not the first cluster
+            if not first:
+                s += ['']
+            else:
+                first = False
+
+            cluster = cluster_data[2]
+            tuplet_type = tuplets.get(len(cluster.sites),
+                                      '{}-tuplet'.format(len(cluster.sites)))
+            s += ['{}: {} {:} {:.4f}'.format(tuplet_type,
+                                             cluster.sites,
+                                             cluster.distances,
+                                             cluster.radius)]
+            for m in range(*cluster_data[3]):
+                elements, count = self.get_cluster_counts_info(m)
+                t = ['{:3} '.format(el) for el in elements]
+                s += ['{} {}'.format(''.join(t), count)]
+        s += [''.center(width, '=')]
+        return '\n'.join(s)
