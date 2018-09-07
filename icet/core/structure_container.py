@@ -214,14 +214,11 @@ class StructureContainer:
         atoms_copy = atoms.copy()
 
         # check for properties in attached calculator
-        if properties is None:
+        if properties is None and atoms.calc:
             properties = {}
-            try:
-                if not atoms.calc.calculation_required(atoms, ['energy']):
-                    energy = atoms.get_potential_energy()
-                    properties['energy'] = energy / len(atoms)
-            except AttributeError:
-                pass
+            if not atoms.calc.calculation_required(atoms, ['energy']):
+                energy = atoms.get_potential_energy()
+                properties['energy'] = energy / len(atoms)
 
         # check if there exists structures with identical cluster vector
         cv = self._cluster_space.get_cluster_vector(atoms_copy)
