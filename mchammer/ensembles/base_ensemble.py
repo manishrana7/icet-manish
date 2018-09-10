@@ -381,10 +381,12 @@ class BaseEnsemble(ABC):
             new occupations (species) by atomic number
         """
         current_species = self.configuration.occupations[sites]
-        current_property = self.calculator.calculate_total(self.configuration.occupations)
+        current_property = self.calculator.calculate_total(
+            occupations=self.configuration.occupations)
 
         self.update_occupations(sites=sites, species=species)
-        new_property = self.calculator.calculate_total(self.configuration.occupations)
+        new_property = self.calculator.calculate_total(
+            occupations=self.configuration.occupations)
         property_change = new_property - current_property
 
         # Restore initial configuration
