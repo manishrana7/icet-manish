@@ -168,29 +168,36 @@ class TestStructureContainer(unittest.TestCase):
         # add atoms with tag and property
         atoms = self.structure_list[0]
         properties = self.properties_list[0]
-        tag = "Structure 5"
+        tag = "Structure 4"
         self.sc.add_structure(atoms, tag, properties)
         self.assertEqual(len(self.sc), len(self.structure_list)+1)
 
         # add atom and read property from calculator
         self.sc.add_structure(atoms)
-        self.assertEqual(len(self.sc.get_properties()),
-                         len(self.structure_list)+2)
+        self.assertEqual(len(self.sc), len(self.structure_list)+2)
+        self.assertEqual(self.sc.get_properties([5], 'energy'),
+                         [self.properties_list[0]['energy']/len(atoms)])
 
         # add atom and don't read property from calculator
         atoms_cpy = atoms.copy()
         atoms_cpy.set_calculator(EMT())
         self.sc.add_structure(atoms_cpy)
-        self.assertEqual(self.sc.available_properties[-1], 'volume')
+        self.assertEqual(len(self.sc), len(self.structure_list)+3)
+        with self.assertRaises(KeyError):
+            self.sc.get_properties([6], 'energy')
 
-        # check that duplicates structure is not added.
-        self.sc.add_structure(atoms, tag, properties)
+        # check that duplicate structure is not added.
         with self.assertRaises(ValueError) as cm:
             self.sc.add_structure(atoms, tag, properties,
                                   allow_duplicate=False)
-        self.assertEqual("atoms 'Structure 5' have identical cluster vector"
-                         " with structure at index 0 and tagged as"
-                         " 'Structure 0'", str(cm.exception))
+        msg = "atoms 'Structure 4' have identical cluster vector with"
+        msg += " structure at index 0 and tagged as 'Structure 0'"
+        self.assertEqual(msg, str(cm.exception))
+        self.assertEqual(len(self.sc), len(self.structure_list)+3)
+
+        symbols = ['Au' for i in range(len(atoms))]
+        atoms.set_chemical_symbols(symbols)
+        self.sc.add_structure(atoms, 'Structure 5', allow_duplicate=False)
         self.assertEqual(len(self.sc), len(self.structure_list)+4)
 
     def test_get_fit_data(self):
