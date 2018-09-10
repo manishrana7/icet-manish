@@ -95,24 +95,24 @@ class TestEnsemble(unittest.TestCase):
 
     def test_init_without_temperature(self):
         """ Test init without temperature."""
-        with self.assertRaises(KeyError) as context:
+        with self.assertRaises(TypeError) as context:
             SemiGrandCanonicalEnsemble(
                 calculator=self.calculator, atoms=self.atoms,
                 name='test-ensemble', random_seed=42)
         self.assertTrue(
-            "Missing required keyword:"
-            " temperature" in str(context.exception))
+            "Missing required argument: temperature"
+            in str(context.exception))
 
     def test_init_without_chemical_potential(self):
         """ Test init chemical potentials."""
-        with self.assertRaises(KeyError) as context:
+        with self.assertRaises(TypeError) as context:
             SemiGrandCanonicalEnsemble(
                 calculator=self.calculator, atoms=self.atoms,
                 name='test-ensemble', temperature=self.temperature,
                 random_seed=42)
         self.assertTrue(
-            "Missing required keyword:"
-            " chemical_potentials" in str(context.exception))
+            "Missing required argument: chemical_potentials"
+            in str(context.exception))
 
     def test_init_with_integer_chemical_potentials(self):
         """ Test init with integer chemical potentials."""

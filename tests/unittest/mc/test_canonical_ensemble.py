@@ -59,11 +59,11 @@ class TestEnsemble(unittest.TestCase):
 
     def test_init_without_temperature(self):
         """ Test init without temperature."""
-        with self.assertRaises(KeyError) as context:
+        with self.assertRaises(TypeError) as context:
             CanonicalEnsemble(
                 calculator=self.calculator, atoms=self.atoms,
                 name='test-ensemble', random_seed=42)
-        self.assertTrue('Missing required keyword: temperature'
+        self.assertTrue('Missing required argument: temperature'
                         in str(context.exception))
 
     def test_property_boltzmann(self):
