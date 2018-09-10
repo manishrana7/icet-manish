@@ -61,6 +61,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
             atoms=atoms, calculator=calculator, name=name,
             data_container=data_container,
             random_seed=random_seed,
+            data_container_write_period=data_container_write_period,
             ensemble_data_write_interval=ensemble_data_write_interval,
             trajectory_write_interval=trajectory_write_interval)
 
