@@ -225,11 +225,10 @@ class StructureContainer:
         if not allow_duplicate:
             for i, fs in enumerate(self):
                 if np.allclose(cv, fs.cluster_vector):
-                    msg = "atoms '{}' have identical cluster vector with" \
-                          " structure at index {}".format(
-                              user_tag if user_tag is not None else '', i)
-                    if not fs.user_tag == 'None':
-                        msg += " and tagged as '{}'".format(fs.user_tag)
+                    msg = "{} have identical cluster vector with {}".format(
+                        user_tag if user_tag is not None else 'Input atoms',
+                        fs.user_tag if fs.user_tag != 'None' else 'structure')
+                    msg += " at index {}".format(i)
                     raise ValueError(msg)
 
         structure = FitStructure(atoms_copy, user_tag)
