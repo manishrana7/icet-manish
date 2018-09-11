@@ -47,15 +47,14 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
 
     """
 
-    def __init__(self, temperature: float,
-                 chemical_potentials: Dict[str, float],
-                 boltzmann_constant: float=kB,
-                 atoms: Atoms=None, calculator: BaseCalculator=None,
+    def __init__(self, atoms: Atoms=None, calculator: BaseCalculator=None,
                  name: str='Semi-grand canonical ensemble',
                  data_container: DataContainer=None, random_seed: int=None,
                  data_container_write_period: float=np.inf,
                  ensemble_data_write_interval: int=None,
-                 trajectory_write_interval: int=None):
+                 trajectory_write_interval: int=None,
+                 boltzmann_constant: float=kB, *, temperature: float,
+                 chemical_potentials: Dict[str, float]):
 
         super().__init__(
             atoms=atoms, calculator=calculator, name=name,
