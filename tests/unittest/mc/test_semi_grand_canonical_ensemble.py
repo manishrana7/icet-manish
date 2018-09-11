@@ -33,8 +33,11 @@ class TestEnsemble(unittest.TestCase):
 
         self.ensemble = SemiGrandCanonicalEnsemble(
             calculator=self.calculator, atoms=self.atoms,
-            name='test-ensemble',
-            random_seed=42, temperature=self.temperature,
+            name='test-ensemble', random_seed=42,
+            data_container_write_period=499.0,
+            ensemble_data_write_interval=25,
+            trajectory_write_interval=40,
+            temperature=self.temperature,
             chemical_potentials=self.chemical_potentials,
             boltzmann_constant=1e-5)
 
@@ -128,6 +131,14 @@ class TestEnsemble(unittest.TestCase):
         self.assertEqual(data['temperature'], 100.0)
         self.assertEqual(data['mu_Al'], 5)
         self.assertEqual(data['mu_Ga'], 0)
+
+    def test_write_interval_and_period(self):
+        """
+        Test interval and period for writing data from ensemble.
+        """
+        self.assertEqual(self.ensemble.data_container_write_period, 499.0)
+        self.assertEqual(self.ensemble._ensemble_data_write_interval, 25)
+        self.assertEqual(self.ensemble._trajectory_write_interval, 40)
 
 
 if __name__ == '__main__':
