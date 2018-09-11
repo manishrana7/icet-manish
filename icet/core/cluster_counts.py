@@ -25,8 +25,7 @@ class ClusterCounts(_ClusterCounts):
         # call (base) C++ constructor
         _ClusterCounts.__init__(self)
 
-        self._count_clusters()
-        self.setup_cluster_counts_info()
+        self.cluster_counts = self._count_clusters()
 
     def _count_clusters(self, keep_order_intact=False):
         """
@@ -51,14 +50,7 @@ class ClusterCounts(_ClusterCounts):
                 local_orbit_list_generator.generate_local_orbit_list(i),
                 keep_order_intact)
 
-    def __repr__(self):
-        """
-        String representation of cluster counts that provides an overview
-        of the clusters (cluster, elements and count).
-        """
-        tuplets = {1: 'Singlet', 2: 'Pair', 3: 'Triplet', 4: 'Quadruplet'}
-        width = 60
-        s = ['{s:=^{n}}'.format(s=' Cluster Counts ', n=width)]
+        self.setup_cluster_counts_info()
 
         # Put clusters in a list that we can sort according to
         # (1) multiplet and (2) size of cluster
@@ -70,24 +62,52 @@ class ClusterCounts(_ClusterCounts):
                  (m, m+len(cluster_info))))
             m += len(cluster_info)
 
-        first = True
+        # Put clusters in a sorted order in a list together with their
+        # actual counts
+        sorted_cluster_counts = []
         for cluster_data in sorted(cluster_counts):
-            # Add an empty line if it is not the first cluster
+            sorted_cluster_counts.append((cluster_data[2], {}))
+            for m in range(*cluster_data[3]):
+                elements, count = self.get_cluster_counts_info(m)
+                sorted_cluster_counts[-1][1][tuple(elements)] = count
+        return sorted_cluster_counts
+
+    def __repr__(self):
+        """
+        String representation of cluster counts that provides an overview
+        of the clusters (cluster, elements and count).
+        """
+        tuplets = {1: 'Singlet', 2: 'Pair', 3: 'Triplet', 4: 'Quadruplet'}
+        width = 60
+        s = ['{s:=^{n}}'.format(s=' Cluster Counts ', n=width)]
+
+        first = True
+        for cluster_count in self.cluster_counts:
             if not first:
                 s += ['']
             else:
                 first = False
 
-            cluster = cluster_data[2]
+            cluster = cluster_count[0]
+
+            # Add a description of the orbit to the string
             tuplet_type = tuplets.get(len(cluster.sites),
                                       '{}-tuplet'.format(len(cluster.sites)))
             s += ['{}: {} {:} {:.4f}'.format(tuplet_type,
                                              cluster.sites,
                                              cluster.distances,
                                              cluster.radius)]
-            for m in range(*cluster_data[3]):
-                elements, count = self.get_cluster_counts_info(m)
+
+            # Print the actual counts together with the elements they refer to
+            for elements, count in cluster_count[1].items():
                 t = ['{:3} '.format(el) for el in elements]
                 s += ['{} {}'.format(''.join(t), count)]
         s += [''.center(width, '=')]
         return '\n'.join(s)
+
+    def __getitem__(self, key):
+        """
+        Return cluster count (Cluster object and dict with counts) for a
+        ClusterCounts object.
+        """
+        return self.cluster_counts[key]
