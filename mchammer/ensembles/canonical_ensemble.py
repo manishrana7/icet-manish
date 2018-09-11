@@ -31,14 +31,13 @@ class CanonicalEnsemble(BaseEnsemble):
 
     """
 
-    def __init__(self, atoms: Atoms=None, calculator: BaseCalculator=None,
+    def __init__(self, temperature: float, boltzmann_constant: float=kB,
+                 atoms: Atoms=None, calculator: BaseCalculator=None,
                  name: str='Canonical ensemble',
                  data_container: DataContainer=None, random_seed: int=None,
                  data_container_write_period: float=np.inf,
                  ensemble_data_write_interval: int=None,
-                 trajectory_write_interval: int=None,
-                 boltzmann_constant: float=kB,
-                 temperature: float=None):
+                 trajectory_write_interval: int=None):
 
         super().__init__(
             atoms=atoms, calculator=calculator, name=name,
@@ -48,11 +47,7 @@ class CanonicalEnsemble(BaseEnsemble):
             ensemble_data_write_interval=ensemble_data_write_interval,
             trajectory_write_interval=trajectory_write_interval)
 
-        if temperature is None:
-            raise TypeError('Missing required argument: temperature')
-        else:
-            self.temperature = temperature
-
+        self.temperature = temperature
         self.boltzmann_constant = boltzmann_constant
 
     def _do_trial_step(self):

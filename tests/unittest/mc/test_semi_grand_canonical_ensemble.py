@@ -93,27 +93,6 @@ class TestEnsemble(unittest.TestCase):
         # at least run it for positive energy diff
         self.ensemble._acceptance_condition(10.0)
 
-    def test_init_without_temperature(self):
-        """ Test init without temperature."""
-        with self.assertRaises(TypeError) as context:
-            SemiGrandCanonicalEnsemble(
-                calculator=self.calculator, atoms=self.atoms,
-                name='test-ensemble', random_seed=42)
-        self.assertTrue(
-            "Missing required argument: temperature"
-            in str(context.exception))
-
-    def test_init_without_chemical_potential(self):
-        """ Test init chemical potentials."""
-        with self.assertRaises(TypeError) as context:
-            SemiGrandCanonicalEnsemble(
-                calculator=self.calculator, atoms=self.atoms,
-                name='test-ensemble', temperature=self.temperature,
-                random_seed=42)
-        self.assertTrue(
-            "Missing required argument: chemical_potentials"
-            in str(context.exception))
-
     def test_init_with_integer_chemical_potentials(self):
         """ Test init with integer chemical potentials."""
 

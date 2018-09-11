@@ -57,15 +57,6 @@ class TestEnsemble(unittest.TestCase):
         # at least run it for positive energy diff
         self.ensemble._acceptance_condition(10.0)
 
-    def test_init_without_temperature(self):
-        """ Test init without temperature."""
-        with self.assertRaises(TypeError) as context:
-            CanonicalEnsemble(
-                calculator=self.calculator, atoms=self.atoms,
-                name='test-ensemble', random_seed=42)
-        self.assertTrue('Missing required argument: temperature'
-                        in str(context.exception))
-
     def test_property_boltzmann(self):
         """ Test init with explicit Boltzmann constant."""
         from ase.units import kB
