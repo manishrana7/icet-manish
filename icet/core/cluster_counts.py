@@ -3,6 +3,7 @@ from icet.core.orbit_list import OrbitList
 from icet import Structure
 from _icet import ClusterCounts as _ClusterCounts
 from .local_orbit_list_generator import LocalOrbitListGenerator
+from collections import OrderedDict
 
 
 class ClusterCounts(_ClusterCounts):
@@ -62,14 +63,15 @@ class ClusterCounts(_ClusterCounts):
                  (m, m+len(cluster_info))))
             m += len(cluster_info)
 
-        # Put clusters in a sorted order in a list together with their
+        # Put clusters in a sorted order in an OrderedDict together with their
         # actual counts
-        sorted_cluster_counts = []
+        sorted_cluster_counts = OrderedDict()
         for cluster_data in sorted(cluster_counts):
-            sorted_cluster_counts.append((cluster_data[2], {}))
+            cluster = cluster_data[2]
+            sorted_cluster_counts[cluster] = {}
             for m in range(*cluster_data[3]):
                 elements, count = self.get_cluster_counts_info(m)
-                sorted_cluster_counts[-1][1][tuple(elements)] = count
+                sorted_cluster_counts[cluster][tuple(elements)] = count
         return sorted_cluster_counts
 
     def __repr__(self):
@@ -82,13 +84,11 @@ class ClusterCounts(_ClusterCounts):
         s = ['{s:=^{n}}'.format(s=' Cluster Counts ', n=width)]
 
         first = True
-        for cluster_count in self.cluster_counts:
+        for cluster, counts in self.cluster_counts.items():
             if not first:
                 s += ['']
             else:
                 first = False
-
-            cluster = cluster_count[0]
 
             # Add a description of the orbit to the string
             tuplet_type = tuplets.get(len(cluster.sites),
@@ -99,7 +99,7 @@ class ClusterCounts(_ClusterCounts):
                                              cluster.radius)]
 
             # Print the actual counts together with the elements they refer to
-            for elements, count in cluster_count[1].items():
+            for elements, count in counts.items():
                 t = ['{:3} '.format(el) for el in elements]
                 s += ['{} {}'.format(''.join(t), count)]
         s += [''.center(width, '=')]
