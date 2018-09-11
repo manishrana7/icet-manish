@@ -4,7 +4,6 @@ This example demonstrates how to count the number of clusters for a structure.
 
 # Start import
 from ase.build import bulk
-from icet import Structure
 from icet.tools import get_primitive_structure
 from icet.core.cluster_counts import ClusterCounts
 from icet.core.orbit_list import create_orbit_list
@@ -20,10 +19,8 @@ atoms.set_chemical_symbols(['Ti', 'W']*1)
 
 # Determine the orbit list for the corresponding primitive structure for all
 # pair clusters within the cutoff distance
-cutoffs = [6.1, 5.1]
-
-prim_structure = Structure.from_atoms(prim_atoms)
-prim_orbitlist = create_orbit_list(prim_structure, cutoffs)
+cutoffs = [5.1]
+prim_orbitlist = create_orbit_list(prim_atoms, cutoffs)
 
 # Use the primitive orbit list to count the number of clusters.
 cluster_counts = ClusterCounts(prim_orbitlist, atoms)
