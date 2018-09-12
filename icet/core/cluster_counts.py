@@ -2,6 +2,7 @@ from ase import Atoms
 from icet.core.orbit_list import OrbitList
 from icet import Structure
 from _icet import ClusterCounts as _ClusterCounts
+from _icet import Cluster
 from .local_orbit_list_generator import LocalOrbitListGenerator
 from collections import OrderedDict
 
@@ -109,5 +110,14 @@ class ClusterCounts(_ClusterCounts):
         """
         Return cluster count (Cluster object and dict with counts) for a
         ClusterCounts object.
+
+        Parameters
+        ----------
+        key : int / icet Cluster object (bi-optional)
+            If int, return the key:th counts, if Cluster, return the counts
+            belonging to that cluster.
         """
-        return self.cluster_counts[key]
+        if isinstance(key, int):
+            return list(self.cluster_counts.values())[key]
+        elif isinstance(key, Cluster):
+            return self.cluster_counts[key]
