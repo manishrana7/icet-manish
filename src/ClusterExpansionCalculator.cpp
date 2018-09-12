@@ -54,59 +54,57 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
             auto orbitPermutations = orbit.getEquivalentSitesPermutations();
 
             int eqSiteIndex = -1;
-            
-            for (const auto latticeSitesOriginal : orbit.getEquivalentSites())
+
+            for (const auto latticeSites : orbit.getEquivalentSites())
             {
-                std::vector<std::vector<LatticeSite>> latticeSitesTranslated = _clusterSpace.getOrbitList().getSitesTranslatedToUnitcell(latticeSitesOriginal);
-                // latticeSitesTranslated.push_back(latticeSitesOriginal);
+                eqSiteIndex++;
 
-                for (int k = 0; k < latticeSitesTranslated.size(); k++)
+                // std::cout<<"eqSiteIndex "<<eqSiteIndex<<std::endl;
+
+                for (int i = 0; i < primitiveSize; i++)
                 {
-                    std::vector<LatticeSite> latticeSites = latticeSitesTranslated[k];
-                    if (k == 0)
+                    // std::cout<<"i="<< i << " / "<< primitiveSize<<std::endl;
+                    Vector3d primPos = _clusterSpace.getPrimitiveStructure().getPositions().row(i);
+                    LatticeSite primitiveSite_i = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(primPos);
+                    LatticeSite superCellEquivalent = _superCell.findLatticeSiteByPosition(primPos); //_theLog.getPrimToSupercellMap()[primitiveSite_i];
+                    // if (std::find(latticeSites.begin(), latticeSites.end(), superCellEquivalent) != latticeSites.end())
+                    if (true)
                     {
-                        eqSiteIndex++;
-                    }
-                    // std::cout<<"eqSiteIndex "<<eqSiteIndex<<std::endl;
-
-                    for (int i = 0; i < primitiveSize; i++)
-                    {
-                        // std::cout<<"i="<< i << " / "<< primitiveSize<<std::endl;
-                        Vector3d primPos = _clusterSpace.getPrimitiveStructure().getPositions().row(i);
-                        LatticeSite primitiveSite_i = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(primPos);
-                        LatticeSite superCellEquivalent = _superCell.findLatticeSiteByPosition(primPos); //_theLog.getPrimToSupercellMap()[primitiveSite_i];
-                        // if (std::find(latticeSites.begin(), latticeSites.end(), superCellEquivalent) != latticeSites.end())
-                        if (true)
+                        // std::cout<<"-----"<<std::endl;
+                        // std::cout<<primPos[0]<< " "<<primPos[1]<< " "<<primPos[2]<<std::endl;
+                        // superCellEquivalent.print();
+                        // primitiveSite_i.print();
+                        // std::cout<<"Size: "<<latticeSites.size()<<std::endl;
+                        // std::cout<<"-----"<<std::endl;
+                        // std::cout<<"Find prim eq sites"<<std::endl;
+                        std::vector<LatticeSite> primitiveEquivalentSites;
+                        for (const auto site : latticeSites)
                         {
-                            // std::cout<<"-----"<<std::endl;
-                            // std::cout<<primPos[0]<< " "<<primPos[1]<< " "<<primPos[2]<<std::endl;
-                            // superCellEquivalent.print();
-                            // primitiveSite_i.print();
-                            // std::cout<<"Size: "<<latticeSites.size()<<std::endl;
-                            // std::cout<<"-----"<<std::endl;
-                            // std::cout<<"Find prim eq sites"<<std::endl;
-                            std::vector<LatticeSite> primitiveEquivalentSites;
-                            for (const auto site : latticeSites)
-                            {
-                                Vector3d sitePosition = _superCell.getPosition(site);
-                                auto primitiveSite = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(sitePosition);
-                                primitiveEquivalentSites.push_back(primitiveSite);
-                            }
+                            Vector3d sitePosition = _superCell.getPosition(site);
+                            auto primitiveSite = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(sitePosition);
+                            primitiveEquivalentSites.push_back(primitiveSite);
+                        }
 
-                            // std::cout<<"search if it exists in orbit vector"<<std::endl;
-                            // std::cout<<"Orbit index "<<orbitIndex<< " orbitVector size "<<orbitVector.size()<<std::endl;
-                            // std::cout<<"primitiveEquivalentSites.size() "<<primitiveEquivalentSites.size()<<std::endl;
-                            // std::cout<<"orbitVector[orbitIndex].getEquivalentSites().size() "<<orbitVector[orbitIndex].getEquivalentSites().size()<<std::endl;
-                            // for(int kk =0; kk<15; kk++){std::cout<<kk<<" ";}
-                            // std::cout<<std::endl;
-                            // if(orbitVector[orbitIndex].size()==0 || primitiveEquivalentSites.size()==1 || std::find(orbitVector[orbitIndex].getEquivalentSites().begin(), orbitVector[orbitIndex].getEquivalentSites().end(), primitiveEquivalentSites) == orbitVector[orbitIndex].getEquivalentSites().end())
+                        // std::cout<<"search if it exists in orbit vector"<<std::endl;
+                        // std::cout<<"Orbit index "<<orbitIndex<< " orbitVector size "<<orbitVector.size()<<std::endl;
+                        // std::cout<<"primitiveEquivalentSites.size() "<<primitiveEquivalentSites.size()<<std::endl;
+                        // std::cout<<"orbitVector[orbitIndex].getEquivalentSites().size() "<<orbitVector[orbitIndex].getEquivalentSites().size()<<std::endl;
+                        // for(int kk =0; kk<15; kk++){std::cout<<kk<<" ";}
+                        // std::cout<<std::endl;
+                        // if(orbitVector[orbitIndex].size()==0 || primitiveEquivalentSites.size()==1 || std::find(orbitVector[orbitIndex].getEquivalentSites().begin(), orbitVector[orbitIndex].getEquivalentSites().end(), primitiveEquivalentSites) == orbitVector[orbitIndex].getEquivalentSites().end())
+
+                        std::vector<std::vector<LatticeSite>> latticeSitesTranslated = _clusterSpace.getOrbitList().getSitesTranslatedToUnitcell(primitiveEquivalentSites);
+                        for (auto latticesitesPrimTrans : latticeSitesTranslated)
+                        {
+
                             auto eqSites = orbitVector[orbitIndex].getEquivalentSites();
-                            if (std::any_of(primitiveEquivalentSites.begin(), primitiveEquivalentSites.end(), [=](LatticeSite ls) { return (ls.unitcellOffset()-zeroOffset).norm()<1e-4; }))
+                            if (std::any_of(latticesitesPrimTrans.begin(), latticesitesPrimTrans.end(), [=](LatticeSite ls) { return (ls.unitcellOffset() - zeroOffset).norm() < 1e-4; }))
                             {
-                                if (std::find(eqSites.begin(), eqSites.end(), primitiveEquivalentSites) == eqSites.end())
+                                // if (std::find(eqSites.begin(), eqSites.end(), latticesitesPrimTrans) == eqSites.end())
+                                if(!orbitVector[orbitIndex].contains(latticesitesPrimTrans, true))
                                 {
                                     // std::cout<<"adding eq sites"<<std::endl;
-                                    orbitVector[orbitIndex].addEquivalentSites(primitiveEquivalentSites);
+                                    orbitVector[orbitIndex].addEquivalentSites(latticesitesPrimTrans);
                                     permutations[orbitIndex].push_back(orbitPermutations[eqSiteIndex]);
                                     // std::cout<<" done adding eq sites"<<std::endl;
                                 }
@@ -252,7 +250,6 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const Stru
 
     // Vector3d offsetVector = indexZeroLatticeSite.unitcellOffset();
     Vector3d offsetVector = localSite.unitcellOffset();
-
 
     // auto translatedOrbitList =_theLog.generateLocalOrbitList(localSite.unitcellOffset());
     // auto translatedOrbitList =_theLog.generateLocalOrbitList(indexZeroLatticeSite.unitcellOffset());
