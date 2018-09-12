@@ -56,7 +56,7 @@ int Orbit::getNumberOfDuplicates(int verbosity) const
  */
 std::vector<std::vector<int>> Orbit::getMCVectors(const std::vector<int> &Mi_local) const
 {
-    if( std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i){ return  i<2; }))
+    if (std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i) { return i < 2; }))
     {
         std::vector<std::vector<int>> emptyVector;
         return emptyVector;
@@ -64,15 +64,14 @@ std::vector<std::vector<int>> Orbit::getMCVectors(const std::vector<int> &Mi_loc
     auto allMCVectors = getAllPossibleMCVectorPermutations(Mi_local);
     std::sort(allMCVectors.begin(), allMCVectors.end());
     std::vector<std::vector<int>> distinctMCVectors;
-    for(const auto &mcVector : allMCVectors)
+    for (const auto &mcVector : allMCVectors)
     {
         std::vector<std::vector<int>> permutedMCVectors;
-        for(const auto &allowedPermutation : _allowedSitesPermutations )
+        for (const auto &allowedPermutation : _allowedSitesPermutations)
         {
             permutedMCVectors.push_back(icet::getPermutedVector<int>(mcVector, allowedPermutation));
         }
-        if(! std::any_of(permutedMCVectors.begin(), permutedMCVectors.end(),[&](const std::vector<int> &permMcVector){
-                 return !(std::find(distinctMCVectors.begin(),distinctMCVectors.end(),permMcVector) == distinctMCVectors.end()); }  ))
+        if (!std::any_of(permutedMCVectors.begin(), permutedMCVectors.end(), [&](const std::vector<int> &permMcVector) { return !(std::find(distinctMCVectors.begin(), distinctMCVectors.end(), permMcVector) == distinctMCVectors.end()); }))
         {
             distinctMCVectors.push_back(mcVector);
         }
@@ -102,4 +101,30 @@ std::vector<std::vector<int>> Orbit::getAllPossibleMCVectorPermutations(const st
     } while (icet::next_cartesian_product(cartesianFactors, firstVector));
 
     return allPossibleMCPermutations;
+}
+
+bool Orbit::contains(const std::vector<LatticeSite> &sites, bool sorted) const
+{
+    auto sitesCopy = sites;
+    if(sorted)
+    {
+        std::sort(sitesCopy.begin(),sitesCopy.end());
+    }
+
+    for (size_t i = 0; i < _equivalentSites.size(); i++)
+    {
+        auto i_sites = _equivalentSites[i];
+        
+        //compare the sorted sites
+        if(sorted)
+        {
+            std::sort(i_sites.begin(), i_sites.end());
+        }
+        
+        if (i_sites == sitesCopy)
+        {
+            return true;
+        }
+    }
+    return false;
 }
