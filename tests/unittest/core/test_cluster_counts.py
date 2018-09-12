@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import sys
 import unittest
 
 from ase.build import bulk
@@ -9,7 +8,6 @@ from icet.core.cluster import Cluster
 from icet.core.orbit_list import create_orbit_list
 from icet.core.cluster_counts import ClusterCounts
 from icet.core.lattice_site import LatticeSite
-from icet.core.many_body_neighbor_list import ManyBodyNeighborList
 from icet.core.neighbor_list import get_neighbor_lists
 from io import StringIO
 
