@@ -50,31 +50,25 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
     def __init__(self, atoms: Atoms=None, calculator: BaseCalculator=None,
                  name: str='Semi-grand canonical ensemble',
                  data_container: DataContainer=None, random_seed: int=None,
+                 data_container_write_period: float=np.inf,
                  ensemble_data_write_interval: int=None,
-                 trajectory_write_interval: int=None, **kwargs):
+                 trajectory_write_interval: int=None,
+                 boltzmann_constant: float=kB, *, temperature: float,
+                 chemical_potentials: Dict[str, float]):
 
         super().__init__(
             atoms=atoms, calculator=calculator, name=name,
             data_container=data_container,
             random_seed=random_seed,
+            data_container_write_period=data_container_write_period,
             ensemble_data_write_interval=ensemble_data_write_interval,
             trajectory_write_interval=trajectory_write_interval)
 
-        if 'temperature' not in kwargs.keys():
-            raise KeyError('Missing required keyword: temperature')
-        else:
-            self.temperature = kwargs['temperature']
+        self.temperature = temperature
+        self.boltzmann_constant = boltzmann_constant
 
-        if 'boltzmann_constant' in kwargs.keys():
-            self.boltzmann_constant = kwargs['boltzmann_constant']
-        else:
-            self.boltzmann_constant = kB
-
-        if 'chemical_potentials' not in kwargs.keys():
-            raise KeyError('Missing required keyword: chemical_potentials')
-        else:
-            self._chemical_potentials = None
-            self.chemical_potentials = kwargs['chemical_potentials']
+        self._chemical_potentials = None
+        self.chemical_potentials = chemical_potentials
 
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
