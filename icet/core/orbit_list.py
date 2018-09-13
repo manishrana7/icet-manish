@@ -1,5 +1,3 @@
-import time
-
 from typing import List
 from ase import Atoms
 import numpy as np
@@ -156,51 +154,29 @@ def create_orbit_list(atoms: Atoms, cutoffs: List[float]):
     """
     max_cutoff = np.max(cutoffs)
 
-    total_time = 0
-
-    t0 = time.time()
     # Set up a permutation matrix
-    permutation_matrix, prim_structure, neighbor_list \
-        = permutation_matrix_from_atoms(atoms, max_cutoff)
-    time_spent = time.time() - t0
-    total_time += time_spent
+    permutation_matrix, prim_structure, _ = \
+        permutation_matrix_from_atoms(atoms, max_cutoff)
 
-    msg = 'Done getting permutation_matrix (time: {:.6f}s)'.format(time_spent)
-    logger.info(msg)
+    logger.info('Done getting permutation_matrix.')
 
-    t0 = time.time()
     # Get a list of neighbor-lists
     neighbor_lists = get_neighbor_lists(prim_structure, cutoffs)
 
-    elapsed_time = time.time() - t0
-    total_time += elapsed_time
+    logger.info('Done getting neighbor lists.')
 
-    logger.info('Done getting neighbor lists.'
-                ' (time: {:.6f}s)'.format(time_spent))
-
-    t0 = time.time()
     # Transform permutation_matrix to be in lattice site format
     pm_lattice_sites \
         = __get_lattice_site_permutation_matrix(prim_structure,
                                                 permutation_matrix,
                                                 prune=True)
-    time_spent = time.time() - t0
-    total_time += time_spent
 
     msg = ['Transformation of permutation matrix to lattice neighbor']
-    msg += ['format completed (time: {:.6f}s)'.format(time_spent)]
+    msg += ['format completed.']
     logger.info(' '.join(msg))
 
-    t0 = time.time()
-    # Create an orbit list
     orbit_list = OrbitList(prim_structure, pm_lattice_sites, neighbor_lists)
 
-    elapsed_time = time.time() - t0
-    total_time += elapsed_time
-
-    logger.info('Finished construction of orbit list.'
-                ' (time: {:.6f}s)'.format(time_spent))
-
-    logger.info('Total time: {:.6f}s'.format(total_time))
+    logger.info('Finished construction of orbit list.')
 
     return orbit_list
