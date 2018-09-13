@@ -188,8 +188,7 @@ class TestOrbitList(unittest.TestCase):
                 self.assertAlmostEqual(
                     cluster.radius, size, places=5)
 
-    #@unittest.expectedFailure
-    def test_allowed_permutations(self):
+    def _test_allowed_permutations(self):
         """
         Test allowed permutations of orbit.
 
@@ -208,6 +207,33 @@ class TestOrbitList(unittest.TestCase):
             for perm in permutations:
                 perm_sites = get_permutation(rep_sites, perm)
                 self.assertIn(perm_sites, translated_sites)
+
+    def test_allowed_permutations(self):
+        """
+        Test allowed permutations of orbit.
+        """
+        from itertools import permutations
+
+        # check all possible permutations are allowed for this case
+        atoms = bulk('Al', crystalstructure='sc', a=3.1)
+        cutoffs = [3.2, 3.2]
+        orbit_list = create_orbit_list(atoms, cutoffs)
+
+        for orbit in orbit_list.orbits:
+            all_perm = \
+                [list(perm) for perm in permutations(range(orbit.order))]
+            self.assertEqual(all_perm, sorted(orbit.allowed_permutations))
+
+        # check a case with lower symmetry
+        atoms = bulk('Al', crystalstructure='bcc', a=3.1)
+        orbit_list = create_orbit_list(atoms, cutoffs)
+
+        allowed_perm = [[[0]],
+                        [[0, 1], [1, 0]],
+                        [[0, 1, 2], [2, 1, 0]]]
+        for orbit in orbit_list.orbits:
+            self.assertEqual(allowed_perm[orbit.order-1],
+                             sorted(orbit.allowed_permutations))
 
     def test_orbit_list_non_pbc(self):
         """
