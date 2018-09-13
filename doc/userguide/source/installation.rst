@@ -3,9 +3,9 @@
 Installation
 ************
 
-
 Setup
 =====
+
 
 (describe installation)
 
@@ -13,7 +13,7 @@ Setup
 Requirements
 ============
 
-:program:`icet` requires Python3 and depends on the `numpy
+:program:`icet` requires a c++11 compiler, eigen3, Boost, Python3 and depends on the `numpy
 <http://www.numpy.org/>`_, `spglib <https://atztogo.github.io/spglib/>`_, and
 `ase <https://wiki.fysik.dtu.dk/ase>`_ packages. If you want to use more
 advanced optimization techniques

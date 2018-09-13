@@ -11,6 +11,9 @@ from .permutation_map import PermutationMap, permutation_matrix_from_atoms
 from .structure import Structure
 from .lattice_site import LatticeSite
 
+from icet.io.logging import logger
+logger = logger.getChild('orbit_list')
+
 
 def __fractional_to_cartesian(fractional_coordinates, cell):
     """
@@ -31,7 +34,7 @@ def __fractional_to_cartesian(fractional_coordinates, cell):
 
 def __get_lattice_site_permutation_matrix(structure: Structure,
                                           permutation_matrix: PermutationMap,
-                                          prune: bool=True, verbosity: int=0):
+                                          prune: bool=True):
     """
     Returns a transformed permutation matrix with lattice sites as entries
     instead of fractional coordinates.
@@ -71,20 +74,21 @@ def __get_lattice_site_permutation_matrix(structure: Structure,
         if len(lat_neighbors) > 0:
             pm_lattice_sites.append(lat_neighbors)
         else:
-            print('list of lattice neighbors is empty')
+            logger.warning('Unable to transform any element in a column of the'
+                           ' fractional permutation matrix to lattice site')
     if prune:
-        if verbosity > 2:
-            print('size before pruning {} '.format(len(pm_lattice_sites)))
-        pm_lattice_sites = __prune_permutation_matrix(pm_lattice_sites,
-                                                      verbosity=verbosity)
-        if verbosity > 2:
-            print('size after pruning {} '.format(len(pm_lattice_sites)))
+        logger.debug('Size of columns of the permutation matrix before'
+                     ' pruning {}'.format(len(pm_lattice_sites)))
+
+        pm_lattice_sites = __prune_permutation_matrix(pm_lattice_sites)
+
+        logger.debug('Size of columns of the permutation matrix after'
+                     ' pruning {}'.format(len(pm_lattice_sites)))
 
     return pm_lattice_sites
 
 
-def __prune_permutation_matrix(permutation_matrix: List[List[LatticeSite]],
-                               verbosity: int=0):
+def __prune_permutation_matrix(permutation_matrix: List[List[LatticeSite]]):
     """
     Prunes the matrix so that the first column only contains unique elements.
 
@@ -92,8 +96,6 @@ def __prune_permutation_matrix(permutation_matrix: List[List[LatticeSite]],
     ----------
     permutation_matrix
         permutation matrix with LatticeSite type entries
-    verbosity
-        verbosity level
     """
 
     for i in range(len(permutation_matrix)):
@@ -102,10 +104,9 @@ def __prune_permutation_matrix(permutation_matrix: List[List[LatticeSite]],
                 continue
             if permutation_matrix[i][0] == permutation_matrix[j][0]:
                 permutation_matrix.pop(j)
-                if verbosity > 2:
-                    msg = ['Removing duplicate in permutation matrix']
-                    msg += ['i: {} j: {}'.format(i, j)]
-                    print(' '.join(msg))
+                msg = ['Removing duplicate in permutation matrix']
+                msg += ['i: {} j: {}'.format(i, j)]
+                logger.debug(' '.join(msg))
 
     return permutation_matrix
 
@@ -138,7 +139,7 @@ def _get_supercell_orbit_list(self, atoms: Atoms):
 OrbitList.get_supercell_orbit_list = _get_supercell_orbit_list
 
 
-def create_orbit_list(atoms: Atoms, cutoffs: List[float], verbosity: int=0):
+def create_orbit_list(atoms: Atoms, cutoffs: List[float]):
     """
     Builds an orbit list.
 
@@ -148,68 +149,58 @@ def create_orbit_list(atoms: Atoms, cutoffs: List[float], verbosity: int=0):
         input atomic structure
     cutoffs
         cutoff radii for each order
-    verbosity
-        verbosity level
 
     Returns
     -------
     An OrbitList object
     """
-
-    atoms_cpy = atoms.copy()
     max_cutoff = np.max(cutoffs)
 
     total_time = 0
 
-    t = time.process_time()
+    t0 = time.time()
     # Set up a permutation matrix
     permutation_matrix, prim_structure, neighbor_list \
-        = permutation_matrix_from_atoms(atoms_cpy, max_cutoff)
+        = permutation_matrix_from_atoms(atoms, max_cutoff)
+    time_spent = time.time() - t0
+    total_time += time_spent
 
-    elapsed_time = time.process_time() - t
-    total_time += elapsed_time
+    msg = 'Done getting permutation_matrix (time: {:.6f}s)'.format(time_spent)
+    logger.info(msg)
 
-    if verbosity > 3:
-        print('Done getting permutation_matrix.'
-              ' Time: {}s'.format(elapsed_time))
-
-    t = time.process_time()
+    t0 = time.time()
     # Get a list of neighbor-lists
     neighbor_lists = get_neighbor_lists(prim_structure, cutoffs)
 
-    elapsed_time = time.process_time() - t
+    elapsed_time = time.time() - t0
     total_time += elapsed_time
 
-    if verbosity > 3:
-        print('Done getting neighbor_lists. Time: {}s'.format(elapsed_time))
+    logger.info('Done getting neighbor lists.'
+                ' (time: {:.6f}s)'.format(time_spent))
 
-    t = time.process_time()
+    t0 = time.time()
     # Transform permutation_matrix to be in lattice site format
     pm_lattice_sites \
         = __get_lattice_site_permutation_matrix(prim_structure,
                                                 permutation_matrix,
-                                                prune=True,
-                                                verbosity=verbosity)
-    elapsed_time = time.process_time() - t
-    total_time += elapsed_time
+                                                prune=True)
+    time_spent = time.time() - t0
+    total_time += time_spent
 
-    if verbosity > 3:
-        msg = ['Transformation of permutation matrix to lattice neighbor']
-        msg += [' format completed. Time: {}s'.format(elapsed_time)]
-        print(' '.join(msg))
+    msg = ['Transformation of permutation matrix to lattice neighbor']
+    msg += ['format completed (time: {:.6f}s)'.format(time_spent)]
+    logger.info(' '.join(msg))
 
-    t = time.process_time()
+    t0 = time.time()
     # Create an orbit list
     orbit_list = OrbitList(prim_structure, pm_lattice_sites, neighbor_lists)
 
-    elapsed_time = time.process_time() - t
+    elapsed_time = time.time() - t0
     total_time += elapsed_time
 
-    if verbosity > 3:
-        print('Finished construction of orbit list.'
-              ' Time: {}s'.format(elapsed_time))
+    logger.info('Finished construction of orbit list.'
+                ' (time: {:.6f}s)'.format(time_spent))
 
-    if verbosity > 3:
-        print('Total time: {}s'.format(total_time))
+    logger.info('Total time: {:.6f}s'.format(total_time))
 
     return orbit_list

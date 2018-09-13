@@ -6,9 +6,11 @@ from ..tools.geometry import (get_primitive_structure,
                               get_fractional_positions_from_neighbor_list,
                               ase_atoms_to_spglib_cell)
 
+from icet.io.logging import logger
+logger = logger.getChild('permutation_map')
 
-def permutation_matrix_from_atoms(atoms, cutoff,
-                                  find_prim=True, verbosity=0):
+
+def permutation_matrix_from_atoms(atoms, cutoff, find_prim=True):
     '''Set up a list of permutation maps from an atoms object.
 
     Parameters
@@ -19,8 +21,6 @@ def permutation_matrix_from_atoms(atoms, cutoff,
         cutoff radius
     find_primitive : boolean
         if True the symmetries of the primitive structure will be employed
-    verbosity : int
-        level of verbosity
 
     Returns
     -------
@@ -35,22 +35,22 @@ def permutation_matrix_from_atoms(atoms, cutoff,
     if len(atoms) > 0:
         atoms.set_chemical_symbols(len(atoms) * [atoms[0].symbol])
     else:
-        raise Exception('Len of atoms are {}'.format(len(atoms)))
+        raise Exception('Length of atoms is {}'.format(len(atoms)))
 
     atoms_prim = atoms
     if find_prim:
         atoms_prim = get_primitive_structure(atoms)
 
-    if verbosity >= 3:
-        print('size of primitive structure: {}'.format(len(atoms_prim)))
+    logger.debug('Size of primitive structure: {}'.format(len(atoms_prim)))
 
-    # get symmetry information and load into a permutation map object
     atoms_as_tuple = ase_atoms_to_spglib_cell(atoms_prim)
 
+    # get symmetry information
     symmetry = spglib.get_symmetry(atoms_as_tuple)
     translations = symmetry['translations']
     rotations = symmetry['rotations']
 
+    # set up a permutation map object
     permutation_matrix = PermutationMap(translations, rotations)
 
     # create neighbor_lists from the different cutoffs
@@ -62,8 +62,9 @@ def permutation_matrix_from_atoms(atoms, cutoff,
     frac_positions = get_fractional_positions_from_neighbor_list(
         prim_structure, neighbor_list)
     # frac_positions.sort()
-    if verbosity >= 3:
-        print('number of positions: {}'.format(len(frac_positions)))
+
+    logger.debug('Number of fractional positions:'
+                 ' {}'.format(len(frac_positions)))
     if len(frac_positions) > 0:
         permutation_matrix.build(frac_positions)
 

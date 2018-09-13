@@ -1,7 +1,7 @@
 import os
 import sys
 import unittest
-from icet.io.logging import set_config
+from icet.io.logging import set_log_config
 
 
 class ScriptTestCase(unittest.TestCase):
@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     import generate_structures_for_testing  # noqa
 
-    set_config(level=40)
+    set_log_config(level='ERROR')
 
     # Find testing dirs
     main_dir = os.path.dirname(__file__)
