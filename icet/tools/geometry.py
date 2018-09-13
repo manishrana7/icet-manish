@@ -76,9 +76,7 @@ def get_primitive_structure(atoms, no_idealize=True):
     atoms_prim = Atoms(scaled_positions=scaled_positions,
                        numbers=numbers, cell=lattice, pbc=atoms.pbc)
     atoms_prim.wrap()
-    # icet_wrap(atoms_prim)
-    # print(atoms_prim.positions)
-    # exit(1)
+
     return atoms_prim
 
 

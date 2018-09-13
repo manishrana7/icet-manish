@@ -1,7 +1,11 @@
 import numpy as np
+import logging
 from ase import Atoms
 from ase.build import cut
 from typing import List, Tuple
+
+from icet.io.logging import logger
+logger = logger.getChild('structure_mapping')
 
 
 def map_structure_to_reference(input_structure: Atoms,
@@ -10,8 +14,7 @@ def map_structure_to_reference(input_structure: Atoms,
                                vacancy_type: str=None,
                                inert_species: List[str]=None,
                                tolerance_cell: float=0.05,
-                               tolerance_positions: float=0.01,
-                               verbose: bool=False) \
+                               tolerance_positions: float=0.01) \
                                -> Tuple[Atoms, float, float]:
     """Maps a relaxed structure onto a reference structure.
     The function returns a tuple comprising
@@ -57,8 +60,6 @@ def map_structure_to_reference(input_structure: Atoms,
     tolerance_positions
         tolerance factor applied when scanning for overlapping positions in
         Angstrom (forwarded to :func:`ase.build.cut`)
-    verbose
-        turn on verbose output
 
     Example
     -------
@@ -103,24 +104,24 @@ def map_structure_to_reference(input_structure: Atoms,
          'ideal: {}\ninput: {}'.format(len(ideal_supercell),
                                        len(scaled_structure)))
 
-    if verbose:
+    if logger.isEnabledFor(logging.DEBUG):
         np.set_printoptions(suppress=True, precision=6)
-        print('Number of atoms in reference structure:'
-              ' {}'.format(len(reference_structure)))
-        print('Number of atoms in input structure:'
-              ' {}\n'.format(len(input_structure)))
-        print('Reference cell metric:\n'
-              '{}'.format(reference_structure.cell))
-        print('Input cell metric:\n'
-              '{}\n'.format(input_structure.cell))
-        print('Transformation matrix connecting reference structure'
-              ' and idealized input structure:\n {}'.format(P))
-        print('Determinant of tranformation matrix:'
-              ' {:.3f}\n'.format(np.linalg.det(P)))
-        print('Cell metric of ideal supercell:\n'
-              '{}'.format(ideal_supercell.cell))
-        print('Cell metric of rescaled input structure:\n'
-              '{}\n'.format(scaled_structure.cell))
+        logger.debug('Number of atoms in reference structure:'
+                     ' {}'.format(len(reference_structure)))
+        logger.debug('Number of atoms in input structure:'
+                     ' {}\n'.format(len(input_structure)))
+        logger.debug('Reference cell metric:\n'
+                     '{}'.format(reference_structure.cell))
+        logger.debug('Input cell metric:\n'
+                     '{}\n'.format(input_structure.cell))
+        logger.debug('Transformation matrix connecting reference structure'
+                     ' and idealized input structure:\n {}'.format(P))
+        logger.debug('Determinant of transformation matrix:'
+                     ' {:.3f}\n'.format(np.linalg.det(P)))
+        logger.debug('Cell metric of ideal supercell:\n'
+                     '{}'.format(ideal_supercell.cell))
+        logger.debug('Cell metric of rescaled input structure:\n'
+                     '{}\n'.format(scaled_structure.cell))
 
     # map atoms in input structure to closest site in ideal supercell
     dr_max = 0.0
@@ -178,43 +179,42 @@ def map_structure_to_reference(input_structure: Atoms,
                           ' input structure ({}) and ideal'
                           ' supercell ({}).'.format(element, n1, n2))
 
-    if verbose:
-        print('Maximum, average and standard deviation of atomic'
-              ' displacements: {} {} {}'.format(dr_max, dr_avg, dr_sdv))
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('Maximum, average and standard deviation of atomic'
+                     ' displacements: {} {} {}'.format(dr_max, dr_avg, dr_sdv))
 
-        print('{:52} {:}'.format('Input structure:',
-                                 'Scaled structure:'))
-        for k, (input_atom, scaled_atom) in enumerate(
-                zip(input_structure,
-                    scaled_structure)):
-            print('{:4}'.format(k), end='')
-            print(' {:2}'.format(input_atom.symbol), end='')
-            print(' {:12.6f} {:12.6f} {:12.6f}'.format(*input_atom.position),
-                  end='')
-            print('    -->', end='')
-            print(' {:12.6f} {:12.6f} {:12.6f}'.format(*scaled_atom.position),
-                  end='')
-            print('')
-        print('')
+        logger.debug('{:52} {:}'.format('Input structure:',
+                                        'Scaled structure:'))
+        for k, (input_atom, scaled_atom) in enumerate(zip(input_structure,
+                                                          scaled_structure)):
+            msg = '{:4}  {:2}'.format(k, input_atom.symbol)
+            msg += (3 * ' {:12.6f}').format(*input_atom.position)
+            msg += '    -->'
+            msg += (3 * ' {:12.6f}').format(*scaled_atom.position)
+            logger.debug(msg)
 
-        print('{:52} {}'.format('Ideal supercell:',
-                                'Scaled structure:'))
+        logger.debug('\n')
+
+        logger.debug('{:52} {}'.format('Ideal supercell:',
+                                       'Scaled structure:'))
         for ideal_atom, k, dr in zip(ideal_supercell, mapped, drs):
-            print(' {:2}'.format(ideal_atom.symbol), end='')
-            print((3 * '  {:12.6f}').format(*ideal_atom.position), end='')
-            print('    -->', end='')
-            print(' {:4}'.format(k), end='')
+            msg = ' {:2}'.format(ideal_atom.symbol)
+            msg += (3 * '  {:12.6f}').format(*ideal_atom.position)
+            msg += '    -->'
+            msg += ' {:4}'.format(k)
+
             if k >= 0:
                 scaled_pos = scaled_structure[k].position
-                print((3 * ' {:12.6f}').format(*scaled_pos), end='')
-                print('    --> {:.4}'.format(dr), end='')
-            print('')
+                msg += (3 * ' {:12.6f}').format(*scaled_pos)
+                msg += '    --> {:.4f}'.format(dr)
+            logger.debug(msg)
 
     return ideal_supercell, dr_max, dr_avg
 
 
-def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
-                     inert_species=None):
+def _get_scaled_cell(input_structure: Atoms, reference_structure: Atoms,
+                     vacancy_type: str=None, inert_species: List[str]=None) \
+                     -> np.ndarray:
     """
     The input structure needs to be scaled in order to match the lattice
     structure of the reference structure. The reference structure can be a
@@ -224,17 +224,17 @@ def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
 
     Parameters
     - ---------
-    input_structure: ASE Atoms object
+    input_structure
         relaxed input structure
     reference_structure: ASE Atoms object
         reference structure, which can but need not represent the primitive
         cell
-    vacancy_type: str
+    vacancy_type
         If not None, the cell is scaled if and only if `inert_species` is not
-        None.
-    inert_species: list of str
+        None
+    inert_species
         List of chemical symbols(e.g., `['Au', 'Pd']`) that are never
-        substituted for a vacancy. Needless if `vacancy_type` is `None`.
+        substituted for a vacancy. Needless if `vacancy_type` is `None`
     """
     modcell = input_structure.get_cell()
     if vacancy_type is None:
@@ -263,26 +263,26 @@ def _get_scaled_cell(input_structure, reference_structure, vacancy_type=None,
     return modcell
 
 
-def _get_transformation_matrix(input_cell, reference_cell,
-                               tolerance_cell=0.05):
+def _get_transformation_matrix(input_cell: np.ndarray,
+                               reference_cell: np.ndarray,
+                               tolerance_cell: float=0.05) -> np.ndarray:
     """
     Obtain the(in general non - integer) transformation matrix connecting the
     input structure to the reference structure L=L_p.P - -> P=L_p ^ -1.L
 
     Parameters
-    - ---------
-    input_cell: NumPy array(3, 3)
+    ----------
+    input_cell
         Cell metric of input structure(possibly scaled)
-    reference_cell: NumPy array(3, 3)
+    reference_cell
         Cell metric of reference structure
-    tolerance_cell: float
+    tolerance_cell
         Tolerance for how much the elements of P are allowed to deviate from
         nearest integer before they are rounded.
 
     Returns
-    - ------
-    NumPy array(3, 3)
-        Transformation matrix P of integers.
+    -------
+    Transformation matrix P of integers.
     """
     P = np.dot(input_cell, np.linalg.inv(reference_cell))
 
@@ -305,33 +305,31 @@ def _get_transformation_matrix(input_cell, reference_cell,
     return P
 
 
-def _rescale_structures(input_structure, reference_structure, P,
-                        tolerance_positions=0.01):
+def _rescale_structures(input_structure: Atoms, reference_structure: Atoms,
+                        P: np.ndarray, tolerance_positions: float=0.01) \
+                        -> Tuple[Atoms, Atoms]:
     """
     Rescale `input_structure` with `P` so that it matches
     `reference_structure`, and make a supercell of `reference_structure` using
     `P`
 
     Parameters
-    - ---------
-    input_structure: ASE Atoms object
+    ----------
+    input_structure
         relaxed input structure
-    reference_structure: ASE Atoms object
+    reference_structure
         reference structure, which can but need not represent the primitive
         cell
-    P: NumPy array(3, 3)
-        Transformation matrix of integers.
-    tolerance_positions: float
+    P
+        Transformation matrix of integers
+    tolerance_positions
         tolerance factor applied when scanning for overlapping positions in
-        Angstrom(forwarded to `ase.build.cut`).
+        Angstrom(forwarded to `ase.build.cut`)
 
     Returns
-    - ------
-    ASE Atoms object
-        Scaled version of `input_structure`
-    ASE Atoms object
-        Supercell of `reference_structure` matching cell metric of
-        `scaled_structure`
+    -------
+    A tuple with the scaled version of `input_structure` and the supercell of
+    `reference_structure` matching cell metric of `scaled_structure`.
     """
     scaled_structure = input_structure.copy()
     scaled_structure.set_cell(np.dot(P, reference_structure.cell),

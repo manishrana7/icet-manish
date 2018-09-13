@@ -22,8 +22,6 @@ class ClusterSpace(object):
           the value the number of allowed components
         * if a single `int` is provided each site the number of allowed
           components will be set to `Mi` for sites in the structure
-    verbosity : int
-        verbosity level
 
     TODO
     ----
@@ -37,15 +35,14 @@ class ClusterSpace(object):
     """
 
     def __init__(self, atoms, cutoffs, chemical_symbols,
-                 Mi=None, verbosity=0):
+                 Mi=None):
 
         self._structure = atoms
         self._cutoffs = cutoffs
         self._chemical_symbols = chemical_symbols
 
         # set up orbit list
-        orbit_list = OrbitList(self._structure, self._cutoffs,
-                               verbosity=verbosity)
+        orbit_list = OrbitList(self._structure, self._cutoffs)
         orbit_list.sort()
         self._orbit_list = orbit_list
         self._mi = Mi
