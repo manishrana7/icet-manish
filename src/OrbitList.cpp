@@ -629,7 +629,8 @@ void OrbitList::addPermutationMatrixColumns(
         {
             indistinctLatNbrs.push_back(permutation_matrix[row][column]);
         }
-        auto translatedEquivalentSites = getSitesTranslatedToUnitcell(indistinctLatNbrs, false);
+        // @todo set sortIt to false breaks test_multi_component_cluster_vectors in TestClusterSpace suite
+        auto translatedEquivalentSites = getSitesTranslatedToUnitcell(indistinctLatNbrs, true);
 
         auto sites_index_pair = getMatchesInPM(translatedEquivalentSites);
 
@@ -693,8 +694,9 @@ std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> OrbitList::ge
     for (const auto &sites : translatedSites)
     {
         try
-        {
-            perm_matrix_rows = findRowsFromCol1(_column1, sites, false);
+        {   
+            // @todo set sortIt to false breaks test_multi_component_cluster_vectors in TestClusterSpace suite 
+            perm_matrix_rows = findRowsFromCol1(_column1, sites, true);
         }
         catch (const std::runtime_error)
         {
