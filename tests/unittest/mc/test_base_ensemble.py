@@ -251,7 +251,8 @@ class TestEnsemble(unittest.TestCase):
         for i in range(len(data_dc)):
             np.testing.assert_approx_equal(
                 data_dc_reloaded[i], data_dc[i], significant=20)
-
+                
+        ensemble_reloaded.run(n_iters)
     def test_internal_run(self):
         """Test the _run method."""
         pass
