@@ -14,7 +14,6 @@ from icet.core.orbit_list import create_orbit_list
 # sites with W atoms.
 # Start setup
 atoms = bulk('Ti', 'bcc', a=3.43).repeat([2, 2, 1])
-atoms.pbc = [True, True, False]
 atoms.set_chemical_symbols(['Ti', 'W', 'W', 'Ti'])
 # End setup
 
