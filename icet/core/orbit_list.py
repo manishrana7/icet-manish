@@ -13,16 +13,17 @@ from icet.io.logging import logger
 logger = logger.getChild('orbit_list')
 
 
-def __fractional_to_cartesian(fractional_coordinates, cell):
+def __fractional_to_cartesian(fractional_coordinates: List[List[float]],
+                              cell: np.ndarray):
     """
-    Convert cell metrics from fractional to cartesian coordinates.
+    Converts cell metrics from fractional to cartesian coordinates.
 
     Parameters
     ----------
-    fractional_coordinates : list of 3d-vectors
+    fractional_coordinates
         list of fractional coordinates
 
-    cell : 3x3 matrix
+    cell
         cell metric
     """
     cartesian_coordinates = [np.dot(frac, cell)
@@ -45,8 +46,6 @@ def __get_lattice_site_permutation_matrix(structure: Structure,
         permutation matrix with fractional coordinates format entries
     prune
         if True the permutation matrix will be pruned
-    verbosity
-        verbosity level
 
     Returns
     -------
@@ -155,8 +154,8 @@ def create_orbit_list(atoms: Atoms, cutoffs: List[float]):
     max_cutoff = np.max(cutoffs)
 
     # Set up a permutation matrix
-    permutation_matrix, prim_structure, _ = \
-        permutation_matrix_from_atoms(atoms, max_cutoff)
+    permutation_matrix, prim_structure, _ \
+        = permutation_matrix_from_atoms(atoms, max_cutoff)
 
     logger.info('Done getting permutation_matrix.')
 
