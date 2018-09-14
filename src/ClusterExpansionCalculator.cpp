@@ -8,12 +8,12 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     // Set up stuff.
     _theLog = LocalOrbitListGenerator(clusterSpace.getOrbitList(), _superCell);
     size_t uniqueOffsets = _theLog.getUniqueOffsetsCount();
-    int numberOfOrbits = _clusterSpace.getOrbitList().size();
+    int numberOfOrbits = _clusterSpace._primitive_orbit_list.size();
     Vector3d zeroOffset = {0.0, 0.0, 0.0};
     int primitiveSize = _clusterSpace.getPrimitiveStructure().size();
     std::vector<Orbit> orbitVector;
 
-    for (const auto orbit : clusterSpace.getOrbitList().getOrbitList())
+    for (const auto orbit : clusterSpace._primitive_orbit_list._orbitList)
     {
         orbitVector.push_back(Orbit(orbit.getRepresentativeCluster()));
     }
@@ -70,7 +70,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
                         primitiveEquivalentSites.push_back(primitiveSite);
                     }
 
-                    std::vector<std::vector<LatticeSite>> latticeSitesTranslated = _clusterSpace.getOrbitList().getSitesTranslatedToUnitcell(primitiveEquivalentSites);
+                    std::vector<std::vector<LatticeSite>> latticeSitesTranslated = _clusterSpace._primitive_orbit_list.getSitesTranslatedToUnitcell(primitiveEquivalentSites);
                     for (auto latticesitesPrimTrans : latticeSitesTranslated)
                     {
 
@@ -100,6 +100,18 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     }
     _basisAtomOrbitList.push_back(orbitList);
     validateBasisAtomOrbitLists();
+    for(int i =0; i < structure.size(); i++)
+    {
+        Vector3d localPosition = structure.getPositions().row(i);
+        LatticeSite localSite = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(localPosition);
+        Vector3d offsetVector = localSite.unitcellOffset();
+
+        if(_localOrbitlists.find(offsetVector) == _localOrbitlists.end())
+        {
+            _localOrbitlists[offsetVector] = _basisAtomOrbitList[0].getLocalOrbitList(structure, offsetVector, _primToSupercellMap);        
+        }
+    }
+
 }
 
 std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const Structure &structure, int index, std::vector<int> ignoredIndices)
@@ -139,7 +151,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const Stru
         throw std::runtime_error("basisIndex and _basisAtomOrbitList are not the same size");
     }
 
-    for (const auto orbit : _basisAtomOrbitList[basisIndex].getOrbitList())
+    for (const auto orbit : _basisAtomOrbitList[basisIndex]._orbitList)
     {
         for (const auto eqSites : orbit.getEquivalentSites())
         {
@@ -165,14 +177,22 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const Stru
 
     // Vector3d offsetVector = indexZeroLatticeSite.unitcellOffset();
     Vector3d offsetVector = localSite.unitcellOffset();
+    
+    
+    // if(_localOrbitlists.find(offsetVector) == _localOrbitlists.end())
+    // {
+    //     _localOrbitlists[offsetVector] = _basisAtomOrbitList[0].getLocalOrbitList(structure, offsetVector, _primToSupercellMap);        
+    // }
 
-    auto translatedOrbitList = _basisAtomOrbitList[0].getLocalOrbitList(structure, offsetVector, _primToSupercellMap);
+    auto translatedOrbitList = _localOrbitlists[offsetVector];
+    
+
     // std::cout << "Ignored indices:  size = " << ignoredIndices.size() << " indices: ";
     for (auto ignoredIndex : ignoredIndices)
     {
         translatedOrbitList.removeSitesContainingIndex(ignoredIndex);
     }
-    for (const auto orbit : translatedOrbitList.getOrbitList())
+    for (const auto orbit : translatedOrbitList._orbitList)
     {
         for (const auto sites : orbit.getEquivalentSites())
         {
@@ -188,45 +208,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const Stru
             }
         }
     }
-
-    // for (const auto orbit : _basisAtomOrbitList[basisIndex].getOrbitList())
-    // {
-    //     std::cout << "orbit order_full " << orbit.getClusterSize() << " orbit size " << orbit.size() << std::endl;
-    // }
-    // for (const auto orbit : _basisAtomOrbitList[basisIndex].getOrbitList())
-    // {
-    //     auto repSites = orbit.getRepresentativeSites();
-    //     for (auto site : repSites)
-    //     {
-    //         std::cout << site.index() << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
-
-    // for (const auto orbit : translatedOrbitList.getOrbitList())
-    // {
-    //     std::cout << "orbit order_reduced " << orbit.getClusterSize() << " orbit size " << orbit.size() << std::endl;
-    // }
-    // for (const auto orbit : translatedOrbitList.getOrbitList())
-    // {
-    //     auto repSites = orbit.getRepresentativeSites();
-    //     for (auto site : repSites)
-    //     {
-    //         std::cout << site.index() << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
-
-    //Get how many eq sites were pruned in reduced OL
-    std::vector<int> orbitSizeDiff(_basisAtomOrbitList[basisIndex].size());
-    for (size_t i = 0; i < _basisAtomOrbitList[basisIndex].size(); i++)
-    {
-        orbitSizeDiff[i] = _basisAtomOrbitList[basisIndex].getOrbit(i).size() - translatedOrbitList.getOrbit(i).size();
-        // std::cout<<"orbitsize diff: "<<orbitSizeDiff[i]<<std::endl;
-    }
-
-
-
+ 
     clusterCounts.countOrbitList(structure, translatedOrbitList, orderIntact);
 
     const auto clusterMap = clusterCounts.getClusterCounts();
@@ -235,17 +217,17 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const Stru
     // Finally begin occupying the cluster vector
     for (size_t i = 0; i < _basisAtomOrbitList[basisIndex].size(); i++)
     {
-        Cluster repCluster = _basisAtomOrbitList[basisIndex].getOrbit(i).getRepresentativeCluster();
+        Cluster repCluster = _basisAtomOrbitList[basisIndex]._orbitList[i].getRepresentativeCluster();
         std::vector<int> allowedOccupations;
 
-        if (i >= _clusterSpace.getOrbitList().size())
+        if (i >= _clusterSpace._primitive_orbit_list.size())
         {
-            std::cout << _basisAtomOrbitList[basisIndex].size() << " >= " << _clusterSpace.getOrbitList().size() << std::endl;
+            std::cout << _basisAtomOrbitList[basisIndex].size() << " >= " << _clusterSpace._primitive_orbit_list.size() << std::endl;
             throw std::runtime_error("index i larger than cs.orbit_list.size() in ClusterExpansionCalculator::getLocalClusterVector");
         }
         try
         {
-            allowedOccupations = _clusterSpace.getAllowedOccupations(_clusterSpace.getPrimitiveStructure(), _clusterSpace.getOrbitList().getOrbit(i).getRepresentativeSites());
+            allowedOccupations = _clusterSpace.getAllowedOccupations(_clusterSpace.getPrimitiveStructure(), _clusterSpace._primitive_orbit_list._orbitList[i].getRepresentativeSites());
         }
         catch (const std::exception &e)
         {
@@ -259,8 +241,8 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const Stru
             continue;
         }
 
-        auto mcVectors = _clusterSpace.getOrbitList().getOrbit(i).getMCVectors(allowedOccupations);
-        auto allowedPermutationsSet = _clusterSpace.getOrbitList().getOrbit(i).getAllowedSitesPermutations();
+        auto mcVectors = _clusterSpace._primitive_orbit_list._orbitList[i].getMCVectors(allowedOccupations);
+        auto allowedPermutationsSet = _clusterSpace._primitive_orbit_list._orbitList[i].getAllowedSitesPermutations();
         auto elementPermutations = _clusterSpace.getMCVectorPermutations(mcVectors, i);
         repCluster.setClusterTag(i);
         int currentMCVectorIndex = 0;
@@ -291,7 +273,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const Stru
                     multiplicity += elementsCountPair.second;
                 }
             }
-            int realMultiplicity = _clusterSpace.getOrbitList().getOrbitList()[i].getEquivalentSites().size();
+            int realMultiplicity = _clusterSpace._primitive_orbit_list._orbitList[i].getEquivalentSites().size();
             clusterVectorElement /= ((double)structure.size() * realMultiplicity);
             //  clusterVectorElement /= ((double)structure.size());
             clusterVector.push_back(clusterVectorElement * repCluster.order());
@@ -310,7 +292,7 @@ void ClusterExpansionCalculator::validateBasisAtomOrbitLists()
 
     for (const auto orbitList : _basisAtomOrbitList)
     {
-        for (const auto orbit : orbitList.getOrbitList())
+        for (const auto orbit : orbitList._orbitList)
         {
             for (int i = 0; i < orbit.getEquivalentSites().size(); i++)
             {

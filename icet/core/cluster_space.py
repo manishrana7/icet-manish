@@ -293,9 +293,10 @@ class ClusterSpace(_ClusterSpace):
             atoms = structure.to_atoms()
             add_vacuum_in_non_pbc(atoms)
             structure = Structure.from_atoms(atoms)
-        else:
+        else:            
             atoms = structure.to_atoms()
             structure = Structure.from_atoms(atoms)
+            
         return _ClusterSpace.get_cluster_vector(self, structure)
 
     @property

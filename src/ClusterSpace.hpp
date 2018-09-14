@@ -118,6 +118,8 @@ class ClusterSpace
     {
         return _elementRepresentation;
     } 
+    ///Primitive orbit list based on the structure and the global cutoffs
+    OrbitList _primitive_orbit_list;
 
   private:
     ///Currently we have constant Mi for development but will later change to dynamic Mi
@@ -126,8 +128,6 @@ class ClusterSpace
     ///Primitive cell/structure
     Structure _primitive_structure;
 
-    ///Primitive orbit list based on the structure and the global cutoffs
-    OrbitList _primitive_orbit_list;
 
     ///Unique id for this cluster space
     int clusterSpace_ID;

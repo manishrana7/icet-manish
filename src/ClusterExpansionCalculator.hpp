@@ -13,6 +13,7 @@
 #include "LocalOrbitListGenerator.hpp"
 #include "ClusterCounts.hpp"
 #include "PeriodicTable.hpp"
+#include "Vector3dCompare.hpp"
 using namespace Eigen;
 
 
@@ -26,6 +27,8 @@ class ClusterExpansionCalculator
     double getLocalContribution(const Structure &, const int) const;
 
     private:
+    std::map<Vector3d, OrbitList, Vector3dCompare> _localOrbitlists;
+
     void validateBasisAtomOrbitLists();
     ClusterSpace _clusterSpace;
     Structure _superCell;

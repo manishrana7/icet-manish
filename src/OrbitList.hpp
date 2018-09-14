@@ -200,8 +200,9 @@ class OrbitList
 
     /// Remove each element in orbit.equivalent sites if a vector<sites> have at least one lattice site with this index
     void removeSitesContainingIndex(const int);
+    std::vector<Orbit> _orbitList;
   private:
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;
     Structure _primitiveStructure;
-    std::vector<Orbit> _orbitList;
+    
 };
