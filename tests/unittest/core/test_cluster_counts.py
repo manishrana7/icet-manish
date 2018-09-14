@@ -140,11 +140,23 @@ class TestClusterCounts(unittest.TestCase):
         self.cluster_counts.reset()
         self.assertEqual(len(self.cluster_counts), 0)
 
-    def test_repr(self):
+    def test_getitem(self):
+        """
+        Test __getitem__ functionality.
+        """
+        # Test with integer as key
+        self.assertEqual(self.cluster_counts[2],
+                         {('Fe', 'Ni'): 6, ('Ni', 'Ni'): 6})
+        # Test with icet Cluster as key
+        cluster = list(self.cluster_counts.cluster_counts.keys())[0]
+        self.assertEqual(self.cluster_counts[cluster], {
+                         ('Fe',): 1, ('Ni',): 3})
+
+    def test_str(self):
         """
         Test representation of cluster_counts.
         """
-        retval = self.cluster_counts.__repr__()
+        retval = self.cluster_counts.__str__()
         target = """
 ====================== Cluster Counts ======================
 Singlet: [0] [] 0.0000
