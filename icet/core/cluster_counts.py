@@ -13,15 +13,22 @@ class ClusterCounts(_ClusterCounts):
 
     Parameters
     ----------
-    primitive_orbit_list : OrbitList object
+    orbit_list : OrbitList object
         orbit list for a primitive structure
     atoms : ASE Atoms object
-        supercell of the primitive structure that `primitive_orbit_list` is
-        based on
+        supercell of the structure that `orbit_list` is based on
+
+    Attributes
+    ----------
+    cluster_counts : OrderedDict
+        keys are representative clusters (icet Cluster objects) for all
+        distinct orbits in the orbit list, values are dicts where keys are
+        the elements in a cluster, and values the number of counts of such
+        clusters, e.g. {('Au', 'Ag'): 3, ('Au', 'Au'): 5}
     """
 
-    def __init__(self, primitive_orbit_list: OrbitList, atoms: Atoms):
-        self._primitive_orbit_list = primitive_orbit_list
+    def __init__(self, orbit_list: OrbitList, atoms: Atoms):
+        self._orbit_list = orbit_list
         self._structure = Structure.from_atoms(atoms)
 
         # call (base) C++ constructor
@@ -36,17 +43,13 @@ class ClusterCounts(_ClusterCounts):
         Parameters
         ----------
         keep_order_intact: boolean
-            count the clusters in the orbit with the same orientation as the
-            prototype cluster
+            if False, count the clusters in the orbit with the same
+            orientation as the prototype cluster
         """
         local_orbit_list_generator = LocalOrbitListGenerator(
-            self._primitive_orbit_list, self._structure)
+            self._orbit_list, self._structure)
 
         for i in range(local_orbit_list_generator.get_unique_offsets_count()):
-            # sending local orbit list directly into function was about
-            # 10% faster than:
-            # local_orbit_list = \
-            #    local_orbit_list_generator.generate_local_orbit_list(i)
             self.count_orbit_list(
                 self._structure,
                 local_orbit_list_generator.generate_local_orbit_list(i),
@@ -75,7 +78,7 @@ class ClusterCounts(_ClusterCounts):
                 sorted_cluster_counts[cluster][tuple(elements)] = count
         return sorted_cluster_counts
 
-    def __repr__(self):
+    def __str__(self):
         """
         String representation of cluster counts that provides an overview
         of the clusters (cluster, elements and count).
@@ -108,7 +111,7 @@ class ClusterCounts(_ClusterCounts):
 
     def __getitem__(self, key):
         """
-        Return cluster count (Cluster object and dict with counts) for a
+        Returns cluster count (Cluster object and dict with counts) for a
         ClusterCounts object.
 
         Parameters
