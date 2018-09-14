@@ -7,7 +7,7 @@ Cluster counts
 ===============
 
 A cluster vector is essentially a count of clusters averaged and aggregated in
-a compact form. Sometimes it may of interest to study the underlying cluster
+a compact form. Sometimes it may be of interest to study the underlying cluster
 counts rather than the cluster vector. In a binary alloy with species A and B,
 for example, one may wonder how many nearest neighbor pairs are A-A, A-B and
 B-B, respectively. To facilitate such analyses, icet provides a cluster counts
@@ -16,7 +16,7 @@ module. This example demonstrates how to use this module.
 Import modules
 --------------
 
-In addition to the actual class :class:`ClusterCounts <_icet.ClusterCounts>` we
+In addition to the actual class :class:`ClusterCounts <icet.core.cluster_counts.ClusterCounts>` we
 need to import the function :func:`create_orbit_list
 <icet.core.orbit_list.create_orbit_list>`. Here, we also use the `ASE
 <https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.build.bulk` to generate
@@ -91,8 +91,8 @@ The resulting output should be similar to the following::
   W   W    2
   ============================================================
 
-The orbits are listed by inreasing order (singles, pairs, triplets, ...) and
-increasing size. For every orbit, the number of cluster containing a certain
+The orbits are listed by increasing order (singles, pairs, triplets, ...) and
+increasing size. For every orbit, the number of clusters containing a certain
 set of species is printed. Note that these are the numbers that would be used
 to construct a cluster vector for this particular structure.
 
