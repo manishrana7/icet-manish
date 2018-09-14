@@ -1,11 +1,12 @@
 #pragma once
 
+#include <vector>
 #include "LatticeSite.hpp"
 #include "Structure.hpp"
 
 namespace icet {
 
-    /// Returns the geometrical radius of a set of lattice sites.
-    double getClusterRadius(const std::vector<LatticeSite> &, const Structure &);
+    /// Returns the geometrical radius of a cluster.
+    double getGeometricalRadius(const std::vector<LatticeSite> &, const Structure &);
 
 }

@@ -8,7 +8,8 @@ from ase import Atom
 from icet.tools import enumerate_structures
 
 
-def count_structures(atoms, sizes, species, correct_count, tag):
+def count_structures(atoms, sizes, species, correct_count, tag,
+                     conc_rest=None):
     """
     Count structures given by structure enumeration and assert that the
     right number is given.
@@ -27,7 +28,8 @@ def count_structures(atoms, sizes, species, correct_count, tag):
         Describes the structure.
     """
     count = 0
-    for _ in enumerate_structures(atoms, sizes, species):
+    for _ in enumerate_structures(atoms, sizes, species,
+                                  concentration_restrictions=conc_rest):
         count += 1
     msg = 'Structure enumeration failed for {}'.format(tag)
     assert count == correct_count, msg
@@ -43,7 +45,7 @@ count_structures(atoms, sizes, species, correct_count, tag)
 tag = 'FCC, elongated cell, two sites'
 atoms = bulk('Au', crystalstructure='fcc', a=4.0)
 cell = atoms.cell
-cell[0] = 1.33*cell[0]
+cell[0] = 1.33 * cell[0]
 atoms.cell = cell
 atoms.append(Atom('H', (2.0, 2.0, 2.0)))
 species = [['Au', 'Pd'], ['H', 'V']]
@@ -72,3 +74,12 @@ species = ['Au', 'Pd']
 sizes = range(1, 9)
 correct_count = 62
 count_structures(atoms, sizes, species, correct_count, tag)
+
+tag = 'FCC, concentration restricted'
+atoms = bulk('Au', crystalstructure='fcc')
+species = ['Au', 'Pd']
+sizes = range(1, 9)
+concentration_restrictions = {'Au': [0.0, 0.36]}
+correct_count = 134
+count_structures(atoms, sizes, species, correct_count, tag,
+                 conc_rest=concentration_restrictions)

@@ -54,7 +54,7 @@ class Orbit
     {
         return _representativeCluster.radius();
     }
-    ///Return the sorted, reprasentative cluster for this orbit
+    ///Return the sorted, representative cluster for this orbit
     Cluster getRepresentativeCluster() const
     {
         return _representativeCluster;
@@ -297,11 +297,10 @@ class Orbit
         }
 
         ///Mi_local are the same size as representative sites and details the allowed occupations on the representative sites
-        std::vector<std::vector<int>> getMCVectors(const std::vector<int> & Mi_local) const;
+        std::vector<std::vector<int>> getMultiComponentVectors(const std::vector<int> & Mi_local) const;
 
-        std::vector<std::vector<int>> getAllPossibleMCVectorPermutations(const std::vector<int> &Mi_local) const;
-        bool contains(const std::vector<LatticeSite> &sites,bool sorted) const;
-        void removeSitesWithIndex(const int);
+        std::vector<std::vector<int>> getAllPossibleMultiComponentVectorPermutations(const std::vector<int> &Mi_local) const;
+
       private:
         ///Representative sorted cluster for this orbit
         Cluster _representativeCluster;

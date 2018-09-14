@@ -1,15 +1,14 @@
-from collections import OrderedDict
+import pickle
 
-import numpy as np
-from _icet import ClusterSpace as _ClusterSpace
 from ase import Atoms
-from icet.tools.geometry import get_primitive_structure
+from collections import OrderedDict
+from typing import List, Union
+import numpy as np
 
-from icet.tools.geometry import add_vacuum_in_non_pbc
+from _icet import ClusterSpace as _ClusterSpace
+from icet.tools.geometry import get_primitive_structure, add_vacuum_in_non_pbc
 from icet.core.orbit_list import create_orbit_list
 from icet.core.structure import Structure
-
-import pickle
 
 
 class ClusterSpace(_ClusterSpace):
@@ -34,33 +33,24 @@ class ClusterSpace(_ClusterSpace):
           the value the number of allowed components
         * if a single `int` is provided each site the number of allowed
           components will be set to `Mi` for sites in the structure
-    verbosity : int
-        verbosity level
     """
 
-    def __init__(self, atoms, cutoffs, chemical_symbols,
-                 Mi=None, verbosity=0, bothways=False):
+    def __init__(self, atoms: Union[Atoms, Structure], cutoffs: List[float],
+                 chemical_symbols: List[str], Mi: Union[list, dict, int]=None):
 
-        # deal with different types of structure objects
-        if isinstance(atoms, Atoms):
-            self._structure = Structure.from_atoms(atoms)
-            self._input_atoms = atoms
-        elif isinstance(atoms, Structure):
-            self._structure = atoms
-            self._input_atoms = atoms.to_atoms()
-        else:
-            msg = 'Unknown structure format'
-            msg += ' {} (ClusterSpace)'.format(type(atoms))
-            raise Exception(msg)
+        assert isinstance(atoms, Atoms), \
+            'input configuration must be an ASE Atoms object'
 
+        self._atoms = atoms
         self._cutoffs = cutoffs
         self._chemical_symbols = chemical_symbols
         self._mi = Mi
-        self._verbosity = verbosity
+
         # set up orbit list
-        orbit_list = create_orbit_list(self._structure, self._cutoffs,
-                                       verbosity=verbosity, bothways=bothways)
+        orbit_list = create_orbit_list(self._structure, self._cutoffs)
         orbit_list.sort()
+
+        # handle occupations
         if Mi is None:
             Mi = len(chemical_symbols)
         if isinstance(Mi, dict):
@@ -71,17 +61,15 @@ class ClusterSpace(_ClusterSpace):
                 Mi = [Mi] * len(orbit_list.get_primitive_structure())
             else:
                 raise Exception('Mi has wrong type (ClusterSpace)')
-        msg = ['len(Mi) does not equal len(primitive_structure);']
-        msg += ['{} != {}'.format(len(Mi),
-                                  len(orbit_list.get_primitive_structure()))]
-        msg = ' '.join(msg)
-        assert len(Mi) == len(orbit_list.get_primitive_structure()), msg
+        assert len(Mi) == len(orbit_list.get_primitive_structure()), \
+            'len(Mi) does not equal the number of sites' \
+            ' in the primitive structure'
 
         # call (base) C++ constructor
         _ClusterSpace.__init__(self, Mi, chemical_symbols, orbit_list)
 
     @staticmethod
-    def _get_Mi_from_dict(Mi, structure):
+    def _get_Mi_from_dict(Mi: dict, atoms: Union[Atoms, Structure]):
         """
         Mi maps the orbit index to the number of allowed components. This
         function maps a dictionary onto the list format that is used
@@ -89,11 +77,11 @@ class ClusterSpace(_ClusterSpace):
 
         Parameters
         ----------
-        Mi : dictionary
+        Mi
             each site in the structure should be represented by one entry in
             this dictionary, where the key is the site index and the value is
             the number of components that are allowed on the repsective site
-        atoms : ASE Atoms object / icet Structure object (bi-optional)
+        atoms
             atomic configuration
 
         Returns
@@ -104,9 +92,15 @@ class ClusterSpace(_ClusterSpace):
         Todo
         ----
         * rename function
+        * remove bi-optionality between icet Structure and ASE Atoms input
         """
-        cluster_data = get_singlet_info(structure)
-        Mi_ret = [-1] * len(structure)
+        assert isinstance(atoms, (Atoms, Structure)), \
+            'input configuration must be an ASE Atoms/icet Structure object'
+        if isinstance(atoms, Atoms):
+            cluster_data = get_singlet_info(atoms)
+        else:
+            cluster_data = get_singlet_info(atoms.to_atoms())
+        Mi_ret = [-1] * len(atoms)
         for singlet in cluster_data:
             for site in singlet['sites']:
                 if singlet['orbit_index'] not in Mi:
@@ -116,17 +110,17 @@ class ClusterSpace(_ClusterSpace):
 
         return Mi_ret
 
-    def _get_string_representation(self, print_threshold=None,
-                                   print_minimum=10):
+    def _get_string_representation(self, print_threshold: int=None,
+                                   print_minimum: int=10) -> str:
         """
         String representation of the cluster space that provides an overview of
         the orbits (order, radius, multiplicity etc) that constitute the space.
 
         Parameters
         ----------
-        print_threshold : int
+        print_threshold
             if the number of orbits exceeds this number print dots
-        print_minimum : int
+        print_minimum
             number of lines printed from the top and the bottom of the orbit
             list if `print_threshold` is exceeded
 
@@ -159,7 +153,8 @@ class ClusterSpace(_ClusterSpace):
         width = len(repr_orbit(prototype_orbit))
         s = []
         s += ['{s:=^{n}}'.format(s=' Cluster Space ', n=width)]
-        s += [' subelements: {}'.format(' '.join(self.get_atomic_numbers()))]
+        s += [' chemical species: {}'
+              .format(' '.join(self.get_chemical_symbols()))]
         s += [' cutoffs: {}'.format(' '.join(['{:.4f}'.format(co)
                                               for co in self._cutoffs]))]
         s += [' total number of orbits: {}'.format(len(self))]
@@ -182,26 +177,26 @@ class ClusterSpace(_ClusterSpace):
                     index <= len(self) - print_minimum):
                 index = len(self) - print_minimum
                 s += [' ...']
-            s += [repr_orbit(orbit_list_info[index]).rstrip()]
+            s += [repr_orbit(orbit_list_info[index])]
             index += 1
         s += [''.center(width, '=')]
 
         return '\n'.join(s)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """ String representation. """
         return self._get_string_representation(print_threshold=50)
 
-    def print_overview(self, print_threshold=None, print_minimum=10):
+    def print_overview(self, print_threshold: int=None, print_minimum: int=10):
         """
         Print an overview of the cluster space in terms of the orbits (order,
         radius, multiplicity etc).
 
         Parameters
         ----------
-        print_threshold : int
+        print_threshold
             if the number of orbits exceeds this number print dots
-        print_minimum : int
+        print_minimum
             number of lines printed from the top and the bottom of the orbit
             list if `print_threshold` is exceeded
         """
@@ -219,7 +214,8 @@ class ClusterSpace(_ClusterSpace):
                                ('order', 0),
                                ('radius', 0),
                                ('multiplicity', 1),
-                               ('orbit_index', -1)])
+                               ('orbit_index', -1),
+                               ('multi_component_vector', '.')])
 
         data.append(zerolet)
         index = 1
@@ -228,10 +224,10 @@ class ClusterSpace(_ClusterSpace):
             orbit_index = cluster_space_info[0]
             mc_vector = cluster_space_info[1]
             orbit = self.get_orbit(orbit_index)
-            local_Mi = self.get_allowed_occupations(
+            local_Mi = self.get_number_of_allowed_species_by_site(
                 self._get_primitive_structure(), orbit.representative_sites)
             mc_vectors = orbit.get_mc_vectors(local_Mi)
-            mc_permutations = self.get_mc_vector_permutations(
+            mc_permutations = self.get_multi_component_vector_permutations(
                 mc_vectors, orbit_index)
             mc_index = mc_vectors.index(mc_vector)
             mc_permutations_multiplicity = len(mc_permutations[mc_index])
@@ -249,7 +245,7 @@ class ClusterSpace(_ClusterSpace):
             index += 1
         return data
 
-    def get_number_of_orbits_by_order(self):
+    def get_number_of_orbits_by_order(self) -> OrderedDict:
         """
         Return the number of orbits by order.
 
@@ -265,95 +261,75 @@ class ClusterSpace(_ClusterSpace):
             count_orbits[k] = count_orbits.get(k, 0) + 1
         return OrderedDict(sorted(count_orbits.items()))
 
-    def get_cluster_vector(self, atoms):
+    def get_cluster_vector(self, atoms: Atoms) -> np.ndarray:
         """
         Returns the cluster vector for a structure.
 
         Parameters
         ----------
-        atoms : ASE Atoms object / icet Structure object (bi-optional)
+        atoms
             atomic configuration
 
         Returns
         -------
-        NumPy array
-            the cluster vector
+        the cluster vector
         """
-        atoms=atoms.copy()
-        if isinstance(atoms, Atoms):
-            structure = Structure.from_atoms(atoms)
-        elif isinstance(atoms, Structure):
-            structure = atoms
-        else:
-            msg = 'Unknown structure format'
-            msg += ' {} (ClusterSpace.get_cluster_vector)'.format(type(atoms))
-            raise Exception(msg)
-        # if pbc is not true one needs to massage the structure a bit
-        if not np.array(structure.get_pbc()).all():
-            atoms = structure.to_atoms()
-            add_vacuum_in_non_pbc(atoms)
-            structure = Structure.from_atoms(atoms)
-        else:            
-            atoms = structure.to_atoms()
-            structure = Structure.from_atoms(atoms)
-            
-        return _ClusterSpace.get_cluster_vector(self, structure)
+        assert isinstance(atoms, Atoms), \
+            'input configuration must be an ASE Atoms object'
+        if not atoms.pbc.all():
+            add_vacuum_in_non_pbc(atoms)        
+        return _ClusterSpace.get_cluster_vector(self,
+                                                Structure.from_atoms(atoms))
 
     @property
-    def structure(self):
+    def primitive_structure(self) -> Atoms:
         """
-        icet Structure object : structure used for initializing the cluster
-        space
-        """
-        return self._structure
-
-    @property
-    def primitive_structure(self):
-        """
-        ASE Atoms object : primitive structure on which the cluster space
-        is based
+        Primitive structure on which the cluster space is based
         """
         return self._get_primitive_structure().to_atoms()
 
     @property
-    def chemical_symbols(self):
+    def chemical_symbols(self) -> List[str]:
         """
-        list of str : list of elements considered
+        Chemical species considered
         """
         return self._chemical_symbols.copy()
 
     @property
-    def cutoffs(self):
-        """ list : cutoffs used for initializing the cluster space """
+    def cutoffs(self) -> List[float]:
+        """
+        Cutoffs for the different n-body clusters. Each cutoff radii
+        (in Angstroms) defines the largest inter-atomic distance in each
+        cluster
+        """
         return self._cutoffs
 
-    def write(self, filename):
+    def write(self, filename: str):
         """
-        Save cluster space to a file.
+        Saves cluster space to a file.
 
         Parameters
         ---------
-        filename : str
-        filename for file
+        filename
+            name of file to which to write
         """
 
-        parameters = {'atoms': self._input_atoms.copy(),
+        parameters = {'atoms': self._atoms.copy(),
                       'cutoffs': self._cutoffs,
                       'chemical_symbols': self._chemical_symbols,
-                      'Mi': self._mi,
-                      'verbosity': self._verbosity}
+                      'Mi': self._mi}
         with open(filename, 'wb') as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
-    def read(filename):
+    def read(filename: str):
         """
-        Read cluster space from filename.
+        Reads cluster space from filename.
 
         Parameters
         ---------
-        filename : str with filename to saved
-        cluster space.
+        filename
+            name of file from which to read cluster space
         """
         if isinstance(filename, str):
             with open(filename, 'rb') as handle:
@@ -364,20 +340,19 @@ class ClusterSpace(_ClusterSpace):
         return ClusterSpace(parameters['atoms'],
                             parameters['cutoffs'],
                             parameters['chemical_symbols'],
-                            parameters['Mi'],
-                            parameters['verbosity'])
+                            parameters['Mi'])
 
 
-def get_singlet_info(atoms, return_cluster_space=False):
+def get_singlet_info(atoms: Atoms, return_cluster_space: bool=False):
     """
-    Retrieve information concerning the singlets in the input structure.
+    Retrieves information concerning the singlets in the input structure.
 
     Parameters
     ----------
-    atoms : ASE Stoms object / icet Structure object (bi-optional)
+    atoms
         atomic configuration
-    return_cluster_space : boolean
-        return the cluster space created during the process
+    return_cluster_space
+        if True return the cluster space created during the process
 
     Returns
     -------
@@ -386,12 +361,14 @@ def get_singlet_info(atoms, return_cluster_space=False):
     ClusterSpace object (optional)
         cluster space created during the process
     """
+    assert isinstance(atoms, Atoms), \
+        'input configuration must be an ASE Atoms object'
 
     # create dummy elements and cutoffs
-    subelements = ['H', 'He']
+    chemical_symbols = ['H', 'He']
     cutoffs = [0.0]
 
-    cs = ClusterSpace(atoms, cutoffs, subelements)
+    cs = ClusterSpace(atoms, cutoffs, chemical_symbols)
 
     singlet_data = []
 
@@ -417,16 +394,16 @@ def get_singlet_info(atoms, return_cluster_space=False):
         return singlet_data
 
 
-def get_singlet_configuration(atoms, to_primitive=False):
+def get_singlet_configuration(atoms: Atoms, to_primitive: bool=False) -> Atoms:
     """
-    Return atomic configuration decorated with a different element for each
-    Wyckoff site. This is useful for visualization and analysis.
+    Returns the atomic configuration decorated with a different element for
+    each Wyckoff site. This is useful for visualization and analysis.
 
     Parameters
     ----------
-    atoms : ASE Atoms object / icet Structure object (bi-optional)
+    atoms
         atomic configuration
-    to_primitive : boolean
+    to_primitive
         if True the input structure will be reduced to its primitive unit cell
         before processing
 
@@ -435,8 +412,9 @@ def get_singlet_configuration(atoms, to_primitive=False):
     ASE Atoms object
         structure with singlets highlighted by different elements
     """
-
     from ase.data import chemical_symbols
+    assert isinstance(atoms, Atoms), \
+        'input configuration must be an ASE Atoms object'
     cluster_data, cluster_space = get_singlet_info(atoms,
                                                    return_cluster_space=True)
 
@@ -465,19 +443,21 @@ def get_singlet_configuration(atoms, to_primitive=False):
     return singlet_configuration
 
 
-def view_singlets(atoms, to_primitive=False):
+def view_singlets(atoms: Atoms, to_primitive: bool=False):
     """
     Visualize singlets in a structure using the ASE graphical user interface.
 
     Parameters
     ----------
-    atoms : ASE Atoms object / icet Structure object (bi-optional)
+    atoms
         atomic configuration
-    to_primitive : boolean
+    to_primitive
         if True the input structure will be reduced to its primitive unit cell
         before processing
     """
     from ase.visualize import view
+    assert isinstance(atoms, Atoms), \
+        'input configuration must be an ASE Atoms object'
     singlet_configuration = get_singlet_configuration(
         atoms, to_primitive=to_primitive)
     view(singlet_configuration)

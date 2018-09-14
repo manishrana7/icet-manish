@@ -1,21 +1,22 @@
-'''
+"""
 This example demonstrates how to checks the column correlation for a set of
 clustervectors and asserts that none of the columns are highly correlated
-'''
+"""
 
 # Import modules
 import random
 import numpy as np
+
 from ase.db import connect
-from icet import ClusterSpace, Structure
+from icet import ClusterSpace
 
 
 # Function for generating random structures
 def generate_random_structure(atoms_prim, subelements, repeat=8):
-    '''
+    """
     Generate a random structure with atoms_prim as a base
     and fill it randomly with symbols from subelements
-    '''
+    """
 
     atoms = atoms_prim.copy().repeat(repeat)
 
@@ -28,13 +29,12 @@ def generate_random_structure(atoms_prim, subelements, repeat=8):
 
 # Function for generating cluster vectors
 def generate_cv_set(n, atoms_prim, subelements, clusterspace, repeat=8):
-    '''
+    """
     Generate a set of cluster vectors from a cluster space
-    '''
+    """
     clustervectors = []
     for i in range(n):
         conf = generate_random_structure(atoms_prim, subelements, repeat)
-        conf = Structure().from_atoms(conf)
         cv = clusterspace.get_cluster_vector(conf)
         clustervectors.append(cv)
 
@@ -43,11 +43,11 @@ def generate_cv_set(n, atoms_prim, subelements, clusterspace, repeat=8):
 
 # Function for calculating column correlations
 def get_column_correlation(i, j, cv_matrix):
-    '''
+    """
     Returns the correlation between column i and j
 
     cv_matrix: numpy matrix
-    '''
+    """
     col_i = cv_matrix[:, i]
     col_j = cv_matrix[:, j]
 
@@ -59,9 +59,9 @@ def get_column_correlation(i, j, cv_matrix):
 
 # Function for asserting that columns are not correlated
 def assert_no_correlation(cvs, tol=0.99):
-    '''
+    """
     Check that no column in cvs are above tolerance
-    '''
+    """
     cvs_matrix = np.array(cvs)
     for i in range(len(cvs[0])):
         # Do not loop over zerolet since this is always ones

@@ -12,11 +12,12 @@ fine-tune parameters that are not included in this interface, it is of course
 possible to use scikit-learn directly.
 More information about the sklearn linear models can be found at
 http://scikit-learn.org/stable/modules/linear_model.html
-
 """
 
 import numpy as np
 from ..io.logging import logger
+from collections import OrderedDict
+from .split_bregman import fit_split_bregman
 try:
     from sklearn.linear_model import (Lasso,
                                       LassoCV,
@@ -24,15 +25,56 @@ try:
                                       ElasticNetCV,
                                       BayesianRidge,
                                       ARDRegression)
+    from sklearn.preprocessing import StandardScaler
     # arrangement of logger assignments is owed to pep8 requirements
     logger = logger.getChild('fit_methods')
 except Exception:
     logger = logger.getChild('fit_methods')
-    logger.warning('Failed to import scitkit-learn;'
+    logger.warning('Failed to import scikit-learn;'
                    ' several optimizers will fail')
 
 
-def fit_least_squares(X, y):
+def fit(X, y, fit_method, standardize=True, **kwargs):
+    """ Wrapper function for all available fit methods.
+
+    Parameters
+    -----------
+    X : matrix / array
+        fit matrix
+    y : array
+        target array
+    fit_method : string
+        method to be used for training; possible choice are
+        "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
+    standardize : bool
+        whether or not to standardize the fit matrix before fitting
+
+    Returns
+    ----------
+    results : dict
+        dict containing parameters and possibly pther information obtained by
+        the fit_method
+    """
+
+    if fit_method not in available_fit_methods:
+        msg = ['Fit method not available']
+        msg += ['Please choose one of the following:']
+        for key in available_fit_methods:
+            msg += [' * ' + key]
+        raise ValueError('\n'.join(msg))
+
+    if standardize:
+        ss = StandardScaler(copy=False, with_mean=False, with_std=True)
+        ss.fit_transform(X)  # change in place
+        results = fit_methods[fit_method](X, y, **kwargs)
+        ss.inverse_transform(X)  # change in place
+        ss.transform(results['parameters'].reshape(1, -1)).reshape(-1,)
+    else:
+        results = fit_methods[fit_method](X, y, **kwargs)
+    return results
+
+
+def _fit_least_squares(X, y):
     """
     Return the least-squares solution `a` to the linear problem `Xa=y`.
 
@@ -55,7 +97,7 @@ def fit_least_squares(X, y):
     return results
 
 
-def fit_lasso(X, y, alpha=None, fit_intercept=False, **kwargs):
+def _fit_lasso(X, y, alpha=None, fit_intercept=False, **kwargs):
     """
     Return the solution `a` to the linear problem `Xa=y` obtained by using
     the LASSO method as implemented in scitkit-learn.
@@ -84,7 +126,7 @@ def fit_lasso(X, y, alpha=None, fit_intercept=False, **kwargs):
         dictionary containing parameters
     """
     if alpha is None:
-        return fit_lassoCV(X, y, fit_intercept=fit_intercept, **kwargs)
+        return _fit_lassoCV(X, y, fit_intercept=fit_intercept, **kwargs)
     else:
         lasso = Lasso(alpha=alpha, fit_intercept=fit_intercept, **kwargs)
         lasso.fit(X, y)
@@ -93,8 +135,8 @@ def fit_lasso(X, y, alpha=None, fit_intercept=False, **kwargs):
         return results
 
 
-def fit_lassoCV(X, y, alphas=None, fit_intercept=False, cv=10, n_jobs=-1,
-                **kwargs):
+def _fit_lassoCV(X, y, alphas=None, fit_intercept=False, cv=10, n_jobs=-1,
+                 **kwargs):
     """
     Return the solution `a` to the linear problem `Xa=y` obtained by using
     the LassoCV method as implemented in scitkit-learn.
@@ -119,7 +161,6 @@ def fit_lassoCV(X, y, alphas=None, fit_intercept=False, cv=10, n_jobs=-1,
         alpha_optimal (alpha value that yields the lowest validation rmse),
         alpha_path (all tested alpha values),
         mse_path (mse for validation set for each alpha)
-
     """
 
     if alphas is None:
@@ -136,7 +177,7 @@ def fit_lassoCV(X, y, alphas=None, fit_intercept=False, cv=10, n_jobs=-1,
     return results
 
 
-def fit_elasticnet(X, y, alpha=None, fit_intercept=False, **kwargs):
+def _fit_elasticnet(X, y, alpha=None, fit_intercept=False, **kwargs):
     """
     Return the solution `a` to the linear problem `Xa=y` obtained by using
     the ElasticNet method as implemented in scitkit-learn.
@@ -161,7 +202,7 @@ def fit_elasticnet(X, y, alpha=None, fit_intercept=False, **kwargs):
         dictionary containing parameters
     """
     if alpha is None:
-        return fit_elasticnetCV(X, y, fit_intercept=fit_intercept, **kwargs)
+        return _fit_elasticnetCV(X, y, fit_intercept=fit_intercept, **kwargs)
     else:
         elasticnet = ElasticNet(alpha=alpha, fit_intercept=fit_intercept,
                                 **kwargs)
@@ -171,8 +212,8 @@ def fit_elasticnet(X, y, alpha=None, fit_intercept=False, **kwargs):
         return results
 
 
-def fit_elasticnetCV(X, y, alphas=None, l1_ratio=None, fit_intercept=False,
-                     cv=10, n_jobs=-1, **kwargs):
+def _fit_elasticnetCV(X, y, alphas=None, l1_ratio=None, fit_intercept=False,
+                      cv=10, n_jobs=-1, **kwargs):
     """
     Return the solution `a` to the linear problem `Xa=y` obtained by using
     the ElasticNetCV method as implemented in scitkit-learn.
@@ -201,7 +242,6 @@ def fit_elasticnetCV(X, y, alphas=None, l1_ratio=None, fit_intercept=False,
         l1_ratio_optmal (alpha value that yields the lowest validation rmse),
         l1_ratio_pathh (all tested l1_ratio values)
         mse_path (mse for validation set for each alpha and l1_ratio)
-
     """
 
     if alphas is None:
@@ -224,7 +264,7 @@ def fit_elasticnetCV(X, y, alphas=None, l1_ratio=None, fit_intercept=False,
     return results
 
 
-def fit_bayesian_ridge(X, y, fit_intercept=False, **kwargs):
+def _fit_bayesian_ridge(X, y, fit_intercept=False, **kwargs):
     """
     Return the solution `a` to the linear problem `Xa=y` obtained by using
     Bayesian ridge regression as implemented in scitkit-learn.
@@ -241,17 +281,16 @@ def fit_bayesian_ridge(X, y, fit_intercept=False, **kwargs):
     Returns
     ----------
     results : dict
-        dict containing parameters, covariance matrix
+        dict containing parameters
     """
     brr = BayesianRidge(fit_intercept=fit_intercept, **kwargs)
     brr.fit(X, y)
     results = dict()
     results['parameters'] = brr.coef_
-    results['covariance-matrix'] = brr.sigma_
     return results
 
 
-def fit_ardr(X, y, threshold_lambda=1e6, fit_intercept=False, **kwargs):
+def _fit_ardr(X, y, threshold_lambda=1e6, fit_intercept=False, **kwargs):
     """
     Return the solution `a` to the linear problem `Xa=y` obtained by using
     the automatic relevance determination regression (ARDR) method as
@@ -271,12 +310,22 @@ def fit_ardr(X, y, threshold_lambda=1e6, fit_intercept=False, **kwargs):
     Returns
     ----------
     results : dict
-        dictionary containing parameters, covariance matrix
+        dictionary containing parameters
     """
     ardr = ARDRegression(threshold_lambda=threshold_lambda,
                          fit_intercept=fit_intercept, **kwargs)
     ardr.fit(X, y)
     results = dict()
     results['parameters'] = ardr.coef_
-    results['covariance-matrix'] = ardr.sigma_
     return results
+
+
+fit_methods = OrderedDict([
+    ('least-squares', _fit_least_squares),
+    ('lasso', _fit_lasso),
+    ('elasticnet', _fit_elasticnet),
+    ('bayesian-ridge', _fit_bayesian_ridge),
+    ('ardr', _fit_ardr),
+    ('split-bregman', fit_split_bregman)
+    ])
+available_fit_methods = list(fit_methods.keys())

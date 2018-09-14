@@ -5,12 +5,9 @@
 namespace PeriodicTable
 {
 
-
-
-
-
 static std::map<std::string, int> strInt =
-    {{"H", 1},
+    {{"X", 0},
+     {"H", 1},
      {"He", 2},
      {"Li", 3},
      {"Be", 4},

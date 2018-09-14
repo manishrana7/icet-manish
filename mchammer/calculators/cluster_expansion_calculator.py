@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 from _icet import _ClusterExpansionCalculator
+=======
+from ase import Atoms
+from icet import ClusterExpansion
+>>>>>>> master
 from mchammer.calculators.base_calculator import BaseCalculator
 from typing import List
 from icet import Structure
@@ -6,33 +11,42 @@ from icet import ClusterSpace
 import numpy as np
 
 class ClusterExpansionCalculator(BaseCalculator):
-    """
-    Cluster expansion calculator.
+    """A ClusterExpansionCalculator object enables the efficient
+    calculation of properties described by a cluster expansion. It is
+    specific for a particular (supercell) structure and commonly
+    employed when setting up a Monte Carlo simulation, see
+    :ref:`ensembles`.
 
-    Class for efficiently calculating the
-    cluster expansion property
-    for a specific structure
+    Cluster expansions, e.g., of the energy, typically yield property
+    values *per site*. When running a Monte Carlo simulation one,
+    however, considers changes in the *total* energy of the
+    system. The default behavior is therefore to multiply the output
+    of the cluster expansion by the number of sites. This behavior can
+    be changed via the ``scaling`` keyword parameter.
 
     Parameters
     ----------
-    atoms : ASE Atoms object
-        the structure that the calculator can use
-        to optimize the calculate functions.
-
-    cluster_expansion : icet ClusterExpansion object
+    atoms : :class:`ase:Atoms`
+        structure for which to set up the calculator
+    cluster_expansion : ClusterExpansion
+        cluster expansion from which to build calculator
     name : str
-        human readable identifier for this calculator
+        human-readable identifier for this calculator
+    scaling : float
+        scaling factor applied to the property value predicted by the
+        cluster expansion
 
     Todo
     ----
-    * add the real occupation constraints when
-      that is setup in the cluster space.
+    * add OccupationConstraints once available
 
     """
 
-    def __init__(self, atoms, cluster_expansion,
-                 name='Cluster Expansion Calculator'):
+    def __init__(self, atoms: Atoms, cluster_expansion: ClusterExpansion,
+                 name: str='Cluster Expansion Calculator',
+                 scaling: float=None):
         super().__init__(atoms=atoms, name=name)
+<<<<<<< HEAD
 
         self.cpp_calc = _ClusterExpansionCalculator(cluster_expansion.cluster_space, Structure.from_atoms(atoms) )
         self._cluster_expansion = cluster_expansion
@@ -41,53 +55,50 @@ class ClusterExpansionCalculator(BaseCalculator):
                     self.cluster_expansion.cluster_space._chemical_symbols,
                     self.cluster_expansion.cluster_space._mi,
                     bothways=True)
+=======
+        self._cluster_expansion = cluster_expansion
+        if scaling is None:
+            self._property_scaling = len(atoms)
+        else:
+            self._property_scaling = scaling
+>>>>>>> master
 
     @property
-    def cluster_expansion(self):
-        """
-        icet ClusterExpansion object.
-        """
+    def cluster_expansion(self) -> ClusterExpansion:
+        """ cluster expansion from which calculator was constructed """
         return self._cluster_expansion
 
-    def calculate_total(self, *, occupations: List[int]):
+    def calculate_total(self, *, occupations: List[int]) -> float:
         """
-        Calculates the total property of the current configuration.
+        Calculates and returns the total property value of the current
+        configuration.
 
         Parameters
         ----------
-        occupations: list of int
+        occupations
             the entire occupation vector (i.e. list of atomic species)
-
-
-        Return
-        -------
-            total_property : float
         """
         self.atoms.set_atomic_numbers(occupations)
-        return self.cluster_expansion.predict(self.atoms)
+        return self.cluster_expansion.predict(self.atoms) * \
+            self._property_scaling
 
     def calculate_local_contribution(self, local_indices: List[int] = None,
-                                     occupations: List[int] = None):
+                                     occupations: List[int] = None) -> float:
         """
-        Return the sum of the contributions from the indices in the input list.
-        local_indices refer to the lattice sites from which the local
-        contributions should be summed up from. Occupations is the entire
-        occupation vector.
+        Calculates and returns the sum of the contributions to the property
+        due to the sites specified in `local_indices`
 
         Parameters
         ----------
-        local_indices : list of ints
-            the lattice indices for which to obtain the local contribution
-        occupations : list of ints
-            the entire occupation vector
-
-        Return
-        ------
-        float : sum of contributions
+        local_indices
+            sites over which to sum up the local contribution
+        occupations
+            entire occupation vector
         """
         if local_indices is None:
-            raise TypeError("Missing required keyword argument: local_indices")
+            raise TypeError('Missing required argument: local_indices')
         if occupations is None:
+<<<<<<< HEAD
             raise TypeError("Missing required keyword argument: occupations")
 
         self.atoms.set_atomic_numbers(occupations)
@@ -113,10 +124,15 @@ class ClusterExpansionCalculator(BaseCalculator):
         structure = Structure.from_atoms(self.atoms)
         local_cv = self.cpp_calc.get_local_cluster_vector(structure, index, exclude_indices)
         return np.dot(local_cv, self.cluster_expansion.parameters)
+=======
+            raise TypeError('Missing required argument: occupations')
+        return self.calculate_total(occupations=occupations) * \
+            self._property_scaling
+>>>>>>> master
 
     @property
-    def occupation_constraints(self):
-        """A map from site to allowed species."""
-        elements = list(
-            self.cluster_expansion.cluster_space.element_map.keys())
-        return [elements] * len(self.atoms)
+    def occupation_constraints(self) -> List[List[int]]:
+        """ map from site to allowed species """
+        species = list(
+            self.cluster_expansion.cluster_space.species_map.keys())
+        return [species] * len(self.atoms)

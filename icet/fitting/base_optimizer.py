@@ -1,24 +1,10 @@
+
 """
 BaseOptimizer serves as base for all optimizers.
 """
 
 import numpy as np
-from collections import OrderedDict
-from .tools import compute_rmse
-from .fit_methods import (fit_least_squares,
-                          fit_lasso,
-                          fit_elasticnet,
-                          fit_bayesian_ridge,
-                          fit_ardr)
-
-
-fit_methods = OrderedDict([
-    ('least-squares', fit_least_squares),
-    ('lasso', fit_lasso),
-    ('elasticnet', fit_elasticnet),
-    ('bayesian-ridge', fit_bayesian_ridge),
-    ('ardr', fit_ardr),
-    ])
+from .fit_methods import available_fit_methods
 
 
 class BaseOptimizer:
@@ -38,11 +24,13 @@ class BaseOptimizer:
     fit_method : string
         method to be used for training; possible choice are
         "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
+    standardize : bool
+        whether or not to standardize the fit matrix before fitting
     seed : int
         seed for pseudo random number generator
     """
 
-    def __init__(self, fit_data, fit_method, seed):
+    def __init__(self, fit_data, fit_method, standardize=True, seed=42):
         """
         Attributes
         ----------
@@ -50,22 +38,24 @@ class BaseOptimizer:
             fit matrix
         _y : NumPy (N) array
             target values
-        _optimizer_function : function
-            optimizer function to be called when training
         """
 
-        if fit_method not in fit_methods.keys():
-            raise ValueError('Fit method not available')
+        if fit_method not in available_fit_methods:
+            raise ValueError('Unknown fit_method: {}'.format(fit_method))
 
         if fit_data[0].shape[0] != fit_data[1].shape[0]:
-            raise ValueError('Invalid fit data, shape did not match')
+            raise ValueError('Invalid fit data; shapes of fit matrix'
+                             ' and target vector do not match')
+
+        if len(fit_data[0].shape) != 2:
+            raise ValueError('Invalid fit matrix; must have two dimensions')
 
         self._A, self._y = fit_data
-        self._Nrows = self._A.shape[0]
-        self._Ncols = self._A.shape[1]
+        self._n_rows = self._A.shape[0]
+        self._n_cols = self._A.shape[1]
         self._fit_method = fit_method
+        self._standarize = standardize
         self._seed = seed
-        self._optimizer_function = fit_methods[self.fit_method]
         self._fit_results = {'parameters': None}
 
     def compute_rmse(self, A, y):
@@ -87,7 +77,10 @@ class BaseOptimizer:
         float
             root mean squared error
         """
-        return compute_rmse(A, self.parameters, y)
+        y_predicted = self.predict(A)
+        delta_y = y_predicted - y
+        rmse = np.sqrt(np.mean(delta_y**2))
+        return rmse
 
     def predict(self, A):
         """
@@ -96,14 +89,14 @@ class BaseOptimizer:
 
         Parameters
         ----------
-        A : NumPy (N, M) array
+        A : NumPy (N, M) array or NumPy (M, )
             fit matrix where `N` (=rows of `A`, elements of `y`) equals the
             number of target values and `M` (=columns of `A`) equals the number
             of parameters
 
         Returns
         -------
-        NumPy (N) array
+        NumPy (N) array, or float if single row is inputed
             vector of predicted values
         """
         return np.dot(A, self.parameters)
@@ -132,19 +125,23 @@ class BaseOptimizer:
         """ dict : Comprehensive information about the optimizer. """
         info = dict()
         info['fit_method'] = self.fit_method
+        info['standardize'] = self.standardize
         info['number_of_target_values'] = self.number_of_target_values
         info['number_of_parameters'] = self.number_of_parameters
+        info['number_of_nonzero_parameters'] = \
+            self.number_of_nonzero_parameters
         return {**info, **self._fit_results}
 
     def __str__(self):
         width = 54
         s = []
         s.append(' {} '.format(self.__class__.__name__).center(width, '='))
-        for key, value in self.summary.items():
+        for key in sorted(self.summary.keys()):
+            value = self.summary[key]
             if isinstance(value, (str, int)):
-                s.append('{:25} : {}'.format(key, value))
+                s.append('{:30} : {}'.format(key, value))
             elif isinstance(value, (float)):
-                s.append('{:25} : {:.7g}'.format(key, value))
+                s.append('{:30} : {:.7g}'.format(key, value))
         s.append(''.center(width, '='))
         return '\n'.join(s)
 
@@ -166,18 +163,31 @@ class BaseOptimizer:
             return self._fit_results['parameters'].copy()
 
     @property
+    def number_of_nonzero_parameters(self):
+        """ int : number of non-zero parameters """
+        if self.parameters is None:
+            return None
+        else:
+            return np.count_nonzero(self.parameters)
+
+    @property
     def number_of_target_values(self):
         """ int : number of target values (=rows in `A` matrix). """
-        return self._Nrows
+        return self._n_rows
 
     @property
     def number_of_parameters(self):
         """ int : number of parameters (=columns in `A` matrix). """
-        return self._Ncols
+        return self._n_cols
+
+    @property
+    def standardize(self):
+        """ bool : whether or not to standardize the fit matrix before
+                   fitting.
+        """
+        return self._standarize
 
     @property
     def seed(self):
-        """
-        int : seed used to initialize pseudo random number of generator.
-        """
+        """ int : seed used to initialize pseudo random number generator."""
         return self._seed

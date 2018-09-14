@@ -15,7 +15,7 @@ class TestConfigurationManager(unittest.TestCase):
         self.atoms = self.atoms.repeat(3)
         self.constraints = [[13, 47] for _ in range(len(self.atoms))]
         self.strict_constraints = self.constraints
-        self.sublattices = [[i for i in range(len(self.atoms))]]
+        self.sublattices = [list(range(len(self.atoms)))]
 
     def setUp(self):
         self.cm = ConfigurationManager(
@@ -25,6 +25,17 @@ class TestConfigurationManager(unittest.TestCase):
     def test_type(self):
         """Test cm type."""
         self.assertIsInstance(self.cm, ConfigurationManager)
+
+    def test_init_alternative_constructors(self):
+        cm = ConfigurationManager(
+            self.atoms, self.strict_constraints, self.sublattices, None)
+        self.assertTrue(cm.occupation_constraints == self.strict_constraints)
+
+        constraints = [[13, 47] if i < 5 else [13]
+                       for i in range(len(self.atoms))]
+        cm = ConfigurationManager(
+            self.atoms, constraints, self.sublattices, None)
+        self.assertTrue(cm.occupation_constraints == constraints)
 
     def test_check_occupation_constraint(self):
         """Test the check occupation constraint method."""
@@ -40,9 +51,8 @@ class TestConfigurationManager(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             self.cm._check_occupation_constraint(strict_constraint, constraint)
 
-        self.assertTrue("User defined occupation constraints must be "
-                        "stricter or as strict as strict"
-                        " occupations constraints." in str(context.exception))
+        self.assertTrue('User defined occupation_constraints must be stricter'
+                        in str(context.exception))
 
         # Check that the length of the constraints throw a value error
         constraint = [[1, 2], [1, 2], [1]]
@@ -50,9 +60,12 @@ class TestConfigurationManager(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             self.cm._check_occupation_constraint(strict_constraint, constraint)
 
-        self.assertTrue("strict occupations and occupation "
-                        "constraints must be equal length"
-                        in str(context.exception))
+        self.assertTrue('strict_occupations and occupation_constraints'
+                        ' must be equal length' in str(context.exception))
+
+    def test_property_atoms(self):
+        """Test atoms property."""
+        self.assertEqual(self.atoms, self.cm.atoms)
 
     def test_property_occupations(self):
         """
@@ -146,14 +159,14 @@ class TestConfigurationManager(unittest.TestCase):
         with self.assertRaises(SwapNotPossibleError) as context:
             indices, elements = cm_two_sublattices.get_swapped_state(1)
 
-        self.assertTrue("Sublattice is empty" in str(context.exception))
+        self.assertTrue("Sublattice 1 is empty" in str(context.exception))
 
     def test_get_flip_index(self):
         """Test the getting flip indices method."""
 
         for _ in range(1000):
-            indices, elements = self.cm.get_flip_state(0)
-            self.assertNotEqual(self.cm.occupations[indices[0]], elements[0])
+            index, element = self.cm.get_flip_state(0)
+            self.assertNotEqual(self.cm.occupations[index], element)
 
     def test_update_occupations(self):
         """Test the update occupation method."""
@@ -162,46 +175,54 @@ class TestConfigurationManager(unittest.TestCase):
         elements = [13, 13, 47, 47, 13, 47]
 
         self.assertNotEqual(list(self.cm.occupations[indices]), list(elements))
-        self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
+        self.assertTrue(self._is_sites_by_species_dict_correct(self.cm))
         self.cm.update_occupations(indices, elements)
         self.assertEqual(list(self.cm.occupations[indices]), elements)
-        self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
+        self.assertTrue(self._is_sites_by_species_dict_correct(self.cm))
 
-    def test_element_occupations(self):
+        # test that correct exceptions are raised
+        with self.assertRaises(ValueError) as context:
+            self.cm.update_occupations([-1], [0])
+        self.assertTrue('Site -1 is not present' in str(context.exception))
+        with self.assertRaises(ValueError) as context:
+            self.cm.update_occupations([0], [-1])
+        self.assertTrue('Invalid new species' in str(context.exception))
+
+    def test_sites_by_species(self):
         """Test the element occupation dict."""
 
         # Initially consistent
-        self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
+        self.assertTrue(self._is_sites_by_species_dict_correct(self.cm))
 
         # Test that changing occupations manually is wrong
 
         element = self.cm._occupations[0]
         self.cm._occupations[0] = 200
-        self.assertFalse(self._is_element_occupation_dict_correct(self.cm))
+        self.assertFalse(self._is_sites_by_species_dict_correct(self.cm))
 
         # Fix error
         self.cm._occupations[0] = element
-        self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
+        self.assertTrue(self._is_sites_by_species_dict_correct(self.cm))
 
         # Set everything to Al
         indices = [i for i in range(len(self.atoms))]
         elements = [13] * len(self.atoms)
         self.cm.update_occupations(indices, elements)
-        self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
+        self.assertTrue(self._is_sites_by_species_dict_correct(self.cm))
 
         # Set everything to Ag
         indices = [i for i in range(len(self.atoms))]
         elements = [47] * len(self.atoms)
         self.cm.update_occupations(indices, elements)
-        self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
+        self.assertTrue(self._is_sites_by_species_dict_correct(self.cm))
 
         # Set everything to Al-Ag-Al-Ag ...
         indices = [i for i in range(len(self.atoms))]
         elements = [13, 47] * (len(self.atoms)//2)
         self.cm.update_occupations(indices, elements)
-        self.assertTrue(self._is_element_occupation_dict_correct(self.cm))
+        self.assertTrue(self._is_sites_by_species_dict_correct(self.cm))
 
-    def _is_element_occupation_dict_correct(self, configuration_manager):
+    def _is_sites_by_species_dict_correct(self, configuration_manager):
         """
         Check that the internal Element -> site dict is consistent
         with the occupation list.
@@ -215,7 +236,7 @@ class TestConfigurationManager(unittest.TestCase):
         False if the dict is inconsistent with self.occupations
         """
 
-        for element_dict in configuration_manager._element_occupation:
+        for element_dict in configuration_manager._sites_by_species:
             for element in element_dict.keys():
                 for index in element_dict[element]:
                     if element != configuration_manager.occupations[index]:

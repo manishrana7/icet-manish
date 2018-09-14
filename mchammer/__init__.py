@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division
 
-from .ensembles.base_ensemble import BaseEnsemble
-from .observers.base_observer import BaseObserver
+from .configuration_manager import ConfigurationManager
 from .data_container import DataContainer
 
-'''
-mchammer module of icet.
-'''
+"""
+mchammer - Monte Carlo simulation module
+"""
 
 __project__ = 'icet-mchammer'
 __description__ = 'A Pythonic approach to cluster expansions'
@@ -22,9 +20,8 @@ __credits__ = ['Mattias Ångqvist',
                'Thomas Holm Rod',
                'Paul Erhart']
 __version__ = '0.1'
-__all__ = ['DataContainer',
-           'BaseEnsemble',
-           'BaseObserver']
+__all__ = ['ConfigurationManager',
+           'DataContainer']
 __maintainer__ = 'The icet developers team'
 __maintainer_email__ = 'icet@materialsmodeling.org'
 __status__ = 'alpha-version'

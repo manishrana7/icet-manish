@@ -41,10 +41,10 @@ interactions (ECIs). The last term in the  above expression represents the
 average over cluster functions  :math:`\Gamma_{\alpha}(\boldsymbol{\sigma})`
 belonging to symmetry  equivalent clusters (:term:`orbits`). The cluster
 functions  themselves are obtained as a product over basis functions
-:math:`\Theta` as described in the :ref:`section detailing the  construction of
-cluster functions <cluster-functions>`.
+:math:`\Theta` as described in the section detailing the  construction of
+cluster functions.
 
-.. todo:
+.. todo::
 
    insert section on cluster functions
 
