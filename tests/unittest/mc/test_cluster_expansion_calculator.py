@@ -8,6 +8,8 @@ from _icet import _ClusterExpansionCalculator
 from icet import Structure
 
 import random
+
+
 class TestCECalculator(unittest.TestCase):
     """
     Container for tests of the class functionality.
@@ -22,25 +24,30 @@ class TestCECalculator(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestCECalculator, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al",'hcp',a=4.0,c=3.1).repeat(3)
+        self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1).repeat(2)
         # self.atoms = bulk("Al",'bcc',a=4.0).repeat(3)
         # self.atoms = bulk("Al",'diamond',a=4.0).repeat(3)
-        print("atoms len ",len(self.atoms))
-        self.cutoffs = [2.9]#[2.9]
+        print("atoms len ", len(self.atoms))
+        self.cutoffs = [5.1,5]  # [2.9]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
         params = [1.0] * params_len
+        params = [0] * params_len
+        # params[6] = 1
         # params = [random.random() for _ in range(params_len)]
-
         params[0] = 0
         params[1] = 0
+
         print(self.cs)
 
         self.ce = ClusterExpansion(self.cs, params)
 
     def setUp(self):
         """Setup before each test."""
+        self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1).repeat(2)
+        # self.atoms = bulk("Al",'bcc',a=4.0).repeat(3)
+
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
 
@@ -65,11 +72,111 @@ class TestCECalculator(unittest.TestCase):
             occupations=self.atoms.get_atomic_numbers()), 66.96296296)
         self.assertAlmostEqual(self.calculator.cluster_expansion.predict(
             self.calculator.atoms),  66.96296296)
+            
     
+    def test_local_contribution_many_occupations(self):
+        """ Test local/total contributions with many occupations"""
+        
+        # Test inital occupations
+        self._test_local_contribution_thorough()
+
+        # Test checkerboard-ish
+        for i in range(len(self.atoms)):
+            if i % 2 == 0:
+                self.atoms[i].number = 13
+            else:
+                self.atoms[i].number = 32
+        self._test_local_contribution_thorough()
+
+         # Test segregated-ish
+        for i in range(len(self.atoms)):
+            if i < len(self.atoms)/2:
+                self.atoms[i].number = 13
+            else:
+                self.atoms[i].number = 32
+        self._test_local_contribution_thorough()
+
+    def _test_local_contribution_thorough(self):
+        """Test more"""
+
+        # Test first all flip combinations
+        for i in range(len(self.atoms)):
+            indices = [i]
+            local_diff, total_diff = self._get_energy_diffs_local_and_total(indices)
+            self.assertAlmostEqual(total_diff, local_diff)
+
+        # Test pair flip combinations
+        for i in range(len(self.atoms)):
+            for j in range(len(self.atoms)):
+                if j<=i:
+                    continue
+                indices = [i,j]
+                local_diff, total_diff = self._get_energy_diffs_local_and_total(indices)
+                self.assertAlmostEqual(total_diff, local_diff)
+
+        # Test triplet flips
+        for i in range(len(self.atoms)):
+            for j in range(len(self.atoms)):
+                if j<=i:
+                    continue
+                for k in range(len(self.atoms)):
+                    if k<=j:
+                        continue
+                    indices = [i, j , k]
+                    # print("indices= ", indices)
+                    local_diff, total_diff = self._get_energy_diffs_local_and_total(indices)
+                    self.assertAlmostEqual(total_diff, local_diff)
+
+
+    def _get_energy_diffs_local_and_total(self, indices):
+        """ Get energy diffs using local and total"""
+
+        # Original occupations
+        original_occupations = self.atoms.numbers.copy()
+        current_occupations = [self.atoms.get_atomic_numbers()[i]
+                               for i in indices]
+        # Initial value total energy
+        initial_value_total = self.calculator.calculate_total(
+            occupations=self.atoms.get_atomic_numbers())
+
+        # Initial value local energy
+        initial_value_local = self.calculator.calculate_local_contribution(
+            indices, self.atoms.get_atomic_numbers())
+
+        # Flip indices
+        for atom in self.atoms:
+            if atom.index == indices:
+                if atom.number == 13:
+                    atom.number = 32
+                elif atom.number == 32:
+                    atom.number = 13
+                else:
+                    raise Exception(
+                        "Found unknown element in atoms object. {}".format(atom))
+
+        # Calculate new total energy
+        new_value_total = self.calculator.calculate_total(
+            occupations=self.atoms.get_atomic_numbers().copy())
+        
+        # Calculate new local energy
+        new_value_local = self.calculator.calculate_local_contribution(
+            indices, self.atoms.get_atomic_numbers().copy())
+        
+        # difference in energy according to total energy
+        total_diff = new_value_total - initial_value_total
+
+        # Difference in energy according to local energy
+        local_diff = new_value_local - initial_value_local
+
+        # Reset occupations
+        self.atoms.set_atomic_numbers(original_occupations.copy())
+
+        return local_diff, total_diff
+
     def test_calculate_local_contribution(self):
         """Test calculate local contribution."""
         # indices = [i for i in range(len(self.atoms))]
-        indices = [1]
+        indices = [3, 5]
         local_contribution = self.calculator.calculate_local_contribution(
             indices, self.atoms.get_atomic_numbers())
         self.assertIsInstance(local_contribution, float)
@@ -78,11 +185,13 @@ class TestCECalculator(unittest.TestCase):
         original_occupations = self.atoms.numbers.copy()
         initial_value_total = self.calculator.calculate_total(
             occupations=self.atoms.get_atomic_numbers())
+
         self.atoms.set_atomic_numbers(original_occupations.copy())
         initial_value_local = self.calculator.calculate_local_contribution(
             indices, self.atoms.get_atomic_numbers())
         self.atoms.set_atomic_numbers(original_occupations.copy())
-        current_occupations = [self.atoms.get_atomic_numbers()[i] for i in indices]
+        current_occupations = [self.atoms.get_atomic_numbers()[i]
+                               for i in indices]
         self.atoms.set_atomic_numbers(original_occupations.copy())
         swapped_elements = []
         for atom in current_occupations:
@@ -91,15 +200,18 @@ class TestCECalculator(unittest.TestCase):
             elif atom == 32:
                 swapped_elements.append(13)
             else:
-                raise Exception("Found unknown element in atoms object. {}".format(atom))
-        
+                raise Exception(
+                    "Found unknown element in atoms object. {}".format(atom))
+
         new_occupations = self.atoms.get_atomic_numbers().copy()
         for index, element in zip(indices, swapped_elements):
             new_occupations[index] = element
         self.atoms.set_atomic_numbers(new_occupations.copy())
-        new_value_total = self.calculator.calculate_total(occupations=new_occupations.copy())
+        new_value_total = self.calculator.calculate_total(
+            occupations=new_occupations.copy())
         self.atoms.set_atomic_numbers(new_occupations.copy())
-        new_value_local = self.calculator.calculate_local_contribution(indices, new_occupations.copy())
+        new_value_local = self.calculator.calculate_local_contribution(
+            indices, new_occupations.copy())
         self.atoms.set_atomic_numbers(new_occupations.copy())
 
         total_diff = new_value_total - initial_value_total
@@ -125,19 +237,20 @@ class TestCECalculator(unittest.TestCase):
     def test_get_local_cluster_vector(self):
         """ Tests the get local clustervector method."""
 
-        cpp_calc = _ClusterExpansionCalculator(self.cs, Structure.from_atoms(self.atoms))
+        cpp_calc = _ClusterExpansionCalculator(
+            self.cs, Structure.from_atoms(self.atoms))
 
         structure = Structure.from_atoms(self.atoms)
         index = 4
-        local_cv_before = cpp_calc.get_local_cluster_vector(structure, index)
+        local_cv_before = cpp_calc.get_local_cluster_vector(
+            structure, index, [])
 
         self.atoms[index].symbol = 'Ge'
         structure = Structure.from_atoms(self.atoms)
-        local_cv_after = cpp_calc.get_local_cluster_vector(structure, index)
+        local_cv_after = cpp_calc.get_local_cluster_vector(
+            structure, index, [])
 
         print(local_cv_before-local_cv_after)
-
-
 
 
 if __name__ == '__main__':

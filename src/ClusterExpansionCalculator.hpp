@@ -21,7 +21,8 @@ class ClusterExpansionCalculator
     public:
     ClusterExpansionCalculator(const ClusterSpace &, const Structure &);
 
-    std::vector<double> getLocalClusterVector(const Structure &, const int);    
+    // std::vector<double> getLocalClusterVector(const Structure &, const int);
+    std::vector<double> getLocalClusterVector(const Structure &,const int, const std::vector<int>);
     double getLocalContribution(const Structure &, const int) const;
 
     private:

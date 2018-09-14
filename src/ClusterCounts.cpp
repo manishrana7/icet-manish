@@ -60,7 +60,7 @@ void ClusterCounts::count(const Structure &structure, const std::vector<std::vec
             placeHolderElements.push_back(structure.getAtomicNumber(0));
         }
         // _clusterCounts[cluster][placeHolderElements] += 0;
-        std::cout<<"No neighbors in count. Cluster tag= "<<cluster.tag()<<std::endl;
+        // std::cout<<"No neighbors in count. Cluster tag= "<<cluster.tag()<<std::endl;
     }
 
     for (const auto &latnbrs : latticeNeighbors)

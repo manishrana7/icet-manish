@@ -301,7 +301,7 @@ class Orbit
 
         std::vector<std::vector<int>> getAllPossibleMCVectorPermutations(const std::vector<int> &Mi_local) const;
         bool contains(const std::vector<LatticeSite> &sites,bool sorted) const;
-        
+        void removeSitesWithIndex(const int);
       private:
         ///Representative sorted cluster for this orbit
         Cluster _representativeCluster;

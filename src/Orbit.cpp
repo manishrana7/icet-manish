@@ -106,25 +106,47 @@ std::vector<std::vector<int>> Orbit::getAllPossibleMCVectorPermutations(const st
 bool Orbit::contains(const std::vector<LatticeSite> &sites, bool sorted) const
 {
     auto sitesCopy = sites;
-    if(sorted)
+    if (sorted)
     {
-        std::sort(sitesCopy.begin(),sitesCopy.end());
+        std::sort(sitesCopy.begin(), sitesCopy.end());
     }
 
     for (size_t i = 0; i < _equivalentSites.size(); i++)
     {
         auto i_sites = _equivalentSites[i];
-        
+
         //compare the sorted sites
-        if(sorted)
+        if (sorted)
         {
             std::sort(i_sites.begin(), i_sites.end());
         }
-        
+
         if (i_sites == sitesCopy)
         {
             return true;
         }
     }
     return false;
+}
+void Orbit::removeSitesWithIndex(const int index)
+{
+    for (int i = _equivalentSites.size() - 1; i >= 0; i--)
+    {
+        if (std::any_of(_equivalentSites[i].begin(), _equivalentSites[i].end(), [=](LatticeSite &ls) { return ls.index() == index; }))
+        {
+            _equivalentSites.erase(_equivalentSites.begin()+i);
+            _equivalentSitesPermutations.erase(_equivalentSitesPermutations.begin()+i);
+        }
+        else
+        {
+            for(auto ls : _equivalentSites[i])
+            {
+                if(ls.index()==index)
+                {
+                    std::cout<<" index was not removed!! "<<index<<std::endl;
+                }
+
+            }
+        }
+    }
 }

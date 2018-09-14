@@ -833,3 +833,11 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &superCell, const Vector3
     }
     return localOrbitList;
 }
+/// Remove each element in orbit.equivalent sites if a vector<sites> have at least one lattice site with this index
+void OrbitList::removeSitesContainingIndex(const int index)
+{
+    for(auto &orbit : _orbitList)
+    {
+        orbit.removeSitesWithIndex(index);
+    }
+}

@@ -117,6 +117,14 @@ class OrbitList
             {
                 std::cout << "Duplicates: " << orbit.getNumberOfDuplicates() << std::endl;
             }
+            for(auto sites : orbit.getEquivalentSites())
+            {
+                for(auto site : sites )
+                {
+                    std::cout<<"("<<site.index()<< " : ["<<site.unitcellOffset()[0]<<" "<<site.unitcellOffset()[1]<< " " <<site.unitcellOffset()[2]<<"]) . ";
+                }
+                std::cout<<std::endl;
+            }
             std::cout << std::endl;
         }
     }
@@ -190,6 +198,8 @@ class OrbitList
     ///Check that the lattice neighbors do not have any unitcell offsets in a pbc=false direction
     bool isSitesPBCCorrect(const std::vector<LatticeSite> &sites) const;
 
+    /// Remove each element in orbit.equivalent sites if a vector<sites> have at least one lattice site with this index
+    void removeSitesContainingIndex(const int);
   private:
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;
     Structure _primitiveStructure;
