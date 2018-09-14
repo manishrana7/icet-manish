@@ -7,9 +7,11 @@ doi:10.1137/080725891
 import numpy as np
 from scipy.optimize import minimize
 
+from icet.io.logging import logger
+logger = logger.getChild('split_bregman')
 
-def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,
-                      verbose=0):
+
+def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,):
     """
     Split-Bregman algorithm described in T. Goldstein and S. Osher,
     SIAM J. Imaging Sci. 2, 323 (2009); doi:10.1137/080725891
@@ -47,11 +49,10 @@ def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,
     ftA = np.dot(y.conj().transpose(), A)
     ii = 0
     for i in range(n_iters):
-        if verbose:
-            print('Iteration ', i)
+        logger.info('Iteration {} of {}'.format(i, n_iters))
         args = (A, y, mu, lmbda, d, b, AtA, ftA)
         res = minimize(_objective_function, x, args, method='BFGS', options={
-                       'disp': False}, jac=_objective_function_derivative)
+            'disp': False}, jac=_objective_function_derivative)
         x = res.x
 
         d = _shrink(mu*x + b, 1.0/lmbda)
@@ -60,14 +61,13 @@ def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,
         new_norm = np.linalg.norm(x)
         ii = ii + 1
 
-        if verbose:
-            print('|new_norm-old_norm| = ', abs(new_norm-old_norm))
+        logger.info('|new_norm-old_norm| = {}'.format(abs(new_norm-old_norm)))
         if abs(new_norm-old_norm) < tol:
             break
 
         old_norm = new_norm
     else:
-        print('Warning: Split Bregman ran for max iters')
+        logger.warning('Maximum possible number of iterations exceeded')
 
     fit_results = {'parameters': x}
     return fit_results

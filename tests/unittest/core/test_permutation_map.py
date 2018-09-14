@@ -158,8 +158,7 @@ class TestPermutationMap(unittest.TestCase):
     def test_permutation_matrix_from_atoms(self):
         """ Test permutation matrix from atoms functionality. """
         pm, _, _ = \
-            permutation_matrix_from_atoms(
-                self.atoms, self.cutoff, verbosity=3)
+            permutation_matrix_from_atoms(self.atoms, self.cutoff)
 
         matrix = pm.get_permuted_positions()
         matrix2 = self.pm.get_permuted_positions()
@@ -253,9 +252,10 @@ class TestPermutationMap(unittest.TestCase):
         """
         pm, prim_structure, _ = \
             permutation_matrix_from_atoms(self.atoms, self.cutoff)
+
         pm_lattice_site = \
-            get_lattice_site_permutation_matrix(prim_structure, pm,
-                                                verbosity=3)
+            get_lattice_site_permutation_matrix(prim_structure, pm)
+
         pruned_matrix = prune_permutation_matrix(pm_lattice_site)
         first_col = []
         for row in pruned_matrix:

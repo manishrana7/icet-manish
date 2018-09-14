@@ -312,7 +312,7 @@ class TestEnsemble(unittest.TestCase):
         elements = [13, 31, 13, 31, 13]
 
         prop_diff = self.ensemble._get_property_change(indices, elements)
-        self.assertAlmostEqual(prop_diff, 1512)
+        self.assertAlmostEqual(prop_diff, 56)
 
         # Test that the method doesn't change the occupation.
         self.assertListEqual(list(initial_occupations),

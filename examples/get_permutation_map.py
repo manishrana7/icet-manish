@@ -13,7 +13,7 @@ atoms = bulk('Al', 'fcc', a=2.0)
 # Generate a permutation map (matrix) for all neighbors inside the cutoff
 neighbor_cutoff = 2.0
 permutation_map, prim_structure, neighbor_list = \
-    permutation_matrix_from_atoms(atoms, neighbor_cutoff, verbosity=3)
+    permutation_matrix_from_atoms(atoms, neighbor_cutoff)
 
 # Extract the permuted, indexed and unique positions.
 perm_pos = permutation_map.get_permuted_positions()

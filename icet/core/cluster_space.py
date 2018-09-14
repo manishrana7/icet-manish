@@ -3,6 +3,7 @@ import pickle
 from ase import Atoms
 from collections import OrderedDict
 from typing import List, Union
+import numpy as np
 
 from _icet import ClusterSpace as _ClusterSpace
 from icet.tools.geometry import get_primitive_structure, add_vacuum_in_non_pbc
@@ -32,13 +33,11 @@ class ClusterSpace(_ClusterSpace):
           the value the number of allowed components
         * if a single `int` is provided each site the number of allowed
           components will be set to `Mi` for sites in the structure
-    verbosity : int
-        verbosity level
     """
 
     def __init__(self, atoms: Union[Atoms, Structure], cutoffs: List[float],
-                 chemical_symbols: List[str], Mi: Union[list, dict, int]=None,
-                 verbosity: int=0):
+                 chemical_symbols: List[str], Mi: Union[list, dict, int]=None):
+
         assert isinstance(atoms, Atoms), \
             'input configuration must be an ASE Atoms object'
 
@@ -46,12 +45,10 @@ class ClusterSpace(_ClusterSpace):
         self._cutoffs = cutoffs
         self._chemical_symbols = chemical_symbols
         self._mi = Mi
-        self._verbosity = verbosity
 
         # set up orbit list
         orbit_list = create_orbit_list(Structure.from_atoms(atoms),
-                                       self._cutoffs,
-                                       verbosity=verbosity)
+                                       self._cutoffs)
         orbit_list.sort()
 
         # handle occupations
@@ -73,7 +70,7 @@ class ClusterSpace(_ClusterSpace):
         _ClusterSpace.__init__(self, Mi, chemical_symbols, orbit_list)
 
     @staticmethod
-    def _get_Mi_from_dict(Mi, atoms):
+    def _get_Mi_from_dict(Mi: dict, atoms: Union[Atoms, Structure]):
         """
         Mi maps the orbit index to the number of allowed components. This
         function maps a dictionary onto the list format that is used
@@ -81,11 +78,11 @@ class ClusterSpace(_ClusterSpace):
 
         Parameters
         ----------
-        Mi : dict
+        Mi
             each site in the structure should be represented by one entry in
             this dictionary, where the key is the site index and the value is
             the number of components that are allowed on the repsective site
-        atoms : ASE Atoms / icet Structure object
+        atoms
             atomic configuration
 
         Returns
@@ -114,17 +111,17 @@ class ClusterSpace(_ClusterSpace):
 
         return Mi_ret
 
-    def _get_string_representation(self, print_threshold=None,
-                                   print_minimum=10):
+    def _get_string_representation(self, print_threshold: int=None,
+                                   print_minimum: int=10) -> str:
         """
         String representation of the cluster space that provides an overview of
         the orbits (order, radius, multiplicity etc) that constitute the space.
 
         Parameters
         ----------
-        print_threshold : int
+        print_threshold
             if the number of orbits exceeds this number print dots
-        print_minimum : int
+        print_minimum
             number of lines printed from the top and the bottom of the orbit
             list if `print_threshold` is exceeded
 
@@ -187,20 +184,20 @@ class ClusterSpace(_ClusterSpace):
 
         return '\n'.join(s)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """ String representation. """
         return self._get_string_representation(print_threshold=50)
 
-    def print_overview(self, print_threshold=None, print_minimum=10):
+    def print_overview(self, print_threshold: int=None, print_minimum: int=10):
         """
         Print an overview of the cluster space in terms of the orbits (order,
         radius, multiplicity etc).
 
         Parameters
         ----------
-        print_threshold : int
+        print_threshold
             if the number of orbits exceeds this number print dots
-        print_minimum : int
+        print_minimum
             number of lines printed from the top and the bottom of the orbit
             list if `print_threshold` is exceeded
         """
@@ -249,7 +246,7 @@ class ClusterSpace(_ClusterSpace):
             index += 1
         return data
 
-    def get_number_of_orbits_by_order(self):
+    def get_number_of_orbits_by_order(self) -> OrderedDict:
         """
         Return the number of orbits by order.
 
@@ -265,19 +262,18 @@ class ClusterSpace(_ClusterSpace):
             count_orbits[k] = count_orbits.get(k, 0) + 1
         return OrderedDict(sorted(count_orbits.items()))
 
-    def get_cluster_vector(self, atoms):
+    def get_cluster_vector(self, atoms: Atoms) -> np.ndarray:
         """
         Returns the cluster vector for a structure.
 
         Parameters
         ----------
-        atoms : ASE Atoms object
+        atoms
             atomic configuration
 
         Returns
         -------
-        NumPy array
-            the cluster vector
+        the cluster vector
         """
         assert isinstance(atoms, Atoms), \
             'input configuration must be an ASE Atoms object'
@@ -289,23 +285,26 @@ class ClusterSpace(_ClusterSpace):
                                                 Structure.from_atoms(atoms))
 
     @property
-    def primitive_structure(self):
+    def primitive_structure(self) -> Atoms:
         """
-        ASE Atoms object : primitive structure on which the cluster space
-        is based
+        Primitive structure on which the cluster space is based
         """
         return self._get_primitive_structure().to_atoms()
 
     @property
-    def chemical_symbols(self):
+    def chemical_symbols(self) -> List[str]:
         """
-        list of str : list of elements considered
+        Chemical species considered
         """
         return self._chemical_symbols.copy()
 
     @property
-    def cutoffs(self):
-        """ list : cutoffs used for initializing the cluster space """
+    def cutoffs(self) -> List[float]:
+        """
+        Cutoffs for the different n-body clusters. Each cutoff radii
+        (in Angstroms) defines the largest inter-atomic distance in each
+        cluster
+        """
         return self._cutoffs
 
     def write(self, filename: str):
@@ -321,8 +320,7 @@ class ClusterSpace(_ClusterSpace):
         parameters = {'atoms': self._atoms.copy(),
                       'cutoffs': self._cutoffs,
                       'chemical_symbols': self._chemical_symbols,
-                      'Mi': self._mi,
-                      'verbosity': self._verbosity}
+                      'Mi': self._mi}
         with open(filename, 'wb') as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -345,8 +343,7 @@ class ClusterSpace(_ClusterSpace):
         return ClusterSpace(parameters['atoms'],
                             parameters['cutoffs'],
                             parameters['chemical_symbols'],
-                            parameters['Mi'],
-                            parameters['verbosity'])
+                            parameters['Mi'])
 
 
 def get_singlet_info(atoms: Atoms, return_cluster_space: bool=False):
@@ -400,16 +397,16 @@ def get_singlet_info(atoms: Atoms, return_cluster_space: bool=False):
         return singlet_data
 
 
-def get_singlet_configuration(atoms, to_primitive=False):
+def get_singlet_configuration(atoms: Atoms, to_primitive: bool=False) -> Atoms:
     """
-    Return atomic configuration decorated with a different element for each
-    Wyckoff site. This is useful for visualization and analysis.
+    Returns the atomic configuration decorated with a different element for
+    each Wyckoff site. This is useful for visualization and analysis.
 
     Parameters
     ----------
-    atoms : ASE Atoms object
+    atoms
         atomic configuration
-    to_primitive : boolean
+    to_primitive
         if True the input structure will be reduced to its primitive unit cell
         before processing
 
@@ -449,15 +446,15 @@ def get_singlet_configuration(atoms, to_primitive=False):
     return singlet_configuration
 
 
-def view_singlets(atoms, to_primitive=False):
+def view_singlets(atoms: Atoms, to_primitive: bool=False):
     """
     Visualize singlets in a structure using the ASE graphical user interface.
 
     Parameters
     ----------
-    atoms : ASE Atoms object
+    atoms
         atomic configuration
-    to_primitive : boolean
+    to_primitive
         if True the input structure will be reduced to its primitive unit cell
         before processing
     """
