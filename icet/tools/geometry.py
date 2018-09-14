@@ -62,17 +62,17 @@ def add_vacuum_in_non_pbc(atoms: Atoms) -> Atoms:
     atoms
         input atomic structure with vacuum in non-pbc directions
     """
-
+    atoms_cpy = atoms.copy()
     vacuum_axis = []
     for i, pbc in enumerate(atoms.pbc):
         if not pbc:
             vacuum_axis.append(i)
 
     if len(vacuum_axis) > 0:
-        atoms.center(30, axis=vacuum_axis)
-        atoms.wrap()
+        atoms_cpy.center(30, axis=vacuum_axis)
+        atoms_cpy.wrap()
 
-    return atoms
+    return atoms_cpy
 
 
 def get_primitive_structure(atoms: Atoms, no_idealize: bool=True) -> Atoms:
@@ -91,8 +91,8 @@ def get_primitive_structure(atoms: Atoms, no_idealize: bool=True) -> Atoms:
     atoms_prim
         primitive structure
     """
-
-    atoms_with_vacuum = add_vacuum_in_non_pbc(atoms.copy())
+    atoms_cpy = atoms.copy()
+    atoms_with_vacuum = add_vacuum_in_non_pbc(atoms_cpy)
 
     atoms_as_tuple = ase_atoms_to_spglib_cell(atoms_with_vacuum)
 
