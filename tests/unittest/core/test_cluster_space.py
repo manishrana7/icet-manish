@@ -371,7 +371,6 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         self.assertEqual(list(self.cs._cutoffs), list(cs_read._cutoffs))
         self.assertEqual(self.cs._chemical_symbols, cs_read._chemical_symbols)
         self.assertEqual(self.cs._mi, cs_read._mi)
-        self.assertEqual(self.cs._verbosity, cs_read._verbosity)
 
     def test_chemical_symbols(self):
         """ Tests chemical_symbols property. """

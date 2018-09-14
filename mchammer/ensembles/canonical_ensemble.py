@@ -34,21 +34,21 @@ class CanonicalEnsemble(BaseEnsemble):
     def __init__(self, atoms: Atoms=None, calculator: BaseCalculator=None,
                  name: str='Canonical ensemble',
                  data_container: DataContainer=None, random_seed: int=None,
-                 ensemble_data_write_interval: int=None, **kwargs):
+                 data_container_write_period: float=np.inf,
+                 ensemble_data_write_interval: int=None,
+                 trajectory_write_interval: int=None,
+                 boltzmann_constant: float=kB, *, temperature: float):
+
         super().__init__(
             atoms=atoms, calculator=calculator, name=name,
             data_container=data_container,
             random_seed=random_seed,
-            ensemble_data_write_interval=ensemble_data_write_interval)
-        if 'temperature' not in kwargs.keys():
-            raise KeyError('Missing required keyword: temperature')
-        else:
-            self.temperature = kwargs['temperature']
+            data_container_write_period=data_container_write_period,
+            ensemble_data_write_interval=ensemble_data_write_interval,
+            trajectory_write_interval=trajectory_write_interval)
 
-        if 'boltzmann_constant' in kwargs.keys():
-            self.boltzmann_constant = kwargs['boltzmann_constant']
-        else:
-            self.boltzmann_constant = kB
+        self.temperature = temperature
+        self.boltzmann_constant = boltzmann_constant
 
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
