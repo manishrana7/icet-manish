@@ -47,8 +47,7 @@ class ClusterSpace(_ClusterSpace):
         self._mi = Mi
 
         # set up orbit list
-        orbit_list = create_orbit_list(Structure.from_atoms(atoms),
-                                       self._cutoffs)
+        orbit_list = create_orbit_list(self._atoms, self._cutoffs)
         orbit_list.sort()
 
         # handle occupations

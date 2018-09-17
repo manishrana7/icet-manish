@@ -159,7 +159,7 @@ set_log_config(level='INFO')
 ```
 In which case the output will show an info messages on console as follows:
 ```
-icet.orbit_list: INFO - Finished construction of orbit list. (time: 0.001853s)
+icet.orbit_list: INFO - Finished construction of orbit list.
 ```
 In the same way, log events above certain level can be written to a file:
 ```python
