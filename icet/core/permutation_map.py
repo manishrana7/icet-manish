@@ -3,7 +3,8 @@ from _icet import PermutationMap
 from .neighbor_list import NeighborList
 from .structure import Structure
 from ..tools.geometry import (get_primitive_structure,
-                              get_fractional_positions_from_neighbor_list)
+                              get_fractional_positions_from_neighbor_list,
+                              ase_atoms_to_spglib_cell)
 
 from icet.io.logging import logger
 logger = logger.getChild('permutation_map')
@@ -42,8 +43,10 @@ def permutation_matrix_from_atoms(atoms, cutoff, find_prim=True):
 
     logger.debug('Size of primitive structure: {}'.format(len(atoms_prim)))
 
+    atoms_as_tuple = ase_atoms_to_spglib_cell(atoms_prim)
+
     # get symmetry information
-    symmetry = spglib.get_symmetry(atoms_prim)
+    symmetry = spglib.get_symmetry(atoms_as_tuple)
     translations = symmetry['translations']
     rotations = symmetry['rotations']
 

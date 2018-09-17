@@ -14,7 +14,6 @@ from icet.core.orbit_list import create_orbit_list
 # sites with W atoms.
 # Start setup
 atoms = bulk('Ti', 'bcc', a=3.43).repeat([2, 2, 1])
-atoms.pbc = [True, True, False]
 atoms.set_chemical_symbols(['Ti', 'W', 'W', 'Ti'])
 # End setup
 
@@ -22,8 +21,7 @@ atoms.set_chemical_symbols(['Ti', 'W', 'W', 'Ti'])
 # pair clusters within the cutoff distance
 cutoffs = [4.0]
 prim_atoms = get_primitive_structure(atoms)
-prim_structure = Structure.from_atoms(prim_atoms)
-prim_orbitlist = create_orbit_list(prim_structure, cutoffs)
+prim_orbitlist = create_orbit_list(prim_atoms, cutoffs)
 
 # Use the primitive orbit list to count the number of clusters.
 cluster_counts = ClusterCounts()
