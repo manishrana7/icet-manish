@@ -746,11 +746,7 @@ PYBIND11_MODULE(_icet, m)
         .def("get_cluster_vector", [](const ClusterSpace &ClusterSpace, const Structure &structure) {
             auto cv = ClusterSpace.getClusterVector(structure);
             return py::array(cv.size(), cv.data());
-        })
-        .def("get_local_cluster_vector", [](const ClusterSpace &ClusterSpace, const Structure &structure, const int index) {
-            auto cv = ClusterSpace.generateLocalClusterVector(structure, index);
-            return py::array(cv.size(), cv.data());
-        })
+        })        
         .def("get_orbit_list", &ClusterSpace::getOrbitList)
         .def("get_orbit", &ClusterSpace::getOrbit)
         .def_property_readonly("species_map", &ClusterSpace::getSpeciesMap)

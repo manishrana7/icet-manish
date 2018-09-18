@@ -103,8 +103,9 @@ int OrbitList::findOrbit(const Cluster &cluster, const std::unordered_map<Cluste
     }
 }
 
-OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<LatticeSite>> &permutation_matrix, const std::vector<NeighborList> &neighbor_lists, bool bothways)
+OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<LatticeSite>> &permutation_matrix, const std::vector<NeighborList> &neighbor_lists)
 {
+    bool bothways = false;
     _primitiveStructure = structure;
     std::vector<std::vector<std::vector<LatticeSite>>> lattice_neighbors;
     std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> many_bodyNeighborIndices;

@@ -16,8 +16,8 @@
 class ClusterSpace
 {
   public:
-
     /// Constructor.
+    ClusterSpace();
     ClusterSpace(std::vector<int>, std::vector<std::string>, const OrbitList);
 
     /// Returns the cluster vector corresponding to the input structure.
@@ -38,11 +38,9 @@ class ClusterSpace
 
     /// Returns the multi-component (MC) vector permutations for each MC vector in the set of input vectors.
     /// @todo Clean up this description.
-    std::vector<std::vector<std::vector<int>>> getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &, const int ) const;
-
+    std::vector<std::vector<std::vector<int>>> getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &, const int) const;
 
   public:
-
     /// Returns the cutoff for each order.
     std::vector<double> getCutoffs() const { return _clusterCutoffs; }
 
@@ -73,23 +71,20 @@ class ClusterSpace
     std::map<int, int> getSpeciesMap() const { return _speciesMap; }
 
     ///Primitive orbit list based on the structure and the global cutoffs
-    OrbitList _orbit_list;
-
-  private:
+    OrbitList _orbitList;
 
     /// Returns the cluster product.
-    /// @todo This function computes a specific term in the cluster vector. Can we find a more telling name?
+    /// @todo Can we find a more telling name?
     double evaluateClusterProduct(const std::vector<int> &, const std::vector<int> &, const std::vector<int> &) const;
 
+  private:
     /// Collect information about the cluster space.
     void collectClusterSpaceInfo();
 
     /// Returns the default cluster function.
     double evaluateClusterFunction(const int, const int, const int) const;
 
-
   private:
-
     /// True if cluster space has been initialized.
     bool _isClusterSpaceInitialized = false;
 
@@ -113,7 +108,6 @@ class ClusterSpace
 
     /// Map between atomic numbers and the internal species enumeration scheme.
     std::map<int, int> _speciesMap;
-
 };
 
 //}

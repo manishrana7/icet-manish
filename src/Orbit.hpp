@@ -300,6 +300,12 @@ class Orbit
         std::vector<std::vector<int>> getMultiComponentVectors(const std::vector<int> & Mi_local) const;
 
         std::vector<std::vector<int>> getAllPossibleMultiComponentVectorPermutations(const std::vector<int> &Mi_local) const;
+        
+        /// Returns true if the input sites exists in _equivalentSites, order doesn't matter if sorted= false.
+        bool contains(const std::vector<LatticeSite> &sites, bool sorted) const;
+
+        /// Remove all elements i in equivalent sites if any sites in _equivalentSites[i] have the input index
+        void removeSitesWithIndex(const int index);
 
       private:
         ///Representative sorted cluster for this orbit
