@@ -267,7 +267,7 @@ class BaseEnsemble(ABC):
         """ seed used to initialize random number generator """
         return self._random_seed
 
-    def _next_random_number(self) -> int:
+    def _next_random_number(self) -> float:
         """ Returns the next random number from the PRNG. """
         return random.random()
 

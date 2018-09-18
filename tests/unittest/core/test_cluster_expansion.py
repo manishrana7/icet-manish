@@ -71,7 +71,7 @@ class TestClusterExpansion(unittest.TestCase):
         # save to file
         temp_file = tempfile.NamedTemporaryFile()
         self.ce.write(temp_file.name)
-
+        
         # read from file
         temp_file.seek(0)
         ce_read = ClusterExpansion.read(temp_file.name)

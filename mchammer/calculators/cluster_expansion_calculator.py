@@ -2,10 +2,11 @@ from _icet import _ClusterExpansionCalculator
 from ase import Atoms
 from icet import ClusterExpansion
 from mchammer.calculators.base_calculator import BaseCalculator
-from typing import List
+from typing import Union, List
 from icet import Structure
 from icet import ClusterSpace
 import numpy as np
+
 
 class ClusterExpansionCalculator(BaseCalculator):
     """A ClusterExpansionCalculator object enables the efficient
@@ -23,13 +24,13 @@ class ClusterExpansionCalculator(BaseCalculator):
 
     Parameters
     ----------
-    atoms : :class:`ase:Atoms`
+    atom
         structure for which to set up the calculator
     cluster_expansion : ClusterExpansion
         cluster expansion from which to build calculator
-    name : str
+    name
         human-readable identifier for this calculator
-    scaling : float
+    scaling
         scaling factor applied to the property value predicted by the
         cluster expansion
 
@@ -41,15 +42,17 @@ class ClusterExpansionCalculator(BaseCalculator):
 
     def __init__(self, atoms: Atoms, cluster_expansion: ClusterExpansion,
                  name: str='Cluster Expansion Calculator',
-                 scaling: float=None):
+                 scaling: Union[float, int]=None) -> None:
         super().__init__(atoms=atoms, name=name)
 
-        self.cpp_calc = _ClusterExpansionCalculator(cluster_expansion.cluster_space, Structure.from_atoms(atoms) )
+        self.cpp_calc = _ClusterExpansionCalculator(
+            cluster_expansion.cluster_space, Structure.from_atoms(atoms))
         self._cluster_expansion = cluster_expansion
-        self._local_cluster_space = ClusterSpace(self.cluster_expansion.cluster_space._atoms.copy(),
-                    self.cluster_expansion.cluster_space._cutoffs,
-                    self.cluster_expansion.cluster_space._chemical_symbols,
-                    self.cluster_expansion.cluster_space._mi)
+        self._local_cluster_space = ClusterSpace(
+            self.cluster_expansion.cluster_space._atoms.copy(),
+            self.cluster_expansion.cluster_space._cutoffs,
+            self.cluster_expansion.cluster_space._chemical_symbols,
+            self.cluster_expansion.cluster_space._mi)
         self._cluster_expansion = cluster_expansion
         if scaling is None:
             self._property_scaling = len(atoms)
@@ -75,8 +78,8 @@ class ClusterExpansionCalculator(BaseCalculator):
         return self.cluster_expansion.predict(self.atoms) * \
             self._property_scaling
 
-    def calculate_local_contribution(self,local_indices: List[int] = None,
-                                     occupations: List[int] = None) -> float:
+    def calculate_local_contribution(self, *, local_indices: List[int],
+                                     occupations: List[int]) -> float:
         """
         Calculates and returns the sum of the contributions to the property
         due to the sites specified in `local_indices`
@@ -91,14 +94,15 @@ class ClusterExpansionCalculator(BaseCalculator):
 
         self.atoms.set_atomic_numbers(occupations)
         local_contribution = 0
-        exclude_indices = []
+        exclude_indices = []  # type: List[int]
         for index in local_indices:
-            local_contribution += self._calculate_local_contribution(index, exclude_indices)
+            local_contribution += self._calculate_local_contribution(
+                index, exclude_indices)
             exclude_indices.append(index)
 
         return local_contribution
 
-    def _calculate_local_contribution(self, index, exclude_indices = []):
+    def _calculate_local_contribution(self, index, exclude_indices=[]):
         """
         Internal method to calculate the local contribution for one
         index.
@@ -110,8 +114,10 @@ class ClusterExpansionCalculator(BaseCalculator):
 
         """
         structure = Structure.from_atoms(self.atoms)
-        local_cv = self.cpp_calc.get_local_cluster_vector(structure, index, exclude_indices)
-        return np.dot(local_cv, self.cluster_expansion.parameters) * self._property_scaling            
+        local_cv = self.cpp_calc.get_local_cluster_vector(
+            structure, index, exclude_indices)
+        return np.dot(local_cv, self.cluster_expansion.parameters) * \
+            self._property_scaling
 
     @property
     def occupation_constraints(self) -> List[List[int]]:
