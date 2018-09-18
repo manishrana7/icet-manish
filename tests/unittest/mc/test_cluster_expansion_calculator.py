@@ -7,8 +7,6 @@ from mchammer.calculators.cluster_expansion_calculator import \
 from _icet import _ClusterExpansionCalculator
 from icet import Structure
 
-import random
-
 
 class TestCECalculator(unittest.TestCase):
     """
@@ -28,7 +26,7 @@ class TestCECalculator(unittest.TestCase):
         # self.atoms = bulk("Al",'bcc',a=4.0).repeat(3)
         # self.atoms = bulk("Al",'diamond',a=4.0).repeat(3)
         print("atoms len ", len(self.atoms))
-        self.cutoffs = [5.1,5]  # [2.9]
+        self.cutoffs = [5.1, 5]  # [2.9]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
@@ -72,11 +70,10 @@ class TestCECalculator(unittest.TestCase):
             occupations=self.atoms.get_atomic_numbers()), 66.96296296)
         self.assertAlmostEqual(self.calculator.cluster_expansion.predict(
             self.calculator.atoms),  66.96296296)
-            
-    
+
     def test_local_contribution_many_occupations(self):
         """ Test local/total contributions with many occupations"""
-        
+
         # Test inital occupations
         self._test_local_contribution_thorough()
 
@@ -88,7 +85,7 @@ class TestCECalculator(unittest.TestCase):
                 self.atoms[i].number = 32
         self._test_local_contribution_thorough()
 
-         # Test segregated-ish
+        # Test segregated-ish
         for i in range(len(self.atoms)):
             if i < len(self.atoms)/2:
                 self.atoms[i].number = 13
@@ -102,31 +99,33 @@ class TestCECalculator(unittest.TestCase):
         # Test first all flip combinations
         for i in range(len(self.atoms)):
             indices = [i]
-            local_diff, total_diff = self._get_energy_diffs_local_and_total(indices)
+            local_diff, total_diff = self._get_energy_diffs_local_and_total(
+                indices)
             self.assertAlmostEqual(total_diff, local_diff)
 
         # Test pair flip combinations
         for i in range(len(self.atoms)):
             for j in range(len(self.atoms)):
-                if j<=i:
+                if j <= i:
                     continue
-                indices = [i,j]
-                local_diff, total_diff = self._get_energy_diffs_local_and_total(indices)
+                indices = [i, j]
+                local_diff, total_diff = \
+                    self._get_energy_diffs_local_and_total(indices)
                 self.assertAlmostEqual(total_diff, local_diff)
 
         # Test triplet flips
         for i in range(len(self.atoms)):
             for j in range(len(self.atoms)):
-                if j<=i:
+                if j <= i:
                     continue
                 for k in range(len(self.atoms)):
-                    if k<=j:
+                    if k <= j:
                         continue
-                    indices = [i, j , k]
+                    indices = [i, j, k]
                     # print("indices= ", indices)
-                    local_diff, total_diff = self._get_energy_diffs_local_and_total(indices)
+                    local_diff, total_diff = \
+                        self._get_energy_diffs_local_and_total(indices)
                     self.assertAlmostEqual(total_diff, local_diff)
-
 
     def _get_energy_diffs_local_and_total(self, indices):
         """ Get energy diffs using local and total"""
@@ -152,16 +151,18 @@ class TestCECalculator(unittest.TestCase):
                     atom.number = 13
                 else:
                     raise Exception(
-                        "Found unknown element in atoms object. {}".format(atom))
-
+                        "Found unknown element"
+                        " in atoms object. {}".format(atom))
+        self.atoms.set_atomic_numbers(current_occupations)
         # Calculate new total energy
         new_value_total = self.calculator.calculate_total(
             occupations=self.atoms.get_atomic_numbers().copy())
-        
+
         # Calculate new local energy
         new_value_local = self.calculator.calculate_local_contribution(
-            local_indices=indices, occupations=self.atoms.get_atomic_numbers().copy())
-        
+            local_indices=indices,
+            occupations=self.atoms.get_atomic_numbers().copy())
+
         # difference in energy according to total energy
         total_diff = new_value_total - initial_value_total
 
@@ -232,7 +233,8 @@ class TestCECalculator(unittest.TestCase):
                     index)
         self.assertEqual(local_contribution,
                          self.calculator.calculate_local_contribution(
-                             local_indices=indices, occupations=self.atoms.get_atomic_numbers()))
+                             local_indices=indices,
+                             occupations=self.atoms.get_atomic_numbers()))
 
     def test_get_local_cluster_vector(self):
         """ Tests the get local clustervector method."""
