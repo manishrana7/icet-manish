@@ -2,7 +2,7 @@ import pickle
 
 from ase import Atoms
 from collections import OrderedDict
-from typing import List, Union, Dict
+from typing import List, Union
 import numpy as np
 
 from _icet import ClusterSpace as _ClusterSpace
