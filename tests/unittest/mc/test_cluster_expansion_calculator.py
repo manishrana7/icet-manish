@@ -141,7 +141,7 @@ class TestCECalculator(unittest.TestCase):
 
         # Initial value local energy
         initial_value_local = self.calculator.calculate_local_contribution(
-            indices, self.atoms.get_atomic_numbers())
+            local_indices=indices, occupations=self.atoms.get_atomic_numbers())
 
         # Flip indices
         for atom in self.atoms:
@@ -160,7 +160,7 @@ class TestCECalculator(unittest.TestCase):
         
         # Calculate new local energy
         new_value_local = self.calculator.calculate_local_contribution(
-            indices, self.atoms.get_atomic_numbers().copy())
+            local_indices=indices, occupations=self.atoms.get_atomic_numbers().copy())
         
         # difference in energy according to total energy
         total_diff = new_value_total - initial_value_total
@@ -178,7 +178,7 @@ class TestCECalculator(unittest.TestCase):
         # indices = [i for i in range(len(self.atoms))]
         indices = [3, 5]
         local_contribution = self.calculator.calculate_local_contribution(
-            indices, self.atoms.get_atomic_numbers())
+            local_indices=indices, occupations=self.atoms.get_atomic_numbers())
         self.assertIsInstance(local_contribution, float)
 
         # test local contribution by comparing with differences
@@ -188,7 +188,7 @@ class TestCECalculator(unittest.TestCase):
 
         self.atoms.set_atomic_numbers(original_occupations.copy())
         initial_value_local = self.calculator.calculate_local_contribution(
-            indices, self.atoms.get_atomic_numbers())
+            local_indices=indices, occupations=self.atoms.get_atomic_numbers())
         self.atoms.set_atomic_numbers(original_occupations.copy())
         current_occupations = [self.atoms.get_atomic_numbers()[i]
                                for i in indices]
@@ -211,7 +211,7 @@ class TestCECalculator(unittest.TestCase):
             occupations=new_occupations.copy())
         self.atoms.set_atomic_numbers(new_occupations.copy())
         new_value_local = self.calculator.calculate_local_contribution(
-            indices, new_occupations.copy())
+            local_indices=indices, occupations=new_occupations.copy())
         self.atoms.set_atomic_numbers(new_occupations.copy())
 
         total_diff = new_value_total - initial_value_total
@@ -232,7 +232,7 @@ class TestCECalculator(unittest.TestCase):
                     index)
         self.assertEqual(local_contribution,
                          self.calculator.calculate_local_contribution(
-                             indices, occupations=self.atoms.get_atomic_numbers()))
+                             local_indices=indices, occupations=self.atoms.get_atomic_numbers()))
 
     def test_get_local_cluster_vector(self):
         """ Tests the get local clustervector method."""
