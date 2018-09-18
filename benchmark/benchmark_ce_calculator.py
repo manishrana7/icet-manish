@@ -1,4 +1,4 @@
-from mchammer.calculators.cluster_expansion_calculator import ClusterExpansionCalculator
+from mchammer.calculators import ClusterExpansionCalculator
 from icet import ClusterSpace, ClusterExpansion
 from ase.build import bulk
 import numpy as np
@@ -11,7 +11,8 @@ def time_local_energy(calculator, iters):
     occupations = calculator.atoms.numbers
     t0 = time.time()
     for _ in range(iters):
-        calculator.calculate_local_contribution(local_indices=indices, occupations=occupations)
+        calculator.calculate_local_contribution(local_indices=indices,
+                                                occupations=occupations)
     t1 = time.time() - t0
     t1 /= iters
     return t1
@@ -29,7 +30,7 @@ def time_total_energy(calculator, iters):
 
 
 if __name__ == '__main__':
-    iters=100
+    iters = 100
     atoms = bulk("Al")
     cutoffs = [10, 6, 5]
     elements = ["Al", "Ga"]
@@ -48,5 +49,7 @@ if __name__ == '__main__':
     print("Time taken for total energy {:0.5f}".format(t_total))
     print("Speed up for local calc {:0.2f} ".format(t_total/t_local))
 
-    print("Time for calculating {} mc step ({}) local energies {}s".format(iters/len(atoms),len(atoms),t_local * len(calculator.atoms)))
-    print("Time for {} mc steps {} minutes".format(iters/len(atoms), t_local /60 * iters/len(calculator.atoms)))
+    print("Time for calculating {} mc step ({}) local energies {}s".format(
+        iters/len(atoms), len(atoms), t_local * len(calculator.atoms)))
+    print("Time for {} mc steps {} minutes".format(
+        iters/len(atoms),        t_local / 60 * iters/len(calculator.atoms)))
