@@ -113,9 +113,8 @@ class ClusterExpansionCalculator(BaseCalculator):
             lattice index
 
         """
-        structure = Structure.from_atoms(self.atoms)
         local_cv = self.cpp_calc.get_local_cluster_vector(
-            structure, index, exclude_indices)
+            self.atoms.get_atomic_numbers(), index, exclude_indices)
         return np.dot(local_cv, self.cluster_expansion.parameters) * \
             self._property_scaling
 

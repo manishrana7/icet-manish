@@ -242,15 +242,15 @@ class TestCECalculator(unittest.TestCase):
         cpp_calc = _ClusterExpansionCalculator(
             self.cs, Structure.from_atoms(self.atoms))
 
-        structure = Structure.from_atoms(self.atoms)
+        
         index = 4
         local_cv_before = cpp_calc.get_local_cluster_vector(
-            structure, index, [])
+            self.atoms.get_atomic_numbers(), index, [])
 
         self.atoms[index].symbol = 'Ge'
-        structure = Structure.from_atoms(self.atoms)
+        
         local_cv_after = cpp_calc.get_local_cluster_vector(
-            structure, index, [])
+            self.atoms.get_atomic_numbers(), index, [])
 
         print(local_cv_before-local_cv_after)
 
