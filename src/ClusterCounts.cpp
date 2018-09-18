@@ -97,19 +97,23 @@ void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> 
  @param orbitList orbit list
  @param orderIntact if True do not reorder clusters before comparison (i.e., ABC != ACB)
 */
-void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &orbitList, bool orderIntact)
+void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &orbitList, bool orderIntact, bool permuteSites)
 {
     for (int i = 0; i < orbitList.size(); i++)
     {
         Cluster repr_cluster = orbitList.getOrbit(i).getRepresentativeCluster();
         repr_cluster.setTag(i);
-        if(orderIntact && repr_cluster.order()!= 1)
+        if(permuteSites && orderIntact && repr_cluster.order()!= 1)
         {
             count(structure, orbitList.getOrbit(i).getPermutedEquivalentSites(), repr_cluster, orderIntact);
         }
+        else if(!permuteSites && orderIntact  && repr_cluster.order()!= 1)
+        {
+            count(structure, orbitList._orbitList[i]._equivalentSites, repr_cluster, orderIntact);
+        }
         else
         {
-            count(structure, orbitList.getOrbit(i).getEquivalentSites(), repr_cluster, orderIntact);
+            count(structure, orbitList._orbitList[i]._equivalentSites, repr_cluster, orderIntact);
         }
     }
 }

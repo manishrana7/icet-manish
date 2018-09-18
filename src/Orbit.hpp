@@ -306,13 +306,15 @@ class Orbit
 
         /// Remove all elements i in equivalent sites if any sites in _equivalentSites[i] have the input index
         void removeSitesWithIndex(const int index);
+        
+        ///Container of equivalent sites for this orbit
+        std::vector<std::vector<LatticeSite>> _equivalentSites;
 
-      private:
         ///Representative sorted cluster for this orbit
         Cluster _representativeCluster;
 
-        ///Container of equivalent sites for this orbit
-        std::vector<std::vector<LatticeSite>> _equivalentSites;
+      private:
+
 
         ///Contains the permutations of the equivalent sites which takes it to the order of the reference cluster
         std::vector<std::vector<int>> _equivalentSitesPermutations;

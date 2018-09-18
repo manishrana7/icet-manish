@@ -52,6 +52,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
     // count the clusters in the orbit with the same orientation (order) as the prototype cluster
     // @todo Clarify description.
     bool orderIntact = true;
+    bool permuteSites = true;
 
     LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(_orbitList, structure);
     size_t uniqueOffsets = localOrbitListGenerator.getNumberOfUniqueOffsets();
@@ -60,7 +61,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
     // Create local orbit list and count associated clusters.
     for (int i = 0; i < uniqueOffsets; i++) {
         const auto localOrbitList = localOrbitListGenerator.getLocalOrbitList(i);
-        clusterCounts.countOrbitList(structure, localOrbitList, orderIntact);
+        clusterCounts.countOrbitList(structure, localOrbitList, orderIntact, permuteSites);
     }
 
     // Check that the number of unique offsets equals the number of unit cells in the supercell.

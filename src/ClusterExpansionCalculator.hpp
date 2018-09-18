@@ -23,7 +23,7 @@ class ClusterExpansionCalculator
     ClusterExpansionCalculator(const ClusterSpace &, const Structure &);
 
     // std::vector<double> getLocalClusterVector(const Structure &, const int);
-    std::vector<double> getLocalClusterVector(const Structure &,const int, const std::vector<int>);
+    std::vector<double> getLocalClusterVector(const std::vector<int>& ,const int, const std::vector<int>);
     double getLocalContribution(const Structure &, const int) const;
 
     private:
@@ -33,7 +33,7 @@ class ClusterExpansionCalculator
     ClusterSpace _clusterSpace;
     Structure _superCell;
     LocalOrbitListGenerator _theLog;
-    std::vector<OrbitList> _basisAtomOrbitList;
+    OrbitList _fullPrimitiveOrbitList;
     ///this maps a latticeNeighbor from the primitive and get the equivalent in supercell
     std::unordered_map<LatticeSite, LatticeSite> _primToSupercellMap;
 
