@@ -121,12 +121,12 @@ void ClusterCounts::setupClusterCountsInfo()
         _clusterCountsInfo.push_back(std::make_pair(elementVec, getCountPair));
       }
     }
-    std::sort(
-        _clusterCountsInfo.begin(),
-        _clusterCountsInfo.end(),
-        [](const std::pair<std::vector<std::string>, int> &a, const std::pair<std::vector<std::string>, int> &b){
-            return a.first.size() < b.first.size();
-        });
+    //std::sort(
+    //    _clusterCountsInfo.begin(),
+    //    _clusterCountsInfo.end(),
+    //    [](const std::pair<std::vector<std::string>, int> &a, const std::pair<std::vector<std::string>, int> &b){
+    //        return a.first.size() < b.first.size();
+    //    });
 }
 
 // Retrieve cluster count information
