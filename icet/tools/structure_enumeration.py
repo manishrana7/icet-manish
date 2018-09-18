@@ -9,11 +9,12 @@ from .structure_enumeration_support.smith_normal_form \
     import get_unique_snfs, SmithNormalForm
 from .structure_enumeration_support.labeling_generation \
     import LabelingGenerator
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Generator
 
 
-def _translate_labelings(labeling: tuple, snf: SmithNormalForm,
-                         nsites: int, include_self: bool=False) -> Tuple[int]:
+def _translate_labelings(
+        labeling: tuple, snf: SmithNormalForm, nsites: int,
+        include_self: bool=False)-> Generator[Tuple[int], None, None]:
     """
     Yields labelings that are equivalent to the original labeling
     under translations as dictated by snf.
