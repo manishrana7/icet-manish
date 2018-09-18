@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 from _icet import _ClusterExpansionCalculator
-=======
 from ase import Atoms
 from icet import ClusterExpansion
->>>>>>> master
 from mchammer.calculators.base_calculator import BaseCalculator
 from typing import List
 from icet import Structure
@@ -46,22 +43,18 @@ class ClusterExpansionCalculator(BaseCalculator):
                  name: str='Cluster Expansion Calculator',
                  scaling: float=None):
         super().__init__(atoms=atoms, name=name)
-<<<<<<< HEAD
 
         self.cpp_calc = _ClusterExpansionCalculator(cluster_expansion.cluster_space, Structure.from_atoms(atoms) )
         self._cluster_expansion = cluster_expansion
-        self._local_cluster_space = ClusterSpace(self.cluster_expansion.cluster_space._input_atoms.copy(),
+        self._local_cluster_space = ClusterSpace(self.cluster_expansion.cluster_space._atoms.copy(),
                     self.cluster_expansion.cluster_space._cutoffs,
                     self.cluster_expansion.cluster_space._chemical_symbols,
-                    self.cluster_expansion.cluster_space._mi,
-                    bothways=True)
-=======
+                    self.cluster_expansion.cluster_space._mi)
         self._cluster_expansion = cluster_expansion
         if scaling is None:
             self._property_scaling = len(atoms)
         else:
             self._property_scaling = scaling
->>>>>>> master
 
     @property
     def cluster_expansion(self) -> ClusterExpansion:
@@ -82,7 +75,7 @@ class ClusterExpansionCalculator(BaseCalculator):
         return self.cluster_expansion.predict(self.atoms) * \
             self._property_scaling
 
-    def calculate_local_contribution(self, local_indices: List[int] = None,
+    def calculate_local_contribution(self,local_indices: List[int] = None,
                                      occupations: List[int] = None) -> float:
         """
         Calculates and returns the sum of the contributions to the property
@@ -95,11 +88,6 @@ class ClusterExpansionCalculator(BaseCalculator):
         occupations
             entire occupation vector
         """
-        if local_indices is None:
-            raise TypeError('Missing required argument: local_indices')
-        if occupations is None:
-<<<<<<< HEAD
-            raise TypeError("Missing required keyword argument: occupations")
 
         self.atoms.set_atomic_numbers(occupations)
         local_contribution = 0
@@ -123,12 +111,7 @@ class ClusterExpansionCalculator(BaseCalculator):
         """
         structure = Structure.from_atoms(self.atoms)
         local_cv = self.cpp_calc.get_local_cluster_vector(structure, index, exclude_indices)
-        return np.dot(local_cv, self.cluster_expansion.parameters)
-=======
-            raise TypeError('Missing required argument: occupations')
-        return self.calculate_total(occupations=occupations) * \
-            self._property_scaling
->>>>>>> master
+        return np.dot(local_cv, self.cluster_expansion.parameters) * self._property_scaling            
 
     @property
     def occupation_constraints(self) -> List[List[int]]:

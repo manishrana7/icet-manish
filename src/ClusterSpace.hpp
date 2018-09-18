@@ -17,7 +17,7 @@ class ClusterSpace
 {
   public:
     /// Constructor.
-    ClusterSpace();
+    ClusterSpace(){};
     ClusterSpace(std::vector<int>, std::vector<std::string>, const OrbitList);
 
     /// Returns the cluster vector corresponding to the input structure.

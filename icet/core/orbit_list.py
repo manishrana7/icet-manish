@@ -176,7 +176,7 @@ def create_orbit_list(structure, cutoffs):
     logger.info(' '.join(msg))
 
     t0 = time.time()
-    orbit_list = OrbitList(prim_structure, pm_lattice_sites, neighbor_lists, bothways)
+    orbit_list = OrbitList(prim_structure, pm_lattice_sites, neighbor_lists)
     t1 = time.time()
     time_spent = t1 - t0
     total_time_spent += time_spent

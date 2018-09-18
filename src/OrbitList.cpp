@@ -181,6 +181,8 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
         checkEquivalentClusters();
         // std::cout << "Done checking equivalent structures" << std::endl;
     }
+
+    sort();
 }
 
 /**
