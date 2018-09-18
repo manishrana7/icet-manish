@@ -77,7 +77,7 @@ class ConfigurationManager(object):
         return sites_by_species
 
     def _check_occupation_constraint(self,
-     strict_constraints: Union[List[List[int]], List[int]],
+                                     strict_constraints: Union[List[List[int]], List[int]],
                                      occupation_constraints: List[List[int]]):
         """Checks that the user defined occupation constraints are stricter or
         as strict as the strict constraints.
