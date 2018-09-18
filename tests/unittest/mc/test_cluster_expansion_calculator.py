@@ -153,7 +153,7 @@ class TestCECalculator(unittest.TestCase):
                     raise Exception(
                         "Found unknown element"
                         " in atoms object. {}".format(atom))
-        self.atoms.set_atomic_numbers(current_occupations)
+        self.atoms.set_atomic_numbers(original_occupations)
         # Calculate new total energy
         new_value_total = self.calculator.calculate_total(
             occupations=self.atoms.get_atomic_numbers().copy())
