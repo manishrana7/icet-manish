@@ -434,6 +434,4 @@ class BaseEnsemble(ABC):
             self._data_container.last_state['accepted_trials']
 
         # Restart random state
-        self._random_seed = self._data_container.parameters['seed']
-        random.seed(a=self._random_seed)
         random.setstate(self._data_container.last_state['random_state'])
