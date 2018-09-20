@@ -44,6 +44,7 @@ class DataContainer:
         self._observables = []
         self._parameters = OrderedDict()
         self._metadata = OrderedDict()
+        self._last_state = OrderedDict()
         self._data = pd.DataFrame(columns=['mctrial'])
         self._data = self._data.astype({'mctrial': int})
 
@@ -123,7 +124,7 @@ class DataContainer:
         * This might be a quite expensive way to add data to the data
           frame. Testing and profiling to be carried out later.
         """
-        if not isinstance(mctrial, int):
+        if not isinstance(mctrial, (int, np.int64)):
             raise TypeError('mctrial has the wrong type: {}'
                             .format(type(mctrial)))
         if not self._data.mctrial.empty:
@@ -138,6 +139,24 @@ class DataContainer:
         row_data['mctrial'] = mctrial
         row_data.update(record)
         self._data = self._data.append(row_data, ignore_index=True)
+
+    def _update_last_state(self, occupations: List[int], accepted_trials: int,
+                           random_state: tuple):
+        """Updates last state of the simulation: occupation vector, number of
+        accepted trial steps and state of the random generator.
+
+        Parameters
+        ----------
+        occupations
+            occupation vector observed during the last trial step
+        accepted_trial
+            number of current accepted trial steps
+        random_state
+            tuple representing the last state of the random generator
+        """
+        self._last_state['occupations'] = occupations
+        self._last_state['accepted_trials'] = accepted_trials
+        self._last_state['random_state'] = random_state
 
     def get_data(self, tags: List[str]=None,
                  start: int=None, stop: int=None, interval: int=1,
@@ -270,6 +289,11 @@ class DataContainer:
         """ metadata associated with data container """
         return self._metadata
 
+    @property
+    def last_state(self) -> dict:
+        """ last state to be used to restart Monte Carlo simulation """
+        return self._last_state
+
     def reset(self):
         """ Resets (clears) data frame of data container. """
         self._data = pd.DataFrame(columns=['mctrial'])
@@ -391,7 +415,7 @@ class DataContainer:
 
     def write_trajectory(self, outfile: Union[str, BinaryIO, TextIO]):
         """
-        Save trajectory to a file along with the respectives values of the
+        Saves trajectory to a file along with the respectives values of the
         potential field for each configuration. If the file exists the
         trajectory will be appended. Use ase gui to visualize the trajectory
         with values of the potential for each frame.
@@ -459,6 +483,13 @@ class DataContainer:
                         if tag == 'ensemble_name':
                             continue
                         dc._metadata[tag] = value
+                elif key == 'last_state':
+                    for tag, value in reference_data[key].items():
+                        if tag == 'random_state':
+                            value = \
+                                tuple(tuple(x) if isinstance(x, list)
+                                      else x for x in value)
+                        dc._last_state[tag] = value
                 elif key == 'parameters':
                     for tag, value in reference_data[key].items():
                         if tag == 'seed':
@@ -497,7 +528,8 @@ class DataContainer:
         # Save reference data
         reference_data = {'observables': self._observables,
                           'parameters': self._parameters,
-                          'metadata': self._metadata}
+                          'metadata': self._metadata,
+                          'last_state': self._last_state}
 
         reference_data_file = tempfile.NamedTemporaryFile()
         with open(reference_data_file.name, 'w') as handle:

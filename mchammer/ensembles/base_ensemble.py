@@ -97,6 +97,7 @@ class BaseEnsemble(ABC):
         self._data_container_filename = data_container
         if data_container is not None and os.path.isfile(data_container):
             self._data_container = DataContainer.read(data_container)
+            self._restart_ensemble()
         else:
             self._data_container = \
                 DataContainer(atoms=atoms, ensemble_name=name,
@@ -252,6 +253,12 @@ class BaseEnsemble(ABC):
 
         if len(row_dict) > 0:
             self._data_container.append(mctrial=step, record=row_dict)
+            # Update the last state of the simulation
+            # Todo: occupation property has array (not list) type
+            self._data_container._update_last_state(
+                self.configuration.occupations.tolist(),
+                self.accepted_trials,
+                random.getstate())
 
     @abstractmethod
     def _do_trial_step(self):
@@ -408,3 +415,25 @@ class BaseEnsemble(ABC):
         * add unit test
         """
         return 0
+
+    def _restart_ensemble(self):
+        """ Restarts ensemble using the last state saved in DataContainer file.
+        """
+
+        # Restart step
+        self._step = self._data_container.data['mctrial'].iloc[-1]
+
+        # Update configuration
+        occupations = self._data_container.last_state['occupations']
+        sites = list(range(len(self.configuration.atoms)))
+        self.update_occupations(sites, occupations)
+
+        # Restart number of total and accepted trial steps
+        self.total_trials = self._step
+        self.accepted_trials = \
+            self._data_container.last_state['accepted_trials']
+
+        # Restart random state
+        self._random_seed = self._data_container.parameters['seed']
+        random.seed(a=self._random_seed)
+        random.setstate(self._data_container.last_state['random_state'])
