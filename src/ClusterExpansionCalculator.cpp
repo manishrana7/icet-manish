@@ -107,7 +107,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
             for (auto &orbit : _localOrbitlists[offsetVector]._orbitList)
             {
                 auto permutedSites = orbit.getPermutedEquivalentSites();
-                orbit._equivalentSites = permutedSites;
+                // orbit._equivalentSites = permutedSites;
             }
         }
     }
@@ -138,7 +138,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
 
     int dprint = 0;
     bool orderIntact = true;   // dont sort the clusters
-    bool permuteSites = false; // count the clusters in the order they lie in equivalent sites
+    bool permuteSites = true; // count the clusters in the order they lie in equivalent sites
 
     ClusterCounts clusterCounts = ClusterCounts();
 
@@ -171,7 +171,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
     // Finally begin occupying the cluster vector
     for (size_t i = 0; i < _fullPrimitiveOrbitList.size(); i++)
     {
-        Cluster repCluster = _fullPrimitiveOrbitList._orbitList[i]._representativeCluster;
+        Cluster repCluster = _fullPrimitiveOrbitList._orbitList[i].getRepresentativeCluster();
         std::vector<int> allowedOccupations;
 
         if (i >= _clusterSpace._orbitList.size())
