@@ -143,9 +143,9 @@ class BaseEnsemble(ABC):
     @property
     def acceptance_ratio(self) -> float:
         """ acceptance ratio """
-        if self.total_trials == 0:
-            return None
-        return self.accepted_trials / self.total_trials
+        if self.total_trials > 0:
+            return self.accepted_trials / self.total_trials
+        return 0
 
     @property
     def calculator(self) -> BaseCalculator:
