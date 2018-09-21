@@ -143,7 +143,9 @@ class BaseEnsemble(ABC):
     @property
     def acceptance_ratio(self) -> float:
         """ acceptance ratio """
-        return self.accepted_trials / self.total_trials
+        if self.total_trials > 0:
+            return self.accepted_trials / self.total_trials
+        return 0
 
     @property
     def calculator(self) -> BaseCalculator:
@@ -396,7 +398,8 @@ class BaseEnsemble(ABC):
     def get_ensemble_data(self) -> dict:
         """ Returns the current calculator property. """
         return {'potential': self.calculator.calculate_total(
-            occupations=self.configuration.occupations)}
+            occupations=self.configuration.occupations),
+            'acceptance_ratio': self.acceptance_ratio}
 
     def get_random_sublattice_index(self) -> int:
         """Returns a random sublattice index based on the weights of the
