@@ -52,7 +52,7 @@ class ConcreteEnsemble(BaseEnsemble):
             ensemble_data_write_interval=ensemble_data_write_interval,
             trajectory_write_interval=trajectory_write_interval)
 
-    def do_trial_step(self):
+    def _do_trial_step(self):
         pass
 
 
@@ -155,7 +155,7 @@ class TestEnsemble(unittest.TestCase):
         Test the get_next_random_number method.
         """
         self.assertAlmostEqual(
-            self.ensemble.next_random_number(), 0.6394267984578837)
+            self.ensemble._next_random_number(), 0.6394267984578837)
 
     def test_run(self):
         """
@@ -349,8 +349,8 @@ class TestEnsemble(unittest.TestCase):
         indices = [0, 1, 2, 3, 4]
         elements = [13, 31, 13, 31, 13]
 
-        prop_diff = self.ensemble.get_property_change(indices, elements)
-        self.assertAlmostEqual(prop_diff, 1512)
+        prop_diff = self.ensemble._get_property_change(indices, elements)
+        self.assertAlmostEqual(prop_diff, 56)
 
         # Test that the method doesn't change the occupation.
         self.assertListEqual(list(initial_occupations),

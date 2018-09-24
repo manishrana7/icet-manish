@@ -116,7 +116,7 @@ def map_structure_to_reference(input_structure: Atoms,
                      '{}\n'.format(input_structure.cell))
         logger.debug('Transformation matrix connecting reference structure'
                      ' and idealized input structure:\n {}'.format(P))
-        logger.debug('Determinant of tranformation matrix:'
+        logger.debug('Determinant of transformation matrix:'
                      ' {:.3f}\n'.format(np.linalg.det(P)))
         logger.debug('Cell metric of ideal supercell:\n'
                      '{}'.format(ideal_supercell.cell))

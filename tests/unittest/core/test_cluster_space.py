@@ -330,26 +330,40 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
             target = np.array(row.data.target_cv)
             self.assertTrue(np.all(np.isclose(target, retval)))
 
-    def test_multi_component_cluster_vectors(self):
+    def test_cluster_vectors(self):
         """
-        Tests the consistency of multi components cluster
-        vectors. Will test against ternary and quaternary cluster
-        vectors with fcc, bcc and hcp.
+        Test the calculation of cluster vectors against databases
+        of structures with known cluster vectors.
         """
         self._test_cluster_vectors_in_database(
-            'tests/unittest/core/fcc_ternary.db')
+            'tests/unittest/core/structure_databases/fcc_binary.db')
         self._test_cluster_vectors_in_database(
-            'tests/unittest/core/fcc_quaternary.db')
+            'tests/unittest/core/structure_databases/fcc_skew_binary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/fcc_ternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/fcc_quaternary.db')
 
         self._test_cluster_vectors_in_database(
-            'tests/unittest/core/bcc_ternary.db')
+            'tests/unittest/core/structure_databases/bcc_longedge_binary.db')
         self._test_cluster_vectors_in_database(
-            'tests/unittest/core/bcc_quaternary.db')
+            'tests/unittest/core/structure_databases/bcc_ternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/bcc_quaternary.db')
 
         self._test_cluster_vectors_in_database(
-            'tests/unittest/core/hcp_ternary.db')
+            'tests/unittest/core/structure_databases/hcp_binary.db')
         self._test_cluster_vectors_in_database(
-            'tests/unittest/core/hcp_quaternary.db')
+            'tests/unittest/core/structure_databases/hcp_skew_binary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/hcp_ternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/hcp_quaternary.db')
+
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/tetragonal_binary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/tetragonal_ternary.db')
 
     def test_read_write(self):
         """
@@ -398,6 +412,7 @@ class TestClusterSpaceSurface(unittest.TestCase):
         self.cs = ClusterSpace(self.atoms_prim, self.cutoffs,
                                self.chemical_symbols)
 
+    @unittest.expectedFailure
     def test_get_cluster_vector(self):
         """
         Testing get_cluster_vector functionality

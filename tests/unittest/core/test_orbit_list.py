@@ -190,18 +190,17 @@ class TestOrbitList(unittest.TestCase):
         """
         # TODO: Returned results are incorrect for simple-cubic structures.
         atoms = bulk('Al', 'sc', a=4.0).repeat(4)
-        structure = Structure.from_atoms(atoms)
         # [True, True, False]
-        structure.set_pbc([True, True, False])
-        orbit_list = create_orbit_list(structure, [0.])
+        atoms.set_pbc([True, True, False])
+        orbit_list = create_orbit_list(atoms, [0.])
         self.assertEqual(len(orbit_list), 4)
         # [True, False, False]
-        structure.set_pbc([True, False, False])
-        orbit_list = create_orbit_list(structure, [0.])
+        atoms.set_pbc([True, False, False])
+        orbit_list = create_orbit_list(atoms, [0.])
         self.assertEqual(len(orbit_list), 7)
         # [False]
-        structure.set_pbc([False, False, False])
-        orbit_list = create_orbit_list(structure, [0.])
+        atoms.set_pbc([False, False, False])
+        orbit_list = create_orbit_list(atoms, [0.])
         self.assertEqual(len(orbit_list), 20)
 
     def test_orbit_list_fcc(self):
@@ -211,8 +210,7 @@ class TestOrbitList(unittest.TestCase):
         """
         atoms = bulk('Al', 'fcc', a=3.0)
         cutoffs = [2.5]
-        structure = Structure.from_atoms(atoms)
-        orbit_list = create_orbit_list(structure, cutoffs)
+        orbit_list = create_orbit_list(atoms, cutoffs)
         # only a singlet and a pair are expected
         self.assertEqual(len(orbit_list), 2)
         # singlet
@@ -232,8 +230,7 @@ class TestOrbitList(unittest.TestCase):
         """
         atoms = bulk('Al', 'bcc', a=3.0)
         cutoffs = [3.0]
-        structure = Structure.from_atoms(atoms)
-        orbit_list = create_orbit_list(structure, cutoffs)
+        orbit_list = create_orbit_list(atoms, cutoffs)
         # one singlet and two pairs expected
         self.assertEqual(len(orbit_list), 3)
         # singlet
@@ -256,8 +253,7 @@ class TestOrbitList(unittest.TestCase):
         """
         atoms = bulk('Ni', 'hcp', a=3.0)
         cutoffs = [3.1]
-        structure = Structure.from_atoms(atoms)
-        orbit_list = create_orbit_list(structure, cutoffs)
+        orbit_list = create_orbit_list(atoms, cutoffs)
         # only one singlet and one pair expected
         self.assertEqual(len(orbit_list), 3)
         # singlet

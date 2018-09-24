@@ -6,11 +6,10 @@ from typing import BinaryIO, Dict, List, TextIO, Tuple, Union
 import numpy as np
 import ase.db
 from ase import Atoms
-from ase.calculators.calculator import PropertyNotImplementedError
 
 from icet import ClusterSpace
 from icet.io.logging import logger
-logger = logger.getChild('sc')
+logger = logger.getChild('structure_container')
 
 
 class StructureContainer:
@@ -33,7 +32,8 @@ class StructureContainer:
 
     def __init__(self, cluster_space: ClusterSpace,
                  list_of_atoms: Union[list, tuple]=None,
-                 list_of_properties: List[dict]=None):
+                 list_of_properties: List[dict]=None,
+                 allow_duplicate: bool=True):
 
         self._cluster_space = cluster_space
         self._structure_list = []
@@ -57,9 +57,11 @@ class StructureContainer:
                                                      list_of_properties):
                 try:
                     self.add_structure(atoms=atoms, user_tag=user_tag,
-                                       properties=properties)
-                except AssertionError as err:
-                    logger.warning('Skipping structure; ' + str(err))
+                                       properties=properties,
+                                       allow_duplicate=allow_duplicate)
+                except (TypeError, ValueError):
+                    logger.exception('Skipping structure {}; '.format(
+                        list_of_atoms.index((atoms, user_tag))))
 
     def __len__(self) -> int:
         return len(self._structure_list)
@@ -183,7 +185,7 @@ class StructureContainer:
                       properties: dict=None,
                       allow_duplicate: bool=True):
         """
-        Adds a structure to the structure list.
+        Adds a structure to the structure container.
 
         Parameters
         ----------
@@ -200,33 +202,34 @@ class StructureContainer:
              structure with identical cluster-vector
         """
         # atoms must have a proper format and label
-        assert isinstance(atoms, Atoms), 'atoms has not ASE Atoms format'
+        if not isinstance(atoms, Atoms):
+            raise TypeError('atoms must be an ASE Atoms object.'
+                            ' Not {}'.format(type(atoms)))
+
         if user_tag is not None:
-            assert isinstance(user_tag, str), 'user_tag has wrong type (str)'
+            if not isinstance(user_tag, str):
+                raise TypeError('user_tag must be a string.'
+                                ' Not {}.'.format(type(user_tag)))
+
         atoms_copy = atoms.copy()
 
         # check for properties in attached calculator
-        if properties is None:
+        if properties is None and atoms.calc:
             properties = {}
-            if atoms.calc:
-                if len(atoms.calc.check_state(atoms)) == 0:
-                    try:
-                        energy = atoms.get_potential_energy()
-                    except PropertyNotImplementedError:
-                        logger.warning('Potential energy is not among'
-                                       ' properties in the calculator')
-                    else:
-                        properties['energy'] = energy / len(atoms)
+            if not atoms.calc.calculation_required(atoms, ['energy']):
+                energy = atoms.get_potential_energy()
+                properties['energy'] = energy / len(atoms)
 
-        # check if there exists structures with identical cluster-vector
+        # check if there exists structures with identical cluster vector
         cv = self._cluster_space.get_cluster_vector(atoms_copy)
         if not allow_duplicate:
             for i, fs in enumerate(self):
                 if np.allclose(cv, fs.cluster_vector):
-                    logger.warning(
-                        'Skipping structure; atoms have identical cluster'
-                        ' vector with structure {}'.format(i))
-                    return
+                    msg = "{} have identical cluster vector with {}".format(
+                        user_tag if user_tag is not None else 'Input atoms',
+                        fs.user_tag if fs.user_tag != 'None' else 'structure')
+                    msg += " at index {}".format(i)
+                    raise ValueError(msg)
 
         structure = FitStructure(atoms_copy, user_tag)
         structure.set_properties(properties)
@@ -358,12 +361,12 @@ class StructureContainer:
 
     @property
     def cluster_space(self) -> ClusterSpace:
-        """Returns the cluster space object."""
+        """Cluster space used to calculate the cluster vectors."""
         return self._cluster_space
 
     @property
     def fit_structures(self):
-        """Returns the fit structures."""
+        """List of the fit structures."""
         return self._structure_list
 
     @property

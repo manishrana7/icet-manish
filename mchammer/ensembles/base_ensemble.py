@@ -143,7 +143,9 @@ class BaseEnsemble(ABC):
     @property
     def acceptance_ratio(self) -> float:
         """ acceptance ratio """
-        return self.accepted_trials / self.total_trials
+        if self.total_trials > 0:
+            return self.accepted_trials / self.total_trials
+        return 0
 
     @property
     def calculator(self) -> BaseCalculator:
@@ -193,6 +195,7 @@ class BaseEnsemble(ABC):
             if self._data_container_filename is not None and \
                     time()-last_write_time > self.data_container_write_period:
                 self.data_container.write(self._data_container_filename)
+                last_write_time = time()
 
             self._run(uninterrupted_steps)
             step += uninterrupted_steps
@@ -215,7 +218,7 @@ class BaseEnsemble(ABC):
            number of trial steps to run without stopping
         """
         for _ in range(number_of_trial_steps):
-            self.do_trial_step()
+            self._do_trial_step()
 
     def _observe_configuration(self, step: int):
         """Submits current configuration to observers and appends
@@ -253,7 +256,7 @@ class BaseEnsemble(ABC):
             self._data_container.append(mctrial=step, record=row_dict)
 
     @abstractmethod
-    def do_trial_step(self):
+    def _do_trial_step(self):
         pass
 
     @property
@@ -266,7 +269,7 @@ class BaseEnsemble(ABC):
         """ seed used to initialize random number generator """
         return self._random_seed
 
-    def next_random_number(self) -> int:
+    def _next_random_number(self) -> int:
         """ Returns the next random number from the PRNG. """
         return random.random()
 
@@ -365,8 +368,8 @@ class BaseEnsemble(ABC):
             raise ValueError('sites and species must have the same length.')
         self.configuration.update_occupations(sites, species)
 
-    def get_property_change(self,
-                            sites: List[int], species: List[int]) -> float:
+    def _get_property_change(self,
+                             sites: List[int], species: List[int]) -> float:
         """Computes and returns the property change due to a change of the
         configuration.
 
@@ -380,12 +383,12 @@ class BaseEnsemble(ABC):
             new occupations (species) by atomic number
         """
         current_species = self.configuration.occupations[sites]
-        current_property = self.calculator.calculate_local_contribution(
-            sites, self.configuration.occupations)
+        current_property = self.calculator.calculate_total(
+            occupations=self.configuration.occupations)
 
         self.update_occupations(sites=sites, species=species)
-        new_property = self.calculator.calculate_local_contribution(
-            sites, self.configuration.occupations)
+        new_property = self.calculator.calculate_total(
+            occupations=self.configuration.occupations)
         property_change = new_property - current_property
 
         # Restore initial configuration
@@ -395,7 +398,8 @@ class BaseEnsemble(ABC):
     def get_ensemble_data(self) -> dict:
         """ Returns the current calculator property. """
         return {'potential': self.calculator.calculate_total(
-            occupations=self.configuration.occupations)}
+            occupations=self.configuration.occupations),
+            'acceptance_ratio': self.acceptance_ratio}
 
     def get_random_sublattice_index(self) -> int:
         """Returns a random sublattice index based on the weights of the

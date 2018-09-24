@@ -48,6 +48,7 @@ def test_mi_int_list_and_dict(atoms, species, cutoffs, allowed_sites):
     msg = 'Cluster vectors were not equal for an equivalent Mi (int vs dict)'
     assert (np.array(cv_int) == np.array(cv_dict)).all, msg
 
+
 db = connect('structures_for_testing.db')
 species = ['H', 'He', 'Pb']
 for row in db.select():
