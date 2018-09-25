@@ -844,3 +844,12 @@ void OrbitList::removeSitesContainingIndex(const int index)
         orbit.removeSitesWithIndex(index);
     }
 }
+
+/// Remove each element in orbit.equivalent sites if a vector<sites> have at least one lattice site with this index
+void OrbitList::removeSitesNotContainingIndex(const int index)
+{
+    for(auto &orbit : _orbitList)
+    {
+        orbit.removeSitesNotWithIndex(index);
+    }
+}

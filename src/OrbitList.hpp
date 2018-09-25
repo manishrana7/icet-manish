@@ -117,6 +117,8 @@ class OrbitList
             {
                 std::cout << "Duplicates: " << orbit.getNumberOfDuplicates() << std::endl;
             }
+            if(verbosity>-1)
+            {
             for(auto sites : orbit.getEquivalentSites())
             {
                 for(auto site : sites )
@@ -124,6 +126,7 @@ class OrbitList
                     std::cout<<"("<<site.index()<< " : ["<<site.unitcellOffset()[0]<<" "<<site.unitcellOffset()[1]<< " " <<site.unitcellOffset()[2]<<"]) . ";
                 }
                 std::cout<<std::endl;
+            }
             }
             std::cout << std::endl;
         }
@@ -200,6 +203,10 @@ class OrbitList
 
     /// Remove each element in orbit.equivalent sites if a vector<sites> have at least one lattice site with this index
     void removeSitesContainingIndex(const int);
+
+    /// Remove each element in orbit.equivalent sites if a vector<sites> doesn't have a lattice site with this index
+    void removeSitesNotContainingIndex(const int);
+
     std::vector<Orbit> _orbitList;
   private:
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;

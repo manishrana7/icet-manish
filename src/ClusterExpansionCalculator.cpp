@@ -11,7 +11,8 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     Vector3d zeroOffset = {0.0, 0.0, 0.0};
     int primitiveSize = _clusterSpace.getPrimitiveStructure().size();
     std::vector<Orbit> orbitVector;
-
+    // std::cout<<"Primitve"<<std::endl;
+    // clusterSpace.getOrbitList().print();
     for (const auto orbit : clusterSpace._orbitList._orbitList)
     {
         orbitVector.push_back(Orbit(orbit.getRepresentativeCluster()));
@@ -38,6 +39,11 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     to orbitVector[i][orbitIndex] if the latticesites has the basis atom `i` in them.
 
     */
+
+   // Map lattice indices to other lattice indices that are equivalent
+   std::map<int, int> singletMap;
+
+
     for (int offsetIndex = 0; offsetIndex < uniqueOffsets; offsetIndex++)
     {
         int orbitIndex = -1;
@@ -68,11 +74,10 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
                         primitiveEquivalentSites.push_back(primitiveSite);
                     }
 
-                    std::vector<std::vector<LatticeSite>> latticeSitesTranslated = _clusterSpace._orbitList.getSitesTranslatedToUnitcell(primitiveEquivalentSites);
+                    std::vector<std::vector<LatticeSite>> latticeSitesTranslated = _clusterSpace._orbitList.getSitesTranslatedToUnitcell(primitiveEquivalentSites);                                        
                     for (auto latticesitesPrimTrans : latticeSitesTranslated)
                     {
-
-                        if (std::any_of(latticesitesPrimTrans.begin(), latticesitesPrimTrans.end(), [=](LatticeSite ls) { return (ls.unitcellOffset() - zeroOffset).norm() < 1e-4; }))
+                        if (std::any_of(latticesitesPrimTrans.begin(), latticesitesPrimTrans.end(), [=](LatticeSite ls) { return (ls.unitcellOffset()).norm() < 1e-4; }))
                         {
                             if (!orbitVector[orbitIndex].contains(latticesitesPrimTrans, true))
                             {
@@ -94,6 +99,8 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         orbit.setEquivalentSitesPermutations(permutations[orbitIndex]);
         _fullPrimitiveOrbitList.addOrbit(orbit);
     }
+    // std::cout<<"Full list"<<std::endl;
+    // _fullPrimitiveOrbitList.print();
     validateBasisAtomOrbitLists();
     for (int i = 0; i < structure.size(); i++)
     {
@@ -148,15 +155,15 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
 
     // Calc offset for this site
 
-    Vector3d positionVector = _superCell.getPositions().row(localSite.index()) - _superCell.getPositions().row(0);
-    Vector3d localIndexZeroPos = localPosition - positionVector;
+    Vector3d positionVector = _clusterSpace.getPrimitiveStructure().getPositions().row(0)-_clusterSpace.getPrimitiveStructure().getPositions().row(localSite.index());
+    Vector3d localIndexZeroPos = localPosition + positionVector;
     auto indexZeroLatticeSite = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(localIndexZeroPos);
 
-    // Vector3d offsetVector = indexZeroLatticeSite.unitcellOffset();
-    Vector3d offsetVector = localSite.unitcellOffset();
+    Vector3d offsetVector = indexZeroLatticeSite.unitcellOffset();
+    // Vector3d offsetVector = localSite.unitcellOffset();
 
     OrbitList translatedOrbitList = _localOrbitlists[offsetVector];
-
+    translatedOrbitList.removeSitesNotContainingIndex(index);
     // Purge the orbitlist of all sites containing the ignored indices
     for (auto ignoredIndex : ignoredIndices)
     {
@@ -221,9 +228,9 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
                     multiplicity += elementsCountPair.second;
                 }
             }
-            int realMultiplicity = _clusterSpace._orbitList._orbitList[i]._equivalentSites.size();
-            clusterVectorElement /= ((double)_superCell.size() * realMultiplicity);
-            clusterVector.push_back(clusterVectorElement * repCluster.order());
+            int realMultiplicity = elementPermutations[currentMCVectorIndex].size()*_clusterSpace._orbitList._orbitList[i]._equivalentSites.size()/_clusterSpace.getPrimitiveStructure().size();
+            clusterVectorElement /= ((double)realMultiplicity*(double)_superCell.size());
+            clusterVector.push_back(clusterVectorElement);
             currentMCVectorIndex++;
         }
     }

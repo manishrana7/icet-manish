@@ -306,7 +306,10 @@ class Orbit
 
         /// Remove all elements i in equivalent sites if any sites in _equivalentSites[i] have the input index
         void removeSitesWithIndex(const int index);
-        
+
+        /// Remove all elements i in equivalent sites if no sites in _equivalentSites[i] have the input index                
+        void removeSitesNotWithIndex(const int index);
+
         ///Container of equivalent sites for this orbit
         std::vector<std::vector<LatticeSite>> _equivalentSites;
 

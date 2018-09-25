@@ -130,6 +130,21 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
                     multiplicity += speciesCountPair.second;
                 }
             }
+            if(multiplicity != speciesPermutations[currentMultiComponentVectorIndex].size()*_orbitList.getOrbit(i).getEquivalentSites().size()*structure.size()/_primitiveStructure.size())
+            {
+
+                std::string msg = "Found non expected multiplicity in get cv. ";
+                msg += std::to_string(multiplicity) + " != " + std::to_string(_orbitList.getOrbit(i).getEquivalentSites().size()*structure.size()/_primitiveStructure.size());
+                msg += "\nStructure size: " + std::to_string(structure.size());
+                msg += "\nPrim Structure size: " + std::to_string(_primitiveStructure.size());
+                msg += "\nOrbit size: " + std::to_string(_orbitList.getOrbit(i).getEquivalentSites().size());
+                msg += "\nOrbit order: " + std::to_string(_orbitList.getOrbit(i).getRepresentativeCluster().order());
+                msg += "\nMultiplicity: " + std::to_string(multiplicity);
+                msg += "\nPermutations  vector size: " + std::to_string(speciesPermutations[currentMultiComponentVectorIndex].size());
+                std::cout<<msg<<std::endl;
+                // throw std::runtime_error(msg);
+
+            }
             clusterVectorElement /= ((double)multiplicity);
             clusterVector.push_back(clusterVectorElement);
 

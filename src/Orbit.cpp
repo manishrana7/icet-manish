@@ -132,21 +132,35 @@ void Orbit::removeSitesWithIndex(const int index)
 {
     for (int i = _equivalentSites.size() - 1; i >= 0; i--)
     {
-        if (std::any_of(_equivalentSites[i].begin(), _equivalentSites[i].end(), [=](LatticeSite &ls) { return ls.index() == index; }))
+        if (std::any_of(_equivalentSites[i].begin(), _equivalentSites[i].end(), [=](LatticeSite &ls) { return ls.index() == index && ls.unitcellOffset().norm()<1e-4 ; }))
         {
             _equivalentSites.erase(_equivalentSites.begin()+i);
             _equivalentSitesPermutations.erase(_equivalentSitesPermutations.begin()+i);
         }
-        else
-        {
-            for(auto ls : _equivalentSites[i])
-            {
-                if(ls.index()==index)
-                {
-                    std::cout<<" index was not removed!! "<<index<<std::endl;
-                }
+        // else
+        // {
+        //     for(auto ls : _equivalentSites[i])
+        //     {
+        //         if(ls.index()==index)
+        //         {
+        //             std::cout<<" index was not removed!! "<<index<<std::endl;
+        //         }
 
-            }
+        //     }
+        // }
+    }
+}
+
+
+
+void Orbit::removeSitesNotWithIndex(const int index)
+{
+    for (int i = _equivalentSites.size() - 1; i >= 0; i--)
+    {
+        if (std::none_of(_equivalentSites[i].begin(), _equivalentSites[i].end(), [=](LatticeSite &ls) { return ls.index() == index && ls.unitcellOffset().norm()<1e-4; }))
+        {
+            _equivalentSites.erase(_equivalentSites.begin()+i);
+            _equivalentSitesPermutations.erase(_equivalentSitesPermutations.begin()+i);
         }
     }
 }
