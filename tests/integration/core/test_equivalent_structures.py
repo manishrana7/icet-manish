@@ -1,5 +1,6 @@
-
-# TODO: Include docstring with details about this test.
+"""
+This script checks the cluster vectors calculated for equivalent structures.
+"""
 
 from icet import ClusterSpace
 from ase.build import bulk
