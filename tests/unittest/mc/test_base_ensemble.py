@@ -248,19 +248,13 @@ class TestEnsemble(unittest.TestCase):
                            ensemble_reloaded.data_container.data,
                            check_dtype=False)
 
-        # run old and new ensemble and check both data container are equal
-        try:
-            n_iters = 50
-            ensemble.run(n_iters)
-        finally:
-            os.remove('my-datacontainer.dc')
-
+        # run new ensemble and check data container
         ensemble_reloaded.attach_observer(observer)
         ensemble_reloaded.run(n_iters)
-
-        assert_frame_equal(ensemble.data_container.data,
-                           ensemble_reloaded.data_container.data,
-                           check_dtype=False)
+        dc_data = \
+            ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
+        self.assertEqual(len(dc_data),
+                         364 // observer.interval + 1)
 
     def test_internal_run(self):
         """Test the _run method."""

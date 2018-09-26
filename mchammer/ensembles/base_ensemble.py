@@ -214,7 +214,7 @@ class BaseEnsemble(ABC):
         Parameters
         ----------
         number_of_trial_steps
-           number of trial steps to run without stopping
+            number of trial steps to run without stopping
         """
         for _ in range(number_of_trial_steps):
             self._do_trial_step()
@@ -257,8 +257,7 @@ class BaseEnsemble(ABC):
             # Todo: occupation property has array (not list) type
             self._data_container._update_last_state(
                 self.configuration.occupations.tolist(),
-                self.accepted_trials,
-                random.getstate())
+                self.accepted_trials)
 
     @abstractmethod
     def _do_trial_step(self):
@@ -432,6 +431,3 @@ class BaseEnsemble(ABC):
         self.total_trials = self._step
         self.accepted_trials = \
             self._data_container.last_state['accepted_trials']
-
-        # Restart random state
-        random.setstate(self._data_container.last_state['random_state'])
