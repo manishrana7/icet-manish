@@ -431,7 +431,7 @@ class BaseEnsemble(ABC):
         """Updates last state of the Monte Carlo simulation and
         writes DataContainer to file."""
         self._data_container._update_last_state(
-            self._step,
-            self.configuration.occupations.tolist(),
-            self.accepted_trials)
+            last_step=self._step,
+            occupations=self.configuration.occupations.tolist(),
+            accepted_trials=self.accepted_trials)
         self.data_container.write(self._data_container_filename)
