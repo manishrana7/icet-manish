@@ -149,7 +149,7 @@ class DataContainer:
         Parameters
         ----------
         last_step
-            last step in the ensemble run
+            last trial step
         occupations
             occupation vector observed during the last trial step
         accepted_trial

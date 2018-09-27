@@ -193,7 +193,7 @@ class BaseEnsemble(ABC):
                 self._observe_configuration(self._step)
             if self._data_container_filename is not None and \
                     time()-last_write_time > self.data_container_write_period:
-                self.write_data_container()
+                self._write_data_container()
                 last_write_time = time()
 
             self._run(uninterrupted_steps)
@@ -205,7 +205,7 @@ class BaseEnsemble(ABC):
             self._observe_configuration(self._step)
 
         if self._data_container_filename is not None:
-            self.write_data_container()
+            self._write_data_container()
 
     def _run(self, number_of_trial_steps: int):
         """Runs MC simulation for a number of trial steps without
@@ -429,7 +429,7 @@ class BaseEnsemble(ABC):
         self.accepted_trials = \
             self.data_container.last_state['accepted_trials']
 
-    def write_data_container(self):
+    def _write_data_container(self):
         """Updates last state of the Monte Carlo simulation and
         writes DataContainer to file."""
         self._data_container._update_last_state(
