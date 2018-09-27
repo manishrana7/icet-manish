@@ -131,9 +131,12 @@ class TestDataContainer(unittest.TestCase):
         """
         Test update_last_state functionality.
         """
-        self.dc._update_last_state(occupations=[13]*len(self.atoms),
+        self.dc._update_last_state(last_step=10001,
+                                   occupations=[13]*len(self.atoms),
                                    accepted_trials=12)
         for key, value in self.dc._last_state.items():
+            if key == 'last_step':
+                self.assertIsInstance(value, int)
             if key == 'occupations':
                 self.assertIsInstance(value, list)
             if key == 'accepted_trials':
@@ -162,10 +165,12 @@ class TestDataContainer(unittest.TestCase):
         """
         Test last_state property.
         """
-        self.dc._update_last_state(occupations=[13]*len(self.atoms),
+        self.dc._update_last_state(last_step=10001,
+                                   occupations=[13]*len(self.atoms),
                                    accepted_trials=12)
         self.assertEqual(self.dc.last_state,
-                         OrderedDict([('occupations', [13]*len(self.atoms)),
+                         OrderedDict([('last_step', 10001),
+                                      ('occupations', [13]*len(self.atoms)),
                                       ('accepted_trials', 12)]))
 
     def test_get_data(self):

@@ -1,5 +1,6 @@
-import getpass
 import json
+import getpass
+import numbers
 import numpy as np
 import pandas as pd
 import socket
@@ -44,7 +45,7 @@ class DataContainer:
         self._observables = []
         self._parameters = OrderedDict()
         self._metadata = OrderedDict()
-        self._last_state = OrderedDict()
+        self._last_state = {}
         self._data = pd.DataFrame(columns=['mctrial'])
         self._data = self._data.astype({'mctrial': int})
 
@@ -124,7 +125,7 @@ class DataContainer:
         * This might be a quite expensive way to add data to the data
           frame. Testing and profiling to be carried out later.
         """
-        if not isinstance(mctrial, (int, np.int64)):
+        if not isinstance(mctrial, numbers.Integral):
             raise TypeError('mctrial has the wrong type: {}'
                             .format(type(mctrial)))
         if not self._data.mctrial.empty:
@@ -140,17 +141,21 @@ class DataContainer:
         row_data.update(record)
         self._data = self._data.append(row_data, ignore_index=True)
 
-    def _update_last_state(self, occupations: List[int], accepted_trials: int):
-        """Updates last state of the simulation: occupation vector and number
-        of accepted trial steps.
+    def _update_last_state(self, last_step: int,
+                           occupations: List[int], accepted_trials: int):
+        """Updates last state of the simulation: last step, occupation vector
+        and number of accepted trial steps.
 
         Parameters
         ----------
+        last_step
+            last step in the ensemble run
         occupations
             occupation vector observed during the last trial step
         accepted_trial
             number of current accepted trial steps
         """
+        self._last_state['last_step'] = last_step
         self._last_state['occupations'] = occupations
         self._last_state['accepted_trials'] = accepted_trials
 
@@ -286,7 +291,7 @@ class DataContainer:
         return self._metadata
 
     @property
-    def last_state(self) -> dict:
+    def last_state(self) -> Dict[str, Union[int, List[int]]]:
         """ last state to be used to restart Monte Carlo simulation """
         return self._last_state
 

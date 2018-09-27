@@ -250,11 +250,14 @@ class TestEnsemble(unittest.TestCase):
 
         # run new ensemble and check data container
         ensemble_reloaded.attach_observer(observer)
-        ensemble_reloaded.run(n_iters)
+        ensemble_reloaded.run(n_iters+1)
         dc_data = \
             ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
         self.assertEqual(len(dc_data),
                          364 // observer.interval + 1)
+        self.assertEqual(
+            ensemble_reloaded.data_container.last_state['last_step'],
+            364 + 1)
 
     def test_internal_run(self):
         """Test the _run method."""
