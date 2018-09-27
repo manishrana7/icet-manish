@@ -253,8 +253,6 @@ class BaseEnsemble(ABC):
 
         if len(row_dict) > 0:
             self._data_container.append(mctrial=step, record=row_dict)
-            # Update the last state of the simulation
-            # Todo: occupation property has array (not list) type
 
     @abstractmethod
     def _do_trial_step(self):
