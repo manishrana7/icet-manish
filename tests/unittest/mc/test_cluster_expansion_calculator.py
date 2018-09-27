@@ -536,17 +536,21 @@ class TestCECalculatorTernaryBCCLongCutoffSmallSystem(unittest.TestCase):
               self).__init__(*args, **kwargs)
 
         self.atoms = bulk("Al",'bcc',a=4.0).repeat(2)        
-        self.cutoffs = [17]
+        self.cutoffs = [6]
         self.subelements = ['Al', 'Ge','Si']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
         params = [1.0] * params_len
+        print("setting ternary ce calc ecis to zero in unit test")        
+        params = [0] * params_len
+        params [7] = 1
 
         self.ce = ClusterExpansion(self.cs, params)
+        print(self.ce)
 
     def setUp(self):
         """Setup before each test."""
-        self.atoms = bulk("Al",'bcc',a=4.0).repeat(2)
+        self.atoms = bulk("Al",'bcc',a=4.0).repeat(5)
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
 
