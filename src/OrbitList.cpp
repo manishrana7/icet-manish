@@ -210,7 +210,10 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
 
 */
 void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeSite> &col1, const std::vector<std::vector<LatticeSite>> &permutation_matrix)
-{
+{  
+    _col1 = col1;
+    _permutationMatrix = permutation_matrix;
+
     for (size_t i = 0; i < size(); i++)
     {
 
@@ -837,11 +840,11 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &superCell, const Vector3
     return localOrbitList;
 }
 /// Remove each element in orbit.equivalent sites if a vector<sites> have at least one lattice site with this index
-void OrbitList::removeSitesContainingIndex(const int index)
+void OrbitList::removeSitesContainingIndex(const int indexRemove, const int indexKeep)
 {
     for(auto &orbit : _orbitList)
     {
-        orbit.removeSitesWithIndex(index);
+        orbit.removeSitesWithIndex(indexRemove, indexKeep);
     }
 }
 

@@ -99,7 +99,7 @@ class ClusterExpansionCalculator(BaseCalculator):
         exclude_indices = []  # type: List[int]
         for index in local_indices:
             local_contribution += self._calculate_local_contribution(
-                index, exclude_indices)
+                index, exclude_indices = exclude_indices)
             exclude_indices.append(index)
 
         return local_contribution
@@ -117,6 +117,8 @@ class ClusterExpansionCalculator(BaseCalculator):
         """
         local_cv = self.cpp_calc.get_local_cluster_vector(
             self.atoms.get_atomic_numbers(), index, exclude_indices)
+        assert(len(local_cv)==len(self.cluster_expansion.parameters))
+        # print(local_cv)
         return np.dot(local_cv, self.cluster_expansion.parameters) * \
             self._property_scaling
 

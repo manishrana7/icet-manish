@@ -25,12 +25,12 @@ class TestCECalculatorBinary(unittest.TestCase):
         self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1).repeat(2)
         # self.atoms = bulk("Al",'bcc',a=4.0).repeat(3)
         # self.atoms = bulk("Al",'diamond',a=4.0).repeat(3)
-        print("atoms len ", len(self.atoms))
-        self.cutoffs = [4]  # [2.9]
+        # print("atoms len ", len(self.atoms))
+        self.cutoffs = [5, 5]  # [2.9]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
-        params = [1.0] * params_len
+        params = [1.1] * params_len
 
         self.ce = ClusterExpansion(self.cs, params)
 
@@ -263,12 +263,12 @@ class TestCECalculatorBinaryHCPLongCutoffSmallSystem(unittest.TestCase):
               self).__init__(*args, **kwargs)
 
         self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1).repeat(2)
-        print("atoms len ", len(self.atoms))
-        self.cutoffs = [12]  # [2.9]
+        # print("atoms len ", len(self.atoms))
+        self.cutoffs = [12,12]  # [2.9]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
-        params = [1.0] * params_len
+        params = [1.1] * params_len
         # params[0] = 0
         # params[1] = 0
 
@@ -406,7 +406,7 @@ class TestCECalculatorBinaryBCCLongCutoffSmallSystem(unittest.TestCase):
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
-        params = [1.0] * params_len
+        params = [1.1] * params_len
 
         self.ce = ClusterExpansion(self.cs, params)
 
@@ -536,21 +536,21 @@ class TestCECalculatorTernaryBCCLongCutoffSmallSystem(unittest.TestCase):
               self).__init__(*args, **kwargs)
 
         self.atoms = bulk("Al",'bcc',a=4.0).repeat(2)        
-        self.cutoffs = [6]
-        self.subelements = ['Al', 'Ge','Si']
+        self.cutoffs = [3.9]
+        self.subelements = ['Al', 'Ge', 'Pt']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
         params = [1.0] * params_len
         print("setting ternary ce calc ecis to zero in unit test")        
-        params = [0] * params_len
-        params [7] = 1
+        # params = [0] * params_len
+        params [3] = 1
 
         self.ce = ClusterExpansion(self.cs, params)
-        print(self.ce)
+        # print(self.ce)
 
     def setUp(self):
         """Setup before each test."""
-        self.atoms = bulk("Al",'bcc',a=4.0).repeat(5)
+        self.atoms = bulk("Al",'bcc',a=4.0).repeat(2)
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
 
@@ -571,7 +571,9 @@ class TestCECalculatorTernaryBCCLongCutoffSmallSystem(unittest.TestCase):
                 indices = [i, j]
                 local_diff, total_diff = \
                     self._get_energy_diffs_local_and_total(indices)
-                self.assertAlmostEqual(total_diff, local_diff, msg=msg)
+                msg1 = "[{}, {}]".format(i,j)
+                # print(local_diff, total_diff)
+                self.assertAlmostEqual(total_diff, local_diff, msg=msg1)
 
     def test_local_contribution_flip(self):
         """ Test potential differences when flipping."""
@@ -647,15 +649,19 @@ class TestCECalculatorTernaryBCCLongCutoffSmallSystem(unittest.TestCase):
 
         # difference in energy according to total energy
         total_diff = new_value_total - initial_value_total
+        # print("total diff = {} - {} = {}".format(new_value_total, initial_value_total,total_diff))
 
         # Difference in energy according to local energy
         local_diff = new_value_local - initial_value_local
-
+        # print("local_diff = {} - {} = {}\n".format(new_value_local, initial_value_local , local_diff))
         # Reset occupations
+        # if (local_diff-total_diff)**2 > 1e-5:
+        #     from ase.visualize import view
+        #     view(self.atoms)
+
         self.atoms.set_atomic_numbers(original_occupations.copy())
 
         return local_diff, total_diff
-
 
 
 if __name__ == '__main__':

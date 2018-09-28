@@ -89,13 +89,15 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
     _fullPrimitiveOrbitList.setPrimitiveStructure(_clusterSpace.getPrimitiveStructure());
     int orbitIndex = -1;
-    for (auto &orbit : orbitVector)
+    for (auto orbit : orbitVector)
     {
         orbitIndex++;
-        orbit.setEquivalentSitesPermutations(permutations[orbitIndex]);
+        // orbit.setEquivalentSitesPermutations(permutations[orbitIndex]);
         _fullPrimitiveOrbitList.addOrbit(orbit);
     }
-    _fullPrimitiveOrbitList.sort();
+    _fullPrimitiveOrbitList.addPermutationInformationToOrbits(_clusterSpace.getOrbitList().getCol1(),
+    _clusterSpace.getOrbitList().getPermutationMatrix());
+    // _fullPrimitiveOrbitList.sort();
     // std::cout<<"Full list"<<std::endl;
     // _fullPrimitiveOrbitList.print();
     // validateBasisAtomOrbitLists();
@@ -158,14 +160,31 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
     auto indexZeroLatticeSite = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(localIndexZeroPos);
 
     Vector3d offsetVector = indexZeroLatticeSite.unitcellOffset();
-    // Vector3d offsetVector = localSite.unitcellOffset();
+    Vector3d offsetVectorLocal = localSite.unitcellOffset();
 
+    
     OrbitList translatedOrbitList = _localOrbitlists[offsetVector];
+    if(offsetVector[0] != offsetVectorLocal[0] || offsetVector[1] != offsetVectorLocal[1] ||offsetVector[2] != offsetVectorLocal[2])
+    {
+        translatedOrbitList += _localOrbitlists[offsetVectorLocal];
+        std::cout<<"adding extra OL"<<std::endl;
+    }
+    for(const auto orbit : translatedOrbitList.getOrbitList())
+    {
+        for(const auto sites : orbit.getEquivalentSites())
+        {
+            if (std::none_of(sites.begin(), sites.end(), [](const LatticeSite &ls) { return  ls.unitcellOffset().norm()<1e-4; }))
+            {
+                // std::cout<<"No zeroth offsets sites in translated orbit"<<std::endl;
+                // std::cout<<"Orbit order: "<<orbit.getRepresentativeCluster().order()<<std::endl;
+            }
+        }
+    }
     translatedOrbitList.removeSitesNotContainingIndex(index);
     // Purge the orbitlist of all sites containing the ignored indices
     for (auto ignoredIndex : ignoredIndices)
     {
-        translatedOrbitList.removeSitesContainingIndex(ignoredIndex);
+        translatedOrbitList.removeSitesContainingIndex(ignoredIndex, -1);
     }
 
     clusterCounts.countOrbitList(_superCell, translatedOrbitList, orderIntact, permuteSites);
@@ -187,6 +206,12 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
         try
         {
             allowedOccupations = _clusterSpace.getNumberOfAllowedSpeciesBySite(_clusterSpace.getPrimitiveStructure(), _clusterSpace._orbitList._orbitList[i].getRepresentativeSites());
+            // std::cout << "Allowed occupations: ";
+            // for (auto a : allowedOccupations)
+            // {
+                // std::cout << a << " ";
+            // }
+            // std::cout << std::endl;
         }
         catch (const std::exception &e)
         {
@@ -200,8 +225,12 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
             continue;
         }
 
-        auto mcVectors = _clusterSpace._orbitList._orbitList[i].getMultiComponentVectors(allowedOccupations);
-        auto allowedPermutationsSet = _clusterSpace._orbitList._orbitList[i].getAllowedSitesPermutations();
+        // auto mcVectors = _clusterSpace.getOrbitList()._orbitList[i].getMultiComponentVectors(allowedOccupations);
+        auto mcVectors = _fullPrimitiveOrbitList._orbitList[i].getMultiComponentVectors(allowedOccupations);
+
+        // auto allowedPermutationsSet = _clusterSpace.getOrbitList()._orbitList[i].getAllowedSitesPermutations();
+        auto allowedPermutationsSet = _fullPrimitiveOrbitList._orbitList[i].getAllowedSitesPermutations();
+
         auto elementPermutations = _clusterSpace.getMultiComponentVectorPermutations(mcVectors, i);
         repCluster.setTag(i);
         int currentMCVectorIndex = 0;
@@ -214,6 +243,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
             if (clusterFind == clusterMap.end())
             {
                 clusterVector.push_back(0);
+                std::cout<<"Didnt find cluster"<<std::endl;
                 continue;
             }
             for (const auto &elementsCountPair : clusterMap.at(repCluster))
@@ -221,13 +251,41 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
                 for (const auto &perm : elementPermutations[currentMCVectorIndex])
                 {
                     auto permutedMCVector = icet::getPermutedVector(mcVector, perm);
+                    // std::cout << "mcVector: ";
+                    // for (auto a : mcVector)
+                    // {
+                    //     std::cout << a << " ";
+                    // }
+                    // std::cout << std::endl;
+
+                    // std::cout << "permutedMCVector: ";
+                    // for (auto a : permutedMCVector)
+                    // {
+                    //     std::cout << a << " ";
+                    // }
+                    // std::cout << std::endl;
+                    // std::cout << "elementsCountPair.first: ";
+                    // for (auto a : elementsCountPair.first)
+                    // {
+                    //     std::cout << a << " ";
+                    // }
+                    // std::cout << std::endl;
                     auto permutedAllowedOccupations = icet::getPermutedVector(allowedOccupations, perm);
+
+                    // std::cout << "permutedAllowedOccupations: ";
+                    // for (auto a : permutedAllowedOccupations)
+                    // {
+                    //     std::cout << a << " ";
+                    // }
+                    // std::cout << std::endl;
+                    // std::cout << " cluster product " << _clusterSpace.evaluateClusterProduct(permutedMCVector, permutedAllowedOccupations, elementsCountPair.first) << std::endl;
+
                     clusterVectorElement += _clusterSpace.evaluateClusterProduct(permutedMCVector, permutedAllowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                     multiplicity += elementsCountPair.second;
                 }
             }
             //multiplicity != speciesPermutations[currentMultiComponentVectorIndex].size()*_orbitList.getOrbit(i).getEquivalentSites().size()*structure.size()/_primitiveStructure.size()
-            double realMultiplicity = (double) elementPermutations[currentMCVectorIndex].size() * (double)_clusterSpace._orbitList._orbitList[i]._equivalentSites.size() /(double) _clusterSpace.getPrimitiveStructure().size();
+            double realMultiplicity = (double)elementPermutations[currentMCVectorIndex].size() * (double)_clusterSpace._orbitList._orbitList[i]._equivalentSites.size() / (double)_clusterSpace.getPrimitiveStructure().size();
             clusterVectorElement /= ((double)realMultiplicity * (double)_superCell.size());
             clusterVector.push_back(clusterVectorElement);
             currentMCVectorIndex++;

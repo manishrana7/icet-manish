@@ -305,7 +305,7 @@ class Orbit
         bool contains(const std::vector<LatticeSite> &sites, bool sorted) const;
 
         /// Remove all elements i in equivalent sites if any sites in _equivalentSites[i] have the input index
-        void removeSitesWithIndex(const int index);
+        void removeSitesWithIndex(const int indexRemove, const int indexKeep);
 
         /// Remove all elements i in equivalent sites if no sites in _equivalentSites[i] have the input index                
         void removeSitesNotWithIndex(const int index);
