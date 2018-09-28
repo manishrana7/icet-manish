@@ -1,5 +1,6 @@
 import unittest
 import tempfile
+import random
 from collections import OrderedDict
 import numpy as np
 import pandas as pd
@@ -133,7 +134,9 @@ class TestDataContainer(unittest.TestCase):
         """
         self.dc._update_last_state(last_step=10001,
                                    occupations=[13]*len(self.atoms),
-                                   accepted_trials=12)
+                                   accepted_trials=12,
+                                   random_state=random.getstate())
+
         for key, value in self.dc._last_state.items():
             if key == 'last_step':
                 self.assertIsInstance(value, int)
@@ -141,6 +144,8 @@ class TestDataContainer(unittest.TestCase):
                 self.assertIsInstance(value, list)
             if key == 'accepted_trials':
                 self.assertIsInstance(value, int)
+            if key == 'random_state':
+                self.assertIsInstance(value, tuple)
 
     def test_property_data(self):
         """ Test data property."""
@@ -167,11 +172,13 @@ class TestDataContainer(unittest.TestCase):
         """
         self.dc._update_last_state(last_step=10001,
                                    occupations=[13]*len(self.atoms),
-                                   accepted_trials=12)
+                                   accepted_trials=12,
+                                   random_state=random.getstate())
         self.assertEqual(self.dc.last_state,
-                         OrderedDict([('last_step', 10001),
-                                      ('occupations', [13]*len(self.atoms)),
-                                      ('accepted_trials', 12)]))
+                         dict([('last_step', 10001),
+                               ('occupations', [13]*len(self.atoms)),
+                               ('accepted_trials', 12),
+                               ('random_state', random.getstate())]))
 
     def test_get_data(self):
         """

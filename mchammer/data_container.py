@@ -46,8 +46,8 @@ class DataContainer:
         self._parameters = OrderedDict()
         self._metadata = OrderedDict()
         self._last_state = {}
-        self._data = pd.DataFrame(columns=['mctrial'])
-        self._data = self._data.astype({'mctrial': int})
+        self._data = pd.DataFrame(columns=['mctrial', 'occupations'])
+        self._data = self._data.astype({'mctrial': int, 'occupations': object})
 
         self.add_parameter('seed', random_seed)
 
@@ -141,8 +141,8 @@ class DataContainer:
         row_data.update(record)
         self._data = self._data.append(row_data, ignore_index=True)
 
-    def _update_last_state(self, last_step: int,
-                           occupations: List[int], accepted_trials: int):
+    def _update_last_state(self, last_step: int, occupations: List[int],
+                           accepted_trials: int, random_state: tuple):
         """Updates last state of the simulation: last step, occupation vector
         and number of accepted trial steps.
 
@@ -154,10 +154,13 @@ class DataContainer:
             occupation vector observed during the last trial step
         accepted_trial
             number of current accepted trial steps
+        random_state
+            tuple representing the last state of the random generator
         """
         self._last_state['last_step'] = last_step
         self._last_state['occupations'] = occupations
         self._last_state['accepted_trials'] = accepted_trials
+        self._last_state['random_state'] = random_state
 
     def get_data(self, tags: List[str]=None,
                  start: int=None, stop: int=None, interval: int=1,
@@ -486,6 +489,10 @@ class DataContainer:
                         dc._metadata[tag] = value
                 elif key == 'last_state':
                     for tag, value in reference_data[key].items():
+                        if tag == 'random_state':
+                            value = \
+                                tuple(tuple(x) if isinstance(x, list)
+                                      else x for x in value)
                         dc._last_state[tag] = value
                 elif key == 'parameters':
                     for tag, value in reference_data[key].items():

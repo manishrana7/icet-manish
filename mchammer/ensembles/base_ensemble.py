@@ -427,11 +427,17 @@ class BaseEnsemble(ABC):
         self.accepted_trials = \
             self.data_container.last_state['accepted_trials']
 
+        # Restart state of random number generator
+        random.setstate(self.data_container.last_state['random_state'])
+
     def _write_data_container(self):
         """Updates last state of the Monte Carlo simulation and
         writes DataContainer to file."""
+
         self._data_container._update_last_state(
             last_step=self._step,
             occupations=self.configuration.occupations.tolist(),
-            accepted_trials=self.accepted_trials)
+            accepted_trials=self.accepted_trials,
+            random_state=random.getstate())
+
         self.data_container.write(self._data_container_filename)
