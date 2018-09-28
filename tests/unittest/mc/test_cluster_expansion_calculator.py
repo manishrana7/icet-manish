@@ -264,13 +264,13 @@ class TestCECalculatorBinaryHCPLongCutoffSmallSystem(unittest.TestCase):
 
         self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1).repeat(2)
         # print("atoms len ", len(self.atoms))
-        self.cutoffs = [12,12]  # [2.9]
+        self.cutoffs = [15.12]  # [2.9]
         self.subelements = ['Al', 'Ge']
-        self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
+        self.cs = ClusterSpace(self.atoms.copy(), self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
-        params = [1.1] * params_len
-        # params[0] = 0
-        # params[1] = 0
+        params = [1.0] * params_len
+        params[0] = 0
+        params[1] = 0
 
         self.ce = ClusterExpansion(self.cs, params)
 
@@ -520,7 +520,7 @@ class TestCECalculatorBinaryBCCLongCutoffSmallSystem(unittest.TestCase):
 
 
 
-class TestCECalculatorTernaryBCCLongCutoffSmallSystem(unittest.TestCase):
+class TestCECalculatorTernaryBCC(unittest.TestCase):
     """
     Container for tests of the class functionality.
 
@@ -532,7 +532,7 @@ class TestCECalculatorTernaryBCCLongCutoffSmallSystem(unittest.TestCase):
     """
 
     def __init__(self, *args, **kwargs):
-        super(TestCECalculatorTernaryBCCLongCutoffSmallSystem,
+        super(TestCECalculatorTernaryBCC,
               self).__init__(*args, **kwargs)
 
         self.atoms = bulk("Al",'bcc',a=4.0).repeat(2)        
@@ -542,15 +542,15 @@ class TestCECalculatorTernaryBCCLongCutoffSmallSystem(unittest.TestCase):
         params_len = self.cs.get_cluster_space_size()
         params = [1.0] * params_len
         print("setting ternary ce calc ecis to zero in unit test")        
-        # params = [0] * params_len
+        params = [0] * params_len
         params [3] = 1
 
         self.ce = ClusterExpansion(self.cs, params)
-        # print(self.ce)
+        print(self.ce)
 
     def setUp(self):
         """Setup before each test."""
-        self.atoms = bulk("Al",'bcc',a=4.0).repeat(2)
+        self.atoms = bulk("Al",'bcc',a=4.0).repeat(3)
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
 

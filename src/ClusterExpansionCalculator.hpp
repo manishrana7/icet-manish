@@ -25,6 +25,8 @@ class ClusterExpansionCalculator
     // std::vector<double> getLocalClusterVector(const Structure &, const int);
     std::vector<double> getLocalClusterVector(const std::vector<int>& ,const int, const std::vector<int>);
     double getLocalContribution(const Structure &, const int) const;
+    OrbitList getLocalOrbitList(int index);
+    void testRemovingSites();
 
     private:
     std::map<Vector3d, OrbitList, Vector3dCompare> _localOrbitlists;
