@@ -22,10 +22,7 @@ class TestCECalculatorBinary(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestCECalculatorBinary, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1).repeat(2)
-        # self.atoms = bulk("Al",'bcc',a=4.0).repeat(3)
-        # self.atoms = bulk("Al",'diamond',a=4.0).repeat(3)
-        # print("atoms len ", len(self.atoms))
+        self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1)
         self.cutoffs = [5, 5]  # [2.9]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
@@ -37,8 +34,6 @@ class TestCECalculatorBinary(unittest.TestCase):
     def setUp(self):
         """Setup before each test."""
         self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1).repeat(2)
-        # self.atoms = bulk("Al",'diamond',a=4.0).repeat(3)
-        # self.atoms = bulk("Al",'bcc',a=4.0).repeat(3)
 
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
@@ -169,7 +164,6 @@ class TestCECalculatorBinary(unittest.TestCase):
 
     def test_calculate_local_contribution(self):
         """Test calculate local contribution."""
-        # indices = [i for i in range(len(self.atoms))]
         indices = [3, 5]
         local_contribution = self.calculator.calculate_local_contribution(
             local_indices=indices, occupations=self.atoms.get_atomic_numbers())
@@ -210,10 +204,6 @@ class TestCECalculatorBinary(unittest.TestCase):
 
         total_diff = new_value_total - initial_value_total
         local_diff = new_value_local - initial_value_local
-        print("total_diff: {}".format(total_diff))
-        print("local_diff: {}".format(local_diff))
-        print("total/local = {}".format(total_diff/local_diff))
-        print("local/total = {}".format(local_diff/total_diff))
         self.assertAlmostEqual(total_diff, local_diff)
 
     def __test_internal_calc_local_contribution(self):
@@ -244,8 +234,6 @@ class TestCECalculatorBinary(unittest.TestCase):
         local_cv_after = cpp_calc.get_local_cluster_vector(
             self.atoms.get_atomic_numbers(), index, [], False)
 
-        print(local_cv_before-local_cv_after)
-
 
 class TestCECalculatorBinaryHCP(unittest.TestCase):
     """
@@ -268,8 +256,6 @@ class TestCECalculatorBinaryHCP(unittest.TestCase):
         self.cs = ClusterSpace(self.atoms.copy(), self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
         params = [1.0] * params_len
-        # params[0] = 0
-        # params[1] = 0
 
         self.ce = ClusterExpansion(self.cs, params)
 
@@ -540,7 +526,6 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
         params = [1.0] * params_len
-        print("setting ternary ce calc ecis to zero in unit test")        
         self.ce = ClusterExpansion(self.cs, params)
 
 
@@ -568,7 +553,6 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
                 local_diff, total_diff = \
                     self._get_energy_diffs_local_and_total(indices)
                 msg1 = "[{}, {}]".format(i,j)
-                # print(local_diff, total_diff)
                 self.assertAlmostEqual(total_diff, local_diff, msg=msg1)
 
     def test_local_contribution_flip(self):
@@ -645,15 +629,9 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
 
         # difference in energy according to total energy
         total_diff = new_value_total - initial_value_total
-        # print("total diff = {} - {} = {}".format(new_value_total, initial_value_total,total_diff))
 
         # Difference in energy according to local energy
         local_diff = new_value_local - initial_value_local
-        # print("local_diff = {} - {} = {}\n".format(new_value_local, initial_value_local , local_diff))
-        # Reset occupations
-        # if (local_diff-total_diff)**2 > 1e-5:
-        #     from ase.visualize import view
-        #     view(self.atoms)
 
         self.atoms.set_atomic_numbers(original_occupations.copy())
 
