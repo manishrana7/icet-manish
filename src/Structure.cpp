@@ -75,6 +75,11 @@ Vector3d Structure::getPosition(const LatticeSite &latticeNeighbor) const
     return position;
 }
 
+Vector3d Structure::getPositionByIndex(const size_t &index) const
+{    
+    Vector3d position = _positions.row(index);
+    return position;
+}
 /**
   @details This function returns the atomic number of a site.
   @param i index of site
