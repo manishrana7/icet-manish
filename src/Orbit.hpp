@@ -302,14 +302,15 @@ class Orbit
         std::vector<std::vector<int>> getAllPossibleMultiComponentVectorPermutations(const std::vector<int> &Mi_local) const;
         
         /// Returns true if the input sites exists in _equivalentSites, order doesn't matter if sorted= false.
-        bool contains(const std::vector<LatticeSite> &sites, bool sorted) const;
+        bool contains(const std::vector<LatticeSite> sites, bool sorted) const;
 
         /// Remove all elements i in equivalent sites if any sites in _equivalentSites[i] have the input index
-        void removeSitesWithIndex(const int indexRemove, const int indexKeep);
+        void removeSitesWithIndex(const int indexRemove, bool);
 
         /// Remove all elements i in equivalent sites if no sites in _equivalentSites[i] have the input index                
-        void removeSitesNotWithIndex(const int index);
+        void removeSitesNotWithIndex(const int index, bool);
 
+        void removeSites(std::vector<LatticeSite>);
         ///Container of equivalent sites for this orbit
         std::vector<std::vector<LatticeSite>> _equivalentSites;
 

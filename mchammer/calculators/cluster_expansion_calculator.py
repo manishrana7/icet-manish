@@ -45,7 +45,6 @@ class ClusterExpansionCalculator(BaseCalculator):
                  scaling: Union[float, int]=None) -> None:
         super().__init__(atoms=atoms, name=name)
 
-
         atoms_cpy = atoms.copy()
         self.cpp_calc = _ClusterExpansionCalculator(
             cluster_expansion.cluster_space, Structure.from_atoms(atoms_cpy))
@@ -57,9 +56,9 @@ class ClusterExpansionCalculator(BaseCalculator):
             self.cluster_expansion.cluster_space._mi)
         self._cluster_expansion = cluster_expansion
         if scaling is None:
-            self._property_scaling = 1#len(atoms)
+            self._property_scaling = 1  # len(atoms)
         else:
-            self._property_scaling = 1#scaling
+            self._property_scaling = 1  # scaling
 
     @property
     def cluster_expansion(self) -> ClusterExpansion:
@@ -97,14 +96,17 @@ class ClusterExpansionCalculator(BaseCalculator):
         self.atoms.set_atomic_numbers(occupations)
         local_contribution = 0
         exclude_indices = []  # type: List[int]
+        only_flip = False
+        if len(local_indices) == 1:
+            only_flip = True        
         for index in local_indices:
             local_contribution += self._calculate_local_contribution(
-                index, exclude_indices = exclude_indices)
+                index, exclude_indices=exclude_indices, only_flip=only_flip)
             exclude_indices.append(index)
 
         return local_contribution
 
-    def _calculate_local_contribution(self, index, exclude_indices=[]):
+    def _calculate_local_contribution(self, index, exclude_indices=[], only_flip=None):
         """
         Internal method to calculate the local contribution for one
         index.
@@ -116,8 +118,8 @@ class ClusterExpansionCalculator(BaseCalculator):
 
         """
         local_cv = self.cpp_calc.get_local_cluster_vector(
-            self.atoms.get_atomic_numbers(), index, exclude_indices)
-        assert(len(local_cv)==len(self.cluster_expansion.parameters))
+            self.atoms.get_atomic_numbers(), index, exclude_indices, only_flip)
+        assert(len(local_cv) == len(self.cluster_expansion.parameters))
         # print(local_cv)
         return np.dot(local_cv, self.cluster_expansion.parameters) * \
             self._property_scaling

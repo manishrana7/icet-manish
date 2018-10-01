@@ -840,19 +840,37 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &superCell, const Vector3
     return localOrbitList;
 }
 /// Remove each element in orbit.equivalent sites if a vector<sites> have at least one lattice site with this index
-void OrbitList::removeSitesContainingIndex(const int indexRemove, const int indexKeep)
+void OrbitList::removeSitesContainingIndex(const int indexRemove, bool removeGhostIndex)
 {
     for(auto &orbit : _orbitList)
     {
-        orbit.removeSitesWithIndex(indexRemove, indexKeep);
+        orbit.removeSitesWithIndex(indexRemove, removeGhostIndex);
     }
 }
 
 /// Remove each element in orbit.equivalent sites if a vector<sites> have at least one lattice site with this index
-void OrbitList::removeSitesNotContainingIndex(const int index)
+void OrbitList::removeSitesNotContainingIndex(const int index, bool removeGhostIndex)
 {
     for(auto &orbit : _orbitList)
     {
-        orbit.removeSitesNotWithIndex(index);
+        orbit.removeSitesNotWithIndex(index, removeGhostIndex);
+    }
+}
+
+void OrbitList::subtractSitesFromOrbitList(const OrbitList &orbitList)
+{
+    if(orbitList.size() != size())
+    {
+        throw std::runtime_error("orbitlists mismatch in size in function OrbitList::subtractSitesFromOrbitList");
+    }
+    for(int i = 0; i<size(); i++)
+    {
+        for(const auto sites : orbitList._orbitList[i]._equivalentSites)
+        {
+            if(_orbitList[i].contains(sites, true))
+            {
+                _orbitList[i].removeSites(sites);
+            }
+        }
     }
 }

@@ -202,10 +202,10 @@ class OrbitList
     bool isSitesPBCCorrect(const std::vector<LatticeSite> &sites) const;
 
     /// Remove each element in orbit.equivalent sites if a vector<sites> have at least one lattice site with this index
-    void removeSitesContainingIndex(const int indexRemove, const int indexKeep);
+    void removeSitesContainingIndex(const int indexRemove, bool);
 
     /// Remove each element in orbit.equivalent sites if a vector<sites> doesn't have a lattice site with this index
-    void removeSitesNotContainingIndex(const int);
+    void removeSitesNotContainingIndex(const int, bool);
 
     std::vector<Orbit> _orbitList;
     std::vector<LatticeSite> getCol1() const
@@ -216,6 +216,7 @@ class OrbitList
     {
         return _permutationMatrix;
     }
+    void subtractSitesFromOrbitList(const OrbitList &);
   private:
     
     std::vector<LatticeSite> _col1;

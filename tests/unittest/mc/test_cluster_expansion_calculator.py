@@ -237,17 +237,17 @@ class TestCECalculatorBinary(unittest.TestCase):
 
         index = 4
         local_cv_before = cpp_calc.get_local_cluster_vector(
-            self.atoms.get_atomic_numbers(), index, [])
+            self.atoms.get_atomic_numbers(), index, [], False)
 
         self.atoms[index].symbol = 'Ge'
 
         local_cv_after = cpp_calc.get_local_cluster_vector(
-            self.atoms.get_atomic_numbers(), index, [])
+            self.atoms.get_atomic_numbers(), index, [], False)
 
         print(local_cv_before-local_cv_after)
 
 
-class TestCECalculatorBinaryHCPLongCutoffSmallSystem(unittest.TestCase):
+class TestCECalculatorBinaryHCP(unittest.TestCase):
     """
     Container for tests of the class functionality.
 
@@ -259,18 +259,17 @@ class TestCECalculatorBinaryHCPLongCutoffSmallSystem(unittest.TestCase):
     """
 
     def __init__(self, *args, **kwargs):
-        super(TestCECalculatorBinaryHCPLongCutoffSmallSystem,
+        super(TestCECalculatorBinaryHCP,
               self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1).repeat(2)
-        # print("atoms len ", len(self.atoms))
-        self.cutoffs = [15.12]  # [2.9]
+        self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1)
+        self.cutoffs = [6,6,6]  # [2.9]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms.copy(), self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
         params = [1.0] * params_len
-        params[0] = 0
-        params[1] = 0
+        # params[0] = 0
+        # params[1] = 0
 
         self.ce = ClusterExpansion(self.cs, params)
 
@@ -386,7 +385,7 @@ class TestCECalculatorBinaryHCPLongCutoffSmallSystem(unittest.TestCase):
         return local_diff, total_diff
 
 
-class TestCECalculatorBinaryBCCLongCutoffSmallSystem(unittest.TestCase):
+class TestCECalculatorBinaryBCC(unittest.TestCase):
     """
     Container for tests of the class functionality.
 
@@ -398,11 +397,11 @@ class TestCECalculatorBinaryBCCLongCutoffSmallSystem(unittest.TestCase):
     """
 
     def __init__(self, *args, **kwargs):
-        super(TestCECalculatorBinaryBCCLongCutoffSmallSystem,
+        super(TestCECalculatorBinaryBCC,
               self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al",'bcc',a=4.0).repeat(2)        
-        self.cutoffs = [17]  # [2.9]
+        self.atoms = bulk("Al",'bcc',a=4.0)  
+        self.cutoffs = [6, 6, 6]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
@@ -535,22 +534,19 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
         super(TestCECalculatorTernaryBCC,
               self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al",'bcc',a=4.0).repeat(2)        
-        self.cutoffs = [3.9]
+        self.atoms = bulk("Al",'bcc',a=4.0)
+        self.cutoffs = [6,6,6]
         self.subelements = ['Al', 'Ge', 'Pt']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
         params = [1.0] * params_len
         print("setting ternary ce calc ecis to zero in unit test")        
-        params = [0] * params_len
-        params [3] = 1
-
         self.ce = ClusterExpansion(self.cs, params)
-        print(self.ce)
+
 
     def setUp(self):
         """Setup before each test."""
-        self.atoms = bulk("Al",'bcc',a=4.0).repeat(3)
+        self.atoms = bulk("Al",'bcc',a=4.0).repeat(2)
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
 
