@@ -93,7 +93,7 @@ class LocalOrbitListGenerator
         double distanceToOrigin = 1e6;
         for (int i = 0; i < _orbitList.getPrimitiveStructure().size(); i++)
         {
-            Vector3d position_i = _orbitList.getPrimitiveStructure().getPositionByIndex(i);
+            Vector3d position_i = _orbitList.getPrimitiveStructure().getPositions().row(i);
             if ((position_i.norm()) < distanceToOrigin)
             {
                 distanceToOrigin = position_i.norm();

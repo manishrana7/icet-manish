@@ -52,17 +52,6 @@ void ClusterCounts::count(const Structure &structure, const std::vector<std::vec
                           const Cluster &cluster, bool orderIntact)
 {   
 
-    if(latticeNeighbors.size()==0)
-    {
-        std::vector<int> placeHolderElements;
-        for(int i = 0; i<cluster.order(); i++)
-        {
-            placeHolderElements.push_back(structure.getAtomicNumber(0));
-        }
-        // _clusterCounts[cluster][placeHolderElements] += 0;
-        // std::cout<<"No neighbors in count. Cluster tag= "<<cluster.tag()<<std::endl;
-    }
-
     for (const auto &latnbrs : latticeNeighbors)
     {
         std::vector<int> elements(latnbrs.size());
@@ -101,7 +90,7 @@ void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &
 {
     for (int i = 0; i < orbitList.size(); i++)
     {
-        Cluster repr_cluster = orbitList.getOrbit(i).getRepresentativeCluster();
+        Cluster repr_cluster = orbitList._orbitList[i].getRepresentativeCluster();
         repr_cluster.setTag(i);
         if(permuteSites && orderIntact && repr_cluster.order()!= 1)
         {

@@ -260,7 +260,8 @@ PYBIND11_MODULE(_icet, m)
              int
                  index of unique site
          )pbdoc")
-        .def("get_position",&Structure::getPosition,
+        .def("get_position",
+             &Structure::getPosition,
              py::arg("site"),
              R"pbdoc(
              Returns the position of a specified site
@@ -763,7 +764,7 @@ PYBIND11_MODULE(_icet, m)
     py::class_<ClusterExpansionCalculator>(m,"_ClusterExpansionCalculator")
     .def(py::init<const ClusterSpace &, const Structure &>())
     // .def("get_local_cluster_vector", &ClusterExpansionCalculator::getLocalClusterVector)
-    .def("get_local_cluster_vector", [](ClusterExpansionCalculator &ceCalc, const std::vector<int> &occupations, const int index, const std::vector<int> indices, bool onlyFlip ) {
+    .def("get_local_cluster_vector", [](ClusterExpansionCalculator &ceCalc, const std::vector<int> &occupations, const int index, const std::vector<int> indices,bool onlyFlip) {
             auto cv = ceCalc.getLocalClusterVector(occupations, index, indices, onlyFlip);
             return py::array(cv.size(), cv.data());
         })

@@ -76,15 +76,20 @@ class ClusterSpace
     /// Returns the cluster product.
     /// @todo Can we find a more telling name?
     double evaluateClusterProduct(const std::vector<int> &, const std::vector<int> &, const std::vector<int> &) const;
+
     /// Primitive (prototype) structure.
     Structure _primitiveStructure;
+
+    std::vector<std::vector<std::vector<int>>> _permutedMultiComponentVectors;
+    std::vector<std::vector<std::vector<std::vector<int>>>> _elementPermutations;
+
+
   private:
     /// Collect information about the cluster space.
     void collectClusterSpaceInfo();
 
     /// Returns the default cluster function.
     double evaluateClusterFunction(const int, const int, const int) const;
-
 
   private:
     /// True if cluster space has been initialized.
@@ -98,7 +103,6 @@ class ClusterSpace
 
     /// Number of allowed components on each site of the primitive structure.
     std::vector<int> _numberOfAllowedSpeciesPerSite;
-
 
 
     /// Radial cutoffs by cluster order starting with pairs.

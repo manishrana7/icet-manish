@@ -48,8 +48,8 @@ def print_timing_ratios(atoms, iters, sizes, cutoffs):
 
 
 if __name__ == '__main__':
-    iters = 15
-    atoms = bulk("Al", a=4.0)
+    iters = 50
+    atoms = bulk("Al")
     cutoffs = [10, 6, 5]
     elements = ["Al", "Ga"]
     sizes = [4,6,8,10,16]
