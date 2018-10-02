@@ -22,10 +22,10 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
     //map all sites
     for (size_t i = 0; i < _supercell.size(); i++)
     {
-        Vector3d position_i = _supercell.getPositions().row(i);
+        Vector3d position_i = _supercell.getPositionByIndex(i);
 
         LatticeSite primitive_site = _orbitList.getPrimitiveStructure().findLatticeSiteByPosition(position_i);
-        Vector3d primitive_position = _orbitList.getPrimitiveStructure().getPositions().row(primitive_site.index());
+        Vector3d primitive_position = _orbitList.getPrimitiveStructure().getPositionByIndex(primitive_site.index());
         // Basically only append offsets to indices that correspond to the atom in the origin
         if ((primitive_position - _positionClosestToOrigin).norm() < 1e-5)
         {
@@ -82,7 +82,7 @@ std::vector<int> LocalOrbitListGenerator::findMatchingSupercellPositions(const V
     std::vector<int> matchedIndices;
     for (int i = 0; i < _supercell.getPositions().rows(); i++)
     {
-        if ((position.transpose() - _supercell.getPositions().row(i)).norm() < 1e-3)
+        if ((position.transpose() - _supercell.getPositionByIndex(i)).norm() < 1e-3)
         {
             matchedIndices.push_back(i);
         }
