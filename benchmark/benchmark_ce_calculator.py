@@ -48,11 +48,11 @@ def print_timing_ratios(atoms, iters, sizes, cutoffs):
 
 
 if __name__ == '__main__':
-    iters = 30
+    iters = 50
     atoms = bulk("Al")
     cutoffs = [10, 6, 5]
     elements = ["Al", "Ga"]
-    sizes = [2,4,5,6,7,8,9,10,16]
+    sizes = [4,6,8,10,16]
     print_timing_ratios(atoms, iters,sizes, cutoffs)
     # asd
     cs = ClusterSpace(atoms, cutoffs, elements)
