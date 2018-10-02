@@ -217,6 +217,8 @@ class OrbitList
         return _permutationMatrix;
     }
     void subtractSitesFromOrbitList(const OrbitList &);
+
+    void removeOrbit(const size_t);
   private:
     
     std::vector<LatticeSite> _col1;

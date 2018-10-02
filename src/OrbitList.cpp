@@ -874,3 +874,15 @@ void OrbitList::subtractSitesFromOrbitList(const OrbitList &orbitList)
         }
     }
 }
+
+/// Removes orbit with the input index
+void OrbitList::removeOrbit(const size_t index)
+{
+    if(index <0 || index >=size())
+    {
+        std::string msg = "Index " + std::to_string(index) + " was out of bounds in OrbitList::removeOrbit";
+        msg += "OrbitList size is " + std::to_string(size());
+        throw std::out_of_range(msg);
+    }
+    _orbitList.erase(_orbitList.begin()+index);
+}

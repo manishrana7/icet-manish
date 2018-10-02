@@ -28,10 +28,26 @@ ClusterSpace::ClusterSpace(std::vector<int> numberOfAllowedSpecies,
         _speciesMap[_species[i]] = i;
     }
 
+
+    //Remove orbits that are inactive
+    for(int i=_orbitList.size()-1; i>=0; i--)
+    {
+        auto numberOfAllowedSpecies = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _orbitList.getOrbit(i).getRepresentativeSites());
+
+        if (std::any_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n) { return n < 2; }))
+        {
+            _orbitList.removeOrbit(i);
+        }        
+    }
+
+
     /// @todo Why is the collectClusterSpaceInfo function not executed
     /// immediately, which would render _isClusterSpaceInitialized unnecessary?
     _isClusterSpaceInitialized = false;
     collectClusterSpaceInfo();
+
+
+    
 }
 
 /**
@@ -102,7 +118,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
             throw std::runtime_error(msg);
         }
 
-        // Jump to the next orbit if none of the sites in the representative cluster are active (i.e. the number of allowed species on this site is less than 2).
+        // Jump to the next orbit if any of the sites in the representative cluster are in-active (i.e. the number of allowed species on this site is less than 2).
         if (any_of(numberOfAllowedSpeciesBySite.begin(), numberOfAllowedSpeciesBySite.end(), [](int n) { return n < 2; }))
         {
             continue;
@@ -341,22 +357,25 @@ void ClusterSpace::collectClusterSpaceInfo()
     _clusterSpaceInfo.clear();
     std::vector<int> emptyVec = {0};
     _clusterSpaceInfo.push_back(make_pair(-1, emptyVec));
+    _permutedMultiComponentVectors.resize(_orbitList.size());
+    _elementPermutations.resize(_orbitList.size());
     for (int i = 0; i < _orbitList.size(); i++)
     {
         std::vector<std::vector<int>> permutedMCVector;
         auto numberOfAllowedSpecies = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _orbitList.getOrbit(i).getRepresentativeSites());
 
         auto multiComponentVectors = _orbitList.getOrbit(i).getMultiComponentVectors(numberOfAllowedSpecies);
-        auto elementPermutations = getMultiComponentVectorPermutations(multiComponentVectors, i);
-        _elementPermutations.push_back(elementPermutations);
-        _permutedMultiComponentVectors.push_back(multiComponentVectors);
+        if (std::none_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n) { return n < 2; }))
+        {
+            auto elementPermutations = getMultiComponentVectorPermutations(multiComponentVectors, i);
+            _elementPermutations[i] = elementPermutations;
+            _permutedMultiComponentVectors[i] = multiComponentVectors;
+        }        
 
         for (const auto &multiComponentVector : multiComponentVectors)
         {
-            // permutedMCVector.push_back(icet::getPermutedVector(multiComponentVector, elementPermutations[i][currentMCVectorIndex]));
-            _clusterSpaceInfo.push_back(make_pair(i, multiComponentVector));            
+            _clusterSpaceInfo.push_back(make_pair(i, multiComponentVector));
         }
-        // _permutedMultiComponentVectors.push_back(permutedMCVector);
     }
     _isClusterSpaceInitialized = true;
 }
