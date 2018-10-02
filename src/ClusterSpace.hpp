@@ -80,7 +80,7 @@ class ClusterSpace
     /// Primitive (prototype) structure.
     Structure _primitiveStructure;
 
-    std::vector<std::vector<std::vector<int>>> _permutedMultiComponentVectors;
+    std::vector<std::vector<std::vector<int>>> _multiComponentVectors;
     std::vector<std::vector<std::vector<std::vector<int>>>> _elementPermutations;
 
 

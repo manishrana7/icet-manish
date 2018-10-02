@@ -4,7 +4,7 @@ from .local_orbit_list_generator import LocalOrbitListGenerator
 
 def __count_clusters(self, structure, prim_orbit_list,
                      keep_order_intact=False):
-    '''
+    """
     Count all clusters in a structure by finding their local orbit list.
 
     Note that this requires creating the local_orbit_list_generator object for
@@ -19,16 +19,12 @@ def __count_clusters(self, structure, prim_orbit_list,
     keep_order_intact: boolean
         count the clusters in the orbit with the same orientation as the
         prototype cluster
-    '''
+    """
 
     local_orbit_list_generator = LocalOrbitListGenerator(prim_orbit_list,
                                                          structure)
 
     for i in range(local_orbit_list_generator.get_unique_offsets_count()):
-        # sending local orbit list directly into function was about 10% faster
-        # than:
-        # local_orbit_list = \
-        #    local_orbit_list_generator.generate_local_orbit_list(i)
         permute_sites = True
         self.count_orbit_list(
             structure,
@@ -37,10 +33,10 @@ def __count_clusters(self, structure, prim_orbit_list,
 
 
 def __get_string_representation(self):
-    '''
+    """
     String representation of cluster counts that provides an overview
     of the clusters (cluster, elements and count).
-    '''
+    """
     self.setup_cluster_counts_info()
     s = ['Cluster Counts']
     cluster_counts = {key: len(values)
@@ -62,9 +58,9 @@ def __get_string_representation(self):
 
 
 def __print_overview(self):
-    '''
+    """
     Print cluster counts representation
-    '''
+    """
     print(__get_string_representation(self))
 
 

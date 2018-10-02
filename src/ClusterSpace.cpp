@@ -102,14 +102,14 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
     for (size_t i = 0; i < _orbitList.size(); i++)
     {
 
-        auto representativeCluster = _orbitList.getOrbit(i).getRepresentativeCluster();
+        auto representativeCluster = _orbitList._orbitList[i].getRepresentativeCluster();
         // @todo This is necessary. Side effects need to carefully evaluated. Ideally move this task elsewhere as it is repeated for every structure, for which the cluster vector is computed.
         representativeCluster.setTag(i);
 
         std::vector<int> numberOfAllowedSpeciesBySite;
         try
         {
-            numberOfAllowedSpeciesBySite = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _orbitList.getOrbit(i).getRepresentativeSites());
+            numberOfAllowedSpeciesBySite = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _orbitList._orbitList[i].getRepresentativeSites());
         }
         catch (const std::exception &e)
         {
@@ -129,9 +129,13 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
         // Example 1: For an AB alloy we obtain [0, 0] and [0, 0, 0] for pair and triplet terms, respectively.
         // Example 2: For an ABC alloy we obtain [0, 0], [0, 1], [1, 1] for pairs and similarly for triplets.
         // Depending on the symmetry of the cluster one might also obtain [1, 0] (e.g., in a clathrate or for some clusters on a HCP lattice).
-        auto multiComponentVectors = _orbitList.getOrbit(i).getMultiComponentVectors(numberOfAllowedSpeciesBySite);
+
+        // auto multiComponentVectors = _orbitList.getOrbit(i).getMultiComponentVectors(numberOfAllowedSpeciesBySite);
+        const auto &multiComponentVectors = _multiComponentVectors[i];
+
         // @todo Make getMultiComponentVectorPermutations take an Orbit rather than an index. Then swap the loop over int for a loop over Orbit above.
-        auto speciesPermutations = getMultiComponentVectorPermutations(multiComponentVectors, i);
+        // auto speciesPermutations = getMultiComponentVectorPermutations(multiComponentVectors, i);
+        const auto &speciesPermutations = _elementPermutations[i];
         int currentMultiComponentVectorIndex = 0;
         for (const auto &multiComponentVector : multiComponentVectors)
         {
@@ -150,20 +154,6 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
                     multiplicity += speciesCountPair.second;
                 }
             }
-            if (multiplicity != speciesPermutations[currentMultiComponentVectorIndex].size() * _orbitList.getOrbit(i).getEquivalentSites().size() * structure.size() / _primitiveStructure.size())
-            {
-
-                std::string msg = "Found non expected multiplicity in get cv. ";
-                msg += std::to_string(multiplicity) + " != " + std::to_string(_orbitList.getOrbit(i).getEquivalentSites().size() * structure.size() / _primitiveStructure.size());
-                msg += "\nStructure size: " + std::to_string(structure.size());
-                msg += "\nPrim Structure size: " + std::to_string(_primitiveStructure.size());
-                msg += "\nOrbit size: " + std::to_string(_orbitList.getOrbit(i).getEquivalentSites().size());
-                msg += "\nOrbit order: " + std::to_string(_orbitList.getOrbit(i).getRepresentativeCluster().order());
-                msg += "\nMultiplicity: " + std::to_string(multiplicity);
-                msg += "\nPermutations  vector size: " + std::to_string(speciesPermutations[currentMultiComponentVectorIndex].size());
-                std::cout << msg << std::endl;
-                // throw std::runtime_error(msg);
-            }
             clusterVectorElement /= ((double)multiplicity);
             clusterVector.push_back(clusterVectorElement);
 
@@ -171,59 +161,6 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
         }
     }
     return clusterVector;
-}
-
-/// Returns the native clusters count in this structure, i.e. only clusters inside the unit cell.
-ClusterCounts ClusterSpace::getNativeClusters(const Structure &structure) const
-{
-    bool orderIntact = true; // count the clusters in the orbit with the same orientation as the prototype cluster
-    LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(_orbitList, structure);
-    size_t uniqueOffsets = localOrbitListGenerator.getNumberOfUniqueOffsets();
-    ClusterCounts clusterCounts = ClusterCounts();
-    int tags = 0;
-    for (int i = 0; i < uniqueOffsets; i++)
-    {
-        const auto localOrbitList = localOrbitListGenerator.getLocalOrbitList(i);
-        for (int j = 0; j < localOrbitList.size(); j++)
-        {
-            Cluster repr_cluster = localOrbitList.getOrbit(j).getRepresentativeCluster();
-
-            for (const auto sites : localOrbitList.getOrbit(j).getPermutedEquivalentSites())
-            {
-                bool cont = true;
-                for (auto site : sites)
-                {
-                    if (site.unitcellOffset().norm() > 0.1)
-                    {
-                        cont = false;
-                    }
-                }
-                if (!cont)
-                {
-                    continue;
-                }
-                repr_cluster.setTag(j);
-                std::vector<int> species(sites.size());
-                if (repr_cluster.order() != 1)
-                {
-                    for (size_t i = 0; i < sites.size(); i++)
-                    {
-                        species[i] = structure.getAtomicNumber(sites[i].index());
-                    }
-                    clusterCounts.countCluster(repr_cluster, species, orderIntact);
-                }
-                else
-                {
-                    for (size_t i = 0; i < sites.size(); i++)
-                    {
-                        species[i] = structure.getAtomicNumber(sites[i].index());
-                    }
-                    clusterCounts.countCluster(repr_cluster, species, orderIntact);
-                }
-            }
-        }
-    }
-    return clusterCounts;
 }
 
 /**
@@ -357,7 +294,7 @@ void ClusterSpace::collectClusterSpaceInfo()
     _clusterSpaceInfo.clear();
     std::vector<int> emptyVec = {0};
     _clusterSpaceInfo.push_back(make_pair(-1, emptyVec));
-    _permutedMultiComponentVectors.resize(_orbitList.size());
+    _multiComponentVectors.resize(_orbitList.size());
     _elementPermutations.resize(_orbitList.size());
     for (int i = 0; i < _orbitList.size(); i++)
     {
@@ -369,7 +306,7 @@ void ClusterSpace::collectClusterSpaceInfo()
         {
             auto elementPermutations = getMultiComponentVectorPermutations(multiComponentVectors, i);
             _elementPermutations[i] = elementPermutations;
-            _permutedMultiComponentVectors[i] = multiComponentVectors;
+            _multiComponentVectors[i] = multiComponentVectors;
         }        
 
         for (const auto &multiComponentVector : multiComponentVectors)
