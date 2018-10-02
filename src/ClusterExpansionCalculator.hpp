@@ -20,24 +20,29 @@ using namespace Eigen;
 class ClusterExpansionCalculator
 {
     public:
+    
+    /// Constructor.
     ClusterExpansionCalculator(const ClusterSpace &, const Structure &);
 
-    // std::vector<double> getLocalClusterVector(const Structure &, const int);
+    /// Returns the local cluster vector.
     std::vector<double> getLocalClusterVector(const std::vector<int>& ,const int, const std::vector<int>);
-    double getLocalContribution(const Structure &, const int) const;
-    OrbitList getLocalOrbitList(int index);
-    void testRemovingSites();
-    void checkNoSelfInteractions();
 
     private:
+    /// Maps offsets to local orbit lists.
     std::map<Vector3d, OrbitList, Vector3dCompare> _localOrbitlists;
 
-    void validateBasisAtomOrbitLists();
+    /// Internal cluster space.
     ClusterSpace _clusterSpace;
+    
+    /// The supercell that the calculator is optimized for.
     Structure _superCell;
-    LocalOrbitListGenerator _theLog;
+    
+    /// The full primitive orbit list, contains all clusters for the primitive cell.
     OrbitList _fullPrimitiveOrbitList;
-    ///this maps a latticeNeighbor from the primitive and get the equivalent in supercell
+
+    /// Maps a lattice site from the primitive and get the equivalent in the super cell.
     std::unordered_map<LatticeSite, LatticeSite> _primToSupercellMap;
+
+    /// Maps supercell index to its corresponding primitive cell offset.
     std::map<int, Vector3d> _indexToOffset;
 };
