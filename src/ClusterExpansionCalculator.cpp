@@ -133,7 +133,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 @param onlyFlip true if we only want to consider flip changes.
 */
 
-std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std::vector<int> &occupations, int index, std::vector<int> ignoredIndices, bool onlyFlip)
+std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std::vector<int> &occupations, int index, std::vector<int> ignoredIndices)
 {
     _superCell.setAtomicNumbers(occupations);
     if (occupations.size() != _superCell.size())

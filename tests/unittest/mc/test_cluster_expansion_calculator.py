@@ -227,12 +227,12 @@ class TestCECalculatorBinary(unittest.TestCase):
 
         index = 4
         local_cv_before = cpp_calc.get_local_cluster_vector(
-            self.atoms.get_atomic_numbers(), index, [], False)
+            self.atoms.get_atomic_numbers(), index, [])
 
         self.atoms[index].symbol = 'Ge'
 
         local_cv_after = cpp_calc.get_local_cluster_vector(
-            self.atoms.get_atomic_numbers(), index, [], False)
+            self.atoms.get_atomic_numbers(), index, [])
 
 
 class TestCECalculatorBinaryHCP(unittest.TestCase):

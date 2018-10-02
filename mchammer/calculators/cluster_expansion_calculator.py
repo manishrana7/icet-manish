@@ -95,18 +95,16 @@ class ClusterExpansionCalculator(BaseCalculator):
 
         self.atoms.set_atomic_numbers(occupations)
         local_contribution = 0
-        exclude_indices = []  # type: List[int]
-        only_flip = False
-        if len(local_indices) == 1:
-            only_flip = True        
+        exclude_indices = []  # type: List[int]        
+
         for index in local_indices:
             local_contribution += self._calculate_local_contribution(
-                index, exclude_indices=exclude_indices, only_flip=only_flip)
+                index, exclude_indices=exclude_indices)
             exclude_indices.append(index)
 
         return local_contribution
 
-    def _calculate_local_contribution(self, index, exclude_indices=[], only_flip=None):
+    def _calculate_local_contribution(self, index, exclude_indices=[]):
         """
         Internal method to calculate the local contribution for one
         index.
@@ -118,7 +116,7 @@ class ClusterExpansionCalculator(BaseCalculator):
 
         """
         local_cv = self.cpp_calc.get_local_cluster_vector(
-            self.atoms.get_atomic_numbers(), index, exclude_indices, only_flip)
+            self.atoms.get_atomic_numbers(), index, exclude_indices)
         assert(len(local_cv) == len(self.cluster_expansion.parameters))
         # print(local_cv)
         return np.dot(local_cv, self.cluster_expansion.parameters) * \
