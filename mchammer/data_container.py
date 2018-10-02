@@ -46,8 +46,8 @@ class DataContainer:
         self._parameters = OrderedDict()
         self._metadata = OrderedDict()
         self._last_state = {}
+        # These seems to be useless
         self._data = pd.DataFrame(columns=['mctrial', 'occupations'])
-        self._data = self._data.astype({'mctrial': int, 'occupations': object})
 
         self.add_parameter('seed', random_seed)
 
@@ -510,6 +510,8 @@ class DataContainer:
             runtime_data_file.seek(0)
             runtime_data = pd.read_json(runtime_data_file)
             dc._data = runtime_data.sort_index(ascending=True)
+            dc._data.occupations = \
+                dc._data.occupations.replace({None: np.nan})
 
         return dc
 

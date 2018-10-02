@@ -238,7 +238,7 @@ class BaseEnsemble(ABC):
 
         # Trajectory data
         if step % self._trajectory_write_interval == 0:
-            row_dict['occupations'] = self.configuration.occupations
+            row_dict['occupations'] = self.configuration.occupations.tolist()
 
         # Observer data
         for observer in self.observers.values():
