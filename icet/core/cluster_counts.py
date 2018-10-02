@@ -29,10 +29,11 @@ def __count_clusters(self, structure, prim_orbit_list,
         # than:
         # local_orbit_list = \
         #    local_orbit_list_generator.generate_local_orbit_list(i)
+        permute_sites = True
         self.count_orbit_list(
             structure,
             local_orbit_list_generator.generate_local_orbit_list(i),
-            keep_order_intact)
+            keep_order_intact, permute_sites)
 
 
 def __get_string_representation(self):
