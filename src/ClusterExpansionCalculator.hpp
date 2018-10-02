@@ -39,5 +39,5 @@ class ClusterExpansionCalculator
     OrbitList _fullPrimitiveOrbitList;
     ///this maps a latticeNeighbor from the primitive and get the equivalent in supercell
     std::unordered_map<LatticeSite, LatticeSite> _primToSupercellMap;
-
+    std::map<int, Vector3d> _indexToOffset;
 };

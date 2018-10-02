@@ -101,7 +101,7 @@ void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &
 {
     for (int i = 0; i < orbitList.size(); i++)
     {
-        Cluster repr_cluster = orbitList.getOrbit(i).getRepresentativeCluster();
+        Cluster repr_cluster = orbitList._orbitList[i].getRepresentativeCluster();
         repr_cluster.setTag(i);
         if(permuteSites && orderIntact && repr_cluster.order()!= 1)
         {
