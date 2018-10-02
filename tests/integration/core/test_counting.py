@@ -90,7 +90,7 @@ def test_no_symmetry_local_orbit_list_counting(atoms_primitive, atoms_tag,
     # with non-local orbit list
     cluster_count_supercell = ClusterCounts()
     cluster_count_supercell.count_orbit_list(
-        structure_repeat, orbit_list_supercell, False)
+        structure_repeat, orbit_list_supercell, False, False)
 
     # get the cluster count map
     cluster_map_local = cluster_count_local.get_cluster_counts()
@@ -241,7 +241,7 @@ db = connect('structures_for_testing.db')
 for row in db.select():
     atoms_row = row.toatoms()
     atoms_tag = row.tag
-    N = 3
+    N = 2
     cutoffs = [1.4] * 3
     if 'NaCl' in atoms_tag:
         cutoffs = [1.1] * 4
