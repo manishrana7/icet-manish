@@ -214,8 +214,8 @@ class TestOrbitList(unittest.TestCase):
         """
         from itertools import permutations
 
-        # check all possible permutations are allowed for this case
-        atoms = bulk('Al', crystalstructure='sc', a=3.1)
+        # check all permutations are allowed for these orbits
+        atoms = bulk('Al')
         cutoffs = [3.2, 3.2]
         orbit_list = create_orbit_list(atoms, cutoffs)
 
@@ -224,13 +224,13 @@ class TestOrbitList(unittest.TestCase):
                 [list(perm) for perm in permutations(range(orbit.order))]
             self.assertEqual(all_perm, sorted(orbit.allowed_permutations))
 
-        # check a case with lower symmetry
-        atoms = bulk('Al', crystalstructure='bcc', a=3.1)
+        # check a case with limited number of permutations for triplets
+        atoms = bulk('Fe')
         orbit_list = create_orbit_list(atoms, cutoffs)
 
         allowed_perm = [[[0]],
                         [[0, 1], [1, 0]],
-                        [[0, 1, 2], [2, 1, 0]]]
+                        [[0, 1, 2], [1, 0, 2]]]
         for orbit in orbit_list.orbits:
             self.assertEqual(allowed_perm[orbit.order-1],
                              sorted(orbit.allowed_permutations))
