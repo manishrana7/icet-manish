@@ -88,12 +88,12 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     int orbitIndex = -1;
     for (auto orbit : orbitVector)
     {
-        orbitIndex++;        
+        orbitIndex++;
         _fullPrimitiveOrbitList.addOrbit(orbit);
     }
     _fullPrimitiveOrbitList.addPermutationInformationToOrbits(_clusterSpace.getOrbitList().getCol1(),
                                                               _clusterSpace.getOrbitList().getPermutationMatrix());
-    
+
     _primToSupercellMap.clear();
     _indexToOffset.clear();
     for (int i = 0; i < structure.size(); i++)
@@ -125,6 +125,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std::vector<int> &occupations, int index, std::vector<int> ignoredIndices)
 {
     _superCell.setAtomicNumbers(occupations);
+
     if (occupations.size() != _superCell.size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size");
@@ -137,22 +138,26 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
             throw std::runtime_error("index larger than Input structure size in method ClusterExpansionCalculator::getLocalClusterVector");
         }
     }
+    
+    // dont sort the clusters
+    bool orderIntact = true;   
 
-    int dprint = 0;
-    bool orderIntact = true;   // dont sort the clusters
-    bool permuteSites = false; // count the clusters in the order they lie in equivalent sites
+    // count the clusters in the order they lie in equivalent sites
+    // since these sites are already in the permuted order
+    bool permuteSites = false; 
 
-    // Remove all that doesnt contain index regardless of offset?
+    // Remove all that doesn't contain index regardless of offset?
     bool removeGhostIndexNotContain = true;
 
     // Remove all ignored indices regardless of offset?
     bool removeGhostIndexContain = false;
-    
+
     ClusterCounts clusterCounts = ClusterCounts();
-    
+
     // Get one of the translated orbitlists
     OrbitList translatedOrbitList = _localOrbitlists[_indexToOffset[index]];
 
+    // Remove sites not containing the local index
     translatedOrbitList.removeSitesNotContainingIndex(index, removeGhostIndexNotContain);
 
     // Purge the orbitlist of all sites containing the ignored indices
@@ -160,13 +165,15 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
     {
         translatedOrbitList.removeSitesContainingIndex(ignoredIndex, removeGhostIndexContain);
     }
+
+    // Count clusters and get cluster count map
     clusterCounts.countOrbitList(_superCell, translatedOrbitList, orderIntact, permuteSites);
     const auto clusterMap = clusterCounts.getClusterCounts();
 
     // Finally begin occupying the cluster vector
     int orbitIndex = -1;
     std::vector<double> clusterVector;
-    clusterVector.push_back(1.0 / _superCell.size());    
+    clusterVector.push_back(1.0 / _superCell.size());
     for (size_t i = 0; i < _fullPrimitiveOrbitList.size(); i++)
     {
         Cluster repCluster = _fullPrimitiveOrbitList._orbitList[i]._representativeCluster;
@@ -193,9 +200,9 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
             continue;
         }
 
-        const auto &mcVectors = _clusterSpace._multiComponentVectors[i];        
+        const auto &mcVectors = _clusterSpace._multiComponentVectors[i];
         const auto &elementPermutations = _clusterSpace._elementPermutations[i];
-        repCluster.setTag(i);        
+        repCluster.setTag(i);
         for (int currentMCVectorIndex = 0; currentMCVectorIndex < _clusterSpace._multiComponentVectors[i].size(); currentMCVectorIndex++)
         {
             double clusterVectorElement = 0;
@@ -204,15 +211,15 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
             auto clusterFind = clusterMap.find(repCluster);
             if (clusterFind == clusterMap.end())
             {
-                clusterVector.push_back(0);                
+                clusterVector.push_back(0);
                 continue;
             }
             for (const auto &elementsCountPair : clusterMap.at(repCluster))
             {
                 for (const auto &perm : _clusterSpace._elementPermutations[i][currentMCVectorIndex])
                 {
-                    const auto permutedMCVector = icet::getPermutedVector(mcVectors[currentMCVectorIndex], perm);                    
-                    const auto permutedAllowedOccupations = icet::getPermutedVector(allowedOccupations, perm);
+                    const auto &permutedMCVector = icet::getPermutedVector(mcVectors[currentMCVectorIndex], perm);
+                    const auto &permutedAllowedOccupations = icet::getPermutedVector(allowedOccupations, perm);
 
                     clusterVectorElement += _clusterSpace.evaluateClusterProduct(permutedMCVector, permutedAllowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                     multiplicity += elementsCountPair.second;
