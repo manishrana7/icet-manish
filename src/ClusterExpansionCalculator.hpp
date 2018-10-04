@@ -29,7 +29,7 @@ class ClusterExpansionCalculator
 
     private:
     /// Maps offsets to local orbit lists.
-    std::map<Vector3d, OrbitList, Vector3dCompare> _localOrbitlists;
+    std::unordered_map<Vector3d, OrbitList, Vector3dHash> _localOrbitlists;
 
     /// Internal cluster space.
     ClusterSpace _clusterSpace;

@@ -252,8 +252,10 @@ double ClusterSpace::evaluateClusterFunction(const int numberOfAllowedSpecies, c
 double ClusterSpace::evaluateClusterProduct(const std::vector<int> &multiComponentVector, const std::vector<int> &numberOfAllowedSpecies, const std::vector<int> &species) const
 {
     double clusterProduct = 1;
+
     for (int i = 0; i < species.size(); i++)
     {
+
         clusterProduct *= evaluateClusterFunction(numberOfAllowedSpecies[i], multiComponentVector[i], _speciesMap.at(species[i]));
     }
     return clusterProduct;

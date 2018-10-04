@@ -2,18 +2,13 @@
 
 ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clusterSpace, const Structure &structure)
 {
-    _clusterSpace = clusterSpace;
-    _clusterSpace._orbitList.sort();
+    _clusterSpace = clusterSpace;    
     _superCell = structure;
-    // Set up stuff.
+    
     LocalOrbitListGenerator _theLog = LocalOrbitListGenerator(clusterSpace.getOrbitList(), _superCell);
     size_t uniqueOffsets = _theLog.getNumberOfUniqueOffsets();
     int numberOfOrbits = _clusterSpace._orbitList.size();
-    Vector3d zeroOffset = {0.0, 0.0, 0.0};
-    int primitiveSize = _clusterSpace._primitiveStructure.size();
     std::vector<Orbit> orbitVector;
-    // std::cout<<"Primitve"<<std::endl;
-    // clusterSpace.getOrbitList().print();
     for (const auto orbit : clusterSpace._orbitList._orbitList)
     {
         orbitVector.push_back(Orbit(orbit.getRepresentativeCluster()));
@@ -24,11 +19,9 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
     /* Strategy to construct the "full" primitive orbitlists
     
-    We first fill up a std::vector<std::vector<Orbit>> orbitVector
-    where the inner vector<orbit> is essentially an orbitlist.
-    the outer vector is over basis atoms. When the entire vector<vector<orbit>> 
-    is constructed we create a vector<orbitlists>
-
+    We first fill up a std::vector<Orbit> orbitVector
+    where vector<orbit> is essentially an orbitlist.
+    
     The existing methods to construct the full orbitlist is to loop over all the
     unique offsets.
 
@@ -37,7 +30,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         `_theLog.getLocalOrbitList(offsetIndex).getOrbitList()`
 
     Then for each group of latticesites in orbit.equivalentSites() we add them
-    to orbitVector[i][orbitIndex] if the latticesites has the basis atom `i` in them.
+    to orbitVector[i][orbitIndex] if the latticesites has a site with offset [0, 0, 0].
 
     */
 
@@ -54,7 +47,6 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
             int eqSiteIndex = -1;
 
             for (const auto latticeSites : orbit.getEquivalentSites())
-            // for(const auto latticeSites : orbit.getPermutedEquivalentSites())
             {
                 eqSiteIndex++;
 
@@ -65,7 +57,6 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
                     auto primitiveSite = _clusterSpace._primitiveStructure.findLatticeSiteByPosition(sitePosition);
                     primitiveEquivalentSites.push_back(primitiveSite);
                 }
-                // //use translated sites (2)
                 std::vector<std::vector<LatticeSite>> latticeSitesTranslated = _clusterSpace._orbitList.getSitesTranslatedToUnitcell(primitiveEquivalentSites, false);
 
                 for (auto latticesitesPrimTrans : latticeSitesTranslated)
@@ -83,7 +74,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
             }
         }
     }
-
+    /// Now create the full primitive orbitlist using the vector<orbit>
     _fullPrimitiveOrbitList.setPrimitiveStructure(_clusterSpace.getPrimitiveStructure());
     int orbitIndex = -1;
     for (auto orbit : orbitVector)
@@ -158,7 +149,10 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
     OrbitList translatedOrbitList = _localOrbitlists[_indexToOffset[index]];
 
     // Remove sites not containing the local index
-    translatedOrbitList.removeSitesNotContainingIndex(index, removeGhostIndexNotContain);
+    if(_clusterSpace._primitiveStructure.size()>1)
+    {
+        translatedOrbitList.removeSitesNotContainingIndex(index, removeGhostIndexNotContain);
+    }
 
     // Purge the orbitlist of all sites containing the ignored indices
     for (auto ignoredIndex : ignoredIndices)

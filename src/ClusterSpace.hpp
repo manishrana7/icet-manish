@@ -5,6 +5,7 @@
 #include "LocalOrbitListGenerator.hpp"
 #include "ClusterCounts.hpp"
 #include "PeriodicTable.hpp"
+#include "VectorHash.hpp"
 
 //namespace icet {
 
@@ -66,7 +67,7 @@ class ClusterSpace
     }
 
     /// Returns the mapping between atomic numbers and the internal species enumeration scheme.
-    std::map<int, int> getSpeciesMap() const { return _speciesMap; }
+    std::unordered_map<int, int> getSpeciesMap() const { return _speciesMap; }
 
     ///Primitive orbit list based on the structure and the global cutoffs
     OrbitList _orbitList;
@@ -78,9 +79,11 @@ class ClusterSpace
     /// Primitive (prototype) structure.
     Structure _primitiveStructure;
 
+    /// Precomputed multicomponent vectors for each orbit in _orbitlist.
     std::vector<std::vector<std::vector<int>>> _multiComponentVectors;
-    std::vector<std::vector<std::vector<std::vector<int>>>> _sitePermutations;
 
+    /// Precomputed site permutations for each orbit in _orbitlist.
+    std::vector<std::vector<std::vector<std::vector<int>>>> _sitePermutations;
 
   private:
     /// Precomputes permutations and multicomponent vectors of each orbit.
@@ -108,7 +111,8 @@ class ClusterSpace
     std::vector<int> _species;
 
     /// Map between atomic numbers and the internal species enumeration scheme.
-    std::map<int, int> _speciesMap;
+    std::unordered_map<int, int> _speciesMap;
+  
 };
 
 //}
