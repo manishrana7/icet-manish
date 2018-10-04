@@ -116,8 +116,8 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 }
 
 /**
-@details This constructs a cluster vector that considers only clusters local to the input index.
-@param occupations the occupation list for the supercell
+@details This constructs a cluster vector that only considers clusters that contain the input index.
+@param occupations the occupation vector for the supercell
 @param index the local index of the supercell 
 @param ignoredIndices a vector of indices which have already had their local energy calculated. This is required to input so that no double counting occurs.
 */
@@ -201,7 +201,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
         }
 
         const auto &mcVectors = _clusterSpace._multiComponentVectors[i];
-        const auto &elementPermutations = _clusterSpace._elementPermutations[i];
+        const auto &elementPermutations = _clusterSpace._sitePermutations[i];
         repCluster.setTag(i);
         for (int currentMCVectorIndex = 0; currentMCVectorIndex < _clusterSpace._multiComponentVectors[i].size(); currentMCVectorIndex++)
         {
@@ -216,7 +216,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
             }
             for (const auto &elementsCountPair : clusterMap.at(repCluster))
             {
-                for (const auto &perm : _clusterSpace._elementPermutations[i][currentMCVectorIndex])
+                for (const auto &perm : _clusterSpace._sitePermutations[i][currentMCVectorIndex])
                 {
                     const auto &permutedMCVector = icet::getPermutedVector(mcVectors[currentMCVectorIndex], perm);
                     const auto &permutedAllowedOccupations = icet::getPermutedVector(allowedOccupations, perm);
@@ -224,8 +224,8 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
                     clusterVectorElement += _clusterSpace.evaluateClusterProduct(permutedMCVector, permutedAllowedOccupations, elementsCountPair.first) * elementsCountPair.second;
                     multiplicity += elementsCountPair.second;
                 }
-            }
-            double realMultiplicity = (double)_clusterSpace._elementPermutations[i][currentMCVectorIndex].size() * (double)_clusterSpace._orbitList._orbitList[i]._equivalentSites.size() / (double)_clusterSpace._primitiveStructure.size();
+            }            
+            double realMultiplicity = (double)_clusterSpace._sitePermutations[i][currentMCVectorIndex].size() * (double)_clusterSpace._orbitList._orbitList[i]._equivalentSites.size() / (double)_clusterSpace._primitiveStructure.size();
             clusterVectorElement /= ((double)realMultiplicity * (double)_superCell.size());
             clusterVector.push_back(clusterVectorElement);
         }

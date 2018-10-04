@@ -28,26 +28,17 @@ ClusterSpace::ClusterSpace(std::vector<int> numberOfAllowedSpecies,
         _speciesMap[_species[i]] = i;
     }
 
-
     //Remove orbits that are inactive
-    for(int i=_orbitList.size()-1; i>=0; i--)
+    for (int i = _orbitList.size() - 1; i >= 0; i--)
     {
         auto numberOfAllowedSpecies = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _orbitList.getOrbit(i).getRepresentativeSites());
 
         if (std::any_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n) { return n < 2; }))
         {
             _orbitList.removeOrbit(i);
-        }        
+        }
     }
-
-
-    /// @todo Why is the collectClusterSpaceInfo function not executed
-    /// immediately, which would render _isClusterSpaceInitialized unnecessary?
-    _isClusterSpaceInitialized = false;
-    collectClusterSpaceInfo();
-
-
-    
+    precomputeClusterSpaceInfo();
 }
 
 /**
@@ -65,16 +56,18 @@ countOrbitList.
 **/
 std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) const
 {
-    // count the clusters in the orbit with the same orientation (order) as the prototype cluster
-    // @todo Clarify description.
+
+    // Don't sort clusters
     bool orderIntact = true;
+
+    // Count the clusters in the orbit with the same orientation (order) as the prototype cluster
     bool permuteSites = true;
 
     LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(_orbitList, structure);
     size_t uniqueOffsets = localOrbitListGenerator.getNumberOfUniqueOffsets();
     ClusterCounts clusterCounts = ClusterCounts();
 
-    // Create local orbit list and count associated clusters.
+    // Create local orbit lists and count associated clusters.
     for (int i = 0; i < uniqueOffsets; i++)
     {
         const auto localOrbitList = localOrbitListGenerator.getLocalOrbitList(i);
@@ -90,7 +83,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
         throw std::runtime_error(msg);
     }
 
-    /// @todo Describe what is happening here.
+    /// Get the cluster -> cluster counts map
     const auto clusterMap = clusterCounts.getClusterCounts();
 
     // Initialize cluster vector and insert zerolet.
@@ -130,12 +123,10 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
         // Example 2: For an ABC alloy we obtain [0, 0], [0, 1], [1, 1] for pairs and similarly for triplets.
         // Depending on the symmetry of the cluster one might also obtain [1, 0] (e.g., in a clathrate or for some clusters on a HCP lattice).
 
-        // auto multiComponentVectors = _orbitList.getOrbit(i).getMultiComponentVectors(numberOfAllowedSpeciesBySite);
         const auto &multiComponentVectors = _multiComponentVectors[i];
 
         // @todo Make getMultiComponentVectorPermutations take an Orbit rather than an index. Then swap the loop over int for a loop over Orbit above.
-        // auto speciesPermutations = getMultiComponentVectorPermutations(multiComponentVectors, i);
-        const auto &speciesPermutations = _elementPermutations[i];
+        const auto &sitePermutations = _sitePermutations[i];
         int currentMultiComponentVectorIndex = 0;
         for (const auto &multiComponentVector : multiComponentVectors)
         {
@@ -146,7 +137,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
             {
 
                 /// @todo Check if numberOfAllowedSpecies should be permuted as well. Is this todo still relevant?
-                for (const auto &perm : speciesPermutations[currentMultiComponentVectorIndex])
+                for (const auto &perm : sitePermutations[currentMultiComponentVectorIndex])
                 {
                     auto permutedMultiComponentVector = icet::getPermutedVector(multiComponentVector, perm);
                     auto permutedNumberOfAllowedSpeciesBySite = icet::getPermutedVector(numberOfAllowedSpeciesBySite, perm);
@@ -287,15 +278,14 @@ std::vector<int> ClusterSpace::getNumberOfAllowedSpeciesBySite(const Structure &
     return numberOfAllowedSpecies;
 }
 
-/// Collect information about the cluster space.
-/// @todo document this function
-void ClusterSpace::collectClusterSpaceInfo()
+/// Precomputes permutations and multicomponent vectors of each orbit.
+void ClusterSpace::precomputeClusterSpaceInfo()
 {
     _clusterSpaceInfo.clear();
     std::vector<int> emptyVec = {0};
     _clusterSpaceInfo.push_back(make_pair(-1, emptyVec));
     _multiComponentVectors.resize(_orbitList.size());
-    _elementPermutations.resize(_orbitList.size());
+    _sitePermutations.resize(_orbitList.size());
     for (int i = 0; i < _orbitList.size(); i++)
     {
         std::vector<std::vector<int>> permutedMCVector;
@@ -304,28 +294,28 @@ void ClusterSpace::collectClusterSpaceInfo()
         auto multiComponentVectors = _orbitList.getOrbit(i).getMultiComponentVectors(numberOfAllowedSpecies);
         if (std::none_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n) { return n < 2; }))
         {
-            auto elementPermutations = getMultiComponentVectorPermutations(multiComponentVectors, i);
-            _elementPermutations[i] = elementPermutations;
+            auto sitePermutations = getMultiComponentVectorPermutations(multiComponentVectors, i);
+            _sitePermutations[i] = sitePermutations;
             _multiComponentVectors[i] = multiComponentVectors;
-        }        
+        }
 
         for (const auto &multiComponentVector : multiComponentVectors)
         {
             _clusterSpaceInfo.push_back(make_pair(i, multiComponentVector));
         }
     }
-    _isClusterSpaceInitialized = true;
 }
 
-/// Returns information about the cluster space.
-/// @todo document this function
+/**
+@details Returns a pair where pair.first is the  index of the underlying orbit in _orbitList.
+          and pair.second is the multicomponent vector for the "outerlying" orbit with index `index`
+@param index index for the "outerlying" orbit
+
+@todo think about a better word than outerlying.
+
+**/
 std::pair<int, std::vector<int>> ClusterSpace::getClusterSpaceInfo(const unsigned int index)
 {
-    if (!_isClusterSpaceInitialized)
-    {
-        collectClusterSpaceInfo();
-    }
-
     if (index >= _clusterSpaceInfo.size())
     {
         std::string msg = "Out of range in ClusterSpace::getClusterSpaceInfo: ";
@@ -335,5 +325,3 @@ std::pair<int, std::vector<int>> ClusterSpace::getClusterSpaceInfo(const unsigne
 
     return _clusterSpaceInfo[index];
 }
-
-//}

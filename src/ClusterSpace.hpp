@@ -62,8 +62,6 @@ class ClusterSpace
     /// Returns the cluster space size, i.e. the length of a cluster vector.
     size_t getClusterSpaceSize()
     {
-        if (!_isClusterSpaceInitialized)
-            collectClusterSpaceInfo();
         return _clusterSpaceInfo.size();
     }
 
@@ -81,19 +79,17 @@ class ClusterSpace
     Structure _primitiveStructure;
 
     std::vector<std::vector<std::vector<int>>> _multiComponentVectors;
-    std::vector<std::vector<std::vector<std::vector<int>>>> _elementPermutations;
+    std::vector<std::vector<std::vector<std::vector<int>>>> _sitePermutations;
 
 
   private:
-    /// Collect information about the cluster space.
-    void collectClusterSpaceInfo();
+    /// Precomputes permutations and multicomponent vectors of each orbit.
+    void precomputeClusterSpaceInfo();
 
     /// Returns the default cluster function.
     double evaluateClusterFunction(const int, const int, const int) const;
 
   private:
-    /// True if cluster space has been initialized.
-    bool _isClusterSpaceInitialized = false;
 
     /// Cluster space information.
     /// The first index (int) corresponds to the orbit index, the second index (vector of ints) refers to a multi-component vector.
