@@ -63,7 +63,7 @@ if __name__ == '__main__':
     print('Constructing CE calculator')
     t0 = time.time()
     calculator = ClusterExpansionCalculator(atoms, ce)
-    print('Done constructing CE calculator. Time: {:.5f}s'.format(time.time()-t0))
+    print('Done constructing CE calculator in {:.5f}s'.format(time.time()-t0))
     t_local = time_local_energy(calculator, iters)
     t_total = time_total_energy(calculator, iters)
     print('Number of sites: {}'.format(len(calculator.atoms)))
