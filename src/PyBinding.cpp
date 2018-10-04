@@ -763,10 +763,21 @@ PYBIND11_MODULE(_icet, m)
 
     py::class_<ClusterExpansionCalculator>(m,"_ClusterExpansionCalculator")
     .def(py::init<const ClusterSpace &, const Structure &>())
-    // .def("get_local_cluster_vector", &ClusterExpansionCalculator::getLocalClusterVector)
     .def("get_local_cluster_vector", [](ClusterExpansionCalculator &ceCalc, const std::vector<int> &occupations, const int index, const std::vector<int> indices) {
             auto cv = ceCalc.getLocalClusterVector(occupations, index, indices);
             return py::array(cv.size(), cv.data());
-        })
+        }, R"pbdoc(
+             Returns a cluster vector that only considers clusters that contain the input index
+             Parameters
+             ----------
+             occupations : list of int
+                 the occupation vector for the supercell
+             index : int
+                 the local index of the supercell
+             ignoredIndices : list of int
+                a list of indices which have already had 
+                their local energy calculated. 
+                This is required to input so that no double counting occurs
+        )pbdoc")
     ;
 }
