@@ -255,37 +255,6 @@ class Orbit
         //The offsets between the offsets of the two rep. eq. sites
         Vector3d offsetOfOffsets;
 
-        /// ============== The below is commented for issue 174.!! ==============
-        // for (size_t i = 0; i < rep_sites_this.size(); i++)
-        // {
-        //     // if (rep_sites_this[i].index() != rep_sites_rhs[i].index())
-        //     // {
-        //     //     std::cout<< rep_sites_this[i].index()<< " "<< rep_sites_rhs[i].index()<<std::endl;
-        //     //     throw std::runtime_error("Error: this orbit and orbit_rhs do not have the same reference cluster in function: Orbit &operator+=");
-        //     // }
-        //     if (i == 0)
-        //     {
-        //         offsetOfOffsets = rep_sites_this[i].unitcellOffset() - rep_sites_rhs[i].unitcellOffset();
-        //     }
-        //     else //check that the offsets between sites at position `i` is the same as `i-1`
-        //     {
-        //         Vector3d newOffset = rep_sites_this[i].unitcellOffset() - rep_sites_rhs[i].unitcellOffset();
-        //         if ((newOffset - offsetOfOffsets).norm() > 0.1)
-        //         {
-        //             throw std::runtime_error("Error: this orbit and orbit_rhs do not have the same offsets between sites in function : Orbit &operator+=");
-        //         }
-        //         else
-        //         {
-        //             offsetOfOffsets = newOffset;
-        //         }
-        //     }
-        // }
-        /// ========= The above is commented for issue 174.!! ==========
-
-        //All tests passed, can now add equivalent sites and equivalent sites permutations
-
-        //_equivalentSites.insert(_equivalentSites.end(), LatticeSites.begin(), LatticeSites.end());
-
         const auto rhsEquivalentSites = orbit_rhs.getEquivalentSites();
         const auto rhsEquivalentSitesPermutations = orbit_rhs.getEquivalentSitesPermutations();
         //Insert rhs eq sites and corresponding permutations
