@@ -6,21 +6,21 @@
 Cluster counts
 ===============
 
-The purpose of this example is to demonstrate how to carry out a cluster count
-analysis.
+A cluster vector is essentially a count of clusters averaged and aggregated in
+a compact form. Sometimes it may be of interest to study the underlying cluster
+counts rather than the cluster vector. In a binary alloy with species A and B,
+for example, one may wonder how many nearest neighbor pairs are A-A, A-B and
+B-B, respectively. To facilitate such analyses, icet provides a cluster counts
+module. This example demonstrates how to use this module.
 
 Import modules
 --------------
 
-First, one needs to import the classes :class:`ClusterCounts
-<_icet.ClusterCounts>` and :class:`Structure <_icet.Structure>`, which
-are used for storing information regarding cluster counts and structures,
-respectively, in addition to the functions :func:`create_orbit_list
-<icet.core.orbit_list.create_orbit_list>` and :func:`get_primitive_structure
-<icet.tools.geometry.get_primitive_structure>`. In particular, the latter
-will be used to generate a primitive structure, for which an orbit list will be
-created, using the former. Also, the `ASE <https://wiki.fysik.dtu.dk/ase>`_
-function :func:`ase.build.bulk` is needed to generate the prototype structure.
+In addition to the actual class :class:`ClusterCounts <icet.core.cluster_counts.ClusterCounts>` we
+need to import the function :func:`create_orbit_list
+<icet.core.orbit_list.create_orbit_list>`. Here, we also use the `ASE
+<https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.build.bulk` to generate
+a prototype structure.
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
    :start-after: # Start import
@@ -29,9 +29,10 @@ function :func:`ase.build.bulk` is needed to generate the prototype structure.
 Generate a prototype Ti supercell
 ---------------------------------
 
-The next step is to build a prototype supercell, in the form of a
-:math:`2\times2\times1` BCC cell that is randomly populated with titanium and
-tungsten atoms. Moreover, the cutoff for pairs is set to 4 Å.
+The next step is to build a prototype supercell. Here, we create a toy
+structure based on Ti and W decorating a simple cubic :math:`2\times1\times1`
+cell. Moreover, we define a cutoff for pairs at 5 Å. We also keep the
+primitive cell, i.e., the :math:`1\times1\times1` simple cubic cell.
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
    :start-after: # Start setup
@@ -40,33 +41,23 @@ tungsten atoms. Moreover, the cutoff for pairs is set to 4 Å.
 Create a primitive orbit list
 -----------------------------
 
-As will be seen later, the orbit list corresponding to the primitive structure
-of the :class:`ASE Atoms` object defined earlier is required for calculating
-the cluster counts. More precisely, this is achieved by first calling the
-:func:`get_primitive_structure <icet.tools.geometry.get_primitive_structure>`
-followed by the :meth:`Structure.from_atoms
-<icet.core.structure.Structure.from_atoms>` method. Thereafter, the
-primitive structure thus obtained is provided as input to
-:func:`create_orbit_list <icet.core.orbit_list.create_orbit_list>`, together
-with the list of cutoff distances for the clusters.
+Next, we create an orbit list based on the above primitive structure and
+cutoff. To this end, we use the function :func:`create_orbit_list
+<icet.core.orbit_list.create_orbit_list>`. The orbit list defines the orbits
+that are included in the cluster count (every cluster corresponds to an
+orbit).
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
-   :start-after: # Determine the orbit list
+   :start-after: # pair clusters within the
    :end-before: # Use the primitive
 
 
 Count the clusters
 ------------------
 
-To count the number of clusters a :class:`ClusterSpace
-<icet.core.cluster_space.ClusterSpace>` object is initiated first.
-Thereafter, a :class:`Structure <_icet.Structure>` is generated from the
-supercell that was generated above with help of the :meth:`Structure.from_atoms
-<icet.core.structure.Structure.from_atoms>` method. To calculate the number
-of clusters, this structure together with the primitive orbit list that was
-created in the previous section are given as input arguments to the
-:meth:`ClusterCounts.count_clusters <_icet.ClusterCounts.count_orbit_list>`
-method.
+We are now ready to create a
+:class:`ClusterCounts<icetc.ore.cluster_counts.ClusterCounts>` object based on
+the orbit list and the above created supercell.
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
    :start-after: # Use the primitive
@@ -75,33 +66,36 @@ method.
 Print the cluster counts
 ------------------------
 
-Finally, the cluster counts that were calculated by the previous code block are
-printed using the :meth:`print` method.
+The cluster counts can conveniently be printed like so:
 
 .. literalinclude:: ../../../../examples/get_cluster_count.py
    :start-after: # Print all of
 
 The resulting output should be similar to the following::
 
-  number of atoms 4
-  Found 3 clusters
-  3.43  :: 0 0 1.715
-  ==============
-  Ti Ti 2
-  Ti W 2
-  Total: 4
+  Number of atoms: 2
+  Found 3 orbits
+  ====================== Cluster Counts ======================
+  Singlet: [0] [] 0.0000
+  Ti   1
+  W    1
 
-  2.97047  :: 0 0 1.48523
-  ==============
-  Ti Ti 4
-  Ti W 4
-  Total: 8
+  Pair: [0, 0] [3.0] 1.5000
+  Ti  Ti   2
+  Ti  W    2
+  W   W    2
 
-   :: 0 0
-  ==============
-  Ti 3
-  W 1
-  Total: 4
+  Pair: [0, 0] [4.242641] 2.1213
+  Ti  Ti   2
+  Ti  W    8
+  W   W    2
+  ============================================================
+
+The orbits are listed by increasing order (singles, pairs, triplets, ...) and
+increasing size. For every orbit, the number of clusters containing a certain
+set of species is printed. Note that these are the numbers that would be used
+to construct a cluster vector for this particular structure.
+
 
 Source code
 -----------
