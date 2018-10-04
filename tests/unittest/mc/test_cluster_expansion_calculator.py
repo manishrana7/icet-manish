@@ -226,12 +226,12 @@ class TestCECalculatorBinary(unittest.TestCase):
             self.cs, Structure.from_atoms(self.atoms))
 
         index = 4
-        local_cv_before = cpp_calc.get_local_cluster_vector(
+        cpp_calc.get_local_cluster_vector(
             self.atoms.get_atomic_numbers(), index, [])
 
         self.atoms[index].symbol = 'Ge'
 
-        local_cv_after = cpp_calc.get_local_cluster_vector(
+        cpp_calc.get_local_cluster_vector(
             self.atoms.get_atomic_numbers(), index, [])
 
 
@@ -251,9 +251,10 @@ class TestCECalculatorBinaryHCP(unittest.TestCase):
               self).__init__(*args, **kwargs)
 
         self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1)
-        self.cutoffs = [6,6,6]  # [2.9]
+        self.cutoffs = [6, 6, 6]  # [2.9]
         self.subelements = ['Al', 'Ge']
-        self.cs = ClusterSpace(self.atoms.copy(), self.cutoffs, self.subelements)
+        self.cs = ClusterSpace(
+            self.atoms.copy(), self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
         params = [1.0] * params_len
 
@@ -272,7 +273,8 @@ class TestCECalculatorBinaryHCP(unittest.TestCase):
             indices = [i]
             local_diff, total_diff = self._get_energy_diffs_local_and_total(
                 indices)
-            msg += ", indices " + str(indices) + ", len of atoms " + str(len(self.atoms))
+            msg += ", indices " + str(indices) + \
+                ", len of atoms " + str(len(self.atoms))
             self.assertAlmostEqual(total_diff, local_diff, msg=msg)
 
     def _test_swap_changes(self, msg):
@@ -284,7 +286,8 @@ class TestCECalculatorBinaryHCP(unittest.TestCase):
                 indices = [i, j]
                 local_diff, total_diff = \
                     self._get_energy_diffs_local_and_total(indices)
-                msg += ", indices " + str(indices) + ", len of atoms " + str(len(self.atoms))
+                msg += ", indices " + \
+                    str(indices) + ", len of atoms " + str(len(self.atoms))
                 self.assertAlmostEqual(total_diff, local_diff, msg=msg)
 
     def test_local_contribution_flip(self):
@@ -386,7 +389,7 @@ class TestCECalculatorBinaryBCC(unittest.TestCase):
         super(TestCECalculatorBinaryBCC,
               self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al",'bcc',a=4.0)  
+        self.atoms = bulk("Al", 'bcc', a=4.0)
         self.cutoffs = [6, 6, 6]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
@@ -397,7 +400,7 @@ class TestCECalculatorBinaryBCC(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.atoms = bulk("Al",'bcc',a=4.0).repeat(2)
+        self.atoms = bulk("Al", 'bcc', a=4.0).repeat(2)
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
 
@@ -504,7 +507,6 @@ class TestCECalculatorBinaryBCC(unittest.TestCase):
         return local_diff, total_diff
 
 
-
 class TestCECalculatorTernaryBCC(unittest.TestCase):
     """
     Container for tests of the class functionality.
@@ -520,18 +522,17 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
         super(TestCECalculatorTernaryBCC,
               self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al",'bcc',a=4.0)
-        self.cutoffs = [6,6,6]
+        self.atoms = bulk("Al", 'bcc', a=4.0)
+        self.cutoffs = [6, 6, 6]
         self.subelements = ['Al', 'Ge', 'Pt']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
         params = [1.0] * params_len
         self.ce = ClusterExpansion(self.cs, params)
 
-
     def setUp(self):
         """Setup before each test."""
-        self.atoms = bulk("Al",'bcc',a=4.0).repeat(2)
+        self.atoms = bulk("Al", 'bcc', a=4.0).repeat(2)
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
 
@@ -552,7 +553,7 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
                 indices = [i, j]
                 local_diff, total_diff = \
                     self._get_energy_diffs_local_and_total(indices)
-                msg1 = "[{}, {}]".format(i,j)
+                msg1 = "[{}, {}]".format(i, j)
                 self.assertAlmostEqual(total_diff, local_diff, msg=msg1)
 
     def test_local_contribution_flip(self):
