@@ -839,24 +839,36 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &superCell, const Vector3
     }
     return localOrbitList;
 }
-/// Remove each element in orbit.equivalent sites if a vector<sites> have at least one lattice site with this index
-void OrbitList::removeSitesContainingIndex(const int indexRemove, bool removeGhostIndex)
+/**
+@details Removes, for each orbit, all set of sites in equivalent sites if any site in the set of sites contain have its index equal to indexRemove.
+@param indexRemove the index to look for.
+@param onlyConsiderZeroOffset if true it will only remove sites with zero offset
+**/
+void OrbitList::removeSitesContainingIndex(const int indexRemove, bool onlyConsiderZeroOffset)
 {
     for(auto &orbit : _orbitList)
     {
-        orbit.removeSitesWithIndex(indexRemove, removeGhostIndex);
+        orbit.removeSitesWithIndex(indexRemove, onlyConsiderZeroOffset);
     }
 }
 
-/// Remove each element in orbit.equivalent sites if a vector<sites> have at least one lattice site with this index
-void OrbitList::removeSitesNotContainingIndex(const int index, bool removeGhostIndex)
+/**
+@details Removes, for each orbit, all set of sites in equivalent sites if no site in the set of sites have its index equal to index.
+@param index the index to look for.
+@param onlyConsiderZeroOffset if true it will look for sites with zero offset
+**/
+void OrbitList::removeSitesNotContainingIndex(const int index, bool onlyConsiderZeroOffset)
 {
     for(auto &orbit : _orbitList)
     {
-        orbit.removeSitesNotWithIndex(index, removeGhostIndex);
+        orbit.removeSitesNotWithIndex(index, onlyConsiderZeroOffset);
     }
 }
 
+/**
+@details Removes, for each orbit, a specific set of sites in this orbit and the corresponding site permutation.
+@param sites the vector of sites that will be removed, order of sites is irrelevant.
+ **/
 void OrbitList::subtractSitesFromOrbitList(const OrbitList &orbitList)
 {
     if(orbitList.size() != size())

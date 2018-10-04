@@ -103,6 +103,13 @@ std::vector<std::vector<int>> Orbit::getAllPossibleMultiComponentVectorPermutati
     return allPossibleMCPermutations;
 }
 
+/** 
+@details Check if this orbit contain a set of sites in its equivalent sites vector.
+@param sites the sites that will be looked for.
+@param sorted if true the order of sites is irrelevant
+
+@returns true if the sites exist in equivalent sites.
+**/
 bool Orbit::contains(const std::vector<LatticeSite> sites, bool sorted) const
 {
     auto sitesCopy = sites;
@@ -128,11 +135,18 @@ bool Orbit::contains(const std::vector<LatticeSite> sites, bool sorted) const
     }
     return false;
 }
-void Orbit::removeSitesWithIndex(const int indexRemove, bool removeGhostIndex)
+
+
+/**
+@details removes all set of sites in equivalent sites if any site in the set of sites contain have its index equal to indexRemove.
+@param indexRemove the index to look for.
+@param onlyConsiderZeroOffset if true it will only remove sites with zero offset
+**/
+void Orbit::removeSitesWithIndex(const int indexRemove, bool onlyConsiderZeroOffset)
 {
     for (int i = _equivalentSites.size() - 1; i >= 0; i--)
     {
-        if (removeGhostIndex)
+        if (onlyConsiderZeroOffset)
         {
             if (std::any_of(_equivalentSites[i].begin(), _equivalentSites[i].end(), [=](LatticeSite &ls) { return ls.index() == indexRemove && ls.unitcellOffset().norm() < 1e-4; }))
             {
@@ -151,11 +165,17 @@ void Orbit::removeSitesWithIndex(const int indexRemove, bool removeGhostIndex)
     }
 }
 
-void Orbit::removeSitesNotWithIndex(const int index, bool removeGhostIndex)
+
+/**
+@details removes all set of sites in equivalent sites if no site in the set of sites have its index equal to index.
+@param index the index to look for.
+@param onlyConsiderZeroOffset if true it will look for sites with zero offset
+**/
+void Orbit::removeSitesNotWithIndex(const int index, bool onlyConsiderZeroOffset)
 {
     for (int i = _equivalentSites.size() - 1; i >= 0; i--)
     {
-        if (removeGhostIndex)
+        if (onlyConsiderZeroOffset)
         {
             if (std::none_of(_equivalentSites[i].begin(), _equivalentSites[i].end(), [=](LatticeSite &ls) { return ls.index() == index && ls.unitcellOffset().norm() < 1e-4; }))
             {
@@ -174,6 +194,11 @@ void Orbit::removeSitesNotWithIndex(const int index, bool removeGhostIndex)
     }
 }
 
+
+/**
+@details removes a specific set of sites in this orbit and the corresponding site permutation.
+@param sites the vector of sites that will be removed, order of sites is irrelevant.
+ **/
 void Orbit::removeSites(std::vector<LatticeSite> sites)
 {
 

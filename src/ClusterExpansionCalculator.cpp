@@ -138,10 +138,10 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
     bool permuteSites = false; 
 
     // Remove all that doesn't contain index regardless of offset?
-    bool removeGhostIndexNotContain = true;
+    bool onlyConsiderZeroOffsetNotContain = true;
 
     // Remove all ignored indices regardless of offset?
-    bool removeGhostIndexContain = false;
+    bool onlyConsiderZeroOffsetContain = false;
 
     ClusterCounts clusterCounts = ClusterCounts();
 
@@ -151,13 +151,13 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
     // Remove sites not containing the local index
     if(_clusterSpace._primitiveStructure.size()>1)
     {
-        translatedOrbitList.removeSitesNotContainingIndex(index, removeGhostIndexNotContain);
+        translatedOrbitList.removeSitesNotContainingIndex(index, onlyConsiderZeroOffsetNotContain);
     }
 
     // Purge the orbitlist of all sites containing the ignored indices
     for (auto ignoredIndex : ignoredIndices)
     {
-        translatedOrbitList.removeSitesContainingIndex(ignoredIndex, removeGhostIndexContain);
+        translatedOrbitList.removeSitesContainingIndex(ignoredIndex, onlyConsiderZeroOffsetContain);
     }
 
     // Count clusters and get cluster count map

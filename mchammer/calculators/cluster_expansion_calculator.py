@@ -119,6 +119,7 @@ class ClusterExpansionCalculator(BaseCalculator):
             self.atoms.get_atomic_numbers(), index, exclude_indices)
         assert(len(local_cv) == len(self.cluster_expansion.parameters))
         return np.dot(local_cv, self.cluster_expansion.parameters)
+
     @property
     def occupation_constraints(self) -> List[List[int]]:
         """ map from site to allowed species """
