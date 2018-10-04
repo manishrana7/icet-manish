@@ -1,5 +1,7 @@
 import unittest
+from itertools import permutations
 from ase.build import bulk
+
 from icet.core.lattice_site import LatticeSite
 from icet.core.cluster import Cluster
 from icet.core.orbit import Orbit
@@ -10,7 +12,6 @@ from icet.core.orbit_list import (
 from icet.core.neighbor_list import get_neighbor_lists
 from icet.core.permutation_map import permutation_matrix_from_atoms
 from icet.core.structure import Structure
-from icet.tools.geometry import get_permutation
 
 
 class TestOrbitList(unittest.TestCase):
@@ -177,7 +178,7 @@ class TestOrbitList(unittest.TestCase):
         """
         Test that all the equivalent sites have the same radius.
         """
-        atoms = bulk("Al")
+        atoms = bulk('Al')
         cutoffs = [10, 10]
         orbit_list = create_orbit_list(atoms, cutoffs)
         for orbit in orbit_list.orbits:
@@ -192,8 +193,6 @@ class TestOrbitList(unittest.TestCase):
         """
         Test allowed permutations of orbit.
         """
-        from itertools import permutations
-
         # check all permutations are allowed for these orbits
         atoms = bulk('Al')
         cutoffs = [3.2, 3.2]
