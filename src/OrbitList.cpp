@@ -106,7 +106,6 @@ int OrbitList::findOrbit(const Cluster &cluster, const std::unordered_map<Cluste
 OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<LatticeSite>> &permutation_matrix, const std::vector<NeighborList> &neighbor_lists)
 {
     _primitiveStructure = structure;
-    _permutation_matrix = permutation_matrix;
     std::vector<std::vector<std::vector<LatticeSite>>> lattice_neighbors;
     std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> many_bodyNeighborIndices;
     bool saveBothWays = false;
@@ -115,7 +114,6 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
     //if [0,1,2] exists in taken_rows then these three rows (with columns) have been accounted for and should not be looked at
     std::unordered_set<std::vector<int>, VectorHash> taken_rows;
     std::vector<LatticeSite> col1 = getColumn1FromPM(permutation_matrix, false);
-    _column1 = col1;
 
     std::set<LatticeSite> col1_uniques(col1.begin(), col1.end());
     if (col1.size() != col1_uniques.size())
@@ -140,10 +138,10 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
                 {
                     throw std::runtime_error("Original sites is not sorted");
                 }
-                std::vector<std::vector<LatticeSite>> translatedSites = getSitesTranslatedToUnitcell(lat_nbrs, false);
+                std::vector<std::vector<LatticeSite>> translatedSites = getSitesTranslatedToUnitcell(lat_nbrs);
                 int missedSites = 0;
 
-                auto sites_index_pair = getMatchesInPM(translatedSites);
+                auto sites_index_pair = getMatchesInPM(translatedSites, col1);
                 if (!isRowsTaken(taken_rows, sites_index_pair[0].second))
                 {
                     //new stuff found
@@ -157,9 +155,8 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
             {
                 std::vector<LatticeSite> lat_nbrs = mbnl_pair.first;
                 auto pm_rows = findRowsFromCol1(col1, lat_nbrs);
-                // auto find = taken_rows.find(pm_rows);
-                // if (find == taken_rows.end())
-                if (!isRowsTaken(taken_rows, pm_rows))
+                auto find = taken_rows.find(pm_rows);
+                if (find == taken_rows.end())
                 {
                     //new stuff found
                     addPermutationMatrixColumns(lattice_neighbors, taken_rows, lat_nbrs, pm_rows, permutation_matrix, col1, true);
@@ -185,15 +182,6 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
         // std::cout << "Done checking equivalent structures" << std::endl;
     }
 }
-
-// /// Check if the indices, when sorted, exits in taken_rows
-// bool OrbitList::isRowsTaken(const std::vector<int> indices, const std::unordered_set<std::vector<int>, VectorHash> &taken_rows) const
-// {
-//     std::sort(indices.begin(),indices.end());
-//     auto find = taken_rows.find(indices);
-//     return find != taken_rows.end();
-
-// }
 
 /**
     Add permutation stuff to orbits
@@ -381,8 +369,8 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeSite>
 
 ///Will find the sites in col1, extract all columns along with their unit cell translated indistinguishable sites
 std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromSites(const std::vector<LatticeSite> &sites,
-                                                                        const std::vector<LatticeSite> &col1,
-                                                                        const std::vector<std::vector<LatticeSite>> &permutation_matrix) const
+                                                                            const std::vector<LatticeSite> &col1,
+                                                                            const std::vector<std::vector<LatticeSite>> &permutation_matrix) const
 {
     bool sortRows = false;
     std::vector<int> rowsFromCol1 = findRowsFromCol1(col1, sites, sortRows);
@@ -395,7 +383,7 @@ std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromSites(const st
 bool OrbitList::isRowsTaken(const std::unordered_set<std::vector<int>, VectorHash> &taken_rows, std::vector<int> rows) const
 {
     //sort
-    std::sort(rows.begin(), rows.end());
+    //std::sort(rows.begin(), rows.end());
 
     //find
     const auto find = taken_rows.find(rows);
@@ -408,28 +396,6 @@ bool OrbitList::isRowsTaken(const std::unordered_set<std::vector<int>, VectorHas
         return true;
     }
 }
-
-
-
-///First construct  then returns true if rows_sort exists in taken_rows
-void OrbitList::takeRows(std::unordered_set<std::vector<int>, VectorHash> &taken_rows, std::vector<int> rows) const
-{
-    //sort
-    std::sort(rows.begin(), rows.end());
-    taken_rows.insert(rows);
-    // //find
-    // const auto find = taken_rows.find(rows);
-    // if (find == taken_rows.end())
-    // {
-    //     return false;
-    // }
-    // else
-    // {
-    //     return true;
-    // }
-}
-
-
 
 /**
 Returns all columns from the given rows in permutation matrix
@@ -629,10 +595,10 @@ void OrbitList::addPermutationMatrixColumns(
         {
             indistinctLatNbrs.push_back(permutation_matrix[row][column]);
         }
-        // @todo set sortIt to false breaks test_multi_component_cluster_vectors in TestClusterSpace suite
-        auto translatedEquivalentSites = getSitesTranslatedToUnitcell(indistinctLatNbrs, true);
+        
+        auto translatedEquivalentSites = getSitesTranslatedToUnitcell(indistinctLatNbrs);
 
-        auto sites_index_pair = getMatchesInPM(translatedEquivalentSites);
+        auto sites_index_pair = getMatchesInPM(translatedEquivalentSites, col1);
 
         // for (int i = 1; i < sites_index_pair.size(); i++)
         // {
@@ -644,24 +610,21 @@ void OrbitList::addPermutationMatrixColumns(
 
         // }
         // auto find_first_validCluster = std::find_if(sites_index_pair.begin(), sites_index_pair.end(),[](const std::pair<std::vector<LatticeSite>,std::vector<int>> &site_index_pair){return validatedCluster(site_index_pair.second);});
-        // auto find = taken_rows.find(sites_index_pair[0].second);
+        auto find = taken_rows.find(sites_index_pair[0].second);
         bool findOnlyOne = true;
-        // if (find == taken_rows.end())
-        if (!isRowsTaken(taken_rows, sites_index_pair[0].second))
+        if (find == taken_rows.end())
         {
             for (int i = 0; i < sites_index_pair.size(); i++)
             {
-                // find = taken_rows.find(sites_index_pair[i].second);
-                // if (find == taken_rows.end())
-                if (!isRowsTaken(taken_rows, sites_index_pair[i].second))
+                find = taken_rows.find(sites_index_pair[i].second);
+                if (find == taken_rows.end())
                 {
                     if (add && findOnlyOne && validatedCluster(sites_index_pair[i].first))
                     {
                         columnLatticeSites.push_back(sites_index_pair[0].first);
                         findOnlyOne = false;
                     }
-                    // taken_rows.insert(sites_index_pair[i].second);
-                    takeRows(taken_rows, sites_index_pair[i].second);
+                    taken_rows.insert(sites_index_pair[i].second);
                 }
             }
 
@@ -687,16 +650,15 @@ void OrbitList::addPermutationMatrixColumns(
 }
 
 ///returns the first set of translated sites that exists in col1 of permutationmatrix
-std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> OrbitList::getMatchesInPM(const std::vector<std::vector<LatticeSite>> &translatedSites) const
+std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> OrbitList::getMatchesInPM(const std::vector<std::vector<LatticeSite>> &translatedSites, const std::vector<LatticeSite> &col1) const
 {
     std::vector<int> perm_matrix_rows;
     std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> matchedSites;
     for (const auto &sites : translatedSites)
     {
         try
-        {   
-            // @todo set sortIt to false breaks test_multi_component_cluster_vectors in TestClusterSpace suite 
-            perm_matrix_rows = findRowsFromCol1(_column1, sites, true);
+        {
+            perm_matrix_rows = findRowsFromCol1(col1, sites);
         }
         catch (const std::runtime_error)
         {
@@ -725,7 +687,7 @@ std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> OrbitList::ge
             std::cout << " ========= " << std::endl;
         }
         std::cout << "col1:" << std::endl;
-        for (auto row : _column1)
+        for (auto row : col1)
         {
             row.print();
         }

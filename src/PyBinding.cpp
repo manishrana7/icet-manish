@@ -715,31 +715,16 @@ PYBIND11_MODULE(_icet, m)
              "Sort the orbits by orbit comparison")
         .def("find_orbit", (int(OrbitList::*)(const Cluster &) const) &OrbitList::findOrbit,
              "Return the index of the orbit with the given representative cluster")
-        //.def("find_orbit", (int (OrbitList::*)(const Cluster &, const std::unordered_map<Cluster, int> &) const) & OrbitList::findOrbit)
         .def("is_row_taken", &OrbitList::isRowsTaken,
              "Some random description")
         .def("get_orbit_list", &OrbitList::getOrbitList,
              "Returns a list of Orbit objects from OrbitList")
-        .def("get_sites_translated_to_unit_cell", &OrbitList::getSitesTranslatedToUnitcell)
         .def_property_readonly("orbits", &OrbitList::getOrbitList)
         .def("get_primitive_structure", &OrbitList::getPrimitiveStructure,
              "Returns the primitive atomic structure used to construct the OrbitList instance")
         .def("__len__", &OrbitList::size,
              "Returns the total number of orbits counted in the OrbitList instance")
         .def("print", &OrbitList::print, py::arg("verbosity") = 0)
-        .def("get_matches_in_pm", &OrbitList::getMatchesInPM,
-          R"pbdoc(
-           Return first set of sites that exists in column1 of Permutation Matrix
-
-           Parameters
-           ---------
-           translated_sites : list of list of lattice sites.
-
-           returns 
-           -------
-           matched_sites : list of tuple of list of lattice sites and corresponding
-               index in column1.
-           )pbdoc")
         // .def("get_supercell_orbit_list", &OrbitList::getSupercellOrbitList)
         ;
 
