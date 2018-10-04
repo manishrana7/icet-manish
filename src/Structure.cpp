@@ -74,7 +74,10 @@ Vector3d Structure::getPosition(const LatticeSite &latticeNeighbor) const
     Vector3d position = _positions.row(latticeNeighbor.index()) + latticeNeighbor.unitcellOffset().transpose() * _cell;
     return position;
 }
-
+/**
+@details returns the position in cartesian coordinates of a specific site.
+@param index index of the site
+ **/
 Vector3d Structure::getPositionByIndex(const size_t &index) const
 {    
     Vector3d position = _positions.row(index);

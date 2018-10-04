@@ -682,7 +682,7 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             neighborg_lists : list of NeighborList objects
+             neighbor_lists : list of NeighborList objects
                 list of neighbor list for the atomic configuration under different cutoffs.
              structure : icet Structure object
                 primitive atomic structure
@@ -761,8 +761,22 @@ PYBIND11_MODULE(_icet, m)
         .def("get_number_of_allowed_species_by_site",&ClusterSpace::getNumberOfAllowedSpeciesBySite)
         .def("__len__", &ClusterSpace::getClusterSpaceSize);
 
+// ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clusterSpace, const Structure &structure)
+
     py::class_<ClusterExpansionCalculator>(m,"_ClusterExpansionCalculator")
-    .def(py::init<const ClusterSpace &, const Structure &>())
+    .def(py::init<const ClusterSpace &, const Structure &>(),
+    R"pbdoc(
+             Initializes a cluster expansion calculator.
+
+             Parameters
+             ----------
+             cluster_space : cluster space
+                defines the cluster space
+             structure : icet Structure object
+                the supercell the calculator will operate on
+        )pbdoc",
+             py::arg("cluster_space"),
+             py::arg("structure"))
     .def("get_local_cluster_vector", [](ClusterExpansionCalculator &ceCalc, const std::vector<int> &occupations, const int index, const std::vector<int> indices) {
             auto cv = ceCalc.getLocalClusterVector(occupations, index, indices);
             return py::array(cv.size(), cv.data());
