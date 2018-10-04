@@ -31,7 +31,7 @@ def print_timing_ratios(atoms, iters, sizes, cutoffs):
     """ Prints timing ratios between local and total energy calculations. """
 
     print('# $1 size, $2 iters, $3 atom size, $4 ce calc init time (s)'
-          '', $5 t_local, $6 t_total, $7 t_total/t_local')
+          ', $5 t_local, $6 t_total, $7 t_total/t_local')
     elements = ['Al', 'Ga']
     cs = ClusterSpace(atoms, cutoffs, elements)
     parameters = np.array([1.2 for _ in range(len(cs))])
