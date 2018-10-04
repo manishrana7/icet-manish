@@ -22,7 +22,7 @@ class TestCECalculatorBinary(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestCECalculatorBinary, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1)
+        self.atoms = bulk("Al", 'fcc', a=4.0)
         self.cutoffs = [5, 5]  # [2.9]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
@@ -33,7 +33,7 @@ class TestCECalculatorBinary(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1).repeat(2)
+        self.atoms = bulk("Al", 'fcc', a=4.0).repeat(2)
 
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
@@ -42,23 +42,6 @@ class TestCECalculatorBinary(unittest.TestCase):
         """Test the cluster expansion property."""
         self.assertIsInstance(
             self.calculator.cluster_expansion, ClusterExpansion)
-
-    def _______test_calculate_total(self):
-        """Test calculating total property."""
-
-        self.assertEqual(self.calculator.calculate_total(
-            occupations=self.atoms.get_atomic_numbers()), 283.0)
-        self.assertEqual(self.calculator.cluster_expansion.predict(
-            self.calculator.atoms), 283.0)
-
-        # set some elements
-        indices = [10, 2, 4, 2]
-        elements = [32] * 4
-        self.calculator.update_occupations(indices, elements)
-        self.assertAlmostEqual(self.calculator.calculate_total(
-            occupations=self.atoms.get_atomic_numbers()), 66.96296296)
-        self.assertAlmostEqual(self.calculator.cluster_expansion.predict(
-            self.calculator.atoms),  66.96296296)
 
     def _test_flip_changes(self, msg):
         """ Test differences when flipping """
@@ -206,19 +189,6 @@ class TestCECalculatorBinary(unittest.TestCase):
         local_diff = new_value_local - initial_value_local
         self.assertAlmostEqual(total_diff, local_diff)
 
-    def __test_internal_calc_local_contribution(self):
-        """Test the internal calc local contribution."""
-        indices = [1, 2, 3]
-        local_contribution = 0
-        for index in indices:
-            local_contribution +=\
-                self.calculator._calculate_local_contribution(
-                    index)
-        self.assertEqual(local_contribution,
-                         self.calculator.calculate_local_contribution(
-                             local_indices=indices,
-                             occupations=self.atoms.get_atomic_numbers()))
-
     def test_get_local_cluster_vector(self):
         """ Tests the get local clustervector method."""
 
@@ -238,12 +208,6 @@ class TestCECalculatorBinary(unittest.TestCase):
 class TestCECalculatorBinaryHCP(unittest.TestCase):
     """
     Container for tests of the class functionality.
-
-    Todo
-    ----
-        * add property test to calculate local contribution when that
-          method has been added as intended.
-
     """
 
     def __init__(self, *args, **kwargs):
@@ -524,7 +488,7 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
 
         self.atoms = bulk("Al", 'bcc', a=4.0)
         self.cutoffs = [6, 6, 6]
-        self.subelements = ['Al', 'Ge', 'Pt']
+        self.subelements = ['Al', 'Ge', 'H']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
         params_len = self.cs.get_cluster_space_size()
         params = [1.0] * params_len
@@ -533,6 +497,138 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
     def setUp(self):
         """Setup before each test."""
         self.atoms = bulk("Al", 'bcc', a=4.0).repeat(2)
+        self.calculator = ClusterExpansionCalculator(
+            self.atoms, self.ce, name='Test CE calc')
+
+    def _test_flip_changes(self, msg):
+        """ Test differences when flipping """
+        for i in range(len(self.atoms)):
+            indices = [i]
+            local_diff, total_diff = self._get_energy_diffs_local_and_total(
+                indices)
+            self.assertAlmostEqual(total_diff, local_diff, msg=msg)
+
+    def _test_swap_changes(self, msg):
+        """ Test differences when flipping """
+        for i in range(len(self.atoms)):
+            for j in range(len(self.atoms)):
+                if j <= i:
+                    continue
+                indices = [i, j]
+                local_diff, total_diff = \
+                    self._get_energy_diffs_local_and_total(indices)
+                msg1 = "[{}, {}]".format(i, j)
+                self.assertAlmostEqual(total_diff, local_diff, msg=msg1)
+
+    def test_local_contribution_flip(self):
+        """ Test potential differences when flipping."""
+
+        # Test original occupations
+        self._test_flip_changes("original occupations")
+
+        # Test checkerboard-ish
+        for i in range(len(self.atoms)):
+            if i % 2 == 0:
+                self.atoms[i].number = 13
+            else:
+                self.atoms[i].number = 32
+
+        self._test_flip_changes("Checkerboard")
+
+        # Test segregated-ish
+        for i in range(len(self.atoms)):
+            if i < len(self.atoms)/2:
+                self.atoms[i].number = 13
+            else:
+                self.atoms[i].number = 32
+        self._test_flip_changes("Segregated")
+
+    def test_local_contribution_swap(self):
+        """ test correct differences when swapping. """
+        # Test original occupations
+        self._test_swap_changes("Original occupations")
+
+        # Test checkerboard-ish
+        for i in range(len(self.atoms)):
+            if i % 2 == 0:
+                self.atoms[i].number = 13
+            else:
+                self.atoms[i].number = 32
+
+        self._test_swap_changes("checkerboard")
+
+        # Test segregated-ish
+        for i in range(len(self.atoms)):
+            if i < len(self.atoms)/2:
+                self.atoms[i].number = 13
+            else:
+                self.atoms[i].number = 32
+        self._test_swap_changes("segregated")
+
+    def _get_energy_diffs_local_and_total(self, indices):
+        """ Get energy diffs using local and total"""
+
+        # Original occupations
+        original_occupations = self.atoms.numbers.copy()
+        # Initial value total energy
+        initial_value_total = self.calculator.calculate_total(
+            occupations=self.atoms.get_atomic_numbers())
+        # Initial value local energy
+        initial_value_local = self.calculator.calculate_local_contribution(
+            local_indices=indices, occupations=self.atoms.get_atomic_numbers())
+        # Flip indices
+
+        for index in indices:
+            if self.atoms[index].number == 13:
+                self.atoms[index].number = 32
+            elif self.atoms[index].number == 32:
+                self.atoms[index].number = 13
+        # Calculate new total energy
+        new_value_total = self.calculator.calculate_total(
+            occupations=self.atoms.get_atomic_numbers().copy())
+
+        # Calculate new local energy
+        new_value_local = self.calculator.calculate_local_contribution(
+            local_indices=indices,
+            occupations=self.atoms.get_atomic_numbers().copy())
+
+        # difference in energy according to total energy
+        total_diff = new_value_total - initial_value_total
+
+        # Difference in energy according to local energy
+        local_diff = new_value_local - initial_value_local
+
+        self.atoms.set_atomic_numbers(original_occupations.copy())
+
+        return local_diff, total_diff
+
+
+class TestCECalculatorTernaryHCP(unittest.TestCase):
+    """
+    Container for tests of the class functionality.
+
+    Todo
+    ----
+        * add property test to calculate local contribution when that
+          method has been added as intended.
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(TestCECalculatorTernaryHCP,
+              self).__init__(*args, **kwargs)
+
+        self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1)
+        self.cutoffs = [6, 6, 6]
+        self.subelements = ['Al', 'Ge', 'H']
+        self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
+        params_len = self.cs.get_cluster_space_size()
+        params = [1.0] * params_len
+        self.ce = ClusterExpansion(self.cs, params)
+
+    def setUp(self):
+        """Setup before each test."""
+        self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1).repeat(2)
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
 
