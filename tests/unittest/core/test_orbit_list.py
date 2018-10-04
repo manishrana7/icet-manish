@@ -188,26 +188,6 @@ class TestOrbitList(unittest.TestCase):
                 self.assertAlmostEqual(
                     cluster.radius, size, places=5)
 
-    def _test_allowed_permutations(self):
-        """
-        Test allowed permutations of orbit.
-
-        Todo
-        ----
-        Test fails
-        """
-        atoms = bulk("Al")
-        cutoffs = [10, 10]
-        orbit_list = create_orbit_list(atoms, cutoffs)
-        for orbit in orbit_list.orbits:
-            rep_sites = orbit.representative_sites
-            translated_sites = orbit_list.get_sites_translated_to_unit_cell(
-                rep_sites, False)
-            permutations = orbit.allowed_permutations
-            for perm in permutations:
-                perm_sites = get_permutation(rep_sites, perm)
-                self.assertIn(perm_sites, translated_sites)
-
     def test_allowed_permutations(self):
         """
         Test allowed permutations of orbit.
