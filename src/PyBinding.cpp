@@ -672,7 +672,7 @@ PYBIND11_MODULE(_icet, m)
         .def(py::self == py::self)
         .def(py::self + Eigen::Vector3d());
 
-    py::class_<OrbitList>(m, "OrbitList")
+    py::class_<OrbitList>(m, "_OrbitList")
         .def(py::init<>())
         .def(py::init<const std::vector<NeighborList> &, const Structure &>(),
              R"pbdoc(
@@ -746,7 +746,7 @@ PYBIND11_MODULE(_icet, m)
             auto cv = ClusterSpace.getClusterVector(structure);
             return py::array(cv.size(), cv.data());
         })
-        .def("get_orbit_list", &ClusterSpace::getOrbitList)
+        .def("_get_orbit_list", &ClusterSpace::getOrbitList)
         .def("get_orbit", &ClusterSpace::getOrbit)
         .def_property_readonly("species_map", &ClusterSpace::getSpeciesMap)
         .def("get_cluster_space_info", &ClusterSpace::getClusterSpaceInfo)
