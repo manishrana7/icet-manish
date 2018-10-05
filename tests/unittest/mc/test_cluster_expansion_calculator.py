@@ -22,7 +22,7 @@ class TestCECalculatorBinary(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestCECalculatorBinary, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al", 'fcc', a=4.0)
+        self.atoms = bulk('Al', 'fcc', a=4.0)
         self.cutoffs = [5, 5]  # [2.9]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
@@ -33,7 +33,7 @@ class TestCECalculatorBinary(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.atoms = bulk("Al", 'fcc', a=4.0).repeat(2)
+        self.atoms = bulk('Al', 'fcc', a=4.0).repeat(2)
 
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
@@ -77,7 +77,7 @@ class TestCECalculatorBinary(unittest.TestCase):
 
         self._test_flip_changes("Checkerboard")
 
-        # Test segregated-ish
+        # Test seggregated-ish
         for i in range(len(self.atoms)):
             if i < len(self.atoms)/2:
                 self.atoms[i].number = 13
@@ -86,7 +86,7 @@ class TestCECalculatorBinary(unittest.TestCase):
         self._test_flip_changes("Segregated")
 
     def test_local_contribution_swap(self):
-        """ test correct differences when swapping. """
+        """ Test correct differences when swapping. """
         # Test original occupations
         self._test_swap_changes("Original occupations")
 
@@ -99,7 +99,7 @@ class TestCECalculatorBinary(unittest.TestCase):
 
         self._test_swap_changes("checkerboard")
 
-        # Test segregated-ish
+        # Test seggregated-ish
         for i in range(len(self.atoms)):
             if i < len(self.atoms)/2:
                 self.atoms[i].number = 13
@@ -125,6 +125,7 @@ class TestCECalculatorBinary(unittest.TestCase):
                 self.atoms[index].number = 32
             elif self.atoms[index].number == 32:
                 self.atoms[index].number = 13
+
         # Calculate new total energy
         new_value_total = self.calculator.calculate_total(
             occupations=self.atoms.get_atomic_numbers().copy())
@@ -146,7 +147,7 @@ class TestCECalculatorBinary(unittest.TestCase):
         return local_diff, total_diff
 
     def test_calculate_local_contribution(self):
-        """Test calculate local contribution."""
+        """ Test calculate local contribution. """
         indices = [3, 5]
         local_contribution = self.calculator.calculate_local_contribution(
             local_indices=indices, occupations=self.atoms.get_atomic_numbers())
@@ -172,7 +173,7 @@ class TestCECalculatorBinary(unittest.TestCase):
                 swapped_elements.append(13)
             else:
                 raise Exception(
-                    "Found unknown element in atoms object. {}".format(atom))
+                    'Found unknown element in atoms object. {}'.format(atom))
 
         new_occupations = self.atoms.get_atomic_numbers().copy()
         for index, element in zip(indices, swapped_elements):
@@ -190,7 +191,7 @@ class TestCECalculatorBinary(unittest.TestCase):
         self.assertAlmostEqual(total_diff, local_diff)
 
     def test_get_local_cluster_vector(self):
-        """ Tests the get local clustervector method."""
+        """ Test the get local clustervector method. """
 
         cpp_calc = _ClusterExpansionCalculator(
             self.cs, Structure.from_atoms(self.atoms))
@@ -214,7 +215,7 @@ class TestCECalculatorBinaryHCP(unittest.TestCase):
         super(TestCECalculatorBinaryHCP,
               self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1)
+        self.atoms = bulk('Al', 'hcp', a=4.0, c=3.1)
         self.cutoffs = [6, 6, 6]  # [2.9]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(
@@ -226,7 +227,7 @@ class TestCECalculatorBinaryHCP(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1).repeat(2)
+        self.atoms = bulk('Al', 'hcp', a=4.0, c=3.1).repeat(2)
 
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
@@ -353,7 +354,7 @@ class TestCECalculatorBinaryBCC(unittest.TestCase):
         super(TestCECalculatorBinaryBCC,
               self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al", 'bcc', a=4.0)
+        self.atoms = bulk('Al', 'bcc', a=4.0)
         self.cutoffs = [6, 6, 6]
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
@@ -364,7 +365,7 @@ class TestCECalculatorBinaryBCC(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.atoms = bulk("Al", 'bcc', a=4.0).repeat(2)
+        self.atoms = bulk('Al', 'bcc', a=4.0).repeat(2)
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
 
@@ -486,7 +487,7 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
         super(TestCECalculatorTernaryBCC,
               self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al", 'bcc', a=4.0)
+        self.atoms = bulk('Al', 'bcc', a=4.0)
         self.cutoffs = [6, 6, 6]
         self.subelements = ['Al', 'Ge', 'H']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
@@ -496,7 +497,7 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.atoms = bulk("Al", 'bcc', a=4.0).repeat(2)
+        self.atoms = bulk('Al', 'bcc', a=4.0).repeat(2)
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
 
@@ -566,7 +567,7 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
         self._test_swap_changes("segregated")
 
     def _get_energy_diffs_local_and_total(self, indices):
-        """ Get energy diffs using local and total"""
+        """ Get energy diffs using local and total. """
 
         # Original occupations
         original_occupations = self.atoms.numbers.copy()
@@ -618,7 +619,7 @@ class TestCECalculatorTernaryHCP(unittest.TestCase):
         super(TestCECalculatorTernaryHCP,
               self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1)
+        self.atoms = bulk('Al', 'hcp', a=4.0, c=3.1)
         self.cutoffs = [6, 6, 6]
         self.subelements = ['Al', 'Ge', 'H']
         self.cs = ClusterSpace(self.atoms, self.cutoffs, self.subelements)
@@ -628,7 +629,7 @@ class TestCECalculatorTernaryHCP(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.atoms = bulk("Al", 'hcp', a=4.0, c=3.1).repeat(2)
+        self.atoms = bulk('Al', 'hcp', a=4.0, c=3.1).repeat(2)
         self.calculator = ClusterExpansionCalculator(
             self.atoms, self.ce, name='Test CE calc')
 
@@ -676,7 +677,7 @@ class TestCECalculatorTernaryHCP(unittest.TestCase):
         self._test_flip_changes("Segregated")
 
     def test_local_contribution_swap(self):
-        """ test correct differences when swapping. """
+        """ Test correct differences when swapping. """
         # Test original occupations
         self._test_swap_changes("Original occupations")
 
@@ -698,7 +699,7 @@ class TestCECalculatorTernaryHCP(unittest.TestCase):
         self._test_swap_changes("segregated")
 
     def _get_energy_diffs_local_and_total(self, indices):
-        """ Get energy diffs using local and total"""
+        """ Gets energy diffs using local and total. """
 
         # Original occupations
         original_occupations = self.atoms.numbers.copy()
@@ -708,8 +709,8 @@ class TestCECalculatorTernaryHCP(unittest.TestCase):
         # Initial value local energy
         initial_value_local = self.calculator.calculate_local_contribution(
             local_indices=indices, occupations=self.atoms.get_atomic_numbers())
-        # Flip indices
 
+        # Flip indices
         for index in indices:
             if self.atoms[index].number == 13:
                 self.atoms[index].number = 32
@@ -724,7 +725,7 @@ class TestCECalculatorTernaryHCP(unittest.TestCase):
             local_indices=indices,
             occupations=self.atoms.get_atomic_numbers().copy())
 
-        # difference in energy according to total energy
+        # Difference in energy according to total energy
         total_diff = new_value_total - initial_value_total
 
         # Difference in energy according to local energy
