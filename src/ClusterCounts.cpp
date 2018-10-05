@@ -86,7 +86,8 @@ void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> 
  @brief Counts the clusters in the input structure.
  @param structure input configuration
  @param orbitList orbit list
- @param orderIntact if True do not reorder clusters before comparison (i.e., ABC != ACB)
+ @param orderIntact if true do not reorder clusters before comparison (i.e., ABC != ACB)
+ @param permuteSites if true the sites will be permuted according to the correspondin gpermutations in the orbit
 */
 void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &orbitList, bool orderIntact, bool permuteSites)
 {
