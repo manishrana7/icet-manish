@@ -62,7 +62,7 @@ def _get_all_labelings(snf: SmithNormalForm,
     are equivalent under translations for this particular SNF will not
     be included. However, labelings that are equivalent by rotations
     that leave the cell (but not the labeling) unchanged will still be
-    included, since these have to be removed for each Hermit normal form (HNF)
+    included, since these have to be removed for each Hermite normal form (HNF)
     separately.
 
     Parameters
