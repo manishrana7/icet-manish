@@ -126,7 +126,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
     {
         if (ignoreIndex >= _superCell.size())
         {
-            throw std::runtime_error("index larger than Input structure size in method ClusterExpansionCalculator::getLocalClusterVector");
+            throw std::runtime_error("Index larger than input structure size in method ClusterExpansionCalculator::getLocalClusterVector");
         }
     }
     
@@ -137,7 +137,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
     // since these sites are already in the permuted order
     bool permuteSites = false; 
 
-    // Remove all that doesn't contain index regardless of offset?
+    // Remove all orbits that do not contain index regardless of offset?
     bool onlyConsiderZeroOffsetNotContain = true;
 
     // Remove all ignored indices regardless of offset?
@@ -176,7 +176,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
         if (i >= _clusterSpace._orbitList.size())
         {
             std::cout << _fullPrimitiveOrbitList.size() << " >= " << _clusterSpace._orbitList.size() << std::endl;
-            throw std::runtime_error("index i larger than cs.orbit_list.size() in ClusterExpansionCalculator::getLocalClusterVector");
+            throw std::runtime_error("Index i larger than cs.orbit_list.size() in ClusterExpansionCalculator::getLocalClusterVector");
         }
         try
         {
@@ -185,10 +185,10 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
         catch (const std::exception &e)
         {
             std::cout << e.what() << std::endl;
-            throw std::runtime_error("Failed getting allowed occupations in genereteClusterVector");
+            throw std::runtime_error("Failed getting allowed occupations in generateClusterVector");
         }
 
-        // Skip rest if any sites aren't active sites (i.e. allowed occupation < 2)
+        // Skip the rest if any of the sites are inactive (i.e. allowed occupation < 2)
         if (std::any_of(allowedOccupations.begin(), allowedOccupations.end(), [](int allowedOccupation) { return allowedOccupation < 2; }))
         {
             continue;
