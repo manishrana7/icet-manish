@@ -25,7 +25,7 @@ class Orbit
   public:
     Orbit(const Cluster &);
 
-    ///Add a group sites that are equivalent to the ones in this orbit
+    /// Adds a group sites that are equivalent to the ones in this orbit.
     void addEquivalentSites(const std::vector<LatticeSite> &latNbrs, bool sort = false)
     {
         _equivalentSites.push_back(latNbrs);
@@ -34,7 +34,7 @@ class Orbit
             sortOrbit();
         }
     }
-    ///add many lattice neigbhors
+    /// Adds equilvalent sites.
     void addEquivalentSites(const std::vector<std::vector<LatticeSite>> &LatticeSites, bool sort = false)
     {
         _equivalentSites.insert(_equivalentSites.end(), LatticeSites.begin(), LatticeSites.end());
@@ -44,29 +44,29 @@ class Orbit
         }
     }
 
-    ///Returns amount of equivalent sites in this orbit
+    /// Returns amount of equivalent sites in this orbit.
     size_t size() const
     {
         return _equivalentSites.size();
     }
-    ///Returns the radius of the orbit defines as the mean distance to the center of the
+    /// Returns the radius of the orbit defines as the mean distance to the center of the
     double radius() const
     {
         return _representativeCluster.radius();
     }
-    ///Return the sorted, representative cluster for this orbit
+    /// Returns the sorted, representative cluster for this orbit.
     Cluster getRepresentativeCluster() const
     {
         return _representativeCluster;
     }
 
-    ///Returns equivalent sites
+    /// Returns equivalent sites.
     std::vector<std::vector<LatticeSite>> getEquivalentSites() const
     {
         return _equivalentSites;
     }
 
-    ///Returns equivalent sites
+    /// Returns equivalent sites.
     std::vector<std::vector<LatticeSite>> getPermutedEquivalentSites() const
     {
         std::vector<std::vector<LatticeSite>> permutedSites(_equivalentSites.size());
@@ -77,7 +77,7 @@ class Orbit
         return permutedSites;
     }
 
-    ///Return the equivalent sites at position `index`
+    /// Returns the equivalent sites at position `index`.
     std::vector<LatticeSite> GetSitesOfIndex(unsigned int index) const
     {
         if (index >= _equivalentSites.size())
@@ -87,7 +87,7 @@ class Orbit
         return _equivalentSites[index];
     }
 
-    ///Return the equivalent sites at position `index` by using the permutation to rep. cluster
+    /// Returns the equivalent sites at position `index` by using the permutation to rep. cluster.
     std::vector<LatticeSite> getSitesWithPermutation(unsigned int index) const
     {
         if (index >= _equivalentSites.size())
@@ -104,7 +104,7 @@ class Orbit
         return icet::getPermutedVector<LatticeSite>(_equivalentSites[index], _equivalentSitesPermutations[index]);
     }
 
-    ///This sets the equivalent sites
+    /// Sets the equivalent sites.
     void setEquivalentSites(const std::vector<std::vector<LatticeSite>> &equivalentSites)
     {
         _equivalentSites = equivalentSites;
@@ -114,12 +114,12 @@ class Orbit
     {
         std::sort(_equivalentSites.begin(), _equivalentSites.end());
     }
-    ///Return the number of bodies of the cluster that represent this orbit
+    /// Returns the number of bodies of the cluster that represent this orbit.
     unsigned int getClusterSize() const
     {
         return _representativeCluster.order();
     }
-    ///Compare operator for automatic sorting in containers
+    /// Comparison operator for automatic sorting in containers.
     friend bool operator==(const Orbit &orbit1, const Orbit &orbit2)
     {
 
@@ -128,23 +128,23 @@ class Orbit
         {
             return false;
         }
-        ///not equal size: compare by radius
+        /// Not equal size: compare by radius
         if (fabs(orbit1.radius() - orbit2.radius()) > 1e-5) // @TODO: remove hard-coded tolerance and add tunable parameter
         {
             return false;
         }
 
-        // check size of vector of equivalent sites
+        // Check size of vector of equivalent sites
         if (orbit1.size() != orbit2.size())
         {
             return false;
         }
 
-        //Now size of  equivalent sites vector are the same, then check the individual equivalent sites
+        // Now size of  equivalent sites vector are the same, then check the individual equivalent sites
         return orbit1.getEquivalentSites() == orbit2.getEquivalentSites();
     }
 
-    ///Compare operator for automatic sorting in containers
+    /// Comparison operator for automatic sorting in containers.
     friend bool operator<(const Orbit &orbit1, const Orbit &orbit2)
     {
 
@@ -153,13 +153,13 @@ class Orbit
         {
             return orbit1.getRepresentativeCluster().order() < orbit2.getRepresentativeCluster().order();
         }
-        ///not equal size: compare by radius
+        /// Not equal size: compare by radius
         if (fabs(orbit1.radius() - orbit2.radius()) > 1e-5) // @TODO: remove 1e-4 and add tunable parameter
         {
             return orbit1.radius() < orbit2.radius();
         }
 
-        // check size of vector of equivalent sites
+        // Check size of vector of equivalent sites
         if (orbit1.size() < orbit2.size())
         {
             return true;
@@ -168,34 +168,34 @@ class Orbit
         {
             return false;
         }
-        //Now size of  equivalent sites vector are the same, then check the individual equivalent sites
+        // Now size of  equivalent sites vector are the same, then check the individual equivalent sites
         return orbit1.getEquivalentSites() < orbit2.getEquivalentSites();
     }
-    ///Return the equivalent sites permutations
+    /// Returnd the equivalent sites permutations.
     std::vector<std::vector<int>> getEquivalentSitesPermutations() const
     {
         return _equivalentSitesPermutations;
     }
 
-    /// Assigns the equivalent sites permutations
+    /// Assigns the equivalent sites permutations.
     void setEquivalentSitesPermutations(std::vector<std::vector<int>> &permutations)
     {
         _equivalentSitesPermutations = permutations;
     }
 
-    /// Assigns the allowed sites permutations
+    /// Assigns the allowed sites permutations.
     void setAllowedSitesPermutations(std::unordered_set<std::vector<int>, VectorHash> &permutations)
     {
         _allowedSitesPermutations = permutations;
     }
 
-    /// Get the allowed sites permutations
+    /// Gets the allowed sites permutations.
     std::unordered_set<std::vector<int>, VectorHash> getAllowedSitesPermutations() const
     {
         return _allowedSitesPermutations;
     }
 
-    ///Return the representative sites of this orbit (if any equivalentSites permutations exists it is to these sites they refer to)
+    /// Returns the representative sites of this orbit (if any equivalentSites permutations exists it is to these sites they refer to).
     std::vector<LatticeSite> getRepresentativeSites() const
     {
         return _equivalentSites[0];
@@ -203,13 +203,13 @@ class Orbit
 
     /**
     Returns the number of exactly equal sites in equivalent sites vector
-    This is used among other things to debug orbits when duplicates is not expected
+    This is used among other things to debug orbits when duplicates are not expected
     */
     int getNumberOfDuplicates(int verbosity = 0) const;
 
     /**
-        Creates a copy of this orbit and translates all LatticeSite offsets in equivalent sites
-        this will also transfer any existing permutations directly which should be fine since an offset doesn't change permutations to the prototype sites)
+    Creates a copy of this orbit and translates all LatticeSite offsets in equivalent sites.
+    This will also transfer any existing permutations directly, which should be fine since an offset does not change permutations to the prototype sites.
     */
     friend Orbit operator+(const Orbit &orbit, const Eigen::Vector3d &offset)
     {
@@ -223,10 +223,10 @@ class Orbit
         }
         return orbitOffset;
     }
-    /// append an orbit to this orbit.
+    /// Appends an orbit to this orbit.
     Orbit &operator+=(const Orbit &orbit_rhs)
     {
-        // this orbit doesn't have any eq. sites permutations: check that orbit_rhs also doesn't have them
+        // This orbit does not have any eq. sites permutations: check that orbit_rhs also doesn't have them
         if (_equivalentSitesPermutations.size() == 0)
         {
             if (orbit_rhs.getEquivalentSitesPermutations().size() != 0)
@@ -234,7 +234,7 @@ class Orbit
                 throw std::runtime_error("Error: one orbit has eq. site permutations and one doesn't in function: Orbit &operator+= ");
             }
         }
-        else //this orbit has some eq. sites permutations: check that orbit_rhs also has them
+        else // This orbit has some eq. sites permutations: check that orbit_rhs also has them
         {
             if (orbit_rhs.getEquivalentSitesPermutations().size() == 0)
             {
@@ -242,9 +242,9 @@ class Orbit
             }
         }
 
-        //Assert that both orbits are referencing the same prototype sites with the difference that the offsets are offset by a constant
+        // Assert that both orbits are referencing the same prototype sites with the difference that the offsets are offset by a constant
 
-        //Get representative sites
+        // Get representative sites
         auto rep_sites_rhs = orbit_rhs.getRepresentativeSites();
         auto rep_sites_this = getRepresentativeSites();
 
@@ -252,18 +252,18 @@ class Orbit
         {
             throw std::runtime_error("Error: Orbit order is not equal in function: Orbit &operator+= ");
         }
-        //The offsets between the offsets of the two rep. eq. sites
+        // The offsets between the offsets of the two rep. eq. sites
         Vector3d offsetOfOffsets;
 
         const auto rhsEquivalentSites = orbit_rhs.getEquivalentSites();
         const auto rhsEquivalentSitesPermutations = orbit_rhs.getEquivalentSitesPermutations();
-        //Insert rhs eq sites and corresponding permutations
+        // Insert rhs eq sites and corresponding permutations
         _equivalentSites.insert(_equivalentSites.end(), rhsEquivalentSites.begin(), rhsEquivalentSites.end());
         _equivalentSitesPermutations.insert(_equivalentSitesPermutations.end(), rhsEquivalentSitesPermutations.begin(), rhsEquivalentSitesPermutations.end());
         return *this;
     }
 
-    ///Mi_local are the same size as representative sites and details the allowed occupations on the representative sites
+    /// Mi_local are the same size as representative sites and details the allowed occupations on the representative sites.
     std::vector<std::vector<int>> getMultiComponentVectors(const std::vector<int> &Mi_local) const;
 
     std::vector<std::vector<int>> getAllPossibleMultiComponentVectorPermutations(const std::vector<int> &Mi_local) const;
@@ -271,23 +271,23 @@ class Orbit
     /// Returns true if the input sites exists in _equivalentSites, order doesn't matter if sorted= false.
     bool contains(const std::vector<LatticeSite> sites, bool sorted) const;
 
-    /// Remove all elements i in equivalent sites if any sites in _equivalentSites[i] have the input index.
+    /// Removes all elements i in equivalent sites if any sites in _equivalentSites[i] have the input index.
     void removeSitesWithIndex(const int indexRemove, bool);
 
-    /// Remove all elements i in equivalent sites if no sites in _equivalentSites[i] have the input index.
+    /// Removes all elements i in equivalent sites if no sites in _equivalentSites[i] have the input index.
     void removeSitesNotWithIndex(const int index, bool);
 
     /// Remove a specific set of sites with corresponding equivalent site permutation.
     void removeSites(std::vector<LatticeSite>);
 
-    ///Container of equivalent sites for this orbit
+    /// Container of equivalent sites for this orbit
     std::vector<std::vector<LatticeSite>> _equivalentSites;
 
-    ///Representative sorted cluster for this orbit
+    /// Representative sorted cluster for this orbit
     Cluster _representativeCluster;
 
   private:
-    ///Contains the permutations of the equivalent sites which takes it to the order of the reference cluster
+    /// Contains the permutations of the equivalent sites which takes it to the order of the reference cluster
     std::vector<std::vector<int>> _equivalentSitesPermutations;
 
     /// Contains the allowed sites permutations. i.e. if 0,2,1 is in this set then 0,1,0 is the same MC vector as 0,0,1
