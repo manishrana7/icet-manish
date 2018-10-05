@@ -104,7 +104,7 @@ class ClusterExpansionCalculator(BaseCalculator):
 
         return local_contribution * self._property_scaling
 
-    def _calculate_local_contribution(self, index, exclude_indices=[]):
+    def _calculate_local_contribution(self, index : int, exclude_indices : List[int] = []):
         """
         Internal method to calculate the local contribution for one
         index.
@@ -113,11 +113,13 @@ class ClusterExpansionCalculator(BaseCalculator):
         ----------
         index : int
             lattice index
+        exclude_indices
+            previously calculated indices, these indices will
+            be ignored in order to avoid double counting bonds
 
         """
         local_cv = self.cpp_calc.get_local_cluster_vector(
             self.atoms.get_atomic_numbers(), index, exclude_indices)
-        assert(len(local_cv) == len(self.cluster_expansion.parameters))
         return np.dot(local_cv, self.cluster_expansion.parameters)
 
     @property
