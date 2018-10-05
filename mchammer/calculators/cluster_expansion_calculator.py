@@ -104,7 +104,8 @@ class ClusterExpansionCalculator(BaseCalculator):
 
         return local_contribution * self._property_scaling
 
-    def _calculate_local_contribution(self, index : int, exclude_indices : List[int] = []):
+    def _calculate_local_contribution(self, index: int,
+                                      exclude_indices: List[int] = []):
         """
         Internal method to calculate the local contribution for one
         index.
