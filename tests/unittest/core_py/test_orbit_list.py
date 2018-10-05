@@ -229,13 +229,9 @@ class TestOrbitList(unittest.TestCase):
         """
         retval = self.orbit_list.__str__()
         target = """
-============= Orbit List ==============
-index | order |  radius  | multiplicity
----------------------------------------
-   0  |   1   |   0.0000 |        1
-   1  |   2   |   1.4460 |        6
-   2  |   2   |   2.0450 |        3
-=======================================
+Orbit 0 - Multiplicity 1
+Orbit 1 - Multiplicity 6
+Orbit 2 - Multiplicity 3
 """
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
