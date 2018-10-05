@@ -273,6 +273,45 @@ class TestStructure(unittest.TestCase):
             found_site = structure.find_lattice_site_by_position(pos)
             self.assertEqual(site, found_site)
 
+    def _compare_atoms_vs_structures(self, atoms, structure):
+        """
+        Comparing icet structures againts ase atoms.
+        """
+        # check number of atoms
+        self.assertEqual(len(atoms), len(structure))
+
+        # check chemical symbols
+        self.assertEqual(atoms.get_chemical_symbols(),
+                         structure.get_chemical_symbols())
+
+        # check positions
+        self.assertTrue(np.all(np.isclose(
+            atoms.positions, structure.positions)))
+
+        # check pbc
+        self.assertTrue((atoms.pbc == structure.pbc).all())
+
+        # check cell
+        self.assertTrue((atoms.cell == structure.cell).all())
+
+        # check structure returns an equal ase atom
+        atoms_icet = structure.to_atoms()
+        self.assertEqual(atoms, atoms_icet)
+
+    def test_conversion_between_atoms_structures_in_database(self):
+        """"
+        Test conversion between icet structures and ase atoms for
+        atoms in database.
+        """
+        from ase.db import connect as db_connect
+
+        db = db_connect('structures_for_testing.db')
+
+        for row in db.select():
+            atoms = row.toatoms()
+            structure = Structure.from_atoms(atoms)
+            self._compare_atoms_vs_structures(atoms, structure)
+
     def test_structure_from_atoms(self):
         """
         Test ASE Atoms-to-icet Structure conversion.
