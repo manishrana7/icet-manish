@@ -5,7 +5,7 @@ import unittest
 from ase.build import bulk
 from icet import Structure
 from icet.core.cluster import Cluster
-from icet.core.orbit_list import create_orbit_list
+from icet.core.orbit_list import OrbitList
 from icet.core.cluster_counts import ClusterCounts
 from icet.core.lattice_site import LatticeSite
 from icet.core.neighbor_list import get_neighbor_lists
@@ -40,7 +40,7 @@ class TestClusterCounts(unittest.TestCase):
         self.cutoffs = [2.2]
         self.neighbor_lists = get_neighbor_lists(
             atoms=self.atoms, cutoffs=self.cutoffs)
-        self.orbit_list = create_orbit_list(self.atoms, self.cutoffs)
+        self.orbit_list = OrbitList(self.atoms, self.cutoffs)
         self.orbit_list.sort()
 
     def setUp(self):

@@ -7,7 +7,7 @@ from icet.core.neighbor_list import NeighborList
 from icet.core.permutation_map import (
     PermutationMap, permutation_matrix_from_atoms)
 from icet.core.orbit_list import (
-    __get_lattice_site_permutation_matrix as
+    _get_lattice_site_permutation_matrix as
     get_lattice_site_permutation_matrix)
 from icet.core.orbit_list import (
     __fractional_to_cartesian as fractional_to_cartesian)

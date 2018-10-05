@@ -7,7 +7,7 @@ import numpy as np
 
 from _icet import ClusterSpace as _ClusterSpace
 from icet.tools.geometry import get_primitive_structure, add_vacuum_in_non_pbc
-from icet.core.orbit_list import create_orbit_list
+from icet.core.orbit_list import OrbitList
 from icet.core.structure import Structure
 
 
@@ -47,8 +47,7 @@ class ClusterSpace(_ClusterSpace):
         self._mi = Mi
 
         # set up orbit list
-        orbit_list = create_orbit_list(self._atoms, self._cutoffs)
-        orbit_list.sort()
+        orbit_list = OrbitList(self._atoms, self._cutoffs)        
 
         # handle occupations
         if Mi is None:
@@ -305,6 +304,13 @@ class ClusterSpace(_ClusterSpace):
         cluster
         """
         return self._cutoffs
+
+    @property
+    def orbit_list(self):
+        """Orbit list that defines the cluster in the cluster space"""
+        ol_cpp = self._get_orbit_list()
+        
+
 
     def write(self, filename: str):
         """

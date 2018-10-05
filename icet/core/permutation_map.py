@@ -28,7 +28,7 @@ def permutation_matrix_from_atoms(atoms, cutoff, find_prim=True):
         the tuple comprises the permutation matrix, the primitive structure,
         and the neighbor list
     '''
-
+    
     atoms = atoms.copy()
     # set each element to the same since we only care about geometry when
     # taking primitive
