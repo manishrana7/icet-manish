@@ -75,7 +75,7 @@ Vector3d Structure::getPosition(const LatticeSite &latticeNeighbor) const
     return position;
 }
 /**
-@details returns the position in cartesian coordinates of a specific site.
+@details This function returns the position of a specific site in Cartesian coordinates.
 @param index index of the site
  **/
 Vector3d Structure::getPositionByIndex(const size_t &index) const
