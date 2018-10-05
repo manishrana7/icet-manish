@@ -44,12 +44,12 @@ class Orbit
         }
     }
 
-    /// Returns amount of equivalent sites in this orbit.
+    /// Returns number of equivalent sites in this orbit.
     size_t size() const
     {
         return _equivalentSites.size();
     }
-    /// Returns the radius of the orbit defines as the mean distance to the center of the
+    /// Returns the radius of the representative cluster in this orbit.
     double radius() const
     {
         return _representativeCluster.radius();
@@ -171,7 +171,7 @@ class Orbit
         // Now size of  equivalent sites vector are the same, then check the individual equivalent sites
         return orbit1.getEquivalentSites() < orbit2.getEquivalentSites();
     }
-    /// Returnd the equivalent sites permutations.
+    /// Return the equivalent sites permutations.
     std::vector<std::vector<int>> getEquivalentSitesPermutations() const
     {
         return _equivalentSitesPermutations;
@@ -263,7 +263,7 @@ class Orbit
         return *this;
     }
 
-    /// Mi_local are the same size as representative sites and details the allowed occupations on the representative sites.
+    /// Returns the relevant multicomponent vectors of this orbit given the number of allowed components.
     std::vector<std::vector<int>> getMultiComponentVectors(const std::vector<int> &Mi_local) const;
 
     std::vector<std::vector<int>> getAllPossibleMultiComponentVectorPermutations(const std::vector<int> &Mi_local) const;
