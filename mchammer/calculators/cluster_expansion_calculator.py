@@ -24,7 +24,7 @@ class ClusterExpansionCalculator(BaseCalculator):
 
     Parameters
     ----------
-    atom
+    atoms
         structure for which to set up the calculator
     cluster_expansion : ClusterExpansion
         cluster expansion from which to build calculator
