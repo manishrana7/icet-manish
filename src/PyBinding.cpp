@@ -781,17 +781,17 @@ PYBIND11_MODULE(_icet, m)
             auto cv = ceCalc.getLocalClusterVector(occupations, index, indices);
             return py::array(cv.size(), cv.data());
         }, R"pbdoc(
-             Returns a cluster vector that only considers clusters that contain the input index
+             Returns a cluster vector that only considers clusters that contain the input index.
+             
              Parameters
              ----------
              occupations : list of int
                  the occupation vector for the supercell
              index : int
-                 the local index of the supercell
+                 local index of the supercell
              ignoredIndices : list of int
-                a list of indices which have already had 
-                their local energy calculated. 
-                This is required to input so that no double counting occurs
+                list of indices that have already had their local energy calculated;
+                this is required to prevent double counting
         )pbdoc")
     ;
 }
