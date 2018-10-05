@@ -55,48 +55,48 @@ class TestStructure(unittest.TestCase):
 
     def test_positions(self):
         """
-        Tests positions of atoms in structure.
+        Test positions of atoms in structure.
         """
         for i, vec in enumerate(self.structure.positions):
             self.assertListEqual(vec.tolist(), self.positions[i])
 
     def test_chemical_symbols(self):
         """
-        Tests chemical symbols of atoms in structure.
+        Test chemical symbols of atoms in structure.
         """
         self.assertListEqual(self.structure.chemical_symbols,
                              self.chemical_symbols)
 
     def test_atomic_numbers(self):
         """
-        Tests atomic numbers.
+        Test atomic numbers.
         """
         self.assertListEqual(self.structure.atomic_numbers,
                              [47, 47])
 
     def test_cell(self):
         """
-        Tests cell.
+        Test cell.
         """
         for i, vec in enumerate(self.structure.cell):
             self.assertListEqual(vec.tolist(), self.cell[i])
 
     def test_pbc(self):
         """
-        Tests periodic boundary conditions.
+        Test periodic boundary conditions.
         """
         self.assertListEqual(self.structure.pbc, [True, True, True])
 
     def test_unique_sites(self):
         """
-        Tests unique sites.
+        Test unique sites.
         """
         self.assertListEqual(self.structure.unique_sites,
                              [0, 0])
 
     def test_set_and_get_positions(self):
         """
-        Tests set and get positions.
+        Test set and get positions.
         """
         new_positions = [[0., 0., 0.001],
                          [0., 1.15470054, 1.63299316]]
@@ -107,7 +107,7 @@ class TestStructure(unittest.TestCase):
 
     def test_set_and_get_chemical_symbols(self):
         """
-        Tests set and get chemical symbols.
+        Test set and get chemical symbols.
         """
         new_chemical_symbols = ['Au', 'Au']
         self.structure.set_chemical_symbols(new_chemical_symbols)
@@ -116,7 +116,7 @@ class TestStructure(unittest.TestCase):
 
     def test_set_and_get_atomic_numbers(self):
         """
-        Tests set and get atomic numbers.
+        Test set and get atomic numbers.
         """
         self.structure.set_atomic_numbers([48, 47])
         retval = self.structure.get_atomic_numbers()
@@ -124,7 +124,7 @@ class TestStructure(unittest.TestCase):
 
     def test_set_and_get_cell(self):
         """
-        Tests set and get cell.
+        Test set and get cell.
         """
         new_cell = [[2., 0., 0.],
                     [-1., 2., 0.],
@@ -136,7 +136,7 @@ class TestStructure(unittest.TestCase):
 
     def test_set_and_get_pbc(self):
         """
-        Tests set and get pbc.
+        Test set and get pbc.
         """
         self.structure.set_pbc([True, True, False])
         retval = self.structure.get_pbc()
@@ -144,7 +144,7 @@ class TestStructure(unittest.TestCase):
 
     def test_set_and_get_unique_sites(self):
         """
-        Tests set and get pbc.
+        Test set and get pbc.
         """
         self.structure.set_unique_sites([0, 1])
         retval = self.structure.get_unique_sites()
@@ -152,14 +152,14 @@ class TestStructure(unittest.TestCase):
 
     def test_get_position(self):
         """
-        Tests get_position functionality.
+        Test get_position functionality.
         """
         retval = self.structure.get_position(LatticeSite(1, [0, 0, 0]))
         self.assertListEqual(retval.tolist(), self.positions[1])
 
     def test_get_distance(self):
         """
-        Tests get_distance functionality.
+        Test get_distance functionality.
         """
         retval = self.structure.get_distance(0, 1,
                                              [0., 0., 0.],
@@ -170,7 +170,7 @@ class TestStructure(unittest.TestCase):
 
     def test_find_lattice_site_by_position_simple(self):
         """
-        Tests finding lattice site by position, simple version using
+        Test finding lattice site by position, simple version using
         only one atom cell.
 
         1. Create a bunch of lattice sites all with index 0 and
@@ -201,7 +201,7 @@ class TestStructure(unittest.TestCase):
 
     def test_find_lattice_site_by_position_medium(self):
         """
-        Tests finding lattice site by position, medium version
+        Test finding lattice site by position, medium version
         tests against hcp and user more than one atom in the basis
         1. Create a bunch of lattice sites all with index 0 and
         integer unitcell offsets
@@ -236,7 +236,7 @@ class TestStructure(unittest.TestCase):
 
     def test_find_lattice_site_by_position_hard(self):
         """
-        Tests finding lattice site by position, hard version tests against hcp,
+        Test finding lattice site by position, hard version tests against hcp,
         many atoms in the basis AND pbc = [True, True, False] !
         1. Create a bunch of lattice sites all with index 0 and
         integer unitcell offsets
@@ -275,7 +275,7 @@ class TestStructure(unittest.TestCase):
 
     def test_structure_from_atoms(self):
         """
-        Tests ASE Atoms-to-icet Structure conversion.
+        Test ASE Atoms-to-icet Structure conversion.
         """
         structure = Structure.from_atoms(self.atoms)
 
@@ -289,7 +289,7 @@ class TestStructure(unittest.TestCase):
 
     def test_structure_to_atoms(self):
         """
-        Tests icet Structure-to-ASE Atoms conversion.
+        Test icet Structure-to-ASE Atoms conversion.
         """
         atoms = Structure.to_atoms(self.structure)
         positions = atoms.get_positions()
@@ -302,7 +302,7 @@ class TestStructure(unittest.TestCase):
 
     def test_repr_function(self):
         """
-        Tests representation.
+        Test representation.
         """
         retval = self.structure.__repr__()
         target = """

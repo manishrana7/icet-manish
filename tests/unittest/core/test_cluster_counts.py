@@ -49,7 +49,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_count_lattice_sites(self):
         """
-        Tests cluster_counts counts a pair given a set of
+        Test cluster_counts counts a pair given a set of
         lattice neighbors.
         """
         lattice_sites = []
@@ -66,7 +66,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_count_list_lattice_sites(self):
         """
-        Tests whether cluster_counts returns the correct number of pairs
+        Test whether cluster_counts returns the correct number of pairs
         given a list of lattice neighbors.
         """
         lattice_sites = []
@@ -90,7 +90,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_count_orbit_list(self):
         """
-        Tests cluster_counts given orbits in an orbit list.
+        Test cluster_counts given orbits in an orbit list.
         """
         cluster_singlet = Cluster(self.structure, [], False, 0)
         cluster_pair = Cluster(self.structure, [], False, 1)
@@ -107,7 +107,7 @@ class TestClusterCounts(unittest.TestCase):
     @unittest.expectedFailure
     def test_count_orbit_list_non_pbc(self):
         """
-        Tests cluster counts using orbit_list for a non-pbc structure.
+        Test cluster counts using orbit_list for a non-pbc structure.
         """
         atoms_non_pbc = self.atoms.copy()
         atoms_non_pbc.set_pbc(False)
@@ -128,14 +128,14 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_len(self):
         """
-        Tests total size of counts.
+        Test total size of counts.
         """
         self.assertEqual(len(self.cluster_counts),
                          len(self.orbit_list))
 
     def test_reset(self):
         """
-        Tests reset functionality.
+        Test reset functionality.
         """
         # self.cluster_counts.count_clusters(self.structure,
         #                                   self.orbit_list, False)
@@ -156,7 +156,7 @@ class TestClusterCounts(unittest.TestCase):
 
     def test_str(self):
         """
-        Tests representation of cluster_counts.
+        Test representation of cluster_counts.
         """
         retval = self.cluster_counts.__str__()
         target = """

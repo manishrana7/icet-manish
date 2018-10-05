@@ -45,13 +45,13 @@ class TestPermutationMap(unittest.TestCase):
 
     def test_init(self):
         """
-        Tests the initializer.
+        Test the initializer.
         """
         self.assertIsInstance(self.pm, PermutationMap)
 
     def test_dimension_permutation_matrix(self):
         """
-        Tests dimensions of permutation matrix. Number of rows should
+        Test dimensions of permutation matrix. Number of rows should
         be equal to the number of symmetry operations while number of columns
         must correpond to the total number of fractional positions.
         """
@@ -62,7 +62,7 @@ class TestPermutationMap(unittest.TestCase):
 
     def test_get_permuted_positions(self):
         """
-        Tests that first row and first column of permutation matrix match
+        Test that first row and first column of permutation matrix match
         the target lists.
         """
         pm_frac = self.pm.get_permuted_positions()
@@ -143,7 +143,7 @@ class TestPermutationMap(unittest.TestCase):
 
     def test_get_indexed_positions(self):
         """
-        Tests that first set of indices along with unique positions in indexed
+        Test that first set of indices along with unique positions in indexed
         positions reproduce correctly the positions retuned in the first row
         of permutation matrix.
         """
@@ -159,7 +159,7 @@ class TestPermutationMap(unittest.TestCase):
 
     def test_permutation_matrix_from_atoms(self):
         """
-        Tests permutation matrix from atoms functionality.
+        Test permutation matrix from atoms functionality.
         """
         pm, _, _ = \
             permutation_matrix_from_atoms(self.atoms, self.cutoff)
@@ -185,7 +185,7 @@ class TestPermutationMap(unittest.TestCase):
 
     def test_fractional_to_cartesian(self):
         """
-        Tests fractional coordinates are converted into cartesians coordinates.
+        Test fractional coordinates are converted into cartesians coordinates.
         """
         target = [[0.0, 0.0, 0.0],
                   [-1.5, -0.87, -2.45],
@@ -220,7 +220,7 @@ class TestPermutationMap(unittest.TestCase):
 
     def test_lattice_site_permutation_matrix(self):
         """
-        Tests lattice sites in permutation matrix by asserting the distances
+        Test lattice sites in permutation matrix by asserting the distances
         between r_ik and r_jk sites in the same column.
         """
         # TODO: Some part of the implementation cannot be covered as test fails
@@ -248,7 +248,7 @@ class TestPermutationMap(unittest.TestCase):
 
     def test_prune_permutation_matrix(self):
         """
-        Tests that first column of pruned permutation matrix
+        Test that first column of pruned permutation matrix
         containes unique elements.
         """
         pm, prim_structure, _ = \

@@ -150,7 +150,7 @@ class TestClusterSpace(unittest.TestCase):
 
     def test_orbit_data(self):
         """
-        Tests orbit_data property.
+        Test orbit_data property.
         """
         target = [OrderedDict([('index', 0),
                                ('order', 0),
@@ -313,7 +313,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 
     def _test_cluster_vectors_in_database(self, db_name):
         """
-        Tests the cluster vectors in the database.
+        Test the cluster vectors in the database.
         """
 
         db = db_connect(db_name)
@@ -367,7 +367,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 
     def test_read_write(self):
         """
-        Tests read/write functionality.
+        Test read/write functionality.
         """
         f = tempfile.NamedTemporaryFile()
         self.cs.write(f.name)
@@ -380,7 +380,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 
     def test_chemical_symbols(self):
         """
-        Tests chemical_symbols property.
+        Test chemical_symbols property.
         """
         target = ['Ag', 'Au']
         self.assertEqual(self.cs.chemical_symbols, target)

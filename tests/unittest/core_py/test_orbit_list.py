@@ -79,7 +79,7 @@ class TestOrbitList(unittest.TestCase):
 
     def test_property_primitive_structure(self):
         """
-        Tests the primitive_structure property.
+        Test the primitive_structure property.
         """
         self.orbit_list.primitive_structure
         self.assertEqual(

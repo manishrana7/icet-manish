@@ -29,7 +29,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_build(self):
         """
-        Tests build.
+        Test build.
         """
         for index in range(len(self.atoms)):
             self.mbnl.build(self.neighbor_lists, index, True)
@@ -58,7 +58,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_singlets(self):
         """
-        Tests that every singlet lattice site is listed
+        Test that every singlet lattice site is listed
         in the many-body neighbor list.
         """
         for index in range(len(self.atoms)):
@@ -68,7 +68,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_pairs(self):
         """
-        Tests that many-body_neighbor list includes all the pairs returned
+        Test that many-body_neighbor list includes all the pairs returned
         by  neighbor_list for a specific lattice site.
         """
         index = 0
@@ -79,7 +79,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_higher_order_neighbors(self):
         """
-        Tests higher order neighbors in many-body neighbor list for a
+        Test higher order neighbors in many-body neighbor list for a
         specific lattice site.
         """
         index = 0
@@ -98,7 +98,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_calculate_intersections(self):
         """
-        Tests intersection between two list of neighbors.
+        Test intersection between two list of neighbors.
         """
         lattice_sites = []
         lattice_sites.append(LatticeSite(0, [0, 0, 0]))
@@ -118,7 +118,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_mbnl_non_pbc(self):
         """
-        Tests many-body neighbor list for non-pbc structure.
+        Test many-body neighbor list for non-pbc structure.
         """
         atoms = self.atoms.copy()
         atoms.set_pbc([False])
@@ -151,7 +151,7 @@ class TestManyBodyNeighborList(unittest.TestCase):
 
     def test_mbnl_cubic_non_pbc(self):
         """
-        Tests that corners sites in a large cubic cell have
+        Test that corners sites in a large cubic cell have
         only three neighbors in many-body neighbor list.
         """
         atoms = bulk('Al', 'sc', a=4.0).repeat(4)

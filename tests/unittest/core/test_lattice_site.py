@@ -29,14 +29,14 @@ class TestLatticeSite(unittest.TestCase):
 
     def test_index_property(self):
         """
-        Tests index property.
+        Test index property.
         """
         self.assertIsInstance(self.lattice_sites[0].index, int)
         self.assertEqual(self.lattice_sites[0].index, 0)
 
     def test_offset_property(self):
         """
-        Tests unitcell_offset property.
+        Test unitcell_offset property.
         """
         self.assertIsInstance(
             self.lattice_sites[0].unitcell_offset, type(np.array([0])))
@@ -48,7 +48,7 @@ class TestLatticeSite(unittest.TestCase):
 
     def test_eq(self):
         """
-        Tests eq operator.
+        Test eq operator.
         """
         index = 152453453
         unitcell_offset = [-234234., 32423423., 235567567.]
@@ -61,13 +61,13 @@ class TestLatticeSite(unittest.TestCase):
 
     def test_less_than(self):
         """
-        Tests less than operator.
+        Test less than operator.
         """
         self.assertLess(self.lattice_sites[0], self.lattice_sites[1])
 
     def test_add_operator(self):
         """
-        Tests adding operator.
+        Test adding operator.
         """
         lattice_site = LatticeSite(0, [0, 0, 0])
         lattice_site2 = LatticeSite(0, [-1, -1, 3])
@@ -77,7 +77,7 @@ class TestLatticeSite(unittest.TestCase):
 
     def test_substraction_operator(self):
         """
-        Tests substraction operator.
+        Test substraction operator.
         """
         lattice_site = LatticeSite(0, [-1, -1, 3])
         lattice_site.unitcell_offset = \
@@ -86,7 +86,7 @@ class TestLatticeSite(unittest.TestCase):
 
     def test_add_assigment_operator(self):
         """
-        Tests adding and assignment operator.
+        Test adding and assignment operator.
         """
         lattice_site = LatticeSite(0, [0, 0, 0])
         lattice_site2 = LatticeSite(0, [-1, -1, 3])
@@ -95,7 +95,7 @@ class TestLatticeSite(unittest.TestCase):
 
     def test_str(self):
         """
-        Tests the string representation of LatticeSite
+        Test the string representation of LatticeSite
         """
         target = '0 : [ 0.  0.  0.]'
         retval = str(self.lattice_sites[0])
@@ -103,7 +103,7 @@ class TestLatticeSite(unittest.TestCase):
 
     def test_hash(self):
         """
-        Tests that lattice site is hashable (check)
+        Test that lattice site is hashable (check)
         """
         index = 152453453
         unitcell_offset = [-234234., 32423423., 235567567.]
