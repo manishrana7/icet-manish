@@ -104,7 +104,7 @@ std::vector<std::vector<int>> Orbit::getAllPossibleMultiComponentVectorPermutati
 }
 
 /** 
-@details Check if this orbit contain a set of sites in its equivalent sites vector.
+@details Check if this orbit contains a set of sites in its equivalent sites vector.
 @param sites the sites that will be looked for.
 @param sorted if true the order of sites is irrelevant
 
@@ -122,7 +122,7 @@ bool Orbit::contains(const std::vector<LatticeSite> sites, bool sorted) const
     {
         auto i_sites = _equivalentSites[i];
 
-        //compare the sorted sites
+        // compare the sorted sites
         if (sorted)
         {
             std::sort(i_sites.begin(), i_sites.end());
@@ -138,9 +138,9 @@ bool Orbit::contains(const std::vector<LatticeSite> sites, bool sorted) const
 
 
 /**
-@details removes all set of sites in equivalent sites if any site in the set of sites contain have its index equal to indexRemove.
-@param indexRemove the index to look for.
-@param onlyConsiderZeroOffset if true it will only remove sites with zero offset
+@details Removes sets of sites in equivalent sites for which any site in the set has an index equal to indexRemove.
+@param indexRemove the index to look for
+@param onlyConsiderZeroOffset if true remove only sites with zero offset
 **/
 void Orbit::removeSitesWithIndex(const int indexRemove, bool onlyConsiderZeroOffset)
 {
@@ -167,9 +167,9 @@ void Orbit::removeSitesWithIndex(const int indexRemove, bool onlyConsiderZeroOff
 
 
 /**
-@details removes all set of sites in equivalent sites if no site in the set of sites have its index equal to index.
-@param index the index to look for.
-@param onlyConsiderZeroOffset if true it will look for sites with zero offset
+@details Removes sets of sites in equivalent sites for which no site in the set has an index equal to index.
+@param index the index to look for
+@param onlyConsiderZeroOffset if true only look for sites with zero offset
 **/
 void Orbit::removeSitesNotWithIndex(const int index, bool onlyConsiderZeroOffset)
 {
@@ -196,8 +196,8 @@ void Orbit::removeSitesNotWithIndex(const int index, bool onlyConsiderZeroOffset
 
 
 /**
-@details removes a specific set of sites in this orbit and the corresponding site permutation.
-@param sites the vector of sites that will be removed, order of sites is irrelevant.
+@details Removes a specific set of sites in this orbit and the corresponding site permutation.
+@param sites vector of sites that will be removed, order of sites is irrelevant
  **/
 void Orbit::removeSites(std::vector<LatticeSite> sites)
 {
