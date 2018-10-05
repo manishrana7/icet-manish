@@ -137,10 +137,10 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
     // since these sites are already in the permuted order
     bool permuteSites = false; 
 
-    // Remove all orbits that do not contain index regardless of offset?
+    // Remove all sites in the orbits that do not contain index regardless of offset?
     bool onlyConsiderZeroOffsetNotContain = true;
 
-    // Remove all ignored indices regardless of offset?
+    // Remove all sites in the orbits ignored indices regardless of offset?
     bool onlyConsiderZeroOffsetContain = false;
 
     ClusterCounts clusterCounts = ClusterCounts();
