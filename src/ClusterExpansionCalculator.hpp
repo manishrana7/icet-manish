@@ -34,13 +34,13 @@ class ClusterExpansionCalculator
     /// Internal cluster space.
     ClusterSpace _clusterSpace;
     
-    /// The supercell that the calculator is optimized for.
+    /// The supercell the calculator is optimized for.
     Structure _superCell;
     
     /// The full primitive orbit list, contains all clusters for the primitive cell.
     OrbitList _fullPrimitiveOrbitList;
 
-    /// Maps a lattice site from the primitive and get the equivalent in the super cell.
+    /// Maps a lattice site from the primitive and get the equivalent in the supercell.
     std::unordered_map<LatticeSite, LatticeSite> _primToSupercellMap;
 
     /// Maps supercell index to its corresponding primitive cell offset.
