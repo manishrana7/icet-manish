@@ -53,8 +53,8 @@ class ClusterSpace(_ClusterSpace):
         if Mi is None:
             Mi = len(chemical_symbols)
         if isinstance(Mi, dict):
-            Mi = self._get_Mi_from_dict(Mi,
-                                        self._orbit_list.get_primitive_structure())
+            Mi = self._get_Mi_from_dict(
+                Mi, self._orbit_list.get_primitive_structure())
         if not isinstance(Mi, list):
             if isinstance(Mi, int):
                 Mi = [Mi] * len(self._orbit_list.get_primitive_structure())
@@ -436,7 +436,8 @@ def get_singlet_configuration(atoms: Atoms, to_primitive: bool=False) -> Atoms:
         singlet_configuration = add_vacuum_in_non_pbc(singlet_configuration)
         # orbit_list = cluster_space.get_orbit_list()
         orbit_list_supercell \
-            = cluster_space._orbit_list.get_supercell_orbit_list(singlet_configuration)
+            = cluster_space._orbit_list.get_supercell_orbit_list(
+                singlet_configuration)
         for singlet in cluster_data:
             for site in singlet['sites']:
                 element = chemical_symbols[singlet['orbit_index'] + 1]

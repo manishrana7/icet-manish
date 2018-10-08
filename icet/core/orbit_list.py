@@ -12,9 +12,10 @@ from .lattice_site import LatticeSite
 from icet.io.logging import logger
 logger = logger.getChild('orbit_list')
 
+
 def _get_lattice_site_permutation_matrix(structure: Structure,
-                                          permutation_matrix: PermutationMap,
-                                          prune: bool=True):
+                                         permutation_matrix: PermutationMap,
+                                         prune: bool=True):
     """
     Returns a transformed permutation matrix with lattice sites as entries
     instead of fractional coordinates.
@@ -172,14 +173,15 @@ class OrbitList(_OrbitList):
         # Transform permutation_matrix to be in lattice site format
         pm_lattice_sites \
             = _get_lattice_site_permutation_matrix(prim_structure,
-                                                    permutation_matrix,
-                                                    prune=True)
+                                                   permutation_matrix,
+                                                   prune=True)
 
         msg = ['Transformation of permutation matrix to lattice neighbor']
         msg += ['format completed.']
         logger.info(' '.join(msg))
 
-        _OrbitList.__init__(self, prim_structure, pm_lattice_sites, neighbor_lists)
+        _OrbitList.__init__(self, prim_structure,
+                            pm_lattice_sites, neighbor_lists)
         self.sort()
         logger.info('Finished construction of orbit list.')
 
@@ -243,8 +245,6 @@ class OrbitList(_OrbitList):
         return supercell_orbit_list
 
 
-
-
 def __fractional_to_cartesian(fractional_coordinates: List[List[float]],
                               cell: np.ndarray):
     """
@@ -261,5 +261,3 @@ def __fractional_to_cartesian(fractional_coordinates: List[List[float]],
     cartesian_coordinates = [np.dot(frac, cell)
                              for frac in fractional_coordinates]
     return cartesian_coordinates
-
-
