@@ -30,6 +30,7 @@ __version__ = '0.1'
 __all__ = ['ClusterSpace',
            'ClusterExpansion',
            'Structure',
+           'OrbitList',
            'StructureContainer',
            'Optimizer',
            'EnsembleOptimizer',

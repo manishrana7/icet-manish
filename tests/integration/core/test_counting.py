@@ -13,6 +13,7 @@ from ase.db import connect
 from icet.core.cluster_counts import ClusterCounts
 from icet import OrbitList
 
+
 def get_equivalent_clustermap_key(key1, clustermap_keys, tol=1e-3):
     """
     Will search for key1 in clustermap keys such that the distances are all

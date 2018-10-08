@@ -7,7 +7,7 @@ import numpy as np
 
 from _icet import ClusterSpace as _ClusterSpace
 from icet.tools.geometry import get_primitive_structure, add_vacuum_in_non_pbc
-from icet.core.orbit_list import OrbitList
+from icet import OrbitList
 from icet.core.structure import Structure
 
 
