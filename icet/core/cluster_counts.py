@@ -36,16 +36,19 @@ class ClusterCounts(_ClusterCounts):
 
         self.cluster_counts = self._count_clusters()
 
-    def _count_clusters(self, keep_order_intact=False):
+    def _count_clusters(self, keep_order_intact=False, permute_sites=True):
         """
         Count all clusters in a structure by finding their local orbit list.
 
         Parameters
         ----------
         keep_order_intact: boolean
-            if False, count the clusters in the orbit with the same
-            orientation as the prototype cluster
+            if true the order in the cluster will be sorted
+        permute_sites : boolean
+            if true will permute the sites so they are in the
+            symmetrically equivalent order as the representative sites
         """
+
         local_orbit_list_generator = LocalOrbitListGenerator(
             self._orbit_list, self._structure)
 
@@ -53,7 +56,7 @@ class ClusterCounts(_ClusterCounts):
             self.count_orbit_list(
                 self._structure,
                 local_orbit_list_generator.generate_local_orbit_list(i),
-                keep_order_intact)
+                keep_order_intact, permute_sites)
 
         self.setup_cluster_counts_info()
 

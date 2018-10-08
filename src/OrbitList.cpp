@@ -105,10 +105,10 @@ int OrbitList::findOrbit(const Cluster &cluster, const std::unordered_map<Cluste
 
 OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<LatticeSite>> &permutation_matrix, const std::vector<NeighborList> &neighbor_lists)
 {
+    bool bothways = false;
     _primitiveStructure = structure;
     std::vector<std::vector<std::vector<LatticeSite>>> lattice_neighbors;
     std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> many_bodyNeighborIndices;
-    bool saveBothWays = false;
     ManyBodyNeighborList mbnl = ManyBodyNeighborList();
 
     //if [0,1,2] exists in taken_rows then these three rows (with columns) have been accounted for and should not be looked at
@@ -124,7 +124,7 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
     for (size_t index = 0; index < neighbor_lists[0].size(); index++)
     {
 
-        std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> mbnl_latnbrs = mbnl.build(neighbor_lists, index, saveBothWays);
+        std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> mbnl_latnbrs = mbnl.build(neighbor_lists, index, bothways);
         for (const auto &mbnl_pair : mbnl_latnbrs)
         {
 
@@ -134,7 +134,7 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
                 lat_nbrs.push_back(latnbr);
                 auto lat_nbrs_copy = lat_nbrs;
                 std::sort(lat_nbrs_copy.begin(), lat_nbrs_copy.end());
-                if (lat_nbrs_copy != lat_nbrs)
+                if (lat_nbrs_copy != lat_nbrs and !bothways)
                 {
                     throw std::runtime_error("Original sites is not sorted");
                 }
@@ -181,6 +181,8 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
         checkEquivalentClusters();
         // std::cout << "Done checking equivalent structures" << std::endl;
     }
+
+    sort();
 }
 
 /**
@@ -206,11 +208,12 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
               else:
                  continue
 
-
-
 */
 void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeSite> &col1, const std::vector<std::vector<LatticeSite>> &permutation_matrix)
-{
+{  
+    _col1 = col1;
+    _permutationMatrix = permutation_matrix;
+
     for (size_t i = 0; i < size(); i++)
     {
 
@@ -369,8 +372,8 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeSite>
 
 ///Will find the sites in col1, extract all columns along with their unit cell translated indistinguishable sites
 std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromSites(const std::vector<LatticeSite> &sites,
-                                                                            const std::vector<LatticeSite> &col1,
-                                                                            const std::vector<std::vector<LatticeSite>> &permutation_matrix) const
+                                                                        const std::vector<LatticeSite> &col1,
+                                                                        const std::vector<std::vector<LatticeSite>> &permutation_matrix) const
 {
     bool sortRows = false;
     std::vector<int> rowsFromCol1 = findRowsFromCol1(col1, sites, sortRows);
@@ -836,4 +839,62 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &superCell, const Vector3
     }
     return localOrbitList;
 }
+/**
+@details Removes, for each orbit, all set of sites in equivalent sites if any site in the set of sites contain have its index equal to indexRemove.
+@param indexRemove the index to look for.
+@param onlyConsiderZeroOffset if true it will only remove sites with zero offset
+**/
+void OrbitList::removeSitesContainingIndex(const int indexRemove, bool onlyConsiderZeroOffset)
+{
+    for(auto &orbit : _orbitList)
+    {
+        orbit.removeSitesWithIndex(indexRemove, onlyConsiderZeroOffset);
+    }
+}
 
+/**
+@details Removes, for each orbit, all set of sites in equivalent sites if no site in the set of sites have its index equal to index.
+@param index the index to look for.
+@param onlyConsiderZeroOffset if true it will look for sites with zero offset
+**/
+void OrbitList::removeSitesNotContainingIndex(const int index, bool onlyConsiderZeroOffset)
+{
+    for(auto &orbit : _orbitList)
+    {
+        orbit.removeSitesNotWithIndex(index, onlyConsiderZeroOffset);
+    }
+}
+
+/**
+@details Removes, for each orbit, a specific set of sites in this orbit and the corresponding site permutation.
+@param sites the vector of sites that will be removed, order of sites is irrelevant.
+ **/
+void OrbitList::subtractSitesFromOrbitList(const OrbitList &orbitList)
+{
+    if(orbitList.size() != size())
+    {
+        throw std::runtime_error("orbitlists mismatch in size in function OrbitList::subtractSitesFromOrbitList");
+    }
+    for(int i = 0; i<size(); i++)
+    {
+        for(const auto sites : orbitList._orbitList[i]._equivalentSites)
+        {
+            if(_orbitList[i].contains(sites, true))
+            {
+                _orbitList[i].removeSites(sites);
+            }
+        }
+    }
+}
+
+/// Removes orbit with the input index
+void OrbitList::removeOrbit(const size_t index)
+{
+    if(index <0 || index >=size())
+    {
+        std::string msg = "Index " + std::to_string(index) + " was out of bounds in OrbitList::removeOrbit";
+        msg += "OrbitList size is " + std::to_string(size());
+        throw std::out_of_range(msg);
+    }
+    _orbitList.erase(_orbitList.begin()+index);
+}

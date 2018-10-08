@@ -67,14 +67,22 @@ Vector3d Structure::getPosition(const LatticeSite &latticeNeighbor) const
     {
         std::string errorMessage = "Site index out of bounds";
         errorMessage += " index: " + std::to_string(latticeNeighbor.index());
-        errorMessage += " npositions: " + std::to_string(_positions.rows());
+        errorMessage += " number of positions: " + std::to_string(_positions.rows());
         errorMessage += " (Structure::getPosition)";
         throw std::out_of_range(errorMessage);
     }
     Vector3d position = _positions.row(latticeNeighbor.index()) + latticeNeighbor.unitcellOffset().transpose() * _cell;
     return position;
 }
-
+/**
+@details This function returns the position of a specific site in Cartesian coordinates.
+@param index index of the site
+ **/
+Vector3d Structure::getPositionByIndex(const size_t &index) const
+{    
+    Vector3d position = _positions.row(index);
+    return position;
+}
 /**
   @details This function returns the atomic number of a site.
   @param i index of site

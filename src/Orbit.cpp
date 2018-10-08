@@ -56,7 +56,7 @@ int Orbit::getNumberOfDuplicates(int verbosity) const
  */
 std::vector<std::vector<int>> Orbit::getMultiComponentVectors(const std::vector<int> &Mi_local) const
 {
-    if( std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i){ return  i<2; }))
+    if (std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i) { return i < 2; }))
     {
         std::vector<std::vector<int>> emptyVector;
         return emptyVector;
@@ -64,15 +64,15 @@ std::vector<std::vector<int>> Orbit::getMultiComponentVectors(const std::vector<
     auto allMCVectors = getAllPossibleMultiComponentVectorPermutations(Mi_local);
     std::sort(allMCVectors.begin(), allMCVectors.end());
     std::vector<std::vector<int>> distinctMCVectors;
-    for(const auto &mcVector : allMCVectors)
+    for (const auto &mcVector : allMCVectors)
     {
         std::vector<std::vector<int>> permutedMCVectors;
-        for(const auto &allowedPermutation : _allowedSitesPermutations )
+        for (const auto &allowedPermutation : _allowedSitesPermutations)
         {
             permutedMCVectors.push_back(icet::getPermutedVector<int>(mcVector, allowedPermutation));
         }
-        if(! std::any_of(permutedMCVectors.begin(), permutedMCVectors.end(),[&](const std::vector<int> &permMcVector){
-                 return !(std::find(distinctMCVectors.begin(),distinctMCVectors.end(),permMcVector) == distinctMCVectors.end()); }  ))
+        // if not any of the vectors in permutedMCVectors exist in distinctMCVectors
+        if (!std::any_of(permutedMCVectors.begin(), permutedMCVectors.end(), [&](const std::vector<int> &permMcVector) { return !(std::find(distinctMCVectors.begin(), distinctMCVectors.end(), permMcVector) == distinctMCVectors.end()); }))
         {
             distinctMCVectors.push_back(mcVector);
         }
@@ -102,4 +102,122 @@ std::vector<std::vector<int>> Orbit::getAllPossibleMultiComponentVectorPermutati
     } while (icet::next_cartesian_product(cartesianFactors, firstVector));
 
     return allPossibleMCPermutations;
+}
+
+/**
+@details Check if this orbit contains a set of sites in its equivalent sites vector.
+@param sites the sites that will be looked for.
+@param sorted if true the order of sites is irrelevant
+
+@returns true if the sites exist in equivalent sites.
+**/
+bool Orbit::contains(const std::vector<LatticeSite> sites, bool sorted) const
+{
+    auto sitesCopy = sites;
+    if (sorted)
+    {
+        std::sort(sitesCopy.begin(), sitesCopy.end());
+    }
+
+    for (size_t i = 0; i < _equivalentSites.size(); i++)
+    {
+        auto i_sites = _equivalentSites[i];
+
+        // compare the sorted sites
+        if (sorted)
+        {
+            std::sort(i_sites.begin(), i_sites.end());
+        }
+
+        if (i_sites == sitesCopy)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+/**
+@details Removes sets of sites in equivalent sites for which any site in the set has an index equal to indexRemove.
+@param indexRemove the index to look for
+@param onlyConsiderZeroOffset if true remove only sites with zero offset
+**/
+void Orbit::removeSitesWithIndex(const int indexRemove, bool onlyConsiderZeroOffset)
+{
+    for (int i = _equivalentSites.size() - 1; i >= 0; i--)
+    {
+        if (onlyConsiderZeroOffset)
+        {
+            if (std::any_of(_equivalentSites[i].begin(), _equivalentSites[i].end(), [=](LatticeSite &ls) { return ls.index() == indexRemove && ls.unitcellOffset().norm() < 1e-4; }))
+            {
+                _equivalentSites.erase(_equivalentSites.begin() + i);
+                _equivalentSitesPermutations.erase(_equivalentSitesPermutations.begin() + i);
+            }
+        }
+        else
+        {
+            if (std::any_of(_equivalentSites[i].begin(), _equivalentSites[i].end(), [=](LatticeSite &ls) { return ls.index() == indexRemove; }))
+            {
+                _equivalentSites.erase(_equivalentSites.begin() + i);
+                _equivalentSitesPermutations.erase(_equivalentSitesPermutations.begin() + i);
+            }
+        }
+    }
+}
+
+
+/**
+@details Removes sets of sites in equivalent sites for which no site in the set has an index equal to index.
+@param index the index to look for
+@param onlyConsiderZeroOffset if true only look for sites with zero offset
+**/
+void Orbit::removeSitesNotWithIndex(const int index, bool onlyConsiderZeroOffset)
+{
+    for (int i = _equivalentSites.size() - 1; i >= 0; i--)
+    {
+        if (onlyConsiderZeroOffset)
+        {
+            if (std::none_of(_equivalentSites[i].begin(), _equivalentSites[i].end(), [=](LatticeSite &ls) { return ls.index() == index && ls.unitcellOffset().norm() < 1e-4; }))
+            {
+                _equivalentSites.erase(_equivalentSites.begin() + i);
+                _equivalentSitesPermutations.erase(_equivalentSitesPermutations.begin() + i);
+            }
+        }
+        else
+        {
+            if (std::none_of(_equivalentSites[i].begin(), _equivalentSites[i].end(), [=](LatticeSite &ls) { return ls.index() == index; }))
+            {
+                _equivalentSites.erase(_equivalentSites.begin() + i);
+                _equivalentSitesPermutations.erase(_equivalentSitesPermutations.begin() + i);
+            }
+        }
+    }
+}
+
+
+/**
+@details Removes a specific set of sites in this orbit and the corresponding site permutation.
+@param sites vector of sites that will be removed, order of sites is irrelevant
+ **/
+void Orbit::removeSites(std::vector<LatticeSite> sites)
+{
+
+    std::sort(sites.begin(), sites.end());
+    for (size_t i = 0; i < _equivalentSites.size(); i++)
+    {
+        auto i_sites = _equivalentSites[i];
+
+        //compare the sorted sites
+
+        std::sort(i_sites.begin(), i_sites.end());
+
+        if (i_sites == sites)
+        {
+            _equivalentSites.erase(_equivalentSites.begin() + i);
+            _equivalentSitesPermutations.erase(_equivalentSitesPermutations.begin() + i);
+            return;
+        }
+    }
+    throw std::runtime_error("did not find any mathcing sites in Orbit::removeSites");
 }

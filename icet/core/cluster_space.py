@@ -6,7 +6,7 @@ from typing import List, Union
 import numpy as np
 
 from _icet import ClusterSpace as _ClusterSpace
-from icet.tools.geometry import get_primitive_structure, add_vacuum_in_non_pbc
+from icet.tools.geometry import add_vacuum_in_non_pbc
 from icet.core.orbit_list import create_orbit_list
 from icet.core.structure import Structure
 
@@ -36,7 +36,8 @@ class ClusterSpace(_ClusterSpace):
     """
 
     def __init__(self, atoms: Union[Atoms, Structure], cutoffs: List[float],
-                 chemical_symbols: List[str], Mi: Union[list, dict, int]=None):
+                 chemical_symbols: List[str],
+                 Mi: Union[list, dict, int]=None) -> None:
 
         assert isinstance(atoms, Atoms), \
             'input configuration must be an ASE Atoms object'
@@ -48,7 +49,6 @@ class ClusterSpace(_ClusterSpace):
 
         # set up orbit list
         orbit_list = create_orbit_list(self._atoms, self._cutoffs)
-        orbit_list.sort()
 
         # handle occupations
         if Mi is None:
@@ -151,7 +151,7 @@ class ClusterSpace(_ClusterSpace):
         # (use largest orbit to obtain maximum line length)
         prototype_orbit = self.orbit_data[-1]
         width = len(repr_orbit(prototype_orbit))
-        s = []
+        s = []  # type: List
         s += ['{s:=^{n}}'.format(s=' Cluster Space ', n=width)]
         s += [' chemical species: {}'
               .format(' '.join(self.get_chemical_symbols()))]
@@ -255,7 +255,7 @@ class ClusterSpace(_ClusterSpace):
             the key represents the order, the value represents the number of
             orbits
         """
-        count_orbits = {}
+        count_orbits = {}  # type: Dict[int, int]
         for orbit in self.orbit_data:
             k = orbit['order']
             count_orbits[k] = count_orbits.get(k, 0) + 1
@@ -278,8 +278,6 @@ class ClusterSpace(_ClusterSpace):
             'input configuration must be an ASE Atoms object'
         if not atoms.pbc.all():
             add_vacuum_in_non_pbc(atoms)
-        else:
-            atoms = get_primitive_structure(atoms)
         return _ClusterSpace.get_cluster_vector(self,
                                                 Structure.from_atoms(atoms))
 
