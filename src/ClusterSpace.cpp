@@ -60,7 +60,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
     // Don't sort clusters
     bool orderIntact = true;
 
-    // Count the clusters in the orbit with the same orientation (order) as the prototype cluster
+    // Count the clusters in the orbit with the same order as the prototype cluster
     bool permuteSites = true;
 
     LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(_orbitList, structure);
