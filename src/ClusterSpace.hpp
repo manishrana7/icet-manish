@@ -87,7 +87,7 @@ class ClusterSpace
 
   private:
     /// Precomputes permutations and multicomponent vectors of each orbit.
-    void precomputeMulticomponentVectors();
+    void precomputeMultiComponentVectors();
 
     /// Returns the default cluster function.
     double evaluateClusterFunction(const int, const int, const int) const;
@@ -112,7 +112,7 @@ class ClusterSpace
 
     /// Map between atomic numbers and the internal species enumeration scheme.
     std::unordered_map<int, int> _speciesMap;
-  
+
 };
 
 //}
