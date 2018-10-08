@@ -33,6 +33,8 @@ class ClusterExpansionCalculator(BaseCalculator):
     scaling
         scaling factor applied to the property value predicted by the
         cluster expansion
+    do_local_computations
+        flag to enable optimized local computations
 
     Todo
     ----
@@ -42,12 +44,17 @@ class ClusterExpansionCalculator(BaseCalculator):
 
     def __init__(self, atoms: Atoms, cluster_expansion: ClusterExpansion,
                  name: str='Cluster Expansion Calculator',
-                 scaling: Union[float, int]=None) -> None:
+                 scaling: Union[float, int]=None,
+                 do_local_computations: bool = True) -> None:
         super().__init__(atoms=atoms, name=name)
 
         atoms_cpy = atoms.copy()
-        self.cpp_calc = _ClusterExpansionCalculator(
-            cluster_expansion.cluster_space, Structure.from_atoms(atoms_cpy))
+        self.do_local_computations = do_local_computations
+        if self.do_local_computations:
+            self.cpp_calc = _ClusterExpansionCalculator(
+                cluster_expansion.cluster_space,
+                Structure.from_atoms(atoms_cpy))
+
         self._cluster_expansion = cluster_expansion
         self._local_cluster_space = ClusterSpace(
             self.cluster_expansion.cluster_space._atoms.copy(),
@@ -92,14 +99,23 @@ class ClusterExpansionCalculator(BaseCalculator):
         occupations
             entire occupation vector
         """
+        if not self.do_local_computations:
+            return self.calculate_total(occupations=occupations)
 
         self.atoms.set_atomic_numbers(occupations)
+
         local_contribution = 0
         exclude_indices = []  # type: List[int]
 
         for index in local_indices:
-            local_contribution += self._calculate_local_contribution(
-                index, exclude_indices=exclude_indices)
+            try:
+                local_contribution += self._calculate_local_contribution(
+                    index, exclude_indices=exclude_indices)
+            except Exception as e:
+                msg = "caugh exception {}. Try setting flag ".format(e)
+                msg += "`do_local_computations to False` in init"
+                raise RuntimeError(msg)
+
             exclude_indices.append(index)
 
         return local_contribution * self._property_scaling
