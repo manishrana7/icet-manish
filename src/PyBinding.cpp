@@ -86,7 +86,7 @@ PYBIND11_MODULE(_icet, m)
            :members:
            :undoc-members:
 
-        PermutationMap
+        PermutationMatrix
         --------------
         .. autoclass:: PermutationMap
            :members:
@@ -461,7 +461,7 @@ PYBIND11_MODULE(_icet, m)
     ;
 
     // @todo document PermutationMap in pybindings
-    py::class_<PermutationMap>(m, "PermutationMap")
+    py::class_<PermutationMap>(m, "PermutationMatrix")
         .def(py::init<const std::vector<Vector3d> &,
                       const std::vector<Matrix3d> &>())
         .def("build", &PermutationMap::build)

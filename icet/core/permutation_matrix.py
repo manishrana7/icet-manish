@@ -1,5 +1,5 @@
 import spglib
-from _icet import PermutationMap
+from _icet import PermutationMatrix
 from icet.core.neighbor_list import NeighborList
 from icet.core.structure import Structure
 from icet.tools.geometry import (get_primitive_structure,
@@ -52,7 +52,7 @@ def permutation_matrix_from_atoms(atoms, cutoff, find_prim=True):
     rotations = symmetry['rotations']
 
     # set up a permutation map object
-    permutation_matrix = PermutationMap(translations, rotations)
+    permutation_matrix = PermutationMatrix(translations, rotations)
 
     # create neighbor_lists from the different cutoffs
     prim_structure = Structure.from_atoms(atoms_prim)
