@@ -123,19 +123,3 @@ class OrbitList(_OrbitList):
         return supercell_orbit_list
 
 
-def __fractional_to_cartesian(fractional_coordinates: List[List[float]],
-                              cell: np.ndarray):
-    """
-    Converts cell metrics from fractional to cartesian coordinates.
-
-    Parameters
-    ----------
-    fractional_coordinates
-        list of fractional coordinates
-
-    cell
-        cell metric
-    """
-    cartesian_coordinates = [np.dot(frac, cell)
-                             for frac in fractional_coordinates]
-    return cartesian_coordinates

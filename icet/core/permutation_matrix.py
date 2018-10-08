@@ -7,7 +7,9 @@ from icet.tools.geometry import (get_primitive_structure,
                               ase_atoms_to_spglib_cell)
 from icet.core.lattice_site import LatticeSite
 from typing import List
+import numpy as np
 from icet.io.logging import logger
+
 logger = logger.getChild('permutation_matrix')
 
 
@@ -73,7 +75,7 @@ def permutation_matrix_from_atoms(atoms, cutoff, find_prim=True):
 
 
 def _get_lattice_site_permutation_matrix(structure: Structure,
-                                         permutation_matrix: PermutationMap,
+                                         permutation_matrix: PermutationMatrix,
                                          prune: bool=True):
     """
     Returns a transformed permutation matrix with lattice sites as entries
@@ -96,7 +98,7 @@ def _get_lattice_site_permutation_matrix(structure: Structure,
 
     pm_lattice_sites = []
     for row in pm_frac:
-        positions = __fractional_to_cartesian(row, structure.cell)
+        positions = _fractional_to_cartesian(row, structure.cell)
         lat_neighbors = []
         if np.all(structure.pbc):
             lat_neighbors = \
@@ -147,3 +149,21 @@ def _prune_permutation_matrix(permutation_matrix: List[List[LatticeSite]]):
                 logger.debug(' '.join(msg))
 
     return permutation_matrix
+
+
+def _fractional_to_cartesian(fractional_coordinates: List[List[float]],
+                              cell: np.ndarray):
+    """
+    Converts cell metrics from fractional to cartesian coordinates.
+
+    Parameters
+    ----------
+    fractional_coordinates
+        list of fractional coordinates
+
+    cell
+        cell metric
+    """
+    cartesian_coordinates = [np.dot(frac, cell)
+                             for frac in fractional_coordinates]
+    return cartesian_coordinates
