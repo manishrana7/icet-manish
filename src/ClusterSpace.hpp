@@ -87,7 +87,7 @@ class ClusterSpace
 
   private:
     /// Precomputes permutations and multicomponent vectors of each orbit.
-    void precomputeMulticompnentVectors();
+    void precomputeMulticomponentVectors();
 
     /// Returns the default cluster function.
     double evaluateClusterFunction(const int, const int, const int) const;
