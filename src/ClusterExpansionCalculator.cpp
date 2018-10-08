@@ -18,25 +18,26 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     std::vector<std::vector<std::vector<int>>> permutations(numberOfOrbits);
 
     /* Strategy to construct the "full" primitive orbitlists
-    
+
     We first fill up a std::vector<Orbit> orbitVector
     where vector<orbit> is essentially an orbitlist.
-    
-    The existing methods to construct the full orbitlist is to add all the 
-    sites in the local orbitlist by looping and adding sites over all
-    local orbitlists with LocalOrbitListGenerator.
 
-    Now we do something similar by loop over each local orbitlist
+    The existing method for constructing the _full_ orbit list proceeds
+    by looping over all local orbit lists with LocalOrbitListGenerator and
+    adding the sites to the local orbit list.
+
+    Now we do something similar by looping over each local orbit list
     (by looping over offsetIndex)
     The local orbitlist is retrieved here:
         `_theLog.getLocalOrbitList(offsetIndex).getOrbitList()`
 
     Then for each orbit `orbitIndex` in `_theLog.getLocalOrbitList(offsetIndex).getOrbitList()`
-    each group of lattice sites in orbit.equivalentSites() we add them
-    to orbitVector[orbitIndex] if the latticesites has a site with offset [0, 0, 0].
+    each group of lattice sites in orbit.equivalentSites() is added to
+    orbitVector[orbitIndex] if the lattice sites have a site with offset [0, 0, 0].
 
-    When the full primitive orbitlist is used to create a local orbit list for site `index`
-    in the supercell it should then contain all lattice sites that contain `index`.
+    When the full primitive orbitlist is used to create a local orbit list for
+    site `index` in the supercell it should thus contain all lattice sites that
+    contain `index`.
 
     */
 
@@ -124,7 +125,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 /**
 @details This constructs a cluster vector that only considers clusters that contain the input index.
 @param occupations the occupation vector for the supercell
-@param index the local index of the supercell 
+@param index the local index of the supercell
 @param ignoredIndices a vector of indices which have already had their local energy calculated. This is required to input so that no double counting occurs.
 */
 
