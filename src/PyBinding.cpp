@@ -493,8 +493,40 @@ PYBIND11_MODULE(_icet, m)
         .def(py::init<>())
         .def("count_lattice_neighbors", &ClusterCounts::countLatticeSites)
         .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<LatticeSite> &)) & ClusterCounts::count)
-        .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool)) & ClusterCounts::count)
-        .def("count_orbit_list", &ClusterCounts::countOrbitList)
+        .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool)) & ClusterCounts::count,
+            R"pbdoc(
+             Will count the vectors in latticeNeighbors
+             and assuming these sets of sites are
+             represented by the cluster 'cluster'.
+
+             Parameters
+             ----------
+             structure : icet Structure
+                the structure that will have its clusters counted
+             latticeSites : list of list of LatticeSite
+                A group of sites, represented by 'cluster', that will be counted
+            cluster : icet Cluster
+                A cluster used as identification on what sites the clusters belong to
+            orderIntact : bool
+                if true the order of the sites will stay
+                the same otherwise the vector of species being counted will be sorted
+
+         )pbdoc")
+        .def("count_orbit_list", &ClusterCounts::countOrbitList,
+             R"pbdoc(
+             Counts all sites in the orbit list.
+
+             Parameters
+             ----------
+             structure : icet Structure
+             orbit_list : icet OrbitList
+             order_intact : bool
+                if true do not reorder clusters
+                before comparison (i.e., ABC != ACB)
+             permuteSites : bool
+                if true the sites will be permuted
+                according to the corresponding permutations in the orbit
+         )pbdoc")
         .def("__len__", &ClusterCounts::size)
         .def("reset", &ClusterCounts::reset)
         .def("setup_cluster_counts_info", &ClusterCounts::setupClusterCountsInfo)
