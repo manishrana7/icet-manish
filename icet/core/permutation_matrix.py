@@ -8,7 +8,7 @@ from icet.tools.geometry import (get_primitive_structure,
 from icet.core.lattice_site import LatticeSite
 from typing import List
 from icet.io.logging import logger
-logger = logger.getChild('permutation_map')
+logger = logger.getChild('permutation_matrix')
 
 
 def permutation_matrix_from_atoms(atoms, cutoff, find_prim=True):
@@ -118,7 +118,7 @@ def _get_lattice_site_permutation_matrix(structure: Structure,
         logger.debug('Size of columns of the permutation matrix before'
                      ' pruning {}'.format(len(pm_lattice_sites)))
 
-        pm_lattice_sites = __prune_permutation_matrix(pm_lattice_sites)
+        pm_lattice_sites = _prune_permutation_matrix(pm_lattice_sites)
 
         logger.debug('Size of columns of the permutation matrix after'
                      ' pruning {}'.format(len(pm_lattice_sites)))
@@ -126,7 +126,7 @@ def _get_lattice_site_permutation_matrix(structure: Structure,
     return pm_lattice_sites
 
 
-def __prune_permutation_matrix(permutation_matrix: List[List[LatticeSite]]):
+def _prune_permutation_matrix(permutation_matrix: List[List[LatticeSite]]):
     """
     Prunes the matrix so that the first column only contains unique elements.
 

@@ -5,10 +5,10 @@ import numpy as np
 from _icet import _OrbitList
 from .local_orbit_list_generator import LocalOrbitListGenerator
 from .neighbor_list import get_neighbor_lists
-from .permutation_map import PermutationMap, permutation_matrix_from_atoms
+from .permutation_matrix import PermutationMap, permutation_matrix_from_atoms
 from .structure import Structure
 from .lattice_site import LatticeSite
-
+from .permutation_matrix import _prune_permutation_matrix, _get_lattice_site_permutation_matrix
 from icet.io.logging import logger
 logger = logger.getChild('orbit_list')
 
