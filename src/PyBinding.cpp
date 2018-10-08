@@ -495,26 +495,25 @@ PYBIND11_MODULE(_icet, m)
         .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<LatticeSite> &)) & ClusterCounts::count)
         .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool)) & ClusterCounts::count,
             R"pbdoc(
-             Will count the vectors in latticeNeighbors
-             and assuming these sets of sites are
-             represented by the cluster 'cluster'.
+            Counts the vectors in latticeSites assuming these sets of sites are
+            represented by the cluster `cluster`.
 
-             Parameters
-             ----------
-             structure : icet Structure
-                the structure that will have its clusters counted
-             latticeSites : list of list of LatticeSite
-                A group of sites, represented by 'cluster', that will be counted
+            Parameters
+            ----------
+            structure : icet Structure
+               structure that will have its clusters counted
+            latticeSites : list of list of LatticeSite objects
+               group of sites, represented by `cluster` that will be counted
             cluster : icet Cluster
-                A cluster used as identification on what sites the clusters belong to
+               cluster used as identification on what sites the clusters belong to
             orderIntact : bool
-                if true the order of the sites will stay
-                the same otherwise the vector of species being counted will be sorted
+               if true the order of the sites will remain the same otherwise the
+               vector of species being counted will be sorted
 
          )pbdoc")
         .def("count_orbit_list", &ClusterCounts::countOrbitList,
              R"pbdoc(
-             Counts all sites in the orbit list.
+             Counts sites in the orbit list.
 
              Parameters
              ----------
@@ -778,7 +777,7 @@ PYBIND11_MODULE(_icet, m)
         .def("get_cluster_vector", [](const ClusterSpace &ClusterSpace, const Structure &structure) {
             auto cv = ClusterSpace.getClusterVector(structure);
             return py::array(cv.size(), cv.data());
-        })        
+        })
         .def("get_orbit_list", &ClusterSpace::getOrbitList)
         .def("get_orbit", &ClusterSpace::getOrbit)
         .def_property_readonly("species_map", &ClusterSpace::getSpeciesMap)
@@ -814,7 +813,7 @@ PYBIND11_MODULE(_icet, m)
             return py::array(cv.size(), cv.data());
         }, R"pbdoc(
              Returns a cluster vector that only considers clusters that contain the input index.
-             
+
              Parameters
              ----------
              occupations : list of int

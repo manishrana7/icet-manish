@@ -81,7 +81,8 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
             }
         }
     }
-    /// Now create the full primitive orbitlist using the vector<orbit>
+
+    /// Now create the full primitive orbit list using the vector<orbit>
     _fullPrimitiveOrbitList.setPrimitiveStructure(_clusterSpace.getPrimitiveStructure());
     int orbitIndex = -1;
     for (auto orbit : orbitVector)
@@ -89,11 +90,11 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         orbitIndex++;
         _fullPrimitiveOrbitList.addOrbit(orbit);
     }
-    /** calculate the permutation for each orbit in this orbit list.
-     *  This is normally done in the constructor but since we made one manually
-     *  we have to do this ourself
-    **/
 
+    /** Calculate the permutation for each orbit in this orbit list.
+     *  This is normally done in the constructor but since we made one manually
+     *  we have to do this ourself.
+    **/
     _fullPrimitiveOrbitList.addPermutationInformationToOrbits(_clusterSpace.getOrbitList().getFirstColumnOfPermutationMatrix(),
                                                               _clusterSpace.getOrbitList().getPermutationMatrix());
 
