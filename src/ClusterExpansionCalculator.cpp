@@ -48,7 +48,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         {
             orbitIndex++;
 
-            auto orbitPermutations = orbit.getEquivalentSitesPermutations();
+            auto orbitPermutations = orbit.getPermutationsOfEquivalentSites();
 
             int eqSiteIndex = -1;
 

@@ -172,7 +172,7 @@ class Orbit
         return orbit1.getEquivalentSites() < orbit2.getEquivalentSites();
     }
     /// Return the equivalent sites permutations.
-    std::vector<std::vector<int>> getEquivalentSitesPermutations() const
+    std::vector<std::vector<int>> getPermutationsOfEquivalentSites() const
     {
         return _equivalentSitesPermutations;
     }
@@ -229,14 +229,14 @@ class Orbit
         // This orbit does not have any eq. sites permutations: check that orbit_rhs also doesn't have them
         if (_equivalentSitesPermutations.size() == 0)
         {
-            if (orbit_rhs.getEquivalentSitesPermutations().size() != 0)
+            if (orbit_rhs.getPermutationsOfEquivalentSites().size() != 0)
             {
                 throw std::runtime_error("Error: one orbit has eq. site permutations and one doesn't in function: Orbit &operator+= ");
             }
         }
         else // This orbit has some eq. sites permutations: check that orbit_rhs also has them
         {
-            if (orbit_rhs.getEquivalentSitesPermutations().size() == 0)
+            if (orbit_rhs.getPermutationsOfEquivalentSites().size() == 0)
             {
                 throw std::runtime_error("Error: one orbit has eq. site permutations and one doesn't in function: Orbit &operator+= ");
             }
@@ -256,7 +256,7 @@ class Orbit
         Vector3d offsetOfOffsets;
 
         const auto rhsEquivalentSites = orbit_rhs.getEquivalentSites();
-        const auto rhsEquivalentSitesPermutations = orbit_rhs.getEquivalentSitesPermutations();
+        const auto rhsEquivalentSitesPermutations = orbit_rhs.getPermutationsOfEquivalentSites();
         // Insert rhs eq sites and corresponding permutations
         _equivalentSites.insert(_equivalentSites.end(), rhsEquivalentSites.begin(), rhsEquivalentSites.end());
         _equivalentSitesPermutations.insert(_equivalentSitesPermutations.end(), rhsEquivalentSitesPermutations.begin(), rhsEquivalentSitesPermutations.end());

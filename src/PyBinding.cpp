@@ -571,7 +571,7 @@ PYBIND11_MODULE(_icet, m)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
         .def("get_allowed_sites_permutations", &Orbit::getAllowedSitesPermutations)
         .def("get_representative_sites", &Orbit::getRepresentativeSites)
-        .def("get_equivalent_sites_permutations", &Orbit::getEquivalentSitesPermutations)
+        .def("get_equivalent_sites_permutations", &Orbit::getPermutationsOfEquivalentSites)
 
         .def("get_representative_cluster", &Orbit::getRepresentativeCluster,
         R"pbdoc(
@@ -587,7 +587,7 @@ PYBIND11_MODULE(_icet, m)
         represents the geometrical
         version of what this orbit is.
         )pbdoc")
-        .def_property("permutations_to_representative", &Orbit::getEquivalentSitesPermutations, &Orbit::setEquivalentSitesPermutations,
+        .def_property("permutations_to_representative", &Orbit::getPermutationsOfEquivalentSites, &Orbit::setEquivalentSitesPermutations,
                       R"pbdoc(
         Get the list of permutations.
         Where permutations_to_representative[i]
@@ -688,7 +688,7 @@ PYBIND11_MODULE(_icet, m)
         functions (0,1,0) will not
         be considered since it is
         equivalent to (0,0,1).)pbdoc")
-        .def_property("permutations_to_representative", &Orbit::getEquivalentSitesPermutations, &Orbit::setEquivalentSitesPermutations,
+        .def_property("permutations_to_representative", &Orbit::getPermutationsOfEquivalentSites, &Orbit::setEquivalentSitesPermutations,
         R"pbdoc(
         list of permutations;
         permutations_to_representative[i] takes self.equivalent_sites[i] to
