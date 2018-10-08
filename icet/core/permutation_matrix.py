@@ -3,8 +3,8 @@ from _icet import PermutationMatrix
 from icet.core.neighbor_list import NeighborList
 from icet.core.structure import Structure
 from icet.tools.geometry import (get_primitive_structure,
-                              get_fractional_positions_from_neighbor_list,
-                              ase_atoms_to_spglib_cell)
+                                 get_fractional_positions_from_neighbor_list,
+                                 ase_atoms_to_spglib_cell)
 from icet.core.lattice_site import LatticeSite
 from typing import List
 import numpy as np
@@ -152,7 +152,7 @@ def _prune_permutation_matrix(permutation_matrix: List[List[LatticeSite]]):
 
 
 def _fractional_to_cartesian(fractional_coordinates: List[List[float]],
-                              cell: np.ndarray):
+                             cell: np.ndarray):
     """
     Converts cell metrics from fractional to cartesian coordinates.
 

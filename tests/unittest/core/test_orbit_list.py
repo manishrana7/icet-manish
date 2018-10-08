@@ -8,12 +8,13 @@ from icet.core.orbit_list import OrbitList
 from icet.core.orbit_list import (
     _get_lattice_site_permutation_matrix as
     get_lattice_site_permutation_matrix)
-from icet.core.neighbor_list import get_neighbor_lists
 from icet.core.permutation_matrix import permutation_matrix_from_atoms
 from icet.core.structure import Structure
 
+
 class TestOrbitList(unittest.TestCase):
     """Container for test of the module functionality."""
+
     def __init__(self, *args, **kwargs):
         super(TestOrbitList, self).__init__(*args, **kwargs)
         self.cutoffs = [4.2]
@@ -45,7 +46,7 @@ class TestOrbitList(unittest.TestCase):
         """Test the different initializers."""
         orbit_list = OrbitList(
             self.prim_structure, self.cutoffs)
-        self.assertIsInstance(self.orbit_list, OrbitList)
+        self.assertIsInstance(orbit_list, OrbitList)
 
     def test_add_orbit(self):
         """Test add orbit funcionality."""

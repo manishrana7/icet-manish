@@ -1,15 +1,15 @@
-from typing import List
-from ase import Atoms
 import numpy as np
 
 from _icet import _OrbitList
+from ase import Atoms
+from icet.io.logging import logger
+
 from .local_orbit_list_generator import LocalOrbitListGenerator
 from .neighbor_list import get_neighbor_lists
-from .permutation_matrix import PermutationMatrix, permutation_matrix_from_atoms
+from .permutation_matrix import (_get_lattice_site_permutation_matrix,
+                                 permutation_matrix_from_atoms)
 from .structure import Structure
-from .lattice_site import LatticeSite
-from .permutation_matrix import _prune_permutation_matrix, _get_lattice_site_permutation_matrix
-from icet.io.logging import logger
+
 logger = logger.getChild('orbit_list')
 
 
@@ -121,5 +121,3 @@ class OrbitList(_OrbitList):
         supercell_orbit_list = log.generate_full_orbit_list()
 
         return supercell_orbit_list
-
-

@@ -109,7 +109,7 @@ class TestClusterCounts(unittest.TestCase):
         """
         atoms_non_pbc = self.atoms.copy()
         atoms_non_pbc.set_pbc(False)
-        orbit_list = create_orbit_list(atoms_non_pbc, self.cutoffs)
+        orbit_list = OrbitList(atoms_non_pbc, self.cutoffs)
 
         cluster_singlet = Cluster(self.structure, [], False, 0)
         cluster_pair = Cluster(self.structure, [], False, 1)

@@ -40,7 +40,7 @@ class TestPermutationMatrix(unittest.TestCase):
         self.rotations = symmetry['rotations']
 
         self.pm = PermutationMatrix(self.translations,
-                                 self.rotations)
+                                    self.rotations)
         self.pm.build(self.frac_positions)
 
     def test_init(self):
