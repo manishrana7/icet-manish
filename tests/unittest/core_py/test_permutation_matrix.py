@@ -3,7 +3,7 @@ from icet.core.permutation_matrix import permutation_matrix_from_atoms
 from icet.core.permutation_matrix import \
     PermutationMatrix as PermutationMatrix_cpp
 from ase.build import bulk
-from icet.core.orbit_list import __get_lattice_site_permutation_matrix\
+from icet.core.permutation_matrix import _get_lattice_site_permutation_matrix\
     as get_lattice_site_permutation_matrix
 
 import unittest
