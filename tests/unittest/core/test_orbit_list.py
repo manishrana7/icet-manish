@@ -12,7 +12,6 @@ from icet.core.neighbor_list import get_neighbor_lists
 from icet.core.permutation_map import permutation_matrix_from_atoms
 from icet.core.structure import Structure
 
-
 class TestOrbitList(unittest.TestCase):
     """Container for test of the module functionality."""
     def __init__(self, *args, **kwargs):

@@ -1,11 +1,12 @@
 import spglib
 from _icet import PermutationMap
-from .neighbor_list import NeighborList
-from .structure import Structure
-from ..tools.geometry import (get_primitive_structure,
+from icet.core.neighbor_list import NeighborList
+from icet.core.structure import Structure
+from icet.tools.geometry import (get_primitive_structure,
                               get_fractional_positions_from_neighbor_list,
                               ase_atoms_to_spglib_cell)
-
+from icet.core.lattice_site import LatticeSite
+from typing import List
 from icet.io.logging import logger
 logger = logger.getChild('permutation_map')
 
@@ -69,3 +70,80 @@ def permutation_matrix_from_atoms(atoms, cutoff, find_prim=True):
         permutation_matrix.build(frac_positions)
 
     return permutation_matrix, prim_structure, neighbor_list
+
+
+def _get_lattice_site_permutation_matrix(structure: Structure,
+                                         permutation_matrix: PermutationMap,
+                                         prune: bool=True):
+    """
+    Returns a transformed permutation matrix with lattice sites as entries
+    instead of fractional coordinates.
+
+    Parameters
+    ----------
+    structure
+        primitive atomic structure
+    permutation_matrix
+        permutation matrix with fractional coordinates format entries
+    prune
+        if True the permutation matrix will be pruned
+
+    Returns
+    -------
+    Permutation matrix in a row major order with lattice site format entries
+    """
+    pm_frac = permutation_matrix.get_permuted_positions()
+
+    pm_lattice_sites = []
+    for row in pm_frac:
+        positions = __fractional_to_cartesian(row, structure.cell)
+        lat_neighbors = []
+        if np.all(structure.pbc):
+            lat_neighbors = \
+                structure.find_lattice_sites_by_positions(positions)
+        else:
+            for pos in positions:
+                try:
+                    lat_neighbor = \
+                        structure.find_lattice_site_by_position(pos)
+                except RuntimeError:
+                    continue
+                lat_neighbors.append(lat_neighbor)
+        if len(lat_neighbors) > 0:
+            pm_lattice_sites.append(lat_neighbors)
+        else:
+            logger.warning('Unable to transform any element in a column of the'
+                           ' fractional permutation matrix to lattice site')
+    if prune:
+        logger.debug('Size of columns of the permutation matrix before'
+                     ' pruning {}'.format(len(pm_lattice_sites)))
+
+        pm_lattice_sites = __prune_permutation_matrix(pm_lattice_sites)
+
+        logger.debug('Size of columns of the permutation matrix after'
+                     ' pruning {}'.format(len(pm_lattice_sites)))
+
+    return pm_lattice_sites
+
+
+def __prune_permutation_matrix(permutation_matrix: List[List[LatticeSite]]):
+    """
+    Prunes the matrix so that the first column only contains unique elements.
+
+    Parameters
+    ----------
+    permutation_matrix
+        permutation matrix with LatticeSite type entries
+    """
+
+    for i in range(len(permutation_matrix)):
+        for j in reversed(range(len(permutation_matrix))):
+            if j <= i:
+                continue
+            if permutation_matrix[i][0] == permutation_matrix[j][0]:
+                permutation_matrix.pop(j)
+                msg = ['Removing duplicate in permutation matrix']
+                msg += ['i: {} j: {}'.format(i, j)]
+                logger.debug(' '.join(msg))
+
+    return permutation_matrix
