@@ -213,7 +213,7 @@ class OrbitList
     std::vector<Orbit> _orbitList;
 
     /// Returns column one of the permutation matrix used to construct the orbit list.
-    std::vector<LatticeSite> getCol1() const
+    std::vector<LatticeSite> getFirstColumnOfPermutationMatrix() const
     {
         return _col1;
     }

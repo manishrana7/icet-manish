@@ -88,7 +88,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         orbitIndex++;
         _fullPrimitiveOrbitList.addOrbit(orbit);
     }
-    _fullPrimitiveOrbitList.addPermutationInformationToOrbits(_clusterSpace.getOrbitList().getCol1(),
+    _fullPrimitiveOrbitList.addPermutationInformationToOrbits(_clusterSpace.getOrbitList().getFirstColumnOfPermutationMatrix(),
                                                               _clusterSpace.getOrbitList().getPermutationMatrix());
 
     _primToSupercellMap.clear();
