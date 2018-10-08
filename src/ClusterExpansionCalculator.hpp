@@ -34,7 +34,7 @@ class ClusterExpansionCalculator
     /// Internal cluster space.
     ClusterSpace _clusterSpace;
     
-    /// The supercell the calculator is optimized for.
+    /// The supercell the calculator is created for.
     Structure _superCell;
     
     /// The full primitive orbit list, contains all clusters for the primitive cell.
