@@ -38,7 +38,7 @@ ClusterSpace::ClusterSpace(std::vector<int> numberOfAllowedSpecies,
             _orbitList.removeOrbit(i);
         }
     }
-    precomputeClusterSpaceInfo();
+    precomputeMulticompnentVectors();
 }
 
 /**
@@ -281,7 +281,7 @@ std::vector<int> ClusterSpace::getNumberOfAllowedSpeciesBySite(const Structure &
 }
 
 /// Precomputes permutations and multicomponent vectors of each orbit.
-void ClusterSpace::precomputeClusterSpaceInfo()
+void ClusterSpace::precomputeMulticompnentVectors()
 {
     _clusterSpaceInfo.clear();
     std::vector<int> emptyVec = {0};
