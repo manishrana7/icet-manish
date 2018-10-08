@@ -2,9 +2,9 @@
 
 ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clusterSpace, const Structure &structure)
 {
-    _clusterSpace = clusterSpace;    
+    _clusterSpace = clusterSpace;
     _superCell = structure;
-    
+
     LocalOrbitListGenerator _theLog = LocalOrbitListGenerator(clusterSpace.getOrbitList(), _superCell);
     size_t uniqueOffsets = _theLog.getNumberOfUniqueOffsets();
     int numberOfOrbits = _clusterSpace._orbitList.size();
@@ -92,15 +92,14 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
      *  This is normally done in the constructor but since we made one manually
      *  we have to do this ourself
     **/
-    
+
     _fullPrimitiveOrbitList.addPermutationInformationToOrbits(_clusterSpace.getOrbitList().getFirstColumnOfPermutationMatrix(),
                                                               _clusterSpace.getOrbitList().getPermutationMatrix());
-
 
     _primToSupercellMap.clear();
     _indexToOffset.clear();
 
-    /// Precompute all possible local orbitlists for this supercell and map it to the offset    
+    /// Precompute all possible local orbitlists for this supercell and map it to the offset
     for (int i = 0; i < structure.size(); i++)
     {
         Vector3d localPosition = structure.getPositions().row(i);
@@ -145,13 +144,13 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
             throw std::runtime_error("Index larger than input structure size in method ClusterExpansionCalculator::getLocalClusterVector");
         }
     }
-    
+
     // dont sort the clusters
-    bool orderIntact = true;   
+    bool orderIntact = true;
 
     // count the clusters in the order they lie in equivalent sites
     // since these sites are already in the permuted order
-    bool permuteSites = false; 
+    bool permuteSites = false;
 
     // Remove all sites in the orbits that do not contain index regardless of offset?
     bool onlyConsiderZeroOffsetNotContain = true;
@@ -165,7 +164,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
     OrbitList translatedOrbitList = _localOrbitlists[_indexToOffset[index]];
 
     // Remove sites not containing the local index
-    if(_clusterSpace._primitiveStructure.size()>1)
+    if (_clusterSpace._primitiveStructure.size() > 1)
     {
         translatedOrbitList.removeSitesNotContainingIndex(index, onlyConsiderZeroOffsetNotContain);
     }
@@ -213,28 +212,36 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
         const auto &mcVectors = _clusterSpace._multiComponentVectors[i];
         const auto &elementPermutations = _clusterSpace._sitePermutations[i];
         repCluster.setTag(i);
+
+        /// Loop over all multi component vectors for this orbit
         for (int currentMCVectorIndex = 0; currentMCVectorIndex < _clusterSpace._multiComponentVectors[i].size(); currentMCVectorIndex++)
         {
             double clusterVectorElement = 0;
-            int multiplicity = 0;
 
             auto clusterFind = clusterMap.find(repCluster);
+
+            /// Push back zero if nothing was counted for this orbit
             if (clusterFind == clusterMap.end())
             {
                 clusterVector.push_back(0);
                 continue;
             }
+
+            /// Loop over all the counts for this orbit
             for (const auto &elementsCountPair : clusterMap.at(repCluster))
             {
+                /// Loop over all equivalent permutations for this orbit and mc vector
                 for (const auto &perm : _clusterSpace._sitePermutations[i][currentMCVectorIndex])
                 {
+                    /// Permute the mc vector and the allowed occupations
                     const auto &permutedMCVector = icet::getPermutedVector(mcVectors[currentMCVectorIndex], perm);
                     const auto &permutedAllowedOccupations = icet::getPermutedVector(allowedOccupations, perm);
 
                     clusterVectorElement += _clusterSpace.evaluateClusterProduct(permutedMCVector, permutedAllowedOccupations, elementsCountPair.first) * elementsCountPair.second;
-                    multiplicity += elementsCountPair.second;
                 }
-            }            
+            }
+
+            /// This is the multiplicity one would have gotten during a full cluster vector calculation and is needed as normalizing factor
             double realMultiplicity = (double)_clusterSpace._sitePermutations[i][currentMCVectorIndex].size() * (double)_clusterSpace._orbitList._orbitList[i]._equivalentSites.size() / (double)_clusterSpace._primitiveStructure.size();
             clusterVectorElement /= ((double)realMultiplicity * (double)_superCell.size());
             clusterVector.push_back(clusterVectorElement);
