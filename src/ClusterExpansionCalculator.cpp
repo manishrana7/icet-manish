@@ -88,11 +88,19 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         orbitIndex++;
         _fullPrimitiveOrbitList.addOrbit(orbit);
     }
+    /** calculate the permutation for each orbit in this orbit list.
+     *  This is normally done in the constructor but since we made one manually
+     *  we have to do this ourself
+    **/
+    
     _fullPrimitiveOrbitList.addPermutationInformationToOrbits(_clusterSpace.getOrbitList().getFirstColumnOfPermutationMatrix(),
                                                               _clusterSpace.getOrbitList().getPermutationMatrix());
 
+
     _primToSupercellMap.clear();
     _indexToOffset.clear();
+
+    /// Precompute all possible local orbitlists for this supercell and map it to the offset    
     for (int i = 0; i < structure.size(); i++)
     {
         Vector3d localPosition = structure.getPositions().row(i);
@@ -103,6 +111,8 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         if (_localOrbitlists.find(offsetVector) == _localOrbitlists.end())
         {
             _localOrbitlists[offsetVector] = _fullPrimitiveOrbitList.getLocalOrbitList(structure, offsetVector, _primToSupercellMap);
+
+            /// Set eq sites equal to the permuted sites so no permutation is required in the orbitlist counting.
             for (auto &orbit : _localOrbitlists[offsetVector]._orbitList)
             {
                 auto permutedSites = orbit.getPermutedEquivalentSites();
