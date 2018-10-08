@@ -10,9 +10,9 @@ from .fitting import (Optimizer,
                       EnsembleOptimizer,
                       CrossValidationEstimator)
 
-'''
+"""
 icet module.
-'''
+"""
 
 __project__ = 'icet'
 __description__ = 'A Pythonic approach to cluster expansions'

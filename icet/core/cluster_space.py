@@ -1,14 +1,14 @@
 import pickle
-
-from ase import Atoms
 from collections import OrderedDict
 from typing import List, Union
+
 import numpy as np
 
 from _icet import ClusterSpace as _ClusterSpace
-from icet.tools.geometry import get_primitive_structure, add_vacuum_in_non_pbc
-from icet import OrbitList
+from ase import Atoms
+from icet.core.orbit_list import OrbitList
 from icet.core.structure import Structure
+from icet.tools.geometry import add_vacuum_in_non_pbc, get_primitive_structure
 
 
 class ClusterSpace(_ClusterSpace):
