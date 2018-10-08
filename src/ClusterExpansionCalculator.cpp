@@ -22,15 +22,21 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     We first fill up a std::vector<Orbit> orbitVector
     where vector<orbit> is essentially an orbitlist.
     
-    The existing methods to construct the full orbitlist is to loop over all the
-    unique offsets.
+    The existing methods to construct the full orbitlist is to add all the 
+    sites in the local orbitlist by looping and adding sites over all
+    local orbitlists with LocalOrbitListGenerator.
 
-    We loop over each local orbitlist (by looping over offsetIndex)
+    Now we do something similar by loop over each local orbitlist
+    (by looping over offsetIndex)
     The local orbitlist is retrieved here:
         `_theLog.getLocalOrbitList(offsetIndex).getOrbitList()`
 
-    Then for each group of latticesites in orbit.equivalentSites() we add them
-    to orbitVector[i][orbitIndex] if the latticesites has a site with offset [0, 0, 0].
+    Then for each orbit `orbitIndex` in `_theLog.getLocalOrbitList(offsetIndex).getOrbitList()`
+    each group of lattice sites in orbit.equivalentSites() we add them
+    to orbitVector[orbitIndex] if the latticesites has a site with offset [0, 0, 0].
+
+    When the full primitive orbitlist is used to create a local orbit list for site `index`
+    in the supercell it should then contain all lattice sites that contain `index`.
 
     */
 
