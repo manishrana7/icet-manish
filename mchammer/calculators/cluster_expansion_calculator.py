@@ -33,8 +33,10 @@ class ClusterExpansionCalculator(BaseCalculator):
     scaling
         scaling factor applied to the property value predicted by the
         cluster expansion
-    do_local_computations
-        flag to enable optimized local computations
+    use_local_energy_calculator
+        evaluate energy changes using only the local environment; this method
+        is generally *much* faster; unless you know what you are doing do *not*
+        set this option to `False`
 
     Todo
     ----
@@ -45,12 +47,12 @@ class ClusterExpansionCalculator(BaseCalculator):
     def __init__(self, atoms: Atoms, cluster_expansion: ClusterExpansion,
                  name: str='Cluster Expansion Calculator',
                  scaling: Union[float, int]=None,
-                 do_local_computations: bool = True) -> None:
+                 use_local_energy_calculator: bool = True) -> None:
         super().__init__(atoms=atoms, name=name)
 
         atoms_cpy = atoms.copy()
-        self.do_local_computations = do_local_computations
-        if self.do_local_computations:
+        self.use_local_energy_calculator = use_local_energy_calculator
+        if self.use_local_energy_calculator:
             self.cpp_calc = _ClusterExpansionCalculator(
                 cluster_expansion.cluster_space,
                 Structure.from_atoms(atoms_cpy))
@@ -99,7 +101,7 @@ class ClusterExpansionCalculator(BaseCalculator):
         occupations
             entire occupation vector
         """
-        if not self.do_local_computations:
+        if not self.use_local_energy_calculator:
             return self.calculate_total(occupations=occupations)
 
         self.atoms.set_atomic_numbers(occupations)
@@ -113,7 +115,7 @@ class ClusterExpansionCalculator(BaseCalculator):
                     index, exclude_indices=exclude_indices)
             except Exception as e:
                 msg = "caugh exception {}. Try setting flag ".format(e)
-                msg += "`do_local_computations to False` in init"
+                msg += "`use_local_energy_calculator to False` in init"
                 raise RuntimeError(msg)
 
             exclude_indices.append(index)
