@@ -28,16 +28,16 @@ for temperature in [900, 600, 300]:
                              chemical_symbols[1]: 0})
 
     # Evolve configuration through the entire composition range
-    for dmu in arange(-0.6, 0.53, 0.04):
+    for dmu in arange(-0.6, 0.51, 0.05):
         mc.chemical_potentials = {chemical_symbols[0]: 0,
                                   chemical_symbols[1]: dmu}
 
         # equilibration run
-        mc.run(number_of_trial_steps=400)
+        mc.run(number_of_trial_steps=len(atoms)*8)
 
         # production run
         mc.reset_data_container()
-        mc.run(number_of_trial_steps=1000)
+        mc.run(number_of_trial_steps=len(atoms)*20)
         # TODO: change the next line (and the tutorial) once mc.data_container
         # is writable
         mc.data_container.write('sgc-T{}-dmu{:.3f}.dc'

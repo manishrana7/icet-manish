@@ -33,7 +33,7 @@ for equilibration is shortened.
    :start-after: # step 2
 
 On an Intel i7-950 CPU the set up of the calculator takes about 10 seconds,
-whereas the Monte Carlo simulation takes about 70 seconds for each data point.
+whereas the Monte Carlo simulation takes about 0.2 seconds per MC trial step.
 
 Source code
 -----------
