@@ -403,7 +403,7 @@ class BaseEnsemble(ABC):
         """ Returns the current calculator property. """
         return {
             'potential': self.calculator.calculate_total(
-            occupations=self.configuration.occupations),
+                occupations=self.configuration.occupations),
             'acceptance_ratio': self.acceptance_ratio}
 
     def get_random_sublattice_index(self) -> int:
