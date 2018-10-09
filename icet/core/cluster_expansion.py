@@ -4,7 +4,8 @@ import re
 
 from icet import ClusterSpace
 from icet.core.structure import Structure
-from typing import List, Union, BinaryIO
+from os import PathLike
+from typing import List, Union
 from ase import Atoms
 
 
@@ -20,7 +21,8 @@ class ClusterExpansion:
         effective cluster interactions (ECIs)
     """
 
-    def __init__(self, cluster_space: ClusterSpace, parameters: List[float]):
+    def __init__(self, cluster_space: ClusterSpace,
+                 parameters: List[float]) -> None:
         """
         Initializes a ClusterExpansion object.
 
@@ -87,7 +89,7 @@ class ClusterExpansion:
             len('{:9.3g}'.format(max(self._parameters, key=abs))), len('ECI'))
         width = len(cluster_space_repr[0]) + len(' | ') + eci_col_width
 
-        s = []
+        s = []  # type: List
         s += ['{s:=^{n}}'.format(s=' Cluster Expansion ', n=width)]
         s += [t for t in cluster_space_repr if re.search(':', t)]
 
@@ -141,7 +143,7 @@ class ClusterExpansion:
             pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
-    def read(filename: Union[str, BinaryIO]):
+    def read(filename: PathLike):
         """
         Reads ClusterExpansion object from file.
 
@@ -151,12 +153,8 @@ class ClusterExpansion:
             file from which to read
         """
         cs = ClusterSpace.read(filename)
-        if isinstance(filename, str):
-            with open(filename, 'rb') as handle:
-                data = pickle.load(handle)
-        else:
-            with open(filename) as handle:
-                data = pickle.load(handle)
+        with open(filename, 'rb') as handle:
+            data = pickle.load(handle)
         parameters = data['parameters']
 
         return ClusterExpansion(cs, parameters)

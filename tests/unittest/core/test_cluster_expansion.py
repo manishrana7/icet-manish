@@ -105,7 +105,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
    3  |   3   |   1.6657 |        8     |       2     |       [0, 0, 0]        |         3
    4  |   4   |   1.7667 |        2     |       3     |      [0, 0, 0, 0]      |         4
 ==========================================================================================
-""" # noqa
+"""  # noqa
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
 
@@ -127,7 +127,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
  ...
    4  |   4   |   1.7667 |        2     |       3     |      [0, 0, 0, 0]      |         4
 ==========================================================================================
-""" # noqa
+"""  # noqa
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
 

@@ -9,14 +9,15 @@ from .structure_enumeration_support.smith_normal_form \
     import get_unique_snfs, SmithNormalForm
 from .structure_enumeration_support.labeling_generation \
     import LabelingGenerator
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Generator
 
 
-def _translate_labelings(labeling: tuple, snf: SmithNormalForm,
-                         nsites: int, include_self: bool=False) -> Tuple[int]:
+def _translate_labelings(
+        labeling: tuple, snf: SmithNormalForm, nsites: int,
+        include_self: bool=False)-> Generator[Tuple[int], None, None]:
     """
     Yields labelings that are equivalent to the original labeling
-    under translations as dictated by snf.
+    under translations as dictated by the Smith normal form (SNF) provided.
 
     Parameters
     ----------
@@ -25,7 +26,7 @@ def _translate_labelings(labeling: tuple, snf: SmithNormalForm,
     snf
         SmithNormalForm object
     nsites
-        number of sites in the primtive cell
+        number of sites in the primitive cell
     include_self
         if True original labeling will be included
     """
@@ -56,12 +57,13 @@ def _get_all_labelings(snf: SmithNormalForm,
                        labeling_generator: LabelingGenerator,
                        nsites: int) -> List[tuple]:
     """
-    Returns of inequivalent labelings corresponding to a Smith Normal
-    Form matrix.  Superperiodic labelings as well as labelings that
+    Returns inequivalent labelings corresponding to a Smith normal
+    form (SNF) matrix. Superperiodic labelings as well as labelings that
     are equivalent under translations for this particular SNF will not
     be included. However, labelings that are equivalent by rotations
     that leave the cell (but not the labeling) unchanged will still be
-    included, since these have to be removed for each HNF separately.
+    included, since these have to be removed for each Hermite normal form (HNF)
+    separately.
 
     Parameters
     ----------
@@ -70,7 +72,7 @@ def _get_all_labelings(snf: SmithNormalForm,
     labeling_generator
         LabelingGenerator object
     nsites
-        number of sites per primtive cell
+        number of sites per primitive cell
     """
     labelings = []
     for labeling in labeling_generator.yield_labelings(snf.ncells):
@@ -98,7 +100,7 @@ def _permute_labeling(labeling: tuple, snf: SmithNormalForm,
                       transformation: List[np.ndarray],
                       nsites: int) -> Tuple[int]:
     """
-    Returns permute labeling according to transformations defined by
+    Returns permuted labeling according to transformations defined by
     transformation.
 
     Parameters
@@ -108,9 +110,9 @@ def _permute_labeling(labeling: tuple, snf: SmithNormalForm,
     snf
         SmithNormalForm object
     transformation
-        transformations consisting of rotation, translation and basis shift
+        transformation consisting of rotation, translation and basis shift
     nsites
-        number of sites in the primtive cell
+        number of sites in the primitive cell
     """
 
     # Calculate transformation imposed by LRL multiplication
@@ -146,15 +148,15 @@ def _yield_unique_labelings(labelings: List[int], snf: SmithNormalForm,
     Parameters
     ----------
     labelkeys
-        List of hash keys to labelings that may still contain labelings that
-        are equivalent under rotations that leaves the supercell shape
-        unchanged.
+        list of hash keys to labelings that may still contain labelings that
+        are equivalent under rotations that leave the supercell shape
+        unchanged
     snf
         SmithNormalForm object
     hnf
         HermiteNormalForm object
     nsites
-        Number of sites in the primitive cell.
+        number of sites in the primitive cell
     """
     saved_labelings = []
     for labeling in labelings:
@@ -246,15 +248,15 @@ def get_symmetry_operations(atoms: Atoms,
                             tolerance: float=1e-3) -> Dict[str, list]:
     """
     Returns symmetry operations permissable for a given structure as
-    obtained using `spglib <https://atztogo.github.io/spglib/>`_. The
-    symmetry operations consist of three parts: rotations, translation
-    and "basis_shifts". The latter define the way that the sublattices
+    obtained via `spglib <https://atztogo.github.io/spglib/>`_. The
+    symmetry operations consist of three parts: rotation, translation
+    and basis shifts. The latter define the way that sublattices
     shift upon rotation (correponds to `d_Nd` in [HarFor09]_).
 
     Parameters
     ----------
     atoms
-        structure for which the symmetry operations are sought
+        structure for which symmetry operations are sought
     tolerance
         numerical tolerance imposed during symmetry analysis
     """
@@ -370,7 +372,7 @@ def enumerate_structures(atoms: Atoms, sizes: List[int], species: list,
         enumerate_structures(atoms=prim, sizes=range(1, 7),
                              species=['Ag', 'Au'])
 
-    To limit the concentration range to 10 to 40 % Au the code should
+    To limit the concentration range to 10 to 40% Au the code should
     be modified as follows::
 
         enumerate_structures(atoms=prim, sizes=range(1, 7),
