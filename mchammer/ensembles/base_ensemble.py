@@ -109,7 +109,6 @@ class BaseEnsemble(ABC):
             self._ensemble_data_write_interval = default_interval
         else:
             self._ensemble_data_write_interval = ensemble_data_write_interval
-        self._data_container.add_observable('potential')
 
         # Handle trajectory writing
         if trajectory_write_interval is None:
@@ -235,6 +234,8 @@ class BaseEnsemble(ABC):
         if step % self._ensemble_data_write_interval == 0:
             ensemble_data = self.get_ensemble_data()
             for key, value in ensemble_data.items():
+                if key not in self._data_container.observables:
+                    self._data_container.add_observable(key)
                 row_dict[key] = value
 
         # Trajectory data
@@ -399,7 +400,8 @@ class BaseEnsemble(ABC):
 
     def get_ensemble_data(self) -> dict:
         """ Returns the current calculator property. """
-        return {'potential': self.calculator.calculate_total(
+        return {
+            'potential': self.calculator.calculate_total(
             occupations=self.configuration.occupations),
             'acceptance_ratio': self.acceptance_ratio}
 
