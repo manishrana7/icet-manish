@@ -189,30 +189,72 @@ class TestOrbitList(unittest.TestCase):
                 self.assertAlmostEqual(
                     cluster.radius, size, places=5)
 
+    def test_translate_sites_to_unitcell(self):
+        """
+        You better test this thing.
+        """
+        pass
+
+    def test_find_rows_from_col1(self):
+        """
+        You better test this thing.
+        """
+        column1 = [row[0] for row in self.pm_lattice_sites]
+        sites = [LatticeSite(0, [0, 0, 0])]
+        retval = self.orbit_list.find_rows_from_col1(column1, sites, False)
+        self.assertEqual(retval, [0])
+
+    def test_get_all_columns_from_row(self):
+        """
+        Your better test this thing.
+        """
+        pass
+
     def test_allowed_permutations(self):
         """
-        Test allowed permutations of orbit.
+        You better test this thing.
+        1- permutation matrix should be an attribute of orbit list
+        2- same for column1
+        3- it should be optional to add translated sites in function
+        get_all_columns_from_values
         """
-        # check all permutations are allowed for these orbits
+        from icet.tools.geometry import get_permutation
+
         atoms = bulk('Al')
-        cutoffs = [3.2, 3.2]
-        orbit_list = create_orbit_list(atoms, cutoffs)
+        cutoffs = [15.2, 15.2]
+
+        # set an orbit list in four steps
+        pm, prim_structure, _ = permutation_matrix_from_atoms(atoms, cutoffs[0])
+        pm_latt_sites = get_lattice_site_permutation_matrix(prim_structure, pm)
+        neighbor_lists = get_neighbor_lists(prim_structure, cutoffs)
+        orbit_list = OrbitList(prim_structure, pm_latt_sites, neighbor_lists)
+
+        column1 = [row[0] for row in pm_latt_sites]
+        #print(column1)
 
         for orbit in orbit_list.orbits:
-            all_perm = \
-                [list(perm) for perm in permutations(range(orbit.order))]
-            self.assertEqual(all_perm, sorted(orbit.allowed_permutations))
-
-        # check a case with limited number of permutations for triplets
-        atoms = bulk('Fe')
-        orbit_list = create_orbit_list(atoms, cutoffs)
-
-        allowed_perm = [[[0]],
-                        [[0, 1], [1, 0]],
-                        [[0, 1, 2], [1, 0, 2]]]
-        for orbit in orbit_list.orbits:
-            self.assertEqual(allowed_perm[orbit.order-1],
-                             sorted(orbit.allowed_permutations))
+            allowed_perm = []
+            # set all possible permutations
+            all_perm = [list(perm) for perm in permutations(range(orbit.order))]
+            repr_sites = orbit.get_representative_sites()
+            translated_sites = orbit_list.get_sites_translated_to_unitcell(repr_sites, False)
+            for sites in translated_sites:
+                for perm in all_perm:
+                    perm_sites = get_permutation(sites, perm)
+                    rows = \
+                        orbit_list.find_rows_from_col1(column1, perm_sites, False)
+                    columns = \
+                        orbit_list.get_all_columns_from_rows(rows, pm_latt_sites, False, False)
+                    if perm not in orbit.allowed_permutations:
+                        self.assertNotIn(repr_sites, columns)
+                    if repr_sites in columns:
+                        if perm not in allowed_perm:
+                            allowed_perm.append(perm)
+            if sorted(allowed_perm) != sorted(orbit.allowed_permutations):
+                print(all_perm)
+                print(orbit.get_representative_cluster().print())
+            self.assertEqual(sorted(allowed_perm), sorted(orbit.allowed_permutations))
+            #print(orbit.allowed_permutations)
 
     def test_orbit_list_non_pbc(self):
         """

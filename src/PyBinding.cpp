@@ -720,6 +720,10 @@ PYBIND11_MODULE(_icet, m)
         .def("get_orbit_list", &OrbitList::getOrbitList,
              "Returns a list of Orbit objects from OrbitList")
         .def_property_readonly("orbits", &OrbitList::getOrbitList)
+        .def("get_sites_translated_to_unitcell", &OrbitList::getSitesTranslatedToUnitcell)
+        .def("find_rows_from_col1", &OrbitList::findRowsFromCol1)
+        .def("get_all_columns_from_rows", &OrbitList::getAllColumnsFromRow)
+        .def("get_all_columns_from_sites", &OrbitList::getAllColumnsFromSites)
         .def("get_primitive_structure", &OrbitList::getPrimitiveStructure,
              "Returns the primitive atomic structure used to construct the OrbitList instance")
         .def("__len__", &OrbitList::size,
