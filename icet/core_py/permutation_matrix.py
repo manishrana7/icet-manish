@@ -8,6 +8,9 @@ from icet.tools.geometry import (
     get_primitive_structure,
     fractional_to_cartesian)
 
+from icet.io.logging import logger
+logger = logger.getChild('permutation_matrix')
+
 
 class PermutationMatrix(object):
     '''
@@ -47,26 +50,20 @@ class PermutationMatrix(object):
         via spglib. This primitive structure will
         then be used to construct the neighbor list,
         be what the lattice sites refer to etc.
-    verbosity : int
-        sets the verbosity of this class
     '''
 
-    def __init__(self, atoms, cutoff, find_prim=True, verbosity=0):
+    def __init__(self, atoms, cutoff, find_prim=True):
         atoms = atoms.copy()
         self.cutoff = cutoff
-        self.verbosity = verbosity
+
         # set each element to the same since we only care about geometry when
         # taking primitive
-
         atoms.set_chemical_symbols(len(atoms) * [atoms[0].symbol])
 
         if find_prim:
             atoms = get_primitive_structure(atoms)
 
         self.primitive_structure = atoms
-
-        if self.verbosity >= 3:
-            print('number of atoms {}'.format(len(self.primitive_structure)))
 
         # Get symmetry information and load into a permutation map object
         symmetry = spglib.get_symmetry(self.primitive_structure)
@@ -93,8 +90,6 @@ class PermutationMatrix(object):
             self.primitive_structure, neighbor_list)
 
         # frac_positions.sort()
-        if self.verbosity >= 3:
-            print('number of positions: {}'.format(len(frac_positions)))
 
         permutation_matrix = []
         for frac_pos in frac_positions:
@@ -135,7 +130,7 @@ class PermutationMatrix(object):
                         if isinstance(lattice_site, LatticeSite):
                             sites.append(lattice_site)
                     except Exception as e:  # NOQA
-                        print("Skipping exception {}".format(e))
+                        logger.warning("Skipping exception {}".format(e))
             if len(sites) > 0:
                 pm_lattice_sites.append(sites)
             else:
@@ -154,10 +149,9 @@ class PermutationMatrix(object):
                     continue
                 if self.pm_lattice_sites[i][0] == self.pm_lattice_sites[j][0]:
                     self.pm_lattice_sites.pop(j)
-                    if self.verbosity > 2:
-                        msg = ['Removing duplicate in permutation matrix']
-                        msg += ['i: {} j: {}'.format(i, j)]
-                        print(' '.join(msg))
+                    msg = ['Removing duplicate in permutation matrix']
+                    msg += ['i: {} j: {}'.format(i, j)]
+                    logger.debug(' '.join(msg))
 
     @property
     def column1(self):

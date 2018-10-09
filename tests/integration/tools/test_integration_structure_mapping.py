@@ -81,8 +81,7 @@ mapped_structure, r_max, r_av = \
     map_structure_to_reference(atoms, reference,
                                tolerance_mapping=0.9,
                                vacancy_type='O',
-                               inert_species=['Y', 'Al'],
-                               verbose=True)
+                               inert_species=['Y', 'Al'])
 
 # Calculate cluster vector and compare to expected value
 cv = cs.get_cluster_vector(mapped_structure)

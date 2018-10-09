@@ -61,7 +61,7 @@ generated/scipy.spatial.ConvexHull.html>`_.
 
     def __init__(self,
                  concentrations: Union[List[float], List[List[float]]],
-                 energies: List[float]):
+                 energies: List[float]) -> None:
         assert len(concentrations) == len(energies)
         # Prepare data in format suitable for SciPy-ConvexHull
         concentrations = np.array(concentrations)

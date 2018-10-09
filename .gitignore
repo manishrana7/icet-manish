@@ -1,12 +1,15 @@
 build/
 doc/_build/
 __pycache__/
+.mypy_cache/
 .vscode
 *~
+*.dc
 *.pyc
 *.swp
 *.db
 !tests/integration/core/equivalent_structure_pairs.db
+!tests/unittest/core/structure_databases/*.db
 *.png
 *.eps
 *.so

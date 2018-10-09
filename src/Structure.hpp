@@ -35,6 +35,9 @@ class Structure
     /// Return the position of a site in Cartesian coordinates.
     Vector3d getPosition(const LatticeSite &) const;
 
+    /// Return the position of a site in Cartesian coordinates.
+    Vector3d getPositionByIndex(const size_t &index) const;
+
     /// Returns atomic number of site.
     int getAtomicNumber(const unsigned int) const;
 

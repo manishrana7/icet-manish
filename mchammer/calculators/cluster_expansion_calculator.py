@@ -1,7 +1,11 @@
+from _icet import _ClusterExpansionCalculator
 from ase import Atoms
 from icet import ClusterExpansion
 from mchammer.calculators.base_calculator import BaseCalculator
-from typing import List
+from typing import Union, List
+from icet import Structure
+from icet import ClusterSpace
+import numpy as np
 
 
 class ClusterExpansionCalculator(BaseCalculator):
@@ -20,15 +24,19 @@ class ClusterExpansionCalculator(BaseCalculator):
 
     Parameters
     ----------
-    atoms : :class:`ase:Atoms`
+    atoms
         structure for which to set up the calculator
     cluster_expansion : ClusterExpansion
         cluster expansion from which to build calculator
-    name : str
+    name
         human-readable identifier for this calculator
-    scaling : float
+    scaling
         scaling factor applied to the property value predicted by the
         cluster expansion
+    use_local_energy_calculator
+        evaluate energy changes using only the local environment; this method
+        is generally *much* faster; unless you know what you are doing do *not*
+        set this option to `False`
 
     Todo
     ----
@@ -38,8 +46,23 @@ class ClusterExpansionCalculator(BaseCalculator):
 
     def __init__(self, atoms: Atoms, cluster_expansion: ClusterExpansion,
                  name: str='Cluster Expansion Calculator',
-                 scaling: float=None):
+                 scaling: Union[float, int]=None,
+                 use_local_energy_calculator: bool = True) -> None:
         super().__init__(atoms=atoms, name=name)
+
+        atoms_cpy = atoms.copy()
+        self.use_local_energy_calculator = use_local_energy_calculator
+        if self.use_local_energy_calculator:
+            self.cpp_calc = _ClusterExpansionCalculator(
+                cluster_expansion.cluster_space,
+                Structure.from_atoms(atoms_cpy))
+
+        self._cluster_expansion = cluster_expansion
+        self._local_cluster_space = ClusterSpace(
+            self.cluster_expansion.cluster_space._atoms.copy(),
+            self.cluster_expansion.cluster_space._cutoffs,
+            self.cluster_expansion.cluster_space._chemical_symbols,
+            self.cluster_expansion.cluster_space._mi)
         self._cluster_expansion = cluster_expansion
         if scaling is None:
             self._property_scaling = len(atoms)
@@ -65,8 +88,8 @@ class ClusterExpansionCalculator(BaseCalculator):
         return self.cluster_expansion.predict(self.atoms) * \
             self._property_scaling
 
-    def calculate_local_contribution(self, local_indices: List[int] = None,
-                                     occupations: List[int] = None) -> float:
+    def calculate_local_contribution(self, *, local_indices: List[int],
+                                     occupations: List[int]) -> float:
         """
         Calculates and returns the sum of the contributions to the property
         due to the sites specified in `local_indices`
@@ -78,12 +101,45 @@ class ClusterExpansionCalculator(BaseCalculator):
         occupations
             entire occupation vector
         """
-        if local_indices is None:
-            raise TypeError('Missing required argument: local_indices')
-        if occupations is None:
-            raise TypeError('Missing required argument: occupations')
-        return self.calculate_total(occupations=occupations) * \
-            self._property_scaling
+        if not self.use_local_energy_calculator:
+            return self.calculate_total(occupations=occupations)
+
+        self.atoms.set_atomic_numbers(occupations)
+
+        local_contribution = 0
+        exclude_indices = []  # type: List[int]
+
+        for index in local_indices:
+            try:
+                local_contribution += self._calculate_local_contribution(
+                    index, exclude_indices=exclude_indices)
+            except Exception as e:
+                msg = "caugh exception {}. Try setting flag ".format(e)
+                msg += "`use_local_energy_calculator to False` in init"
+                raise RuntimeError(msg)
+
+            exclude_indices.append(index)
+
+        return local_contribution * self._property_scaling
+
+    def _calculate_local_contribution(self, index: int,
+                                      exclude_indices: List[int] = []):
+        """
+        Internal method to calculate the local contribution for one
+        index.
+
+        Parameters
+        ----------
+        index : int
+            lattice index
+        exclude_indices
+            previously calculated indices, these indices will
+            be ignored in order to avoid double counting bonds
+
+        """
+        local_cv = self.cpp_calc.get_local_cluster_vector(
+            self.atoms.get_atomic_numbers(), index, exclude_indices)
+        return np.dot(local_cv, self.cluster_expansion.parameters)
 
     @property
     def occupation_constraints(self) -> List[List[int]]:

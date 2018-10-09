@@ -109,8 +109,7 @@ class TestStructureMapping(unittest.TestCase):
             map_structure_to_reference(self.atoms, self.reference,
                                        0.7,
                                        vacancy_type='V',
-                                       inert_species=['Au', 'Pd'],
-                                       verbose=False)
+                                       inert_species=['Au', 'Pd'])
         self.assertEqual(mapped.get_chemical_formula(), 'H6Au4Pd4V2')
         self.assertTrue(r_av < r_max)
 

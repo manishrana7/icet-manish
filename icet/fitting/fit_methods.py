@@ -30,7 +30,7 @@ try:
     logger = logger.getChild('fit_methods')
 except Exception:
     logger = logger.getChild('fit_methods')
-    logger.warning('Failed to import scitkit-learn;'
+    logger.warning('Failed to import scikit-learn;'
                    ' several optimizers will fail')
 
 
