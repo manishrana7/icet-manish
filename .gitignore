@@ -1,6 +1,7 @@
 build/
 doc/_build/
 __pycache__/
+.mypy_cache/
 .vscode
 *~
 *.pyc
