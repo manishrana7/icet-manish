@@ -433,7 +433,6 @@ def get_singlet_configuration(atoms: Atoms, to_primitive: bool=False) -> Atoms:
     else:
         singlet_configuration = atoms.copy()
         singlet_configuration = add_vacuum_in_non_pbc(singlet_configuration)
-        # orbit_list = cluster_space.get_orbit_list()
         orbit_list_supercell \
             = cluster_space._orbit_list.get_supercell_orbit_list(
                 singlet_configuration)
