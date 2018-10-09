@@ -128,8 +128,12 @@ class DataContainer:
                             .format(type(mctrial)))
         if not self._data.mctrial.empty:
             if self._data.mctrial.iloc[-1] > mctrial:
-                raise ValueError('mctrial values should be given in'
-                                 ' ascending order')
+                raise ValueError('mctrial values should be given in ascending'
+                                 ' order. This error can for example occur'
+                                 ' when trying to append to an existing data'
+                                 ' container after having reset the time step.'
+                                 ' Note that the latter happens automatically'
+                                 ' when initializing a new ensemble.')
 
         if not isinstance(record, dict):
             raise TypeError('record has the wrong type: {}'
