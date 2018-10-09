@@ -140,6 +140,7 @@ class DataContainer:
         row_data['mctrial'] = mctrial
         row_data.update(record)
         self._data = self._data.append(row_data, ignore_index=True)
+        self._data.mctrial = self._data.mctrial.astype('int')
 
     def _update_last_state(self, last_step: int, occupations: List[int],
                            accepted_trials: int, random_state: tuple):
