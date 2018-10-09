@@ -49,15 +49,15 @@ def print_timing_ratios(atoms, iters, sizes, cutoffs):
 
 
 if __name__ == '__main__':
-    iters = 50
+    iters = 2
     atoms = bulk('Al')
     cutoffs = [10, 6, 5]
     elements = ['Al', 'Ga']
-    sizes = [4, 6, 8, 10, 16]
+    sizes = [4, 6, 8]
     print_timing_ratios(atoms, iters, sizes, cutoffs)
     # asd
     cs = ClusterSpace(atoms, cutoffs, elements)
-    atoms = atoms.repeat(10)
+    atoms = atoms.repeat(5)
     parameters = np.array([1.2 for _ in range(len(cs))])
     ce = ClusterExpansion(cs, parameters)
     print('Constructing CE calculator')
