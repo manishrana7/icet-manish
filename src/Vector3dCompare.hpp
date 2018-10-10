@@ -1,6 +1,11 @@
 #pragma once
 #include <Eigen/Dense>
 using namespace Eigen;
+#include <boost/functional/hash.hpp>
+using boost::hash;
+using boost::hash_combine;
+using boost::hash_value;
+
 
 struct Vector3dCompare
 {
@@ -86,4 +91,17 @@ struct NeighborPairCompareOffset
         return false;
     }
 
+};
+
+
+
+struct Vector3dHash {
+    size_t operator()(const Vector3d& v) const 
+    {
+        size_t seed = 0;
+        for (size_t i =0; i<3; i++) {
+            hash_combine(seed, hash_value(v[i]));
+        }
+        return seed;
+    }
 };

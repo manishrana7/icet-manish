@@ -82,7 +82,7 @@ std::vector<int> LocalOrbitListGenerator::findMatchingSupercellPositions(const V
     std::vector<int> matchedIndices;
     for (int i = 0; i < _supercell.getPositions().rows(); i++)
     {
-        if ((position.transpose() - _supercell.getPositions().row(i)).norm() < 1e-3)
+        if ((position - _supercell.getPositionByIndex(i)).norm() < 1e-3)
         {
             matchedIndices.push_back(i);
         }

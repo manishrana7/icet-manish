@@ -140,7 +140,7 @@ class StructureContainer:
         width = len(repr_structure(dummy))
 
         # table header
-        s = []
+        s = []  # type: List
         s += ['{s:=^{n}}'.format(s=' Structure Container ', n=width)]
         s += ['Total number of structures: {}'.format(len(self))]
         s += [''.center(width, '-')]

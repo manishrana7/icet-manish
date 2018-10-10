@@ -4,6 +4,7 @@ import os
 import tempfile
 import numpy as np
 from ase.build import bulk
+from pandas.testing import assert_frame_equal
 
 from icet import ClusterExpansion, ClusterSpace
 from mchammer.calculators.cluster_expansion_calculator import \
@@ -233,9 +234,9 @@ class TestEnsemble(unittest.TestCase):
                                     atoms=self.atoms,
                                     name='this-ensemble',
                                     data_container='my-datacontainer.dc',
-                                    data_container_write_period=1e-4,
-                                    ensemble_data_write_interval=np.inf,
-                                    trajectory_write_interval=np.inf)
+                                    data_container_write_period=1e-2,
+                                    ensemble_data_write_interval=14,
+                                    trajectory_write_interval=56)
 
         # attach observer
         observer = ParakeetObserver(interval=14, tag='Parakeet2')
@@ -243,10 +244,9 @@ class TestEnsemble(unittest.TestCase):
 
         # back-up data while run ensemble and then read the file
         try:
-            n_iters = 364
+            n_iters = 182
             ensemble.run(n_iters)
             dc_read = DataContainer.read('my-datacontainer.dc')
-
         finally:
             os.remove('my-datacontainer.dc')
 
@@ -264,17 +264,31 @@ class TestEnsemble(unittest.TestCase):
         ensemble_reloaded = \
             ConcreteEnsemble(calculator=self.calculator,
                              atoms=self.atoms,
-                             data_container=temp_container_file.name)
+                             data_container=temp_container_file.name,
+                             ensemble_data_write_interval=14,
+                             trajectory_write_interval=56)
 
-        # check loaded data container of new ensemble
-        data_dc_reloaded = \
-            ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
-        data_dc = \
-            ensemble.data_container.get_data(tags=['Parakeet2'])
-        self.assertEqual(len(data_dc), len(data_dc_reloaded))
-        for i in range(len(data_dc)):
-            np.testing.assert_approx_equal(
-                data_dc_reloaded[i], data_dc[i], significant=20)
+        assert_frame_equal(ensemble.data_container.data,
+                           ensemble_reloaded.data_container.data,
+                           check_dtype=False)
+
+        # run old and new ensemble and check both data containers are equal
+        try:
+            n_iters = 50
+            ensemble.run(n_iters)
+        finally:
+            os.remove('my-datacontainer.dc')
+
+        ensemble_reloaded.attach_observer(observer)
+        ensemble_reloaded.run(n_iters)
+
+        assert_frame_equal(ensemble.data_container.data,
+                           ensemble_reloaded.data_container.data,
+                           check_dtype=False)
+
+        self.assertEqual(
+            ensemble_reloaded.data_container.last_state['last_step'],
+            182 + 50)
 
     def test_internal_run(self):
         """

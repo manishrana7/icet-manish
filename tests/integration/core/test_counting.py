@@ -217,7 +217,7 @@ db = connect('structures_for_testing.db')
 for row in db.select():
     atoms_row = row.toatoms()
     atoms_tag = row.tag
-    N = 3
+    N = 2
     cutoffs = [1.4] * 3
     if 'NaCl' in atoms_tag:
         cutoffs = [1.1] * 4
