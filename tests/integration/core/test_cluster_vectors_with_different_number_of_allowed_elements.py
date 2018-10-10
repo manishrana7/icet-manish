@@ -9,7 +9,7 @@ from icet import ClusterSpace, get_singlet_info
 from icet.tools import get_primitive_structure
 
 
-def test_mi_int_list_and_dict(atoms, species, cutoffs, allowed_sites):
+def test_mi_int_list_and_dict(atoms, chemical_symbols, cutoffs, allowed_sites):
     """
     Test that int Mi, list Mi and dict Mi produces the same cluster vectors.
     """
@@ -24,9 +24,12 @@ def test_mi_int_list_and_dict(atoms, species, cutoffs, allowed_sites):
     for singlet in singlet_data:
         Mi_dict[singlet['orbit_index']] = allowed_sites
 
-    cluster_space_int = ClusterSpace(atoms, cutoffs, species,  Mi=Mi_int)
-    cluster_space_list = ClusterSpace(atoms, cutoffs, species, Mi=Mi_list)
-    cluster_space_dict = ClusterSpace(atoms, cutoffs, species, Mi=Mi_dict)
+    cluster_space_int = \
+        ClusterSpace(atoms, cutoffs, chemical_symbols,  Mi=Mi_int)
+    cluster_space_list = \
+        ClusterSpace(atoms, cutoffs, chemical_symbols, Mi=Mi_list)
+    cluster_space_dict = \
+        ClusterSpace(atoms, cutoffs, chemical_symbols, Mi=Mi_dict)
     atoms_prim = cluster_space_int.primitive_structure
 
     # create and populate a supercell and get cluster vector
@@ -36,7 +39,7 @@ def test_mi_int_list_and_dict(atoms, species, cutoffs, allowed_sites):
             repeat[i] = 3
     conf = atoms_prim.repeat(repeat)
     for at in conf:
-        at.symbol = np.random.choice(species)
+        at.symbol = np.random.choice(chemical_symbols)
 
     cv_int = cluster_space_int.get_cluster_vector(conf)
     cv_list = cluster_space_list.get_cluster_vector(conf)
@@ -50,7 +53,7 @@ def test_mi_int_list_and_dict(atoms, species, cutoffs, allowed_sites):
 
 
 db = connect('structures_for_testing.db')
-species = ['H', 'He', 'Pb']
+chemical_symbols = ['H', 'He', 'Pb']
 for row in db.select():
     atoms_row = row.toatoms()
     atoms_tag = row.tag
@@ -59,5 +62,5 @@ for row in db.select():
         continue
     atoms_row.set_chemical_symbols(len(atoms_row) * [atoms_row[0].symbol])
     for allowed_sites in range(2, 4):
-        test_mi_int_list_and_dict(atoms_row, species,
+        test_mi_int_list_and_dict(atoms_row, chemical_symbols,
                                   cutoffs, allowed_sites)

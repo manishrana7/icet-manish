@@ -59,16 +59,16 @@ class TestStructureContainer(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestStructureContainer, self).__init__(*args, **kwargs)
         prim = bulk('Ag', a=4.09)
-        chemical_species = ['Ag', 'Au']
+        chemical_symbols = ['Ag', 'Au']
         self.cs = ClusterSpace(atoms=prim,
                                cutoffs=[4.0, 4.0, 4.0],
-                               chemical_symbols=chemical_species)
+                               chemical_symbols=chemical_symbols)
         self.structure_list = []
         self.user_tags = []
         for k in range(4):
             atoms = prim.repeat(2)
-            symbols = [chemical_species[0]] * len(atoms)
-            symbols[:k] = [chemical_species[1]] * k
+            symbols = [chemical_symbols[0]] * len(atoms)
+            symbols[:k] = [chemical_symbols[1]] * k
             atoms.set_chemical_symbols(symbols)
             self.structure_list.append(atoms)
             self.user_tags.append('Structure {}'.format(k))

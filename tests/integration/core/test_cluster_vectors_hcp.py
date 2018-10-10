@@ -8,9 +8,9 @@ from ase.build import bulk, make_supercell
 from icet import ClusterSpace
 
 cutoffs = [8.0, 7.0]
-species = ['Re', 'Ti']
+chemical_symbols = ['Re', 'Ti']
 prototype = bulk('Re')
-cs = ClusterSpace(prototype, cutoffs, species)
+cs = ClusterSpace(prototype, cutoffs, chemical_symbols)
 
 # structure #1
 cv = cs.get_cluster_vector(prototype.copy())
