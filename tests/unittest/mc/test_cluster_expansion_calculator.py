@@ -46,7 +46,7 @@ class TestCECalculatorBinary(unittest.TestCase):
             self.calculator.cluster_expansion, ClusterExpansion)
 
     def _test_flip_changes(self, msg):
-        """ Test differences when flipping """
+        """ Test differences when flipping. """
         for i in range(len(self.atoms)):
             indices = [i]
             local_diff, total_diff = self._get_energy_diffs_local_and_total(
@@ -54,7 +54,7 @@ class TestCECalculatorBinary(unittest.TestCase):
             self.assertAlmostEqual(total_diff, local_diff, msg=msg)
 
     def _test_swap_changes(self, msg):
-        """ Test differences when flipping """
+        """ Test differences when swapping. """
         for i in range(len(self.atoms)):
             for j in range(len(self.atoms)):
                 if j <= i:
@@ -65,8 +65,9 @@ class TestCECalculatorBinary(unittest.TestCase):
                 self.assertAlmostEqual(total_diff, local_diff, msg=msg)
 
     def test_local_contribution_flip(self):
-        """ Test potential differences when flipping."""
-
+        """
+        Test potential differences when flipping.
+        """
         # Test original occupations
         self._test_flip_changes("original occupations")
 
@@ -88,7 +89,9 @@ class TestCECalculatorBinary(unittest.TestCase):
         self._test_flip_changes("Segregated")
 
     def test_local_contribution_swap(self):
-        """ Test correct differences when swapping. """
+        """
+        Test correct differences when swapping.
+        """
         # Test original occupations
         self._test_swap_changes("Original occupations")
 
@@ -110,7 +113,7 @@ class TestCECalculatorBinary(unittest.TestCase):
         self._test_swap_changes("segregated")
 
     def _get_energy_diffs_local_and_total(self, indices):
-        """ Get energy diffs using local and total"""
+        """ Get energy diffs using local and total. """
 
         # Original occupations
         original_occupations = self.atoms.numbers.copy()
@@ -149,7 +152,9 @@ class TestCECalculatorBinary(unittest.TestCase):
         return local_diff, total_diff
 
     def test_calculate_local_contribution(self):
-        """ Test calculate local contribution. """
+        """
+        Test calculate local contribution.
+        """
         indices = [3, 5]
         local_contribution = self.calculator.calculate_local_contribution(
             local_indices=indices, occupations=self.atoms.get_atomic_numbers())
@@ -193,7 +198,9 @@ class TestCECalculatorBinary(unittest.TestCase):
         self.assertAlmostEqual(total_diff, local_diff)
 
     def test_get_local_cluster_vector(self):
-        """ Test the get local clustervector method. """
+        """
+        Test the get local clustervector method.
+        """
 
         cpp_calc = _ClusterExpansionCalculator(
             self.cs, Structure.from_atoms(self.atoms))
@@ -258,8 +265,9 @@ class TestCECalculatorBinaryHCP(unittest.TestCase):
                 self.assertAlmostEqual(total_diff, local_diff, msg=msg)
 
     def test_local_contribution_flip(self):
-        """ Test potential differences when flipping."""
-
+        """
+        Test potential differences when flipping.
+        """
         # Test original occupations
         self._test_flip_changes("original occupations")
 
@@ -281,7 +289,8 @@ class TestCECalculatorBinaryHCP(unittest.TestCase):
         self._test_flip_changes("Segregated")
 
     def test_local_contribution_swap(self):
-        """ test correct differences when swapping. """
+        """
+        Test correct differences when swapping. """
         # Test original occupations
         self._test_swap_changes("Original occupations")
 
@@ -391,7 +400,9 @@ class TestCECalculatorBinaryBCC(unittest.TestCase):
                 self.assertAlmostEqual(total_diff, local_diff, msg=msg)
 
     def test_local_contribution_flip(self):
-        """ Test potential differences when flipping."""
+        """
+        Test potential differences when flipping.
+        """
 
         # Test original occupations
         self._test_flip_changes("original occupations")
@@ -414,7 +425,9 @@ class TestCECalculatorBinaryBCC(unittest.TestCase):
         self._test_flip_changes("Segregated")
 
     def test_local_contribution_swap(self):
-        """ test correct differences when swapping. """
+        """
+        Test correct differences when swapping.
+        """
         # Test original occupations
         self._test_swap_changes("Original occupations")
 
@@ -512,7 +525,7 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
             self.assertAlmostEqual(total_diff, local_diff, msg=msg)
 
     def _test_swap_changes(self, msg):
-        """ Test differences when flipping """
+        """ Test differences when swapping """
         for i in range(len(self.atoms)):
             for j in range(len(self.atoms)):
                 if j <= i:
@@ -524,7 +537,9 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
                 self.assertAlmostEqual(total_diff, local_diff, msg=msg1)
 
     def test_local_contribution_flip(self):
-        """ Test potential differences when flipping."""
+        """
+        Test potential differences when flipping.
+        """
 
         # Test original occupations
         self._test_flip_changes("original occupations")
@@ -547,7 +562,9 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
         self._test_flip_changes("Segregated")
 
     def test_local_contribution_swap(self):
-        """ test correct differences when swapping. """
+        """
+        Test correct differences when swapping.
+        """
         # Test original occupations
         self._test_swap_changes("Original occupations")
 
@@ -644,7 +661,7 @@ class TestCECalculatorTernaryHCP(unittest.TestCase):
             self.assertAlmostEqual(total_diff, local_diff, msg=msg)
 
     def _test_swap_changes(self, msg):
-        """ Test differences when flipping """
+        """ Test differences when swapping """
         for i in range(len(self.atoms)):
             for j in range(len(self.atoms)):
                 if j <= i:
@@ -656,8 +673,9 @@ class TestCECalculatorTernaryHCP(unittest.TestCase):
                 self.assertAlmostEqual(total_diff, local_diff, msg=msg1)
 
     def test_local_contribution_flip(self):
-        """ Test potential differences when flipping."""
-
+        """
+        Test potential differences when flipping.
+        """
         # Test original occupations
         self._test_flip_changes("original occupations")
 
@@ -679,7 +697,9 @@ class TestCECalculatorTernaryHCP(unittest.TestCase):
         self._test_flip_changes("Segregated")
 
     def test_local_contribution_swap(self):
-        """ Test correct differences when swapping. """
+        """
+        Test correct differences when swapping.
+        """
         # Test original occupations
         self._test_swap_changes("Original occupations")
 
