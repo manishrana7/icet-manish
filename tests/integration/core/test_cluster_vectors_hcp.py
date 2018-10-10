@@ -3,7 +3,9 @@ This script checks the computation of cluster vectors for three HCP-based
 structures.
 """
 
+import sys
 import numpy as np
+from io import StringIO
 from ase.build import bulk, make_supercell
 from icet import ClusterSpace
 
@@ -11,6 +13,13 @@ cutoffs = [8.0, 7.0]
 chemical_symbols = ['Re', 'Ti']
 prototype = bulk('Re')
 cs = ClusterSpace(prototype, cutoffs, chemical_symbols)
+
+# testing info functionality
+with StringIO() as capturedOutput:
+    sys.stdout = capturedOutput
+    cs.print_overview()
+    sys.stdout = sys.__stdout__
+    assert 'Cluster Space' in capturedOutput.getvalue()
 
 # structure #1
 cv = cs.get_cluster_vector(prototype.copy())
