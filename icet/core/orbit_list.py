@@ -4,13 +4,12 @@ import numpy as np
 
 from _icet import _OrbitList
 from ase import Atoms
+from icet.core.local_orbit_list_generator import LocalOrbitListGenerator
+from icet.core.neighbor_list import get_neighbor_lists
+from icet.core.permutation_matrix import (_get_lattice_site_permutation_matrix,
+                                          permutation_matrix_from_atoms)
+from icet.core.structure import Structure
 from icet.io.logging import logger
-
-from .local_orbit_list_generator import LocalOrbitListGenerator
-from .neighbor_list import get_neighbor_lists
-from .permutation_matrix import (_get_lattice_site_permutation_matrix,
-                                 permutation_matrix_from_atoms)
-from .structure import Structure
 
 logger = logger.getChild('orbit_list')
 
@@ -20,19 +19,16 @@ class OrbitList(_OrbitList):
     The orbit list object has an internal list of orbits.
 
     An orbit has a list of equivalent sites with the restriction
-    that at least one site is in the cell of the
-    primitive structure.
+    that at least one site is in the cell of the primitive structure.
 
     parameters
     ----------
     atoms : ASE Atoms object
-            This atoms object will be used
-            to construct a primitive structure
-            on which all the lattice sites in the orbits
+            This atoms object will be used to construct a primitive
+            structure on which all the lattice sites in the orbits
             are based on.
     cutoffs : list of float
-              cutoffs[i] is the cutoff for
-              orbits with order i+2.
+              cutoffs[i] is the cutoff for orbits with order i+2.
     """
 
     def __init__(self, atoms, cutoffs):
@@ -56,9 +52,8 @@ class OrbitList(_OrbitList):
                                                    permutation_matrix,
                                                    prune=True)
 
-        msg = ['Transformation of permutation matrix to lattice neighbor']
-        msg += ['format completed.']
-        logger.info(' '.join(msg))
+        logger.info('Transformation of permutation matrix to lattice neighbor'
+                    'format completed.')
 
         _OrbitList.__init__(self, prim_structure,
                             pm_lattice_sites, neighbor_lists)
@@ -68,9 +63,8 @@ class OrbitList(_OrbitList):
     @property
     def primitive_structure(self):
         """
-        Returns the primitive structure to
-        which the lattice sites in the
-        orbits are referenced to.
+        Returns the primitive structure to which the lattice sites in
+        the orbits are referenced to.
         """
         return self._primitive_structure.copy()
 
@@ -114,8 +108,8 @@ class OrbitList(_OrbitList):
         Parameters
         ----------
         allowed_species
-            the number of allowed species on each site in
-            the primitive structure
+            the number of allowed species on each site in the primitive
+            structure
         """
         prim_structure = self.get_primitive_structure()
         print(allowed_species)
