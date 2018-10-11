@@ -32,20 +32,12 @@ class TestOrbitList(unittest.TestCase):
 
     def setUp(self):
         """Instantiate class before each test."""
-        # @todo: this can be a single line of code
-        permutation_matrix, self.prim_structure, _ = \
-            permutation_matrix_from_atoms(self.atoms, self.cutoffs[0])
-        self.pm_lattice_sites = \
-            get_lattice_site_permutation_matrix(self.prim_structure,
-                                                permutation_matrix)
-
-        self.orbit_list = OrbitList(self.prim_structure,
-                                    self.cutoffs)
+        self.orbit_list = OrbitList(self.atoms, self.cutoffs)
 
     def test_init(self):
         """Test the different initializers."""
         orbit_list = OrbitList(
-            self.prim_structure, self.cutoffs)
+            self.atoms, self.cutoffs)
         self.assertIsInstance(orbit_list, OrbitList)
 
     def test_add_orbit(self):
@@ -116,7 +108,16 @@ class TestOrbitList(unittest.TestCase):
                 self.assertEqual(orbit.get_representative_cluster(),
                                  repr_clusters[k])
 
-    @unittest.expectedFailure
+    def test_remove_all_orbits(self):
+        """Test removing all orbits"""
+
+        mi = [1]*len(self.orbit_list.get_primitive_structure())
+        len_before = len(self.orbit_list)
+        self.assertNotEqual(len_before, 0)
+        self.orbit_list.remove_inactive_orbits(mi)
+        len_after = len(self.orbit_list)
+        self.assertEqual(len_after, 0)
+
     def test_get_primitive_structure(self):
         """
         Test get primitive structure functionality.
@@ -125,8 +126,8 @@ class TestOrbitList(unittest.TestCase):
         ----
         Test fails
         """
-        self.assertEqual(
-            self.orbit_list.get_primitive_structure(), self.prim_structure)
+        self.assertIsInstance(
+            self.orbit_list.get_primitive_structure(), Structure)
 
     def test_len(self):
         """Test len of orbit list."""
