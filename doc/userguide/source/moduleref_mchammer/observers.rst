@@ -6,16 +6,14 @@
 Observers
 =========
 
-
 .. index::
-   single: Function reference; ShortRangeOrder
-   single: Class reference; ShortRangeOrder
-   single: Monte Carlo; Short-range order observer
+   single: Class reference; ClusterExpansionObserver
+   single: Monte Carlo; Cluster expansion observer
 
-ShortRangeOrder
----------------
+ClusterExpansionObserver
+------------------------
 
-.. autoclass:: ShortRangeOrder
+.. autoclass:: ClusterExpansionObserver
    :members:
    :undoc-members:
    :inherited-members:

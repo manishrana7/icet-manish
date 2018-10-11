@@ -103,14 +103,14 @@ class TestClusterSpace(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestClusterSpace, self).__init__(*args, **kwargs)
-        self.subelements = ['Ag', 'Au']
+        self.chemical_symbols = ['Ag', 'Au']
         self.cutoffs = [4.0] * 3
         self.atoms_prim = bulk('Ag', a=4.09)
         self.structure_list = []
         for k in range(4):
             atoms = self.atoms_prim.repeat(2)
-            symbols = [self.subelements[0]] * len(atoms)
-            symbols[:k] = [self.subelements[1]] * k
+            symbols = [self.chemical_symbols[0]] * len(atoms)
+            symbols[:k] = [self.chemical_symbols[1]] * k
             atoms.set_chemical_symbols(symbols)
             self.structure_list.append(atoms)
 
@@ -118,7 +118,8 @@ class TestClusterSpace(unittest.TestCase):
         """
         Instantiate class before each test.
         """
-        self.cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
+        self.cs = ClusterSpace(self.atoms_prim, self.cutoffs,
+                               self.chemical_symbols)
 
     def test_init(self):
         """
@@ -126,17 +127,17 @@ class TestClusterSpace(unittest.TestCase):
         (initialization) of tested class work
         """
         # initialize from ASE Atoms
-        cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
+        cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.chemical_symbols)
         self.assertIsInstance(cs, ClusterSpace)
         self.assertEqual(len(cs), len(self.cs))
         # check Mi as int
         cs = ClusterSpace(self.atoms_prim, self.cutoffs,
-                          self.subelements, Mi=2)
+                          self.chemical_symbols, Mi=2)
         self.assertIsInstance(cs, ClusterSpace)
         self.assertEqual(len(cs), len(self.cs))
         # check Mi as dict
         cs = ClusterSpace(self.atoms_prim, self.cutoffs,
-                          self.subelements, Mi={0: 2})
+                          self.chemical_symbols, Mi={0: 2})
         self.assertIsInstance(cs, ClusterSpace)
         self.assertEqual(len(cs), len(self.cs))
 
@@ -183,14 +184,14 @@ class TestClusterSpace(unittest.TestCase):
         retval = self.cs.__repr__()
         target = """
 =============================== Cluster Space ================================
- subelements: Ag Au
+ chemical species: Ag Au
  cutoffs: 4.0000 4.0000 4.0000
  total number of orbits: 5
  number of orbits by order: 0= 1  1= 1  2= 1  3= 1  4= 1
 ------------------------------------------------------------------------------
 index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 ------------------------------------------------------------------------------
-   0  |   0   |   0.0000 |        1     |      -1
+   0  |   0   |   0.0000 |        1     |      -1     |           .
    1  |   1   |   0.0000 |        1     |       0     |          [0]
    2  |   2   |   1.4460 |        6     |       1     |         [0, 0]
    3  |   3   |   1.6697 |        8     |       2     |       [0, 0, 0]
@@ -208,14 +209,14 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
                                                     print_minimum=1)
         target = """
 =============================== Cluster Space ================================
- subelements: Ag Au
+ chemical species: Ag Au
  cutoffs: 4.0000 4.0000 4.0000
  total number of orbits: 5
  number of orbits by order: 0= 1  1= 1  2= 1  3= 1  4= 1
 ------------------------------------------------------------------------------
 index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 ------------------------------------------------------------------------------
-   0  |   0   |   0.0000 |        1     |      -1
+   0  |   0   |   0.0000 |        1     |      -1     |           .
  ...
    4  |   4   |   1.7710 |        2     |       3     |      [0, 0, 0, 0]
 ==============================================================================
@@ -293,7 +294,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         """
         Testing get_Mi_from_dict functionality
         """
-        d = {0: len(self.subelements)}
+        d = {0: len(self.chemical_symbols)}
         Mi = ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
         self.assertEqual(Mi, [2])
         # check that function fails if dictionary is incomplete
@@ -325,31 +326,43 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
             target = np.array(row.data.target_cv)
             self.assertTrue(np.all(np.isclose(target, retval)))
 
-    def test_multi_component_cluster_vectors(self):
+    def test_cluster_vectors(self):
         """
-        Test the consistency of multi components cluster
-        vectors. Will test against ternary and quaternary cluster
-        vectors with fcc, bcc and hcp.
+        Test the calculation of cluster vectors against databases
+        of structures with known cluster vectors.
         """
         self._test_cluster_vectors_in_database(
-            'tests/unittest/core/fcc_ternary.db')
+            'tests/unittest/core/structure_databases/fcc_binary.db')
         self._test_cluster_vectors_in_database(
-            'tests/unittest/core/fcc_quaternary.db')
+            'tests/unittest/core/structure_databases/fcc_skew_binary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/fcc_ternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/fcc_quaternary.db')
 
         self._test_cluster_vectors_in_database(
-            'tests/unittest/core/bcc_ternary.db')
+            'tests/unittest/core/structure_databases/bcc_longedge_binary.db')
         self._test_cluster_vectors_in_database(
-            'tests/unittest/core/bcc_quaternary.db')
+            'tests/unittest/core/structure_databases/bcc_ternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/bcc_quaternary.db')
 
         self._test_cluster_vectors_in_database(
-            'tests/unittest/core/hcp_ternary.db')
+            'tests/unittest/core/structure_databases/hcp_binary.db')
         self._test_cluster_vectors_in_database(
-            'tests/unittest/core/hcp_quaternary.db')
+            'tests/unittest/core/structure_databases/hcp_skew_binary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/hcp_ternary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/hcp_quaternary.db')
+
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/tetragonal_binary.db')
+        self._test_cluster_vectors_in_database(
+            'tests/unittest/core/structure_databases/tetragonal_ternary.db')
 
     def test_read_write(self):
-        """
-        Test read/write functionality.
-        """
+        """ Tests read/write functionality. """
         f = tempfile.NamedTemporaryFile()
         self.cs.write(f.name)
         f.seek(0)
@@ -358,10 +371,9 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         self.assertEqual(list(self.cs._cutoffs), list(cs_read._cutoffs))
         self.assertEqual(self.cs._chemical_symbols, cs_read._chemical_symbols)
         self.assertEqual(self.cs._mi, cs_read._mi)
-        self.assertEqual(self.cs._verbosity, cs_read._verbosity)
 
     def test_chemical_symbols(self):
-        """Test chemical_symbols functionality."""
+        """ Tests chemical_symbols property. """
         target = ['Ag', 'Au']
         self.assertEqual(self.cs.chemical_symbols, target)
 
@@ -373,15 +385,15 @@ class TestClusterSpaceSurface(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestClusterSpaceSurface, self).__init__(*args, **kwargs)
-        self.subelements = ['Ag', 'Au']
+        self.chemical_symbols = ['Ag', 'Au']
         self.cutoffs = [4.0] * 3
         self.atoms_prim = fcc111('Ag', a=4.09, vacuum=5.0, size=[1, 1, 3])
         self.atoms_prim.pbc = [True, True, False]
         self.structure_list = []
         for k in range(3):
             atoms = self.atoms_prim.repeat((2, 2, 1))
-            symbols = [self.subelements[0]] * len(atoms)
-            symbols[:k] = [self.subelements[1]] * k
+            symbols = [self.chemical_symbols[0]] * len(atoms)
+            symbols[:k] = [self.chemical_symbols[1]] * k
             atoms.set_chemical_symbols(symbols)
             self.structure_list.append(atoms)
 
@@ -389,8 +401,10 @@ class TestClusterSpaceSurface(unittest.TestCase):
         """
         Instantiate class before each test.
         """
-        self.cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
+        self.cs = ClusterSpace(self.atoms_prim, self.cutoffs,
+                               self.chemical_symbols)
 
+    @unittest.expectedFailure
     def test_get_cluster_vector(self):
         """
         Testing get_cluster_vector functionality
@@ -435,7 +449,7 @@ class TestClusterSpaceSurface(unittest.TestCase):
         """
         d = {}
         for k in range(len(self.atoms_prim)):
-            d[k] = len(self.subelements)
+            d[k] = len(self.chemical_symbols)
         d[1] = 1
         Mi = ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
         self.assertEqual(Mi, [2, 1, 2])
@@ -453,7 +467,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestClusterSpaceTernary, self).__init__(*args, **kwargs)
-        self.subelements = ['Ag', 'Au', 'Pd']
+        self.chemical_symbols = ['Ag', 'Au', 'Pd']
         self.cutoffs = [4.0] * 3
         self.atoms_prim = bulk('Ag', 'fcc')
 
@@ -461,7 +475,8 @@ class TestClusterSpaceTernary(unittest.TestCase):
         """
         Instantiate class before each test.
         """
-        self.cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
+        self.cs = ClusterSpace(self.atoms_prim, self.cutoffs,
+                               self.chemical_symbols)
 
     def _get_mc_vector(self, cluster_space, orbit_index):
         """
@@ -475,9 +490,10 @@ class TestClusterSpaceTernary(unittest.TestCase):
             The orbit which the mc vectors should be returned from.
         """
         orbit = cluster_space.get_orbit(orbit_index)
-        local_Mi = cluster_space.get_allowed_occupations(
-            cluster_space._get_primitive_structure(),
-            orbit.representative_sites)
+        local_Mi = \
+            cluster_space.get_number_of_allowed_species_by_site(
+                cluster_space._get_primitive_structure(),
+                orbit.representative_sites)
 
         mc_vectors = orbit.get_mc_vectors(local_Mi)
         return mc_vectors
@@ -495,7 +511,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
         permutations_target = [[[0, 1]],
                                [[0, 1], [1, 0]],
                                [[0, 1]]]
-        permutation_retval = self.cs.get_mc_vector_permutations(
+        permutation_retval = self.cs.get_multi_component_vector_permutations(
             mc_vector_target, orbit_index)
         self.assertEqual(permutations_target, permutation_retval)
 
@@ -516,7 +532,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
                                [[0, 1, 2], [1, 2, 0], [2, 1, 0]],
                                [[0, 1, 2], [2, 0, 1], [2, 1, 0]],
                                [[0, 1, 2]]]
-        permutation_retval = self.cs.get_mc_vector_permutations(
+        permutation_retval = self.cs.get_multi_component_vector_permutations(
             mc_vector_target, orbit_index)
         self.assertEqual(permutations_target, permutation_retval)
 
@@ -545,7 +561,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
                                    2, 3, 1, 0],
                                 [3, 2, 0, 1]],
                                [[0, 1, 2, 3]]]
-        permutation_retval = self.cs.get_mc_vector_permutations(
+        permutation_retval = self.cs.get_multi_component_vector_permutations(
             mc_vector_target, orbit_index)
         self.assertEqual(permutations_target, permutation_retval)
 

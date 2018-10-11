@@ -55,8 +55,15 @@ class TestBaseCalculator(unittest.TestCase):
         self.assertEqual(self.atoms[1].symbol, 'H')
         self.assertEqual(self.atoms[3].symbol, 'He')
 
-        with self.assertRaises(Exception):
+        # test that correct exceptions are raised
+        with self.assertRaises(TypeError) as context:
+            self.calculator.update_occupations(0, 0)
+        self.assertTrue('must be of type list'
+                        in str(context.exception))
+        with self.assertRaises(ValueError) as context:
             self.calculator.update_occupations([0, 1], [0, 1, 2, 3])
+        self.assertTrue('must have the same length'
+                        in str(context.exception))
 
 
 if __name__ == '__main__':

@@ -21,6 +21,7 @@ SET(SourceFiles
   ClusterSpace.cpp
   Symmetry.cpp
   Geometry.cpp
+  ClusterExpansionCalculator.cpp
 )
 
 PYBIND11_ADD_MODULE(_icet ${SourceFiles})

@@ -12,6 +12,7 @@ from icet.tools.geometry import find_lattice_site_by_position
 from icet.tools.geometry import get_position_from_lattice_site
 from icet.tools.geometry import fractional_to_cartesian
 from icet.tools.geometry import get_permutation
+from icet.tools.geometry import ase_atoms_to_spglib_cell
 
 
 class TestGeometry(unittest.TestCase):
@@ -208,6 +209,23 @@ class TestGeometry(unittest.TestCase):
         # Error on permutation list going out of range
         with self.assertRaises(IndexError):
             get_permutation(value, [0, 1, 3])
+
+    def test_ase_atoms_to_spglib_cell(self):
+        """
+        Test that function returns the right tuple from the provided ASE
+        Atoms object.
+        """
+        atoms = bulk('Al').repeat(3)
+        atoms[1].symbol = 'Ag'
+
+        cell, positions, species \
+            = ase_atoms_to_spglib_cell(self.atoms)
+
+        self.assertTrue((cell == self.atoms.get_cell()).all())
+        self.assertTrue(
+            (positions == self.atoms.get_scaled_positions()).all())
+        self.assertTrue(
+            (species == self.atoms.get_atomic_numbers()).all())
 
 
 if __name__ == '__main__':

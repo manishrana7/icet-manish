@@ -1,22 +1,23 @@
 #include "Geometry.hpp"
 
-namespace icet {
+namespace icet
+{
 
     /**
-    @details The radius is defined as the maximum average distance to the center of mass of the cluster.
+     @details This function computes the geometrical radius of a cluster that is defined in terms of lattice sites.
     @param latticeSites a list of lattice sites
-    @param structure atomic configuration, which allows transforming LatticeSite information to a Cartesian coordinate
+    @param structure atomic configuration used to convert information in latticeSites to Cartesian coordinates
     */
-    double getClusterRadius(const std::vector<LatticeSite> &latticeSites, const Structure &structure)
+    double getGeometricalRadius(const std::vector<LatticeSite> &latticeSites, const Structure &structure)
     {
-        // compute the center of the cluster of lattice sites
+        // Compute the center of the cluster.
         Vector3d centerPosition = {0.0, 0.0, 0.0};
         for(const auto &latnbr : latticeSites)
         {
             centerPosition += structure.getPosition(latnbr) / latticeSites.size();
         }
 
-        // compute the average distance to the center
+        // Compute the average distance of the points in the cluster to its center.
         double avgDistanceToCenter = 0.0;
         for(const auto &latnbr : latticeSites)
         {

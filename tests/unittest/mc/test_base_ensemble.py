@@ -4,6 +4,7 @@ import os
 import tempfile
 import numpy as np
 from ase.build import bulk
+from pandas.testing import assert_frame_equal
 
 from icet import ClusterExpansion, ClusterSpace
 from mchammer.calculators.cluster_expansion_calculator import \
@@ -43,14 +44,16 @@ class ConcreteEnsemble(BaseEnsemble):
 
     def __init__(self, calculator, atoms=None, name=None, data_container=None,
                  data_container_write_period=np.inf, random_seed=None,
-                 ensemble_data_write_interval=None):
+                 ensemble_data_write_interval=None,
+                 trajectory_write_interval=None):
         super().__init__(
             calculator, atoms=atoms, name=name, data_container=data_container,
             data_container_write_period=data_container_write_period,
             random_seed=random_seed,
-            ensemble_data_write_interval=ensemble_data_write_interval)
+            ensemble_data_write_interval=ensemble_data_write_interval,
+            trajectory_write_interval=trajectory_write_interval)
 
-    def do_trial_step(self):
+    def _do_trial_step(self):
         pass
 
 
@@ -60,9 +63,9 @@ class TestEnsemble(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEnsemble, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk("Al").repeat(3)
+        self.atoms = bulk('Al').repeat(3)
         cutoffs = [5, 5, 4]
-        elements = ["Al", "Ga"]
+        elements = ['Al', 'Ga']
         self.cs = ClusterSpace(self.atoms, cutoffs, elements)
         parameters = np.array([1.2 for _ in range(len(self.cs))])
         self.ce = ClusterExpansion(self.cs, parameters)
@@ -81,7 +84,7 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble.attach_observer(observer)
 
     def test_init(self):
-        """Test exceptions are raised in initialisation."""
+        """Test exceptions are raised in initialization."""
         # without atoms parameters
         with self.assertRaises(Exception) as context:
             ConcreteEnsemble(calculator=self.calculator, atoms=None,
@@ -101,6 +104,10 @@ class TestEnsemble(unittest.TestCase):
     def test_property_name(self):
         """Test name property."""
         self.assertEqual('test-ensemble', self.ensemble.name)
+
+    def test_property_atoms(self):
+        """Test atoms property."""
+        self.assertEqual(self.atoms, self.ensemble.atoms)
 
     def test_property_random_seed(self):
         """Test random seed property."""
@@ -129,9 +136,9 @@ class TestEnsemble(unittest.TestCase):
         pass
 
     def test_get_next_random_number(self):
-        """Test the get_next_random_number method."""
+        """Test the get__next_random_number method."""
         self.assertAlmostEqual(
-            self.ensemble.next_random_number(), 0.6394267984578837)
+            self.ensemble._next_random_number(), 0.6394267984578837)
 
     def test_run(self):
         """Test the run method."""
@@ -141,7 +148,7 @@ class TestEnsemble(unittest.TestCase):
         self.assertEqual(self.ensemble.step, n_iters)
         dc_data = self.ensemble.data_container.get_data(tags=['Parakeet2'])
 
-        number_of_observations = len([x for x in dc_data[0] if x is not None])
+        number_of_observations = len([x for x in dc_data if x is not None])
         # plus one since we also count step 0
         self.assertEqual(
             number_of_observations,
@@ -170,7 +177,7 @@ class TestEnsemble(unittest.TestCase):
             self.assertEqual(self.ensemble.step, total_iters)
             dc_data = self.ensemble.data_container.get_data(tags=['Parakeet2'])
             number_of_observations = len(
-                [x for x in dc_data[0] if x is not None])
+                [x for x in dc_data if x is not None])
             # plus one since we also count step 0
             self.assertEqual(
                 number_of_observations,
@@ -203,8 +210,9 @@ class TestEnsemble(unittest.TestCase):
                                     atoms=self.atoms,
                                     name='this-ensemble',
                                     data_container='my-datacontainer.dc',
-                                    data_container_write_period=1e-4,
-                                    ensemble_data_write_interval=np.inf)
+                                    data_container_write_period=1e-2,
+                                    ensemble_data_write_interval=14,
+                                    trajectory_write_interval=56)
 
         # attach observer
         observer = ParakeetObserver(interval=14, tag='Parakeet2')
@@ -212,17 +220,16 @@ class TestEnsemble(unittest.TestCase):
 
         # back-up data while run ensemble and then read the file
         try:
-            n_iters = 364
+            n_iters = 182
             ensemble.run(n_iters)
             dc_read = DataContainer.read('my-datacontainer.dc')
-
         finally:
             os.remove('my-datacontainer.dc')
 
         # check data container
         dc_data = dc_read.get_data(tags=['Parakeet2'])
         self.assertEqual(
-            len(dc_data[0]),
+            len(dc_data),
             n_iters // observer.interval + 1)
 
         # write data container to tempfile
@@ -233,27 +240,35 @@ class TestEnsemble(unittest.TestCase):
         ensemble_reloaded = \
             ConcreteEnsemble(calculator=self.calculator,
                              atoms=self.atoms,
-                             data_container=temp_container_file.name)
+                             data_container=temp_container_file.name,
+                             ensemble_data_write_interval=14,
+                             trajectory_write_interval=56)
 
-        # check loaded data container of new ensemble
-        data_dc_reloaded = \
-            ensemble_reloaded.data_container.get_data(tags=['Parakeet2'])
-        data_dc = \
-            ensemble.data_container.get_data(tags=['Parakeet2'])
-        self.assertEqual(len(data_dc[0]), len(data_dc_reloaded[0]))
-        for i in range(len(data_dc[0])):
-            np.testing.assert_approx_equal(
-                data_dc_reloaded[0][i], data_dc[0][i], significant=20)
+        assert_frame_equal(ensemble.data_container.data,
+                           ensemble_reloaded.data_container.data,
+                           check_dtype=False)
+
+        # run old and new ensemble and check both data containers are equal
+        try:
+            n_iters = 50
+            ensemble.run(n_iters)
+        finally:
+            os.remove('my-datacontainer.dc')
+
+        ensemble_reloaded.attach_observer(observer)
+        ensemble_reloaded.run(n_iters)
+
+        assert_frame_equal(ensemble.data_container.data,
+                           ensemble_reloaded.data_container.data,
+                           check_dtype=False)
+
+        self.assertEqual(
+            ensemble_reloaded.data_container.last_state['last_step'],
+            182 + 50)
 
     def test_internal_run(self):
         """Test the _run method."""
         pass
-
-    def test_property_structure(self):
-        """Test the get current structure method."""
-        # need calculator for structure
-        pass
-        # self.assertEqual(self.ensemble.structure, self.atoms)
 
     def test_attach_observer(self):
         """Test the attach method."""
@@ -273,6 +288,12 @@ class TestEnsemble(unittest.TestCase):
         self.assertEqual(self.ensemble.observers['test_Parakeet'].interval, 15)
         self.assertEqual(
             self.ensemble.observers['test_Parakeet'].tag, 'test_Parakeet')
+
+        # check that correct exceptions are raised
+        with self.assertRaises(TypeError) as context:
+            self.ensemble.attach_observer('xyz')
+        self.assertTrue('observer has the wrong type'
+                        in str(context.exception))
 
     def test_property_data_container(self):
         """Test the data container property."""
@@ -304,8 +325,8 @@ class TestEnsemble(unittest.TestCase):
         indices = [0, 1, 2, 3, 4]
         elements = [13, 31, 13, 31, 13]
 
-        prop_diff = self.ensemble.get_property_change(indices, elements)
-        self.assertAlmostEqual(prop_diff, 2.0740740740740735)
+        prop_diff = self.ensemble._get_property_change(indices, elements)
+        self.assertAlmostEqual(prop_diff, 56)
 
         # Test that the method doesn't change the occupation.
         self.assertListEqual(list(initial_occupations),
@@ -314,15 +335,14 @@ class TestEnsemble(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             self.ensemble.update_occupations(indices, elements+[31])
 
-        self.assertTrue(
-            "List of sites and list of elements are not the same size."
-            in str(context.exception))
+        self.assertTrue('sites and species must have the same length.'
+                        in str(context.exception))
 
     def test_get_ensemble_data(self):
         """Test the get ensemble data method."""
         data = self.ensemble.get_ensemble_data()
 
-        self.assertIn('energy', data.keys())
+        self.assertIn('potential', data.keys())
 
 
 if __name__ == '__main__':

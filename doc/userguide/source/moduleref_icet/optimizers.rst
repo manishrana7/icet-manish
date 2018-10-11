@@ -1,3 +1,5 @@
+.. _optimizers:
+
 .. index::
    single: Function reference; optimizers
    single: Class reference; optimizers

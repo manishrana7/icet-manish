@@ -3,6 +3,8 @@
 
 .. module:: mchammer.ensembles
 
+.. _ensembles:
+
 Ensembles
 =========
 
@@ -19,6 +21,7 @@ CanonicalEnsemble
    :undoc-members:
    :inherited-members:
 
+.. _sgc:
 
 .. index::
    single: Class reference; SGCEnsemble
@@ -28,19 +31,6 @@ SemiGrandCanonicalEnsemble
 --------------------------
 
 .. autoclass:: SemiGrandCanonicalEnsemble
-   :members:
-   :undoc-members:
-   :inherited-members:
-
-
-.. index::
-   single: Class reference; VCSGCEnsemble
-   single: Monte Carlo; Variance constrained semi-grand canonical ensemble
-
-VCSGC
------
-
-.. autoclass:: VCSGCEnsemble
    :members:
    :undoc-members:
    :inherited-members:

@@ -35,6 +35,9 @@ class Structure
     /// Return the position of a site in Cartesian coordinates.
     Vector3d getPosition(const LatticeSite &) const;
 
+    /// Return the position of a site in Cartesian coordinates.
+    Vector3d getPositionByIndex(const size_t &index) const;
+
     /// Returns atomic number of site.
     int getAtomicNumber(const unsigned int) const;
 
@@ -75,16 +78,10 @@ class Structure
     std::vector<int> getAtomicNumbers() const { return _atomicNumbers; }
 
     /// Set atomic numbers via chemical symbols.
-    void setChemicalSymbols(const std::vector<std::string> &chemicalSymbols)
-    {
-        setAtomicNumbers(convertChemicalSymbolsToAtomicNumbers(chemicalSymbols));
-    }
+    void setChemicalSymbols(const std::vector<std::string> &chemicalSymbols) { setAtomicNumbers(convertChemicalSymbolsToAtomicNumbers(chemicalSymbols)); }
 
     /// Returns chemical symbols.
-    std::vector<std::string> getChemicalSymbols() const
-    {
-        return convertAtomicNumbersToChemicalSymbols(_atomicNumbers);
-    }
+    std::vector<std::string> getChemicalSymbols() const { return convertAtomicNumbersToChemicalSymbols(_atomicNumbers); }
 
     /// Returns periodic boundary condition along direction k.
     bool hasPBC(const int k) const { return _pbc[k]; }
@@ -102,13 +99,13 @@ class Structure
     Eigen::Matrix<double, 3, 3> getCell() const { return _cell; }
 
     /// Set allowed components for each site by vector.
-    void setNumberOfAllowedComponents(const std::vector<int> &);
+    void setNumberOfAllowedSpecies(const std::vector<int> &);
 
     /// Set allowed components for each site by scalar.
-    void setNumberOfAllowedComponents(const int);
+    void setNumberOfAllowedSpecies(const int);
 
     /// Returns number of allowed components on each site.
-    int getNumberOfAllowedComponents(const unsigned int) const;
+    int getNumberOfAllowedSpeciesBySite(const unsigned int) const;
 
     /// Set tolerance applied when comparing positions.
     void setTolerance(double tolerance) { _tolerance = tolerance; }
@@ -132,19 +129,6 @@ class Structure
         return round(val * 1.0 / rounding_tolerance) / (1.0 / rounding_tolerance);
     }
 
-    /// Round to nearest integer toward zero.
-    /// @todo move to a more general location.
-    int nearestIntegerTowardZero(const double value) const
-    {
-        if (value > 0)
-        {
-            return int(floor(value));
-        }
-        else
-        {
-            return int(floor(value));
-        }
-    }
 
   private:
 
@@ -164,7 +148,7 @@ class Structure
     std::vector<int> _uniqueSites;
 
     /// List of the number of allowed components on each site.
-    std::vector<int> _numbersOfAllowedComponents;
+    std::vector<int> _numbersOfAllowedSpecies;
 
     /// tolerance used for rounding positions.
     double _tolerance;

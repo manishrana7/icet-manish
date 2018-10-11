@@ -1,154 +1,118 @@
 #pragma once
-#include <pybind11/pybind11.h>
-#include <iostream>
-#include <pybind11/eigen.h>
-#include <Eigen/Dense>
-#include <vector>
-#include <utility>
-#include <string>
-#include <math.h>
+
 #include "Structure.hpp"
 #include "OrbitList.hpp"
 #include "LocalOrbitListGenerator.hpp"
 #include "ClusterCounts.hpp"
 #include "PeriodicTable.hpp"
-using namespace Eigen;
+#include "VectorHash.hpp"
+
+//namespace icet {
 
 /**
-This is the cluster space object.
-
-It will have the definition of the cluster space a cluster expansion is based on.
-
+@brief This class handles the cluster space.
+@details It provides functionality for setting up a cluster space, calculating cluster vectors as well as retrieving various types of associated information.
 */
 
 class ClusterSpace
 {
   public:
-    ClusterSpace(std::vector<int> Mi, std::vector<std::string> elements, const OrbitList primOrbitList)
-    {
-        _Mi = Mi;
-        _primitive_orbit_list = primOrbitList;
-        _primitive_structure = primOrbitList.getPrimitiveStructure();
-        _primitive_structure.setNumberOfAllowedComponents(_Mi);
-        initElementMap(elements);
-        _isClusterSpaceInitialized = false;
-    };
+    /// Constructor.
+    ClusterSpace(){};
+    ClusterSpace(std::vector<int>, std::vector<std::string>, const OrbitList);
 
-    void initElementMap(std::vector<std::string> elements)
-    {
-        // std::sort(elements.begin(), elements.end());
-        std::vector<int> intElements;
-        for (const auto el : elements)
-        {
-            intElements.push_back(PeriodicTable::strInt[el]);
-        }
-        std::sort(intElements.begin(), intElements.end());
+    /// Returns the cluster vector corresponding to the input structure.
+    std::vector<double> getClusterVector(const Structure &) const;
 
-        for (size_t i = 0; i < elements.size(); i++)
-        {
-            _elementRepresentation[intElements[i]] = i;
-        }
-
-        _elements = intElements;
-    }
-
-    ///Generate the cluster vector on the input structure
-    std::vector<double> generateClusterVector(const Structure &) const;
-
-    ///Return the full cluster product of entire cluster (elements vector). Assuming all sites have same Mi
-    double getClusterProduct(const std::vector<int> &mcVector, const std::vector<int> &Mi, const std::vector<int> &elements) const;
-
-    ///setup  _clusterSpaceInfo
-    void setupClusterSpaceInfo();
-
-    ///Returns cluster space information (orbit index and mc vector)
+    /// Returns information concerning the cluster space.
     std::pair<int, std::vector<int>> getClusterSpaceInfo(const unsigned int);
 
-    ///Gets the cluster space size, i.e. the length of a cluster vector
-    size_t getClusterSpaceSize();
+    /// Returns the entire orbit list.
+    OrbitList getOrbitList() const { return _orbitList; }
 
-    ///Returns the cutoffs
-    std::vector<double> getCutoffs() const
-    {
-        return _clusterCutoffs;
-    }
+    /// Returns an orbit from the orbit list.
+    Orbit getOrbit(const size_t index) const { return _orbitList.getOrbit(index); }
 
-    ///Get elements in str format
-    std::vector<std::string> getAtomicNumbers() const
-    {
-        std::vector<std::string> elements;
-        for (const auto &intEl : _elements)
-        {
-            elements.push_back(PeriodicTable::intStr[intEl]);
-        }
-        return elements;
-    }
-    ///returns a orbit from the orbit list
-    Orbit getOrbit(const size_t index) const
-    {
-        return _primitive_orbit_list.getOrbit(index);
-    }
-
-    OrbitList getOrbitList() const
-    {
-        return _primitive_orbit_list;
-    }
-
-    ///returns the primitive structure
-    Structure getPrimitiveStructure() const
-    {
-        return _primitive_structure;
-    }
-
+    /// Returns the native clusters.
+    /// @todo What is a native cluster? Partial answer: clusters within the unit cell?
     ClusterCounts getNativeClusters(const Structure &structure) const;
 
-    /// Return the MC vector permutations for each mc vector in the set of mc vectors.
-    std::vector<std::vector<std::vector<int>>> getMCVectorPermutations(const std::vector<std::vector<int>> &, const int ) const;
+    /// Returns the multi-component (MC) vector permutations for each MC vector in the set of input vectors.
+    /// @todo Clean up this description.
+    std::vector<std::vector<std::vector<int>>> getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &, const int) const;
 
-    ///Returns the allowed occupations on the sites
-    std::vector<int> getAllowedOccupations(const Structure &structure, const std::vector<LatticeSite> &latticeNeighbors) const;
-    
+  public:
+    /// Returns the cutoff for each order.
+    std::vector<double> getCutoffs() const { return _clusterCutoffs; }
 
-    std::map<int, int> getElementMap() const
+    /// Returns the primitive structure.
+    Structure getPrimitiveStructure() const { return _primitiveStructure; }
+
+    /// Returns the number of allowed components for each site.
+    std::vector<int> getNumberOfAllowedSpeciesBySite(const Structure &, const std::vector<LatticeSite> &) const;
+
+    /// Returns a list of species associated with cluster space as chemical symbols.
+    std::vector<std::string> getChemicalSymbols() const
     {
-        return _elementRepresentation;
-    } 
+        std::vector<std::string> species;
+        for (const auto &s : _species)
+            species.push_back(PeriodicTable::intStr[s]);
+        return species;
+    }
 
-  private:
-    ///Currently we have constant Mi for development but will later change to dynamic Mi
-    std::vector<int> _Mi;
+    /// Returns the cluster space size, i.e. the length of a cluster vector.
+    size_t getClusterSpaceSize()
+    {
+        return _clusterSpaceInfo.size();
+    }
 
-    ///Primitive cell/structure
-    Structure _primitive_structure;
+    /// Returns the mapping between atomic numbers and the internal species enumeration scheme.
+    std::unordered_map<int, int> getSpeciesMap() const { return _speciesMap; }
 
     ///Primitive orbit list based on the structure and the global cutoffs
-    OrbitList _primitive_orbit_list;
+    OrbitList _orbitList;
 
-    ///Unique id for this cluster space
-    int clusterSpace_ID;
+    /// Returns the cluster product.
+    /// @todo Can we find a more telling name?
+    double evaluateClusterProduct(const std::vector<int> &, const std::vector<int> &, const std::vector<int> &) const;
 
-    ///The radial cutoffs for neigbhor inclusion. First element in vector is pairs, then triplets etc.
-    std::vector<double> _clusterCutoffs;
+    /// Primitive (prototype) structure.
+    Structure _primitiveStructure;
 
-    ///Elements considered in this cluster space (The integers represent their order in the periodic table)
-    std::vector<int> _elements;
+    /// Precomputed multicomponent vectors for each orbit in _orbitlist.
+    std::vector<std::vector<std::vector<int>>> _multiComponentVectors;
 
-    ///Cluster space information, the vector is over all dimension of the cluster space. the first int is the orbit index, the vector of ints are MC vectors
+    /// Precomputed site permutations for each orbit in _orbitlist.
+    std::vector<std::vector<std::vector<std::vector<int>>>> _sitePermutations;
+
+  private:
+    /// Precomputes permutations and multicomponent vectors of each orbit.
+    void precomputeMultiComponentVectors();
+
+    /// Returns the default cluster function.
+    double evaluateClusterFunction(const int, const int, const int) const;
+
+  private:
+
+    /// Cluster space information.
+    /// The first index (int) corresponds to the orbit index, the second index (vector of ints) refers to a multi-component vector.
+    /// @todo Check description.
+    /// @todo This function returns a very specific type of information. Consider giving it a more descriptive name.
     std::vector<std::pair<int, std::vector<int>>> _clusterSpaceInfo;
 
-    ///a boolean to keep track if this is initialized or not
-    bool _isClusterSpaceInitialized;
-
-    /**
-    This maps a orbit to other orbits i.e. of _equalSitesList[0] = [1,2,3] then orbit zero should be seen as equal to orbit 1,2 and three.
-    This will mean that when retrieving the cluster vector the zeroth element will be a combination of orbit 0,1,2 and 3.
-    */
-    std::map<int, std::vector<int>> _equalOrbitsList;
-
-    ///return the default clusterfunction of the input element when this site can have Mi elements
-    double defaultClusterFunction(const int Mi, const int clusterFunction, const int element) const;
+    /// Number of allowed components on each site of the primitive structure.
+    std::vector<int> _numberOfAllowedSpeciesPerSite;
 
 
-    //Maps real elements  to a 0,1,2, ... representation
-    std::map<int, int> _elementRepresentation;
+    /// Radial cutoffs by cluster order starting with pairs.
+    std::vector<double> _clusterCutoffs;
+
+    /// Species considered in this cluster space identified by atomic number.
+    std::vector<int> _species;
+
+    /// Map between atomic numbers and the internal species enumeration scheme.
+    std::unordered_map<int, int> _speciesMap;
+
 };
+
+//}

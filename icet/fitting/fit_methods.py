@@ -17,6 +17,7 @@ http://scikit-learn.org/stable/modules/linear_model.html
 import numpy as np
 from ..io.logging import logger
 from collections import OrderedDict
+from .split_bregman import fit_split_bregman
 try:
     from sklearn.linear_model import (Lasso,
                                       LassoCV,
@@ -29,7 +30,7 @@ try:
     logger = logger.getChild('fit_methods')
 except Exception:
     logger = logger.getChild('fit_methods')
-    logger.warning('Failed to import scitkit-learn;'
+    logger.warning('Failed to import scikit-learn;'
                    ' several optimizers will fail')
 
 
@@ -325,5 +326,6 @@ fit_methods = OrderedDict([
     ('elasticnet', _fit_elasticnet),
     ('bayesian-ridge', _fit_bayesian_ridge),
     ('ardr', _fit_ardr),
+    ('split-bregman', fit_split_bregman)
     ])
 available_fit_methods = list(fit_methods.keys())
