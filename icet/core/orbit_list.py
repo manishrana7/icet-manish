@@ -18,7 +18,7 @@ class OrbitList(_OrbitList):
     The orbit list object has an internal list of orbits.
 
     An orbit has a list of equivalent sites with the restriction
-    that at least one site is in the primitive cell of the
+    that at least one site is in the cell of the
     primitive structure.
 
     parameters
