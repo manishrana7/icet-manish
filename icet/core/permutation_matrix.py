@@ -1,20 +1,22 @@
+from typing import List
+
+import numpy as np
 import spglib
+
 from _icet import PermutationMatrix
+from icet.core.lattice_site import LatticeSite
 from icet.core.neighbor_list import NeighborList
 from icet.core.structure import Structure
-from icet.tools.geometry import (get_primitive_structure,
-                                 get_fractional_positions_from_neighbor_list,
-                                 ase_atoms_to_spglib_cell)
-from icet.core.lattice_site import LatticeSite
-from typing import List
-import numpy as np
 from icet.io.logging import logger
+from icet.tools.geometry import (ase_atoms_to_spglib_cell,
+                                 get_fractional_positions_from_neighbor_list,
+                                 get_primitive_structure)
 
 logger = logger.getChild('permutation_matrix')
 
 
 def permutation_matrix_from_atoms(atoms, cutoff, find_prim=True):
-    '''Set up a list of permutation maps from an atoms object.
+    """Set up a list of permutation maps from an atoms object.
 
     Parameters
     ----------
@@ -30,7 +32,7 @@ def permutation_matrix_from_atoms(atoms, cutoff, find_prim=True):
     matrix, icet Structure object, NeighborList object
         the tuple comprises the permutation matrix, the primitive structure,
         and the neighbor list
-    '''
+    """
 
     atoms = atoms.copy()
     # set each element to the same since we only care about geometry when
@@ -144,9 +146,8 @@ def _prune_permutation_matrix(permutation_matrix: List[List[LatticeSite]]):
                 continue
             if permutation_matrix[i][0] == permutation_matrix[j][0]:
                 permutation_matrix.pop(j)
-                msg = ['Removing duplicate in permutation matrix']
-                msg += ['i: {} j: {}'.format(i, j)]
-                logger.debug(' '.join(msg))
+                logger.debug('Removing duplicate in permutation matrix'
+                             'i: {} j: {}'.format(i, j))
 
     return permutation_matrix
 
