@@ -4,12 +4,8 @@ from ase.build import bulk
 from icet.core.lattice_site import LatticeSite
 from icet.core.cluster import Cluster
 from icet.core.orbit import Orbit
-from icet.core.orbit_list import OrbitList
-from icet.core.orbit_list import (
-    _get_lattice_site_permutation_matrix as
-    get_lattice_site_permutation_matrix)
-from icet.core.permutation_matrix import permutation_matrix_from_atoms
-from icet.core.structure import Structure
+from icet import OrbitList
+from icet import Structure
 
 
 class TestOrbitList(unittest.TestCase):
