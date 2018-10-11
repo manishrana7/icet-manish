@@ -32,3 +32,4 @@ results.
    :maxdepth: 1
 
    run_monte_carlo
+   analyze_monte_carlo

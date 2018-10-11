@@ -16,7 +16,7 @@ for row in db.select('natoms<=6'):
 
 # step 2: Plot results
 fig, ax = plt.subplots(figsize=(4, 3))
-ax.set_xlabel(r'Concentration')
+ax.set_xlabel(r'Pd concentration')
 ax.set_ylabel(r'Mixing energy (meV/atom)')
 ax.set_xlim([0, 1])
 ax.set_ylim([-69, 15])

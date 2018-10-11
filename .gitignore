@@ -1,8 +1,10 @@
 build/
 doc/_build/
 __pycache__/
+.mypy_cache/
 .vscode
 *~
+*.dc
 *.pyc
 *.swp
 *.db
