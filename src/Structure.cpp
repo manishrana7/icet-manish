@@ -79,7 +79,7 @@ Vector3d Structure::getPosition(const LatticeSite &latticeNeighbor) const
 @param index index of the site
  **/
 Vector3d Structure::getPositionByIndex(const size_t &index) const
-{    
+{
     Vector3d position = _positions.row(index);
     return position;
 }
@@ -316,6 +316,24 @@ int Structure::getNumberOfAllowedSpeciesBySite(const unsigned int i) const
         throw std::out_of_range(errorMessage);
     }
     return _numbersOfAllowedSpecies[i];
+}
+
+/**
+  @details This function returns the a vector with number of components allowed on each site index
+  @param indices indices of sites
+  @returns the list of number of the allowed components on each site
+**/
+std::vector<int> Structure::getNumberOfAllowedSpeciesBySites(const std::vector<LatticeSite> &sites) const
+{   
+    
+    std::vector<int> numberOfAllowedSpecies(sites.size());
+    int i = -1;
+    for (const auto site : sites)
+    {
+        i++;
+        numberOfAllowedSpecies[i] = getNumberOfAllowedSpeciesBySite(site.index());
+    }
+    return numberOfAllowedSpecies;
 }
 
 /**

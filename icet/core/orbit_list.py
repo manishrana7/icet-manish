@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 
 from _icet import _OrbitList
@@ -105,3 +107,17 @@ class OrbitList(_OrbitList):
         supercell_orbit_list = log.generate_full_orbit_list()
 
         return supercell_orbit_list
+
+    def remove_inactive_orbits(self, allowed_species: List[int]):
+        """ Removes orbits with inactive sites
+
+        Parameters
+        ----------
+        allowed_species
+            the number of allowed species on each site in
+            the primitive structure
+        """
+        prim_structure = self.get_primitive_structure()
+        print(allowed_species)
+        prim_structure.set_number_of_allowed_species(allowed_species)
+        self._remove_inactive_orbits(prim_structure)

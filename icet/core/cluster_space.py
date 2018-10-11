@@ -65,6 +65,8 @@ class ClusterSpace(_ClusterSpace):
             'len(Mi) does not equal the number of sites' \
             ' in the primitive structure'
 
+        self._orbit_list.remove_inactive_orbits(Mi)
+
         # call (base) C++ constructor
         _ClusterSpace.__init__(self, Mi, chemical_symbols, self._orbit_list)
 
@@ -307,7 +309,7 @@ class ClusterSpace(_ClusterSpace):
     @property
     def orbit_list(self):
         """Orbit list that defines the cluster in the cluster space"""
-        return self._get_orbit_list()
+        return self._orbit_list
 
     def write(self, filename: str):
         """

@@ -28,16 +28,6 @@ ClusterSpace::ClusterSpace(std::vector<int> numberOfAllowedSpecies,
         _speciesMap[_species[i]] = i;
     }
 
-    //Remove orbits that are inactive
-    for (int i = _orbitList.size() - 1; i >= 0; i--)
-    {
-        auto numberOfAllowedSpecies = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _orbitList.getOrbit(i).getRepresentativeSites());
-
-        if (std::any_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n) { return n < 2; }))
-        {
-            _orbitList.removeOrbit(i);
-        }
-    }
     precomputeMultiComponentVectors();
 }
 

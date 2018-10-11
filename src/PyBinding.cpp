@@ -240,6 +240,32 @@ PYBIND11_MODULE(_icet, m)
              -------
              list of ints
          )pbdoc")
+        .def("set_number_of_allowed_species", (void (Structure::*)(const std::vector<int> &)) &Structure::setNumberOfAllowedSpecies,
+             py::arg("numbersOfAllowedSpecies"),
+             R"pbdoc(
+             Sets the number of allowed species on each site.
+
+             This method allows one to specify for each site in the structure
+             the number of species allowed on that site.
+
+             Parameters
+             ----------
+             numbersOfAllowedSpecies : list of int        
+         )pbdoc")
+        .def("set_number_of_allowed_species",
+            (void (Structure::*)(const int)) &Structure::setNumberOfAllowedSpecies,
+             py::arg("numbersOfAllowedSpecies"),
+             R"pbdoc(
+             Sets the number of allowed species on each site.
+
+             This method allows one to specify for each site in the structure
+             the number of species allowed on that site.
+
+             Parameters
+             ----------
+             numbersOfAllowedSpecies : int        
+         )pbdoc")
+
         .def_property("unique_sites",
                       &Structure::getUniqueSites,
                       &Structure::setUniqueSites,
@@ -750,6 +776,7 @@ PYBIND11_MODULE(_icet, m)
              "Returns the number of orbits in the OrbitList")
         .def("get_orbit", &OrbitList::getOrbit,
              "Returns a copy of the orbit at the position i in the OrbitList")
+        .def("_remove_inactive_orbits",&OrbitList::removeInactiveOrbits)
         .def("clear", &OrbitList::clear,
              "Clears the OrbitList")
         .def("sort", &OrbitList::sort,
