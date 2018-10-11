@@ -20,14 +20,14 @@ In this example the sampling will be carried out in the semi-grand canonical
 (SGC) ensemble. To this end, we set up a :ref:`SGC ensemble object <sgc>`
 object and loop over both temperatures and chemical potential differences.
 
-After a shorter equilibration run, we carry out a longer production run. Prior
-the latter we reset the data container (which clears the data collection and
-resets the MC trial cycle counter) and the production run has finished the
-results are written to file (in the form of a :ref:`DataContainer
-<data_container>` object). The latter will be used in the next step to analyze
-the runs. Note that the ensemble object is only initialized once for each
-temperature. Thereby the configuration evolves gradually and the period needed
-for equilibration is shortened.
+We carry out a rather long MC run, anticipating that the analysis will
+only include the latter part of the simulation after equilibration.
+After the run the results are written to file (in the form of a
+:ref:`DataContainer <data_container>` object). The latter will be used
+in the next step to analyze the runs. Note that the ensemble object is
+only initialized once for each temperature. Thereby the configuration
+evolves gradually and the period needed for equilibration is
+shortened.
 
 .. literalinclude:: ../../../../tutorial/basic/5_run_monte_carlo.py
    :start-after: # step 2
