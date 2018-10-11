@@ -457,6 +457,15 @@ PYBIND11_MODULE(_icet, m)
                                "int : order of the cluster (= number of sites)")
         .def("__hash__", [](const Cluster &cluster) { return std::hash<Cluster>{}(cluster); })
         .def("__len__", &Cluster::order)
+        .def("__str__", [](const Cluster &cluster) {
+            std::string niceStr = "Radius: " + std::to_string(cluster.radius());
+            niceStr += " Vertex-distances:";
+            for (const auto d : cluster.distances())
+            {
+                niceStr += " " + std::to_string(d);
+            }
+            return niceStr;
+        })
         .def(py::self < py::self)
         .def(py::self == py::self);
     ;
@@ -485,8 +494,7 @@ PYBIND11_MODULE(_icet, m)
         .def(py::self < py::self)
         .def(py::self == py::self)
         .def(py::self + Eigen::Vector3d())
-        .def("__hash__", [](const LatticeSite &latticeNeighbor) { return std::hash<LatticeSite>{}(latticeNeighbor); })
-        ;
+        .def("__hash__", [](const LatticeSite &latticeNeighbor) { return std::hash<LatticeSite>{}(latticeNeighbor); });
 
     // @todo document ClusterCounts in pybindings
     py::class_<ClusterCounts>(m, "ClusterCounts")
@@ -494,7 +502,7 @@ PYBIND11_MODULE(_icet, m)
         .def("count_lattice_neighbors", &ClusterCounts::countLatticeSites)
         .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<LatticeSite> &)) & ClusterCounts::count)
         .def("count", (void (ClusterCounts::*)(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool)) & ClusterCounts::count,
-            R"pbdoc(
+             R"pbdoc(
             Counts the vectors in latticeSites assuming these sets of sites are
             represented by the cluster `cluster`.
 
@@ -573,7 +581,7 @@ PYBIND11_MODULE(_icet, m)
         .def("get_equivalent_sites_permutations", &Orbit::getPermutationsOfEquivalentSites)
 
         .def("get_representative_cluster", &Orbit::getRepresentativeCluster,
-        R"pbdoc(
+             R"pbdoc(
         The representative cluster represents the geometrical version of what
         this orbit is.
         )pbdoc")
@@ -632,7 +640,7 @@ PYBIND11_MODULE(_icet, m)
         sites of equivalent_sites[index].)pbdoc")
         // .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
         .def("get_mc_vectors", &Orbit::getMultiComponentVectors,
-                R"pbdoc(
+             R"pbdoc(
         Return the mc vectors for this orbit given the allowed components.
         The mc vectors are returned as a list of tuples
 
@@ -648,7 +656,7 @@ PYBIND11_MODULE(_icet, m)
         Sort the equivalent sites list.
         )pbdoc")
         .def("get_all_possible_mc_vector_permutations", &Orbit::getAllPossibleMultiComponentVectorPermutations,
-        R"pbdoc(
+             R"pbdoc(
         Similar to get all permutations but
         needs to be filtered through the
         number of allowed elements.
@@ -688,7 +696,7 @@ PYBIND11_MODULE(_icet, m)
         be considered since it is
         equivalent to (0,0,1).)pbdoc")
         .def_property("permutations_to_representative", &Orbit::getPermutationsOfEquivalentSites, &Orbit::setEquivalentSitesPermutations,
-        R"pbdoc(
+                      R"pbdoc(
         list of permutations;
         permutations_to_representative[i] takes self.equivalent_sites[i] to
         the same order as self.representative_sites.
@@ -735,6 +743,7 @@ PYBIND11_MODULE(_icet, m)
              py::arg("structure"),
              py::arg("permutation_matrix"),
              py::arg("neighbor_lists"))
+        .def_property_readonly("orbits", &OrbitList::getOrbitList, R"pbdoc(Internal list of orbits)pbdoc")
         .def("add_orbit", &OrbitList::addOrbit,
              "Add an Orbit object to the OrbitList")
         .def("get_number_of_NClusters", &OrbitList::getNumberOfNClusters,
@@ -745,7 +754,7 @@ PYBIND11_MODULE(_icet, m)
              "Clears the OrbitList")
         .def("sort", &OrbitList::sort,
              "Sort the orbits by orbit comparison")
-        .def("find_orbit", (int(OrbitList::*)(const Cluster &) const) &OrbitList::findOrbit,
+        .def("find_orbit", (int (OrbitList::*)(const Cluster &) const) & OrbitList::findOrbit,
              "Return the index of the orbit with the given representative cluster")
         //.def("find_orbit", (int (OrbitList::*)(const Cluster &, const std::unordered_map<Cluster, int> &) const) & OrbitList::findOrbit)
         .def("is_row_taken", &OrbitList::isRowsTaken,
@@ -783,20 +792,18 @@ PYBIND11_MODULE(_icet, m)
         .def_property_readonly("species_map", &ClusterSpace::getSpeciesMap)
         .def("get_cluster_space_info", &ClusterSpace::getClusterSpaceInfo)
         .def("get_cluster_space_size", &ClusterSpace::getClusterSpaceSize)
-        .def("get_chemical_symbols",
-             &ClusterSpace::getChemicalSymbols,
-             "Returns list of species associated with cluster space as chemical symbols.")
+        .def("get_chemical_symbols", &ClusterSpace::getChemicalSymbols, "Returns list of species associated with cluster space as chemical symbols.")
         .def("get_cutoffs", &ClusterSpace::getCutoffs)
         .def("_get_primitive_structure", &ClusterSpace::getPrimitiveStructure)
-        .def("get_multi_component_vector_permutations",&ClusterSpace::getMultiComponentVectorPermutations)
-        .def("get_number_of_allowed_species_by_site",&ClusterSpace::getNumberOfAllowedSpeciesBySite)
+        .def("get_multi_component_vector_permutations", &ClusterSpace::getMultiComponentVectorPermutations)
+        .def("get_number_of_allowed_species_by_site", &ClusterSpace::getNumberOfAllowedSpeciesBySite)
         .def("__len__", &ClusterSpace::getClusterSpaceSize);
 
-// ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clusterSpace, const Structure &structure)
+    // ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clusterSpace, const Structure &structure)
 
-    py::class_<ClusterExpansionCalculator>(m,"_ClusterExpansionCalculator")
-    .def(py::init<const ClusterSpace &, const Structure &>(),
-    R"pbdoc(
+    py::class_<ClusterExpansionCalculator>(m, "_ClusterExpansionCalculator")
+        .def(py::init<const ClusterSpace &, const Structure &>(),
+             R"pbdoc(
              Initializes a cluster expansion calculator.
 
              Parameters
@@ -808,10 +815,11 @@ PYBIND11_MODULE(_icet, m)
         )pbdoc",
              py::arg("cluster_space"),
              py::arg("structure"))
-    .def("get_local_cluster_vector", [](ClusterExpansionCalculator &ceCalc, const std::vector<int> &occupations, const int index, const std::vector<int> indices) {
+        .def("get_local_cluster_vector", [](ClusterExpansionCalculator &ceCalc, const std::vector<int> &occupations, const int index, const std::vector<int> indices) {
             auto cv = ceCalc.getLocalClusterVector(occupations, index, indices);
             return py::array(cv.size(), cv.data());
-        }, R"pbdoc(
+        },
+             R"pbdoc(
              Returns a cluster vector that only considers clusters that contain the input index.
 
              Parameters
@@ -823,6 +831,5 @@ PYBIND11_MODULE(_icet, m)
              ignoredIndices : list of int
                 list of indices that have already had their local energy calculated;
                 this is required to prevent double counting
-        )pbdoc")
-    ;
+        )pbdoc");
 }

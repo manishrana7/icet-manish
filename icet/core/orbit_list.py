@@ -74,28 +74,16 @@ class OrbitList(_OrbitList):
 
     @property
     def permutation_matrix(self):
-        """
-        Return icet PermutationMatrix object.
-        """
+        """Returns icet PermutationMatrix object."""
         return self._permutation_matrix
 
-    # @property
-    # def orbits(self):
-    #     """
-    #     Return the internal list of orbits
-    #     """
-    #     return self._orbits
-
-    # def __len__(self):
-    #     """
-    #     Lenght of an orbit list is number of orbits in orbit list.
-    #     """
-    #     return len(self._orbits)
-
     def __str__(self):
-        nice_str = ''
+        nice_str = 'Number of orbits: {}'.format(len(self))
+
         for i, orbit in enumerate(self.orbits):
-            nice_str += "orbit {} - Multiplicity {} '\n'".format(i, len(orbit))
+            cluster_str = self.orbits[i].representative_cluster.__str__()
+            nice_str += "\norbit {} - Multiplicity {} - Cluster: {}".format(
+                i, len(orbit), cluster_str)
         return nice_str
 
     def get_supercell_orbit_list(self, atoms: Atoms):
@@ -110,10 +98,6 @@ class OrbitList(_OrbitList):
         Returns
         -------
         An OrbitList object
-
-        Todo
-        ----
-        * Is there any reason to make this a private member
         """
         structure = Structure.from_atoms(atoms)
         log = LocalOrbitListGenerator(self, structure)
