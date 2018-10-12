@@ -210,7 +210,7 @@ OrbitList::OrbitList(const Structure &structure, const std::vector<std::vector<L
 
 */
 void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeSite> &col1, const std::vector<std::vector<LatticeSite>> &permutation_matrix)
-{  
+{
     _col1 = col1;
     _permutationMatrix = permutation_matrix;
 
@@ -846,7 +846,7 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &superCell, const Vector3
 **/
 void OrbitList::removeSitesContainingIndex(const int indexRemove, bool onlyConsiderZeroOffset)
 {
-    for(auto &orbit : _orbitList)
+    for (auto &orbit : _orbitList)
     {
         orbit.removeSitesWithIndex(indexRemove, onlyConsiderZeroOffset);
     }
@@ -859,7 +859,7 @@ void OrbitList::removeSitesContainingIndex(const int indexRemove, bool onlyConsi
 **/
 void OrbitList::removeSitesNotContainingIndex(const int index, bool onlyConsiderZeroOffset)
 {
-    for(auto &orbit : _orbitList)
+    for (auto &orbit : _orbitList)
     {
         orbit.removeSitesNotWithIndex(index, onlyConsiderZeroOffset);
     }
@@ -871,15 +871,15 @@ void OrbitList::removeSitesNotContainingIndex(const int index, bool onlyConsider
  **/
 void OrbitList::subtractSitesFromOrbitList(const OrbitList &orbitList)
 {
-    if(orbitList.size() != size())
+    if (orbitList.size() != size())
     {
         throw std::runtime_error("orbitlists mismatch in size in function OrbitList::subtractSitesFromOrbitList");
     }
-    for(int i = 0; i<size(); i++)
+    for (int i = 0; i < size(); i++)
     {
-        for(const auto sites : orbitList._orbitList[i]._equivalentSites)
+        for (const auto sites : orbitList._orbitList[i]._equivalentSites)
         {
-            if(_orbitList[i].contains(sites, true))
+            if (_orbitList[i].contains(sites, true))
             {
                 _orbitList[i].removeSites(sites);
             }
@@ -890,11 +890,30 @@ void OrbitList::subtractSitesFromOrbitList(const OrbitList &orbitList)
 /// Removes orbit with the input index
 void OrbitList::removeOrbit(const size_t index)
 {
-    if(index <0 || index >=size())
+    if (index < 0 || index >= size())
     {
         std::string msg = "Index " + std::to_string(index) + " was out of bounds in OrbitList::removeOrbit";
         msg += "OrbitList size is " + std::to_string(size());
         throw std::out_of_range(msg);
     }
-    _orbitList.erase(_orbitList.begin()+index);
+    _orbitList.erase(_orbitList.begin() + index);
+}
+
+/** 
+@details Removes all orbits that have inactive sites.
+@param structure the structure contain the number of allowed
+        species on each lattice site 
+**/
+void OrbitList::removeInactiveOrbits(const Structure &structure)
+{
+    //Remove orbits that are inactive
+    for (int i = _orbitList.size() - 1; i >= 0; i--)
+    {
+        auto numberOfAllowedSpecies = structure.getNumberOfAllowedSpeciesBySites(_orbitList[i].getRepresentativeSites());
+
+        if (std::any_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n) { return n < 2; }))
+        {
+            removeOrbit(i);
+        }
+    }
 }

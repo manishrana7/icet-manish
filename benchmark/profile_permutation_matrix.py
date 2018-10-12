@@ -2,9 +2,9 @@ from icet.core_py.permutation_matrix import PermutationMatrix
 
 import time
 from ase.build import bulk
-from icet.core.permutation_map import permutation_matrix_from_atoms
+from icet.core.permutation_matrix import permutation_matrix_from_atoms
 
-from icet.core.orbit_list import __get_lattice_site_permutation_matrix\
+from icet.core.permutation_matrix import _get_lattice_site_permutation_matrix\
     as get_lattice_site_permutation_matrix
 
 

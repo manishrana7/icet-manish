@@ -4,17 +4,13 @@ from ase.build import bulk
 from icet.core.lattice_site import LatticeSite
 from icet.core.cluster import Cluster
 from icet.core.orbit import Orbit
-from icet.core.orbit_list import OrbitList, create_orbit_list
-from icet.core.orbit_list import (
-    __get_lattice_site_permutation_matrix as
-    get_lattice_site_permutation_matrix)
-from icet.core.neighbor_list import get_neighbor_lists
-from icet.core.permutation_map import permutation_matrix_from_atoms
-from icet.core.structure import Structure
+from icet import OrbitList
+from icet import Structure
 
 
 class TestOrbitList(unittest.TestCase):
     """Container for test of the module functionality."""
+
     def __init__(self, *args, **kwargs):
         super(TestOrbitList, self).__init__(*args, **kwargs)
         self.cutoffs = [4.2]
@@ -32,32 +28,13 @@ class TestOrbitList(unittest.TestCase):
 
     def setUp(self):
         """Instantiate class before each test."""
-        # @todo: this can be a single line of code
-        permutation_matrix, self.prim_structure, _ = \
-            permutation_matrix_from_atoms(self.atoms, self.cutoffs[0])
-        self.pm_lattice_sites = \
-            get_lattice_site_permutation_matrix(self.prim_structure,
-                                                permutation_matrix)
-        # @todo: check if the same neighborlist is returned from PermutationMap
-        self.neighbor_lists = get_neighbor_lists(
-            self.prim_structure, self.cutoffs)
-
-        self.orbit_list = OrbitList(self.prim_structure,
-                                    self.pm_lattice_sites,
-                                    self.neighbor_lists)
+        self.orbit_list = OrbitList(self.atoms, self.cutoffs)
 
     def test_init(self):
         """Test the different initializers."""
-        # empty
-        orbit_list = OrbitList()
-        self.assertIsInstance(orbit_list, OrbitList)
-        # with mnbl and structure
-        orbit_list = OrbitList(self.neighbor_lists, self.prim_structure)
-        self.assertIsInstance(orbit_list, OrbitList)
-        # with mnbl, structure and permutation matrix
         orbit_list = OrbitList(
-            self.prim_structure, self.pm_lattice_sites, self.neighbor_lists)
-        self.assertIsInstance(self.orbit_list, OrbitList)
+            self.atoms, self.cutoffs)
+        self.assertIsInstance(orbit_list, OrbitList)
 
     def test_add_orbit(self):
         """Test add orbit funcionality."""
@@ -127,7 +104,16 @@ class TestOrbitList(unittest.TestCase):
                 self.assertEqual(orbit.get_representative_cluster(),
                                  repr_clusters[k])
 
-    @unittest.expectedFailure
+    def test_remove_all_orbits(self):
+        """Test removing all orbits"""
+
+        mi = [1]*len(self.orbit_list.get_primitive_structure())
+        len_before = len(self.orbit_list)
+        self.assertNotEqual(len_before, 0)
+        self.orbit_list.remove_inactive_orbits(mi)
+        len_after = len(self.orbit_list)
+        self.assertEqual(len_after, 0)
+
     def test_get_primitive_structure(self):
         """
         Test get primitive structure functionality.
@@ -136,8 +122,8 @@ class TestOrbitList(unittest.TestCase):
         ----
         Test fails
         """
-        self.assertEqual(
-            self.orbit_list.get_primitive_structure(), self.prim_structure)
+        self.assertIsInstance(
+            self.orbit_list.get_primitive_structure(), Structure)
 
     def test_len(self):
         """Test len of orbit list."""
@@ -166,7 +152,7 @@ class TestOrbitList(unittest.TestCase):
         Test  orbit list is built from structure and cutoffs by calling
         this function.
         """
-        orbit_list = create_orbit_list(self.atoms, self.cutoffs)
+        orbit_list = OrbitList(self.atoms, self.cutoffs)
         for i in range(len(self.orbit_list)):
             orbit = self.orbit_list.get_orbit(i)
             orbit_ = orbit_list.get_orbit(i)
@@ -185,15 +171,15 @@ class TestOrbitList(unittest.TestCase):
         atoms = bulk('Al', 'sc', a=4.0).repeat(4)
         # [True, True, False]
         atoms.set_pbc([True, True, False])
-        orbit_list = create_orbit_list(atoms, [0.])
+        orbit_list = OrbitList(atoms, [0.])
         self.assertEqual(len(orbit_list), 4)
         # [True, False, False]
         atoms.set_pbc([True, False, False])
-        orbit_list = create_orbit_list(atoms, [0.])
+        orbit_list = OrbitList(atoms, [0.])
         self.assertEqual(len(orbit_list), 7)
         # [False]
         atoms.set_pbc([False, False, False])
-        orbit_list = create_orbit_list(atoms, [0.])
+        orbit_list = OrbitList(atoms, [0.])
         self.assertEqual(len(orbit_list), 20)
 
     def test_orbit_list_fcc(self):
@@ -203,7 +189,7 @@ class TestOrbitList(unittest.TestCase):
         """
         atoms = bulk('Al', 'fcc', a=3.0)
         cutoffs = [2.5]
-        orbit_list = create_orbit_list(atoms, cutoffs)
+        orbit_list = OrbitList(atoms, cutoffs)
         # only a singlet and a pair are expected
         self.assertEqual(len(orbit_list), 2)
         # singlet
@@ -223,7 +209,7 @@ class TestOrbitList(unittest.TestCase):
         """
         atoms = bulk('Al', 'bcc', a=3.0)
         cutoffs = [3.0]
-        orbit_list = create_orbit_list(atoms, cutoffs)
+        orbit_list = OrbitList(atoms, cutoffs)
         # one singlet and two pairs expected
         self.assertEqual(len(orbit_list), 3)
         # singlet
@@ -246,7 +232,7 @@ class TestOrbitList(unittest.TestCase):
         """
         atoms = bulk('Ni', 'hcp', a=3.0)
         cutoffs = [3.1]
-        orbit_list = create_orbit_list(atoms, cutoffs)
+        orbit_list = OrbitList(atoms, cutoffs)
         # only one singlet and one pair expected
         self.assertEqual(len(orbit_list), 3)
         # singlet

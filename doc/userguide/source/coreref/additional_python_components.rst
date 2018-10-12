@@ -63,7 +63,7 @@ OrbitList
 PermutationMap
 --------------
 
-.. automodule:: icet.core.permutation_map
+.. automodule:: icet.core.permutation_matrix
    :members:
    :undoc-members:
    :inherited-members:
