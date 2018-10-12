@@ -20,17 +20,26 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
 
     def setUp(self):
         """
-        Instantiates class before each test case.
+        Instantiate class for each test case.
         """
         self.log = LocalOrbitListGenerator(self.orbit_list, self.structure)
 
     def test_generate_local_orbit_list(self):
         """
-        Test method functionality.
+        Testing this function generates an orbit list by passing
+        an index that corresponds to a specific offset of the supercell.
         """
-        index = 1
+        index = 0
         local_orbit_list = self.log.generate_local_orbit_list(index)
-        
+        for orbit in local_orbit_list.get_orbit_list():
+            print(orbit.get_representative_sites().__str__())
+
+    def test_unique_offsets(self):
+        """
+        Testing unique offsets obtained by mapping supercell sites to primitive cell.
+        """
+        unique_offsets =  self.log.get_unique_primcell_offsets()
+        print(unique_offsets)
 
 
 if __name__ == '__main__':
