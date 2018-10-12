@@ -80,11 +80,11 @@ class CanonicalEnsemble(BaseEnsemble):
                 self.boltzmann_constant * self.temperature)) > \
                 self._next_random_number()
 
-    def get_ensemble_data(self) -> Dict:
+    def _get_ensemble_data(self) -> Dict:
         """Returns the data associated with the ensemble. For the SGC
         ensemble this specifically includes the temperature and the
         species counts.
         """
-        data = super().get_ensemble_data()
+        data = super()._get_ensemble_data()
         data['temperature'] = self.temperature
         return data

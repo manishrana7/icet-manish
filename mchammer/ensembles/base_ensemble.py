@@ -233,7 +233,7 @@ class BaseEnsemble(ABC):
 
         # Ensemble specific data
         if step % self._ensemble_data_write_interval == 0:
-            ensemble_data = self.get_ensemble_data()
+            ensemble_data = self._get_ensemble_data()
             for key, value in ensemble_data.items():
                 if key not in self._data_container.observables:
                     self._data_container.add_observable(key)
@@ -399,7 +399,7 @@ class BaseEnsemble(ABC):
         self.update_occupations(sites, current_species)
         return property_change
 
-    def get_ensemble_data(self) -> dict:
+    def _get_ensemble_data(self) -> dict:
         """ Returns the current calculator property. """
         return {
             'potential': self.calculator.calculate_total(

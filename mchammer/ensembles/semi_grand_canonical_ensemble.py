@@ -134,13 +134,13 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
                         format(num))
             self._chemical_potentials.update(cps)
 
-    def get_ensemble_data(self) -> Dict:
+    def _get_ensemble_data(self) -> Dict:
         """Returns the data associated with the ensemble. For the SGC
         ensemble this specifically includes the temperature and the
         species counts.
         """
         # generic data
-        data = super().get_ensemble_data()
+        data = super()._get_ensemble_data()
 
         # temperature
         data['temperature'] = self.temperature
