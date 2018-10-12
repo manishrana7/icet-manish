@@ -44,12 +44,11 @@ class VCSGCEnsemble(BaseEnsemble):
 
         # Initialize counter to keep track of concentrations efficiently
         species, counts = np.unique(self.configuration.occupations,
-                                     return_counts=True)
+                                    return_counts=True)
         self.species_count = dict(zip(species, counts))
         # There may be species that are not in the input structure
         for species in self.configuration._allowed_species:
             self.species_count[species] = self.species_count.get(species, 0)
-
 
     def _do_trial_step(self):
         """ Carry out one Monte Carlo trial step. """
@@ -65,9 +64,9 @@ class VCSGCEnsemble(BaseEnsemble):
         # Note that this assumes that only one atom was flipped
         potential_diff = 1.0  # dN
         potential_diff -= self.species_count[old_species]
-        potential_diff -= 0.5*self._concentration_parameters[old_species]
+        potential_diff -= 0.5 * self._concentration_parameters[old_species]
         potential_diff += self.species_count[new_species]
-        potential_diff += 0.5*self._concentration_parameters[new_species]
+        potential_diff += 0.5 * self._concentration_parameters[new_species]
         potential_diff *= self.variance_parameter
         potential_diff /= len(self.configuration.atoms)
 
@@ -131,7 +130,19 @@ class VCSGCEnsemble(BaseEnsemble):
 
         # concentration parameters
         for atnum, phi in self.concentration_parameters.items():
-            data['phi_{}'.format(chemical_symbols[atnum])] = phi
+            data['phi_{}'.format(chemical_symbols[atnum])] = \
+                phi / len(self.atoms)
+
+        # variance parameter
+        data['kappa'] = self.variance_parameter
+
+        # free energy derivative
+        atnum_1 = min(self.concentration_parameters.keys())
+        concentration = self.species_count[atnum_1] / len(self.atoms)
+        data['free_energy_derivative'] = \
+            - 2 * self.variance_parameter * concentration - \
+            self.variance_parameter * \
+            self.concentration_parameters[atnum_1] / len(self.atoms)
 
         # temperature
         data['temperature'] = self.temperature
@@ -146,4 +157,3 @@ class VCSGCEnsemble(BaseEnsemble):
             data['{}_count'.format(chemical_symbols[atnum])] = count
 
         return data
-
