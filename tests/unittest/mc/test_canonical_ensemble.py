@@ -74,9 +74,9 @@ class TestEnsemble(unittest.TestCase):
             random_seed=42, temperature=100.0, boltzmann_constant=1.0)
         self.assertAlmostEqual(1.0, ens.boltzmann_constant)
 
-    def test_get_ensemble_data(self):
+    def test__get_ensemble_data(self):
         """Tests the get ensemble data method."""
-        data = self.ensemble.get_ensemble_data()
+        data = self.ensemble._get_ensemble_data()
 
         self.assertIn('potential', data.keys())
         self.assertIn('temperature', data.keys())

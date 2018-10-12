@@ -18,13 +18,14 @@ for fname in sorted(glob('sgc*.dc')):
     dmu = row['mu_Pd'] - row['mu_Ag']
     data[temperature]['dmu'].append(dmu)
 
-    conc = dc.get_average('Pd_count')[0] / nsites
+    nequil = nsites*10
+    conc = dc.get_average('Pd_count', start=nequil)[0] / nsites
     data[temperature]['concentration'].append(conc)
 
-    emix = dc.get_average('potential')[0] / nsites
+    emix = dc.get_average('potential', start=nequil)[0] / nsites
     data[temperature]['mixing_energy'].append(emix)
 
-    accratio = dc.get_average('acceptance_ratio')[0]
+    accratio = dc.get_average('acceptance_ratio', start=nequil)[0]
     data[temperature]['acceptance_ratio'].append(accratio)
 
 # step 2: Plot chemical potential difference vs composition

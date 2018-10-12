@@ -4,24 +4,24 @@ import spglib
 import numpy as np
 from icet import Structure
 from icet.core.neighbor_list import NeighborList
-from icet.core.permutation_map import (
-    PermutationMap, permutation_matrix_from_atoms)
-from icet.core.orbit_list import (
-    __get_lattice_site_permutation_matrix as
+from icet.core.permutation_matrix import (
+    PermutationMatrix, permutation_matrix_from_atoms)
+from icet.core.permutation_matrix import (
+    _get_lattice_site_permutation_matrix as
     get_lattice_site_permutation_matrix)
-from icet.core.orbit_list import (
-    __fractional_to_cartesian as fractional_to_cartesian)
-from icet.core.orbit_list import (
-    __prune_permutation_matrix as prune_permutation_matrix)
+from icet.core.permutation_matrix import (
+    _fractional_to_cartesian as fractional_to_cartesian)
+from icet.core.permutation_matrix import (
+    _prune_permutation_matrix as prune_permutation_matrix)
 from icet.tools.geometry import (
     get_primitive_structure, get_fractional_positions_from_neighbor_list)
 
 
-class TestPermutationMap(unittest.TestCase):
+class TestPermutationMatrix(unittest.TestCase):
     """Container for test of the module functionality."""
 
     def __init__(self, *args, **kwargs):
-        super(TestPermutationMap, self).__init__(*args, **kwargs)
+        super(TestPermutationMatrix, self).__init__(*args, **kwargs)
 
         self.atoms = bulk('Ni', 'hcp', a=3.0).repeat([2, 2, 1])
         self.cutoff = 5.0
@@ -39,13 +39,13 @@ class TestPermutationMap(unittest.TestCase):
         self.translations = symmetry['translations']
         self.rotations = symmetry['rotations']
 
-        self.pm = PermutationMap(self.translations,
-                                 self.rotations)
+        self.pm = PermutationMatrix(self.translations,
+                                    self.rotations)
         self.pm.build(self.frac_positions)
 
     def test_init(self):
-        """Tests the initializer."""
-        self.assertIsInstance(self.pm, PermutationMap)
+        """Test initializer."""
+        self.assertIsInstance(self.pm, PermutationMatrix)
 
     def test_dimension_permutation_matrix(self):
         """

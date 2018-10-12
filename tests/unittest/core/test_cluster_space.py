@@ -137,7 +137,7 @@ class TestClusterSpace(unittest.TestCase):
     def test_len(self):
         """Tests length functionality."""
         number_orbits = self.cs.__len__()
-        self.assertEqual(number_orbits, len(self.cs.get_orbit_list()) + 1)
+        self.assertEqual(number_orbits, len(self.cs._get_orbit_list()) + 1)
 
     def test_orbit_data(self):
         """Tests orbit_data property."""

@@ -6,9 +6,11 @@
 Analyze Monte Carlo simulations
 ===============================
 
-After the :ref:`Monte Carlo simulations <tutorial_monte_carlo_simulations>`
-have finished, they can be analyzed in various ways. It is convenient first to
-collect all data in a convenient format.
+After the :ref:`Monte Carlo simulations
+<tutorial_monte_carlo_simulations>` have finished, they can be
+analyzed in various ways. It is convenient first to collect all data
+in a convenient format. Here, we discard data collected during the
+first ten MC cycles to allow for equilibration.
 
 .. literalinclude:: ../../../../tutorial/basic/6_analyze_monte_carlo.py
    :start-after: # step 1

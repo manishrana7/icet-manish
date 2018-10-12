@@ -191,7 +191,7 @@ class BaseEnsemble(ABC):
             uninterrupted_steps = min(
                 self.observer_interval, final_step - step)
             if self._step % self.observer_interval == 0:
-                self._observe_configuration(self._step)
+                self._observe(self._step)
             if self._data_container_filename is not None and \
                     time()-last_write_time > self.data_container_write_period:
                 self._write_data_container()
@@ -203,7 +203,7 @@ class BaseEnsemble(ABC):
 
         # If we end on an observation interval we also observe
         if self._step % self.observer_interval == 0:
-            self._observe_configuration(self._step)
+            self._observe(self._step)
 
         if self._data_container_filename is not None:
             self._write_data_container()
@@ -220,7 +220,7 @@ class BaseEnsemble(ABC):
         for _ in range(number_of_trial_steps):
             self._do_trial_step()
 
-    def _observe_configuration(self, step: int):
+    def _observe(self, step: int):
         """Submits current configuration to observers and appends
         observations to data container.
 
@@ -233,7 +233,7 @@ class BaseEnsemble(ABC):
 
         # Ensemble specific data
         if step % self._ensemble_data_write_interval == 0:
-            ensemble_data = self.get_ensemble_data()
+            ensemble_data = self._get_ensemble_data()
             for key, value in ensemble_data.items():
                 if key not in self._data_container.observables:
                     self._data_container.add_observable(key)
@@ -399,7 +399,7 @@ class BaseEnsemble(ABC):
         self.update_occupations(sites, current_species)
         return property_change
 
-    def get_ensemble_data(self) -> dict:
+    def _get_ensemble_data(self) -> dict:
         """ Returns the current calculator property. """
         return {
             'potential': self.calculator.calculate_total(

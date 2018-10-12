@@ -109,9 +109,9 @@ class TestEnsemble(unittest.TestCase):
             chemical_potentials=chemical_potentials)
         ensemble._do_trial_step()
 
-    def test_get_ensemble_data(self):
+    def test__get_ensemble_data(self):
         """Tests the get ensemble data method."""
-        data = self.ensemble.get_ensemble_data()
+        data = self.ensemble._get_ensemble_data()
 
         self.assertIn('potential', data.keys())
         self.assertIn('Al_count', data.keys())
