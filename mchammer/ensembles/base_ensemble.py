@@ -191,7 +191,7 @@ class BaseEnsemble(ABC):
             uninterrupted_steps = min(
                 self.observer_interval, final_step - step)
             if self._step % self.observer_interval == 0:
-                self._observe_configuration(self._step)
+                self._observe(self._step)
             if self._data_container_filename is not None and \
                     time()-last_write_time > self.data_container_write_period:
                 self._write_data_container()
@@ -203,7 +203,7 @@ class BaseEnsemble(ABC):
 
         # If we end on an observation interval we also observe
         if self._step % self.observer_interval == 0:
-            self._observe_configuration(self._step)
+            self._observe(self._step)
 
         if self._data_container_filename is not None:
             self._write_data_container()
@@ -220,7 +220,7 @@ class BaseEnsemble(ABC):
         for _ in range(number_of_trial_steps):
             self._do_trial_step()
 
-    def _observe_configuration(self, step: int):
+    def _observe(self, step: int):
         """Submits current configuration to observers and appends
         observations to data container.
 
