@@ -26,28 +26,20 @@ class TestBaseCalculator(unittest.TestCase):
         self.calculator = ConcreteCalculator(self.atoms)
 
     def test_property_atoms(self):
-        """
-        Test property atoms.
-        """
+        """Tests property atoms."""
         self.assertIsInstance(self.calculator.atoms, Atoms)
         self.assertEqual(self.atoms, self.calculator.atoms)
 
     def test_calculate_total(self):
-        """
-        Test calculate total
-        """
+        """Tests calculate total."""
         self.calculator.calculate_total()
 
     def test_calculate_local_contribution(self):
-        """
-        Test calculate local contribution.
-        """
+        """Tests calculate local contribution."""
         self.calculator.calculate_local_contribution()
 
     def test_update_occupations(self):
-        """
-        Test set elements method.
-        """
+        """Tests set elements method."""
         indices = [0, 1, 3]
         elements = [6, 1, 2]
 

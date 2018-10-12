@@ -5,9 +5,7 @@ from icet.fitting import EnsembleOptimizer
 
 
 class TestEnsemble(unittest.TestCase):
-    """
-    Unittest class for EnsembleOptimizer.
-    """
+    """Unittest class for EnsembleOptimizer."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -22,9 +20,7 @@ class TestEnsemble(unittest.TestCase):
         self.y = np.dot(self.A, self.x) + self.noise
 
     def test_init(self):
-        """
-        Test init
-        """
+        """Tests init."""
 
         # specify train size via integer
         train_size = int(0.7*self.n_rows)
@@ -40,9 +36,7 @@ class TestEnsemble(unittest.TestCase):
             EnsembleOptimizer((self.A, self.y), train_size=train_size)
 
     def test_run_ensemble(self):
-        """
-        Test _run_ensemble.
-        """
+        """Tests _run_ensemble."""
 
         size = 10
         eopt = EnsembleOptimizer((self.A, self.y), ensemble_size=size)
@@ -68,9 +62,7 @@ class TestEnsemble(unittest.TestCase):
         self.assertIsNotNone(eopt._rmse_test_ensemble)
 
     def test_construct_final_model(self):
-        """
-        Test construct final model.
-        """
+        """Tests construct final model."""
         eopt = EnsembleOptimizer((self.A, self.y))
         self.assertIsNone(eopt.parameters)
         self.assertIsNone(eopt._parameters_std)
@@ -80,9 +72,7 @@ class TestEnsemble(unittest.TestCase):
         self.assertIsNotNone(eopt._parameters_std)
 
     def test_error_matrix(self):
-        """
-        Test error_matrix property.
-        """
+        """Tests error_matrix property."""
         ensemble_size = 50
         eopt = EnsembleOptimizer((self.A, self.y), ensemble_size=ensemble_size)
         eopt.train()
@@ -90,9 +80,7 @@ class TestEnsemble(unittest.TestCase):
         self.assertEqual(error_matrix.shape, (self.n_rows, ensemble_size))
 
     def test_predict(self):
-        """
-        Test predict.
-        """
+        """Tests predict."""
         ensemble_size = 50
         eopt = EnsembleOptimizer((self.A, self.y), ensemble_size=ensemble_size)
         eopt.train()
@@ -112,9 +100,7 @@ class TestEnsemble(unittest.TestCase):
         self.assertIsInstance(stds, float)
 
     def test_summary_property(self):
-        """
-        Test summary property
-        """
+        """Tests summary property."""
 
         # without having trained
         eopt = EnsembleOptimizer((self.A, self.y))
@@ -128,9 +114,7 @@ class TestEnsemble(unittest.TestCase):
         self.assertIn('parameters_std', eopt.summary.keys())
 
     def test_repr(self):
-        """
-        Test repr dunder
-        """
+        """Tests repr dunder."""
         opt = EnsembleOptimizer((self.A, self.y))
         self.assertIsInstance(repr(opt), str)
 

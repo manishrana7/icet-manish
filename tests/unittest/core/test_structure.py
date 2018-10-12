@@ -27,9 +27,7 @@ def strip_surrounding_spaces(input_string):
 
 
 class TestStructure(unittest.TestCase):
-    """
-    Container for test of the module functionality.
-    """
+    """Container for test of the module functionality."""
     def __init__(self, *args, **kwargs):
         super(TestStructure, self).__init__(*args, **kwargs)
         self.atoms = bulk('Ag', 'hcp', a=2.0)
@@ -42,9 +40,7 @@ class TestStructure(unittest.TestCase):
                      [0., 0., 3.26598632]]
 
     def setUp(self):
-        """
-        Set up before each test.
-        """
+        """Setup before each test."""
         self.structure = Structure(
             positions=self.positions,
             chemical_symbols=self.chemical_symbols,
@@ -53,50 +49,36 @@ class TestStructure(unittest.TestCase):
         random.seed(113)
 
     def test_positions(self):
-        """
-        Test positions of atoms in structure.
-        """
+        """Tests positions of atoms in structure."""
         for i, vec in enumerate(self.structure.positions):
             self.assertListEqual(vec.tolist(), self.positions[i])
 
     def test_chemical_symbols(self):
-        """
-        Test chemical symbols of atoms in structure.
-        """
+        """Tests chemical symbols of atoms in structure."""
         self.assertListEqual(self.structure.chemical_symbols,
                              self.chemical_symbols)
 
     def test_atomic_numbers(self):
-        """
-        Test atomic numbers.
-        """
+        """Tests atomic numbers."""
         self.assertListEqual(self.structure.atomic_numbers,
                              [47, 47])
 
     def test_cell(self):
-        """
-        Test cell.
-        """
+        """Tests cell."""
         for i, vec in enumerate(self.structure.cell):
             self.assertListEqual(vec.tolist(), self.cell[i])
 
     def test_pbc(self):
-        """
-        Test periodic boundary conditions.
-        """
+        """Tests periodic boundary conditions."""
         self.assertListEqual(self.structure.pbc, [True, True, True])
 
     def test_unique_sites(self):
-        """
-        Test unique sites.
-        """
+        """Tests unique sites."""
         self.assertListEqual(self.structure.unique_sites,
                              [0, 0])
 
     def test_set_and_get_positions(self):
-        """
-        Test set and get positions.
-        """
+        """Tests set and get positions."""
         new_positions = [[0., 0., 0.001],
                          [0., 1.15470054, 1.63299316]]
         self.structure.set_positions(new_positions)
@@ -105,26 +87,20 @@ class TestStructure(unittest.TestCase):
             self.assertListEqual(vec.tolist(), new_positions[i])
 
     def test_set_and_get_chemical_symbols(self):
-        """
-        Test set and get chemical symbols.
-        """
+        """Tests set and get chemical symbols."""
         new_chemical_symbols = ['Au', 'Au']
         self.structure.set_chemical_symbols(new_chemical_symbols)
         retval = self.structure.get_chemical_symbols()
         self.assertListEqual(retval, new_chemical_symbols)
 
     def test_set_and_get_atomic_numbers(self):
-        """
-        Test set and get atomic numbers.
-        """
+        """Tests set and get atomic numbers."""
         self.structure.set_atomic_numbers([48, 47])
         retval = self.structure.get_atomic_numbers()
         self.assertListEqual(retval, [48, 47])
 
     def test_set_and_get_cell(self):
-        """
-        Test set and get cell.
-        """
+        """Tests set and get cell."""
         new_cell = [[2., 0., 0.],
                     [-1., 2., 0.],
                     [0., 0., 4.]]
@@ -134,32 +110,24 @@ class TestStructure(unittest.TestCase):
             self.assertListEqual(vec.tolist(), new_cell[i])
 
     def test_set_and_get_pbc(self):
-        """
-        Test set and get pbc.
-        """
+        """Tests set and get pbc."""
         self.structure.set_pbc([True, True, False])
         retval = self.structure.get_pbc()
         self.assertListEqual(retval, [True, True, False])
 
     def test_set_and_get_unique_sites(self):
-        """
-        Test set and get pbc.
-        """
+        """Tests set and get unique sites."""
         self.structure.set_unique_sites([0, 1])
         retval = self.structure.get_unique_sites()
         self.assertListEqual(retval, [0, 1])
 
     def test_get_position(self):
-        """
-        Test get_position functionality.
-        """
+        """Tests get_position functionality."""
         retval = self.structure.get_position(LatticeSite(1, [0, 0, 0]))
         self.assertListEqual(retval.tolist(), self.positions[1])
 
     def test_get_distance(self):
-        """
-        Test get_distance functionality.
-        """
+        """Tests get_distance functionality."""
         retval = self.structure.get_distance(0, 1,
                                              [0., 0., 0.],
                                              [0., 0., 0.])
@@ -169,7 +137,7 @@ class TestStructure(unittest.TestCase):
 
     def test_find_lattice_site_by_position_simple(self):
         """
-        Test finding lattice site by position, simple version using
+        Tests finding lattice site by position, simple version using
         only one atom cell.
 
         1. Create a bunch of lattice sites all with index 0 and
@@ -200,7 +168,7 @@ class TestStructure(unittest.TestCase):
 
     def test_find_lattice_site_by_position_medium(self):
         """
-        Test finding lattice site by position, medium version
+        Tests finding lattice site by position, medium version
         tests against hcp and user more than one atom in the basis
         1. Create a bunch of lattice sites all with index 0 and
         integer unitcell offsets
@@ -235,7 +203,7 @@ class TestStructure(unittest.TestCase):
 
     def test_find_lattice_site_by_position_hard(self):
         """
-        Test finding lattice site by position, hard version tests against hcp,
+        Tests finding lattice site by position, hard version tests against hcp,
         many atoms in the basis AND pbc = [True, True, False] !
         1. Create a bunch of lattice sites all with index 0 and
         integer unitcell offsets
@@ -273,9 +241,7 @@ class TestStructure(unittest.TestCase):
             self.assertEqual(site, found_site)
 
     def test_structure_from_atoms(self):
-        """
-        Test ASE Atoms-to-icet Structure conversion.
-        """
+        """Tests ASE Atoms-to-icet Structure conversion."""
         structure = Structure.from_atoms(self.atoms)
 
         positions = structure.get_positions()
@@ -287,9 +253,7 @@ class TestStructure(unittest.TestCase):
         self.assertListEqual(chem_symbols, ['Ag', 'Ag'])
 
     def test_structure_to_atoms(self):
-        """
-        Test icet Structure-to-ASE Atoms conversion.
-        """
+        """Tests icet Structure-to-ASE Atoms conversion."""
         atoms = Structure.to_atoms(self.structure)
         positions = atoms.get_positions()
         struc_positions = self.structure.get_positions()
@@ -300,9 +264,7 @@ class TestStructure(unittest.TestCase):
         self.assertListEqual(chem_symbols, ['Ag', 'Ag'])
 
     def test_repr_function(self):
-        """
-        Test representation.
-        """
+        """Tests string representation."""
         retval = self.structure.__repr__()
         target = """
 Cell:

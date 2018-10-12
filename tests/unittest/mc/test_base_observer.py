@@ -28,27 +28,19 @@ class TestBaseObserver(unittest.TestCase):
         self.observer = ConcreteObserver(interval=10, tag='test_observer')
 
     def test_return_type(self):
-        """
-        Test property return type.
-        """
+        """Tests property return type."""
         self.assertEqual(self.observer.return_type, int)
 
     def test_get_observable(self):
-        """
-        Test base observer by calling concrete observers get_observable.
-        """
+        """Tests base observer by calling concrete observers get_observable."""
         self.assertEqual(self.observer.get_observable(self.atoms), 27)
 
     def test_interval_attribute(self):
-        """
-        Test interval attribute.
-        """
+        """Tests interval attribute."""
         self.assertEqual(self.observer.interval, 10)
 
     def test_attribute_tag(self):
-        """
-        Test the tag attribute.
-        """
+        """Tests the tag attribute."""
         self.assertEqual(self.observer.tag, 'test_observer')
 
 

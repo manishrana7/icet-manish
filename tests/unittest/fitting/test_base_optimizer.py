@@ -6,9 +6,7 @@ from icet.fitting.base_optimizer import BaseOptimizer
 
 
 class TestBaseOptimizer(unittest.TestCase):
-    """
-    Unittest class for BaseOptimizer..
-    """
+    """Unittest class for BaseOptimizer."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -26,9 +24,7 @@ class TestBaseOptimizer(unittest.TestCase):
         pass
 
     def test_init(self):
-        """
-        Test initializing BaseOptimizer.
-        """
+        """Tests initializing BaseOptimizer."""
 
         # test init with all fit_methods
         for fit_method in available_fit_methods:
@@ -44,17 +40,12 @@ class TestBaseOptimizer(unittest.TestCase):
             BaseOptimizer((A_faulty, self.y), 'least-squares')
 
     def test_str(self):
-        """
-        Test str dunder
-        """
+        """Tests str dunder."""
         bopt = BaseOptimizer((self.A, self.y), 'least-squares')
         self.assertIsInstance(str(bopt), str)
 
     def test_get_contributions(self):
-        """
-        Test get_contributions.
-        """
-
+        """Tests get_contributions."""
         A = np.array([[1, 2], [-3, -4]])
         parameters = np.array([1, 10])
         target = np.array([2, 30])
@@ -64,9 +55,7 @@ class TestBaseOptimizer(unittest.TestCase):
         np.testing.assert_almost_equal(target, bopt.get_contributions(A))
 
     def test_summary_property(self):
-        """
-        Test summary property
-        """
+        """Tests summary property."""
         bopt = BaseOptimizer((self.A, self.y), 'least-squares')
         self.assertIn('parameters', bopt.summary.keys())
         self.assertIn('fit_method', bopt.summary.keys())
