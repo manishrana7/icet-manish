@@ -11,7 +11,7 @@ import numpy as np
 
 from ase.db import connect
 from icet.core.cluster_counts import ClusterCounts
-from icet.core.orbit_list import create_orbit_list
+from icet import OrbitList
 
 
 def get_equivalent_clustermap_key(key1, clustermap_keys, tol=1e-3):
@@ -64,11 +64,11 @@ def test_no_symmetry_local_orbit_list_counting(atoms_primitive, atoms_tag,
             atom.symbol = 'H'
 
     # orbit list primitive
-    orbit_list_primitive = create_orbit_list(atoms, cutoffs)
+    orbit_list_primitive = OrbitList(atoms, cutoffs)
     orbit_list_primitive.sort()
 
     # orbit list supercell
-    orbit_list_supercell = create_orbit_list(atoms_repeat, cutoffs)
+    orbit_list_supercell = OrbitList(atoms_repeat, cutoffs)
     orbit_list_supercell.sort()
 
     # set up cluster counts and count clusters
@@ -157,7 +157,7 @@ def test_no_symmetry_vs_symmetry_count(atoms_primitive, atoms_tag,
             atom.symbol = 'H'
 
     """ Get orbit list no symmetry case """
-    orbit_list_no_symmetry = create_orbit_list(atoms_repeat, cutoffs)
+    orbit_list_no_symmetry = OrbitList(atoms_repeat, cutoffs)
     orbit_list_no_symmetry.sort()
     """Set up cluster count and count. Here we use a cutoff so that no extra
     clusters are found in the symmetry case and compare the counts found in
@@ -166,7 +166,7 @@ def test_no_symmetry_vs_symmetry_count(atoms_primitive, atoms_tag,
                                               atoms_repeat)
 
     """ Get orbit list symmetry case """
-    orbit_list_symmetry = create_orbit_list(atoms, cutoffs)
+    orbit_list_symmetry = OrbitList(atoms, cutoffs)
     orbit_list_symmetry.sort()
 
     """ Set up cluster count """

@@ -6,32 +6,34 @@
 Monte Carlo simulations
 =======================
 
-We are now in a position to carry out a series of Monte Carlo (MC)
-simulations to sample the cluster expansion model that was constructed
-and validated in the previous steps. To set up the simulation we
-construct a supercell and then create a calculator by combining
-:ref:`our cluster expansion model
-<tutorial_construct_cluster_expansion>` with the supercell.
+We are now in a position to carry out a series of Monte Carlo (MC) simulations
+to sample the cluster expansion model that was constructed and validated in the
+previous steps. To set up the simulation we first construct a supercell and
+initialize an associated calculator by combining :ref:`our cluster expansion
+model <tutorial_construct_cluster_expansion>` with the supercell.
 
 .. literalinclude:: ../../../../tutorial/basic/5_run_monte_carlo.py
+   :start-after: # step 1
    :end-before: # step 2
 
-In this example the sampling will be carried out in the semi-grand
-canonical (SGC) ensemble, which requires a temperature and a set of
-chemical potentials as input. Accordingly we set up a loop over
-different temperature and chemical potential values. In the body of
-the two nested loops we instantiate a :ref:`SGC ensemble object <sgc>`
-using the calculator configured before and then run a MC simulation
-for a number of trial steps.
+In this example the sampling will be carried out in the semi-grand canonical
+(SGC) ensemble. To this end, we set up a :ref:`SGC ensemble object <sgc>`
+object and loop over both temperatures and chemical potential differences.
+
+We carry out a rather long MC run, anticipating that the analysis will
+only include the latter part of the simulation after equilibration.
+After the run the results are written to file (in the form of a
+:ref:`DataContainer <data_container>` object). The latter will be used
+in the next step to analyze the runs. Note that the ensemble object is
+only initialized once for each temperature. Thereby the configuration
+evolves gradually and the period needed for equilibration is
+shortened.
 
 .. literalinclude:: ../../../../tutorial/basic/5_run_monte_carlo.py
    :start-after: # step 2
 
-Here, the results of the simulation are stored in a :ref:`data
-container <data_container>`, which is written to a file named
-`sgc.dc`. In the next step these data will be analyzed to generate
-e.g., a map of the chemical potential difference vs composition.
-
+On an Intel i7-950 CPU the set up of the calculator takes about 10 seconds,
+whereas the Monte Carlo simulation takes about 0.2 seconds per MC trial step.
 
 Source code
 -----------

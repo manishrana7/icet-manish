@@ -338,9 +338,9 @@ class TestEnsemble(unittest.TestCase):
         self.assertTrue('sites and species must have the same length.'
                         in str(context.exception))
 
-    def test_get_ensemble_data(self):
+    def test__get_ensemble_data(self):
         """Test the get ensemble data method."""
-        data = self.ensemble.get_ensemble_data()
+        data = self.ensemble._get_ensemble_data()
 
         self.assertIn('potential', data.keys())
 

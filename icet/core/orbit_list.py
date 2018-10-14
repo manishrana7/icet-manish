@@ -1,181 +1,117 @@
 from typing import List
-from ase import Atoms
+
 import numpy as np
 
-from _icet import OrbitList
-from .local_orbit_list_generator import LocalOrbitListGenerator
-from .neighbor_list import get_neighbor_lists
-from .permutation_map import PermutationMap, permutation_matrix_from_atoms
-from .structure import Structure
-from .lattice_site import LatticeSite
-
+from _icet import _OrbitList
+from ase import Atoms
+from icet.core.local_orbit_list_generator import LocalOrbitListGenerator
+from icet.core.neighbor_list import get_neighbor_lists
+from icet.core.permutation_matrix import (_get_lattice_site_permutation_matrix,
+                                          permutation_matrix_from_atoms)
+from icet.core.structure import Structure
 from icet.io.logging import logger
+
 logger = logger.getChild('orbit_list')
 
 
-def __fractional_to_cartesian(fractional_coordinates: List[List[float]],
-                              cell: np.ndarray):
+class OrbitList(_OrbitList):
     """
-    Converts cell metrics from fractional to cartesian coordinates.
+    The orbit list object has an internal list of orbits.
 
-    Parameters
+    An orbit has a list of equivalent sites with the restriction
+    that at least one site is in the cell of the primitive structure.
+
+    parameters
     ----------
-    fractional_coordinates
-        list of fractional coordinates
-
-    cell
-        cell metric
-    """
-    cartesian_coordinates = [np.dot(frac, cell)
-                             for frac in fractional_coordinates]
-    return cartesian_coordinates
-
-
-def __get_lattice_site_permutation_matrix(structure: Structure,
-                                          permutation_matrix: PermutationMap,
-                                          prune: bool=True):
-    """
-    Returns a transformed permutation matrix with lattice sites as entries
-    instead of fractional coordinates.
-
-    Parameters
-    ----------
-    structure
-        primitive atomic structure
-    permutation_matrix
-        permutation matrix with fractional coordinates format entries
-    prune
-        if True the permutation matrix will be pruned
-
-    Returns
-    -------
-    Permutation matrix in a row major order with lattice site format entries
-    """
-    pm_frac = permutation_matrix.get_permuted_positions()
-
-    pm_lattice_sites = []
-    for row in pm_frac:
-        positions = __fractional_to_cartesian(row, structure.cell)
-        lat_neighbors = []
-        if np.all(structure.pbc):
-            lat_neighbors = \
-                structure.find_lattice_sites_by_positions(positions)
-        else:
-            for pos in positions:
-                try:
-                    lat_neighbor = \
-                        structure.find_lattice_site_by_position(pos)
-                except RuntimeError:
-                    continue
-                lat_neighbors.append(lat_neighbor)
-        if len(lat_neighbors) > 0:
-            pm_lattice_sites.append(lat_neighbors)
-        else:
-            logger.warning('Unable to transform any element in a column of the'
-                           ' fractional permutation matrix to lattice site')
-    if prune:
-        logger.debug('Size of columns of the permutation matrix before'
-                     ' pruning {}'.format(len(pm_lattice_sites)))
-
-        pm_lattice_sites = __prune_permutation_matrix(pm_lattice_sites)
-
-        logger.debug('Size of columns of the permutation matrix after'
-                     ' pruning {}'.format(len(pm_lattice_sites)))
-
-    return pm_lattice_sites
-
-
-def __prune_permutation_matrix(permutation_matrix: List[List[LatticeSite]]):
-    """
-    Prunes the matrix so that the first column only contains unique elements.
-
-    Parameters
-    ----------
-    permutation_matrix
-        permutation matrix with LatticeSite type entries
+    atoms : ASE Atoms object
+            This atoms object will be used to construct a primitive
+            structure on which all the lattice sites in the orbits
+            are based on.
+    cutoffs : list of float
+              cutoffs[i] is the cutoff for orbits with order i+2.
     """
 
-    for i in range(len(permutation_matrix)):
-        for j in reversed(range(len(permutation_matrix))):
-            if j <= i:
-                continue
-            if permutation_matrix[i][0] == permutation_matrix[j][0]:
-                permutation_matrix.pop(j)
-                msg = ['Removing duplicate in permutation matrix']
-                msg += ['i: {} j: {}'.format(i, j)]
-                logger.debug(' '.join(msg))
+    def __init__(self, atoms, cutoffs):
+        if isinstance(atoms, Structure):
+            atoms = atoms.to_atoms()
+        max_cutoff = np.max(cutoffs)
+        # Set up a permutation matrix
+        permutation_matrix, prim_structure, _ \
+            = permutation_matrix_from_atoms(atoms, max_cutoff)
 
-    return permutation_matrix
+        logger.info('Done getting permutation_matrix.')
 
+        # Get a list of neighbor-lists
+        neighbor_lists = get_neighbor_lists(prim_structure, cutoffs)
 
-def _get_supercell_orbit_list(self, atoms: Atoms):
-    """
-    Returns an orbit list for a supercell structure.
+        logger.info('Done getting neighbor lists.')
 
-    Parameters
-    ----------
-    atoms
-        supercell atomic structure
+        # Transform permutation_matrix to be in lattice site format
+        pm_lattice_sites \
+            = _get_lattice_site_permutation_matrix(prim_structure,
+                                                   permutation_matrix,
+                                                   prune=True)
 
-    Returns
-    -------
-    An OrbitList object
+        logger.info('Transformation of permutation matrix to lattice neighbor'
+                    'format completed.')
 
-    Todo
-    ----
-    * Is there any reason to make this a private member
-    """
-    structure = Structure.from_atoms(atoms)
-    log = LocalOrbitListGenerator(self, structure)
+        _OrbitList.__init__(self, prim_structure,
+                            pm_lattice_sites, neighbor_lists)
+        self.sort()
+        logger.info('Finished construction of orbit list.')
 
-    supercell_orbit_list = log.generate_full_orbit_list()
+    @property
+    def primitive_structure(self):
+        """
+        Returns the primitive structure to which the lattice sites in
+        the orbits are referenced to.
+        """
+        return self._primitive_structure.copy()
 
-    return supercell_orbit_list
+    @property
+    def permutation_matrix(self):
+        """Returns icet PermutationMatrix object."""
+        return self._permutation_matrix
 
+    def __str__(self):
+        nice_str = 'Number of orbits: {}'.format(len(self))
 
-OrbitList.get_supercell_orbit_list = _get_supercell_orbit_list
+        for i, orbit in enumerate(self.orbits):
+            cluster_str = self.orbits[i].representative_cluster.__str__()
+            nice_str += "\norbit {} - Multiplicity {} - Cluster: {}".format(
+                i, len(orbit), cluster_str)
+        return nice_str
 
+    def get_supercell_orbit_list(self, atoms: Atoms):
+        """
+        Returns an orbit list for a supercell structure.
 
-def create_orbit_list(atoms: Atoms, cutoffs: List[float]):
-    """
-    Builds an orbit list.
+        Parameters
+        ----------
+        atoms
+            supercell atomic structure
 
-    Parameters
-    ----------
-    atoms
-        input atomic structure
-    cutoffs
-        cutoff radii for each order
+        Returns
+        -------
+        An OrbitList object
+        """
+        structure = Structure.from_atoms(atoms)
+        log = LocalOrbitListGenerator(self, structure)
 
-    Returns
-    -------
-    An OrbitList object
-    """
-    max_cutoff = np.max(cutoffs)
+        supercell_orbit_list = log.generate_full_orbit_list()
 
-    # Set up a permutation matrix
-    permutation_matrix, prim_structure, _ \
-        = permutation_matrix_from_atoms(atoms, max_cutoff)
+        return supercell_orbit_list
 
-    logger.info('Done getting permutation_matrix.')
+    def remove_inactive_orbits(self, allowed_species: List[int]):
+        """ Removes orbits with inactive sites
 
-    # Get a list of neighbor-lists
-    neighbor_lists = get_neighbor_lists(prim_structure, cutoffs)
-
-    logger.info('Done getting neighbor lists.')
-
-    # Transform permutation_matrix to be in lattice site format
-    pm_lattice_sites \
-        = __get_lattice_site_permutation_matrix(prim_structure,
-                                                permutation_matrix,
-                                                prune=True)
-
-    msg = ['Transformation of permutation matrix to lattice neighbor']
-    msg += ['format completed.']
-    logger.info(' '.join(msg))
-
-    orbit_list = OrbitList(prim_structure, pm_lattice_sites, neighbor_lists)
-
-    logger.info('Finished construction of orbit list.')
-
-    return orbit_list
+        Parameters
+        ----------
+        allowed_species
+            the number of allowed species on each site in the primitive
+            structure
+        """
+        prim_structure = self.get_primitive_structure()
+        print(allowed_species)
+        prim_structure.set_number_of_allowed_species(allowed_species)
+        self._remove_inactive_orbits(prim_structure)

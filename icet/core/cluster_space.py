@@ -1,14 +1,14 @@
 import pickle
-
-from ase import Atoms
 from collections import OrderedDict
 from typing import List, Union
+
 import numpy as np
 
 from _icet import ClusterSpace as _ClusterSpace
-from icet.tools.geometry import add_vacuum_in_non_pbc
-from icet.core.orbit_list import create_orbit_list
+from ase import Atoms
+from icet.core.orbit_list import OrbitList
 from icet.core.structure import Structure
+from icet.tools.geometry import add_vacuum_in_non_pbc
 
 
 class ClusterSpace(_ClusterSpace):
@@ -48,25 +48,27 @@ class ClusterSpace(_ClusterSpace):
         self._mi = Mi
 
         # set up orbit list
-        orbit_list = create_orbit_list(self._atoms, self._cutoffs)
+        self._orbit_list = OrbitList(self._atoms, self._cutoffs)
 
         # handle occupations
         if Mi is None:
             Mi = len(chemical_symbols)
         if isinstance(Mi, dict):
-            Mi = self._get_Mi_from_dict(Mi,
-                                        orbit_list.get_primitive_structure())
+            Mi = self._get_Mi_from_dict(
+                Mi, self._orbit_list.get_primitive_structure())
         if not isinstance(Mi, list):
             if isinstance(Mi, int):
-                Mi = [Mi] * len(orbit_list.get_primitive_structure())
+                Mi = [Mi] * len(self._orbit_list.get_primitive_structure())
             else:
                 raise Exception('Mi has wrong type (ClusterSpace)')
-        assert len(Mi) == len(orbit_list.get_primitive_structure()), \
+        assert len(Mi) == len(self._orbit_list.get_primitive_structure()), \
             'len(Mi) does not equal the number of sites' \
             ' in the primitive structure'
 
+        self._orbit_list.remove_inactive_orbits(Mi)
+
         # call (base) C++ constructor
-        _ClusterSpace.__init__(self, Mi, chemical_symbols, orbit_list)
+        _ClusterSpace.__init__(self, Mi, chemical_symbols, self._orbit_list)
 
     @staticmethod
     def _get_Mi_from_dict(Mi: dict, atoms: Union[Atoms, Structure]):
@@ -304,6 +306,11 @@ class ClusterSpace(_ClusterSpace):
         """
         return self._cutoffs
 
+    @property
+    def orbit_list(self):
+        """Orbit list that defines the cluster in the cluster space"""
+        return self._orbit_list
+
     def write(self, filename: str):
         """
         Saves cluster space to a file.
@@ -428,9 +435,9 @@ def get_singlet_configuration(atoms: Atoms, to_primitive: bool=False) -> Atoms:
     else:
         singlet_configuration = atoms.copy()
         singlet_configuration = add_vacuum_in_non_pbc(singlet_configuration)
-        orbit_list = cluster_space.get_orbit_list()
         orbit_list_supercell \
-            = orbit_list.get_supercell_orbit_list(singlet_configuration)
+            = cluster_space._orbit_list.get_supercell_orbit_list(
+                singlet_configuration)
         for singlet in cluster_data:
             for site in singlet['sites']:
                 element = chemical_symbols[singlet['orbit_index'] + 1]
