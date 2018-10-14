@@ -896,10 +896,6 @@ void OrbitList::removeOrbit(const size_t index)
         msg += "OrbitList size is " + std::to_string(size());
         throw std::out_of_range(msg);
     }
-<<<<<<< HEAD
-    _orbitList.erase(_orbitList.begin()+index);
-}
-=======
     _orbitList.erase(_orbitList.begin() + index);
 }
 
@@ -921,4 +917,3 @@ void OrbitList::removeInactiveOrbits(const Structure &structure)
         }
     }
 }
->>>>>>> master
