@@ -229,8 +229,8 @@ class TestOrbitList(unittest.TestCase):
         neighbor_lists = get_neighbor_lists(prim_structure, cutoffs)
         orbit_list = OrbitList(prim_structure, pm_latt_sites, neighbor_lists)
 
-        column1 = [row[0] for row in pm_latt_sites]
-        #print(column1)
+        #column1 = [row[0] for row in pm_latt_sites]
+        column1 = orbit_list.get_column1_from_pm(pm_latt_sites, False)
 
         for orbit in orbit_list.orbits:
             allowed_perm = []
@@ -254,7 +254,6 @@ class TestOrbitList(unittest.TestCase):
                 print(all_perm)
                 print(orbit.get_representative_cluster().print())
             self.assertEqual(sorted(allowed_perm), sorted(orbit.allowed_permutations))
-            #print(orbit.allowed_permutations)
 
     def test_orbit_list_non_pbc(self):
         """
