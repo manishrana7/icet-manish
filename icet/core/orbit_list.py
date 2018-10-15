@@ -47,7 +47,7 @@ class OrbitList(_OrbitList):
         logger.info('Done getting neighbor lists.')
 
         # Transform permutation_matrix to be in lattice site format
-        pm_lattice_sites \
+        self._pm_lattice_sites \
             = _get_lattice_site_permutation_matrix(prim_structure,
                                                    permutation_matrix,
                                                    prune=True)
@@ -56,7 +56,7 @@ class OrbitList(_OrbitList):
                     'format completed.')
 
         _OrbitList.__init__(self, prim_structure,
-                            pm_lattice_sites, neighbor_lists)
+                            self._pm_lattice_sites, neighbor_lists)
         self.sort()
         logger.info('Finished construction of orbit list.')
 
@@ -71,7 +71,7 @@ class OrbitList(_OrbitList):
     @property
     def permutation_matrix(self):
         """Returns icet PermutationMatrix object."""
-        return self._permutation_matrix
+        return self._pm_lattice_sites
 
     def __str__(self):
         nice_str = 'Number of orbits: {}'.format(len(self))
@@ -112,6 +112,5 @@ class OrbitList(_OrbitList):
             structure
         """
         prim_structure = self.get_primitive_structure()
-        print(allowed_species)
         prim_structure.set_number_of_allowed_species(allowed_species)
         self._remove_inactive_orbits(prim_structure)

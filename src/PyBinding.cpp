@@ -780,24 +780,23 @@ PYBIND11_MODULE(_icet, m)
         .def("clear", &OrbitList::clear,
              "Clears the OrbitList")
         .def("sort", &OrbitList::sort,
-             "Sort the orbits by orbit comparison")
-        .def("find_orbit", (int (OrbitList::*)(const Cluster &) const) & OrbitList::findOrbit,
-             "Return the index of the orbit with the given representative cluster")
-        .def("is_row_taken", &OrbitList::isRowsTaken,
-             "Some random description")
+             "Sorts the orbits by orbit comparison")
+        .def("_find_orbit", (int (OrbitList::*)(const Cluster &) const) & OrbitList::findOrbit,
+             "Returns the index of the orbit with the given representative cluster")
+        .def("_is_row_taken", &OrbitList::isRowsTaken,
+             "Verifies if rows of permutation matrix have been already considered")
         .def("get_orbit_list", &OrbitList::getOrbitList,
              "Returns a list of Orbit objects from OrbitList")
         .def_property_readonly("orbits", &OrbitList::getOrbitList)
-        .def("get_sites_translated_to_unitcell", &OrbitList::getSitesTranslatedToUnitcell)
-        .def("get_column1_from_pm", &OrbitList::getColumn1FromPM)
-        .def("find_rows_from_col1", &OrbitList::findRowsFromCol1)
-        .def("get_all_columns_from_rows", &OrbitList::getAllColumnsFromRow)
-        .def("get_all_columns_from_sites", &OrbitList::getAllColumnsFromSites)
+        .def("_get_all_translated_sites", &OrbitList::getSitesTranslatedToUnitcell,
+             "Returns a set of sites where at least one site is translated inside the unit cell.")
+        .def("_get_all_columns_from_sites", &OrbitList::getAllColumnsFromSites,
+             "Returns all columns along with their unit cell translated indistinguishable sites")
         .def("get_primitive_structure", &OrbitList::getPrimitiveStructure,
              "Returns the primitive atomic structure used to construct the OrbitList instance")
         .def("__len__", &OrbitList::size,
              "Returns the total number of orbits counted in the OrbitList instance")
-        .def("print", &OrbitList::print, py::arg("verbosity") = 0)
+        // .def("print", &OrbitList::print, py::arg("verbosity") = 0)
         // .def("get_supercell_orbit_list", &OrbitList::getSupercellOrbitList)
         ;
 
