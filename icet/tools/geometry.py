@@ -283,7 +283,9 @@ def get_decorated_primitive_structure(atoms: Atoms, allowed_species: List[List[s
     """Returns a decorated primitive structure
 
         Will put hydrogen on sublattice 1, Helium on sublattice 2 and
-        so on        
+        so on
+
+        todo : simplify the revert back to unsorted symbols
     """
     if len(atoms) != len(allowed_species):
         raise ValueError(
@@ -293,7 +295,6 @@ def get_decorated_primitive_structure(atoms: Atoms, allowed_species: List[List[s
 
     # number_of_sublattices = len(symbols)
     decorated_primitive = atoms.copy()
-    
     for i, sym in enumerate(allowed_species):
         sublattice = symbols.index(tuple(sorted(sym))) + 1
         decorated_primitive[i].symbol = chemical_symbols[sublattice]
@@ -303,5 +304,9 @@ def get_decorated_primitive_structure(atoms: Atoms, allowed_species: List[List[s
     for atom in decorated_primitive:
         sublattice = chemical_symbols.index(atom.symbol)
         primitive_chemical_symbols.append(symbols[sublattice-1])
-    
+
+    for symbols in allowed_species:
+        if tuple(sorted(symbols)) in primitive_chemical_symbols:
+            index = primitive_chemical_symbols.index(tuple(sorted(symbols)))
+            primitive_chemical_symbols[index] = tuple(symbols)
     return decorated_primitive, primitive_chemical_symbols
