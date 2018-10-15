@@ -37,7 +37,7 @@ class OrbitList(_OrbitList):
         max_cutoff = np.max(cutoffs)
         # Set up a permutation matrix
         permutation_matrix, prim_structure, _ \
-            = permutation_matrix_from_atoms(atoms, max_cutoff)
+            = permutation_matrix_from_atoms(atoms, max_cutoff, find_prim=False)
 
         logger.info('Done getting permutation_matrix.')
 
@@ -102,7 +102,7 @@ class OrbitList(_OrbitList):
 
         return supercell_orbit_list
 
-    def remove_inactive_orbits(self, allowed_species: List[int]):
+    def remove_inactive_orbits(self, allowed_species: List[List[str]]):
         """ Removes orbits with inactive sites
 
         Parameters

@@ -8,7 +8,10 @@ from _icet import ClusterSpace as _ClusterSpace
 from ase import Atoms
 from icet.core.orbit_list import OrbitList
 from icet.core.structure import Structure
-from icet.tools.geometry import add_vacuum_in_non_pbc
+from icet.tools.geometry import add_vacuum_in_non_pbc, get_decorated_primitive_structure
+from ase.data import chemical_symbols
+
+from ase.visualize import view
 
 
 class ClusterSpace(_ClusterSpace):
@@ -24,51 +27,46 @@ class ClusterSpace(_ClusterSpace):
         cutoff radii per order that define the cluster space
     chemical_symbols : list of strings
         list of chemical symbols, each of which must map to an element of
-        the periodic table
-    Mi : list / dictionary / int
-        * if a list is provided, it must contain as many elements as there
-          are sites and each element represents the number of allowed
-          components on the respective site
-        * if a dictionary is provided the key represent the site index and
-          the value the number of allowed components
-        * if a single `int` is provided each site the number of allowed
-          components will be set to `Mi` for sites in the structure
+        the periodic table    
+        * if a list is provided, all sites on the lattice will have the
+          same allowed occupations as the input list        
+        * if a list of list of chemical symbols is provided then the outer
+          list requires to be of the same length as the atoms object and
+          chemical_symbols[i] will correspond to the allowed species on
+          site 'i' on the lattice
     """
 
     def __init__(self, atoms: Union[Atoms, Structure], cutoffs: List[float],
-                 chemical_symbols: List[str],
-                 Mi: Union[list, dict, int]=None) -> None:
+                 chemical_symbols: Union[List[str], List[List[str]]]) -> None:
 
         assert isinstance(atoms, Atoms), \
             'input configuration must be an ASE Atoms object'
 
-        self._atoms = atoms
+        self._atoms = atoms.copy()
         self._cutoffs = cutoffs
-        self._chemical_symbols = chemical_symbols
-        self._mi = Mi
-
-        # set up orbit list
-        self._orbit_list = OrbitList(self._atoms, self._cutoffs)
 
         # handle occupations
-        if Mi is None:
-            Mi = len(chemical_symbols)
-        if isinstance(Mi, dict):
-            Mi = self._get_Mi_from_dict(
-                Mi, self._orbit_list.get_primitive_structure())
-        if not isinstance(Mi, list):
-            if isinstance(Mi, int):
-                Mi = [Mi] * len(self._orbit_list.get_primitive_structure())
-            else:
-                raise Exception('Mi has wrong type (ClusterSpace)')
-        assert len(Mi) == len(self._orbit_list.get_primitive_structure()), \
-            'len(Mi) does not equal the number of sites' \
-            ' in the primitive structure'
+        if all(isinstance(i, str) for i in chemical_symbols):
+            chemical_symbols = [chemical_symbols]
 
-        self._orbit_list.remove_inactive_orbits(Mi)
+        elif not all(isinstance(i, list) for i in chemical_symbols):
+            raise TypeError("chemical_symbols must be"
+                            " List[str] or List[List[str]],"
+                            " not {}".format(type(chemical_symbols)))
+
+        self._chemical_symbols = chemical_symbols
+        decorated_primitive, primitive_chemical_symbols = get_decorated_primitive_structure(
+            self._atoms, self._chemical_symbols)
+
+        
+        # set up orbit list
+        self._orbit_list = OrbitList(decorated_primitive, self._cutoffs)
+        print(self._orbit_list)
+        exit()
+        self._orbit_list.remove_inactive_orbits(primitive_chemical_symbols)
 
         # call (base) C++ constructor
-        _ClusterSpace.__init__(self, Mi, chemical_symbols, self._orbit_list)
+        _ClusterSpace.__init__(self, chemical_symbols, self._orbit_list)
 
     @staticmethod
     def _get_Mi_from_dict(Mi: dict, atoms: Union[Atoms, Structure]):

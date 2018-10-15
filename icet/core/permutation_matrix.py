@@ -37,10 +37,10 @@ def permutation_matrix_from_atoms(atoms, cutoff, find_prim=True):
     atoms = atoms.copy()
     # set each element to the same since we only care about geometry when
     # taking primitive
-    if len(atoms) > 0:
-        atoms.set_chemical_symbols(len(atoms) * [atoms[0].symbol])
-    else:
-        raise Exception('Length of atoms is {}'.format(len(atoms)))
+    # if len(atoms) > 0:
+    #     atoms.set_chemical_symbols(len(atoms) * [atoms[0].symbol])
+    # else:
+    #     raise Exception('Length of atoms is {}'.format(len(atoms)))
 
     atoms_prim = atoms
     if find_prim:
@@ -54,7 +54,7 @@ def permutation_matrix_from_atoms(atoms, cutoff, find_prim=True):
     symmetry = spglib.get_symmetry(atoms_as_tuple)
     translations = symmetry['translations']
     rotations = symmetry['rotations']
-
+    
     # set up a permutation map object
     permutation_matrix = PermutationMatrix(translations, rotations)
 
