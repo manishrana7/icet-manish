@@ -155,26 +155,6 @@ class TestOrbitList(unittest.TestCase):
             # check all orbits in both lists are equal
             self.assertEqual(orbit, orbit_)
 
-    def test_orbit_list_non_pbc(self):
-        """
-        Tests that singlets in orbit list retrieves the right number of unique
-        sites of the structure with different periodic boundary conditions.
-        """
-        # TODO: Returned results are incorrect for simple-cubic structures.
-        atoms = bulk('Al', 'sc', a=4.0).repeat(4)
-        # [True, True, False]
-        atoms.set_pbc([True, True, False])
-        orbit_list = OrbitList(atoms, [0.])
-        self.assertEqual(len(orbit_list), 4)
-        # [True, False, False]
-        atoms.set_pbc([True, False, False])
-        orbit_list = OrbitList(atoms, [0.])
-        self.assertEqual(len(orbit_list), 7)
-        # [False]
-        atoms.set_pbc([False, False, False])
-        orbit_list = OrbitList(atoms, [0.])
-        self.assertEqual(len(orbit_list), 20)
-
     def test_orbit_list_fcc(self):
         """
         Tests orbit list has the right number of singlet and pairs for
