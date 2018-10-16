@@ -54,7 +54,7 @@ def permutation_matrix_from_atoms(atoms, cutoff, find_prim=True):
     symmetry = spglib.get_symmetry(atoms_as_tuple)
     translations = symmetry['translations']
     rotations = symmetry['rotations']
-    
+
     # set up a permutation map object
     permutation_matrix = PermutationMatrix(translations, rotations)
 

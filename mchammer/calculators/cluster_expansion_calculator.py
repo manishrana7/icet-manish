@@ -4,7 +4,6 @@ from icet import ClusterExpansion
 from mchammer.calculators.base_calculator import BaseCalculator
 from typing import Union, List
 from icet import Structure
-from icet import ClusterSpace
 from icet.tools.geometry import find_lattice_site_by_position
 import numpy as np
 
@@ -139,8 +138,11 @@ class ClusterExpansionCalculator(BaseCalculator):
     @property
     def occupation_constraints(self) -> List[List[int]]:
         """ map from site to allowed species """
-        allowed_species_prim = self.cluster_expansion.cluster_space.chemical_symbols
-        indices_in_prim = [find_lattice_site_by_position(self.cluster_expansion.cluster_space.primitive_structure, position=pos).index for pos in self.atoms.positions ] 
+        allowed_species_prim = \
+            self.cluster_expansion.cluster_space.chemical_symbols
+        indices_in_prim = [find_lattice_site_by_position(
+            self.cluster_expansion.cluster_space.primitive_structure,
+            position=pos).index for pos in self.atoms.positions]
         allowed_species = [allowed_species_prim[i] for i in indices_in_prim]
         print(allowed_species)
         return allowed_species

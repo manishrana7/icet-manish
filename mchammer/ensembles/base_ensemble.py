@@ -443,7 +443,7 @@ class BaseEnsemble(ABC):
         * fix this method
         * add unit test
         """
-        return np.random.choice(range(0,len(self._sublattices)))
+        return np.random.choice(range(0, len(self._sublattices)))
 
     def _restart_ensemble(self):
         """Restarts ensemble using the last state saved in DataContainer file.

@@ -183,7 +183,6 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 """
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
-        
 
     def test_get_string_representation(self):
         """Tests _get_string_representation functionality."""
@@ -337,7 +336,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         cs_read = ClusterSpace.read(f.name)
         self.assertEqual(self.cs._atoms, cs_read._atoms)
         self.assertEqual(list(self.cs._cutoffs), list(cs_read._cutoffs))
-        self.assertEqual(self.cs._chemical_symbols, cs_read._chemical_symbols)        
+        self.assertEqual(self.cs._chemical_symbols, cs_read._chemical_symbols)
 
     def test_chemical_symbols(self):
         """Tests chemical_symbols property."""

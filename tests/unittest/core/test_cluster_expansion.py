@@ -84,7 +84,7 @@ class TestClusterExpansion(unittest.TestCase):
         self.assertEqual(self.cs._atoms, ce_read.cluster_space._atoms)
         self.assertEqual(self.cs._cutoffs, ce_read.cluster_space._cutoffs)
         self.assertEqual(self.cs._chemical_symbols,
-                         ce_read.cluster_space._chemical_symbols)        
+                         ce_read.cluster_space._chemical_symbols)
 
         # check parameters
         self.assertEqual(ce_read.parameters, self.parameters)

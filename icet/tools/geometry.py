@@ -279,14 +279,16 @@ def ase_atoms_to_spglib_cell(atoms: Atoms) \
             atoms.get_atomic_numbers())
 
 
-def get_decorated_primitive_structure(atoms: Atoms, allowed_species: List[List[str]])-> Tuple[Atoms, List[List[str]]]:
+def get_decorated_primitive_structure(
+        atoms: Atoms, allowed_species: List[List[str]])-> Tuple[
+        Atoms, List[List[str]]]:
     """Returns a decorated primitive structure
 
         Will put hydrogen on sublattice 1, Helium on sublattice 2 and
         so on
 
         todo : simplify the revert back to unsorted symbols
-    """    
+    """
     if len(atoms) != len(allowed_species):
         raise ValueError(
             "Atoms object and chemical symbols need to be the same size.")
