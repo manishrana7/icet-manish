@@ -104,6 +104,7 @@ class TestClusterSpace(unittest.TestCase):
             self.structure_list.append(atoms)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):
@@ -191,6 +192,7 @@ class TestClusterSpaceSurface(unittest.TestCase):
             self.structure_list.append(atoms)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

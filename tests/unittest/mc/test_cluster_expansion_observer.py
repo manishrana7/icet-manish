@@ -26,6 +26,7 @@ class TestCEObserver(unittest.TestCase):
         self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

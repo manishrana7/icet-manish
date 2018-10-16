@@ -295,9 +295,7 @@ class OrbitList(object):
                                "in orbit list")
 
     def __str__(self):
-        """
-        String representation.
-        """
+        """String representation."""
         nice_str = ""
         for i, orbit in enumerate(self.orbits):
             nice_str += "Orbit {} - Multiplicity {}\n".format(i, len(orbit))

@@ -32,6 +32,7 @@ class TestCECalculatorBinary(unittest.TestCase):
         self.ce = ClusterExpansion(self.cs, params)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):
@@ -226,6 +227,7 @@ class TestCECalculatorBinaryHCP(unittest.TestCase):
         self.ce = ClusterExpansion(self.cs, params)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):
@@ -366,6 +368,7 @@ class TestCECalculatorBinaryBCC(unittest.TestCase):
         self.ce = ClusterExpansion(self.cs, params)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):
@@ -500,6 +503,7 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
         self.ce = ClusterExpansion(self.cs, params)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):
@@ -635,6 +639,7 @@ class TestCECalculatorTernaryHCP(unittest.TestCase):
         self.ce = ClusterExpansion(self.cs, params)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

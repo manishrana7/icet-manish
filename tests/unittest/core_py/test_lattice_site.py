@@ -26,6 +26,7 @@ class TestLatticeSite(unittest.TestCase):
             self.unitcell_offsets.append(list(element))
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

@@ -71,6 +71,7 @@ class TestEnsemble(unittest.TestCase):
         self.ce = ClusterExpansion(self.cs, parameters)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

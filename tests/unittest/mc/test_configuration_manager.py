@@ -18,6 +18,7 @@ class TestConfigurationManager(unittest.TestCase):
         self.sublattices = [list(range(len(self.atoms)))]
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

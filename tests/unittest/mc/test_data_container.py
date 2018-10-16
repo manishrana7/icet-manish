@@ -27,6 +27,7 @@ class TestDataContainer(unittest.TestCase):
         self.atoms = bulk('Al').repeat(4)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

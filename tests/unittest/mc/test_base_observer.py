@@ -12,6 +12,7 @@ class TestBaseObserver(unittest.TestCase):
         self.atoms = bulk('Al').repeat(3)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

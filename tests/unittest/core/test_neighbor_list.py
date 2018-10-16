@@ -22,6 +22,7 @@ class TestNeighborList(unittest.TestCase):
         self.ase_indices, self.ase_offsets = self.ase_nl.get_neighbors(0)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

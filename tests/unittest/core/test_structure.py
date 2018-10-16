@@ -40,6 +40,7 @@ class TestStructure(unittest.TestCase):
                      [0., 0., 3.26598632]]
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

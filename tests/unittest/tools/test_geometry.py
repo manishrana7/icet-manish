@@ -22,6 +22,7 @@ class TestGeometry(unittest.TestCase):
         super(TestGeometry, self).__init__(*args, **kwargs)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

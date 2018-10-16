@@ -21,6 +21,7 @@ class TestOptimizer(unittest.TestCase):
         self.y = np.dot(self.A, self.x) + self.noise
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def test_get_rows_via_sizes(self):

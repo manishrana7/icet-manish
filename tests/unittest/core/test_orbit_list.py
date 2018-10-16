@@ -26,6 +26,7 @@ class TestOrbitList(unittest.TestCase):
             structure, [lattice_sites[0], lattice_sites[1]], True)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

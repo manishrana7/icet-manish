@@ -41,6 +41,7 @@ class TestOrbitList(unittest.TestCase):
         self.atoms = bulk('Ag', a=4.09)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

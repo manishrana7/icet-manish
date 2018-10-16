@@ -34,6 +34,7 @@ class TestClusterExpansion(unittest.TestCase):
         self.cs = ClusterSpace(self.atoms, cutoffs, chemical_symbols)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

@@ -35,6 +35,7 @@ class TestLabelingGenerator(unittest.TestCase):
         self.concentrations = {0: (0, 0.15), 2: (0, 0.3)}
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):
@@ -138,6 +139,7 @@ class TestSiteGroup(unittest.TestCase):
         self.multiplicity = 7
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

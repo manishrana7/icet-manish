@@ -113,6 +113,7 @@ class TestClusterSpace(unittest.TestCase):
             self.structure_list.append(atoms)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):
@@ -381,6 +382,7 @@ class TestClusterSpaceSurface(unittest.TestCase):
                                self.chemical_symbols)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     @unittest.expectedFailure
@@ -450,6 +452,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
                                self.chemical_symbols)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def _get_mc_vector(self, cluster_space, orbit_index):

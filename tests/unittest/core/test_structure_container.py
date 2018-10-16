@@ -83,6 +83,7 @@ class TestStructureContainer(unittest.TestCase):
             self.add_properties_list.append(add_properties)
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):
@@ -343,6 +344,7 @@ class TestFitStructure(unittest.TestCase):
                                chemical_symbols=['Ag', 'Au'])
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

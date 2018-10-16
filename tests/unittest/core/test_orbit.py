@@ -38,6 +38,7 @@ class TestOrbit(unittest.TestCase):
                                        zip(indices, unitcell_offsets)]
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

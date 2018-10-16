@@ -44,6 +44,7 @@ class TestClusterCounts(unittest.TestCase):
         self.orbit_list.sort()
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):
