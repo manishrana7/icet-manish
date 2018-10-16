@@ -286,7 +286,7 @@ def get_decorated_primitive_structure(atoms: Atoms, allowed_species: List[List[s
         so on
 
         todo : simplify the revert back to unsorted symbols
-    """
+    """    
     if len(atoms) != len(allowed_species):
         raise ValueError(
             "Atoms object and chemical symbols need to be the same size.")

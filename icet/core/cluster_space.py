@@ -44,17 +44,17 @@ class ClusterSpace(_ClusterSpace):
 
         self._atoms = atoms.copy()
         self._cutoffs = cutoffs
+        self._chemical_symbols = chemical_symbols
 
         # handle occupations
-        if all(isinstance(i, str) for i in chemical_symbols):
-            chemical_symbols = [chemical_symbols]
+        if all(isinstance(i, str) for i in self._chemical_symbols):
+            self._chemical_symbols = [self._chemical_symbols]*len(self._atoms)
 
-        elif not all(isinstance(i, list) for i in chemical_symbols):
+        elif not all(isinstance(i, list) for i in self._chemical_symbols):
             raise TypeError("chemical_symbols must be"
                             " List[str] or List[List[str]],"
-                            " not {}".format(type(chemical_symbols)))
+                            " not {}".format(type(self._chemical_symbols)))
 
-        self._chemical_symbols = chemical_symbols
         decorated_primitive, primitive_chemical_symbols = \
             get_decorated_primitive_structure(
                 self._atoms, self._chemical_symbols)
@@ -323,8 +323,7 @@ class ClusterSpace(_ClusterSpace):
 
         parameters={'atoms': self._atoms.copy(),
                       'cutoffs': self._cutoffs,
-                      'chemical_symbols': self._chemical_symbols,
-                      'Mi': self._mi}
+                      'chemical_symbols': self._chemical_symbols}
         with open(filename, 'wb') as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -346,8 +345,7 @@ class ClusterSpace(_ClusterSpace):
 
         return ClusterSpace(parameters['atoms'],
                             parameters['cutoffs'],
-                            parameters['chemical_symbols'],
-                            parameters['Mi'])
+                            parameters['chemical_symbols'])
 
 
 def get_singlet_info(atoms: Atoms, return_cluster_space: bool=False):

@@ -130,16 +130,6 @@ class TestClusterSpace(unittest.TestCase):
         cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.chemical_symbols)
         self.assertIsInstance(cs, ClusterSpace)
         self.assertEqual(len(cs), len(self.cs))
-        # check Mi as int
-        cs = ClusterSpace(self.atoms_prim, self.cutoffs,
-                          self.chemical_symbols, Mi=2)
-        self.assertIsInstance(cs, ClusterSpace)
-        self.assertEqual(len(cs), len(self.cs))
-        # check Mi as dict
-        cs = ClusterSpace(self.atoms_prim, self.cutoffs,
-                          self.chemical_symbols, Mi={0: 2})
-        self.assertIsInstance(cs, ClusterSpace)
-        self.assertEqual(len(cs), len(self.cs))
 
     def test_len(self):
         """
@@ -184,7 +174,7 @@ class TestClusterSpace(unittest.TestCase):
         retval = self.cs.__repr__()
         target = """
 =============================== Cluster Space ================================
- chemical species: Ag Au
+ chemical species: ['Ag', 'Au']
  cutoffs: 4.0000 4.0000 4.0000
  total number of orbits: 5
  number of orbits by order: 0= 1  1= 1  2= 1  3= 1  4= 1
@@ -200,6 +190,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
 """
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
+        
 
     def test_get_string_representation(self):
         """
@@ -209,7 +200,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
                                                     print_minimum=1)
         target = """
 =============================== Cluster Space ================================
- chemical species: Ag Au
+ chemical species: ['Ag', 'Au']
  cutoffs: 4.0000 4.0000 4.0000
  total number of orbits: 5
  number of orbits by order: 0= 1  1= 1  2= 1  3= 1  4= 1
@@ -369,12 +360,11 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         cs_read = ClusterSpace.read(f.name)
         self.assertEqual(self.cs._atoms, cs_read._atoms)
         self.assertEqual(list(self.cs._cutoffs), list(cs_read._cutoffs))
-        self.assertEqual(self.cs._chemical_symbols, cs_read._chemical_symbols)
-        self.assertEqual(self.cs._mi, cs_read._mi)
+        self.assertEqual(self.cs._chemical_symbols, cs_read._chemical_symbols)        
 
     def test_chemical_symbols(self):
         """ Tests chemical_symbols property. """
-        target = ['Ag', 'Au']
+        target = [['Ag', 'Au']]
         self.assertEqual(self.cs.chemical_symbols, target)
 
 
