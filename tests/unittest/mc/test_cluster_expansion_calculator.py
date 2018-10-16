@@ -31,6 +31,9 @@ class TestCECalculatorBinary(unittest.TestCase):
 
         self.ce = ClusterExpansion(self.cs, params)
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Setup before each test."""
         self.atoms = bulk('Al', 'fcc', a=4.0).repeat(2)
@@ -222,6 +225,9 @@ class TestCECalculatorBinaryHCP(unittest.TestCase):
 
         self.ce = ClusterExpansion(self.cs, params)
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Setup before each test."""
         self.atoms = bulk('Al', 'hcp', a=4.0, c=3.1).repeat(2)
@@ -359,6 +365,9 @@ class TestCECalculatorBinaryBCC(unittest.TestCase):
 
         self.ce = ClusterExpansion(self.cs, params)
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Setup before each test."""
         self.atoms = bulk('Al', 'bcc', a=4.0).repeat(2)
@@ -489,6 +498,9 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
         params_len = self.cs.get_cluster_space_size()
         params = [1.0] * params_len
         self.ce = ClusterExpansion(self.cs, params)
+
+    def shortDescription(self):
+        return None
 
     def setUp(self):
         """Setup before each test."""
@@ -621,6 +633,9 @@ class TestCECalculatorTernaryHCP(unittest.TestCase):
         params_len = self.cs.get_cluster_space_size()
         params = [1.0] * params_len
         self.ce = ClusterExpansion(self.cs, params)
+
+    def shortDescription(self):
+        return None
 
     def setUp(self):
         """Setup before each test."""

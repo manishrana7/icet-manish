@@ -14,6 +14,9 @@ class TestConvexHull(unittest.TestCase):
         self.concentrations = [0.0, 1.0, 0.4, 0.6]
         self.energies = [0.0, 10.0, -10.0, 20.0]
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Instantiates class before each test."""
         self.ch = ConvexHull(self.concentrations, self.energies)
@@ -56,6 +59,9 @@ class TestConvexHullTernary(unittest.TestCase):
         self.concentrations = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0],
                                [0.1, 0.1], [0.3, 0.3]]
         self.energies = [0.0, 10.0, -10.0, 3.0, -7.0]
+
+    def shortDescription(self):
+        return None
 
     def setUp(self):
         """Instantiates class before each test."""

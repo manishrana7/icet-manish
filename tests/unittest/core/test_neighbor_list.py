@@ -21,6 +21,9 @@ class TestNeighborList(unittest.TestCase):
         self.ase_nl.update(self.atoms)
         self.ase_indices, self.ase_offsets = self.ase_nl.get_neighbors(0)
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Setup before each test."""
         self.nl = NeighborList(self.cutoff)

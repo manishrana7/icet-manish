@@ -34,6 +34,9 @@ class TestLabelingGenerator(unittest.TestCase):
         self.iter_elements = [(0, 1), (2,), (2,), (2,), (0, 1), (0, 2)]
         self.concentrations = {0: (0, 0.15), 2: (0, 0.3)}
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Instantiates class before each test."""
         self.lg = LabelingGenerator(self.iter_elements,
@@ -133,6 +136,9 @@ class TestSiteGroup(unittest.TestCase):
         self.iter_element = (0, 1, 3)
         self.position = 3
         self.multiplicity = 7
+
+    def shortDescription(self):
+        return None
 
     def setUp(self):
         """Instantiates class before each test."""

@@ -20,6 +20,9 @@ class TestBaseOptimizer(unittest.TestCase):
         self.noise = np.random.normal(0, 0.1, (self.n_rows, ))
         self.y = np.dot(self.A, self.x) + self.noise
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         pass
 

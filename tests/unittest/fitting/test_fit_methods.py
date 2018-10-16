@@ -19,6 +19,9 @@ class TestOptimizer(unittest.TestCase):
         noise = np.random.normal(0.0, 0.2, N)
         self.y = np.dot(self.A, self.x) + noise
 
+    def shortDescription(self):
+        return None
+
     def test_all_available_fit_methods(self):
         """Tests all available fit_methods."""
         for fit_method in available_fit_methods:

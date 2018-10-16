@@ -20,6 +20,9 @@ class TestPermutationMatrix(unittest.TestCase):
         self.atoms = bulk("Al").repeat(2)
         self.cutoff = 5.0
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Set up class before each test case"""
         self.pm = PermutationMatrix(self.atoms, self.cutoff)

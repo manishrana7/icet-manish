@@ -103,6 +103,9 @@ class TestClusterSpace(unittest.TestCase):
             atoms.set_chemical_symbols(symbols)
             self.structure_list.append(atoms)
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Instantiates class before each test."""
         self.cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.subelements)
@@ -186,6 +189,9 @@ class TestClusterSpaceSurface(unittest.TestCase):
             symbols[:k] = [self.subelements[1]] * k
             atoms.set_chemical_symbols(symbols)
             self.structure_list.append(atoms)
+
+    def shortDescription(self):
+        return None
 
     def setUp(self):
         """

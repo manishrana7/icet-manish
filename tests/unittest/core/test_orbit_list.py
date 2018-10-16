@@ -25,6 +25,9 @@ class TestOrbitList(unittest.TestCase):
         self.cluster_pair = Cluster(
             structure, [lattice_sites[0], lattice_sites[1]], True)
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Instantiate class before each test."""
         self.orbit_list = OrbitList(self.atoms, self.cutoffs)

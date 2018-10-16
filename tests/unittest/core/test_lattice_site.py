@@ -23,6 +23,9 @@ class TestLatticeSite(unittest.TestCase):
             lattice_site = LatticeSite(index, unitcell_offset)
             self.lattice_sites.append(lattice_site)
 
+    def shortDescription(self):
+        return None
+
     def test_index_property(self):
         """Tests index property."""
         self.assertIsInstance(self.lattice_sites[0].index, int)

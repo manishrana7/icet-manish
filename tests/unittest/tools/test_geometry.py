@@ -21,6 +21,9 @@ class TestGeometry(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestGeometry, self).__init__(*args, **kwargs)
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Setup some basic stuff which can be useful in the tests."""
         cutoff = 3.0

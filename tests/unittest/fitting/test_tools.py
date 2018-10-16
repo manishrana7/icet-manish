@@ -10,6 +10,9 @@ class TestFittingTools(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def shortDescription(self):
+        return None
+
     def test_compute_correlation_matrix(self):
         """Tests compute_correlation_matrix."""
 

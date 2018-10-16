@@ -17,6 +17,9 @@ class TestConfigurationManager(unittest.TestCase):
         self.strict_constraints = self.constraints
         self.sublattices = [list(range(len(self.atoms)))]
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         self.cm = ConfigurationManager(
             self.atoms, self.strict_constraints, self.sublattices,

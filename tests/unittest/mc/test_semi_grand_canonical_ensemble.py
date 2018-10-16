@@ -24,6 +24,9 @@ class TestEnsemble(unittest.TestCase):
         self.ce = ClusterExpansion(self.cs, parameters)
         self.temperature = 100.0
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Setup before each test."""
         self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)

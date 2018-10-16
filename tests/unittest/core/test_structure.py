@@ -39,6 +39,9 @@ class TestStructure(unittest.TestCase):
                      [-1., 1.73205081, 0.],
                      [0., 0., 3.26598632]]
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Setup before each test."""
         self.structure = Structure(

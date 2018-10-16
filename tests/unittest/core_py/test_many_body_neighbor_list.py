@@ -25,6 +25,9 @@ class TestManyBodyNeighborList(unittest.TestCase):
         self.atoms = bulk("Al").repeat(2)
         self.cutoffs = [5, 5]
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Set up before each test."""
         self.mbnl = ManyBodyNeighborList(self.atoms, self.cutoffs)

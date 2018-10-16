@@ -11,6 +11,9 @@ class TestBaseCalculator(unittest.TestCase):
         super(TestBaseCalculator, self).__init__(*args, **kwargs)
         self.atoms = bulk("Al").repeat(3)
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Setup before each test."""
         class ConcreteCalculator(BaseCalculator):

@@ -70,6 +70,9 @@ class TestEnsemble(unittest.TestCase):
         parameters = np.array([1.2 for _ in range(len(self.cs))])
         self.ce = ClusterExpansion(self.cs, parameters)
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Setup before each test."""
         self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)

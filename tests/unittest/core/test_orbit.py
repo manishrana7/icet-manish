@@ -37,6 +37,9 @@ class TestOrbit(unittest.TestCase):
                                        for index, unitcell_offset in
                                        zip(indices, unitcell_offsets)]
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Instantiates class before each test."""
         atoms = bulk("Al")

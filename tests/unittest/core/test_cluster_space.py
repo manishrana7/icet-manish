@@ -112,6 +112,9 @@ class TestClusterSpace(unittest.TestCase):
             atoms.set_chemical_symbols(symbols)
             self.structure_list.append(atoms)
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Setup before each test."""
         self.cs = ClusterSpace(self.atoms_prim, self.cutoffs,
@@ -377,6 +380,9 @@ class TestClusterSpaceSurface(unittest.TestCase):
         self.cs = ClusterSpace(self.atoms_prim, self.cutoffs,
                                self.chemical_symbols)
 
+    def shortDescription(self):
+        return None
+
     @unittest.expectedFailure
     def test_get_cluster_vector(self):
         """Tests get_cluster_vector functionality."""
@@ -442,6 +448,9 @@ class TestClusterSpaceTernary(unittest.TestCase):
         """Instantiates class before each test."""
         self.cs = ClusterSpace(self.atoms_prim, self.cutoffs,
                                self.chemical_symbols)
+
+    def shortDescription(self):
+        return None
 
     def _get_mc_vector(self, cluster_space, orbit_index):
         """

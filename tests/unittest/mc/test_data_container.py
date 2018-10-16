@@ -26,6 +26,9 @@ class TestDataContainer(unittest.TestCase):
         super(TestDataContainer, self).__init__(*args, **kwargs)
         self.atoms = bulk('Al').repeat(4)
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Setup before each test case."""
         self.dc = DataContainer(self.atoms,

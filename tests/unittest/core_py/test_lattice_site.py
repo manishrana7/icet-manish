@@ -25,6 +25,9 @@ class TestLatticeSite(unittest.TestCase):
         for element in itertools.product(*cartesian_product_lists):
             self.unitcell_offsets.append(list(element))
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Setup."""
         self.lattice_sites = []

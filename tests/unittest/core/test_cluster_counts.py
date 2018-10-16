@@ -43,6 +43,9 @@ class TestClusterCounts(unittest.TestCase):
         self.orbit_list = OrbitList(self.atoms, self.cutoffs)
         self.orbit_list.sort()
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """ Sets up an empty cluster counts object. """
         self.cluster_counts = ClusterCounts(self.orbit_list, self.atoms)

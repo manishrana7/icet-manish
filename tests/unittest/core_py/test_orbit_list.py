@@ -40,6 +40,9 @@ class TestOrbitList(unittest.TestCase):
         self.cutoffs = [4.2]
         self.atoms = bulk('Ag', a=4.09)
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Instantiates class before each test."""
         self.orbit_list = OrbitList(self.atoms, self.cutoffs)

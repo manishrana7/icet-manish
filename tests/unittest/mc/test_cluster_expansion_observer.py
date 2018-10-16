@@ -25,6 +25,9 @@ class TestCEObserver(unittest.TestCase):
         self.ce = ClusterExpansion(cs, params)
         self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
 
+    def shortDescription(self):
+        return None
+
     def setUp(self):
         """Set up observer before each test."""
         self.observer = ClusterExpansionObserver(
