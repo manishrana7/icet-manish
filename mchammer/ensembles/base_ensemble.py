@@ -3,14 +3,16 @@ import random
 from abc import ABC, abstractmethod
 from math import gcd
 from time import time
-from typing import List, Dict
+from typing import Dict, List
+
 import numpy as np
 
 from ase import Atoms
+from ase.data import chemical_symbols
 
-from ..data_container import DataContainer
 from ..calculators.base_calculator import BaseCalculator
 from ..configuration_manager import ConfigurationManager
+from ..data_container import DataContainer
 from ..observers.base_observer import BaseObserver
 
 
@@ -80,8 +82,34 @@ class BaseEnsemble(ABC):
         # calculator and configuration
         self._calculator = calculator
         self._name = name
-        strict_constraints = self.calculator.occupation_constraints
-        sublattices = [[i for i in range(len(self.calculator.atoms))]]
+        strict_constraints_symbol = self.calculator.occupation_constraints
+        symbols = list({tuple(sym) for sym in strict_constraints_symbol})
+        print("Symbols: ", symbols)
+        sublattices = [[] for _ in symbols]
+        print(sublattices)
+        # exit()
+        for i, constraint in enumerate(strict_constraints_symbol):
+            for j, sym in enumerate(symbols):
+                if sorted(constraint) == sorted(sym):
+                    print(constraint, sym, i, j)
+                    sublattices[j].append(i)
+        self._sublattices = sublattices
+        print("Symbols: ", symbols)
+        # tmp = sublattices[0]
+        # sublattices[0] = sublattices[1]
+        # sublattices[1] = tmp
+        print(sublattices)
+
+        # print(sublattices[0])
+        # print(sublattices[1])
+        # exit()
+        strict_constraints = []
+        for symbols in strict_constraints_symbol:
+            numbers = []
+            for symbol in symbols:
+                numbers.append(chemical_symbols.index(symbol))
+            strict_constraints.append(numbers)
+        # sublattices = [[i for i in range(len(self.calculator.atoms))]]
         self.configuration = ConfigurationManager(
             atoms, strict_constraints, sublattices)
 
@@ -415,7 +443,7 @@ class BaseEnsemble(ABC):
         * fix this method
         * add unit test
         """
-        return 0
+        return np.random.choice(range(0,len(self._sublattices)))
 
     def _restart_ensemble(self):
         """Restarts ensemble using the last state saved in DataContainer file.
