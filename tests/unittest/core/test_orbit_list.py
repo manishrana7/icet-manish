@@ -1,8 +1,5 @@
 import unittest
-<<<<<<< HEAD
 from itertools import permutations
-=======
->>>>>>> master
 from ase.build import bulk
 from ase.db import connect as ase_connect
 
@@ -53,7 +50,7 @@ class TestOrbitList(unittest.TestCase):
         permutation_matrix, prim_structure, _ = \
             permutation_matrix_from_atoms(self.atoms, self.cutoffs[0])
         pm_lattice_site = _get_lattice_site_permutation_matrix(
-            prim_structure, permutation_matrix, prune=True) 
+            prim_structure, permutation_matrix, prune=True)
 
         self.assertEqual(self.orbit_list.permutation_matrix, pm_lattice_site)
 
@@ -160,7 +157,7 @@ class TestOrbitList(unittest.TestCase):
             orbit_super = orbit_list_super.get_orbit(k)
             orbit = self.orbit_list.get_orbit(k)
             self.assertEqual(orbit, orbit_super)
-            
+
     def test_translate_sites_to_unitcell(self):
         """Tests the get all translated sites functionality."""
         # no offset site shoud get itself as translated
