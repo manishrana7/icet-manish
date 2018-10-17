@@ -21,7 +21,7 @@ class OrbitList(_OrbitList):
     An orbit has a list of equivalent sites with the restriction
     that at least one site is in the cell of the primitive structure.
 
-    parameters
+    Parameters
     ----------
     atoms : ASE Atoms object
             This atoms object will be used to construct a primitive
@@ -47,7 +47,7 @@ class OrbitList(_OrbitList):
         logger.info('Done getting neighbor lists.')
 
         # Transform permutation_matrix to be in lattice site format
-        self._pm_lattice_sites \
+        _pm_lattice_sites \
             = _get_lattice_site_permutation_matrix(prim_structure,
                                                    permutation_matrix,
                                                    prune=True)
@@ -56,7 +56,7 @@ class OrbitList(_OrbitList):
                     'format completed.')
 
         _OrbitList.__init__(self, prim_structure,
-                            self._pm_lattice_sites, neighbor_lists)
+                            _pm_lattice_sites, neighbor_lists)
         self.sort()
         logger.info('Finished construction of orbit list.')
 
@@ -71,9 +71,10 @@ class OrbitList(_OrbitList):
     @property
     def permutation_matrix(self):
         """Returns icet PermutationMatrix object."""
-        return self._pm_lattice_sites
+        return self._permutation_matrix()
 
     def __str__(self):
+        """String representation."""
         nice_str = 'Number of orbits: {}'.format(len(self))
 
         for i, orbit in enumerate(self.orbits):

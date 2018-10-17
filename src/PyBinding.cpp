@@ -787,7 +787,7 @@ PYBIND11_MODULE(_icet, m)
              "Verifies if rows of permutation matrix have been already considered")
         .def("get_orbit_list", &OrbitList::getOrbitList,
              "Returns a list of Orbit objects from OrbitList")
-        .def_property_readonly("orbits", &OrbitList::getOrbitList)
+        //.def_property_readonly("orbits", &OrbitList::getOrbitList)
         .def("_get_all_translated_sites", &OrbitList::getSitesTranslatedToUnitcell,
              "Returns a set of sites where at least one site is translated inside the unit cell.")
         .def("_get_all_columns_from_sites", &OrbitList::getAllColumnsFromSites,
@@ -796,6 +796,8 @@ PYBIND11_MODULE(_icet, m)
              "Returns the primitive atomic structure used to construct the OrbitList instance")
         .def("__len__", &OrbitList::size,
              "Returns the total number of orbits counted in the OrbitList instance")
+        .def("_permutation_matrix", &OrbitList::getPermutationMatrix,
+             "Returns permutation matrix object used to build orbit list")
         // .def("print", &OrbitList::print, py::arg("verbosity") = 0)
         // .def("get_supercell_orbit_list", &OrbitList::getSupercellOrbitList)
         ;
