@@ -1,5 +1,8 @@
 import unittest
+<<<<<<< HEAD
 from itertools import permutations
+=======
+>>>>>>> master
 from ase.build import bulk
 from ase.db import connect as ase_connect
 
@@ -31,6 +34,10 @@ class TestOrbitList(unittest.TestCase):
         self.cluster_pair = Cluster(
             structure, [lattice_sites[0], lattice_sites[1]], True)
 
+    def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
+        return None
+
     def setUp(self):
         """Instantiate class before each test."""
         self.orbit_list = OrbitList(self.atoms, self.cutoffs)
@@ -51,18 +58,18 @@ class TestOrbitList(unittest.TestCase):
         self.assertEqual(self.orbit_list.permutation_matrix, pm_lattice_site)
 
     def test_add_orbit(self):
-        """Test add orbit funcionality."""
+        """Tests add_orbit funcionality."""
         orbit = Orbit(self.cluster_pair)
         self.orbit_list.add_orbit(orbit)
         self.assertEqual(len(self.orbit_list), 3)
 
     def test_get_number_of_NClusters(self):
-        """Test that only a pair is counted in the orbit list."""
+        """Tests that only a pair is counted in the orbit list."""
         NPairs = self.orbit_list.get_number_of_NClusters(2)
         self.assertEqual(NPairs, 1)
 
     def test_get_orbit(self):
-        """Test function returns the number of orbits of a given order."""
+        """Tests function returns the number of orbits of a given order."""
         # get singlet
         orbit = self.orbit_list.get_orbit(0)
         self.assertEqual(orbit.order, 1)
@@ -74,30 +81,28 @@ class TestOrbitList(unittest.TestCase):
             self.orbit_list.get_orbit(3)
 
     def test_clear(self):
-        """Test orbit list is empty after calling this function."""
+        """Tests orbit list is empty after calling this function."""
         self.orbit_list.clear()
         with self.assertRaises(IndexError):
             self.orbit_list.get_orbit(0)
 
     def test_sort(self):
-        """Test orbits in orbit list are sorted."""
+        """Tests orbits in orbit list are sorted."""
         self.orbit_list.sort()
         for i in range(len(self.orbit_list) - 1):
             self.assertLess(
                 self.orbit_list.get_orbit(i), self.orbit_list.get_orbit(i + 1))
 
     def test_find_orbit(self):
-        """
-        Test orbit index is retuned from the given representative cluster.
-        """
-        # @todo: test a non-representative cluster returns -1
+        """Tests orbit index returned for the given representative cluster."""
+        # TODO: test a non-representative cluster returns -1
         self.assertEqual(
             self.orbit_list._find_orbit(self.cluster_singlet), 0)
         self.assertEqual(
             self.orbit_list._find_orbit(self.cluster_pair), 1)
 
     def test_is_row_taken(self):
-        """Test functionality."""
+        """Tests is_row_taken (private) functionality."""
         taken_rows = set()
         row_indices = tuple([0, 1, 2])
         self.assertFalse(self.orbit_list._is_row_taken(
@@ -108,7 +113,7 @@ class TestOrbitList(unittest.TestCase):
             taken_rows, row_indices))
 
     def test_get_orbit_list(self):
-        """Test a list of orbits is returned from this function."""
+        """Tests a list of orbits is returned from this function."""
         orbit_list = self.orbit_list.get_orbit_list()
         # clusters for testing
         repr_clusters = [self.cluster_singlet, self.cluster_pair]
@@ -119,7 +124,7 @@ class TestOrbitList(unittest.TestCase):
                                  repr_clusters[k])
 
     def test_remove_all_orbits(self):
-        """Test removing all orbits."""
+        """Tests removing all orbits"""
 
         mi = [1]*len(self.orbit_list.get_primitive_structure())
         len_before = len(self.orbit_list)
@@ -130,7 +135,7 @@ class TestOrbitList(unittest.TestCase):
 
     def test_get_primitive_structure(self):
         """
-        Test get primitive structure functionality.
+        Tests get primitive structure functionality.
 
         Todo
         ----
@@ -140,17 +145,12 @@ class TestOrbitList(unittest.TestCase):
             self.orbit_list.get_primitive_structure(), Structure)
 
     def test_len(self):
-        """Test len of orbit list."""
+        """Tests length of orbit list."""
         self.assertEqual(len(self.orbit_list), 2)
 
     def test_get_supercell_orbit_list(self):
-        """
-        Test orbit list is returned for the given supercell
-
-        Todo
-        ----
-        Test fails for an actual supercell of the testing structure
-        """
+        """Tests orbit list is returned for the given supercell."""
+        # TODO : Tests fails for an actual supercell of the testing structure
         atoms_supercell = self.atoms.copy()
         orbit_list_super = \
             self.orbit_list.get_supercell_orbit_list(atoms_supercell)
@@ -162,7 +162,7 @@ class TestOrbitList(unittest.TestCase):
             self.assertEqual(orbit, orbit_super)
             
     def test_translate_sites_to_unitcell(self):
-        """Test the get all translated sites functionality."""
+        """Tests the get all translated sites functionality."""
         # no offset site shoud get itself as translated
         sites = [LatticeSite(0, [0, 0, 0])]
         target = [[LatticeSite(0, [0, 0, 0])]]
@@ -209,7 +209,7 @@ class TestOrbitList(unittest.TestCase):
             self.orbit_list._get_all_translated_sites(sites, False), target)
 
     def test_get_all_columns_from_sites(self):
-        """Test get_all_columns_from_sites functionality."""
+        """Tests get_all_columns_from_sites functionality."""
         # These sites are first and last elements in column1
         sites = [LatticeSite(0, [0., 0., 0.]),
                  LatticeSite(0, [1., 0., 0.])]
@@ -305,13 +305,10 @@ class TestOrbitList(unittest.TestCase):
 
     def test_orbit_list_non_pbc(self):
         """
-        Test that singlets in orbit list retrieves the right number of unique
-        sites of the structure with different periodic boundary conditions
-
-        Todo
-        ----
-        Returned results are incorrect for simple-cubic structures.
+        Tests that singlets in orbit list retrieves the right number of unique
+        sites of the structure with different periodic boundary conditions.
         """
+        # TODO: Returned results are incorrect for simple-cubic structures.
         atoms = bulk('Al', 'sc', a=4.0).repeat(4)
         # [True, True, False]
         atoms.set_pbc([True, True, False])
@@ -328,7 +325,7 @@ class TestOrbitList(unittest.TestCase):
 
     def test_orbit_list_fcc(self):
         """
-        Test orbit list has the right number of singlet and pairs for
+        Tests orbit list has the right number of singlet and pairs for
         a fcc structure.
         """
         atoms = bulk('Al', 'fcc', a=3.0)
@@ -348,8 +345,8 @@ class TestOrbitList(unittest.TestCase):
 
     def test_orbit_list_bcc(self):
         """
-        Test orbit list has the right number  of singlet and pairs for
-        a bcc structure
+        Tests orbit list has the right number  of singlet and pairs for
+        a bcc structure.
         """
         atoms = bulk('Al', 'bcc', a=3.0)
         cutoffs = [3.0]
@@ -371,8 +368,8 @@ class TestOrbitList(unittest.TestCase):
 
     def test_orbit_list_hcp(self):
         """
-        Test orbit list has the right number of singlet and pairs for
-        a hcp structure
+        Tests orbit list has the right number of singlet and pairs for
+        a hcp structure.
         """
         atoms = bulk('Ni', 'hcp', a=3.0)
         cutoffs = [3.1]
