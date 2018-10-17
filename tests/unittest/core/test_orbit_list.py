@@ -9,6 +9,8 @@ from icet.core.orbit import Orbit
 from icet import OrbitList
 from icet import Structure
 from icet.tools.geometry import get_permutation
+from icet.core.permutation_matrix import (_get_lattice_site_permutation_matrix,
+                                          permutation_matrix_from_atoms)
 
 
 class TestOrbitList(unittest.TestCase):
@@ -38,6 +40,15 @@ class TestOrbitList(unittest.TestCase):
         orbit_list = OrbitList(
             self.atoms, self.cutoffs)
         self.assertIsInstance(orbit_list, OrbitList)
+
+    def test_property_permutation_matrix(self):
+        """Tests permutation matrix property."""
+        permutation_matrix, prim_structure, _ = \
+            permutation_matrix_from_atoms(self.atoms, self.cutoffs[0])
+        pm_lattice_site = _get_lattice_site_permutation_matrix(
+            prim_structure, permutation_matrix, prune=True) 
+
+        self.assertEqual(self.orbit_list.permutation_matrix, pm_lattice_site)
 
     def test_add_orbit(self):
         """Test add orbit funcionality."""
@@ -149,35 +160,7 @@ class TestOrbitList(unittest.TestCase):
             orbit_super = orbit_list_super.get_orbit(k)
             orbit = self.orbit_list.get_orbit(k)
             self.assertEqual(orbit, orbit_super)
-
-    def test_create_orbit_list(self):
-        """
-        Test  orbit list is built from structure and cutoffs by calling
-        this function.
-        Todo: Add this to init test
-        """
-        orbit_list = OrbitList(self.atoms, self.cutoffs)
-        for i in range(len(self.orbit_list)):
-            orbit = self.orbit_list.get_orbit(i)
-            orbit_ = orbit_list.get_orbit(i)
-            # check all orbits in both lists are equal
-            self.assertEqual(orbit, orbit_)
-
-    def test_equivalent_sites_size(self):
-        """
-        Test that all the equivalent sites have the same radius.
-        """
-        atoms = bulk('Al')
-        cutoffs = [10, 10]
-        orbit_list = OrbitList(atoms, cutoffs)
-        for orbit in orbit_list.orbits:
-            size = orbit.radius
-            for eq_sites in orbit.equivalent_sites:
-                structure = Structure.from_atoms(atoms)
-                cluster = Cluster(structure, eq_sites, True)
-                self.assertAlmostEqual(
-                    cluster.radius, size, places=5)
-
+            
     def test_translate_sites_to_unitcell(self):
         """Test the get all translated sites functionality."""
         # no offset site shoud get itself as translated
@@ -286,15 +269,39 @@ class TestOrbitList(unittest.TestCase):
             self.assertEqual(sorted(allowed_perm),
                              sorted(orbit.allowed_permutations))
 
-    def test_allowed_permutations_for_atoms_in_database(self):
+    def _test_equivalent_sites(self, atoms):
         """
-        Tests allowed_permutation for atoms in database (only pbc=True).
+        Tests that at least one of equivalent sites is among the permutations
+        of the representative site for each orbit in orbit list.
+        """
+        cutoffs = [1.4, 1.4]
+        orbit_list = OrbitList(atoms, cutoffs)
+
+        for orbit in orbit_list.orbits:
+            all_perm_sites = []
+            repr_sites = orbit.get_representative_sites()
+            all_perm = \
+                [list(perm) for perm in permutations(range(orbit.order))]
+            translated_sites = \
+                orbit_list._get_all_translated_sites(repr_sites, False)
+            for sites in translated_sites:
+                for perm in all_perm:
+                    perm_sites = get_permutation(sites, perm)
+                    all_perm_sites.append(perm_sites)
+            self.assertTrue(
+                any(s in all_perm_sites for s in orbit.equivalent_sites))
+
+    def test_orbit_permutations_for_atoms_in_database(self):
+        """
+        Tests allowed_permutation and equivalent_sites of orbits in orbit_list
+        for atoms in database (only atoms with pbc=True).
         """
         db = ase_connect("structures_for_testing.db")
         for row in db.select('pbc=TTT'):
             atoms = row.toatoms()
             with self.subTest(atoms_tag=row.tag):
                 self._test_allowed_permutations(atoms)
+                self._test_equivalent_sites(atoms)
 
     def test_orbit_list_non_pbc(self):
         """
