@@ -72,15 +72,16 @@ class VCSGCEnsemble(BaseEnsemble):
         self.temperature = temperature
         self.boltzmann_constant = boltzmann_constant
 
-        self._concentration_parameters = concentration_parameters
+        self._concentration_parameters = None
+        self.concentration_parameters = concentration_parameters
         self.variance_parameter = variance_parameter
 
         if len(self.configuration._allowed_species) > 2:
             raise NotImplementedError('VCSGCEnsemble does not yet support '
                                       'cluster spaces with more than two '
                                       'species.')
-
-        self._species_counts = self.configuration.occupations
+        self._species_counts = None
+        self.species_counts = self.configuration.occupations
 
     def _do_trial_step(self):
         """ Carry out one Monte Carlo trial step. """
@@ -94,21 +95,21 @@ class VCSGCEnsemble(BaseEnsemble):
 
         # Calculate difference in VCSGC thermodynamic potential.
         # Note that this assumes that only one atom was flipped.
+        N = len(self.atoms)
         potential_diff = 1.0  # dN
-        potential_diff -= self.species_counts[old_species]
+        potential_diff -= self.species_counts[old_species] / N
         potential_diff -= 0.5 * self._concentration_parameters[old_species]
-        potential_diff += self.species_counts[new_species]
+        potential_diff += self.species_counts[new_species] / N
         potential_diff += 0.5 * self._concentration_parameters[new_species]
         potential_diff *= self.variance_parameter
-        potential_diff /= len(self.configuration.atoms)
 
         potential_diff += self._get_property_change([index], [new_species])
 
         if self._acceptance_condition(potential_diff):
             self.accepted_trials += 1
             self.update_occupations([index], [new_species])
-            self.species_counts[old_species] -= 1
-            self.species_counts[new_species] += 1
+            self._species_counts[old_species] -= 1
+            self._species_counts[new_species] += 1
 
     def _acceptance_condition(self, potential_diff: float) -> bool:
         """
@@ -137,24 +138,22 @@ class VCSGCEnsemble(BaseEnsemble):
     def concentration_parameters(self, concentration_parameters):
         if not isinstance(concentration_parameters, dict):
             raise TypeError('concentration_parameters has the wrong type')
-        if abs(sum(self.concentration_parameters.values()) + 2) > 1e-6:
-            raise ValueError('The sum of all concentration parameters must '
-                             'equal -2.')
+        if abs(sum(concentration_parameters.values()) + 2) > 1e-6:
+            raise ValueError('The sum of all concentration_parameters must '
+                             'equal -2')
 
         self._concentration_parameters = {}
 
         for key, phi in concentration_parameters.items():
             if isinstance(key, str):
                 atomic_number = atomic_numbers[key]
-                self._concentration_parameters[atomic_number] = \
-                    phi * len(self.atoms)
+                self._concentration_parameters[atomic_number] = phi
             elif isinstance(key, int):
-                self._concentration_parameters[key] = \
-                    phi * len(self.atoms)
+                self._concentration_parameters[key] = phi
         if set(self.configuration._allowed_species) != \
-           set(self.concentration_parameters.keys()):
-            raise ValueError('Concentration parameter was not set for '
-                             'all species.')
+           set(self._concentration_parameters.keys()):
+            raise ValueError('concentration_parameters were not set for '
+                             'all species')
 
     @property
     def species_counts(self) -> Dict[int, int]:
@@ -166,11 +165,11 @@ class VCSGCEnsemble(BaseEnsemble):
         # Initialize counter to keep track of concentrations efficiently
         species, counts = np.unique(occupations,
                                     return_counts=True)
-        self.species_counts = dict(zip(species, counts))
+        self._species_counts = dict(zip(species, counts))
 
         # There may be species that are not in the input structure
         for species in self.configuration._allowed_species:
-            self.species_counts[species] = self.species_count.get(species, 0)
+            self._species_counts[species] = self._species_counts.get(species, 0)
 
     def get_ensemble_data(self) -> Dict:
         """
@@ -189,8 +188,7 @@ class VCSGCEnsemble(BaseEnsemble):
 
         # concentration parameters
         for atnum, phi in self.concentration_parameters.items():
-            data['phi_{}'.format(chemical_symbols[atnum])] = \
-                phi / len(self.atoms)
+            data['phi_{}'.format(chemical_symbols[atnum])] = phi
 
         # variance parameter
         data['kappa'] = self.variance_parameter
@@ -201,7 +199,7 @@ class VCSGCEnsemble(BaseEnsemble):
         data['free_energy_derivative'] = \
             - 2 * self.variance_parameter * concentration - \
             self.variance_parameter * \
-            self.concentration_parameters[atnum_1] / len(self.atoms)
+            self.concentration_parameters[atnum_1]
 
         # temperature
         data['temperature'] = self.temperature
@@ -235,4 +233,4 @@ class VCSGCEnsemble(BaseEnsemble):
             if input lists are not of the same length
         """
         super().update_occupations(sites, species)
-        self._species_counts = self.configuration.occupations
+        self.species_counts = self.configuration.occupations
