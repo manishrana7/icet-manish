@@ -96,12 +96,16 @@ class TestEnsemble(unittest.TestCase):
 
     def test_do_trial_step(self):
         """Test the do trial step."""
-
         # Do it many times and hopefully get both a reject and an accept
         for _ in range(10):
             self.ensemble._do_trial_step()
 
         self.assertEqual(self.ensemble.total_trials, 10)
+
+        # Test that the species_counts were properly updated
+        new_species_counts = self.ensemble.species_counts
+        self.ensemble.species_counts = self.ensemble.configuration.occupations
+        self.assertEqual(new_species_counts, self.ensemble.species_counts)
 
     def test_acceptance_condition(self):
         """ Test the acceptance condition method."""
