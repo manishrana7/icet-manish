@@ -97,11 +97,12 @@ class VCSGCEnsemble(BaseEnsemble):
         # Note that this assumes that only one atom was flipped.
         N = len(self.atoms)
         potential_diff = 1.0  # dN
-        potential_diff -= self.species_counts[old_species] / N
-        potential_diff -= 0.5 * self._concentration_parameters[old_species]
-        potential_diff += self.species_counts[new_species] / N
-        potential_diff += 0.5 * self._concentration_parameters[new_species]
+        potential_diff -= self.species_counts[old_species]
+        potential_diff -= 0.5 * N * self._concentration_parameters[old_species]
+        potential_diff += self.species_counts[new_species]
+        potential_diff += 0.5 * N * self._concentration_parameters[new_species]
         potential_diff *= self.variance_parameter
+        potential_diff /= N
 
         potential_diff += self._get_property_change([index], [new_species])
 
