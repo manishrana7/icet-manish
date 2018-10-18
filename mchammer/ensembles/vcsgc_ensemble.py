@@ -1,5 +1,5 @@
 """
-Definition of the semi-grand canonical ensemble class.
+Definition of the variance-constrained semi-grand canonical ensemble class.
 """
 
 import numpy as np
@@ -7,7 +7,7 @@ import numpy as np
 from ase import Atoms
 from ase.data import atomic_numbers, chemical_symbols
 from ase.units import kB
-from typing import Dict
+from typing import List, Dict
 
 from .. import DataContainer
 from .base_ensemble import BaseEnsemble
@@ -16,10 +16,43 @@ from ..calculators.base_calculator import BaseCalculator
 
 class VCSGCEnsemble(BaseEnsemble):
     """Variance-constrained semi-grand canonical (VCSGC) ensemble.
+
+    Instances of this class allow one to simulate systems in the VCSGC
+    ensemble (:math:`N\phi\kappa VT`), i.e. at constant temperature
+    (:math:`T`), total number of sites (:math:`N=\sum_i N_i`),
+    and two additional parameters :math:`\phi` and :math:`\kappa`, which
+    constrain the concentration and variance of the concentration,
+    respectively. The derivative of the canonical free energy can be
+    expressed in observables of the ensemble,
+
+    .. math::
+
+        \\frac{1}{N} \\frac{\\partial F}{\\partial c} = - \phi - 2 N \kappa
+        \\langle c \\rangle.
+
+    Unlike the SGC ensemble, the VCSGC ensemble allows for sampling across
+    multi-phase regions, meaning that the free energy can be recovered by
+    direct integration even when such regions are present.
+
+    The VCSGC ensemble currently supports systems with no more than two
+    different species.
+
+    Attributes
+    -----------
+    temperature : float
+        temperature :math:`T` in appropriate units [commonly Kelvin]
+    boltzmann_constant : float
+        Boltzmann constant :math:`k_B` in appropriate
+        units, i.e. units that are consistent
+        with the underlying cluster expansion
+        and the temperature units [default: eV/K]
+    variance_parameter : float
+        parameter that constrains the fluctuations of the concentration
     """
 
     def __init__(self, atoms: Atoms=None, calculator: BaseCalculator=None,
-                 name: str='Semi-grand canonical ensemble',
+                 name: str='Variance-constrained semi-grand' +
+                           ' canonical ensemble',
                  data_container: DataContainer=None, random_seed: int=None,
                  data_container_write_period: float=np.inf,
                  ensemble_data_write_interval: int=None,
@@ -42,13 +75,12 @@ class VCSGCEnsemble(BaseEnsemble):
         self._concentration_parameters = concentration_parameters
         self.variance_parameter = variance_parameter
 
-        # Initialize counter to keep track of concentrations efficiently
-        species, counts = np.unique(self.configuration.occupations,
-                                    return_counts=True)
-        self.species_count = dict(zip(species, counts))
-        # There may be species that are not in the input structure
-        for species in self.configuration._allowed_species:
-            self.species_count[species] = self.species_count.get(species, 0)
+        if len(self.configuration._allowed_species) > 2:
+            raise NotImplementedError('VCSGCEnsemble does not yet support '
+                                      'cluster spaces with more than two '
+                                      'species.')
+
+        self._species_counts = self.configuration.occupations
 
     def _do_trial_step(self):
         """ Carry out one Monte Carlo trial step. """
@@ -60,12 +92,12 @@ class VCSGCEnsemble(BaseEnsemble):
             self.configuration.get_flip_state(sublattice_index)
         old_species = self.configuration.occupations[index]
 
-        # Calculate difference in VCSGC thermodynamic potential
-        # Note that this assumes that only one atom was flipped
+        # Calculate difference in VCSGC thermodynamic potential.
+        # Note that this assumes that only one atom was flipped.
         potential_diff = 1.0  # dN
-        potential_diff -= self.species_count[old_species]
+        potential_diff -= self.species_counts[old_species]
         potential_diff -= 0.5 * self._concentration_parameters[old_species]
-        potential_diff += self.species_count[new_species]
+        potential_diff += self.species_counts[new_species]
         potential_diff += 0.5 * self._concentration_parameters[new_species]
         potential_diff *= self.variance_parameter
         potential_diff /= len(self.configuration.atoms)
@@ -75,8 +107,8 @@ class VCSGCEnsemble(BaseEnsemble):
         if self._acceptance_condition(potential_diff):
             self.accepted_trials += 1
             self.update_occupations([index], [new_species])
-            self.species_count[old_species] -= 1
-            self.species_count[new_species] += 1
+            self.species_counts[old_species] -= 1
+            self.species_counts[new_species] += 1
 
     def _acceptance_condition(self, potential_diff: float) -> bool:
         """
@@ -97,28 +129,55 @@ class VCSGCEnsemble(BaseEnsemble):
 
     @property
     def concentration_parameters(self) -> Dict[int, float]:
-        """ dict : concentration parameters :math:`\\phi_i` """
+        """ dict : concentration parameters :math:`\\phi_i`, one for each
+        element but their sum must be :math:`-2.0`"""
         return self._concentration_parameters
 
     @concentration_parameters.setter
     def concentration_parameters(self, concentration_parameters):
-        # TODO: check that length of concentration_parameters is correct
+        if not isinstance(concentration_parameters, dict):
+            raise TypeError('concentration_parameters has the wrong type')
+        if abs(sum(self.concentration_parameters.values()) + 2) > 1e-6:
+            raise ValueError('The sum of all concentration parameters must '
+                             'equal -2.')
+
         self._concentration_parameters = {}
-        for key, concentration in concentration_parameters.items():
+
+        for key, phi in concentration_parameters.items():
             if isinstance(key, str):
                 atomic_number = atomic_numbers[key]
-                self._concentration_parameters[atomic_number] =\
-                    concentration * len(self.atoms)
+                self._concentration_parameters[atomic_number] = \
+                    phi * len(self.atoms)
             elif isinstance(key, int):
-                self._concentration_parameters[key] =\
-                    concentration * len(self.atoms)
+                self._concentration_parameters[key] = \
+                    phi * len(self.atoms)
+        if set(self.configuration._allowed_species) != \
+           set(self.concentration_parameters.keys()):
+            raise ValueError('Concentration parameter was not set for '
+                             'all species.')
+
+    @property
+    def species_counts(self) -> Dict[int, int]:
+        """ dict : keeps track of the number of atoms of each species"""
+        return self._species_counts
+
+    @species_counts.setter
+    def species_counts(self, occupations):
+        # Initialize counter to keep track of concentrations efficiently
+        species, counts = np.unique(occupations,
+                                    return_counts=True)
+        self.species_counts = dict(zip(species, counts))
+
+        # There may be species that are not in the input structure
+        for species in self.configuration._allowed_species:
+            self.species_counts[species] = self.species_count.get(species, 0)
 
     def get_ensemble_data(self) -> Dict:
         """
         Returns a dict with the default data of
         the ensemble.
 
-        Here the temperature and species counts
+        Here temperature and species counts
         are added to the default data.
 
         Returns
@@ -138,7 +197,7 @@ class VCSGCEnsemble(BaseEnsemble):
 
         # free energy derivative
         atnum_1 = min(self.concentration_parameters.keys())
-        concentration = self.species_count[atnum_1] / len(self.atoms)
+        concentration = self.species_counts[atnum_1] / len(self.atoms)
         data['free_energy_derivative'] = \
             - 2 * self.variance_parameter * concentration - \
             self.variance_parameter * \
@@ -157,3 +216,23 @@ class VCSGCEnsemble(BaseEnsemble):
             data['{}_count'.format(chemical_symbols[atnum])] = count
 
         return data
+
+    def update_occupations(self, sites: List[int], species: List[int]):
+        """Updates the occupation vector of the configuration being sampled.
+        This will change the state of the configuration in both the
+        calculator and the configuration manager.
+
+        Parameters
+        ----------
+        sites
+            indices of sites of the configuration to change
+        species
+            new occupations (species) by atomic number
+
+        Raises
+        ------
+        ValueError
+            if input lists are not of the same length
+        """
+        super().update_occupations(sites, species)
+        self._species_counts = self.configuration.occupations
