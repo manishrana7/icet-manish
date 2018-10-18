@@ -170,7 +170,8 @@ class VCSGCEnsemble(BaseEnsemble):
 
         # There may be species that are not in the input structure
         for species in self.configuration._allowed_species:
-            self._species_counts[species] = self._species_counts.get(species, 0)
+            self._species_counts[species] = \
+                self._species_counts.get(species, 0)
 
     def get_ensemble_data(self) -> Dict:
         """
