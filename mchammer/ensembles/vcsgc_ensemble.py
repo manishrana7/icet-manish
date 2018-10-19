@@ -88,7 +88,7 @@ class VCSGCEnsemble(BaseEnsemble):
         self.species_counts = self.configuration.occupations
 
     def _do_trial_step(self):
-        """ Carry out one Monte Carlo trial step. """
+        """ Carries out one Monte Carlo trial step. """
         self.total_trials += 1
 
         # choose swap
@@ -118,7 +118,7 @@ class VCSGCEnsemble(BaseEnsemble):
 
     def _acceptance_condition(self, potential_diff: float) -> bool:
         """
-        Evaluate Metropolis acceptance criterion.
+        Evaluates Metropolis acceptance criterion.
 
         Parameters
         ----------
