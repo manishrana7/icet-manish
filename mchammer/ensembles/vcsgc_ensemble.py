@@ -37,6 +37,10 @@ class VCSGCEnsemble(BaseEnsemble):
     The VCSGC ensemble currently supports systems with no more than two
     different species.
 
+    When using this ensemble, please cite 
+    Sadigh, B. and Erhart, P., Phys. Rev. B **86**, 134204 (2012)
+    [SadErh12]_.
+
     Attributes
     -----------
     temperature : float
