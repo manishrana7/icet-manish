@@ -122,7 +122,7 @@ class VCSGCEnsemble(BaseEnsemble):
 
         Parameters
         ----------
-        potential_diff : float
+        potential_diff
             the change in the thermodynamic potential associated
             with the trial step
         """
@@ -135,7 +135,7 @@ class VCSGCEnsemble(BaseEnsemble):
 
     @property
     def concentration_parameters(self) -> Dict[int, float]:
-        """ dict : concentration parameters :math:`\\phi_i`, one for each
+        """concentration parameters :math:`\\phi_i`, one for each
         element but their sum must be :math:`-2.0`"""
         return self._concentration_parameters
 
@@ -162,7 +162,7 @@ class VCSGCEnsemble(BaseEnsemble):
 
     @property
     def species_counts(self) -> Dict[int, int]:
-        """ dict : keeps track of the number of atoms of each species"""
+        """keeps track of the number of atoms of each species"""
         return self._species_counts
 
     @species_counts.setter
