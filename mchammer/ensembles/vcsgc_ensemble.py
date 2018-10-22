@@ -89,7 +89,7 @@ class VCSGCEnsemble(BaseEnsemble):
         """ Carries out one Monte Carlo trial step. """
         self.total_trials += 1
 
-        # choose swap
+        # choose flip
         sublattice_index = self.get_random_sublattice_index()
         index, new_species = \
             self.configuration.get_flip_state(sublattice_index)
