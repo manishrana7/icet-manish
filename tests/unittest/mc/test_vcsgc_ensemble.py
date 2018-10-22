@@ -67,7 +67,7 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(TypeError) as context:
             self.ensemble.concentration_parameters = 'xyz'
-        self.assertTrue('concentration_parameters has the wrong type'
+        self.assertTrue('concentration_parameters must be dict'
                         in str(context.exception))
 
         with self.assertRaises(ValueError) as context:
