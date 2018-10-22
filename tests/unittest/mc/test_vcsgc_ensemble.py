@@ -75,19 +75,6 @@ class TestEnsemble(unittest.TestCase):
         self.assertTrue('The sum of all concentration_parameters must'
                         in str(context.exception))
 
-    def test_property_species_counts(self):
-        """Test property species_counts."""
-        retval = self.ensemble.species_counts
-        target = {13: 13, 31: 14}
-        self.assertEqual(retval, target)
-
-        # Test that it handles absent species
-        occupations = [13] * 27
-        self.ensemble.species_counts = occupations
-        retval = self.ensemble.species_counts
-        target = {13: 27, 31: 0}
-        self.assertEqual(retval, target)
-
     def test_temperature_attribute(self):
         """Test temperature attribute."""
         self.assertEqual(self.ensemble.temperature, self.temperature)
@@ -101,11 +88,6 @@ class TestEnsemble(unittest.TestCase):
             self.ensemble._do_trial_step()
 
         self.assertEqual(self.ensemble.total_trials, 10)
-
-        # Test that the species_counts were properly updated
-        new_species_counts = self.ensemble.species_counts
-        self.ensemble.species_counts = self.ensemble.configuration.occupations
-        self.assertEqual(new_species_counts, self.ensemble.species_counts)
 
     def test_acceptance_condition(self):
         """ Test the acceptance condition method."""
@@ -134,15 +116,6 @@ class TestEnsemble(unittest.TestCase):
             concentration_parameters=concentration_parameters,
             variance_parameter=self.variance_parameter)
         ensemble._do_trial_step()
-
-    def test_update_occupations(self):
-        """
-        Test that species_counts are properly updated when occupations
-        are updated.
-        """
-        self.ensemble.update_occupations([1], [31])
-        self.assertEqual(self.ensemble.species_counts[13], 12)
-        self.assertEqual(self.ensemble.species_counts[31], 15)
 
     def test_get_ensemble_data(self):
         """Test the get ensemble data method."""
