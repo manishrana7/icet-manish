@@ -5,7 +5,7 @@ import unittest
 from ase.build import bulk
 from icet import Structure
 from icet.core.cluster import Cluster
-from icet.core.orbit_list import create_orbit_list
+from icet.core.orbit_list import OrbitList
 from icet.core.cluster_counts import ClusterCounts
 from icet.core.lattice_site import LatticeSite
 from icet.core.neighbor_list import get_neighbor_lists
@@ -40,8 +40,12 @@ class TestClusterCounts(unittest.TestCase):
         self.cutoffs = [2.2]
         self.neighbor_lists = get_neighbor_lists(
             atoms=self.atoms, cutoffs=self.cutoffs)
-        self.orbit_list = create_orbit_list(self.atoms, self.cutoffs)
+        self.orbit_list = OrbitList(self.atoms, self.cutoffs)
         self.orbit_list.sort()
+
+    def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
+        return None
 
     def setUp(self):
         """ Sets up an empty cluster counts object. """
@@ -89,7 +93,7 @@ class TestClusterCounts(unittest.TestCase):
         self.assertEqual(count, {(28, 26): 1, (28, 28): 1})
 
     def test_count_orbit_list(self):
-        """ Tests cluster_counts given orbits in an orbit list. """
+        """Tests cluster_counts given orbits in an orbit list."""
         cluster_singlet = Cluster(self.structure, [], False, 0)
         cluster_pair = Cluster(self.structure, [], False, 1)
         clusters = [cluster_singlet, cluster_pair]
@@ -104,12 +108,10 @@ class TestClusterCounts(unittest.TestCase):
 
     @unittest.expectedFailure
     def test_count_orbit_list_non_pbc(self):
-        """
-        Test cluster counts using orbit_list for a non-pbc structure.
-        """
+        """Tests cluster counts using orbit_list for a non-pbc structure."""
         atoms_non_pbc = self.atoms.copy()
         atoms_non_pbc.set_pbc(False)
-        orbit_list = create_orbit_list(atoms_non_pbc, self.cutoffs)
+        orbit_list = OrbitList(atoms_non_pbc, self.cutoffs)
 
         cluster_singlet = Cluster(self.structure, [], False, 0)
         cluster_pair = Cluster(self.structure, [], False, 1)
@@ -125,25 +127,19 @@ class TestClusterCounts(unittest.TestCase):
             self.assertEqual(count, expected_counts[k])
 
     def test_len(self):
-        """
-        Test total size of counts.
-        """
+        """Tests total size of counts."""
         self.assertEqual(len(self.cluster_counts),
                          len(self.orbit_list))
 
     def test_reset(self):
-        """
-        Test reset.
-        """
+        """Tests reset functionality."""
         # self.cluster_counts.count_clusters(self.structure,
         #                                   self.orbit_list, False)
         self.cluster_counts.reset()
         self.assertEqual(len(self.cluster_counts), 0)
 
     def test_getitem(self):
-        """
-        Test __getitem__ functionality.
-        """
+        """Tests __getitem__ functionality."""
         # Test with integer as key
         self.assertEqual(self.cluster_counts[2],
                          {('Fe', 'Ni'): 6, ('Ni', 'Ni'): 6})
@@ -153,9 +149,7 @@ class TestClusterCounts(unittest.TestCase):
                          ('Fe',): 1, ('Ni',): 3})
 
     def test_str(self):
-        """
-        Test representation of cluster_counts.
-        """
+        """Tests representation of cluster_counts."""
         retval = self.cluster_counts.__str__()
         target = """
 ====================== Cluster Counts ======================

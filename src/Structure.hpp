@@ -107,6 +107,9 @@ class Structure
     /// Returns number of allowed components on each site.
     int getNumberOfAllowedSpeciesBySite(const unsigned int) const;
 
+    /// Returns number of allowed components on each site.
+    std::vector<int> getNumberOfAllowedSpeciesBySites(const std::vector<LatticeSite> &) const;
+
     /// Set tolerance applied when comparing positions.
     void setTolerance(double tolerance) { _tolerance = tolerance; }
 

@@ -22,7 +22,7 @@ for temperature in [900, 600, 300]:
     mc = SemiGrandCanonicalEnsemble(
         calculator=calculator,
         atoms=atoms,
-        ensemble_data_write_interval=10,
+        ensemble_data_write_interval=len(atoms),
         temperature=temperature,
         chemical_potentials={chemical_symbols[0]: 0,
                              chemical_symbols[1]: 0})
@@ -32,12 +32,8 @@ for temperature in [900, 600, 300]:
         mc.chemical_potentials = {chemical_symbols[0]: 0,
                                   chemical_symbols[1]: dmu}
 
-        # equilibration run
-        mc.run(number_of_trial_steps=len(atoms)*8)
-
-        # production run
         mc.reset_data_container()
-        mc.run(number_of_trial_steps=len(atoms)*20)
+        mc.run(number_of_trial_steps=len(atoms)*30)
         # TODO: change the next line (and the tutorial) once mc.data_container
         # is writable
         mc.data_container.write('sgc-T{}-dmu{:.3f}.dc'

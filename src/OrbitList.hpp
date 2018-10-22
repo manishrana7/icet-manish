@@ -229,6 +229,10 @@ class OrbitList
 
     /// Remove an orbit according to its index.
     void removeOrbit(const size_t);
+
+    /// Removes all orbits that have inactive sites.
+    void removeInactiveOrbits(const Structure &);
+
   private:
     
     std::vector<LatticeSite> _col1;
