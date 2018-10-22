@@ -7,7 +7,7 @@ import numpy as np
 from ase import Atoms
 from ase.data import atomic_numbers, chemical_symbols
 from ase.units import kB
-from typing import List, Dict
+from typing import Dict
 
 from .. import DataContainer
 from .base_ensemble import BaseEnsemble
