@@ -50,8 +50,9 @@ class VCSGCEnsemble(BaseEnsemble):
         units, i.e. units that are consistent
         with the underlying cluster expansion
         and the temperature units [default: eV/K]
-    variance_parameter : float
+    kappa : float
         parameter that constrains the fluctuations of the concentration
+        (referred to as :math:`\bar{\kappa}` in [SadErh12]_)
     """
 
     def __init__(self, atoms: Atoms=None, calculator: BaseCalculator=None,
@@ -62,8 +63,8 @@ class VCSGCEnsemble(BaseEnsemble):
                  ensemble_data_write_interval: int=None,
                  trajectory_write_interval: int=None,
                  boltzmann_constant: float=kB, *, temperature: float,
-                 concentration_parameters: Dict[str, float],
-                 variance_parameter: float):
+                 phis: Dict[str, float],
+                 kappa: float):
 
         super().__init__(
             atoms=atoms, calculator=calculator, name=name,
@@ -76,9 +77,9 @@ class VCSGCEnsemble(BaseEnsemble):
         self.temperature = temperature
         self.boltzmann_constant = boltzmann_constant
 
-        self._concentration_parameters = None
-        self.concentration_parameters = concentration_parameters
-        self.variance_parameter = variance_parameter
+        self._phis = None
+        self.phis = phis
+        self.kappa = kappa
 
         if len(self.configuration._allowed_species) > 2:
             raise NotImplementedError('VCSGCEnsemble does not yet support '
@@ -101,10 +102,10 @@ class VCSGCEnsemble(BaseEnsemble):
         occupations = self.configuration._occupations.tolist()
         potential_diff = 1.0  # dN
         potential_diff -= occupations.count(old_species)
-        potential_diff -= 0.5 * N * self._concentration_parameters[old_species]
+        potential_diff -= 0.5 * N * self.phis[old_species]
         potential_diff -= occupations.count(new_species)
-        potential_diff += 0.5 * N * self._concentration_parameters[new_species]
-        potential_diff *= self.variance_parameter
+        potential_diff += 0.5 * N * self._phis[new_species]
+        potential_diff *= self.kappa
         potential_diff /= N
 
         potential_diff += self._get_property_change([index], [new_species])
@@ -131,34 +132,31 @@ class VCSGCEnsemble(BaseEnsemble):
                 self._next_random_number()
 
     @property
-    def concentration_parameters(self) -> Dict[int, float]:
-        """concentration parameters :math:`\\phi_i`, one for each
-        element but their sum must be :math:`-2.0`"""
-        return self._concentration_parameters
+    def phis(self) -> Dict[int, float]:
+        """phis :math:`\\phi_i`, one for each
+        element but their sum must be :math:`-2.0`
+        (referred to as :math:`\bar{\phi}` in [SadErh12]_)"""
+        return self._phis
 
-    @concentration_parameters.setter
-    def concentration_parameters(self, concentration_parameters):
-        if not isinstance(concentration_parameters, dict):
-            raise TypeError('concentration_parameters must be dict, '
-                            'not {}'.format(type(concentration_parameters)))
-        if abs(sum(concentration_parameters.values()) + 2) > 1e-6:
-            raise ValueError('The sum of all concentration_parameters must '
-                             'equal -2')
+    @phis.setter
+    def phis(self, phis):
+        if not isinstance(phis, dict):
+            raise TypeError('phis must be dict, not {}'.format(type(phis)))
+        if abs(sum(phis.values()) + 2) > 1e-6:
+            raise ValueError('The sum of all phis must equal -2')
 
-        self._concentration_parameters = {}
+        self._phis = {}
 
-        for key, phi in concentration_parameters.items():
+        for key, phi in phis.items():
             if isinstance(key, str):
                 atomic_number = atomic_numbers[key]
-                self._concentration_parameters[atomic_number] = phi
+                self._phis[atomic_number] = phi
             elif isinstance(key, int):
-                self._concentration_parameters[key] = phi
-        if set(self.configuration._allowed_species) != \
-           set(self._concentration_parameters.keys()):
-            raise ValueError('concentration_parameters were not set for '
-                             'all species')
+                self._phis[key] = phi
+        if set(self.configuration._allowed_species) != set(self._phis.keys()):
+            raise ValueError('phis were not set for all species')
 
-    def get_ensemble_data(self) -> Dict:
+    def _get_ensemble_data(self) -> Dict:
         """
         Returns a dict with the default data of
         the ensemble.
@@ -171,23 +169,21 @@ class VCSGCEnsemble(BaseEnsemble):
         dict : ensemble data key pairs
 
         """
-        data = super().get_ensemble_data()
+        data = super()._get_ensemble_data()
 
-        # concentration parameters
-        for atnum, phi in self.concentration_parameters.items():
+        # concentration parameters (phis)
+        for atnum, phi in self.phis.items():
             data['phi_{}'.format(chemical_symbols[atnum])] = phi
 
-        # variance parameter
-        data['kappa'] = self.variance_parameter
+        # variance parameter (kappa)
+        data['kappa'] = self.kappa
 
         # free energy derivative
-        atnum_1 = min(self.concentration_parameters.keys())
+        atnum_1 = min(self.phis.keys())
         concentration = self.configuration._occupations.tolist().count(
             atnum_1) / len(self.atoms)
         data['free_energy_derivative'] = \
-            - 2 * self.variance_parameter * concentration - \
-            self.variance_parameter * \
-            self.concentration_parameters[atnum_1]
+            - 2 * self.kappa * concentration - self.kappa * self.phis[atnum_1]
 
         # temperature
         data['temperature'] = self.temperature

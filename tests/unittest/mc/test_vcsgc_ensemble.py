@@ -21,8 +21,8 @@ class TestEnsemble(unittest.TestCase):
                 atom.symbol = 'Ga'
         cutoffs = [5, 5, 4]
         elements = ['Al', 'Ga']
-        self.concentration_parameters = {'Al': -1.3, 'Ga': -0.7}
-        self.variance_parameter = 10.0
+        self.phis = {'Al': -1.3, 'Ga': -0.7}
+        self.kappa = 10.0
         self.cs = ClusterSpace(self.atoms, cutoffs, elements)
         parameters = parameters = np.array([1.2] * len(self.cs))
         self.ce = ClusterExpansion(self.cs, parameters)
@@ -39,41 +39,38 @@ class TestEnsemble(unittest.TestCase):
             ensemble_data_write_interval=25,
             trajectory_write_interval=40,
             temperature=self.temperature,
-            concentration_parameters=self.concentration_parameters,
-            variance_parameter=self.variance_parameter,
+            phis=self.phis,
+            kappa=self.kappa,
             boltzmann_constant=1e-5)
 
-    def test_property_concentration_parameters(self):
-        """Test property concentration_parameters."""
-        retval = self.ensemble.concentration_parameters
+    def test_property_phis(self):
+        """Test property phis."""
+        retval = self.ensemble.phis
         target = {13: -1.3, 31: -0.7}
         self.assertEqual(retval, target)
 
-        self.ensemble.concentration_parameters = {'Al': -1.2, 'Ga': -0.8}
-        retval = self.ensemble.concentration_parameters
+        self.ensemble.phis = {'Al': -1.2, 'Ga': -0.8}
+        retval = self.ensemble.phis
         target = {13: -1.2, 31: -0.8}
         self.assertEqual(retval, target)
 
-        self.ensemble.concentration_parameters = {13: -2.2, 31: 0.2}
-        retval = self.ensemble.concentration_parameters
+        self.ensemble.phis = {13: -2.2, 31: 0.2}
+        retval = self.ensemble.phis
         target = {13: -2.2, 31: 0.2}
         self.assertEqual(retval, target)
 
         # test exceptions
         with self.assertRaises(ValueError) as context:
-            self.ensemble.concentration_parameters = {13: -2.0}
-        self.assertTrue('concentration_parameters were not set'
-                        in str(context.exception))
+            self.ensemble.phis = {13: -2.0}
+        self.assertTrue('phis were not set' in str(context.exception))
 
         with self.assertRaises(TypeError) as context:
-            self.ensemble.concentration_parameters = 'xyz'
-        self.assertTrue('concentration_parameters must be dict'
-                        in str(context.exception))
+            self.ensemble.phis = 'xyz'
+        self.assertTrue('phis must be dict' in str(context.exception))
 
         with self.assertRaises(ValueError) as context:
-            self.ensemble.concentration_parameters = {13: -1.2, 31: -0.7}
-        self.assertTrue('The sum of all concentration_parameters must'
-                        in str(context.exception))
+            self.ensemble.phis = {13: -1.2, 31: -0.7}
+        self.assertTrue('The sum of all phis must' in str(context.exception))
 
     def test_temperature_attribute(self):
         """Test temperature attribute."""
@@ -97,29 +94,29 @@ class TestEnsemble(unittest.TestCase):
         # at least run it for positive energy diff
         self.ensemble._acceptance_condition(10.0)
 
-    def test_init_with_integer_concentration_parameters(self):
+    def test_init_with_integer_phis(self):
         """ Test init with integer chemical potentials."""
 
-        concentration_parameters = {13: -1, 31: -1}
+        phis = {13: -1, 31: -1}
         ensemble = VCSGCEnsemble(
             calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
             random_seed=42, temperature=self.temperature,
-            concentration_parameters=concentration_parameters,
-            variance_parameter=self.variance_parameter)
+            phis=phis,
+            kappa=self.kappa)
         ensemble._do_trial_step()
 
         # Test both int and str
-        concentration_parameters = {'Al': -1, 31: -1}
+        phis = {'Al': -1, 31: -1}
         ensemble = VCSGCEnsemble(
             calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
             random_seed=42, temperature=self.temperature,
-            concentration_parameters=concentration_parameters,
-            variance_parameter=self.variance_parameter)
+            phis=phis,
+            kappa=self.kappa)
         ensemble._do_trial_step()
 
     def test_get_ensemble_data(self):
         """Test the get ensemble data method."""
-        data = self.ensemble.get_ensemble_data()
+        data = self.ensemble._get_ensemble_data()
 
         self.assertIn('potential', data.keys())
         self.assertIn('Al_count', data.keys())
