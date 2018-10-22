@@ -139,7 +139,8 @@ class VCSGCEnsemble(BaseEnsemble):
     @concentration_parameters.setter
     def concentration_parameters(self, concentration_parameters):
         if not isinstance(concentration_parameters, dict):
-            raise TypeError('concentration_parameters has the wrong type')
+            raise TypeError('concentration_parameters must be dict, '
+                            'not {}'.format(type(concentration_parameters)))
         if abs(sum(concentration_parameters.values()) + 2) > 1e-6:
             raise ValueError('The sum of all concentration_parameters must '
                              'equal -2')
