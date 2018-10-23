@@ -244,7 +244,7 @@ class TestOrbitList(unittest.TestCase):
         then append the respective permutation to allowed_perm list.
         5. Check allowed_perm list is equal to orbit.allowed_permutation.
         """
-        cutoffs = [1.4, 1.4]
+        cutoffs = [1.6, 1.6]
         orbit_list = OrbitList(atoms, cutoffs)
 
         pm = orbit_list.permutation_matrix
@@ -285,7 +285,7 @@ class TestOrbitList(unittest.TestCase):
         """
         Tests permutations taken equivalent sites to representative sites.
         """
-        cutoffs = [1.4, 1.4]
+        cutoffs = [1.6, 1.6]
         orbit_list = OrbitList(atoms, cutoffs)
 
         pm = orbit_list.permutation_matrix
@@ -295,7 +295,6 @@ class TestOrbitList(unittest.TestCase):
             match_repr_site = False
             # Take representative sites and translated them into unitcell
             repr_sites = orbit.get_representative_sites()
-            print(len(repr_sites))
             # Take equivalent sites and its permutations_to_representative
             for eq_sites, perm in zip(orbit.equivalent_sites,
                                       orbit.permutations_to_representative):
