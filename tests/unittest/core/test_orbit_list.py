@@ -164,25 +164,28 @@ class TestOrbitList(unittest.TestCase):
         sites = [LatticeSite(0, [0, 0, 0])]
         target = [[LatticeSite(0, [0, 0, 0])]]
         self.assertListEqual(
-            self.orbit_list._get_all_translated_sites(sites, False), target)
+            self.orbit_list._get_sites_translated_to_unitcell(sites, False),
+            target)
 
         # test a singlet site with offset
         sites = [LatticeSite(3, [0, 0, -1])]
         target = [[LatticeSite(3, [0, 0, -1])],
                   [LatticeSite(3, [0, 0, 0])]]
         self.assertListEqual(
-            self.orbit_list._get_all_translated_sites(sites, False), target)
+            self.orbit_list._get_sites_translated_to_unitcell(sites, False),
+            target)
 
         # sort output
         self.assertListEqual(
-            self.orbit_list._get_all_translated_sites(sites, True),
+            self.orbit_list._get_sites_translated_to_unitcell(sites, True),
             sorted(target))
 
         # Does it break when the offset is floats?
         sites = [LatticeSite(0, [0.0, 0.0, 0.0])]
         target = [[LatticeSite(0, [0.0, 0.0, 0.0])]]
         self.assertListEqual(
-            self.orbit_list._get_all_translated_sites(sites, False), target)
+            self.orbit_list._get_sites_translated_to_unitcell(sites, False),
+            target)
 
         # Test two sites with floats
         sites = [LatticeSite(0, [1.0, 0.0, 0.0]),
@@ -191,7 +194,8 @@ class TestOrbitList(unittest.TestCase):
                    LatticeSite(0, [-1., 0.0, 0.0])],
                   sites]
         self.assertListEqual(
-            self.orbit_list._get_all_translated_sites(sites, False), target)
+            self.orbit_list._get_sites_translated_to_unitcell(sites, False),
+            target)
 
         # Test sites where none is inside unit cell
         sites = [LatticeSite(0, [1.0, 2.0, -1.0]),
@@ -203,7 +207,8 @@ class TestOrbitList(unittest.TestCase):
                    LatticeSite(2, [1.0, -2.0, 1.0])],
                   sites]
         self.assertListEqual(
-            self.orbit_list._get_all_translated_sites(sites, False), target)
+            self.orbit_list._get_sites_translated_to_unitcell(sites, False),
+            target)
 
     def test_get_all_columns_from_sites(self):
         """Tests get_all_columns_from_sites functionality."""
@@ -219,7 +224,8 @@ class TestOrbitList(unittest.TestCase):
         for i in range(len(pm[0])):
             perm_sites = [pm[0][i], pm[-1][i]]
             translated_sites = \
-                self.orbit_list._get_all_translated_sites(perm_sites, False)
+                self.orbit_list._get_sites_translated_to_unitcell(perm_sites,
+                                                                  False)
             for k, sites in enumerate(translated_sites):
                 self.assertEqual(columns[k+2*i], sites)
 
@@ -245,48 +251,67 @@ class TestOrbitList(unittest.TestCase):
         column1 = [row[0] for row in pm]
 
         for orbit in orbit_list.orbits:
+            # Set up all possible permutations
             allowed_perm = []
             all_perm = \
                 [list(perm) for perm in permutations(range(orbit.order))]
+            # Get representative site of orbit
             repr_sites = orbit.get_representative_sites()
             translated_sites = \
-                orbit_list._get_all_translated_sites(repr_sites, False)
+                orbit_list._get_sites_translated_to_unitcell(repr_sites, False)
             for sites in translated_sites:
                 for perm in all_perm:
+                    # Permute translated sites
                     perm_sites = get_permutation(sites, perm)
+                    # Get from all columns those sites at the rows
+                    # where permuted sites is found in column1.
                     columns = \
                         orbit_list._get_all_columns_from_sites(perm_sites,
                                                                column1, pm)
+                    # Any translated sites will be find in columns since
+                    # permutation is not allowed
                     if perm not in orbit.allowed_permutations:
                         self.assertTrue(
                             any(s not in columns for s in translated_sites))
+                    # If translated sites is found then save permutation
                     for s in translated_sites:
                         if s in columns and perm not in allowed_perm:
                             allowed_perm.append(perm)
+            # Check all collected permutations match allowed_permutations
             self.assertEqual(sorted(allowed_perm),
                              sorted(orbit.allowed_permutations))
 
     def _test_equivalent_sites(self, atoms):
         """
-        Tests that at least one of equivalent sites is among the permutations
-        of the representative site for each orbit in orbit list.
+        Tests permutations taken equivalent sites to representative sites.
         """
         cutoffs = [1.4, 1.4]
         orbit_list = OrbitList(atoms, cutoffs)
 
+        pm = orbit_list.permutation_matrix
+        column1 = [row[0] for row in pm]
+
         for orbit in orbit_list.orbits:
-            all_perm_sites = []
+            match_repr_site = False
+            # Take representative sites and translated them into unitcell
             repr_sites = orbit.get_representative_sites()
-            all_perm = \
-                [list(perm) for perm in permutations(range(orbit.order))]
-            translated_sites = \
-                orbit_list._get_all_translated_sites(repr_sites, False)
-            for sites in translated_sites:
-                for perm in all_perm:
+            print(len(repr_sites))
+            # Take equivalent sites and its permutations_to_representative
+            for eq_sites, perm in zip(orbit.equivalent_sites,
+                                      orbit.permutations_to_representative):
+                trans_eq_sites = \
+                    orbit_list._get_sites_translated_to_unitcell(eq_sites,
+                                                                 False)
+                # Permute equivalent sites and get all columns from those sites
+                for sites in trans_eq_sites:
                     perm_sites = get_permutation(sites, perm)
-                    all_perm_sites.append(perm_sites)
-            self.assertTrue(
-                any(s in all_perm_sites for s in orbit.equivalent_sites))
+                    columns = \
+                        orbit_list._get_all_columns_from_sites(perm_sites,
+                                                               column1, pm)
+                    # Check representative sites can be found in columns
+                    if repr_sites in columns:
+                        match_repr_site = True
+            self.assertTrue(match_repr_site)
 
     def test_orbit_permutations_for_atoms_in_database(self):
         """
