@@ -83,13 +83,16 @@ class BaseEnsemble(ABC):
         self._calculator = calculator
         self._name = name
         strict_constraints_symbol = self.calculator.occupation_constraints
-        symbols = list({tuple(sym) for sym in strict_constraints_symbol})
+        symbols = list({tuple(sym) for sym in strict_constraints_symbol if len(sym)>1})
+        dis_allowed_symbols = list({tuple(sym) for sym in strict_constraints_symbol if len(sym)<2})
         print("Symbols: ", symbols)
         sublattices = [[] for _ in symbols]
         print(sublattices)
         # exit()
         for i, constraint in enumerate(strict_constraints_symbol):
             for j, sym in enumerate(symbols):
+                if len(sym) <2:
+                    continue
                 if sorted(constraint) == sorted(sym):
                     print(constraint, sym, i, j)
                     sublattices[j].append(i)
