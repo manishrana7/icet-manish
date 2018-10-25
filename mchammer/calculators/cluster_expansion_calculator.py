@@ -139,7 +139,7 @@ class ClusterExpansionCalculator(BaseCalculator):
     def occupation_constraints(self) -> List[List[int]]:
         """ map from site to allowed species """
         allowed_species_prim = \
-            self.cluster_expansion.cluster_space.chemical_symbols
+            self.cluster_expansion.cluster_space.primitive_chemical_symbols
         indices_in_prim = [find_lattice_site_by_position(
             self.cluster_expansion.cluster_space.primitive_structure,
             position=pos).index for pos in self.atoms.positions]

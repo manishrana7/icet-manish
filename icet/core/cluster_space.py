@@ -53,9 +53,13 @@ class ClusterSpace(_ClusterSpace):
                             " List[str] or List[List[str]],"
                             " not {}".format(type(self._chemical_symbols)))
 
+        
+
         decorated_primitive, primitive_chemical_symbols = \
             get_decorated_primitive_structure(
                 self._atoms, self._chemical_symbols)
+
+        self._primitive_chemical_symbols = primitive_chemical_symbols
 
         # view(decorated_primitive)
         assert len(decorated_primitive) == len(primitive_chemical_symbols)
@@ -67,6 +71,12 @@ class ClusterSpace(_ClusterSpace):
         # call (base) C++ constructor
         _ClusterSpace.__init__(
             self, primitive_chemical_symbols, self._orbit_list)
+
+
+    @property
+    def primitive_chemical_symbols(self)->List[List[str]]:
+        """Allowed chemical symbols for the primitive structure"""
+        return self._primitive_chemical_symbols
 
     @staticmethod
     def _get_Mi_from_dict(Mi: dict, atoms: Union[Atoms, Structure]):
