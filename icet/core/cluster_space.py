@@ -53,8 +53,6 @@ class ClusterSpace(_ClusterSpace):
                             " List[str] or List[List[str]],"
                             " not {}".format(type(self._chemical_symbols)))
 
-        
-
         decorated_primitive, primitive_chemical_symbols = \
             get_decorated_primitive_structure(
                 self._atoms, self._chemical_symbols)
@@ -71,7 +69,6 @@ class ClusterSpace(_ClusterSpace):
         # call (base) C++ constructor
         _ClusterSpace.__init__(
             self, primitive_chemical_symbols, self._orbit_list)
-
 
     @property
     def primitive_chemical_symbols(self)->List[List[str]]:
@@ -119,6 +116,13 @@ class ClusterSpace(_ClusterSpace):
                 Mi_ret[site[0].index] = Mi[singlet['orbit_index']]
 
         return Mi_ret
+
+    # def _get_chemical_symbol_representation(self):
+    #     """Returns a str version of the chemical symbols that is 
+    #         easier to the eyes.
+    #     """
+    #     nice_str = ''
+    #     if len(self.get_chemical_symbols()) > 4:
 
     def _get_string_representation(self, print_threshold: int=None,
                                    print_minimum: int=10) -> str:
