@@ -117,12 +117,36 @@ class ClusterSpace(_ClusterSpace):
 
         return Mi_ret
 
-    # def _get_chemical_symbol_representation(self):
-    #     """Returns a str version of the chemical symbols that is 
-    #         easier to the eyes.
-    #     """
-    #     nice_str = ''
-    #     if len(self.get_chemical_symbols()) > 4:
+    def _get_chemical_symbol_representation(self):
+        """Returns a str version of the chemical symbols that is 
+            easier to the eyes.
+        """
+        nice_str = ''
+        if len (self.get_chemical_symbols()) > 4:            
+            last_symbol = self.get_chemical_symbols()[0]
+            count = 1
+            for i in range(1, len(self.get_chemical_symbols())):
+                if self.get_chemical_symbols()[i] == last_symbol:
+                    count +=1
+                    if i == len(self.get_chemical_symbols())-1:
+                        if count == 1:
+                            nice_str += '{} '.format(last_symbol)
+                        else:
+                            nice_str += '{}*{} '.format(count,last_symbol)
+                else:
+                    if count == 1:
+                        nice_str += '{} '.format(last_symbol)
+                    else:
+                        nice_str += '{}*{} '.format(count,last_symbol)
+                    count = 1
+                    last_symbol = self.get_chemical_symbols()[i]
+        else:
+            for s in self.get_chemical_symbols():
+                nice_str += '{} '.format(s)
+        return nice_str
+            
+
+
 
     def _get_string_representation(self, print_threshold: int=None,
                                    print_minimum: int=10) -> str:
@@ -168,8 +192,7 @@ class ClusterSpace(_ClusterSpace):
         s = []  # type: List
         s += ['{s:=^{n}}'.format(s=' Cluster Space ', n=width)]
         s += [' chemical species: {}'
-              .format(' '.join(
-                  [str(sym) for sym in self.get_chemical_symbols()]))]
+              .format(self._get_chemical_symbol_representation())]
         s += [' cutoffs: {}'.format(' '.join(['{:.4f}'.format(co)
                                               for co in self._cutoffs]))]
         s += [' total number of orbits: {}'.format(len(self))]
