@@ -15,14 +15,14 @@ from ..calculators.base_calculator import BaseCalculator
 
 
 class VCSGCEnsemble(BaseEnsemble):
-    """Variance-constrained semi-grand canonical (VCSGC) ensemble.
-
-    Instances of this class allow one to simulate systems in the VCSGC
-    ensemble (:math:`N\phi\kappa VT`), i.e. at constant temperature
+    """Instances of this class allow one to simulate systems in the
+    variance-constrained semi-grand canonical (VCSGC) ensemble
+    (:math:`N\phi\kappa VT`), i.e. at constant temperature
     (:math:`T`), total number of sites (:math:`N=\sum_i N_i`), and two
-    additional parameters :math:`\phi` and :math:`\kappa`, which constrain
-    average and variance of the concentration, respectively. The VCSGC
-    ensemble is currently only implemented for binary systems.
+    additional parameters :math:`\phi` and :math:`\kappa`, which
+    constrain average and variance of the concentration,
+    respectively. The VCSGC ensemble is currently only implemented for
+    binary systems.
 
     The probability for a particular state in the VCSGC ensemble for a
     :math:`2`-component system can be written

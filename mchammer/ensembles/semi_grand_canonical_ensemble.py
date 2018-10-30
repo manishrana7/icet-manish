@@ -16,13 +16,12 @@ from ..calculators.base_calculator import BaseCalculator
 
 
 class SemiGrandCanonicalEnsemble(BaseEnsemble):
-    """Semi-grand canonical (SGC) ensemble.
-
-    Instances of this class allow one to simulate systems in the SGC
-    ensemble (:math:`N\Delta\mu_i VT`), i.e. at constant temperature
-    (:math:`T`), total number of sites (:math:`N=\sum_i N_i`),
-    relative chemical potentials (:math:`\Delta\mu_i=\mu_i - \mu_1`,
-    where :math:`i` denotes the species), and volume (:math:`V`).
+    """Instances of this class allow one to simulate systems in the
+    emi-grand canonical (SGC) ensemble (:math:`N\Delta\mu_i VT`),
+    i.e. at constant temperature (:math:`T`), total number of sites
+    (:math:`N=\sum_i N_i`), relative chemical potentials
+    (:math:`\Delta\mu_i=\mu_i - \mu_1`, where :math:`i` denotes the
+    species), and volume (:math:`V`).
 
     The probability for a particular state in the SGC ensemble for a
     :math:`m`-component system can be written

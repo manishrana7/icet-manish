@@ -12,12 +12,10 @@ from ..calculators.base_calculator import BaseCalculator
 
 
 class CanonicalEnsemble(BaseEnsemble):
-    """Canonical ensemble.
-
-    Instances of this class allow one to simulate systems in the
+    """Instances of this class allow one to simulate systems in the
     canonical ensemble (:math:`N_iVT`), i.e. at constant temperature
-    (:math:`T`), number of atoms of each species (:math:`N_i`), and volume
-    (:math:`V`).
+    (:math:`T`), number of atoms of each species (:math:`N_i`), and
+    volume (:math:`V`).
 
     The probability for a partiocular state in the canonical ensemble is
     proportional to the well-known Boltzmann factor,
