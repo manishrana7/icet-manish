@@ -146,7 +146,7 @@ class VCSGCEnsemble(BaseEnsemble):
         potential_diff = 1.0  # dN
         potential_diff -= occupations.count(old_species)
         potential_diff -= 0.5 * N * self.phis[old_species]
-        potential_diff -= occupations.count(new_species)
+        potential_diff += occupations.count(new_species)
         potential_diff += 0.5 * N * self._phis[new_species]
         potential_diff *= self.kappa
         potential_diff /= N
