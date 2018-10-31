@@ -446,7 +446,10 @@ class BaseEnsemble(ABC):
         * fix this method
         * add unit test
         """
-        return np.random.choice(range(0, len(self._sublattices)))
+        total_active_sites = sum([len(sub) for sub in self._sublattices])
+        probability_distribution = [ len(sub)/total_active_sites for sub in self._sublattices]
+        pick = np.random.choice(range(0, len(self._sublattices)), p=probability_distribution)        
+        return pick
 
     def _restart_ensemble(self):
         """Restarts ensemble using the last state saved in DataContainer file.
