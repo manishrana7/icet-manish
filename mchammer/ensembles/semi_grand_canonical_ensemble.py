@@ -33,7 +33,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
 
     with the *relative* chemical potentials :math:`\Delta\mu_i = \mu_i -
     \mu_1` and species counts :math:`N_i`. Unlike the
-    :class:`canonical ensemble<mchammer.ensembles.CanonicalEnsemble>`, the
+    :ref:`canonical ensemble<mchammer.ensembles.CanonicalEnsemble>`, the
     number of the respecive species (or, equivalently, the concentrations) are
     allowed to vary in the SGC ensemble. A trial step thus consists of
     randomly picking an atom and changing its identity with probability
@@ -70,7 +70,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
     concentration. Such jumps mark the phase boundaries of a multiphase region
     and can thus be used to construct the phase diagram. To recover the free
     energy, however, such systems require sampling in other ensembles, such as
-    the :class:`variance-constrained semi-grand canonical
+    the :ref:`variance-constrained semi-grand canonical
     ensemble<mchammer.ensembles.VCSGCEnsemble>`.
 
 

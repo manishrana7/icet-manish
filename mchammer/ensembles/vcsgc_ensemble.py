@@ -43,7 +43,7 @@ class VCSGCEnsemble(BaseEnsemble):
     i.e., it does not matter if we use :math:`\phi_1` and :math:`c_1` or
     :math:`\phi_2` and :math:`c_2`.
 
-    Just like the :class:`semi-grand canonical ensemble
+    Just like the :ref:`semi-grand canonical ensemble
     <mchammer.ensembles.SemiGrandCanonicalEnsemble>`, the VCSGC ensemble
     allows concentrations to change. A trial step consists of changing the
     identity of a randomly chosen atom and accepting the change with
@@ -62,7 +62,7 @@ class VCSGCEnsemble(BaseEnsemble):
     :math:`1`. The parameter :math:`\kappa` constrains the fluctuations (or
     the variance) of the concentration at each value of :math:`\phi_1`, with
     higher values of :math:`\kappa` meaning less fluctuations. Unlike the
-    :class:`semi-grand canonical ensemble
+    :ref:`semi-grand canonical ensemble
     <mchammer.ensembles.SemiGrandCanonicalEnsemble>`, one value of
     :math:`\phi_1` maps to one and only one concentration also in multiphase
     regions. Since the derivative of the canonical free energy can be
@@ -76,7 +76,7 @@ class VCSGCEnsemble(BaseEnsemble):
     this ensemble allows for thermodynamic integration across multiphase
     regions. This means that we can construct phase diagrams by directly
     comparing the free energies of the different phases. This often makes the
-    VCSGC ensemble more convenient than the :class:`semi-grand canonical
+    VCSGC ensemble more convenient than the :ref:`semi-grand canonical
     ensemble <mchammer.ensembles.SemiGrandCanonicalEnsemble>` when simulating
     materials with multiphase regions, such as alloys with miscibility gaps.
 
