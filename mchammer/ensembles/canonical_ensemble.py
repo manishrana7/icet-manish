@@ -17,7 +17,7 @@ class CanonicalEnsemble(BaseEnsemble):
     (:math:`T`), number of atoms of each species (:math:`N_i`), and
     volume (:math:`V`).
 
-    The probability for a partiocular state in the canonical ensemble is
+    The probability for a particular state in the canonical ensemble is
     proportional to the well-known Boltzmann factor,
 
     .. math::
