@@ -9,34 +9,46 @@ Ensembles
 =========
 
 
+.. _canonical_ensemble:
+
 .. index::
    single: Class reference; CanonicalEnsemble
    single: Monte Carlo; Canonical ensemble
 
-CanonicalEnsemble
------------------
+Canonical ensemble
+------------------
 
 .. autoclass:: CanonicalEnsemble
    :members:
    :undoc-members:
    :inherited-members:
 
-.. _sgc:
+
+
+.. _sgc_ensemble:
 
 .. index::
-   single: Class reference; SGCEnsemble
+   single: Class reference; SemiGrandCanonicalEnsemble
    single: Monte Carlo; Semi-grand canonical ensemble
 
-SemiGrandCanonicalEnsemble
---------------------------
+Semi-grand canonical ensemble
+-----------------------------
 
 .. autoclass:: SemiGrandCanonicalEnsemble
    :members:
    :undoc-members:
    :inherited-members:
 
-VCSGCEnsemble
---------------------------
+
+
+.. _vcsgc_ensemble:
+
+.. index::
+   single: Class reference; VCSGCEnsemble
+   single: Monte Carlo; Variance-constrained semi-grand canonical ensemble
+
+Variance-constrained semi-grand canonical ensemble
+--------------------------------------------------
 
 .. autoclass:: VCSGCEnsemble
    :members:

@@ -35,7 +35,7 @@ class VCSGCEnsemble(BaseEnsemble):
 
     where :math:`c_1` represents the concentration of species 1, i.e.
     :math:`c_1=N_1/N`. (Please note that the quantities :math:`\kappa` and
-    :math:`\phi` correspond, repsectively, to :math:`\\bar{\kappa}` and
+    :math:`\phi` correspond, respectively, to :math:`\\bar{\kappa}` and
     :math:`\\bar{\phi}` in [SadErh12]_.) This implementation requires
     :math:`\phi` to be specified for both species. The sum of the specified
     :math:`\phi` values is required to be :math:`-2`, because then the above
@@ -43,11 +43,10 @@ class VCSGCEnsemble(BaseEnsemble):
     i.e., it does not matter if we use :math:`\phi_1` and :math:`c_1` or
     :math:`\phi_2` and :math:`c_2`.
 
-    Just like the :ref:`semi-grand canonical ensemble
-    <mchammer.ensembles.SemiGrandCanonicalEnsemble>`, the VCSGC ensemble
-    allows concentrations to change. A trial step consists of changing the
-    identity of a randomly chosen atom and accepting the change with
-    probability
+    Just like the :ref:`semi-grand canonical ensemble <canonical_ensemble>`,
+    the VCSGC ensemble allows concentrations to change. A trial step consists
+    of changing the identity of a randomly chosen atom and accepting the change
+    with probability
 
     .. math::
 
@@ -57,16 +56,15 @@ class VCSGCEnsemble(BaseEnsemble):
     Note that for a sufficiently large value of :math:`\kappa`, say 200, the
     probability density :math:`\\rho_{\\text{VCSGC}}` is sharply peaked around
     :math:`c_1=-\phi_1 / 2`. In practice, this means that we can gradually
-    change :math:`\phi_1` from (using some margins) :math:`-2.1` to
-    :math:`0.1` and take the system continuously from :math:`c_1 = 0` to
-    :math:`1`. The parameter :math:`\kappa` constrains the fluctuations (or
-    the variance) of the concentration at each value of :math:`\phi_1`, with
-    higher values of :math:`\kappa` meaning less fluctuations. Unlike the
-    :ref:`semi-grand canonical ensemble
-    <mchammer.ensembles.SemiGrandCanonicalEnsemble>`, one value of
-    :math:`\phi_1` maps to one and only one concentration also in multiphase
-    regions. Since the derivative of the canonical free energy can be
-    expressed in terms of parameters and observables of the VCSGC ensemble,
+    change :math:`\phi_1` from (using some margins) :math:`-2.1` to :math:`0.1`
+    and take the system continuously from :math:`c_1 = 0` to :math:`1`. The
+    parameter :math:`\kappa` constrains the fluctuations (or the variance) of
+    the concentration at each value of :math:`\phi_1`, with higher values of
+    :math:`\kappa` meaning less fluctuations. Unlike the :ref:`semi-grand
+    canonical ensemble <vcsgc_ensemble>`, one value of :math:`\phi_1` maps to
+    one and only one concentration also in multiphase regions. Since the
+    derivative of the canonical free energy can be expressed in terms of
+    parameters and observables of the VCSGC ensemble,
 
     .. math::
 
@@ -76,9 +74,9 @@ class VCSGCEnsemble(BaseEnsemble):
     this ensemble allows for thermodynamic integration across multiphase
     regions. This means that we can construct phase diagrams by directly
     comparing the free energies of the different phases. This often makes the
-    VCSGC ensemble more convenient than the :ref:`semi-grand canonical
-    ensemble <mchammer.ensembles.SemiGrandCanonicalEnsemble>` when simulating
-    materials with multiphase regions, such as alloys with miscibility gaps.
+    VCSGC ensemble more convenient than the :ref:`semi-grand canonical ensemble
+    <sgc_ensemble>` when simulating materials with multiphase regions, such as
+    alloys with miscibility gaps.
 
     When using the VCSGC ensemble, please cite
     Sadigh, B. and Erhart, P., Phys. Rev. B **86**, 134204 (2012)
