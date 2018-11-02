@@ -24,7 +24,7 @@ class ConfigurationManager(object):
         sites (inner list) that belong to each sublattice (outer list)
     occupation_constraints : list of list of int
         optional occupation constraint to enfore a more stricter species
-        occupation than what is allowed from the Calculator.
+        occupation than what is allowed from the Calculator
 
     Todo
     ----
@@ -201,7 +201,7 @@ class ConfigurationManager(object):
         sites
             indices of sites of the configuration to change
         species
-            new occupations (species) by atomic number
+            new occupations by atomic number
         """
 
         # Update _sites_by_sublattice
