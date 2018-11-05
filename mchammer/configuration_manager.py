@@ -164,8 +164,12 @@ class ConfigurationManager(object):
         possible_swap_species = \
             set(self._occupation_constraints[site1]) - \
             set([self._occupations[site1]])
-        possible_swap_sites = array([self._sites_by_species[sublattice][Z]
-                                     for Z in possible_swap_species]).flatten()
+        possible_swap_sites = []
+        for Z in possible_swap_species:
+            possible_swap_sites.extend(self._sites_by_species[sublattice][Z])
+
+        possible_swap_sites = array(possible_swap_sites)
+
         try:
             site2 = random.choice(possible_swap_sites)
         except IndexError:
