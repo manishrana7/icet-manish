@@ -14,7 +14,7 @@ showcase different features and modes of usage.
    structure_enumeration
    cluster_counts
    cluster_space_info
-   get_cluster_vector
+   cluster_vectors
    map_structure_to_reference
    get_neighbor_list
    get_permutation_matrix
