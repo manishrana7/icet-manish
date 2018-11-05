@@ -59,12 +59,11 @@ class ClusterSpace(_ClusterSpace):
 
         self._primitive_chemical_symbols = primitive_chemical_symbols
 
-        # view(decorated_primitive)
         assert len(decorated_primitive) == len(primitive_chemical_symbols)
+
         # set up orbit list
         self._orbit_list = OrbitList(decorated_primitive, self._cutoffs)
-
-        # self._orbit_list.remove_inactive_orbits(primitive_chemical_symbols)
+        self._orbit_list.remove_inactive_orbits(primitive_chemical_symbols)
 
         # call (base) C++ constructor
         _ClusterSpace.__init__(
@@ -122,31 +121,28 @@ class ClusterSpace(_ClusterSpace):
             easier to the eyes.
         """
         nice_str = ''
-        if len (self.get_chemical_symbols()) > 4:            
+        if len(self.get_chemical_symbols()) > 4:
             last_symbol = self.get_chemical_symbols()[0]
             count = 1
             for i in range(1, len(self.get_chemical_symbols())):
                 if self.get_chemical_symbols()[i] == last_symbol:
-                    count +=1
+                    count += 1
                     if i == len(self.get_chemical_symbols())-1:
                         if count == 1:
                             nice_str += '{} '.format(last_symbol)
                         else:
-                            nice_str += '{}*{} '.format(count,last_symbol)
+                            nice_str += '{}*{} '.format(count, last_symbol)
                 else:
                     if count == 1:
                         nice_str += '{} '.format(last_symbol)
                     else:
-                        nice_str += '{}*{} '.format(count,last_symbol)
+                        nice_str += '{}*{} '.format(count, last_symbol)
                     count = 1
                     last_symbol = self.get_chemical_symbols()[i]
         else:
             for s in self.get_chemical_symbols():
                 nice_str += '{} '.format(s)
         return nice_str
-            
-
-
 
     def _get_string_representation(self, print_threshold: int=None,
                                    print_minimum: int=10) -> str:
