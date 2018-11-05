@@ -15,7 +15,7 @@ showcase different features and modes of usage.
    cluster_counts
    cluster_space_info
    cluster_vectors
-   map_structure_to_reference
+   mapping_structures
    get_neighbor_list
    get_permutation_matrix
    test_cluster_vector_correlation
