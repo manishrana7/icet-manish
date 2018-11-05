@@ -196,6 +196,7 @@ class VCSGCEnsemble(BaseEnsemble):
         potential_diff += occupations.count(new_species)
         potential_diff += 0.5 * N * self._phis[new_species]
         potential_diff *= self.kappa
+        potential_diff *= self.boltzmann_constant * self.temperature
         potential_diff /= N
 
         potential_diff += self._get_property_change([index], [new_species])
@@ -266,8 +267,9 @@ class VCSGCEnsemble(BaseEnsemble):
         atnum_1 = min(self.phis.keys())
         concentration = self.configuration._occupations.tolist().count(
             atnum_1) / len(self.atoms)
-        data['free_energy_derivative'] = \
-            - 2 * self.kappa * concentration - self.kappa * self.phis[atnum_1]
+        data['free_energy_derivative'] = self.kappa * \
+            self.boltzmann_constant * self.temperature * \
+            (- 2 * concentration - self.phis[atnum_1])
 
         # temperature
         data['temperature'] = self.temperature
