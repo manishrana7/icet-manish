@@ -3,7 +3,7 @@
 /// Count clusters given this compact form of lattice neighbors (see ManyBodyNeighborList for more details)
 // build(const NeighborList &nl, int index, int order, bool);
 void ClusterCounts::countLatticeSites(const Structure &structure,
-                                      const std::vector<std::pair<std::vector<LatticeSite>,std::vector<LatticeSite>>> &latticeNeighbors)
+                                      const std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &latticeNeighbors)
 {
     for (const auto &neighborPair : latticeNeighbors)
     {
@@ -46,28 +46,31 @@ void ClusterCounts::count(const Structure &structure,
 }
 
 /**
-Will count the vectors in latticeNeighbors and assuming these sets of sites are represented by the cluster 'cluster'
+@details Will count the vectors in latticeNeighbors and assuming these sets of sites are represented by the cluster 'cluster'.
+@param structure the structure that will have its clusters counted
+@param latticeSites A group of sites, represented by 'cluster', that will be counted
+@param cluster A cluster used as identification on what sites the clusters belong to
+@param orderIntact if true the order of the sites will stay the same otherwise the vector of species being counted will be sorted
 */
-void ClusterCounts::count(const Structure &structure, const std::vector<std::vector<LatticeSite>> &latticeNeighbors,
+void ClusterCounts::count(const Structure &structure, const std::vector<std::vector<LatticeSite>> &latticeSites,
                           const Cluster &cluster, bool orderIntact)
 {
 
-    for (const auto &latnbrs : latticeNeighbors)
+    for (const auto &sites : latticeSites)
     {
-        std::vector<int> elements(latnbrs.size());
-        for (size_t i = 0; i < latnbrs.size(); i++)
+        std::vector<int> elements(sites.size());
+        for (size_t i = 0; i < sites.size(); i++)
         {
-            elements[i] = structure.getAtomicNumber(latnbrs[i].index());
+            elements[i] = structure.getAtomicNumber(sites[i].index());
         }
         countCluster(cluster, elements, orderIntact);
     }
 }
 
-
 ///Count cluster only through this function
 void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> &elements, bool orderIntact)
 {
-    if(orderIntact)
+    if (orderIntact)
     {
         _clusterCounts[cluster][elements] += 1;
     }
@@ -75,30 +78,34 @@ void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> 
     {
         std::vector<int> sortedElements = elements;
         std::sort(sortedElements.begin(), sortedElements.end());
-        _clusterCounts[cluster][sortedElements ] += 1;
+        _clusterCounts[cluster][sortedElements] += 1;
     }
 }
-
 
 /**
  @brief Counts the clusters in the input structure.
  @param structure input configuration
  @param orbitList orbit list
- @param orderIntact if True do not reorder clusters before comparison (i.e., ABC != ACB)
+ @param orderIntact if true do not reorder clusters before comparison (i.e., ABC != ACB)
+ @param permuteSites if true the sites will be permuted according to the correspondin permutations in the orbit
 */
-void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &orbitList, bool orderIntact)
+void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &orbitList, bool orderIntact, bool permuteSites)
 {
     for (int i = 0; i < orbitList.size(); i++)
     {
-        Cluster repr_cluster = orbitList.getOrbit(i).getRepresentativeCluster();
+        Cluster repr_cluster = orbitList._orbitList[i].getRepresentativeCluster();
         repr_cluster.setTag(i);
-        if(orderIntact && repr_cluster.order()!= 1)
+        if (permuteSites && orderIntact && repr_cluster.order() != 1)
         {
             count(structure, orbitList.getOrbit(i).getPermutedEquivalentSites(), repr_cluster, orderIntact);
         }
+        else if (!permuteSites && orderIntact && repr_cluster.order() != 1)
+        {
+            count(structure, orbitList._orbitList[i]._equivalentSites, repr_cluster, orderIntact);
+        }
         else
         {
-            count(structure, orbitList.getOrbit(i).getEquivalentSites(), repr_cluster, orderIntact);
+            count(structure, orbitList._orbitList[i]._equivalentSites, repr_cluster, orderIntact);
         }
     }
 }
@@ -109,17 +116,17 @@ void ClusterCounts::setupClusterCountsInfo()
     _clusterCountsInfo.clear();
     for (const auto &map_pair : _clusterCounts)
     {
-      for (const auto &element_count_pair : map_pair.second)
-      {
-        std::vector<std::string> elementVec;
-        for (auto el : element_count_pair.first)
+        for (const auto &element_count_pair : map_pair.second)
         {
-            auto getElementSymbol = PeriodicTable::intStr[el];
-            elementVec.push_back(getElementSymbol);
+            std::vector<std::string> elementVec;
+            for (auto el : element_count_pair.first)
+            {
+                auto getElementSymbol = PeriodicTable::intStr[el];
+                elementVec.push_back(getElementSymbol);
+            }
+            auto getCountPair = map_pair.second.at(element_count_pair.first);
+            _clusterCountsInfo.push_back(std::make_pair(elementVec, getCountPair));
         }
-        auto getCountPair = map_pair.second.at(element_count_pair.first);
-        _clusterCountsInfo.push_back(std::make_pair(elementVec, getCountPair));
-      }
     }
     //std::sort(
     //    _clusterCountsInfo.begin(),

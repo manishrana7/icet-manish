@@ -1,8 +1,11 @@
 build/
 doc/_build/
+doc/userguide/build*
 __pycache__/
+.mypy_cache/
 .vscode
 *~
+*.dc
 *.pyc
 *.swp
 *.db

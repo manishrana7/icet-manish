@@ -9,14 +9,15 @@ from .structure_enumeration_support.smith_normal_form \
     import get_unique_snfs, SmithNormalForm
 from .structure_enumeration_support.labeling_generation \
     import LabelingGenerator
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Generator
 
 
-def _translate_labelings(labeling: tuple, snf: SmithNormalForm,
-                         nsites: int, include_self: bool=False) -> Tuple[int]:
+def _translate_labelings(
+        labeling: tuple, snf: SmithNormalForm, nsites: int,
+        include_self: bool=False)-> Generator[Tuple[int], None, None]:
     """
     Yields labelings that are equivalent to the original labeling
-    under translations as dictated by snf.
+    under translations as dictated by the Smith normal form (SNF) provided.
 
     Parameters
     ----------
@@ -25,7 +26,7 @@ def _translate_labelings(labeling: tuple, snf: SmithNormalForm,
     snf
         SmithNormalForm object
     nsites
-        number of sites in the primtive cell
+        number of sites in the primitive cell
     include_self
         if True original labeling will be included
     """
@@ -56,12 +57,13 @@ def _get_all_labelings(snf: SmithNormalForm,
                        labeling_generator: LabelingGenerator,
                        nsites: int) -> List[tuple]:
     """
-    Returns of inequivalent labelings corresponding to a Smith Normal
-    Form matrix.  Superperiodic labelings as well as labelings that
+    Returns inequivalent labelings corresponding to a Smith normal
+    form (SNF) matrix. Superperiodic labelings as well as labelings that
     are equivalent under translations for this particular SNF will not
     be included. However, labelings that are equivalent by rotations
     that leave the cell (but not the labeling) unchanged will still be
-    included, since these have to be removed for each HNF separately.
+    included, since these have to be removed for each Hermite normal form (HNF)
+    separately.
 
     Parameters
     ----------
@@ -70,7 +72,7 @@ def _get_all_labelings(snf: SmithNormalForm,
     labeling_generator
         LabelingGenerator object
     nsites
-        number of sites per primtive cell
+        number of sites per primitive cell
     """
     labelings = []
     for labeling in labeling_generator.yield_labelings(snf.ncells):
@@ -98,7 +100,7 @@ def _permute_labeling(labeling: tuple, snf: SmithNormalForm,
                       transformation: List[np.ndarray],
                       nsites: int) -> Tuple[int]:
     """
-    Returns permute labeling according to transformations defined by
+    Returns permuted labeling according to transformations defined by
     transformation.
 
     Parameters
@@ -108,9 +110,9 @@ def _permute_labeling(labeling: tuple, snf: SmithNormalForm,
     snf
         SmithNormalForm object
     transformation
-        transformations consisting of rotation, translation and basis shift
+        transformation consisting of rotation, translation and basis shift
     nsites
-        number of sites in the primtive cell
+        number of sites in the primitive cell
     """
 
     # Calculate transformation imposed by LRL multiplication
@@ -146,15 +148,15 @@ def _yield_unique_labelings(labelings: List[int], snf: SmithNormalForm,
     Parameters
     ----------
     labelkeys
-        List of hash keys to labelings that may still contain labelings that
-        are equivalent under rotations that leaves the supercell shape
-        unchanged.
+        list of hash keys to labelings that may still contain labelings that
+        are equivalent under rotations that leave the supercell shape
+        unchanged
     snf
         SmithNormalForm object
     hnf
         HermiteNormalForm object
     nsites
-        Number of sites in the primitive cell.
+        number of sites in the primitive cell
     """
     saved_labelings = []
     for labeling in labelings:
@@ -194,7 +196,7 @@ def _yield_unique_labelings(labelings: List[int], snf: SmithNormalForm,
 
 def _labeling_to_atoms(labeling: tuple, hnf: np.ndarray, cell: np.ndarray,
                        new_cell: np.ndarray,
-                       basis: np.ndarray, species: List[str],
+                       basis: np.ndarray, chemical_symbols: List[str],
                        pbc: List[bool]) -> Atoms:
     """
     Returns structure object corresponding to the given labeling using
@@ -212,7 +214,7 @@ def _labeling_to_atoms(labeling: tuple, hnf: np.ndarray, cell: np.ndarray,
         new cell shape
     basis
         scaled coordinates to all sites in the primitive cell
-    species
+    chemical_symbols
         list of elements, e.g. ``['Au', 'Ag']``
     pbc
         periodic boundary conditions of the primitive structure
@@ -234,7 +236,7 @@ def _labeling_to_atoms(labeling: tuple, hnf: np.ndarray, cell: np.ndarray,
                                      (j + offset10) * cell[1] +
                                      (k + offset20 + offset21) * cell[2] +
                                      np.dot(cell.T, basis_vector))
-                    symbols.append(species[labeling[count]])
+                    symbols.append(chemical_symbols[labeling[count]])
                     count += 1
     atoms = Atoms(symbols, positions, cell=new_cell, pbc=(True, True, True))
     atoms.wrap()
@@ -246,15 +248,15 @@ def get_symmetry_operations(atoms: Atoms,
                             tolerance: float=1e-3) -> Dict[str, list]:
     """
     Returns symmetry operations permissable for a given structure as
-    obtained using `spglib <https://atztogo.github.io/spglib/>`_. The
-    symmetry operations consist of three parts: rotations, translation
-    and "basis_shifts". The latter define the way that the sublattices
+    obtained via `spglib <https://atztogo.github.io/spglib/>`_. The
+    symmetry operations consist of three parts: rotation, translation
+    and basis shifts. The latter define the way that sublattices
     shift upon rotation (correponds to `d_Nd` in [HarFor09]_).
 
     Parameters
     ----------
     atoms
-        structure for which the symmetry operations are sought
+        structure for which symmetry operations are sought
     tolerance
         numerical tolerance imposed during symmetry analysis
     """
@@ -319,14 +321,14 @@ def get_symmetry_operations(atoms: Atoms,
     return symmetries
 
 
-def enumerate_structures(atoms: Atoms, sizes: List[int], species: list,
+def enumerate_structures(atoms: Atoms, sizes: List[int],
+                         chemical_symbols: list,
                          concentration_restrictions: dict=None,
                          niggli_reduce: bool=None) -> Atoms:
-    """
-    Yields a sequence of enumerated structures. The function generates
+    """Yields a sequence of enumerated structures. The function generates
     *all* inequivalent structures that are permissible given a certain
-    lattice. Using the ``species`` and ``concentration_restrictions``
-    keyword arguments it is possible to specify which species are to
+    lattice. Using the ``chemical_symbols`` and ``concentration_restrictions``
+    keyword arguments it is possible to specify which chemical_symbols are to
     be included on which site and in which concentration range.
 
     The function is sensitive to the boundary conditions of the input
@@ -344,15 +346,16 @@ def enumerate_structures(atoms: Atoms, sizes: List[int], species: list,
         generated
     sizes
         number of sites (included in the enumeration)
-    species
-        species with which to decorate the structure, e.g., ``['Au',
+    chemical_symbols
+        chemical species with which to decorate the structure, e.g., ``['Au',
         'Ag']``; see below for more examples
     concentration_restrictions
         allowed concentration range for one or more element in
-        species, e.g., ``{'Au': (0, 0.2)}`` will only enumerate structures
-        in which the Au content is between 0 and 20 %; here, concentration is
-        always defined as the number of atoms of the specified kind divided by
-        the number of *all* atoms.
+        `chemical_symbols`, e.g., ``{'Au': (0, 0.2)}`` will only
+        enumerate structures in which the Au content is between 0 and
+        20 %; here, concentration is always defined as the number of
+        atoms of the specified kind divided by the number of *all*
+        atoms.
     niggli_reduction
         if True perform a Niggli reduction with spglib for each structure;
         the default is ``True`` if ``atoms`` is periodic in all directions,
@@ -368,13 +371,13 @@ def enumerate_structures(atoms: Atoms, sizes: List[int], species: list,
         from ase.build import bulk
         prim = bulk('Ag')
         enumerate_structures(atoms=prim, sizes=range(1, 7),
-                             species=['Ag', 'Au'])
+                             chemical_symbols=['Ag', 'Au'])
 
-    To limit the concentration range to 10 to 40 % Au the code should
+    To limit the concentration range to 10 to 40% Au the code should
     be modified as follows::
 
         enumerate_structures(atoms=prim, sizes=range(1, 7),
-                             species=['Ag', 'Au'],
+                             chemical_symbols=['Ag', 'Au'],
                              concentration_restrictions={'Au': (0.1, 0.4)})
 
     Often one would like to consider mixing on only one
@@ -383,7 +386,7 @@ def enumerate_structures(atoms: Atoms, sizes: List[int], species: list,
 
         prim = bulk('GaAs', crystalstructure='zincblende', a=5.65)
         enumerate_structures(atoms=prim, sizes=range(1, 9),
-                             species=[['Ga', 'Al'], ['As']])
+                             chemical_symbols=[['Ga', 'Al'], ['As']])
 
     """
 
@@ -391,24 +394,25 @@ def enumerate_structures(atoms: Atoms, sizes: List[int], species: list,
     basis = atoms.get_scaled_positions()
 
     # Construct descriptor of where species are allowed to be
-    if isinstance(species[0], str):
-        iter_elements = [tuple(range(len(species)))] * nsites
-        elements = species
-    elif len(species) == nsites:
-        assert isinstance(species[0][0], str)
+    if isinstance(chemical_symbols[0], str):
+        iter_chemical_symbols = [tuple(range(len(chemical_symbols)))] * nsites
+        elements = chemical_symbols
+    elif len(chemical_symbols) == nsites:
+        assert isinstance(chemical_symbols[0][0], str)
         elements = []
-        for site in species:
+        for site in chemical_symbols:
             for element in site:
                 if element not in elements:
                     elements.append(element)
-        iter_elements = []
-        for site in species:
-            iter_elements.append(tuple(elements.index(i) for i in site))
+        iter_chemical_symbols = []
+        for site in chemical_symbols:
+            iter_chemical_symbols.append(tuple(elements.index(i)
+                                               for i in site))
     else:
-        raise Exception('species needs to be a list of strings '
+        raise Exception('chemical_symbols needs to be a list of strings '
                         'or a list of list of strings.')
 
-    # Adapt concentration restrictions to iter_elements
+    # Adapt concentration restrictions to iter_chemical_symbols
     if concentration_restrictions:
         concentrations = {}
         for key, concentration_range in concentration_restrictions.items():
@@ -417,13 +421,14 @@ def enumerate_structures(atoms: Atoms, sizes: List[int], species: list,
                  ' needs to be specified as (c_low, c_high)')
             if key not in elements:
                 raise ValueError('{} found in concentration_restrictions but'
-                                 ' not in species'.format(key))
+                                 ' not in chemical_symbols'.format(key))
             concentrations[elements.index(key)] = concentration_range
     else:
         concentrations = None
 
     # Construct labeling generator
-    labeling_generator = LabelingGenerator(iter_elements, concentrations)
+    labeling_generator = LabelingGenerator(iter_chemical_symbols,
+                                           concentrations)
 
     # Niggli reduce by default if all directions have
     # periodic boundary conditions

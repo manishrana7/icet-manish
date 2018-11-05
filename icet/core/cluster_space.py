@@ -1,14 +1,14 @@
 import pickle
-
-from ase import Atoms
 from collections import OrderedDict
 from typing import List, Union
+
 import numpy as np
 
 from _icet import ClusterSpace as _ClusterSpace
-from icet.tools.geometry import get_primitive_structure, add_vacuum_in_non_pbc
-from icet.core.orbit_list import create_orbit_list
+from ase import Atoms
+from icet.core.orbit_list import OrbitList
 from icet.core.structure import Structure
+from icet.tools.geometry import add_vacuum_in_non_pbc
 
 
 class ClusterSpace(_ClusterSpace):
@@ -36,7 +36,8 @@ class ClusterSpace(_ClusterSpace):
     """
 
     def __init__(self, atoms: Union[Atoms, Structure], cutoffs: List[float],
-                 chemical_symbols: List[str], Mi: Union[list, dict, int]=None):
+                 chemical_symbols: List[str],
+                 Mi: Union[list, dict, int]=None) -> None:
 
         assert isinstance(atoms, Atoms), \
             'input configuration must be an ASE Atoms object'
@@ -47,26 +48,27 @@ class ClusterSpace(_ClusterSpace):
         self._mi = Mi
 
         # set up orbit list
-        orbit_list = create_orbit_list(self._atoms, self._cutoffs)
-        orbit_list.sort()
+        self._orbit_list = OrbitList(self._atoms, self._cutoffs)
 
         # handle occupations
         if Mi is None:
             Mi = len(chemical_symbols)
         if isinstance(Mi, dict):
-            Mi = self._get_Mi_from_dict(Mi,
-                                        orbit_list.get_primitive_structure())
+            Mi = self._get_Mi_from_dict(
+                Mi, self._orbit_list.get_primitive_structure())
         if not isinstance(Mi, list):
             if isinstance(Mi, int):
-                Mi = [Mi] * len(orbit_list.get_primitive_structure())
+                Mi = [Mi] * len(self._orbit_list.get_primitive_structure())
             else:
                 raise Exception('Mi has wrong type (ClusterSpace)')
-        assert len(Mi) == len(orbit_list.get_primitive_structure()), \
+        assert len(Mi) == len(self._orbit_list.get_primitive_structure()), \
             'len(Mi) does not equal the number of sites' \
             ' in the primitive structure'
 
+        self._orbit_list.remove_inactive_orbits(Mi)
+
         # call (base) C++ constructor
-        _ClusterSpace.__init__(self, Mi, chemical_symbols, orbit_list)
+        _ClusterSpace.__init__(self, Mi, chemical_symbols, self._orbit_list)
 
     @staticmethod
     def _get_Mi_from_dict(Mi: dict, atoms: Union[Atoms, Structure]):
@@ -151,7 +153,7 @@ class ClusterSpace(_ClusterSpace):
         # (use largest orbit to obtain maximum line length)
         prototype_orbit = self.orbit_data[-1]
         width = len(repr_orbit(prototype_orbit))
-        s = []
+        s = []  # type: List
         s += ['{s:=^{n}}'.format(s=' Cluster Space ', n=width)]
         s += [' chemical species: {}'
               .format(' '.join(self.get_chemical_symbols()))]
@@ -255,7 +257,7 @@ class ClusterSpace(_ClusterSpace):
             the key represents the order, the value represents the number of
             orbits
         """
-        count_orbits = {}
+        count_orbits = {}  # type: Dict[int, int]
         for orbit in self.orbit_data:
             k = orbit['order']
             count_orbits[k] = count_orbits.get(k, 0) + 1
@@ -278,8 +280,6 @@ class ClusterSpace(_ClusterSpace):
             'input configuration must be an ASE Atoms object'
         if not atoms.pbc.all():
             add_vacuum_in_non_pbc(atoms)
-        else:
-            atoms = get_primitive_structure(atoms)
         return _ClusterSpace.get_cluster_vector(self,
                                                 Structure.from_atoms(atoms))
 
@@ -305,6 +305,11 @@ class ClusterSpace(_ClusterSpace):
         cluster
         """
         return self._cutoffs
+
+    @property
+    def orbit_list(self):
+        """Orbit list that defines the cluster in the cluster space"""
+        return self._orbit_list
 
     def write(self, filename: str):
         """
@@ -366,7 +371,7 @@ def get_singlet_info(atoms: Atoms, return_cluster_space: bool=False):
     assert isinstance(atoms, Atoms), \
         'input configuration must be an ASE Atoms object'
 
-    # create dummy elements and cutoffs
+    # create dummy species and cutoffs
     chemical_symbols = ['H', 'He']
     cutoffs = [0.0]
 
@@ -398,7 +403,7 @@ def get_singlet_info(atoms: Atoms, return_cluster_space: bool=False):
 
 def get_singlet_configuration(atoms: Atoms, to_primitive: bool=False) -> Atoms:
     """
-    Returns the atomic configuration decorated with a different element for
+    Returns the atomic configuration decorated with a different species for
     each Wyckoff site. This is useful for visualization and analysis.
 
     Parameters
@@ -412,7 +417,7 @@ def get_singlet_configuration(atoms: Atoms, to_primitive: bool=False) -> Atoms:
     Returns
     -------
     ASE Atoms object
-        structure with singlets highlighted by different elements
+        structure with singlets highlighted by different chemical species
     """
     from ase.data import chemical_symbols
     assert isinstance(atoms, Atoms), \
@@ -424,23 +429,23 @@ def get_singlet_configuration(atoms: Atoms, to_primitive: bool=False) -> Atoms:
         singlet_configuration = cluster_space.primitive_structure
         for singlet in cluster_data:
             for site in singlet['sites']:
-                element = chemical_symbols[singlet['orbit_index'] + 1]
+                symbol = chemical_symbols[singlet['orbit_index'] + 1]
                 atom_index = site[0].index
-                singlet_configuration[atom_index].symbol = element
+                singlet_configuration[atom_index].symbol = symbol
     else:
         singlet_configuration = atoms.copy()
         singlet_configuration = add_vacuum_in_non_pbc(singlet_configuration)
-        orbit_list = cluster_space.get_orbit_list()
         orbit_list_supercell \
-            = orbit_list.get_supercell_orbit_list(singlet_configuration)
+            = cluster_space._orbit_list.get_supercell_orbit_list(
+                singlet_configuration)
         for singlet in cluster_data:
             for site in singlet['sites']:
-                element = chemical_symbols[singlet['orbit_index'] + 1]
+                symbol = chemical_symbols[singlet['orbit_index'] + 1]
                 sites = orbit_list_supercell.get_orbit(
                     singlet['orbit_index']).get_equivalent_sites()
                 for lattice_site in sites:
                     k = lattice_site[0].index
-                    singlet_configuration[k].symbol = element
+                    singlet_configuration[k].symbol = symbol
 
     return singlet_configuration
 

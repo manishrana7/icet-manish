@@ -117,6 +117,17 @@ class OrbitList
             {
                 std::cout << "Duplicates: " << orbit.getNumberOfDuplicates() << std::endl;
             }
+            if(verbosity>-1)
+            {
+            for(auto sites : orbit.getEquivalentSites())
+            {
+                for(auto site : sites )
+                {
+                    std::cout<<"("<<site.index()<< " : ["<<site.unitcellOffset()[0]<<" "<<site.unitcellOffset()[1]<< " " <<site.unitcellOffset()[2]<<"]) . ";
+                }
+                std::cout<<std::endl;
+            }
+            }
             std::cout << std::endl;
         }
     }
@@ -137,8 +148,10 @@ class OrbitList
     std::vector<LatticeSite> translateSites(const std::vector<LatticeSite> &, const unsigned int) const;
     std::vector<std::vector<LatticeSite>> getSitesTranslatedToUnitcell(const std::vector<LatticeSite> &, bool sortit = true) const;
     std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> getMatchesInPM(const std::vector<std::vector<LatticeSite>> &, const std::vector<LatticeSite> &) const;
-
+    
     void transformSiteToSupercell(LatticeSite &site, const Structure &superCell, std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap) const;
+
+    /// Sets primitive sructure
     void setPrimitiveStructure(const Structure &primitive)
     {
         _primitiveStructure = primitive;
@@ -190,8 +203,41 @@ class OrbitList
     ///Check that the lattice neighbors do not have any unitcell offsets in a pbc=false direction
     bool isSitesPBCCorrect(const std::vector<LatticeSite> &sites) const;
 
+    /// Remove each element in orbit.equivalent sites if a vector<sites> have at least one lattice site with this index
+    void removeSitesContainingIndex(const int indexRemove, bool);
+
+    /// Remove each element in orbit.equivalent sites if a vector<sites> doesn't have a lattice site with this index
+    void removeSitesNotContainingIndex(const int, bool);
+
+    /// Contains all the orbits in the orbit list
+    std::vector<Orbit> _orbitList;
+
+    /// Returns column one of the permutation matrix used to construct the orbit list.
+    std::vector<LatticeSite> getFirstColumnOfPermutationMatrix() const
+    {
+        return _col1;
+    }
+
+    /// Returns the permutation matrix used to construct the orbit list
+    std::vector<std::vector<LatticeSite>> getPermutationMatrix() const
+    {
+        return _permutationMatrix;
+    }
+
+    /// Remove all equivalent sites that exist both in this orbit list and the input orbitlist.
+    void subtractSitesFromOrbitList(const OrbitList &);
+
+    /// Remove an orbit according to its index.
+    void removeOrbit(const size_t);
+
+    /// Removes all orbits that have inactive sites.
+    void removeInactiveOrbits(const Structure &);
+
   private:
+    
+    std::vector<LatticeSite> _col1;
+    std::vector<std::vector<LatticeSite>> _permutationMatrix;
     int findOrbit(const Cluster &, const std::unordered_map<Cluster, int> &) const;
     Structure _primitiveStructure;
-    std::vector<Orbit> _orbitList;
+    
 };

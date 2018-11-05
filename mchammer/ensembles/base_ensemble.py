@@ -97,6 +97,7 @@ class BaseEnsemble(ABC):
         self._data_container_filename = data_container
         if data_container is not None and os.path.isfile(data_container):
             self._data_container = DataContainer.read(data_container)
+            self._restart_ensemble()
         else:
             self._data_container = \
                 DataContainer(atoms=atoms, ensemble_name=name,
@@ -109,7 +110,6 @@ class BaseEnsemble(ABC):
             self._ensemble_data_write_interval = default_interval
         else:
             self._ensemble_data_write_interval = ensemble_data_write_interval
-        self._data_container.add_observable('potential')
 
         # Handle trajectory writing
         if trajectory_write_interval is None:
@@ -191,10 +191,10 @@ class BaseEnsemble(ABC):
             uninterrupted_steps = min(
                 self.observer_interval, final_step - step)
             if self._step % self.observer_interval == 0:
-                self._observe_configuration(self._step)
+                self._observe(self._step)
             if self._data_container_filename is not None and \
                     time()-last_write_time > self.data_container_write_period:
-                self.data_container.write(self._data_container_filename)
+                self._write_data_container()
                 last_write_time = time()
 
             self._run(uninterrupted_steps)
@@ -203,10 +203,10 @@ class BaseEnsemble(ABC):
 
         # If we end on an observation interval we also observe
         if self._step % self.observer_interval == 0:
-            self._observe_configuration(self._step)
+            self._observe(self._step)
 
         if self._data_container_filename is not None:
-            self.data_container.write(self._data_container_filename)
+            self._write_data_container()
 
     def _run(self, number_of_trial_steps: int):
         """Runs MC simulation for a number of trial steps without
@@ -215,12 +215,12 @@ class BaseEnsemble(ABC):
         Parameters
         ----------
         number_of_trial_steps
-           number of trial steps to run without stopping
+            number of trial steps to run without stopping
         """
         for _ in range(number_of_trial_steps):
             self._do_trial_step()
 
-    def _observe_configuration(self, step: int):
+    def _observe(self, step: int):
         """Submits current configuration to observers and appends
         observations to data container.
 
@@ -233,13 +233,15 @@ class BaseEnsemble(ABC):
 
         # Ensemble specific data
         if step % self._ensemble_data_write_interval == 0:
-            ensemble_data = self.get_ensemble_data()
+            ensemble_data = self._get_ensemble_data()
             for key, value in ensemble_data.items():
+                if key not in self._data_container.observables:
+                    self._data_container.add_observable(key)
                 row_dict[key] = value
 
         # Trajectory data
         if step % self._trajectory_write_interval == 0:
-            row_dict['occupations'] = self.configuration.occupations
+            row_dict['occupations'] = self.configuration.occupations.tolist()
 
         # Observer data
         for observer in self.observers.values():
@@ -269,7 +271,7 @@ class BaseEnsemble(ABC):
         """ seed used to initialize random number generator """
         return self._random_seed
 
-    def _next_random_number(self) -> int:
+    def _next_random_number(self) -> float:
         """ Returns the next random number from the PRNG. """
         return random.random()
 
@@ -383,11 +385,13 @@ class BaseEnsemble(ABC):
             new occupations (species) by atomic number
         """
         current_species = self.configuration.occupations[sites]
-        current_property = self.calculator.calculate_total(
+        current_property = self.calculator.calculate_local_contribution(
+            local_indices=sites,
             occupations=self.configuration.occupations)
 
         self.update_occupations(sites=sites, species=species)
-        new_property = self.calculator.calculate_total(
+        new_property = self.calculator.calculate_local_contribution(
+            local_indices=sites,
             occupations=self.configuration.occupations)
         property_change = new_property - current_property
 
@@ -395,10 +399,11 @@ class BaseEnsemble(ABC):
         self.update_occupations(sites, current_species)
         return property_change
 
-    def get_ensemble_data(self) -> dict:
+    def _get_ensemble_data(self) -> dict:
         """ Returns the current calculator property. """
-        return {'potential': self.calculator.calculate_total(
-            occupations=self.configuration.occupations),
+        return {
+            'potential': self.calculator.calculate_total(
+                occupations=self.configuration.occupations),
             'acceptance_ratio': self.acceptance_ratio}
 
     def get_random_sublattice_index(self) -> int:
@@ -411,3 +416,35 @@ class BaseEnsemble(ABC):
         * add unit test
         """
         return 0
+
+    def _restart_ensemble(self):
+        """Restarts ensemble using the last state saved in DataContainer file.
+        """
+
+        # Restart step
+        self._step = self.data_container.last_state['last_step']
+
+        # Update configuration
+        occupations = self.data_container.last_state['occupations']
+        sites = list(range(len(self.configuration.atoms)))
+        self.update_occupations(sites, occupations)
+
+        # Restart number of total and accepted trial steps
+        self.total_trials = self._step
+        self.accepted_trials = \
+            self.data_container.last_state['accepted_trials']
+
+        # Restart state of random number generator
+        random.setstate(self.data_container.last_state['random_state'])
+
+    def _write_data_container(self):
+        """Updates last state of the Monte Carlo simulation and
+        writes DataContainer to file."""
+
+        self._data_container._update_last_state(
+            last_step=self._step,
+            occupations=self.configuration.occupations.tolist(),
+            accepted_trials=self.accepted_trials,
+            random_state=random.getstate())
+
+        self.data_container.write(self._data_container_filename)

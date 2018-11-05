@@ -5,6 +5,7 @@
 #include "LocalOrbitListGenerator.hpp"
 #include "ClusterCounts.hpp"
 #include "PeriodicTable.hpp"
+#include "VectorHash.hpp"
 
 //namespace icet {
 
@@ -16,8 +17,8 @@
 class ClusterSpace
 {
   public:
-
     /// Constructor.
+    ClusterSpace(){};
     ClusterSpace(std::vector<int>, std::vector<std::string>, const OrbitList);
 
     /// Returns the cluster vector corresponding to the input structure.
@@ -38,11 +39,9 @@ class ClusterSpace
 
     /// Returns the multi-component (MC) vector permutations for each MC vector in the set of input vectors.
     /// @todo Clean up this description.
-    std::vector<std::vector<std::vector<int>>> getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &, const int ) const;
-
+    std::vector<std::vector<std::vector<int>>> getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &, const int) const;
 
   public:
-
     /// Returns the cutoff for each order.
     std::vector<double> getCutoffs() const { return _clusterCutoffs; }
 
@@ -64,32 +63,36 @@ class ClusterSpace
     /// Returns the cluster space size, i.e. the length of a cluster vector.
     size_t getClusterSpaceSize()
     {
-        if (!_isClusterSpaceInitialized)
-            collectClusterSpaceInfo();
         return _clusterSpaceInfo.size();
     }
 
     /// Returns the mapping between atomic numbers and the internal species enumeration scheme.
-    std::map<int, int> getSpeciesMap() const { return _speciesMap; }
+    std::unordered_map<int, int> getSpeciesMap() const { return _speciesMap; }
 
-
-  private:
+    ///Primitive orbit list based on the structure and the global cutoffs
+    OrbitList _orbitList;
 
     /// Returns the cluster product.
-    /// @todo This function computes a specific term in the cluster vector. Can we find a more telling name?
+    /// @todo Can we find a more telling name?
     double evaluateClusterProduct(const std::vector<int> &, const std::vector<int> &, const std::vector<int> &) const;
 
-    /// Collect information about the cluster space.
-    void collectClusterSpaceInfo();
+    /// Primitive (prototype) structure.
+    Structure _primitiveStructure;
+
+    /// Precomputed multicomponent vectors for each orbit in _orbitlist.
+    std::vector<std::vector<std::vector<int>>> _multiComponentVectors;
+
+    /// Precomputed site permutations for each orbit in _orbitlist.
+    std::vector<std::vector<std::vector<std::vector<int>>>> _sitePermutations;
+
+  private:
+    /// Precomputes permutations and multicomponent vectors of each orbit.
+    void precomputeMultiComponentVectors();
 
     /// Returns the default cluster function.
     double evaluateClusterFunction(const int, const int, const int) const;
 
-
   private:
-
-    /// True if cluster space has been initialized.
-    bool _isClusterSpaceInitialized = false;
 
     /// Cluster space information.
     /// The first index (int) corresponds to the orbit index, the second index (vector of ints) refers to a multi-component vector.
@@ -100,11 +103,6 @@ class ClusterSpace
     /// Number of allowed components on each site of the primitive structure.
     std::vector<int> _numberOfAllowedSpeciesPerSite;
 
-    /// Primitive (prototype) structure.
-    Structure _primitiveStructure;
-
-    /// List of orbits based on primitive structure.
-    OrbitList _orbitList;
 
     /// Radial cutoffs by cluster order starting with pairs.
     std::vector<double> _clusterCutoffs;
@@ -113,7 +111,7 @@ class ClusterSpace
     std::vector<int> _species;
 
     /// Map between atomic numbers and the internal species enumeration scheme.
-    std::map<int, int> _speciesMap;
+    std::unordered_map<int, int> _speciesMap;
 
 };
 

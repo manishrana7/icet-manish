@@ -60,10 +60,10 @@ OrbitList
    :undoc-members:
    :inherited-members:
 
-PermutationMap
---------------
+PermutationMatrix
+-----------------
 
-.. automodule:: icet.core.permutation_map
+.. automodule:: icet.core.permutation_matrix
    :members:
    :undoc-members:
    :inherited-members:

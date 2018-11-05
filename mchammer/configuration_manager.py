@@ -24,7 +24,7 @@ class ConfigurationManager(object):
         sites (inner list) that belong to each sublattice (outer list)
     occupation_constraints : list of list of int
         optional occupation constraint to enfore a more stricter species
-        occupation than what is allowed from the Calculator.
+        occupation than what is allowed from the Calculator
 
     Todo
     ----
@@ -37,9 +37,9 @@ class ConfigurationManager(object):
     """
 
     def __init__(self, atoms: Atoms,
-                 strict_constraints: Union[List[list], List[int]],
-                 sites_by_sublattice: Union[List[list], List[int]],
-                 occupation_constraints: List[List[int]]=None):
+                 strict_constraints: Union[List[List[int]], List[int]],
+                 sites_by_sublattice: Union[List[List[int]], List[int]],
+                 occupation_constraints: List[List[int]]=None) -> None:
 
         self._atoms = atoms
         self._occupations = atoms.numbers
@@ -76,7 +76,9 @@ class ConfigurationManager(object):
             sites_by_species.append(species_dict)
         return sites_by_species
 
-    def _check_occupation_constraint(self, strict_constraints: List[List[int]],
+    def _check_occupation_constraint(self,
+                                     strict_constraints: Union[List[List[int]],
+                                                               List[int]],
                                      occupation_constraints: List[List[int]]):
         """Checks that the user defined occupation constraints are stricter or
         as strict as the strict constraints.
@@ -199,7 +201,7 @@ class ConfigurationManager(object):
         sites
             indices of sites of the configuration to change
         species
-            new occupations (species) by atomic number
+            new occupations by atomic number
         """
 
         # Update _sites_by_sublattice
