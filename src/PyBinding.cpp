@@ -797,9 +797,9 @@ PYBIND11_MODULE(_icet, m)
 
             Parameters
             ----------
-            taken_rows: set of ints
+            taken_rows: set of tuple of ints
                 Unique collection of row index
-            rows: tuple of ints
+            rows: list of ints
                 row indices
              )pbdoc",
              py::arg("taken_rows"),
@@ -822,12 +822,13 @@ PYBIND11_MODULE(_icet, m)
              py::arg("sort_it"))
         .def("_get_all_columns_from_sites", &OrbitList::getAllColumnsFromSites,
              R"pbdoc(
-             Returns sites in all columns along with their translated indistinguishable sites
+                Finds the sites in column1, extract and return all columns along with their unit cell
+                translated indistinguishable sites.
 
              Parameters
              ----------
              sites : list of icet LatticeSite objects
-                lattice neighbors
+                sites that define the columns that will be returned
              column1 : list of icet LatticeSite objects
                 first column of permutation matrix
              permutation_matrix : list of list of LatticeSite objects

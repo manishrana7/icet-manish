@@ -101,11 +101,11 @@ class TestOrbitList(unittest.TestCase):
     def test_is_row_taken(self):
         """Tests is_row_taken (private) functionality."""
         taken_rows = set()
-        row_indices = tuple([0, 1, 2])
+        row_indices = [0, 1, 2]
         self.assertFalse(self.orbit_list._is_row_taken(
             taken_rows, row_indices))
 
-        taken_rows = set([row_indices])
+        taken_rows = set([tuple(row_indices)])
         self.assertTrue(self.orbit_list._is_row_taken(
             taken_rows, row_indices))
 
@@ -268,7 +268,7 @@ class TestOrbitList(unittest.TestCase):
                     columns = \
                         orbit_list._get_all_columns_from_sites(perm_sites,
                                                                column1, pm)
-                    # Any translated sites will be find in columns since
+                    # Any translated sites will be found in columns since
                     # permutation is not allowed
                     if perm not in orbit.allowed_permutations:
                         self.assertTrue(
@@ -293,7 +293,7 @@ class TestOrbitList(unittest.TestCase):
 
         for orbit in orbit_list.orbits:
             match_repr_site = False
-            # Take representative sites and translated them into unitcell
+            # Take representative sites and translate them into unitcell
             repr_sites = orbit.get_representative_sites()
             # Take equivalent sites and its permutations_to_representative
             for eq_sites, perm in zip(orbit.equivalent_sites,
