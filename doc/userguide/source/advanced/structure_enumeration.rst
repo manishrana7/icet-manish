@@ -23,8 +23,8 @@ be imported together with some additional functions from `ASE
    :start-after: # Import modules
    :end-before: # Generate all binary
 
-Generate binary Au/Pd structures
---------------------------------
+Generate binary structures
+--------------------------
 
 Before being able to perform the structural enumeration, it is first necessary
 to generate a primitive structure. In this case, an Au fcc :class:`ASE Atoms`
@@ -37,8 +37,8 @@ are subsequently generated and stored in this database.
    :start-after: # and save them
    :end-before: # Generate fcc structures
 
-Generate binary Au/Pd structures in the dilute limit
-----------------------------------------------------
+Generate binary structures in the dilute limit
+----------------------------------------------
 
 The number of distinct structures grows extremely quickly with the size of the
 supercell. It is thus not possible to enumerate too large cell sizes. When the
@@ -59,8 +59,8 @@ structures in the specified concentration regime is small.
    :start-after: # Generate fcc structures
    :end-before: # Enumerate all palladium
 
-Generate PdH structures with vacancies
---------------------------------------
+Generate structures with vacancies
+----------------------------------
 
 The steps above are now repeated to enumerate all palladium hydride structures
 based on up to four primitive cells, which contain up to 4 Pd atoms and between

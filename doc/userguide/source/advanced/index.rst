@@ -11,8 +11,8 @@ showcase different features and modes of usage.
    :maxdepth: 2
    :caption: Contents
 
-   enumerate_structures.rst
-   get_cluster_count.rst
+   structure_enumeration.rst
+   cluster_counts.rst
    get_cluster_space_info.rst
    get_cluster_vector.rst
    map_structure_to_reference.rst
