@@ -85,34 +85,20 @@ class BaseEnsemble(ABC):
         strict_constraints_symbol = self.calculator.occupation_constraints
         symbols = list({tuple(sym) for sym in strict_constraints_symbol if len(sym)>1})
         dis_allowed_symbols = list({tuple(sym) for sym in strict_constraints_symbol if len(sym)<2})
-        print("Symbols: ", symbols)
         sublattices = [[] for _ in symbols]
-        print(sublattices)
-        # exit()
         for i, constraint in enumerate(strict_constraints_symbol):
             for j, sym in enumerate(symbols):
                 if len(sym) <2:
                     continue
-                if sorted(constraint) == sorted(sym):
-                    print(constraint, sym, i, j)
+                if sorted(constraint) == sorted(sym):                    
                     sublattices[j].append(i)
         self._sublattices = sublattices
-        print("Symbols: ", symbols)
-        # tmp = sublattices[0]
-        # sublattices[0] = sublattices[1]
-        # sublattices[1] = tmp
-        print(sublattices)
-
-        # print(sublattices[0])
-        # print(sublattices[1])
-        # exit()
         strict_constraints = []
         for symbols in strict_constraints_symbol:
             numbers = []
             for symbol in symbols:
                 numbers.append(chemical_symbols.index(symbol))
             strict_constraints.append(numbers)
-        # sublattices = [[i for i in range(len(self.calculator.atoms))]]
         self.configuration = ConfigurationManager(
             atoms, strict_constraints, sublattices)
 
