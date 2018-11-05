@@ -22,8 +22,8 @@ PYBIND11_MODULE(_icet, m)
 {
 
     m.doc() = R"pbdoc(
-        Python interface
-        ================
+        Python-C++ interface
+        ====================
 
         This is the Python interface generated via pybind11 from the C++
         core classes and methods.
