@@ -11,11 +11,11 @@ showcase different features and modes of usage.
    :maxdepth: 2
    :caption: Contents
 
-   structure_enumeration.rst
-   cluster_counts.rst
-   get_cluster_space_info.rst
-   get_cluster_vector.rst
-   map_structure_to_reference.rst
-   get_neighbor_list.rst
-   get_permutation_matrix.rst
-   test_cluster_vector_correlation.rst
+   structure_enumeration
+   cluster_counts
+   cluster_space_info
+   get_cluster_vector
+   map_structure_to_reference
+   get_neighbor_list
+   get_permutation_matrix
+   test_cluster_vector_correlation

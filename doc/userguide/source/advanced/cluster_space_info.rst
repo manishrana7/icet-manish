@@ -12,21 +12,21 @@ about a cluster space.
 Import modules
 --------------
 
-First, one needs to import the :class:`ClusterSpace
-<icet.core.cluster_space.ClusterSpace>` class, which is used to store
-information regarding a given cluster space. In addition, one needs the methods
-:func:`get_singlet_info <icet.core.cluster_space.get_singlet_info>` and
-:func:`view_singlets <icet.core.cluster_space.view_singlets>` for extracting
-specific details regarding the singlets. Moreover, the `ASE
-<https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.build.bulk` will be
-needed for constructing structures.
+First, one needs to import the :class:`~icet.ClusterSpace` class,
+which is used to store information regarding a given cluster space. In
+addition, one needs the methods
+:func:`~icet.core.cluster_space.get_singlet_info` and
+:func:`~icet.core.cluster_space.view_singlets` for extracting specific
+details regarding the singlets. Moreover, the `ASE
+<https://wiki.fysik.dtu.dk/ase>`_ function :func:`~ase.build.bulk`
+will be needed for constructing structures.
 
 .. literalinclude:: ../../../../examples/get_cluster_space_info.py
    :start-after: # Import modules
    :end-before: # Create a prototype
 
-Generate prototype Re structure
--------------------------------
+Generate prototype structure
+----------------------------
 
 The next step is to build a prototype structure, here a bulk unit cell of
 rhenium. It is furthermore decided that the cluster space will be created
@@ -38,8 +38,8 @@ respectively.
    :start-after: # triplets (7.0 A)
    :end-before: # Generate and print
 
-Create the cluster space
-------------------------
+Create cluster space
+--------------------
 
 The cluster space is created by initiating a :class:`ClusterSpace
 <icet.core.cluster_space.ClusterSpace>` object and providing the prototype
@@ -71,11 +71,12 @@ The final call should produce the following (partial) output::
 Information regarding singlets
 ------------------------------
 
-Additonal information regarding the singlets is extracted with help of the
-:func:`get_singlet_info <icet.core.cluster_space.get_singlet_info>` function.
-Afterwards, the corresponding clusters are printed by calling
-:func:`view_singlets <icet.core.cluster_space.view_singlets>`. One should note
-that both functions take the prototype :class:`ASE Atoms` object created
+Additonal information regarding the singlets is extracted with help of
+the :func:`get_singlet_info
+<icet.core.cluster_space.get_singlet_info>` function.  Afterwards, the
+corresponding clusters are printed by calling :func:`view_singlets
+<icet.core.cluster_space.view_singlets>`. One should note that both
+functions take the prototype ASE :class:`~ase.Atoms` object created
 earlier as input argument.
 
 .. literalinclude:: ../../../../examples/get_cluster_space_info.py
