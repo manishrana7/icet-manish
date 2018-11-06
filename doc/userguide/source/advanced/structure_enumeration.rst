@@ -27,8 +27,8 @@ Generate binary structures
 --------------------------
 
 Before being able to perform the structural enumeration, it is first necessary
-to generate a primitive structure. In this case, an Au fcc :class:`ASE Atoms`
-object is created using the :func:`ase.build.bulk` function. Then a database
+to generate a primitive structure. In this case, an Au fcc :class:`ase.Atoms`
+object is created using the :func:`~ase.build.bulk` function. Then a database
 ``AuPd-fcc.db`` is initialized, in which the enumerated structures will be
 stored. All possible binary Au/Pd structures with up to 6 atoms per unit cell
 are subsequently generated and stored in this database.
@@ -44,7 +44,7 @@ The number of distinct structures grows extremely quickly with the size of the
 supercell. It is thus not possible to enumerate too large cell sizes. When the
 number of structures grows, a larger and larger proportion of the structures
 will have equal amounts of the constituent elements (e.g., most structures
-will have concentrations close to 50 % in binary systems). Structures in the
+will have concentrations close to 50% in binary systems). Structures in the
 dilute limit may thus be underrepresented. To overcome this problem, it is
 possible to enumerate structures in a specified concentration regime by
 providing a dict in which the range of allowed concentrations is specified for
