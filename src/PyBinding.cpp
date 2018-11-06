@@ -774,19 +774,70 @@ PYBIND11_MODULE(_icet, m)
         .def("clear", &OrbitList::clear,
              "Clears the OrbitList")
         .def("sort", &OrbitList::sort,
-             "Sort the orbits by orbit comparison")
-        .def("find_orbit", (int (OrbitList::*)(const Cluster &) const) & OrbitList::findOrbit,
-             "Return the index of the orbit with the given representative cluster")
-        //.def("find_orbit", (int (OrbitList::*)(const Cluster &, const std::unordered_map<Cluster, int> &) const) & OrbitList::findOrbit)
-        .def("is_row_taken", &OrbitList::isRowsTaken,
-             "Some random description")
+             "Sorts the orbits by orbit comparison")
+        .def("_find_orbit", (int (OrbitList::*)(const Cluster &) const) & OrbitList::findOrbit,
+             R"pbdoc(
+                 Returns the index of the orbit with the given representative cluster.
+
+             Parameters
+             ---------
+             cluster: icet Cluster object
+                representative cluster of an orbit
+             )pbdoc",
+             py::arg("cluster"))
+        .def("_is_row_taken", &OrbitList::isRowsTaken,
+            R"pbdoc(
+                Returns true if rows exist in taken_rows.
+
+            Parameters
+            ----------
+            taken_rows: set of tuple of ints
+                Unique collection of row index
+            rows: list of ints
+                row indices
+             )pbdoc",
+             py::arg("taken_rows"),
+             py::arg("rows"))
         .def("get_orbit_list", &OrbitList::getOrbitList,
              "Returns a list of Orbit objects from OrbitList")
+        //.def_property_readonly("orbits", &OrbitList::getOrbitList)
+        .def("_get_sites_translated_to_unitcell", &OrbitList::getSitesTranslatedToUnitcell,
+             R"pbdoc(
+                Returns a set of sites where at least one site is translated inside the unit cell.
+
+             Parameters
+             ----------
+             lattice_neighbors: list of icet LatticeSite objects
+                set of lattice sites that might be representative for a cluster
+             sort_it: bool
+                If true sort translasted sites.
+             )pbdoc",
+             py::arg("lattice_neighbors"),
+             py::arg("sort_it"))
+        .def("_get_all_columns_from_sites", &OrbitList::getAllColumnsFromSites,
+             R"pbdoc(
+                Finds the sites in column1, extract and return all columns along with their unit cell
+                translated indistinguishable sites.
+
+             Parameters
+             ----------
+             sites : list of icet LatticeSite objects
+                sites that define the columns that will be returned
+             column1 : list of icet LatticeSite objects
+                first column of permutation matrix
+             permutation_matrix : list of list of LatticeSite objects
+                permutation matrix
+             )pbdoc",
+             py::arg("sites"),
+             py::arg("column1"),
+             py::arg("permutation_matrix"))
         .def("get_primitive_structure", &OrbitList::getPrimitiveStructure,
              "Returns the primitive atomic structure used to construct the OrbitList instance")
         .def("__len__", &OrbitList::size,
              "Returns the total number of orbits counted in the OrbitList instance")
-        .def("print", &OrbitList::print, py::arg("verbosity") = 0)
+        .def_property_readonly("permutation_matrix", &OrbitList::getPermutationMatrix,
+             "list of list of icet LatticeSite objects: permutation_matrix")
+        // .def("print", &OrbitList::print, py::arg("verbosity") = 0)
         // .def("get_supercell_orbit_list", &OrbitList::getSupercellOrbitList)
         ;
 
