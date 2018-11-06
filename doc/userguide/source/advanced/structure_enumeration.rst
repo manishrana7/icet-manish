@@ -1,4 +1,4 @@
-.. _example_enumerate_structures:
+.. _example_structure_enumeration:
 .. highlight:: python
 .. index::
    single: Examples; Structure enumeration

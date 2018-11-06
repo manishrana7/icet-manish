@@ -3,19 +3,19 @@ from _icet import Structure
 
 @classmethod
 def __structure_from_atoms(self, conf):
-    '''
+    """
     Creates an icet Structure object from an ASE Atoms object.
 
     Parameters
     ----------
-    conf : ASE Atoms object
+    conf : ase.Atoms
         input configuration
 
     Returns
     -------
-    icet Structure object
+    icet.Structure
         output configuration
-    '''
+    """
     return self(conf.positions,
                 conf.get_chemical_symbols(),
                 conf.cell,
@@ -26,14 +26,14 @@ Structure.from_atoms = __structure_from_atoms
 
 
 def __structure_to_atoms(self):
-    '''
+    """
     Returns the structure as an ASE Atoms object.
 
     Returns
     -------
     ASE Atoms object
         atomic configuration
-    '''
+    """
     import ase
     conf = ase.Atoms(pbc=self.pbc)
     conf.set_cell(self.cell)
