@@ -530,5 +530,74 @@ class TestClusterSpaceTernary(unittest.TestCase):
         self.assertEqual(permutations_target, permutation_retval)
 
 
+class TestClusterSpaceMultiSublattice(unittest.TestCase):
+    """Container for test of the class functionality."""
+
+    def __init__(self, *args, **kwargs):
+        super(TestClusterSpaceMultiSublattice, self).__init__(*args, **kwargs)
+        self.chemical_symbols = [['Ag', 'Au'],
+                                 ['H', 'V']]
+        self.cutoffs = [5] * 2
+        self.atoms_prim = bulk(
+            'Ag', a=4.09, crystalstructure='bcc', cubic=True).repeat([1, 1, 1])
+
+    def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
+        return None
+
+    def setUp(self):
+        """Setup before each test."""
+        self.cs = ClusterSpace(self.atoms_prim, self.cutoffs,
+                               self.chemical_symbols)
+        self.cluster_space_binary = ClusterSpace(
+            self.atoms_prim, self.cutoffs, ['Ag', 'Au'])
+
+    def test_init(self):
+        """Tests that initialization of tested class work."""
+        # initialize from ASE Atoms
+        cs = ClusterSpace(self.atoms_prim, self.cutoffs, self.chemical_symbols)
+        self.assertIsInstance(cs, ClusterSpace)
+        self.assertEqual(len(cs), len(self.cs))
+
+    def test_correct_number_of_singlets(self):
+        """Tests that we get two singlets."""
+        singlet_count = 0
+        for orbit in self.cs.orbit_list.orbits:
+            if orbit.order == 1:
+                singlet_count += 1
+        self.assertEqual(singlet_count, 2)
+
+    def test_correct_number_of_pairs(self):
+        """Tests that we get two singlets."""
+        pair_counts = OrderedDict()
+        pair_counts_binary = OrderedDict()
+        for orbit in self.cs.orbit_list.orbits:
+            if orbit.order == 2:
+                radius = np.round(orbit.representative_cluster.radius, 3)
+                if radius in pair_counts.keys():
+                    pair_counts[radius] += 1
+                else:
+                    pair_counts[radius] = 1
+
+        for orbit in self.cluster_space_binary.orbit_list.orbits:
+            if orbit.order == 2:
+                radius = np.round(orbit.representative_cluster.radius, 3)
+                if radius in pair_counts_binary.keys():
+                    pair_counts_binary[radius] += 1
+                else:
+                    pair_counts_binary[radius] = 1
+
+        self.assertEqual(len(pair_counts.keys()),
+                         len(pair_counts_binary.keys()))
+
+        # origin to center atom only one since these are only
+        # sublattice 1 -> sublattice 2 interactions
+        self.assertEqual(pair_counts_binary[1.771], pair_counts[1.771])
+
+        # Twice as many pairs in 100 direction since they can be both
+        # sublattice-1 -> sublatice 1 and sublattice 2  -> sublattice 2
+        self.assertEqual(pair_counts_binary[2.045]*2, pair_counts[2.045])
+
+
 if __name__ == '__main__':
     unittest.main()
