@@ -31,7 +31,7 @@ class ClusterSpace(_ClusterSpace):
         * if a list of list of chemical symbols is provided then the outer
           list must be the same length as the atoms object and
           chemical_symbols[i] will correspond to the allowed species on
-          site 'i' on the lattice
+          lattice site 'i'
     """
 
     def __init__(self, atoms: Union[Atoms, Structure], cutoffs: List[float],
@@ -73,48 +73,6 @@ class ClusterSpace(_ClusterSpace):
     def primitive_chemical_symbols(self)->List[List[str]]:
         """Allowed chemical symbols for the primitive structure"""
         return self._primitive_chemical_symbols
-
-    @staticmethod
-    def _get_Mi_from_dict(Mi: dict, atoms: Union[Atoms, Structure]):
-        """
-        Mi maps the orbit index to the number of allowed components. This
-        function maps a dictionary onto the list format that is used
-        internatlly for representing Mi.
-
-        Parameters
-        ----------
-        Mi
-            each site in the structure should be represented by one entry in
-            this dictionary, where the key is the site index and the value is
-            the number of components that are allowed on the repsective site
-        atoms
-            atomic configuration
-
-        Returns
-        -------
-        list
-            number of species that are allowed on each site
-
-        Todo
-        ----
-        * rename function
-        * remove bi-optionality between icet Structure and ASE Atoms input
-        """
-        assert isinstance(atoms, (Atoms, Structure)), \
-            'input configuration must be an ASE Atoms/icet Structure object'
-        if isinstance(atoms, Atoms):
-            cluster_data = get_singlet_info(atoms)
-        else:
-            cluster_data = get_singlet_info(atoms.to_atoms())
-        Mi_ret = [-1] * len(atoms)
-        for singlet in cluster_data:
-            for site in singlet['sites']:
-                if singlet['orbit_index'] not in Mi:
-                    raise Exception('Mi for site {} missing from dictionary'
-                                    ''.format(singlet['orbit_index']))
-                Mi_ret[site[0].index] = Mi[singlet['orbit_index']]
-
-        return Mi_ret
 
     def _get_chemical_symbol_representation(self):
         """Returns a str version of the chemical symbols that is
