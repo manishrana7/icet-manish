@@ -10,7 +10,6 @@
 ClusterSpace::ClusterSpace(std::vector<std::vector<std::string>> &chemicalSymbols,
                            const OrbitList &orbitList)
 {
-    // _numberOfAllowedSpeciesPerSite = numberOfAllowedSpecies;
     _orbitList = orbitList;
     _primitiveStructure = orbitList.getPrimitiveStructure();
     _chemicalSymbols = chemicalSymbols;
