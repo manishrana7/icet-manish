@@ -83,14 +83,14 @@ class BaseEnsemble(ABC):
         self._calculator = calculator
         self._name = name
         strict_constraints_symbol = self.calculator.occupation_constraints
-        symbols = list({tuple(sym) for sym in strict_constraints_symbol if len(sym)>1})
-        dis_allowed_symbols = list({tuple(sym) for sym in strict_constraints_symbol if len(sym)<2})
+        symbols = list({tuple(sym)
+                        for sym in strict_constraints_symbol if len(sym) > 1})
         sublattices = [[] for _ in symbols]
         for i, constraint in enumerate(strict_constraints_symbol):
             for j, sym in enumerate(symbols):
-                if len(sym) <2:
+                if len(sym) < 2:
                     continue
-                if sorted(constraint) == sorted(sym):                    
+                if sorted(constraint) == sorted(sym):
                     sublattices[j].append(i)
         self._sublattices = sublattices
         strict_constraints = []
@@ -433,8 +433,10 @@ class BaseEnsemble(ABC):
         * add unit test
         """
         total_active_sites = sum([len(sub) for sub in self._sublattices])
-        probability_distribution = [ len(sub)/total_active_sites for sub in self._sublattices]
-        pick = np.random.choice(range(0, len(self._sublattices)), p=probability_distribution)        
+        probability_distribution = [
+            len(sub)/total_active_sites for sub in self._sublattices]
+        pick = np.random.choice(
+            range(0, len(self._sublattices)), p=probability_distribution)
         return pick
 
     def _restart_ensemble(self):

@@ -117,7 +117,7 @@ class ClusterSpace(_ClusterSpace):
         return Mi_ret
 
     def _get_chemical_symbol_representation(self):
-        """Returns a str version of the chemical symbols that is 
+        """Returns a str version of the chemical symbols that is
             easier to the eyes.
         """
         nice_str = ''

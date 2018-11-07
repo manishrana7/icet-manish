@@ -76,7 +76,8 @@ def add_vacuum_in_non_pbc(atoms: Atoms) -> Atoms:
     return atoms_cpy
 
 
-def get_primitive_structure(atoms: Atoms, no_idealize: bool=True, to_primitive=True, symprec=1e-5) -> Atoms:
+def get_primitive_structure(atoms: Atoms, no_idealize: bool=True,
+                            to_primitive=True, symprec=1e-5) -> Atoms:
     """
     Determines primitive structure using spglib.
 
@@ -98,7 +99,8 @@ def get_primitive_structure(atoms: Atoms, no_idealize: bool=True, to_primitive=T
     atoms_as_tuple = ase_atoms_to_spglib_cell(atoms_with_vacuum)
 
     lattice, scaled_positions, numbers = spglib.standardize_cell(
-        atoms_as_tuple, to_primitive=to_primitive, no_idealize=no_idealize, symprec=symprec)
+        atoms_as_tuple, to_primitive=to_primitive,
+        no_idealize=no_idealize, symprec=symprec)
     scaled_positions = [np.round(pos, 12) for pos in scaled_positions]
     atoms_prim = Atoms(scaled_positions=scaled_positions,
                        numbers=numbers, cell=lattice, pbc=atoms.pbc)
