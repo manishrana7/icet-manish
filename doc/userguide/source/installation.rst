@@ -11,34 +11,22 @@ Requirements
 `scipy <https://www.scipy.org/>`_,
 `spglib <https://atztogo.github.io/spglib/>`_, and
 `ase <https://wiki.fysik.dtu.dk/ase>`_ packages.
-If you want to use more advanced optimization techniques
-(`LASSO <http://scikit-learn.org/stable/modules/linear_model.html#lasso>`_,
-`Bayesian ridge regression <http://scikit-learn.org/stable/modules/linear_model.html#bayesian-ridge-regression>`_,
-`automatic relevance determination regression  <http://scikit-learn.org/stable/modules/linear_model.html#automatic-relevance-determination-ard>`_ etc.) one
-also requires `scitkit-learn <http://scikit-learn.org/>`_.
+In order to be able to use more advanced optimization techniques
+one also requires `scitkit-learn <http://scikit-learn.org/>`_.
 
 Setup
 =====
 
 Setting up :program:`icet` involves
 
-  1. Acquiring the sources
-  2. Installing basic libraries
-  3. Installing Python libraries
+  1. Installing basic libraries
+  2. Installing Python libraries
+  3. Acquiring the sources
   4. Compiling the :program:`icet` C++ module
   5. Adding :program:`icet` to the Python path
 
 These steps are detailed in the sections below.
 Afterwards the correctness of the installation :ref:`ought to be tested <testing>`.
-
-
-Acquiring the sources
----------------------
-
-To begin with, one has to download the :program:`icet` sources.
-Most commonly this is achieved by cloning the :program:`icet` repo::
-
-    git clone https://gitlab.com/materials-modeling/icet.git
 
 
 Installing basic libraries
@@ -47,8 +35,8 @@ Installing basic libraries
 Next one must install a number of basic libraries that are needed for compilation of the C++ components.
 This part is system dependent as described in the following sections.
 
-Debian based distros (including e.g., Ubuntu)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Debian, Ubuntu etc.
+^^^^^^^^^^^^^^^^^^^
 
 To install :program:`icet` on `Debian <https://en.wikipedia.org/wiki/Debian>`_ and Debian based distros
 including e.g., `Ubuntu <https://en.wikipedia.org/wiki/Ubuntu>`_ and `Linux Mint <https://en.wikipedia.org/wiki/Linux_Mint>`_
@@ -63,12 +51,13 @@ This approach has been tested using the latest `Ubuntu Docker image <https://hub
     sudo apt install -qy \
         cmake \
         build-essential \
-        libboost-all-dev \
-        libgsl-dev \
-        libeigen3-dev
-    # install Python base packages
+        libboost-dev \
+        libeigen3-dev \
+        python3-dev \
+    # install pip (to be used for installing Python libraries below)
     sudo apt install -qy \
         python3-pip
+
 
 .. warning::
 
@@ -91,33 +80,37 @@ This approach has been tested using the latest `Fedora Docker image <https://hub
     sudo yum install -y \
         cmake \
         make \
-        automake \
-        gcc \
         gcc-c++ \
         kernel-devel \
         boost-devel \
-        eigen3
-    # install Python base packages
+        eigen3 \
+        python3-devel
+    # install pip (to be used for installing Python libraries below)
     sudo yum install -y \
-        python3-devel \
         python3-pip
 
 Mac OS
 ^^^^^^
 
-To install :program:`icet` on Mac OS one should employ a package manager such as
-`Homebrew <https://en.wikipedia.org/wiki/Homebrew_(package_management_software)>`_.
-One also requires Apple's compilers, which can be obtained as part of `Xcode <https://en.wikipedia.org/wiki/Xcode>`_.
-Provided the compilers have been installed and using Homebrew one can install the necessary packages as follows::
+.. warning::
 
-    brew install \
-        cmake \
-        make \
-        automake \
-        gcc \
-        boost-build \
-        gsl \
-        eigen
+    :program:`icet` can be compiled on Mac OS but 4 out of 386 tests fail.
+    Until this behavior is `resolved <https://gitlab.com/materials-modeling/icet/issues/270>`_
+    it is not recommended to run :program:`icet` on Mac OS.
+
+.. comment
+
+    To install :program:`icet` on Mac OS one should employ a package manager such as
+    `Homebrew <https://en.wikipedia.org/wiki/Homebrew_(package_management_software)>`_.
+    One also requires Apple's compilers, which can be obtained as part of `Xcode <https://en.wikipedia.org/wiki/Xcode>`_.
+    Provided the compilers have been installed and using Homebrew one can install the necessary packages as follows::
+
+        brew install \
+            cmake \
+            make \
+            gcc \
+            boost \
+            eigen
 
 
 Installing Python libraries
@@ -144,6 +137,15 @@ are installed in the home directory of the current user.
         pandas \
         scikit-learn \
         spglib
+
+
+Acquiring the sources
+---------------------
+
+To begin with, one has to download the :program:`icet` sources.
+Most commonly this is achieved by cloning the :program:`icet` repo::
+
+    git clone https://gitlab.com/materials-modeling/icet.git
 
 
 Compiling the :program:`icet` C++ module
