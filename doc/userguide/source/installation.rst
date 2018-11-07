@@ -186,4 +186,4 @@ To this end, the following command should be executed at the command line::
 
     python3 tests/main.py
 
-Running the test suite will commonly take several minutes on an Intel core i5 or i7 system.
+Running the test suite will commonly take several minutes.
