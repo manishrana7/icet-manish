@@ -29,7 +29,7 @@ class ClusterSpace(_ClusterSpace):
         * if a list is provided, all sites on the lattice will have the
           same allowed occupations as the input list
         * if a list of list of chemical symbols is provided then the outer
-          list requires to be of the same length as the atoms object and
+          list must be the same length as the atoms object and
           chemical_symbols[i] will correspond to the allowed species on
           site 'i' on the lattice
     """
