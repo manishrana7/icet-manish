@@ -169,12 +169,14 @@ Now :program:`icet` must be added to the ``PYTHONPATH`` environment variable.
 To this end, when using the `Bash shell <https://en.wikipedia.org/wiki/Bash_(Unix_shell)>`_
 or similar (bash, ksh) the following command should be added to the ``.bashrc`` file (or equivalent) in the home directory::
 
-    export PYTHONPATH=${PYTHONPATH}:<ICET_PATH>/:<ICET_PATH>/build/src/
+    export PYTHONPATH=${PYTHONPATH}:<ICET_PATH>/
+    export PYTHONPATH=${PYTHONPATH}:<ICET_PATH>/build/src/
 
 Here, ``ICET_PATH`` must be replaced with the path to the :program:`icet` root directory.
 If you are using `C shell <https://en.wikipedia.org/wiki/C_shell>`_ (csh, tcsh) the equivalent line reads::
 
-    setenv PYTHONPATH ${PYTHONPATH}:<ICET_PATH>/:<ICET_PATH>/build/src/
+    setenv PYTHONPATH ${PYTHONPATH}:<ICET_PATH>/
+    setenv PYTHONPATH ${PYTHONPATH}:<ICET_PATH>/build/src/
 
 .. _testing:
 
