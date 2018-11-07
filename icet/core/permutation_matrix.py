@@ -35,13 +35,7 @@ def permutation_matrix_from_atoms(atoms, cutoff, find_prim=True):
     """
 
     atoms = atoms.copy()
-    # set each element to the same since we only care about geometry when
-    # taking primitive
-    # if len(atoms) > 0:
-    #     atoms.set_chemical_symbols(len(atoms) * [atoms[0].symbol])
-    # else:
-    #     raise Exception('Length of atoms is {}'.format(len(atoms)))
-
+    
     atoms_prim = atoms
     if find_prim:
         atoms_prim = get_primitive_structure(atoms)
