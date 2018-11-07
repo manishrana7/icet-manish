@@ -93,7 +93,8 @@ for row in db.select('id<=10'):
     atoms_row.wrap()  # Wrap all atoms into the unit cell
     cluster_space = ClusterSpace(atoms_row, cutoffs, chemical_species)
 
-    cvs = generate_cv_set(20, atoms_row, chemical_species, cluster_space, repeat)
+    cvs = generate_cv_set(20, atoms_row, chemical_species,
+                          cluster_space, repeat)
     assert_no_correlation(cvs)
     print('Number of atoms: {}    Length of cluster vector: {}'.format(
         len(atoms_row.repeat(repeat)), len(cvs[0])))
