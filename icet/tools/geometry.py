@@ -297,7 +297,6 @@ def get_decorated_primitive_structure(
     symbols = set()
     symbols = sorted({tuple(sorted(s)) for s in allowed_species})
 
-    # number_of_sublattices = len(symbols)
     decorated_primitive = atoms.copy()
     for i, sym in enumerate(allowed_species):
         sublattice = symbols.index(tuple(sorted(sym))) + 1
