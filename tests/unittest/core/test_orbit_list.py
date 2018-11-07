@@ -108,10 +108,10 @@ class TestOrbitList(unittest.TestCase):
     def test_remove_all_orbits(self):
         """Tests removing all orbits"""
 
-        mi = [1]*len(self.orbit_list.get_primitive_structure())
+        chemical_symbols = [['Al']*len(self.orbit_list.get_primitive_structure())]
         len_before = len(self.orbit_list)
         self.assertNotEqual(len_before, 0)
-        self.orbit_list.remove_inactive_orbits(mi)
+        self.orbit_list.remove_inactive_orbits(chemical_symbols)
         len_after = len(self.orbit_list)
         self.assertEqual(len_after, 0)
 
