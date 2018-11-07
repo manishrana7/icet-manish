@@ -261,17 +261,6 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         self.assertIsInstance(retval, Atoms)
         self.assertEqual(len(retval), len(self.atoms_prim))
 
-    def test_get_Mi_from_dict(self):
-        """Tests get_Mi_from_dict functionality."""
-        d = {0: len(self.chemical_symbols)}
-        Mi = ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
-        self.assertEqual(Mi, [2])
-        # check that function fails if dictionary is incomplete
-        del d[0]
-        with self.assertRaises(Exception) as context:
-            Mi = ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
-        self.assertTrue('missing from dictionary' in str(context.exception))
-
     def test_cutoffs(self):
         """Tests cutoffs property."""
         self.assertEqual(self.cs.cutoffs, self.cutoffs)
@@ -408,20 +397,6 @@ class TestClusterSpaceSurface(unittest.TestCase):
         retval = self.cs.get_number_of_orbits_by_order()
         target = OrderedDict([(0, 1), (1, 3), (2, 5), (3, 10), (4, 4)])
         self.assertEqual(target, retval)
-
-    def test_get_Mi_from_dict(self):
-        """Tests _get_Mi_from_dict functionality."""
-        d = {}
-        for k in range(len(self.atoms_prim)):
-            d[k] = len(self.chemical_symbols)
-        d[1] = 1
-        Mi = ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
-        self.assertEqual(Mi, [2, 1, 2])
-        # check that function fails if dictionary is incomplete
-        del d[0]
-        with self.assertRaises(Exception) as context:
-            Mi = ClusterSpace._get_Mi_from_dict(d, self.atoms_prim)
-        self.assertTrue('missing from dictionary' in str(context.exception))
 
 
 class TestClusterSpaceTernary(unittest.TestCase):
