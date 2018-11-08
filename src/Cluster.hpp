@@ -148,9 +148,12 @@ public:
         {
             return false;
         }
-        if (c1.distances() != c2.distances())
+        for (int i =0; i < c1.distances().size(); i++)
         {
-            return false;
+            if(fabs(c1.distances()[i] - c2.distances()[i])>1e-5)
+            {
+                return false;
+            }
         }
         return true;
     }
