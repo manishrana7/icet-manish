@@ -76,13 +76,13 @@ class ClusterSpace(_ClusterSpace):
         easier on the eyes.
         """
         nice_str = ''
-        if len(self.get_chemical_symbols()) > 4:
-            last_symbol = self.get_chemical_symbols()[0]
+        if len(self.chemical_symbols) > 4:
+            last_symbol = self.chemical_symbols[0]
             count = 1
-            for i in range(1, len(self.get_chemical_symbols())):
-                if self.get_chemical_symbols()[i] == last_symbol:
+            for i in range(1, len(self.chemical_symbols)):
+                if self.chemical_symbols[i] == last_symbol:
                     count += 1
-                    if i == len(self.get_chemical_symbols())-1:
+                    if i == len(self.chemical_symbols)-1:
                         if count == 1:
                             nice_str += '{} '.format(last_symbol)
                         else:
@@ -93,9 +93,9 @@ class ClusterSpace(_ClusterSpace):
                     else:
                         nice_str += '{}*{} '.format(count, last_symbol)
                     count = 1
-                    last_symbol = self.get_chemical_symbols()[i]
+                    last_symbol = self.chemical_symbols[i]
         else:
-            for s in self.get_chemical_symbols():
+            for s in self.chemical_symbols:
                 nice_str += '{} '.format(s)
         return nice_str
 
