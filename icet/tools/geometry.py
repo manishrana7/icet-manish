@@ -305,6 +305,7 @@ def get_decorated_primitive_structure(
         decorated_primitive[i].symbol = chemical_symbols[sublattice]
 
     decorated_primitive = get_primitive_structure(decorated_primitive)
+    decorated_primitive.wrap()
     primitive_chemical_symbols = []
     for atom in decorated_primitive:
         sublattice = chemical_symbols.index(atom.symbol)
