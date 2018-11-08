@@ -108,7 +108,7 @@ class OrbitList(_OrbitList):
         Parameters
         ----------
         allowed_species
-            the list allowed species on each site in the primitive
+            the list of allowed species on each site in the primitive
             structure
         """
         prim_structure = self.get_primitive_structure()
