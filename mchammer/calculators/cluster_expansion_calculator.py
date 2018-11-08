@@ -144,5 +144,4 @@ class ClusterExpansionCalculator(BaseCalculator):
             self.cluster_expansion.cluster_space.primitive_structure,
             position=pos).index for pos in self.atoms.positions]
         allowed_species = [allowed_species_prim[i] for i in indices_in_prim]
-        print(allowed_species)
         return allowed_species
