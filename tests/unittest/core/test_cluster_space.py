@@ -543,7 +543,7 @@ class TestClusterSpaceMultiSublattice(unittest.TestCase):
         self.assertEqual(singlet_count, 2)
 
     def test_correct_number_of_pairs(self):
-        """Tests that we get two singlets."""
+        """Tests that we get correct number of pairs."""
         pair_counts = OrderedDict()
         pair_counts_binary = OrderedDict()
         for orbit in self.cs.orbit_list.orbits:
