@@ -19,15 +19,16 @@ class ClusterSpace(_ClusterSpace):
 
     Parameters
     ----------
-    atoms : ASE Atoms object / icet Structure object (bi-optional)
+    atoms : ase.Atoms or icet.Structure
         atomic configuration
-    cutoffs : list of floats
+    cutoffs : list(float)
         cutoff radii per order that define the cluster space
-    chemical_symbols : list of strings
-        list of chemical symbols, each of which must map to an element of
-        the periodic table
-        * if a list is provided, all sites on the lattice will have the
-          same allowed occupations as the input list
+    chemical_symbols : list(str) or list(list(str))
+        list of chemical symbols, each of which must map to an element
+        of the periodic table
+        * if a list of chemical symbols is provided, all sites on the
+          lattice will have the same allowed occupations as the input
+          list
         * if a list of list of chemical symbols is provided then the outer
           list must be the same length as the atoms object and
           chemical_symbols[i] will correspond to the allowed species on
