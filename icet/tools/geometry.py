@@ -286,10 +286,12 @@ def get_decorated_primitive_structure(
         Atoms, List[List[str]]]:
     """Returns a decorated primitive structure
 
+    Example
+    --------
         Will put hydrogen on sublattice 1, Helium on sublattice 2 and
         so on
 
-        todo : simplify the revert back to unsorted symbols
+    todo : simplify the revert back to unsorted symbols
     """
     if len(atoms) != len(allowed_species):
         raise ValueError(
