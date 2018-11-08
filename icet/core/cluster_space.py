@@ -76,7 +76,7 @@ class ClusterSpace(_ClusterSpace):
 
     def _get_chemical_symbol_representation(self):
         """Returns a str version of the chemical symbols that is
-            easier to the eyes.
+        easier on the eyes.
         """
         nice_str = ''
         if len(self.get_chemical_symbols()) > 4:
