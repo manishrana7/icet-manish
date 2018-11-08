@@ -313,5 +313,5 @@ def get_decorated_primitive_structure(
     for symbols in allowed_species:
         if tuple(sorted(symbols)) in primitive_chemical_symbols:
             index = primitive_chemical_symbols.index(tuple(sorted(symbols)))
-            primitive_chemical_symbols[index] = tuple(symbols)
+            primitive_chemical_symbols[index] = symbols
     return decorated_primitive, primitive_chemical_symbols

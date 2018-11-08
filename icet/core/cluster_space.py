@@ -43,7 +43,8 @@ class ClusterSpace(_ClusterSpace):
 
         self._atoms = atoms.copy()
         self._cutoffs = cutoffs
-        self._chemical_symbols = chemical_symbols
+        self._chemical_symbols = chemical_symbols.copy()
+        self._input_chemical_symbols = chemical_symbols.copy()
 
         # handle occupations
         if all(isinstance(i, str) for i in self._chemical_symbols):
@@ -69,11 +70,6 @@ class ClusterSpace(_ClusterSpace):
         # call (base) C++ constructor
         _ClusterSpace.__init__(
             self, primitive_chemical_symbols, self._orbit_list)
-
-    @property
-    def primitive_chemical_symbols(self)->List[List[str]]:
-        """Allowed chemical symbols for the primitive structure"""
-        return self._primitive_chemical_symbols
 
     def _get_chemical_symbol_representation(self):
         """Returns a str version of the chemical symbols that is
@@ -282,11 +278,11 @@ class ClusterSpace(_ClusterSpace):
         return self._get_primitive_structure().to_atoms()
 
     @property
-    def chemical_symbols(self) -> List[str]:
+    def chemical_symbols(self) -> List[List[str]]:
         """
         Chemical species considered
         """
-        return self._chemical_symbols.copy()
+        return self._primitive_chemical_symbols.copy()
 
     @property
     def cutoffs(self) -> List[float]:
@@ -314,7 +310,7 @@ class ClusterSpace(_ClusterSpace):
 
         parameters = {'atoms': self._atoms.copy(),
                       'cutoffs': self._cutoffs,
-                      'chemical_symbols': self._chemical_symbols}
+                      'chemical_symbols': self._input_chemical_symbols}
         with open(filename, 'wb') as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
