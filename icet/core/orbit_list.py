@@ -31,9 +31,11 @@ class OrbitList(_OrbitList):
               cutoffs[i] is the cutoff for orbits with order i+2.
     """
 
-    def __init__(self, atoms, cutoffs):
-        if isinstance(atoms, Structure):
-            atoms = atoms.to_atoms()
+    def __init__(self, atoms_in, cutoffs):
+        if isinstance(atoms_in, Structure):
+            atoms_in = atoms_in.to_atoms()
+        atoms = atoms_in.copy()
+        atoms.wrap()
         max_cutoff = np.max(cutoffs)
         # Set up a permutation matrix
         permutation_matrix, prim_structure, _ \
