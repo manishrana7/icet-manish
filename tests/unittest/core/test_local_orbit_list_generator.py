@@ -15,14 +15,14 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
         # corner case: tilted structure
         atoms = Atoms('Al',
                       positions=[[0., 0., 0.]],
-                      cell=np.array([[0., 4., 4.],
-                                     [4., 0., 4.],
+                      cell=np.array([[0., 4., 1.],
+                                     [4., 0., 1.],
                                      [4., 4., 0.]]),
                       pbc=[1, 1, 1])
         cutoffs = [4.2, 4.2]
         self.orbit_list = OrbitList(atoms, cutoffs)
         self.primitive = Structure.from_atoms(atoms)
-        self.supercell = Structure.from_atoms(atoms.repeat(2))
+        self.supercell = Structure.from_atoms(atoms.repeat([2, 2, 1]))
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
@@ -43,19 +43,20 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
             local_orbit_list = self.lol_gen.generate_local_orbit_list(index)
             for orbit_prim, orbit_super in zip(self.orbit_list.orbits,
                                                local_orbit_list.orbits):
+                print('---local orbit---')
                 for sites_p, sites_s in zip(orbit_prim.representative_sites,
                                             orbit_super.representative_sites):
                     sites_p.unitcell_offset += offset
                     # pos_super = self.supercell.get_position(sites_s)
                     # pos_prim = self.primitive.get_position(sites_p)
                     print(sites_p, '|', sites_s)
-                print('-------')
 
     def test_generate_local_orbit_list_from_offset(self):
         """
         Tests that function generates an orbit list by passing
         an index that corresponds to a specific offset of the supercell.
         """
+        # @todo positions do not match
         unique_offsets = self.lol_gen.get_unique_primcell_offsets()
         for offset in unique_offsets:
             local_orbit_list = self.lol_gen.generate_local_orbit_list(offset)
@@ -69,16 +70,23 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
                     print(pos_prim, '|', pos_super)
 
     def test_generate_full_orbit_list(self):
-        """Tests that local orbit list of all unique offsets are returned."""
-        full_orbit_list = self.lol_gen.generate_full_orbit_list()
-        print(full_orbit_list)
+        """
+        Tests that equivalent sites of all local orbit lists are listed
+        as equivalent sites in the full orbit list.
+        """
+        fol = self.lol_gen.generate_full_orbit_list()
+        for offset in self.lol_gen.get_unique_primcell_offsets():
+            lol = self.lol_gen.generate_local_orbit_list(offset)
+            for orbit, orbit_ in zip(lol.orbits, fol.orbits):
+                for sites in orbit.equivalent_sites:
+                    self.assertIn(sites, orbit_.equivalent_sites)
 
     def test_clear(self):
         """
         Tests vector of unique offsets and primitive to supercell mapping
         are cleared.
         """
-        self.lol_gen.generate_local_orbit_list(0)
+        self.lol_gen.generate_local_orbit_list(2)
         self.lol_gen.clear()
         offsets_count = self.lol_gen.get_unique_offsets_count()
         self.assertEqual(offsets_count, 0)
@@ -94,28 +102,27 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
                          len(self.supercell))
 
     def test_get_primitive_to_supercell_map(self):
-        """
-        Tests primitive to supercell mapping.
-        """
+        """Tests primitive to supercell mapping."""
+        # @todo positions do not match
         unique_offsets = self.lol_gen.get_unique_primcell_offsets()
         unique_offsets = [unique_offsets[-1]]
 
         for offset in unique_offsets:
-            print('new offset: ', offset)
             self.lol_gen.generate_local_orbit_list(offset)
             mapping = self.lol_gen.get_primitive_to_supercell_map()
             for sites_prim, sites_super in mapping.items():
                 pos_super = self.supercell.get_position(sites_super)
                 pos_prim = self.primitive.get_position(sites_prim)
-                print(sites_prim, '|', sites_super)
+                # print(sites_prim, '|', sites_super)
                 print(pos_prim, '|', pos_super)
 
     def test_unique_primcell_offsets(self):
         """Tests uniqueness of the offsets of primitive cell."""
-        offsets = self.lol_gen.get_unique_primcell_offsets()
-        for i, offset in enumerate(offsets):
-            for k in range(i+1, len(offsets)):
-                self.assertFalse(np.all(np.isclose(offset, offsets[k])))
+        from icet.core.lattice_site import LatticeSite
+        for offset in self.lol_gen.get_unique_primcell_offsets():
+            # positions show map into supercell
+            pos = self.primitive.get_position(LatticeSite(0, offset))
+            print(offset, '|', pos)
 
 
 if __name__ == '__main__':
