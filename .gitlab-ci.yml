@@ -9,6 +9,7 @@ build_linux:
     - mkdir build
     - cd build
     - python3 -m pip install .. -t . --no-cache-dir -v
+    - ls -l
   artifacts:
     expire_in: 14 days
     paths:
@@ -22,6 +23,7 @@ tests:
   dependencies:
     - build_linux
   script:
+    - ls -l build/
     - export PYTHONPATH=$PWD/build/:$PYTHONPATH
     - coverage run tests/main.py
     - coverage report -m
