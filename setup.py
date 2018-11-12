@@ -87,7 +87,7 @@ ext_modules = [
         'src/Symmetry.cpp'],
         include_dirs=[
             # Path to pybind11 headers
-            'src/3rdparty/pybind11/',
+            'src/3rdparty/pybind11/include/',
             get_pybind_include(),
             get_pybind_include(user=True),
             eigen_include,
