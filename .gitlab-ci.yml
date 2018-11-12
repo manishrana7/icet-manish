@@ -6,7 +6,9 @@ build_linux:
   tags:
     - linux
   script:
-    - python3 -m pip install . --user -v
+    - mkdir build
+    - cd build
+    - python3 -m pip install .. -t . --no-cache-dir -v
   artifacts:
     expire_in: 14 days
     paths:
@@ -20,8 +22,7 @@ tests:
   dependencies:
     - build_linux
   script:
-    - export PATH=${PATH}:${HOME}/.local/bin
-    - export PYTHONPATH=$PWD:$PWD/build/src/:$PYTHONPATH
+    - export PYTHONPATH=$PWD/build/:$PYTHONPATH
     - coverage run tests/main.py
     - coverage report -m
     - coverage html -d coverage
