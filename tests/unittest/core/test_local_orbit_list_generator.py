@@ -3,21 +3,20 @@ from ase import Atoms
 import numpy as np
 
 from icet import OrbitList, Structure
+from icet.core.lattice_site import LatticeSite
 from icet.core.local_orbit_list_generator import LocalOrbitListGenerator
 
 
 class TestLocalOrbitListGenerator(unittest.TestCase):
-    """
-    Container for test of class functionality.
-    """
+    """Container for test of class functionality."""
     def __init__(self, *args, **kwargs):
         super(TestLocalOrbitListGenerator, self).__init__(*args, **kwargs)
         # corner case: tilted structure
         atoms = Atoms('Al',
                       positions=[[0., 0., 0.]],
-                      cell=np.array([[0., 4., 1.],
-                                     [4., 0., 1.],
-                                     [4., 4., 0.]]),
+                      cell=np.array([[0., 4., 1],
+                                     [8., 0., 1],
+                                     [8., 4., 0.]]),
                       pbc=[1, 1, 1])
         cutoffs = [4.2, 4.2]
         self.orbit_list = OrbitList(atoms, cutoffs)
@@ -43,31 +42,31 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
             local_orbit_list = self.lol_gen.generate_local_orbit_list(index)
             for orbit_prim, orbit_super in zip(self.orbit_list.orbits,
                                                local_orbit_list.orbits):
-                print('---local orbit---')
-                for sites_p, sites_s in zip(orbit_prim.representative_sites,
-                                            orbit_super.representative_sites):
-                    sites_p.unitcell_offset += offset
-                    # pos_super = self.supercell.get_position(sites_s)
-                    # pos_prim = self.primitive.get_position(sites_p)
-                    print(sites_p, '|', sites_s)
+                for site, site_s in zip(orbit_prim.representative_sites,
+                                        orbit_super.representative_sites):
+                    site.unitcell_offset += offset
+                    pos_super = self.supercell.get_position(site_s)
+                    pos_prim = \
+                        self.orbit_list.primitive_structure.get_position(site)
+                    self.assertTrue(np.all(np.isclose(pos_super, pos_prim)))
 
     def test_generate_local_orbit_list_from_offset(self):
         """
         Tests that function generates an orbit list by passing
         an index that corresponds to a specific offset of the supercell.
         """
-        # @todo positions do not match
         unique_offsets = self.lol_gen.get_unique_primcell_offsets()
         for offset in unique_offsets:
             local_orbit_list = self.lol_gen.generate_local_orbit_list(offset)
             for orbit_prim, orbit_super in zip(self.orbit_list.orbits,
                                                local_orbit_list.orbits):
-                for sites_p, sites_s in zip(orbit_prim.representative_sites,
-                                            orbit_super.representative_sites):
-                    sites_p.unitcell_offset += offset
-                    pos_super = self.supercell.get_position(sites_s)
-                    pos_prim = self.primitive.get_position(sites_p)
-                    print(pos_prim, '|', pos_super)
+                for site, site_s in zip(orbit_prim.representative_sites,
+                                        orbit_super.representative_sites):
+                    site.unitcell_offset += offset
+                    pos_super = self.supercell.get_position(site_s)
+                    pos_prim = \
+                        self.orbit_list.primitive_structure.get_position(site)
+                    self.assertTrue(np.all(np.isclose(pos_super, pos_prim)))
 
     def test_generate_full_orbit_list(self):
         """
@@ -103,26 +102,32 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
 
     def test_get_primitive_to_supercell_map(self):
         """Tests primitive to supercell mapping."""
-        # @todo positions do not match
         unique_offsets = self.lol_gen.get_unique_primcell_offsets()
-        unique_offsets = [unique_offsets[-1]]
+        primitive = self.orbit_list.primitive_structure
 
         for offset in unique_offsets:
             self.lol_gen.generate_local_orbit_list(offset)
             mapping = self.lol_gen.get_primitive_to_supercell_map()
             for sites_prim, sites_super in mapping.items():
                 pos_super = self.supercell.get_position(sites_super)
-                pos_prim = self.primitive.get_position(sites_prim)
-                # print(sites_prim, '|', sites_super)
-                print(pos_prim, '|', pos_super)
+                pos_prim = primitive.get_position(sites_prim)
+                self.assertTrue(np.all(np.isclose(pos_super, pos_prim)))
 
     def test_unique_primcell_offsets(self):
-        """Tests uniqueness of the offsets of primitive cell."""
-        from icet.core.lattice_site import LatticeSite
-        for offset in self.lol_gen.get_unique_primcell_offsets():
-            # positions show map into supercell
-            pos = self.primitive.get_position(LatticeSite(0, offset))
-            print(offset, '|', pos)
+        """
+        Tests primitive offsets are unique and their positions match those
+        in the supercell.
+        """
+        unique_offsets = self.lol_gen.get_unique_primcell_offsets()
+        primitive = self.orbit_list.primitive_structure
+        super_pos = self.supercell.positions
+
+        for k, offset in enumerate(unique_offsets):
+            pos_prim = primitive.get_position(LatticeSite(0, offset))
+            self.assertTrue(
+                np.any(np.isclose(pos_prim, pos) for pos in super_pos))
+            for i in range(k+1, len(unique_offsets)):
+                self.assertFalse(np.all(np.isclose(offset, unique_offsets[i])))
 
 
 if __name__ == '__main__':
