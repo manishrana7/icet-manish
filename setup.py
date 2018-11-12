@@ -102,9 +102,9 @@ def cpp_flag(compiler):
     The c++14 is prefered over c++11 (when it is available).
     """
     if has_flag(compiler, '-std=c++14'):
-        return '-std=c++14 -O3'
+        return '-std=c++14'
     elif has_flag(compiler, '-std=c++11'):
-        return '-std=c++11 -O3'
+        return '-std=c++11'
     else:
         raise RuntimeError('Unsupported compiler -- at least C++11 support '
                            'is needed!')
@@ -126,6 +126,7 @@ class BuildExt(build_ext):
         if ct == 'unix':
             opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
             opts.append(cpp_flag(self.compiler))
+            opts.append('-O3')
             if has_flag(self.compiler, '-fvisibility=hidden'):
                 opts.append('-fvisibility=hidden')
         elif ct == 'msvc':
