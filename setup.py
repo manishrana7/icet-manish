@@ -178,16 +178,14 @@ if __name__ == '__main__':
     # Install cpp
     install_cpp_process = Process(target=setup_cpp)
     install_cpp_process.start()
+    install_cpp_process.join()
 
-    # Install python
+    # Install python icet
     install_icet_process = Process(target=setup_python_icet)
     install_icet_process.start()
-    
-    # setup_python_icet
+    install_icet_process.join()
+
+    # setup_python mchammer
     install_mchammer_process = Process(target=setup_python_mchammer)
     install_mchammer_process.start()
-    
-    # Join processes
-    install_cpp_process.join()
-    install_icet_process.join()
     install_mchammer_process.join()
