@@ -6,10 +6,7 @@ build_linux:
   tags:
     - linux
   script:
-    - mkdir build
-    - cd build
-    - cmake ..
-    - make
+    - python3 -m pip --user -v install . 
   artifacts:
     expire_in: 14 days
     paths:
