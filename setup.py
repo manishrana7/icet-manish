@@ -137,40 +137,77 @@ class BuildExt(build_ext):
 
 
 
+
+if sys.version_info < (3, 5, 0, 'final', 0):
+    raise SystemExit('Python 3.5 or later is required!')
+
+with open('README.md') as fd:
+    long_description = fd.read()
+
+with open('icet/__init__.py') as fd:
+    lines = '\n'.join(fd.readlines())
+version = re.search("__version__ = '(.*)'", lines).group(1)
+maintainer = re.search("__maintainer__ = '(.*)'", lines).group(1)
+url = re.search("__url__ = '(.*)'", lines).group(1)
+email = re.search("__email__ = '(.*)'", lines).group(1)
+description = re.search("__description__ = '(.*)'", lines).group(1)
+authors = re.search("__authors__ = '(.*)'",lines  ).group(1)
+
+
+classifiers=[
+          'Development Status :: 4 - Beta',
+          'Operating System :: OS Independent',
+          'Programming Language :: Python :: 3 :: Only',
+          'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: 3.6',
+          'Programming Language :: Python :: 3.7',
+          'Intended Audience :: Science/Research',
+          'License :: OSI Approved :: MIT License',
+          'Topic :: Scientific/Engineering :: Physics']
+
+
+
 def setup_cpp():
     setup(
         name='icet_cpp',
-        version=__version__,
-        author='Mattias Ångqvist',
-        author_email='angqvist@chalmers.se',    
-        description='A test project using pybind11',
-        long_description='',
+        version=version,
+        author=authors,
+        author_email=email,    
+        description=description,
+        long_description=long_description,
         ext_modules=ext_modules,
         install_requires=['pybind11>=2.2'],
         cmdclass={'build_ext': BuildExt},
         zip_safe=False,
+        classifiers=classifiers,
     )
 
 def setup_python_icet():
         setup(
         name='icet',
-        version=__version__,
-        author='Mattias Ångqvist',
-        author_email='angqvist@chalmers.se',    
-        description='A test project using pybind11',
-        long_description='',
+        version=version,
+        author=authors,
+        author_email=email,    
+        description=description,
+        long_description=long_description,
+        install_requires=['numpy', 'ase', 'scipy', 'sklearn', 'pandas>=0.23'],
         packages=find_packages(),
+        classifiers=classifiers,
+
     )
 
 def setup_python_mchammer():
         setup(
         name='mchammer',
-        version=__version__,
-        author='Mattias Ångqvist',
-        author_email='angqvist@chalmers.se',    
-        description='A test project using pybind11',
+        version=version,
+        author=authors,
+        author_email=email,    
+        description=description,
         packages=find_packages(),
-        long_description='',
+        long_description=long_description,
+        classifiers=classifiers,
+
     )
 
 
