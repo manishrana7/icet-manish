@@ -19,8 +19,8 @@ class VCSGCEnsemble(BaseEnsemble):
     variance-constrained semi-grand canonical (VCSGC) ensemble
     (:math:`N\phi\kappa VT`), i.e. at constant temperature
     (:math:`T`), total number of sites (:math:`N=\sum_i N_i`), and two
-    additional parameters :math:`\phi` and :math:`\kappa`, which
-    constrain average and variance of the concentration,
+    additional dimensionless parameters :math:`\phi` and :math:`\kappa`,
+    which constrain average and variance of the concentration,
     respectively. The VCSGC ensemble is currently only implemented for
     binary systems.
 
@@ -29,9 +29,8 @@ class VCSGCEnsemble(BaseEnsemble):
 
     .. math::
 
-        \\rho_{\\text{VCSGC}} \\propto \exp\\Big[ - \\big( E
-        + \\frac{1}{2} \\kappa N ( c_1 + \phi_1 / 2 )^2
-        \\big) / k_B T \\Big],
+        \\rho_{\\text{VCSGC}} \\propto \exp\\Big[ - E / k_B T
+        + \\kappa N ( c_1 + \phi_1 / 2 )^2 \\Big],
 
     where :math:`c_1` represents the concentration of species 1, i.e.
     :math:`c_1=N_1/N`. (Please note that the quantities :math:`\kappa` and
@@ -50,8 +49,8 @@ class VCSGCEnsemble(BaseEnsemble):
 
     .. math::
 
-        P = \min \{ 1, \, \exp [ - ( \\Delta E + \kappa N \\Delta c_1 (
-        \phi_1 + \\Delta c_1 + 2 c_1 )) / k_B T ] \}.
+        P = \min \{ 1, \, \exp [ - \\Delta E / k_B T + \kappa N \\Delta c_1 (
+        \phi_1 + \\Delta c_1 + 2 c_1 ) ] \}.
 
     Note that for a sufficiently large value of :math:`\kappa`, say 200, the
     probability density :math:`\\rho_{\\text{VCSGC}}` is sharply peaked around
@@ -68,7 +67,7 @@ class VCSGCEnsemble(BaseEnsemble):
 
     .. math::
 
-        \\kappa ( \\phi_1 + 2 \\langle c_1 \\rangle ) = - \\frac{1}{N}
+        k_B T \\kappa ( \\phi_1 + 2 \\langle c_1 \\rangle ) = - \\frac{1}{N}
         \\frac{\\partial F}{\\partial c_1} (N, V, T, \\langle c_1 \\rangle ),
 
     this ensemble allows for thermodynamic integration across multiphase
