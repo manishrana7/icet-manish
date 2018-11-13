@@ -144,7 +144,7 @@ if sys.version_info < (3, 5, 0, 'final', 0):
 with open('README.md') as fd:
     long_description = fd.read()
 
-with open('icet/__init__.py') as fd:
+with open('icet/__init__.py', encoding="utf-8") as fd:
     try:
         lines = '\n'.join(fd.readlines())
     except Exception as e:
@@ -202,7 +202,7 @@ def setup_python_icet():
         author_email=email,    
         description=description,
         long_description=long_description,
-        # install_requires=['numpy', 'ase', 'scipy', 'sklearn', 'pandas>=0.23'],
+        install_requires=['numpy', 'ase', 'scipy', 'sklearn', 'pandas>=0.23'],
         packages=find_packages(),
         classifiers=classifiers,
 
