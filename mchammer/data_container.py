@@ -200,7 +200,7 @@ class DataContainer:
         Raises
         ------
         ValueError
-            if args is empty
+            if tags is empty
         ValueError
             if observables are requested that are not in data container
         ValueError
