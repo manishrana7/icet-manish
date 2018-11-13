@@ -155,7 +155,7 @@ maintainer = re.search("__maintainer__ = '(.*)'", lines).group(1)
 url = re.search("__url__ = '(.*)'", lines).group(1)
 email = re.search("__email__ = '(.*)'", lines).group(1)
 description = re.search("__description__ = '(.*)'", lines).group(1)
-authors = 'Mattias Ångqvist, William Armando Muñoz, Thomas Holm Rod and Paul Erhart'
+authors = 'Mattias Ångqvist William Armando Muñoz Thomas Holm Rod and Paul Erhart'
 
 
 classifiers=[
@@ -170,6 +170,13 @@ classifiers=[
           'License :: OSI Approved :: MIT License',
           'Topic :: Scientific/Engineering :: Physics']
 
+print(version)
+print(maintainer)
+print(url)
+print(email)
+print(description)
+print(authors)
+print("Begin setup!")
 
 
 def setup_cpp():
