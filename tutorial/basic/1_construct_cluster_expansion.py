@@ -10,13 +10,13 @@ prim = db.get(id=1).toatoms()  # primitive structure
 
 # step 2: Set up the basic structure and a cluster space
 cs = ClusterSpace(atoms=prim,
-                  cutoffs=[8.5, 8.5, 7.5],
+                  cutoffs=[13.5, 6.0, 5.5],
                   chemical_symbols=['Ag', 'Pd'])
 print(cs)
 
 # step 3: Parse the input structures and set up a structure container
 sc = StructureContainer(cluster_space=cs)
-for row in db.select('natoms<=6'):
+for row in db.select('natoms<=8'):
     sc.add_structure(atoms=row.toatoms(),
                      user_tag=row.tag,
                      properties={'mixing_energy': row.mixing_energy})

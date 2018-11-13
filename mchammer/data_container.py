@@ -167,18 +167,15 @@ class DataContainer:
         self._last_state['accepted_trials'] = accepted_trials
         self._last_state['random_state'] = random_state
 
-    def get_data(self, tags: List[str]=None,
-                 start: int=None, stop: int=None, interval: int=1,
-                 fill_method: str=None,
-                 apply_to: List[str]=None) -> Union[list, Tuple[list, list]]:
+    def get_data(self, *tags, start: int=None, stop: int=None, interval: int=1,
+                 fill_method: str='skip_none',
+                 apply_to: List[str]=None)-> Union[list, Tuple[list, list]]:
         """Returns the accumulated data for the requested observables.
 
         Parameters
         ----------
         tags
-            tags of the requested properties; by default all columns
-            of the data frame will be returned in lexicographical
-            order.
+            tuples of the requested properties
 
         start
             minimum value of trial step to consider; by default the
@@ -203,6 +200,8 @@ class DataContainer:
         Raises
         ------
         ValueError
+            if args is empty
+        ValueError
             if observables are requested that are not in data container
         ValueError
             if fill method is unknown
@@ -212,19 +211,18 @@ class DataContainer:
                         'fill_forward',
                         'linear_interpolate']
 
-        if tags is None:
-            tags = self._data.columns.tolist()
-        else:
-            for tag in tags:
-                if tag not in self._data:
-                    raise ValueError('No observable named {} in data'
-                                     ' container'.format(tag))
+        if len(tags) == 0:
+            raise TypeError('Missing tags argument')
+
+        for tag in tags:
+            if tag not in self._data:
+                raise ValueError('No observable named {} in data'
+                                 ' container'.format(tag))
 
         if start is None and stop is None:
             data = self._data.loc[::interval, tags]
         else:
             data = self._data.set_index(self._data.mctrial)
-
             if start is None:
                 data = data.loc[:stop:interval, tags]
             elif stop is None:
@@ -233,7 +231,6 @@ class DataContainer:
                 data = data.loc[start:stop:interval, tags]
 
         if fill_method is not None:
-
             if fill_method not in fill_methods:
                 raise ValueError('Unknown fill method: {}'
                                  .format(fill_method))
@@ -270,7 +267,7 @@ class DataContainer:
         for tag in tags:
             data_list.append(
                 # convert NaN to None
-                [None if np.isnan(x).any() else x for x in data[tag]])
+                np.array([None if np.isnan(x).any() else x for x in data[tag]]))
         if len(tags) > 1:
             # return a tuple if more than one tag is given
             return tuple(data_list)
@@ -354,19 +351,35 @@ class DataContainer:
         TypeError
             if requested observable is not of a scalar data type
         """
-        if tag not in self._data:
-            raise ValueError('No observable named {} in data container'
-                             .format(tag))
 
-        if self._data[tag].dtype not in ['int64', 'float64']:
-            raise TypeError('Data for {} is not scalar'.format(tag))
+        data = self.get_data(tag, start=start, stop=stop)
+        return np.mean(data)
 
-        if start is None and stop is None:
-            return self._data[tag].mean(), self._data[tag].std()
-        else:
-            data = self.get_data(tags=[tag], start=start, stop=stop,
-                                 fill_method='skip_none')
-            return np.mean(data), np.std(data)
+    def get_standard_deviation(self, tag: str,
+                    start: int=None, stop: int=None) -> Tuple[float, float]:
+        """
+        Returns average and standard deviation of a scalar observable.
+
+        Parameters
+        ----------
+        tag
+            tag of field over which to average
+        start
+            minimum value of trial step to consider; by default the
+            smallest value in the mctrial column will be used.
+        stop
+            maximum value of trial step to consider; by default the
+            largest value in the mctrial column will be used.
+
+        Raises
+        ------
+        ValueError
+            if observable is requested that is not in data container
+        TypeError
+            if requested observable is not of a scalar data type
+        """
+        data = self.get_data(tag, start=start, stop=stop)
+        return np.std(data)
 
     def get_trajectory(self, start: int=None, stop: int=None, interval: int=1,
                        scalar_property: str=None) \
@@ -404,7 +417,7 @@ class DataContainer:
             this_column = ['occupations']
 
         occupation_vectors, property_values = \
-            self.get_data(tags=['occupations', scalar_property],
+            self.get_data('occupations', scalar_property,
                           start=start, stop=stop, interval=interval,
                           fill_method='skip_none', apply_to=this_column)
 
