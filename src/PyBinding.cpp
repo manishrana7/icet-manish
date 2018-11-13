@@ -794,7 +794,7 @@ PYBIND11_MODULE(_icet, m)
         .def(py::init<const OrbitList &, const Structure &>(),
              R"pbdoc(
              Constructs a LocalOrbitListGenerator object from an orbit list
-             and a supercell.
+             and a supercell structure.
 
              Parameters
              ----------
@@ -807,7 +807,8 @@ PYBIND11_MODULE(_icet, m)
              py::arg("supercell"))
         .def("generate_local_orbit_list", (OrbitList(LocalOrbitListGenerator::*)(const unsigned int)) & LocalOrbitListGenerator::getLocalOrbitList,
              R"pbdoc(
-             Generates and returns the local orbit list from an input index.
+             Generates and returns the local orbit list from an input index corresponding a specific offset of
+             the primitive structure.
                  
              Parameters
              ----------
@@ -817,24 +818,27 @@ PYBIND11_MODULE(_icet, m)
              py::arg("index"))
         .def("generate_local_orbit_list", (OrbitList(LocalOrbitListGenerator::*)(const Vector3d &)) & LocalOrbitListGenerator::getLocalOrbitList,
              R"pbdoc(
-             Generates and returns the local orbit list from an unique offsets.
+             Generates and returns the local orbit list from a specific offset of the primitive structure.
 
              Parameters
              ----------
-             unique_offsets : vector
-                unique offsets
+             unique_offset : vector
+                offset of the primitive cell
              )pbdoc",
              py::arg("unique_offset"))
         .def("generate_full_orbit_list", &LocalOrbitListGenerator::getFullOrbitList,
-             "Generates and returns the total sum of the local orbit list of all unique offsets")
+             R"pbdoc(
+             Generates and returns a local orbit list, which orbits included the equivalent sites 
+             of all local orbit list in the supercell.
+             )pbdoc")
         .def("clear", &LocalOrbitListGenerator::clear,
-             "Clears the LocalOrbitListGenerator object")
+             "Clears the list of offsets and primitive-to-supercell map of the LocalOrbitListGenerator object")
         .def("get_unique_offsets_count", &LocalOrbitListGenerator::getNumberOfUniqueOffsets,
              "Returns the number of unique offsets")
         .def("get_primitive_to_supercell_map", &LocalOrbitListGenerator::getMapFromPrimitiveToSupercell,
-             "Returns the primitive to supercell lattice mapping")
+             "Returns the primitive to supercell mapping")
         .def("get_unique_primcell_offsets", &LocalOrbitListGenerator::getUniquePrimitiveCellOffsets,
-             "Returns a list with the unique primitive offsets");
+             "Returns a list with offsets of primitive structure that span to position of atoms in the supercell");
 
     /// @todo Check which of the following members must actually be exposed.
     /// @todo Turn getters into properties if possible. (Some might require massaging in cluster_space.py.)

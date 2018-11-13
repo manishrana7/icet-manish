@@ -66,7 +66,7 @@ class OrbitList(_OrbitList):
         Returns the primitive structure to which the lattice sites in
         the orbits are referenced to.
         """
-        return self.get_primitive_structure()
+        return self._primitive_structure.copy()
 
     @property
     def permutation_matrix(self):
