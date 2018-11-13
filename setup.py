@@ -141,7 +141,7 @@ class BuildExt(build_ext):
 if sys.version_info < (3, 5, 0, 'final', 0):
     raise SystemExit('Python 3.5 or later is required!')
 
-with open('README.md') as fd:
+with open('README.md', encoding="utf-8") as fd:
     long_description = fd.read()
 
 with open('icet/__init__.py', encoding="utf-8") as fd:
@@ -155,7 +155,8 @@ maintainer = re.search("__maintainer__ = '(.*)'", lines).group(1)
 url = re.search("__url__ = '(.*)'", lines).group(1)
 email = re.search("__email__ = '(.*)'", lines).group(1)
 description = re.search("__description__ = '(.*)'", lines).group(1)
-authors = 'Mattias Ångqvist William Armando Muñoz Thomas Holm Rod and Paul Erhart'
+authors = unicode('Mattias Ångqvist William Armando Muñoz Thomas Holm Rod and Paul Erhart', "utf-8")
+
 
 
 classifiers=[
