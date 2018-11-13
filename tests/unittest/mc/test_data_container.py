@@ -208,6 +208,11 @@ class TestDataContainer(unittest.TestCase):
         with self.assertRaises(TypeError) as context:
             self.dc.get_data()
 
+        # assert numpy array is returned.
+        retval1, retval2 = self.dc.get_data('mctrial', 'obs1')
+        self.assertIsInstance(retval1, np.ndarray)
+        self.assertIsInstance(retval2, np.ndarray)
+
         # using skip_none
         retval1, retval2 = \
             self.dc.get_data('mctrial', 'obs1', fill_method='skip_none')

@@ -169,7 +169,8 @@ class DataContainer:
 
     def get_data(self, *tags, start: int=None, stop: int=None, interval: int=1,
                  fill_method: str='skip_none',
-                 apply_to: List[str]=None)-> Union[list, Tuple[list, list]]:
+                 apply_to: List[str]=None)-> Union[np.ndarray,
+                                                   Tuple[np.ndarray]]:
         """Returns the accumulated data for the requested observables.
 
         Parameters
@@ -191,7 +192,8 @@ class DataContainer:
 
         fill_method : {'skip_none', 'fill_backward', 'fill_forward',
                        'linear_interpolate', None}
-            method employed for dealing with missing values
+            method employed for dealing with missing values; by default
+            uses 'skip_none'
 
         apply_to
             tags of columns for which fill_method will be employed;
@@ -265,9 +267,9 @@ class DataContainer:
 
         data_list = []
         for tag in tags:
-            data_list.append(
-                # convert NaN to None
-                np.array([None if np.isnan(x).any() else x for x in data[tag]]))
+            # convert NaN to None
+            data_list.append(np.array(
+                [None if np.isnan(x).any() else x for x in data[tag]]))
         if len(tags) > 1:
             # return a tuple if more than one tag is given
             return tuple(data_list)
@@ -329,7 +331,7 @@ class DataContainer:
             return self._data[tag].count()
 
     def get_average(self, tag: str,
-                    start: int=None, stop: int=None) -> Tuple[float, float]:
+                    start: int=None, stop: int=None) -> float:
         """
         Returns average and standard deviation of a scalar observable.
 
@@ -355,8 +357,8 @@ class DataContainer:
         data = self.get_data(tag, start=start, stop=stop)
         return np.mean(data)
 
-    def get_standard_deviation(self, tag: str,
-                    start: int=None, stop: int=None) -> Tuple[float, float]:
+    def get_standard_deviation(self, tag: str, start: int=None,
+                               stop: int=None) -> float:
         """
         Returns average and standard deviation of a scalar observable.
 
