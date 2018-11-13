@@ -202,7 +202,7 @@ def setup_python_icet():
         author_email=email,    
         description=description,
         long_description=long_description,
-        install_requires=['numpy', 'ase', 'scipy', 'sklearn', 'pandas>=0.23'],
+        # install_requires=['numpy', 'ase', 'scipy', 'sklearn', 'pandas>=0.23'],
         packages=find_packages(),
         classifiers=classifiers,
 
