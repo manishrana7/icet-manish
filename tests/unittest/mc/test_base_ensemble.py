@@ -179,7 +179,7 @@ class TestEnsemble(unittest.TestCase):
             total_iters = sum(run_iters)
             # Check that the number of iters are correct
             self.assertEqual(self.ensemble.step, total_iters)
-            dc_data = self.ensemble.data_container.get_data(tags=['Parakeet2'])
+            dc_data = self.ensemble.data_container.get_data('Parakeet2')
             number_of_observations = len(
                 [x for x in dc_data if x is not None])
             # plus one since we also count step 0
