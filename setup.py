@@ -6,7 +6,6 @@ import setuptools
 import os
 import re
 from multiprocessing import Process
-__version__ = '0.0.1'
 import glob
 
 
@@ -146,16 +145,17 @@ with open('README.md') as fd:
     long_description = fd.read()
 
 with open('icet/__init__.py') as fd:
-    lines = '\n'.join(fd.readlines())
+    try:
+        lines = '\n'.join(fd.readlines())
+    except Exception as e:
+        raise Exception("Caught exception {}".format(e))
+
 version = re.search("__version__ = '(.*)'", lines).group(1)
 maintainer = re.search("__maintainer__ = '(.*)'", lines).group(1)
 url = re.search("__url__ = '(.*)'", lines).group(1)
 email = re.search("__email__ = '(.*)'", lines).group(1)
 description = re.search("__description__ = '(.*)'", lines).group(1)
-authors = ['Mattias Ångqvist',
-               'William Armando Muñoz',
-               'Thomas Holm Rod',
-               'Paul Erhart']
+authors = 'Mattias Ångqvist, William Armando Muñoz, Thomas Holm Rod and Paul Erhart'
 
 
 classifiers=[
