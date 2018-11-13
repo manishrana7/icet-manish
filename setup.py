@@ -50,29 +50,29 @@ def find_eigen(hint=None):
 eigen_include = find_eigen()
 if eigen_include is None:
     raise RuntimeError("Required library Eigen not found. "
-                "Check the documentation for solutions.")
+                       "Check the documentation for solutions.")
 
 
 ext_modules = [
     Extension(
         '_icet',
         ['src/ClusterCounts.cpp',
-        'src/Cluster.cpp',
-        'src/ClusterExpansionCalculator.cpp',
-        'src/ClusterSpace.cpp',
-        'src/Geometry.cpp',
-        'src/LocalOrbitListGenerator.cpp',
-        'src/ManyBodyNeighborList.cpp',
-        'src/NeighborList.cpp',
-        'src/Orbit.cpp',
-        'src/OrbitList.cpp',
-        'src/PermutationMatrix.cpp',
-        'src/PyBinding.cpp',
-        'src/Structure.cpp',
-        'src/Symmetry.cpp'],
+         'src/Cluster.cpp',
+         'src/ClusterExpansionCalculator.cpp',
+         'src/ClusterSpace.cpp',
+         'src/Geometry.cpp',
+         'src/LocalOrbitListGenerator.cpp',
+         'src/ManyBodyNeighborList.cpp',
+         'src/NeighborList.cpp',
+         'src/Orbit.cpp',
+         'src/OrbitList.cpp',
+         'src/PermutationMatrix.cpp',
+         'src/PyBinding.cpp',
+         'src/Structure.cpp',
+         'src/Symmetry.cpp'],
         include_dirs=[
             # Path to pybind11 headers
-            'src/3rdparty/pybind11/include/',            
+            'src/3rdparty/pybind11/include/',
             eigen_include,
         ],
         language='c++'
@@ -124,18 +124,18 @@ class BuildExt(build_ext):
         ct = self.compiler.compiler_type
         opts = self.c_opts.get(ct, [])
         if ct == 'unix':
-            opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
+            opts.append('-DVERSION_INFO="%s"' %
+                        self.distribution.get_version())
             opts.append(cpp_flag(self.compiler))
             opts.append('-O3')
             if has_flag(self.compiler, '-fvisibility=hidden'):
                 opts.append('-fvisibility=hidden')
         elif ct == 'msvc':
-            opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
+            opts.append('/DVERSION_INFO=\\"%s\\"' %
+                        self.distribution.get_version())
         for ext in self.extensions:
             ext.extra_compile_args = opts
         build_ext.build_extensions(self)
-
-
 
 
 if sys.version_info < (3, 5, 0, 'final', 0):
@@ -155,29 +155,21 @@ maintainer = re.search("__maintainer__ = '(.*)'", lines).group(1)
 url = re.search("__url__ = '(.*)'", lines).group(1)
 email = re.search("__email__ = '(.*)'", lines).group(1)
 description = re.search("__description__ = '(.*)'", lines).group(1)
-authors = u'Mattias Ångqvist William Armando Muñoz Thomas Holm Rod and Paul Erhart'.encode('utf-8')
+authors = u'Mattias Ångqvist William Armando Muñoz Thomas Holm Rod and Paul Erhart'.encode(
+    'utf-8')
 
 
-
-classifiers=[
-          'Development Status :: 4 - Beta',
-          'Operating System :: OS Independent',
-          'Programming Language :: Python :: 3 :: Only',
-          'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.5',
-          'Programming Language :: Python :: 3.6',
-          'Programming Language :: Python :: 3.7',
-          'Intended Audience :: Science/Research',
-          'License :: OSI Approved :: MIT License',
-          'Topic :: Scientific/Engineering :: Physics']
-
-print(version)
-print(maintainer)
-print(url)
-print(email)
-print(description)
-print(authors)
-print("Begin setup!")
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: MIT License',
+    'Topic :: Scientific/Engineering :: Physics']
 
 
 def setup_cpp():
@@ -185,7 +177,7 @@ def setup_cpp():
         name='icet_cpp',
         version=version,
         author=authors,
-        author_email=email,    
+        author_email=email,
         description=description,
         long_description=long_description,
         ext_modules=ext_modules,
@@ -195,12 +187,13 @@ def setup_cpp():
         classifiers=classifiers,
     )
 
+
 def setup_python_icet():
-        setup(
+    setup(
         name='icet',
         version=version,
         author=authors,
-        author_email=email,    
+        author_email=email,
         description=description,
         long_description=long_description,
         install_requires=['numpy', 'ase', 'scipy', 'sklearn', 'pandas>=0.23'],
@@ -209,19 +202,19 @@ def setup_python_icet():
 
     )
 
+
 def setup_python_mchammer():
-        setup(
+    setup(
         name='mchammer',
         version=version,
         author=authors,
-        author_email=email,    
+        author_email=email,
         description=description,
         packages=find_packages(),
         long_description=long_description,
         classifiers=classifiers,
 
     )
-
 
 
 if __name__ == '__main__':
