@@ -333,7 +333,7 @@ class DataContainer:
     def get_average(self, tag: str,
                     start: int=None, stop: int=None) -> float:
         """
-        Returns average and standard deviation of a scalar observable.
+        Returns average of a scalar observable.
 
         Parameters
         ----------
@@ -346,12 +346,6 @@ class DataContainer:
             maximum value of trial step to consider; by default the
             largest value in the mctrial column will be used.
 
-        Raises
-        ------
-        ValueError
-            if observable is requested that is not in data container
-        TypeError
-            if requested observable is not of a scalar data type
         """
 
         data = self.get_data(tag, start=start, stop=stop)
@@ -360,7 +354,7 @@ class DataContainer:
     def get_standard_deviation(self, tag: str, start: int=None,
                                stop: int=None) -> float:
         """
-        Returns average and standard deviation of a scalar observable.
+        Returns standard deviation of a scalar observable.
 
         Parameters
         ----------
@@ -373,12 +367,6 @@ class DataContainer:
             maximum value of trial step to consider; by default the
             largest value in the mctrial column will be used.
 
-        Raises
-        ------
-        ValueError
-            if observable is requested that is not in data container
-        TypeError
-            if requested observable is not of a scalar data type
         """
         data = self.get_data(tag, start=start, stop=stop)
         return np.std(data)
