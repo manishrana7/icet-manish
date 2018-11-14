@@ -1,6 +1,6 @@
 import unittest
 from ase import Atoms
-from ase.build import bulk
+from ase.build import bulk, make_supercell
 import numpy as np
 
 from icet import OrbitList, Structure
@@ -13,16 +13,14 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestLocalOrbitListGenerator, self).__init__(*args, **kwargs)
         # corner case: tilted structure
-        atoms = Atoms('Al',
-                      positions=[[0., 0., 0.]],
-                      cell=np.array([[0., 4., 1],
-                                     [10., 0., 1],
-                                     [10., 1., 0.]]),
-                      pbc=[1, 1, 1])
+        prim_atoms = bulk('Al')
         cutoffs = [4.2, 4.2]
-        self.orbit_list = OrbitList(atoms, cutoffs)
+        self.orbit_list = OrbitList(prim_atoms, cutoffs)
         self.primitive = self.orbit_list.get_primitive_structure()
-        self.supercell = Structure.from_atoms(atoms.repeat(3))
+        super_atoms = make_supercell(prim_atoms, [[2, 0, 10],
+                                                  [0, 3, 0],
+                                                  [0, 0, 10]])
+        self.supercell = Structure.from_atoms(super_atoms)
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
@@ -134,11 +132,14 @@ class TestLocalOrbitListGeneratorHCP(unittest.TestCase):
     """
     def __init__(self, *args, **kwargs):
         super(TestLocalOrbitListGeneratorHCP, self).__init__(*args, **kwargs)
-        atoms = bulk('Ni', 'hcp', a=4.0)
+        prim_atoms = bulk('Ni', 'hcp', a=4.0)
         cutoffs = [4.2, 4.2]
-        self.orbit_list = OrbitList(atoms, cutoffs)
+        self.orbit_list = OrbitList(prim_atoms, cutoffs)
         self.primitive = self.orbit_list.get_primitive_structure()
-        self.supercell = Structure.from_atoms(atoms.repeat(3))
+        super_atoms = make_supercell(prim_atoms, [[2, 0, 10],
+                                                  [0, 3, 0],
+                                                  [0, 0, 10]])
+        self.supercell = Structure.from_atoms(super_atoms)
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
