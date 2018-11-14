@@ -798,9 +798,9 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             orbit_list : an icet OrbitList object
+             orbit_list : OrbitList
                 an orbit list set up from a primitive structure
-             supercell : an icet Structure object
+             supercell : Structure
                 supercell build up from the same primitive structure used to set the input orbit list 
              )pbdoc",
              py::arg("orbit_list"),
@@ -813,7 +813,7 @@ PYBIND11_MODULE(_icet, m)
              Parameters
              ----------
              index : int
-                index of the unique offset list
+                index of the unique offsets list
              )pbdoc",
              py::arg("index"))
         .def("generate_local_orbit_list", (OrbitList(LocalOrbitListGenerator::*)(const Vector3d &)) & LocalOrbitListGenerator::getLocalOrbitList,
@@ -822,8 +822,8 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             unique_offset : vector
-                offset of the primitive cell
+             unique_offset : NumPy array
+                offset of the primitive structure
              )pbdoc",
              py::arg("unique_offset"))
         .def("generate_full_orbit_list", &LocalOrbitListGenerator::getFullOrbitList,
@@ -869,7 +869,7 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             cluster_space : cluster space
+             cluster_space : icet.ClusterSpace
                 defines the cluster space
              structure : icet Structure object
                 the supercell the calculator will operate on
