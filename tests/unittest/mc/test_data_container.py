@@ -341,9 +341,9 @@ class TestDataContainer(unittest.TestCase):
                 mctrial, record={'occupations': [14, 14, 14]})
 
         # TODO: This test can be readded once occupations is not part of df
-        #with self.assertRaises(ValueError) as context:
+        # with self.assertRaises(ValueError) as context:
         #    self.dc.get_average('occupations')
-        #self.assertTrue('occupations is not scalar'
+        # self.assertTrue('occupations is not scalar'
         #                in str(context.exception))
 
     def test_get_trajectory(self):
