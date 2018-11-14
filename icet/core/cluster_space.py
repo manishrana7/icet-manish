@@ -19,7 +19,7 @@ class ClusterSpace(_ClusterSpace):
 
     Parameters
     ----------
-    atoms : ase.Atoms or icet.Structure
+    atoms : ase.Atoms
         atomic configuration
     cutoffs : list(float)
         cutoff radii per order that define the cluster space
@@ -35,11 +35,11 @@ class ClusterSpace(_ClusterSpace):
           lattice site 'i'
     """
 
-    def __init__(self, atoms: Union[Atoms, Structure], cutoffs: List[float],
+    def __init__(self, atoms: Atoms, cutoffs: List[float],
                  chemical_symbols: Union[List[str], List[List[str]]]) -> None:
 
-        assert isinstance(atoms, Atoms), \
-            'input configuration must be an ASE Atoms object'
+        if not isinstance(atoms, Atoms):
+            raise TypeError('Input configuration must be an ASE Atoms object.')
 
         self._atoms = atoms.copy()
         self._cutoffs = cutoffs
