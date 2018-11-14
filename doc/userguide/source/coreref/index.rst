@@ -9,6 +9,6 @@ Core components
 .. toctree::
    :maxdepth: 2
 
-   python_interface_via_pybind
    additional_python_components
+   python_interface_via_pybind
    cpp_classes

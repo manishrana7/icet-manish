@@ -21,7 +21,7 @@ class OrbitList(_OrbitList):
     An orbit has a list of equivalent sites with the restriction
     that at least one site is in the cell of the primitive structure.
 
-    parameters
+    Parameters
     ----------
     atoms : ASE Atoms object
             This atoms object will be used to construct a primitive
@@ -31,13 +31,15 @@ class OrbitList(_OrbitList):
               cutoffs[i] is the cutoff for orbits with order i+2.
     """
 
-    def __init__(self, atoms, cutoffs):
-        if isinstance(atoms, Structure):
-            atoms = atoms.to_atoms()
+    def __init__(self, atoms_in, cutoffs):
+        if isinstance(atoms_in, Structure):
+            atoms_in = atoms_in.to_atoms()
+        atoms = atoms_in.copy()
+        atoms.wrap()
         max_cutoff = np.max(cutoffs)
         # Set up a permutation matrix
         permutation_matrix, prim_structure, _ \
-            = permutation_matrix_from_atoms(atoms, max_cutoff)
+            = permutation_matrix_from_atoms(atoms, max_cutoff, find_prim=False)
 
         logger.info('Done getting permutation_matrix.')
 
@@ -68,12 +70,8 @@ class OrbitList(_OrbitList):
         """
         return self._primitive_structure.copy()
 
-    @property
-    def permutation_matrix(self):
-        """Returns icet PermutationMatrix object."""
-        return self._permutation_matrix
-
     def __str__(self):
+        """String representation."""
         nice_str = 'Number of orbits: {}'.format(len(self))
 
         for i, orbit in enumerate(self.orbits):
@@ -102,15 +100,16 @@ class OrbitList(_OrbitList):
 
         return supercell_orbit_list
 
-    def remove_inactive_orbits(self, allowed_species: List[int]):
+    def remove_inactive_orbits(self, allowed_species: List[List[str]]) -> None:
         """ Removes orbits with inactive sites
 
         Parameters
         ----------
         allowed_species
-            the number of allowed species on each site in the primitive
+            the list of allowed species on each site in the primitive
             structure
         """
         prim_structure = self.get_primitive_structure()
-        prim_structure.set_number_of_allowed_species(allowed_species)
+        number_of_allowed_species = [len(sym) for sym in allowed_species]
+        prim_structure.set_number_of_allowed_species(number_of_allowed_species)
         self._remove_inactive_orbits(prim_structure)

@@ -13,6 +13,22 @@ BaseOptimizer
    :undoc-members:
    :inherited-members:
 
+Cluster
+-------
+
+.. automodule:: icet.core.cluster
+   :members:
+   :undoc-members:
+   :inherited-members:
+
+ClusterCounts
+-------------
+
+.. automodule:: icet.core.cluster_counts
+   :members:
+   :undoc-members:
+   :inherited-members:
+
 Geometry
 --------
 
@@ -20,6 +36,13 @@ Geometry
    :members:
    :undoc-members:
    :inherited-members:
+
+LatticeSite
+-----------
+
+.. automodule:: icet.core.lattice_site
+   :members:
+   :undoc-members:
 
 LocalOrbitListGenerator
 -----------------------

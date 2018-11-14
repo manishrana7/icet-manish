@@ -19,14 +19,14 @@ class StructureContainer:
 
     Parameters
     ----------
-    cluster_space : ClusterSpace
+    cluster_space : icet.ClusterSpace
         cluster space used for evaluating the cluster vectors
 
-    list_of_atoms : list, tuple or list of tuples
+    list_of_atoms : list or tuple or list(tuple)
         list of atoms; if the list contains tuples, the second element of the
         tuple will be used as a tag of the structure
 
-    list_of_properties : list of dicts
+    list_of_properties : list(dict)
         list of properties, which are provided in dicts
     """
 

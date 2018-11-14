@@ -16,9 +16,10 @@ model <tutorial_construct_cluster_expansion>` with the supercell.
    :start-after: # step 1
    :end-before: # step 2
 
-In this example the sampling will be carried out in the semi-grand canonical
-(SGC) ensemble. To this end, we set up a :ref:`SGC ensemble object <sgc>`
-object and loop over both temperatures and chemical potential differences.
+In this example the sampling will be carried out in the semi-grand
+canonical (SGC) ensemble. To this end, we set up a :ref:`SGC ensemble
+object <sgc_ensemble>` object and loop over both temperatures and
+chemical potential differences.
 
 We carry out a rather long MC run, anticipating that the analysis will
 only include the latter part of the simulation after equilibration.

@@ -150,7 +150,7 @@ class TestEnsemble(unittest.TestCase):
         n_iters = 364
         self.ensemble.run(n_iters)
         self.assertEqual(self.ensemble.step, n_iters)
-        dc_data = self.ensemble.data_container.get_data(tags=['Parakeet2'])
+        dc_data = self.ensemble.data_container.get_data('Parakeet2')
 
         number_of_observations = len([x for x in dc_data if x is not None])
         # plus one since we also count step 0
@@ -179,7 +179,7 @@ class TestEnsemble(unittest.TestCase):
             total_iters = sum(run_iters)
             # Check that the number of iters are correct
             self.assertEqual(self.ensemble.step, total_iters)
-            dc_data = self.ensemble.data_container.get_data(tags=['Parakeet2'])
+            dc_data = self.ensemble.data_container.get_data('Parakeet2')
             number_of_observations = len(
                 [x for x in dc_data if x is not None])
             # plus one since we also count step 0
@@ -197,7 +197,7 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble.run(n_iters)
         self.assertEqual(self.ensemble.step, n_iters)
         dc_data = \
-            self.ensemble.data_container.get_data(tags=['value_1', 'value_2'])
+            self.ensemble.data_container.get_data('value_1', 'value_2')
 
         self.assertEqual(len(dc_data[0]), len(dc_data[1]))
 
@@ -231,7 +231,7 @@ class TestEnsemble(unittest.TestCase):
             os.remove('my-datacontainer.dc')
 
         # check data container
-        dc_data = dc_read.get_data(tags=['Parakeet2'])
+        dc_data = dc_read.get_data('Parakeet2')
         self.assertEqual(
             len(dc_data),
             n_iters // observer.interval + 1)

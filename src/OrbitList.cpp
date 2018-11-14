@@ -597,7 +597,7 @@ void OrbitList::addPermutationMatrixColumns(
         for (const int &row : pm_rows)
         {
             indistinctLatNbrs.push_back(permutation_matrix[row][column]);
-        }
+        } 
         auto translatedEquivalentSites = getSitesTranslatedToUnitcell(indistinctLatNbrs);
 
         auto sites_index_pair = getMatchesInPM(translatedEquivalentSites, col1);
