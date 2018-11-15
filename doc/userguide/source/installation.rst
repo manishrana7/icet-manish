@@ -53,7 +53,7 @@ This approach has been tested using the latest `Ubuntu Docker image <https://hub
         build-essential \
         libboost-dev \
         libeigen3-dev \
-        python3-dev \
+        python3-dev
     # install pip (to be used for installing Python libraries below)
     sudo apt install -qy \
         python3-pip

@@ -39,7 +39,8 @@ class ClusterSpace(_ClusterSpace):
                  chemical_symbols: Union[List[str], List[List[str]]]) -> None:
 
         if not isinstance(atoms, Atoms):
-            raise TypeError('Input configuration must be an ASE Atoms object.')
+            raise TypeError('Input configuration must be an ASE Atoms object'
+                            ', not type {}'.format(type(atoms)))
 
         self._atoms = atoms.copy()
         self._cutoffs = cutoffs
