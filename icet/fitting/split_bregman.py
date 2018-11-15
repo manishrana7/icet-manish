@@ -7,20 +7,18 @@ doi:10.1137/080725891
 import numpy as np
 from scipy.optimize import minimize
 
-from icet.io.logging import logger
-logger = logger.getChild('split_bregman')
 
-
-def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,):
+def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,
+                      verbose=0):
     """
     Split-Bregman algorithm described in T. Goldstein and S. Osher,
-    SIAM J. Imaging Sci. 2, 323 (2009); doi:10.1137/080725891
+    SIAM J. Imaging Sci. 2, 323 (2009); doi:10.1137/080725891.
 
     Parameters
     -----------
-    X : matrix / array
+    X : numpy.ndarray
         fit matrix
-    y : array
+    y : numpy.ndarray
         target array
     mu : float
         Sparseness parameter
@@ -34,9 +32,9 @@ def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,):
     Returns
     ----------
     results : dict
-        dict containing parameters
-
+        parameters
     """
+
     n_cols = A.shape[1]
     d = np.zeros(n_cols)
     b = np.zeros(n_cols)
@@ -49,10 +47,11 @@ def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,):
     ftA = np.dot(y.conj().transpose(), A)
     ii = 0
     for i in range(n_iters):
-        logger.info('Iteration {} of {}'.format(i, n_iters))
+        if verbose:
+            print('Iteration ', i)
         args = (A, y, mu, lmbda, d, b, AtA, ftA)
         res = minimize(_objective_function, x, args, method='BFGS', options={
-            'disp': False}, jac=_objective_function_derivative)
+                       'disp': False}, jac=_objective_function_derivative)
         x = res.x
 
         d = _shrink(mu*x + b, 1.0/lmbda)
@@ -61,38 +60,39 @@ def fit_split_bregman(A, y, mu=1e-3, lmbda=100, n_iters=1000, tol=1e-6,):
         new_norm = np.linalg.norm(x)
         ii = ii + 1
 
-        logger.info('|new_norm-old_norm| = {}'.format(abs(new_norm-old_norm)))
+        if verbose:
+            print('|new_norm-old_norm| = ', abs(new_norm-old_norm))
         if abs(new_norm-old_norm) < tol:
             break
 
         old_norm = new_norm
     else:
-        logger.warning('Maximum possible number of iterations exceeded')
+        print('Warning: Split Bregman ran for max iters')
 
     fit_results = {'parameters': x}
     return fit_results
 
 
 def _objective_function(x, A, y, mu, lmbda, d, b, AtA, ftA):
-    """ Objective function to minimized.
+    """ Objective function to be minimized.
 
     Parameters
     -----------
-    X : matrix / array
+    X : numpy.ndarray
         fit matrix
-    y : array
+    y : numpy.ndarray
         target array
     mu : float
         the parameter that adjusts sparseness.
     lmbda : float
         Split Bregman parameter
-    d : numpy array
+    d : numpy.ndarray
         same notation as Nelson, Hart paper
-    b : numpy array
+    b : numpy.ndarray
         same notation as Nelson, Hart paper
-    AtA : matrix
+    AtA : numpy.ndarray
         sensing matrix transpose times sensing matrix.
-    ftA : matrix
+    ftA : numpy.ndarray
         np.dot(y.conj().transpose(), A)
     """
 
@@ -120,21 +120,21 @@ def _objective_function_derivative(x, A, y, mu, lmbda, d, b, AtA, ftA):
 
     Parameters
     -----------
-    X : matrix / array
+    X : numpy.ndarray
         fit matrix
-    y : array
+    y : numpy.ndarray
         target array
     mu : float
         the parameter that adjusts sparseness.
     lmbda : float
         Split Bregman parameter
-    d : numpy array
+    d : numpy.ndarray
         same notation as Nelson, Hart paper
-    b : numpy array
+    b : numpy.ndarray
         same notation as Nelson, Hart paper
-    AtA : matrix
+    AtA : numpy.ndarray
         sensing matrix transpose times sensing matrix.
-    ftA : matrix
+    ftA : numpy.ndarray
         np.dot(y.conj().transpose(), A)
 
     """
@@ -151,7 +151,7 @@ def _shrink(y, alpha):
 
     Parameters
     -----------
-    y : numpy array
+    y : numpy.ndarray
     alpha : float
     """
     return np.sign(y) * np.maximum(np.abs(y) - alpha, 0.0)

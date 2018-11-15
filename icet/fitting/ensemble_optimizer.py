@@ -24,15 +24,16 @@ class EnsembleOptimizer(BaseOptimizer):
 
     Parameters
     ----------
-    fit_data : tuple of (N, M) NumPy array and (N) NumPy array
+    fit_data : tupe(numpy.ndarray, numpy.ndarray)
         the first element of the tuple represents the fit matrix `A`
-        whereas the second element represents the vector of target
-        values `y`; here `N` (=rows of `A`, elements of `y`) equals the number
-        of target values and `M` (=columns of `A`) equals the number of
-        parameters
-    fit_method : string
+        (`N, M` array) while the second element represents the vector
+        of target values `y` (`N` array); here `N` (=rows of `A`,
+        elements of `y`) equals the number of target values and `M`
+        (=columns of `A`) equals the number of parameters
+    fit_method : str
         method to be used for training; possible choice are
-        "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
+        "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr",
+        "rfe-l2", "split-bregman"
     standardize : bool
         whether or not to standardize the fit matrix before fitting
     ensemble_size : int
@@ -41,7 +42,7 @@ class EnsembleOptimizer(BaseOptimizer):
         If float represents the fraction of `fit_data` (rows) to be used for
         training. If int, represents the absolute number of rows to be used for
         training.
-    bootstrap : boolean
+    bootstrap : bool
         if True sampling will be carried out with replacement
     seed : int
         seed for pseudo random number generator
@@ -56,7 +57,7 @@ class EnsembleOptimizer(BaseOptimizer):
         # set training size
         if isinstance(train_size, float):
             self._train_size = int(
-                np.round(train_size * self.number_of_target_values))
+                np.round(train_size * self.n_target_values))
         elif isinstance(train_size, int):
             self._train_size = train_size
         else:
@@ -74,23 +75,23 @@ class EnsembleOptimizer(BaseOptimizer):
 
     def train(self):
         """
-        Carry out ensemble training and construct the final model by averaging
-        over all models in the ensemble.
+        Carries out ensemble training and construct the final model by
+        averaging over all models in the ensemble.
         """
         self._run_ensemble()
         self._construct_final_model()
 
     def _run_ensemble(self):
-        """ Construct an ensemble of models. """
+        """ Constructs an ensemble of models. """
 
         rs = np.random.RandomState(self.seed)
         optimizers = []
         for _ in range(self.ensemble_size):
             # construct training and test sets
-            train_set = rs.choice(np.arange(self.number_of_target_values),
+            train_set = rs.choice(np.arange(self.n_target_values),
                                   self.train_size, replace=self.bootstrap)
             test_set = np.setdiff1d(
-                range(self.number_of_target_values), train_set)
+                range(self.n_target_values), train_set)
 
             # train
             opt = Optimizer(
@@ -112,7 +113,7 @@ class EnsembleOptimizer(BaseOptimizer):
 
     def _construct_final_model(self):
         """
-        Construct final model by averaging over all models in the ensemble.
+        Constructs final model by averaging over all models in the ensemble.
         """
         self._fit_results['parameters'] = np.mean(
             self.parameter_vectors, axis=0)
@@ -120,7 +121,7 @@ class EnsembleOptimizer(BaseOptimizer):
 
     def predict(self, A, return_std=False):
         """
-        Predict data given an input matrix `A`, i.e., `Ax`, where `x` is
+        Predicts data given an input matrix `A`, i.e., `Ax`, where `x` is
         the vector of the fitted parameters.
 
         By using all parameter vectors in the ensemble a standard deviation of
@@ -128,7 +129,7 @@ class EnsembleOptimizer(BaseOptimizer):
 
         Parameters
         ----------
-        A : NumPy (N, M) array
+        A : numpy.ndarray
             fit matrix where `N` (=rows of `A`, elements of `y`) equals the
             number of target values and `M` (=columns of `A`) equals the number
             of parameters
@@ -136,7 +137,7 @@ class EnsembleOptimizer(BaseOptimizer):
             whether or not to return the standard deviation of the prediction
         Returns
         -------
-        (NumPy (N) array, NumPy (N) array) or (float, float)
+        tuple(numpy.ndarray, numpy.ndarray) or tuple(float, float)
             vector of predicted values, vector of standard deviations
         """
         prediction = np.dot(A, self.parameters)
@@ -153,9 +154,9 @@ class EnsembleOptimizer(BaseOptimizer):
     @property
     def error_matrix(self):
         """
-        NumPy (N,M) array : matrix of fit errors where `N` is the number of
-                            target values and `M` is the number of fits
-                            (i.e., the size of the ensemble)
+        numpy.ndarray : matrix of fit errors where `N` is the number
+        of target values and `M` is the number of fits (i.e., the size
+        of the ensemble)
         """
         if self.parameter_vectors is None:
             return None
@@ -166,7 +167,7 @@ class EnsembleOptimizer(BaseOptimizer):
 
     @property
     def summary(self):
-        """ dict : Comprehensive information about the optimizer. """
+        """ dict : comprehensive information about the optimizer """
         info = super().summary
 
         # Add class specific data
@@ -196,23 +197,23 @@ class EnsembleOptimizer(BaseOptimizer):
 
     @property
     def parameters_std(self):
-        """ NumPy array : standard deviation for each parameter. """
+        """ numpy.ndarray : standard deviation for each parameter """
         return self._parameters_std
 
     @property
     def parameter_vectors(self):
-        """ list : all parameter vectors in the ensemble. """
+        """ list(numpy.ndarray) : all parameter vectors in the ensemble """
         return self._parameter_vectors
 
     @property
     def ensemble_size(self):
-        """ int : number of train rounds. """
+        """ int : number of train rounds """
         return self._ensemble_size
 
     @property
     def rmse_train(self):
         """
-        float : ensemble average of root mean squared error over train sets.
+        float : ensemble average of root mean squared error over train sets
         """
         if self.rmse_train_ensemble is None:
             return None
@@ -220,14 +221,14 @@ class EnsembleOptimizer(BaseOptimizer):
 
     @property
     def rmse_train_ensemble(self):
-        """ list : root mean squared train errors obtained during for each
-                   fit in ensemble. """
+        """ list(float) : root mean squared train errors obtained during for
+        each fit in ensemble """
         return self._rmse_train_ensemble
 
     @property
     def rmse_test(self):
         """
-        float : ensemble average of root mean squared error over test sets.
+        float : ensemble average of root mean squared error over test sets
         """
         if self.rmse_test_ensemble is None:
             return None
@@ -235,24 +236,24 @@ class EnsembleOptimizer(BaseOptimizer):
 
     @property
     def rmse_test_ensemble(self):
-        """ list : root mean squared test errors obtained during for each
-                   fit in ensemble. """
+        """ list(float) : root mean squared test errors obtained during for
+        each fit in ensemble """
         return self._rmse_test_ensemble
 
     @property
     def train_size(self):
         """ int : number of rows included in train sets. Note that this will
-        be different from the number of unique rows if boostrapping. """
+        be different from the number of unique rows if boostrapping """
         return self._train_size
 
     @property
     def train_fraction(self):
         """ float : fraction of input data used for training; this value can
-                    differ slightly from the value set during initialization
-                    due to rounding. """
+        differ slightly from the value set during initialization due
+        to rounding """
         return self.train_set_size / self._n_rows
 
     @property
     def bootstrap(self):
-        """ boolean : True if sampling is carried out with replacement. """
+        """ bool : True if sampling is carried out with replacement """
         return self._bootstrap

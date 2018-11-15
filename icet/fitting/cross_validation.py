@@ -20,8 +20,9 @@ class CrossValidationEstimator(BaseOptimizer):
     """
     Optimizer with cross validation.
 
-    This optimizer first computes a cross-validation score and finally
-    generates a model using the full set of input data.
+    This optimizer can compute cross-validation scores in different ways.
+    It can also produce the finalized model (using the full input data) for
+    which the CV score is an estimation of its performance.
 
     Warning
     -------
@@ -32,37 +33,40 @@ class CrossValidationEstimator(BaseOptimizer):
 
     Parameters
     ----------
-    fit_data : tuple of NumPy (N, M) array and NumPy (N) array
+    fit_data : tupe(numpy.ndarray, numpy.ndarray)
         the first element of the tuple represents the fit matrix `A`
-        whereas the second element represents the vector of target
-        values `y`; here `N` (=rows of `A`, elements of `y`) equals the number
-        of target values and `M` (=columns of `A`) equals the number of
-        parameters
-    fit_method : string
+        (`N, M` array) while the second element represents the vector
+        of target values `y` (`N` array); here `N` (=rows of `A`,
+        elements of `y`) equals the number of target values and `M`
+        (=columns of `A`) equals the number of parameters
+    fit_method : str
         method to be used for training; possible choice are
-        "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
+        "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr",
+        "rfe-l2", "split-bregman"
     standardize : bool
         whether or not to standardize the fit matrix before fitting
-    validation_method : string
+    validation_method : str
         method to use for cross-validation; possible choices are
         "shuffle-split", "k-fold"
-    number_of_splits : int
+    n_splits : int
         number of times the fit data set will be split for the cross-validation
     seed : int
         seed for pseudo random number generator
 
     Attributes
     ----------
-    train_scatter_data : ScatterData object (namedtuple)
+    train_scatter_data : ScatterData
         contains target and predicted values from each individual
-        traininig set in the cross-validation split
-    validation_scatter_data : ScatterData object (namedtuple)
+        traininig set in the cross-validation split;
+        :class:`ScatterData` is a namedtuple.
+    validation_scatter_data : ScatterData
         contains target and predicted values from each individual
-        validation set in the cross-validation split
+        validation set in the cross-validation split;
+        :class:`ScatterData` is a namedtuple.
     """
 
     def __init__(self, fit_data, fit_method='least-squares', standardize=True,
-                 validation_method='k-fold', number_of_splits=10,
+                 validation_method='k-fold', n_splits=10,
                  seed=42, **kwargs):
 
         super().__init__(fit_data, fit_method, standardize, seed)
@@ -74,33 +78,35 @@ class CrossValidationEstimator(BaseOptimizer):
                 msg += [' * ' + key]
             raise ValueError('\n'.join(msg))
         self._validation_method = validation_method
-        self._number_of_splits = number_of_splits
+        self._n_splits = n_splits
 
         self._set_kwargs(kwargs)
 
         # data set splitting object
         self._splitter = validation_methods[validation_method](
-            n_splits=self.number_of_splits, random_state=seed,
+            n_splits=self.n_splits, random_state=seed,
             **self._split_kwargs)
 
         self.train_scatter_data = None
         self.validation_scatter_data = None
 
+        self._parameters_splits = None
         self._rmse_train_splits = None
         self._rmse_valid_splits = None
         self._rmse_train_final = None
 
     def train(self):
-        """ Construct the final model using all input data available. """
+        """ Constructs the final model using all input data available. """
         self._fit_results = fit(self._A, self._y, self.fit_method,
                                 self.standardize, **self._fit_kwargs)
         self._rmse_train_final = self.compute_rmse(self._A, self._y)
 
     def validate(self):
-        """ Run validation. """
+        """ Runs validation. """
         train_target, train_predicted = [], []
         valid_target, valid_predicted = [], []
         rmse_train_splits, rmse_valid_splits = [], []
+        parameters_splits = []
         for train_set, test_set in self._splitter.split(self._A):
             opt = Optimizer((self._A, self._y), self.fit_method,
                             train_set=train_set,
@@ -108,6 +114,7 @@ class CrossValidationEstimator(BaseOptimizer):
                             **self._fit_kwargs)
             opt.train()
 
+            parameters_splits.append(opt.parameters)
             rmse_train_splits.append(opt.rmse_train)
             rmse_valid_splits.append(opt.rmse_test)
             train_target.extend(opt.train_scatter_data.target)
@@ -115,6 +122,7 @@ class CrossValidationEstimator(BaseOptimizer):
             valid_target.extend(opt.test_scatter_data.target)
             valid_predicted.extend(opt.test_scatter_data.predicted)
 
+        self._parameters_splits = np.array(parameters_splits)
         self._rmse_train_splits = np.array(rmse_train_splits)
         self._rmse_valid_splits = np.array(rmse_valid_splits)
         self.train_scatter_data = ScatterData(
@@ -123,9 +131,8 @@ class CrossValidationEstimator(BaseOptimizer):
             target=np.array(valid_target), predicted=np.array(valid_predicted))
 
     def _set_kwargs(self, kwargs):
-        """ Sets up fit_kwargs and split_kwargs
-
-        The different split methods need different keywords.
+        """ Sets up fit_kwargs and split_kwargs.
+        Different split methods need different keywords.
         """
         self._fit_kwargs = {}
         self._split_kwargs = {}
@@ -145,12 +152,12 @@ class CrossValidationEstimator(BaseOptimizer):
 
     @property
     def summary(self):
-        """ dict : Comprehensive information about the optimizer. """
+        """ dict : comprehensive information about the optimizer """
         info = super().summary
 
         # Add class specific data
         info['validation_method'] = self.validation_method
-        info['number_of_splits'] = self.number_of_splits
+        info['n_splits'] = self.n_splits
         info['rmse_train_final'] = self.rmse_train_final
         info['rmse_train'] = self.rmse_train
         info['rmse_train_splits'] = self.rmse_train_splits
@@ -167,7 +174,7 @@ class CrossValidationEstimator(BaseOptimizer):
         kwargs = dict()
         kwargs['fit_method'] = self.fit_method
         kwargs['validation_method'] = self.validation_method
-        kwargs['number_of_splits'] = self.number_of_splits
+        kwargs['n_splits'] = self.n_splits
         kwargs['seed'] = self.seed
         kwargs = {**kwargs, **self._fit_kwargs, **self._split_kwargs}
         return 'CrossValidationEstimator((A, y), {})'.format(
@@ -175,44 +182,49 @@ class CrossValidationEstimator(BaseOptimizer):
 
     @property
     def validation_method(self):
-        """ string : validation method name. """
+        """ str : validation method name """
         return self._validation_method
 
     @property
-    def number_of_splits(self):
-        """ string : number of splits (folds) used for cross-validation. """
-        return self._number_of_splits
+    def n_splits(self):
+        """ str : number of splits (folds) used for cross-validation """
+        return self._n_splits
+
+    @property
+    def parameters_splits(self):
+        """ numpy.ndarray : all parameters obtained during cross-validation """
+        return self._parameters_splits
 
     @property
     def rmse_train_final(self):
         """
-        float : root mean squared error when using the full set of input data.
+        float : root mean squared error when using the full set of input data
         """
         return self._rmse_train_final
 
     @property
     def rmse_train(self):
         """ float : average root mean squared training error obtained during
-                    cross-validation. """
+        cross-validation """
         if self._rmse_train_splits is None:
             return None
         return np.sqrt(np.mean(self._rmse_train_splits**2))
 
     @property
     def rmse_train_splits(self):
-        """ list : root mean squared training errors obtained during
-                   cross-validation. """
+        """ list(float) : root mean squared training errors obtained during
+        cross-validation """
         return self._rmse_train_splits
 
     @property
     def rmse_validation(self):
-        """ float : average root mean squared cross-validation error. """
+        """ float : average root mean squared cross-validation error """
         if self._rmse_valid_splits is None:
             return None
         return np.sqrt(np.mean(self._rmse_valid_splits**2))
 
     @property
     def rmse_validation_splits(self):
-        """ list : root mean squared validation errors obtained during
-                   cross-validation. """
+        """ list(float) : root mean squared validation errors obtained during
+        cross-validation """
         return self._rmse_valid_splits

@@ -11,7 +11,7 @@ class TestFittingTools(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     def shortDescription(self):
-        """Silences unittest from printing the docstrings in test cases."""
+        """Prevents unittest from printing docstring in test cases."""
         return None
 
     def test_compute_correlation_matrix(self):
