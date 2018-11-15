@@ -56,7 +56,7 @@ class LocalOrbitListGenerator
         return _uniquePrimcellOffsets.size();
     }
 
-    ///Return the primitive lattice neighbor to supercell latticeneigbhor map
+    ///Return the primitive lattice neighbor to supercell lattice neigbhor map
     std::unordered_map<LatticeSite, LatticeSite> getMapFromPrimitiveToSupercell() const
     {
         return _primToSupercellMap;
