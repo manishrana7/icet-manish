@@ -116,7 +116,6 @@ class BaseEnsemble(ABC):
             self._trajectory_write_interval = default_interval
         else:
             self._trajectory_write_interval = trajectory_write_interval
-        self._data_container.add_observable('occupations')
 
         self._find_observer_interval()
 
@@ -235,8 +234,6 @@ class BaseEnsemble(ABC):
         if step % self._ensemble_data_write_interval == 0:
             ensemble_data = self._get_ensemble_data()
             for key, value in ensemble_data.items():
-                if key not in self._data_container.observables:
-                    self._data_container.add_observable(key)
                 row_dict[key] = value
 
         # Trajectory data
@@ -331,12 +328,6 @@ class BaseEnsemble(ABC):
             self.observers[tag] = observer
         else:
             self.observers[observer.tag] = observer
-
-        if observer.return_type is dict:
-            for key in observer.get_keys():
-                self._data_container.add_observable(key)
-        else:
-            self._data_container.add_observable(observer.tag)
 
         self._find_observer_interval()
 
