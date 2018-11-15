@@ -26,13 +26,15 @@ class ClusterSpace(_ClusterSpace):
     chemical_symbols : list(str) or list(list(str))
         list of chemical symbols, each of which must map to an element
         of the periodic table
-        * if a list of chemical symbols is provided, all sites on the
-          lattice will have the same allowed occupations as the input
-          list
-        * if a list of list of chemical symbols is provided then the outer
-          list must be the same length as the atoms object and
-          chemical_symbols[i] will correspond to the allowed species on
-          lattice site 'i'
+        
+        If a list of chemical symbols is provided, all sites on the
+        lattice will have the same allowed occupations as the input
+        list.
+
+        If a list of list of chemical symbols is provided then the
+        outer list must be the same length as the atoms object and
+        ``chemical_symbols[i]`` will correspond to the allowed species
+        on lattice site ``i``.
     """
 
     def __init__(self, atoms: Atoms, cutoffs: List[float],
