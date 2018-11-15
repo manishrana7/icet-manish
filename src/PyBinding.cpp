@@ -844,8 +844,8 @@ PYBIND11_MODULE(_icet, m)
     py::class_<LocalOrbitListGenerator>(m, "LocalOrbitListGenerator")
         .def(py::init<const OrbitList &, const Structure &>(),
              R"pbdoc(
-             Constructs a LocalOrbitListGenerator object from an orbit list
-             and a supercell structure.
+             Constructs a LocalOrbitListGenerator object from an OrbitList instance
+             and a Structure instance.
 
              Parameters
              ----------
