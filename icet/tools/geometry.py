@@ -1,13 +1,14 @@
-from typing import Tuple, List, Sequence, TypeVar
 import numpy as np
-from ase import Atoms
 import spglib
+from ase import Atoms
+from typing import Tuple, List, Sequence, TypeVar
 
 from ase.neighborlist import NeighborList as ase_NeighborList
 from icet.core.neighbor_list import NeighborList
 from icet.core.structure import Structure
 from icet.core.lattice_site import LatticeSite
 from icet.core_py.lattice_site import LatticeSite as LatticeSite_py
+from ase.data import chemical_symbols
 
 Vector = List[float]
 T = TypeVar('T')
@@ -17,7 +18,7 @@ def get_scaled_positions(positions: np.ndarray,
                          cell: np.ndarray,
                          wrap: bool=True,
                          pbc: List[bool]=[True, True, True]) \
-                         -> np.ndarray:
+        -> np.ndarray:
     """
     Returns the positions in reduced (or scaled) coordinates.
 
@@ -75,7 +76,8 @@ def add_vacuum_in_non_pbc(atoms: Atoms) -> Atoms:
     return atoms_cpy
 
 
-def get_primitive_structure(atoms: Atoms, no_idealize: bool=True) -> Atoms:
+def get_primitive_structure(atoms: Atoms, no_idealize: bool=True,
+                            to_primitive=True, symprec=1e-5) -> Atoms:
     """
     Determines primitive structure using spglib.
 
@@ -84,7 +86,7 @@ def get_primitive_structure(atoms: Atoms, no_idealize: bool=True) -> Atoms:
     atoms
         input atomic structure
     no_idealize
-        If True, disable to idealize length and angles
+        If True lengths and angles are not idealized
 
     Returns
     -------
@@ -97,7 +99,8 @@ def get_primitive_structure(atoms: Atoms, no_idealize: bool=True) -> Atoms:
     atoms_as_tuple = ase_atoms_to_spglib_cell(atoms_with_vacuum)
 
     lattice, scaled_positions, numbers = spglib.standardize_cell(
-        atoms_as_tuple, to_primitive=True, no_idealize=no_idealize)
+        atoms_as_tuple, to_primitive=to_primitive,
+        no_idealize=no_idealize, symprec=symprec)
     scaled_positions = [np.round(pos, 12) for pos in scaled_positions]
     atoms_prim = Atoms(scaled_positions=scaled_positions,
                        numbers=numbers, cell=lattice, pbc=atoms.pbc)
@@ -268,7 +271,7 @@ def find_permutation(target: Sequence[T],
 
 
 def ase_atoms_to_spglib_cell(atoms: Atoms) \
-                             -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Returns a tuple of three components: cell metric, atomic positions, and
     atomic species of the input ASE Atoms object.
@@ -276,3 +279,40 @@ def ase_atoms_to_spglib_cell(atoms: Atoms) \
     return (atoms.get_cell(),
             atoms.get_scaled_positions(),
             atoms.get_atomic_numbers())
+
+
+def get_decorated_primitive_structure(
+        atoms: Atoms, allowed_species: List[List[str]])-> Tuple[
+        Atoms, List[List[str]]]:
+    """Returns a decorated primitive structure
+
+    Example
+    --------
+        Will put hydrogen on sublattice 1, Helium on sublattice 2 and
+        so on
+
+    todo : simplify the revert back to unsorted symbols
+    """
+    if len(atoms) != len(allowed_species):
+        raise ValueError(
+            "Atoms object and chemical symbols need to be the same size.")
+    symbols = set()
+    symbols = sorted({tuple(sorted(s)) for s in allowed_species})
+
+    decorated_primitive = atoms.copy()
+    for i, sym in enumerate(allowed_species):
+        sublattice = symbols.index(tuple(sorted(sym))) + 1
+        decorated_primitive[i].symbol = chemical_symbols[sublattice]
+
+    decorated_primitive = get_primitive_structure(decorated_primitive)
+    decorated_primitive.wrap()
+    primitive_chemical_symbols = []
+    for atom in decorated_primitive:
+        sublattice = chemical_symbols.index(atom.symbol)
+        primitive_chemical_symbols.append(symbols[sublattice-1])
+
+    for symbols in allowed_species:
+        if tuple(sorted(symbols)) in primitive_chemical_symbols:
+            index = primitive_chemical_symbols.index(tuple(sorted(symbols)))
+            primitive_chemical_symbols[index] = symbols
+    return decorated_primitive, primitive_chemical_symbols

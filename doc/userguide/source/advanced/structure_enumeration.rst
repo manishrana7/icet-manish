@@ -1,4 +1,4 @@
-.. _example_enumerate_structures:
+.. _example_structure_enumeration:
 .. highlight:: python
 .. index::
    single: Examples; Structure enumeration
@@ -23,12 +23,12 @@ be imported together with some additional functions from `ASE
    :start-after: # Import modules
    :end-before: # Generate all binary
 
-Generate binary Au/Pd structures
---------------------------------
+Generate binary structures
+--------------------------
 
 Before being able to perform the structural enumeration, it is first necessary
-to generate a primitive structure. In this case, an Au fcc :class:`ASE Atoms`
-object is created using the :func:`ase.build.bulk` function. Then a database
+to generate a primitive structure. In this case, an Au fcc :class:`ase.Atoms`
+object is created using the :func:`~ase.build.bulk` function. Then a database
 ``AuPd-fcc.db`` is initialized, in which the enumerated structures will be
 stored. All possible binary Au/Pd structures with up to 6 atoms per unit cell
 are subsequently generated and stored in this database.
@@ -37,14 +37,14 @@ are subsequently generated and stored in this database.
    :start-after: # and save them
    :end-before: # Generate fcc structures
 
-Generate binary Au/Pd structures in the dilute limit
-----------------------------------------------------
+Generate binary structures in the dilute limit
+----------------------------------------------
 
 The number of distinct structures grows extremely quickly with the size of the
 supercell. It is thus not possible to enumerate too large cell sizes. When the
 number of structures grows, a larger and larger proportion of the structures
 will have equal amounts of the constituent elements (e.g., most structures
-will have concentrations close to 50 % in binary systems). Structures in the
+will have concentrations close to 50% in binary systems). Structures in the
 dilute limit may thus be underrepresented. To overcome this problem, it is
 possible to enumerate structures in a specified concentration regime by
 providing a dict in which the range of allowed concentrations is specified for
@@ -59,8 +59,8 @@ structures in the specified concentration regime is small.
    :start-after: # Generate fcc structures
    :end-before: # Enumerate all palladium
 
-Generate PdH structures with vacancies
---------------------------------------
+Generate structures with vacancies
+----------------------------------
 
 The steps above are now repeated to enumerate all palladium hydride structures
 based on up to four primitive cells, which contain up to 4 Pd atoms and between

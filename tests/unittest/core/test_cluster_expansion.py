@@ -29,9 +29,9 @@ class TestClusterExpansion(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestClusterExpansion, self).__init__(*args, **kwargs)
         self.atoms = bulk('Au')
-        cutoffs = [3.0] * 3
+        self.cutoffs = [3.0] * 3
         chemical_symbols = ['Au', 'Pd']
-        self.cs = ClusterSpace(self.atoms, cutoffs, chemical_symbols)
+        self.cs = ClusterSpace(self.atoms, self.cutoffs, chemical_symbols)
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
@@ -57,6 +57,18 @@ class TestClusterExpansion(unittest.TestCase):
         """Tests predict function."""
         predicted_val = self.ce.predict(self.atoms)
         self.assertEqual(predicted_val, 10.0)
+
+    def test_property_orders(self):
+        """Tests orders property."""
+        self.assertEqual(self.ce.orders, list(range(len(self.cutoffs)+2)))
+
+    def test_property_parameters_as_dataframe(self):
+        """Tests parameters_as_dataframe property."""
+        df = self.ce.parameters_as_dataframe
+        self.assertIn('radius', df.columns)
+        self.assertIn('order', df.columns)
+        self.assertIn('eci', df.columns)
+        self.assertEqual(len(df), len(self.parameters))
 
     def test_property_clusterspace(self):
         """Tests cluster space property."""
@@ -85,7 +97,6 @@ class TestClusterExpansion(unittest.TestCase):
         self.assertEqual(self.cs._cutoffs, ce_read.cluster_space._cutoffs)
         self.assertEqual(self.cs._chemical_symbols,
                          ce_read.cluster_space._chemical_symbols)
-        self.assertEqual(self.cs._mi, ce_read.cluster_space._mi)
 
         # check parameters
         self.assertEqual(ce_read.parameters, self.parameters)
@@ -96,7 +107,7 @@ class TestClusterExpansion(unittest.TestCase):
         retval = self.ce.__repr__()
         target = """
 =================================== Cluster Expansion ====================================
- chemical species: Pd Au
+ chemical species: ['Au', 'Pd']
  cutoffs: 3.0000 3.0000 3.0000
  total number of orbits: 5
  number of orbits by order: 0= 1  1= 1  2= 1  3= 1  4= 1
@@ -110,6 +121,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
    4  |   4   |   1.7667 |        2     |       3     |      [0, 0, 0, 0]      |         4
 ==========================================================================================
 """  # noqa
+
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
 
@@ -120,7 +132,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
                                                     print_minimum=1)
         target = """
 =================================== Cluster Expansion ====================================
- chemical species: Pd Au
+ chemical species: ['Au', 'Pd']
  cutoffs: 3.0000 3.0000 3.0000
  total number of orbits: 5
  number of orbits by order: 0= 1  1= 1  2= 1  3= 1  4= 1

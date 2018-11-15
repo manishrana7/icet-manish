@@ -16,27 +16,65 @@ from ..calculators.base_calculator import BaseCalculator
 
 
 class SemiGrandCanonicalEnsemble(BaseEnsemble):
-    """Semi-grand canonical (SGC) ensemble.
+    """Instances of this class allow one to simulate systems in the
+    semi-grand canonical (SGC) ensemble (:math:`N\Delta\mu_i VT`),
+    i.e. at constant temperature (:math:`T`), total number of sites
+    (:math:`N=\sum_i N_i`), relative chemical potentials
+    (:math:`\Delta\mu_i=\mu_i - \mu_1`, where :math:`i` denotes the
+    species), and volume (:math:`V`).
 
-    Instances of this class allow one to simulate systems in the SGC
-    ensemble (:math:`N\Delta\mu_i VT`), i.e. at constant temperature
-    (:math:`T`), total number of sites (:math:`N=\sum_i N_i`),
-    relative chemical potentials (:math:`\Delta\mu_i=\mu_i - \mu_1`,
-    where :math:`i` denotes the species), and volume (:math:`V`).
-
-    The probability density of the SGC ensemble for a
-    :math:`m`-component system is
+    The probability for a particular state in the SGC ensemble for a
+    :math:`m`-component system can be written
 
     .. math::
 
-        \\rho_{\\text{SGC}} = \exp\\Big[ - \\big( E
-        + \sum_{i>1}^m \Delta\mu_i N_i \\big) / k_B T \\Big]
+        \\rho_{\\text{SGC}} \\propto \exp\\Big[ - \\big( E
+        + \sum_{i>1}^m \Delta\mu_i N_i \\big) \\big / k_B T \\Big]
 
-    with the *relative* chemical potentials :math:`\Delta\mu_i =
-    \mu_i - \mu_1` and species counts :math:`N_i`.
+    with the *relative* chemical potentials :math:`\Delta\mu_i = \mu_i - \mu_1`
+    and species counts :math:`N_i`. Unlike the :ref:`canonical ensemble
+    <canonical_ensemble>`, the number of the respective species (or,
+    equivalently, the concentrations) are allowed to vary in the SGC ensemble.
+    A trial step thus consists of randomly picking an atom and changing its
+    identity with probability
 
-    Attributes
-    -----------
+    .. math::
+
+        P = \min \\Big\{ 1, \, \exp \\big[ - \\big( \\Delta E
+        + \\sum_i \\Delta \\mu_i \\Delta N_i \\big) \\big / k_B T \\big]
+        \\Big\},
+
+    where :math:`\\Delta E` is the change in potential energy caused by the
+    swap.
+
+    There exists a simple relation between the differences in chemical
+    potential and the canonical free energy :math:`F`. In a binary system,
+    this relationship reads
+
+    .. math::
+        \\Delta \mu = - \\frac{1}{N}
+        \\frac{\\partial F}{\\partial c}
+        ( N, V, T, \\langle c \\rangle).
+
+    Here :math:`c` denotes concentration (:math:`c=N_i/N`) and :math:`\\langle
+    c \\rangle` the average concentration observed in the simulation. By
+    recording :math:`\\langle c \\rangle` while gradually changing
+    :math:`\\Delta \\mu`, one can thus in principle calculate the difference in
+    canonical free energy between the pure phases (:math:`c=0` or :math:`1`)
+    and any concentration by integrating :math:`\\Delta \\mu` over that
+    concentration range. In practice this requires that the average recorded
+    concentration :math:`\\langle c \\rangle` varies continuously with
+    :math:`\\Delta \\mu`. This is not the case for materials with multiphase
+    regions (such as miscibility gaps), because in such regions :math:`\\Delta
+    \\mu` maps to multiple concentrations. In a Monte Carlo simulation, this is
+    typically manifested by discontinuous jumps in concentration. Such jumps
+    mark the phase boundaries of a multiphase region and can thus be used to
+    construct the phase diagram. To recover the free energy, however, such
+    systems require sampling in other ensembles, such as the :ref:`variance-
+    constrained semi-grand canonical ensemble <sgc_ensemble>`.
+
+    Parameters
+    ----------
     temperature : float
         temperature :math:`T` in appropriate units [commonly Kelvin]
     boltzmann_constant : float
@@ -44,7 +82,53 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
         units, i.e. units that are consistent
         with the underlying cluster expansion
         and the temperature units [default: eV/K]
+    chemical_potentials : Dict[str, float]
+        chemical potential for each species :math:`\\mu_i`; the key
+        denotes the species, the value specifies the chemical potential in
+        units that are consistent with the underlying cluster expansion
+    calculator : :class:`BaseCalculator`
+        calculator to be used for calculating the potential changes
+        that enter the evaluation of the Metropolis criterion
+    atoms : :class:`ase:Atoms`
+        atomic configuration to be used in the Monte Carlo simulation;
+        also defines the initial occupation vector
+    name : str
+        human-readable ensemble name [default: `BaseEnsemble`]
+    data_container : str
+        name of file the data container associated with the ensemble
+        will be written to; if the file exists it will be read, the
+        data container will be appended, and the file will be
+        updated/overwritten
+    ensemble_data_write_interval : int
+        interval at which data is written to the data container; this
+        includes for example the current value of the calculator
+        (i.e. usually the energy) as well as ensembles specific fields
+        such as temperature or the number of atoms of different species
+    data_container_write_period : float
+        period in units of seconds at which the data container is
+        written to file; writing periodically to file provides both
+        a way to examine the progress of the simulation and to back up
+        the data [default: np.inf]
+    trajectory_write_interval : int
+        interval at which the current occupation vector of the atomic
+        configuration is written to the data container.
+    random_seed : int
+        seed for the random number generator used in the Monte Carlo
+        simulation
 
+    Attributes
+    ----------
+    temperature : float
+        temperature :math:`T` (see parameters section above)
+    boltzmann_constant : float
+        Boltzmann constant :math:`k_B` (see parameters section above)
+    accepted_trials : int
+        number of accepted trial steps
+    total_trials : int
+        number of total trial steps
+    data_container_write_period : int
+        period in units of seconds at which the data container is
+        written to file
     """
 
     def __init__(self, atoms: Atoms=None, calculator: BaseCalculator=None,
@@ -104,7 +188,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
         if potential_diff < 0:
             return True
         else:
-            return np.exp(-potential_diff/(
+            return np.exp(-potential_diff / (
                 self.boltzmann_constant * self.temperature)) > \
                 self._next_random_number()
 

@@ -24,7 +24,7 @@ class ConfigurationManager(object):
         sites (inner list) that belong to each sublattice (outer list)
     occupation_constraints : list of list of int
         optional occupation constraint to enfore a more stricter species
-        occupation than what is allowed from the Calculator.
+        occupation than what is allowed from the Calculator
 
     Todo
     ----
@@ -164,8 +164,12 @@ class ConfigurationManager(object):
         possible_swap_species = \
             set(self._occupation_constraints[site1]) - \
             set([self._occupations[site1]])
-        possible_swap_sites = array([self._sites_by_species[sublattice][Z]
-                                     for Z in possible_swap_species]).flatten()
+        possible_swap_sites = []
+        for Z in possible_swap_species:
+            possible_swap_sites.extend(self._sites_by_species[sublattice][Z])
+
+        possible_swap_sites = array(possible_swap_sites)
+
         try:
             site2 = random.choice(possible_swap_sites)
         except IndexError:
@@ -201,7 +205,7 @@ class ConfigurationManager(object):
         sites
             indices of sites of the configuration to change
         species
-            new occupations (species) by atomic number
+            new occupations by atomic number
         """
 
         # Update _sites_by_sublattice

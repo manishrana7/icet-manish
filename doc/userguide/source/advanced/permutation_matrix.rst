@@ -1,55 +1,55 @@
 .. _example_get_permutation_matrix:
 .. highlight:: python
 .. index::
-   single: Examples; Permutation map
+   single: Examples; Permutation matrix
 
-Permutation map
-===============
+Permutation matrix
+==================
 
-The purpose of this example is to demonstrate how to extract a permutation map.
+The purpose of this example is to demonstrate the extraction of a
+permutation matrix.
 
 Import modules
 --------------
 
-To extract permutation maps, only a single :program:`icet` function is
-required, namely :func:`permutation_matrix_from_atoms
-<icet.core.permutation_matrix.permutation_matrix_from_atoms>`. Additionally, the
-`ASE <https://wiki.fysik.dtu.dk/ase>`_ function :func:`ase.build.bulk` will be
-needed to generate a structure.
+To extract permutation matrices, only a single :program:`icet`
+function is required, namely
+:func:`~icet.core.permutation_matrix.permutation_matrix_from_atoms`. Additionally,
+the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function
+:func:`~ase.build.bulk` will be used to generate a structure.
 
 .. literalinclude:: ../../../../examples/get_permutation_matrix.py
    :start-after: # Import modules
    :end-before: # Create a prototype
 
-Generate prototype Al unit cell
--------------------------------
+Generate prototype unit cell
+----------------------------
 
-The next step is to build a prototype :class:`ASE Atoms` object, here an
-aluminum fcc unit cell.
+The next step is to build a prototype ASE :class:`~ase.Atoms` object,
+here an aluminum fcc unit cell.
 
 .. literalinclude:: ../../../../examples/get_permutation_matrix.py
    :start-after: # Create a prototype
    :end-before: # Generate a permutation
 
-Obtain a permutation map
-------------------------
+Obtain permutation matrix
+-------------------------
 
-Next, the :func:`permutation_matrix_from_atoms
-<icet.core.permutation_matrix.permutation_matrix_from_atoms>` function is called
-with the :class:`ASE Atoms` object that was defined above and a neighbor cutoff
-of 2.0 Å as arguments. The resulting output is a list that contains
-three elements, namely
-a :class:`PermutationMap <_icet.PermutationMap>`,
-a primitive :class:`Structure <_icet.Structure>` and
-a :class:`NeighborList <_icet.NeighborList>`.
+Next, the
+:func:`~icet.core.permutation_matrix.permutation_matrix_from_atoms`
+function is called with the ASE :class:`~ase.Atoms` object that was
+defined above and a neighbor cutoff of 2.0 Å as arguments. The
+resulting output is a list that contains three elements, namely a
+:class:`~_icet.PermutationMatrix`, a primitive
+:class:`~_icet.Structure` and a :class:`~_icet.NeighborList`.
 
 .. literalinclude:: ../../../../examples/get_permutation_matrix.py
-   :start-after: # Generate a permutation map
+   :start-after: # Generate a permutation matrix
    :end-before: # Extract the permuted,
 
-Since the verbosity was set to :math:`\geq 3`, the following extra information
-should be printed by :func:`permutation_matrix_from_atoms
-<icet.core.permutation_matrix.permutation_matrix_from_atoms>`::
+Since the verbosity was set to :math:`\geq 3`, the following extra
+information should be printed by
+:func:`~icet.core.permutation_matrix.permutation_matrix_from_atoms`::
 
   size of atoms_prim 1
   number of positions: 19
@@ -57,18 +57,18 @@ should be printed by :func:`permutation_matrix_from_atoms
 Extract permuted positions
 ----------------------------
 
-The permuted as well as the indexed and unique positions can be extracted
-from the :class:`PermutationMap <icet.core.permutation_matrix.PermutationMap>`
-object, generated earlier, using the methods
-:meth:`PermutationMap.get_permuted_positions` and
-:meth:`PermutationMap.get_indiced_positions`, respectively.
+The permuted as well as the indexed and unique positions can be
+extracted from the :class:`~_icet.PermutationMatrix` object, generated
+earlier, using the methods
+:meth:`~_icet.PermutationMatrix.get_permuted_positions` and
+:meth:`~_icet.PermutationMatrix.get_indexed_positions`, respectively.
 
 .. literalinclude:: ../../../../examples/get_permutation_matrix.py
    :start-after: # Extract the permuted,
    :end-before: # Print the permuted,
 
-Print the positions
--------------------
+Print positions
+---------------
 
 Finally the permuted as well as the indexed and unique positions, obtained in
 the previous section, are printed using the following snippet:
