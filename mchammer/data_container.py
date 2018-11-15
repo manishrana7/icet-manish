@@ -270,7 +270,7 @@ class DataContainer:
     @property
     def observables(self) -> List[str]:
         """ observable names """
-        return [key for key in self._data.keys().tolist() if key != 'mctrial']
+        return [col for col in self._data.columns.tolist() if col != 'mctrial']
 
     @property
     def metadata(self) -> dict:
