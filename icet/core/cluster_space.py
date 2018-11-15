@@ -26,7 +26,7 @@ class ClusterSpace(_ClusterSpace):
     chemical_symbols : list(str) or list(list(str))
         list of chemical symbols, each of which must map to an element
         of the periodic table
-        
+
         If a list of chemical symbols is provided, all sites on the
         lattice will have the same allowed occupations as the input
         list.
