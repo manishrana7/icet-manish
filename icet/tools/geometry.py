@@ -49,31 +49,31 @@ def get_scaled_positions(positions: np.ndarray,
     return fractional
 
 
-def add_vacuum_in_non_pbc(atoms: Atoms) -> Atoms:
+def add_vacuum_in_non_pbc(configuration: Atoms) -> Atoms:
     """
     Adds vacuum in non-periodic directions.
 
     Parameters
     ----------
-    atoms
-        input atomic structur
+    configuration
+        input atomic structure
 
     Returns
     -------
-    atoms
+    ase.Atoms
         input atomic structure with vacuum in non-pbc directions
     """
-    atoms_cpy = atoms.copy()
+    configuration_cpy = configuration.copy()
     vacuum_axis = []
-    for i, pbc in enumerate(atoms.pbc):
+    for i, pbc in enumerate(configuration.pbc):
         if not pbc:
             vacuum_axis.append(i)
 
     if len(vacuum_axis) > 0:
-        atoms_cpy.center(30, axis=vacuum_axis)
-        atoms_cpy.wrap()
+        configuration_cpy.center(30, axis=vacuum_axis)
+        configuration_cpy.wrap()
 
-    return atoms_cpy
+    return configuration_cpy
 
 
 def get_primitive_structure(atoms: Atoms, no_idealize: bool=True,
