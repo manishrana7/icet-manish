@@ -849,9 +849,9 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             orbit_list : OrbitList
+             orbit_list : icet.OrbitList
                 an orbit list set up from a primitive structure
-             supercell : Structure
+             supercell : icet.Structure
                 supercell build up from the same primitive structure used to set the input orbit list 
              )pbdoc",
              py::arg("orbit_list"),
@@ -886,9 +886,9 @@ PYBIND11_MODULE(_icet, m)
              "Clears the list of offsets and primitive-to-supercell map of the LocalOrbitListGenerator object")
         .def("get_unique_offsets_count", &LocalOrbitListGenerator::getNumberOfUniqueOffsets,
              "Returns the number of unique offsets")
-        .def("get_primitive_to_supercell_map", &LocalOrbitListGenerator::getMapFromPrimitiveToSupercell,
+        .def("_get_primitive_to_supercell_map", &LocalOrbitListGenerator::getMapFromPrimitiveToSupercell,
              "Returns the primitive to supercell mapping")
-        .def("get_unique_primcell_offsets", &LocalOrbitListGenerator::getUniquePrimitiveCellOffsets,
+        .def("_get_unique_primcell_offsets", &LocalOrbitListGenerator::getUniquePrimitiveCellOffsets,
              "Returns a list with offsets of primitive structure that span to position of atoms in the supercell");
 
     /// @todo Check which of the following members must actually be exposed.
