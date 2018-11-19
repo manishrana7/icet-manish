@@ -217,7 +217,9 @@ class DataContainer:
             raise TypeError('Missing tags argument')
 
         for tag in tags:
-            if tag not in self._data:
+            if tag == 'trajectory':
+                return self._get_trajectory(tags, start, stop, interval, )
+            elif tag not in self._data:
                 raise ValueError('No observable named {} in data'
                                  ' container'.format(tag))
 
@@ -380,8 +382,8 @@ class DataContainer:
         data = self.get_data(tag, start=start, stop=stop)
         return np.std(data)
 
-    def get_trajectory(self, start: int=None, stop: int=None, interval: int=1,
-                       scalar_property: str=None) \
+    def _get_trajectory(self, *tags, start: int=None, stop: int=None, 
+                        interval: int=1) \
             -> Union[List[Atoms], Tuple[List[Atoms], list]]:
         """
         Returns a trajectory in the form of a list of ASE Atoms and
@@ -403,36 +405,26 @@ class DataContainer:
         scalar_property
             tag of observable to be returned along with trajectory
         """
-        only_trajectory = True
+        tags_ = tuple(['occupations' if tag=='trajectory' else
+                          tag for tag in tags])
+        
+        data_ = \
+            list(self.get_data(*tags_, start=start, stop=stop, interval=interval))
 
-        if scalar_property is not None:
-            only_trajectory = False
-            this_column = None
+        atoms_list = []
+        for tag, data in zip(tags_, data_):
+            if tag == 'occupations':
+                i = data_.index(data)
+                for occupation_vector in data:
+                    atoms = self.atoms.copy()
+                    atoms.numbers = occupation_vector
+                    atoms_list.append(atoms)
+            data_[i] = atoms_list
+
+        if len(data_) == 1:
+            return data_[0]
         else:
-            # default property to potential
-            scalar_property = 'potential'
-            # return all valid observations in observations column
-            # not matter what values are in potential column
-            this_column = ['occupations']
-
-        occupation_vectors, property_values = \
-            self.get_data('occupations', scalar_property,
-                          start=start, stop=stop, interval=interval,
-                          fill_method='skip_none', apply_to=this_column)
-
-        atoms_list, property_list = [], []
-        for occupation_vector, property_value in zip(occupation_vectors,
-                                                     property_values):
-            atoms = self.atoms.copy()
-            atoms.numbers = occupation_vector
-            atoms_list.append(atoms)
-            if not only_trajectory:
-                property_list.append(property_value)
-
-        if property_list:
-            return atoms_list, property_list
-        else:
-            return atoms_list
+            return tuple(data_)
 
     def write_trajectory(self, outfile: Union[str, BinaryIO, TextIO]):
         """
