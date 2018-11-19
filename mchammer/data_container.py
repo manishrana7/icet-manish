@@ -42,12 +42,11 @@ class DataContainer:
 
         self.atoms = atoms.copy()
 
-        self._observables = []
         self._parameters = OrderedDict()
         self._metadata = OrderedDict()
         self._last_state = {}
-        # These seems to be useless
-        self._data = pd.DataFrame(columns=['mctrial', 'occupations'])
+
+        self._data = pd.DataFrame(columns=['mctrial'])
 
         self.add_parameter('seed', random_seed)
 
@@ -57,25 +56,6 @@ class DataContainer:
         self._metadata['username'] = getpass.getuser()
         self._metadata['hostname'] = socket.gethostname()
         self._metadata['icet_version'] = icet_version
-
-    def add_observable(self, tag: str):
-        """
-        Adds observable name.
-
-        Parameters
-        ----------
-        tag
-            name of observable
-
-        Raises
-        ------
-        TypeError
-            if input parameter has the wrong type
-        """
-        if not isinstance(tag, str):
-            raise TypeError('tag has the wrong type: {}'.format(type(tag)))
-        if tag not in self._observables:
-            self._observables.append(tag)
 
     def add_parameter(self, tag: str,
                       value: Union[int, float, List[int], List[float]]):
@@ -292,7 +272,7 @@ class DataContainer:
     @property
     def observables(self) -> List[str]:
         """ observable names """
-        return self._observables
+        return [col for col in self._data.columns.tolist() if col != 'mctrial']
 
     @property
     def metadata(self) -> dict:
@@ -508,9 +488,6 @@ class DataContainer:
                         if tag == 'seed':
                             continue
                         dc.add_parameter(tag, value)
-                elif key == 'observables':
-                    for value in reference_data[key]:
-                        dc.add_observable(value)
 
             # add runtime data from file
             runtime_data_file.write(
@@ -541,8 +518,7 @@ class DataContainer:
         ase_write(reference_atoms_file.name, self.atoms, format='json')
 
         # Save reference data
-        reference_data = {'observables': self._observables,
-                          'parameters': self._parameters,
+        reference_data = {'parameters': self._parameters,
                           'metadata': self._metadata,
                           'last_state': self._last_state}
 

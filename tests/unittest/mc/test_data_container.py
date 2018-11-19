@@ -35,8 +35,6 @@ class TestDataContainer(unittest.TestCase):
         self.dc = DataContainer(self.atoms,
                                 ensemble_name='test-ensemble',
                                 random_seed=44)
-        test_observer = ConcreteObserver(interval=10, tag='obs1')
-        self.dc.add_observable(test_observer.tag)
         self.dc.add_parameter('temperature', 375.15)
 
     def test_init(self):
@@ -52,22 +50,6 @@ class TestDataContainer(unittest.TestCase):
     def test_structure(self):
         """Tests reference structure property."""
         self.assertEqual(self.dc.atoms, self.atoms)
-
-    def test_add_observable(self):
-        """Tests add observable functionality."""
-        test_observer = ConcreteObserver(interval=20, tag='obs2')
-        self.dc.add_observable(test_observer.tag)
-        self.assertEqual(len(self.dc.observables), 2)
-
-        # test no duplicates
-        self.dc.add_observable(test_observer.tag)
-        self.assertEqual(len(self.dc.observables), 2)
-
-        # test whether method raises Exception
-        with self.assertRaises(TypeError) as context:
-            self.dc.add_observable(1)
-        self.assertTrue('tag has the wrong type'
-                        in str(context.exception))
 
     def test_add_parameter(self):
         """Tests add parameter functionality."""
@@ -160,7 +142,9 @@ class TestDataContainer(unittest.TestCase):
 
     def test_property_observables(self):
         """Tests observables property."""
-        self.assertListEqual(self.dc.observables, ['obs1'])
+        self.dc.append(mctrial=100,
+                       record=dict(obs1=13, potential=-0.123))
+        self.assertListEqual(self.dc.observables, ['obs1', 'potential'])
 
     def test_property_metadata(self):
         """
@@ -406,7 +390,6 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(self.atoms, dc_read.atoms)
         self.assertEqual(self.dc.metadata, dc_read.metadata)
         self.assertEqual(self.dc.parameters, dc_read.parameters)
-        self.assertEqual(self.dc.observables, dc_read.observables)
 
         # check data
         pd.testing.assert_frame_equal(
