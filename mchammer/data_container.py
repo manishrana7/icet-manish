@@ -149,8 +149,8 @@ class DataContainer:
 
     def get_data(self, *tags, start: int=None, stop: int=None, interval: int=1,
                  fill_method: str='skip_none',
-                 apply_to: List[str]=None)-> Union[np.ndarray,
-                                                   Tuple[np.ndarray]]:
+                 apply_to: List[str]=None) \
+            -> Union[np.ndarray, List[Atoms], Tuple[np.ndarray, List[Atoms]]]:
         """Returns the accumulated data for the requested observables.
 
         Parameters
@@ -173,7 +173,7 @@ class DataContainer:
         fill_method : {'skip_none', 'fill_backward', 'fill_forward',
                        'linear_interpolate', None}
             method employed for dealing with missing values; by default
-            uses 'skip_none'
+            uses 'skip_none'.
 
         apply_to
             tags of columns for which fill_method will be employed;
@@ -187,6 +187,8 @@ class DataContainer:
             if observables are requested that are not in data container
         ValueError
             if fill method is unknown
+        ValueError
+            if trajectory is requested and fill method is not skip_none
         """
         fill_methods = ['skip_none',
                         'fill_backward',
@@ -196,10 +198,15 @@ class DataContainer:
         if len(tags) == 0:
             raise TypeError('Missing tags argument')
 
+        if 'trajectory' in tags:
+            if not fill_method == 'skip_none':
+                raise ValueError('Only skip_none fill method is avaliable'
+                                 ' when trajectory is requested')
+            return self._get_trajectory(*tags, start=start, stop=stop,
+                                        interval=interval)
+
         for tag in tags:
-            if tag == 'trajectory':
-                return self._get_trajectory(tags, start, stop, interval, )
-            elif tag not in self._data:
+            if tag not in self._data:
                 raise ValueError('No observable named {} in data'
                                  ' container'.format(tag))
 
@@ -362,13 +369,14 @@ class DataContainer:
         data = self.get_data(tag, start=start, stop=stop)
         return np.std(data)
 
-    def _get_trajectory(self, *tags, start: int=None, stop: int=None, 
+    def _get_trajectory(self, *tags, start: int=None, stop: int=None,
                         interval: int=1) \
-            -> Union[List[Atoms], Tuple[List[Atoms], list]]:
+            -> Union[List[Atoms], Tuple[List[Atoms], np.ndarray]]:
         """
-        Returns a trajectory in the form of a list of ASE Atoms and
-        optionally a corresponding list with values of the property
-        with the given label. Configurations with non properties will be
+        Returns a trajectory in the form of a list of ASE Atoms
+        along with the corresponding values of the mctrial and/or scalar
+        properties upon request.
+        Configurations with non properties will be
         skipped in the trajectory if the property is requested.
 
         Parameters
@@ -382,29 +390,33 @@ class DataContainer:
         interval
             increment for mctrial; by default the smallest available
             interval will be used.
-        scalar_property
-            tag of observable to be returned along with trajectory
         """
-        tags_ = tuple(['occupations' if tag=='trajectory' else
-                          tag for tag in tags])
-        
-        data_ = \
-            list(self.get_data(*tags_, start=start, stop=stop, interval=interval))
+        tags_ = tuple(['occupations' if tag == 'trajectory' else
+                       tag for tag in tags])
+        data = \
+            self.get_data(*tags_, start=start, stop=stop, interval=interval)
 
+        if len(tags) > 1:
+            data_list = list(data)
+        else:
+            data_list = [data]
+
+        tag_list = list(tags_)
         atoms_list = []
-        for tag, data in zip(tags_, data_):
+
+        for tag, data_row in zip(tag_list, data_list):
             if tag == 'occupations':
-                i = data_.index(data)
-                for occupation_vector in data:
+                ind = tag_list.index('occupations')
+                for occupation_vector in data_row:
                     atoms = self.atoms.copy()
                     atoms.numbers = occupation_vector
                     atoms_list.append(atoms)
-            data_[i] = atoms_list
+                data_list[ind] = atoms_list
 
-        if len(data_) == 1:
-            return data_[0]
+        if len(data_list) > 1:
+            return tuple(data_list)
         else:
-            return tuple(data_)
+            return data_list[0]
 
     def write_trajectory(self, outfile: Union[str, BinaryIO, TextIO]):
         """
@@ -418,7 +430,7 @@ class DataContainer:
         outfile
             output file name or file object
         """
-        atoms_list, energies = self.get_trajectory(scalar_property='potential')
+        atoms_list, energies = self._get_trajectory('occupations', 'potential')
         traj = Trajectory(outfile, mode='a')
         for atoms, energy in zip(atoms_list, energies):
             traj.write(atoms=atoms, energy=energy)

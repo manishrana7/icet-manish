@@ -24,7 +24,7 @@ class TestDataContainer(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestDataContainer, self).__init__(*args, **kwargs)
-        self.atoms = bulk('Al').repeat(4)
+        self.atoms = bulk('Al').repeat(2)
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
@@ -170,73 +170,61 @@ class TestDataContainer(unittest.TestCase):
         Tests the returned data is a list of list and the options provided by
         the method works as expected.
         """
-        # lets suppose the following data was appended to the data container
-        # mctrials
-        mctrials = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-        # energies
-        energy = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        # observable 1
-        obs1 = [1, None, 3, None, 5, None, 7, None, 9, None]
-        # observable 2
-        obs2 = [None, None, 3, None, None, None, 7, None, None, None]
+        # append data to data container
+        data_rows = \
+            {'mctrial': [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+             'acceptance_ratio': [0.0, 0.9, 0.7, 0.7, 0.75, 0.7, 0.6,
+                                  0.65, 0.66, 0.666, 0.7],
+             'obs1': [16, None, 16, None, 14, None,  16, None, 14, None, 16],
+             'obs2': [11, None, None, 13, None, None, 10, None, None, 10, None]
+             }
 
-        rows_data = \
-            {'mctrial': mctrials, 'potential': energy,
-             'obs1': obs1, 'obs2': obs2}
-
-        self.dc._data = \
-            pd.DataFrame(rows_data,
-                         columns=['mctrial', 'potential', 'obs1', 'obs2'])
+        self.dc._data = pd.DataFrame(data_rows)
 
         # assert ValueError if no tags are given.
         with self.assertRaises(TypeError) as context:
             self.dc.get_data()
+        self.assertTrue('Missing tags argument'
+                        in str(context.exception))
 
         # assert numpy array is returned.
-        retval1, retval2 = self.dc.get_data('mctrial', 'obs1')
-        self.assertIsInstance(retval1, np.ndarray)
-        self.assertIsInstance(retval2, np.ndarray)
+        mctrial, accept_ratio = self.dc.get_data('mctrial', 'acceptance_ratio')
+        self.assertIsInstance(mctrial, np.ndarray)
+        self.assertIsInstance(accept_ratio, np.ndarray)
 
-        # using skip_none
-        retval1, retval2 = \
-            self.dc.get_data('mctrial', 'obs1', fill_method='skip_none')
-        self.assertEqual(retval1.tolist(), [10, 30, 50, 70, 90])
-        self.assertEqual(retval2.tolist(), [1, 3, 5, 7, 9])
+        # default skip_none
+        mctrial, obs1 = \
+            self.dc.get_data('mctrial', 'obs1')
+        self.assertEqual(mctrial.tolist(), [0, 20, 40, 60, 80, 100])
+        self.assertEqual(obs1.tolist(), [16, 16, 14, 16, 14, 16])
 
         # using fill_backward
-        retval = self.dc.get_data('obs1', fill_method='fill_backward')
-        self.assertEqual(retval.tolist(), [1, 3, 3, 5, 5, 7, 7, 9, 9])
+        obs1 = self.dc.get_data('obs1', fill_method='fill_backward')
+        self.assertEqual(obs1.tolist(),
+                         [16, 16, 16, 14, 14, 16,  16, 14, 14, 16, 16])
 
         # using fill_forward
-        retval = self.dc.get_data('obs1', fill_method='fill_forward')
-        self.assertEqual(retval.tolist(), [1, 1, 3, 3, 5, 5, 7, 7, 9, 9])
+        obs1 = self.dc.get_data('obs1', fill_method='fill_forward')
+        self.assertEqual(obs1.tolist(),
+                         [16, 16, 16, 16, 14, 14,  16, 16, 14, 14, 16])
 
         # using linear_interpolate
-        retval = \
+        obs1 = \
             self.dc.get_data('obs1', fill_method='linear_interpolate')
-        self.assertEqual(retval.tolist(), [1, 2, 3, 4, 5, 6, 7, 8, 9])
+        self.assertEqual(obs1.tolist(),
+                         [16, 16, 16, 15, 14, 15,  16, 15, 14, 15, 16])
 
         # skip_none only for obs1
-        retval1, retval2 = self.dc.get_data(
+        obs1, obs2 = self.dc.get_data(
             'obs1', 'obs2', fill_method='skip_none', apply_to=['obs1'])
-        self.assertEqual(retval1.tolist(), [1, 3, 5, 7, 9])
-        self.assertEqual(retval2.tolist(), [None, 3, None, 7, None])
+        self.assertEqual(obs1.tolist(), [16, 16, 14, 16, 14, 16])
+        self.assertEqual(obs2.tolist(), [11, None, None, 10, None, None])
 
         # with a given start, stop and interval
-        retval1, retval2 = \
-            self.dc.get_data('mctrial', 'obs1', start=20, stop=90, interval=3)
-        self.assertEqual(retval1.tolist(), [50])
-        self.assertEqual(retval2.tolist(), [5])
-
-        # check occupations
-        occupations = [np.nan, np.nan, np.nan, np.nan, [13, 13, 11],
-                       np.nan, np.nan, np.nan, np.nan, [13, 11, 11]]
-        rows_data = {'mctrial': mctrials, 'occupations': occupations}
-        self.dc._data = \
-            pd.DataFrame(rows_data, columns=['mctrial', 'occupations'])
-        retval = \
-            self.dc.get_data('occupations', start=50, interval=5)
-        self.assertEqual(retval.tolist(), [[13, 13, 11], [13, 11, 11]])
+        mctrial, obs1 = \
+            self.dc.get_data('mctrial', 'obs1', start=20, stop=80, interval=4)
+        self.assertEqual(mctrial.tolist(), [20, 60])
+        self.assertEqual(obs1.tolist(), [16, 16])
 
         # test fails for non-stock data
         with self.assertRaises(ValueError) as context:
@@ -244,7 +232,7 @@ class TestDataContainer(unittest.TestCase):
         self.assertTrue('No observable named temperature'
                         in str(context.exception))
 
-        # test fails with unkown method
+        # test fails with unknown method
         with self.assertRaises(ValueError) as context:
             self.dc.get_data('mctrial', fill_method='xyz')
         self.assertTrue('Unknown fill method'
@@ -332,33 +320,50 @@ class TestDataContainer(unittest.TestCase):
 
     def test_get_trajectory(self):
         """Tests get_trajectory functionality."""
-        occupation_vector = [14] * len(self.atoms)
-        row_data = dict(occupations=occupation_vector,
-                        potential=-0.120000001)
+        data_rows = \
+            {'mctrial': [0, 10, 20, 30, 40, 50, 60],
+             'potential': [-1.32, -1.35, -1.33, -1.07, -1.02, -1.4, -1.3],
+             'occupations': [[14, 14, 14, 14, 14, 14, 14, 14],
+                             np.nan,
+                             [14, 13, 14, 14, 14, 14, 14, 14],
+                             np.nan,
+                             [14, 13, 13, 14, 14, 13, 14, 14],
+                             np.nan,
+                             [13, 13, 13, 13, 13, 13, 13, 14]]}
 
-        for mctrial in range(len(self.atoms)):
-            self.dc.append(mctrial, row_data)
+        self.dc._data = pd.DataFrame(data_rows)
 
         # only trajectory
-        for atoms in self.dc.get_trajectory():
-            self.assertEqual(atoms.numbers.tolist(), occupation_vector)
+        occupations = \
+            [occ for occ in data_rows['occupations'] if occ is not np.nan]
+        atoms_list = self.dc.get_data('trajectory')
+        for atoms, occupation in zip(atoms_list, occupations):
+            self.assertEqual(atoms.numbers.tolist(), occupation)
 
-        # trajectory and energies
-        atoms_list, energies \
-            = self.dc.get_trajectory(scalar_property='potential')
-        for atoms, energy in zip(atoms_list, energies):
-            self.assertEqual(atoms.numbers.tolist(), occupation_vector)
-            self.assertEqual(energy, -0.120000001)
+        # trajectory and properties
+        mctrial, atoms_list, energies =\
+            self.dc.get_data('mctrial', 'trajectory', 'potential')
+
+        self.assertEqual(mctrial.tolist(), [0, 20, 40, 60])
+        self.assertEqual(energies.tolist(), [-1.32, -1.33, -1.02, -1.3])
+        self.assertIsInstance(atoms_list, list)
 
     def test_write_trajectory(self):
         """Tests write trajectory functionality."""
         # append data
-        occupation_vector = [14] * len(self.atoms)
-        row_data = dict(occupations=occupation_vector,
-                        potential=-0.120000001)
-        for mctrial in range(len(self.atoms)):
-            self.dc.append(mctrial, row_data)
-        # save to file
+        data_rows = \
+            {'mctrial': [0, 10, 20, 30, 40, 50, 60],
+             'potential': [-1.32, -1.35, -1.33, -1.07, -1.02, -1.4, -1.3],
+             'occupations': [[14, 14, 14, 14, 14, 14, 14, 14],
+                             np.nan,
+                             [14, 13, 14, 14, 14, 14, 14, 14],
+                             np.nan,
+                             [14, 13, 13, 14, 14, 13, 14, 14],
+                             np.nan,
+                             [13, 13, 13, 13, 13, 13, 13, 14]]}
+
+        self.dc._data = pd.DataFrame(data_rows)
+
         temp_file = tempfile.NamedTemporaryFile()
         self.dc.write_trajectory(temp_file.name)
 
