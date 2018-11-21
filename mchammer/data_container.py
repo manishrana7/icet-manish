@@ -339,8 +339,11 @@ class DataContainer:
         ------
         ValueError
             if observable is requested that is not in data container
+        ValueError
+            if observable is not scalar
         """
-
+        if tag in ['trajectory', 'occupations']:
+            raise ValueError('{} is not scalar'.format(tag))
         data = self.get_data(tag, start=start, stop=stop)
         return np.mean(data)
 
@@ -365,7 +368,11 @@ class DataContainer:
         ------
         ValueError
             if observable is requested that is not in data container
+        ValueError
+            if observable is not scalar
         """
+        if tag in ['trajectory', 'occupations']:
+            raise ValueError('{} is not scalar'.format(tag))
         data = self.get_data(tag, start=start, stop=stop)
         return np.std(data)
 

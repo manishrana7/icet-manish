@@ -306,17 +306,11 @@ class TestDataContainer(unittest.TestCase):
         self.assertTrue('No observable named temperature'
                         in str(context.exception))
 
-        # test fails for non-scalar data like occupation vector
-        self.dc.reset()
-        for mctrial in range(10):
-            self.dc.append(
-                mctrial, record={'occupations': [14, 14, 14]})
-
-        # TODO: This test can be readded once occupations is not part of df
-        # with self.assertRaises(ValueError) as context:
-        #    self.dc.get_average('occupations')
-        # self.assertTrue('occupations is not scalar'
-        #                in str(context.exception))
+        # test fails for non-scalar data
+        with self.assertRaises(ValueError) as context:
+            self.dc.get_average('trajectory')
+        self.assertTrue('trajectory is not scalar'
+                        in str(context.exception))
 
     def test_get_trajectory(self):
         """Tests get_trajectory functionality."""
@@ -347,6 +341,13 @@ class TestDataContainer(unittest.TestCase):
         self.assertEqual(mctrial.tolist(), [0, 20, 40, 60])
         self.assertEqual(energies.tolist(), [-1.32, -1.33, -1.02, -1.3])
         self.assertIsInstance(atoms_list, list)
+
+        # test fails for non skip_none fill method
+        with self.assertRaises(ValueError) as context:
+            self.dc.get_data('trajectory', fill_method='fill_backward')
+        self.assertTrue('Only skip_none fill method is avaliable'
+                        ' when trajectory is requested'
+                        in str(context.exception))
 
     def test_write_trajectory(self):
         """Tests write trajectory functionality."""
