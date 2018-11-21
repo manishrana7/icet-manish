@@ -341,7 +341,7 @@ class TestDataContainer(unittest.TestCase):
             self.assertEqual(atoms.numbers.tolist(), occupation)
 
         # trajectory and properties
-        mctrial, atoms_list, energies =\
+        mctrial, atoms_list, energies = \
             self.dc.get_data('mctrial', 'trajectory', 'potential')
 
         self.assertEqual(mctrial.tolist(), [0, 20, 40, 60])
