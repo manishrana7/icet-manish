@@ -27,6 +27,7 @@ class TestEnsemble(unittest.TestCase):
         self.temperature = 100.0
 
     def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):

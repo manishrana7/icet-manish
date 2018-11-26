@@ -1,5 +1,5 @@
 """
-Collection of tools for managing and analysisng linear models
+Collection of tools for managing and analyzing linear models.
 
 Todo
 -----
@@ -24,12 +24,12 @@ def compute_correlation_matrix(A):
 
     Parameters
     ----------
-    A : NumPy array
+    A : numpy.ndarray
         fit matrix
 
     Returns
     -------
-    NumPy array
+    numpy.ndarray
         correlation matrix
     """
     N = A.shape[0]

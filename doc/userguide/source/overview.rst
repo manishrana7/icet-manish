@@ -8,8 +8,8 @@ In atomic scale materials modeling (alloy) the cluster expansion (CE) technique
 is most commonly used for predicting the energy as a function of the
 distribution of different elements over lattice sites. Such :term:`CEs` are
 usually trained to match as closely as possible a series of first-principles
-calculations and subsequently sampled using Monte Carlo (MC) simulations, which
-enables one to predict alloy phase diagrams.
+calculations and subsequently used to sample configuration space with Monte Carlo (MC) simulations. In this way, :term:`CEs`
+can be used to predict alloy phase diagrams.
 
 More generally, :term:`CEs` provide a mapping between a configuration and a
 property of interest. The configuration is not restricted to be atomic but

@@ -42,12 +42,11 @@ class DataContainer:
 
         self.atoms = atoms.copy()
 
-        self._observables = []
         self._parameters = OrderedDict()
         self._metadata = OrderedDict()
         self._last_state = {}
-        # These seems to be useless
-        self._data = pd.DataFrame(columns=['mctrial', 'occupations'])
+
+        self._data = pd.DataFrame(columns=['mctrial'])
 
         self.add_parameter('seed', random_seed)
 
@@ -57,25 +56,6 @@ class DataContainer:
         self._metadata['username'] = getpass.getuser()
         self._metadata['hostname'] = socket.gethostname()
         self._metadata['icet_version'] = icet_version
-
-    def add_observable(self, tag: str):
-        """
-        Adds observable name.
-
-        Parameters
-        ----------
-        tag
-            name of observable
-
-        Raises
-        ------
-        TypeError
-            if input parameter has the wrong type
-        """
-        if not isinstance(tag, str):
-            raise TypeError('tag has the wrong type: {}'.format(type(tag)))
-        if tag not in self._observables:
-            self._observables.append(tag)
 
     def add_parameter(self, tag: str,
                       value: Union[int, float, List[int], List[float]]):
@@ -167,18 +147,16 @@ class DataContainer:
         self._last_state['accepted_trials'] = accepted_trials
         self._last_state['random_state'] = random_state
 
-    def get_data(self, tags: List[str]=None,
-                 start: int=None, stop: int=None, interval: int=1,
-                 fill_method: str=None,
-                 apply_to: List[str]=None) -> Union[list, Tuple[list, list]]:
+    def get_data(self, *tags, start: int=None, stop: int=None, interval: int=1,
+                 fill_method: str='skip_none',
+                 apply_to: List[str]=None) \
+            -> Union[np.ndarray, List[Atoms], Tuple[np.ndarray, List[Atoms]]]:
         """Returns the accumulated data for the requested observables.
 
         Parameters
         ----------
         tags
-            tags of the requested properties; by default all columns
-            of the data frame will be returned in lexicographical
-            order.
+            tuples of the requested properties
 
         start
             minimum value of trial step to consider; by default the
@@ -194,7 +172,8 @@ class DataContainer:
 
         fill_method : {'skip_none', 'fill_backward', 'fill_forward',
                        'linear_interpolate', None}
-            method employed for dealing with missing values
+            method employed for dealing with missing values; by default
+            uses 'skip_none'.
 
         apply_to
             tags of columns for which fill_method will be employed;
@@ -203,28 +182,38 @@ class DataContainer:
         Raises
         ------
         ValueError
+            if tags is empty
+        ValueError
             if observables are requested that are not in data container
         ValueError
             if fill method is unknown
+        ValueError
+            if trajectory is requested and fill method is not skip_none
         """
         fill_methods = ['skip_none',
                         'fill_backward',
                         'fill_forward',
                         'linear_interpolate']
 
-        if tags is None:
-            tags = self._data.columns.tolist()
-        else:
-            for tag in tags:
-                if tag not in self._data:
-                    raise ValueError('No observable named {} in data'
-                                     ' container'.format(tag))
+        if len(tags) == 0:
+            raise TypeError('Missing tags argument')
+
+        if 'trajectory' in tags:
+            if fill_method != 'skip_none':
+                raise ValueError('Only skip_none fill method is avaliable'
+                                 ' when trajectory is requested')
+            return self._get_trajectory(*tags, start=start, stop=stop,
+                                        interval=interval)
+
+        for tag in tags:
+            if tag not in self._data:
+                raise ValueError('No observable named {} in data'
+                                 ' container'.format(tag))
 
         if start is None and stop is None:
             data = self._data.loc[::interval, tags]
         else:
             data = self._data.set_index(self._data.mctrial)
-
             if start is None:
                 data = data.loc[:stop:interval, tags]
             elif stop is None:
@@ -233,7 +222,6 @@ class DataContainer:
                 data = data.loc[start:stop:interval, tags]
 
         if fill_method is not None:
-
             if fill_method not in fill_methods:
                 raise ValueError('Unknown fill method: {}'
                                  .format(fill_method))
@@ -268,9 +256,9 @@ class DataContainer:
 
         data_list = []
         for tag in tags:
-            data_list.append(
-                # convert NaN to None
-                [None if np.isnan(x).any() else x for x in data[tag]])
+            # convert NaN to None
+            data_list.append(np.array(
+                [None if np.isnan(x).any() else x for x in data[tag]]))
         if len(tags) > 1:
             # return a tuple if more than one tag is given
             return tuple(data_list)
@@ -291,7 +279,7 @@ class DataContainer:
     @property
     def observables(self) -> List[str]:
         """ observable names """
-        return self._observables
+        return [col for col in self._data.columns.tolist() if col != 'mctrial']
 
     @property
     def metadata(self) -> dict:
@@ -332,9 +320,9 @@ class DataContainer:
             return self._data[tag].count()
 
     def get_average(self, tag: str,
-                    start: int=None, stop: int=None) -> Tuple[float, float]:
+                    start: int=None, stop: int=None) -> float:
         """
-        Returns average and standard deviation of a scalar observable.
+        Returns average of a scalar observable.
 
         Parameters
         ----------
@@ -351,30 +339,51 @@ class DataContainer:
         ------
         ValueError
             if observable is requested that is not in data container
-        TypeError
-            if requested observable is not of a scalar data type
+        ValueError
+            if observable is not scalar
         """
-        if tag not in self._data:
-            raise ValueError('No observable named {} in data container'
-                             .format(tag))
+        if tag in ['trajectory', 'occupations']:
+            raise ValueError('{} is not scalar'.format(tag))
+        data = self.get_data(tag, start=start, stop=stop)
+        return np.mean(data)
 
-        if self._data[tag].dtype not in ['int64', 'float64']:
-            raise TypeError('Data for {} is not scalar'.format(tag))
-
-        if start is None and stop is None:
-            return self._data[tag].mean(), self._data[tag].std()
-        else:
-            data = self.get_data(tags=[tag], start=start, stop=stop,
-                                 fill_method='skip_none')
-            return np.mean(data), np.std(data)
-
-    def get_trajectory(self, start: int=None, stop: int=None, interval: int=1,
-                       scalar_property: str=None) \
-            -> Union[List[Atoms], Tuple[List[Atoms], list]]:
+    def get_standard_deviation(self, tag: str, start: int=None,
+                               stop: int=None) -> float:
         """
-        Returns a trajectory in the form of a list of ASE Atoms and
-        optionally a corresponding list with values of the property
-        with the given label. Configurations with non properties will be
+        Returns standard deviation of a scalar observable, calculated using
+        numpy.
+
+        Parameters
+        ----------
+        tag
+            tag of field over which to average
+        start
+            minimum value of trial step to consider; by default the
+            smallest value in the mctrial column will be used.
+        stop
+            maximum value of trial step to consider; by default the
+            largest value in the mctrial column will be used.
+
+        Raises
+        ------
+        ValueError
+            if observable is requested that is not in data container
+        ValueError
+            if observable is not scalar
+        """
+        if tag in ['trajectory', 'occupations']:
+            raise ValueError('{} is not scalar'.format(tag))
+        data = self.get_data(tag, start=start, stop=stop)
+        return np.std(data)
+
+    def _get_trajectory(self, *tags, start: int=None, stop: int=None,
+                        interval: int=1) \
+            -> Union[List[Atoms], Tuple[List[Atoms], np.ndarray]]:
+        """
+        Returns a trajectory in the form of a list of ASE Atoms
+        along with the corresponding values of the mctrial and/or scalar
+        properties upon request.
+        Configurations with non properties will be
         skipped in the trajectory if the property is requested.
 
         Parameters
@@ -388,39 +397,32 @@ class DataContainer:
         interval
             increment for mctrial; by default the smallest available
             interval will be used.
-        scalar_property
-            tag of observable to be returned along with trajectory
         """
-        only_trajectory = True
+        new_tags = tuple(['occupations' if tag == 'trajectory' else
+                          tag for tag in tags])
+        data = \
+            self.get_data(*new_tags, start=start, stop=stop, interval=interval)
 
-        if scalar_property is not None:
-            only_trajectory = False
-            this_column = None
+        if len(tags) > 1:
+            data_list = list(data)
         else:
-            # default property to potential
-            scalar_property = 'potential'
-            # return all valid observations in observations column
-            # not matter what values are in potential column
-            this_column = ['occupations']
+            data_list = [data]
 
-        occupation_vectors, property_values = \
-            self.get_data(tags=['occupations', scalar_property],
-                          start=start, stop=stop, interval=interval,
-                          fill_method='skip_none', apply_to=this_column)
+        tag_list = list(new_tags)
+        atoms_list = []
+        for tag, data_row in zip(tag_list, data_list):
+            if tag == 'occupations':
+                ind = tag_list.index('occupations')
+                for occupation_vector in data_row:
+                    atoms = self.atoms.copy()
+                    atoms.numbers = occupation_vector
+                    atoms_list.append(atoms)
+                data_list[ind] = atoms_list
 
-        atoms_list, property_list = [], []
-        for occupation_vector, property_value in zip(occupation_vectors,
-                                                     property_values):
-            atoms = self.atoms.copy()
-            atoms.numbers = occupation_vector
-            atoms_list.append(atoms)
-            if not only_trajectory:
-                property_list.append(property_value)
-
-        if property_list:
-            return atoms_list, property_list
+        if len(data_list) > 1:
+            return tuple(data_list)
         else:
-            return atoms_list
+            return data_list[0]
 
     def write_trajectory(self, outfile: Union[str, BinaryIO, TextIO]):
         """
@@ -434,7 +436,7 @@ class DataContainer:
         outfile
             output file name or file object
         """
-        atoms_list, energies = self.get_trajectory(scalar_property='potential')
+        atoms_list, energies = self._get_trajectory('occupations', 'potential')
         traj = Trajectory(outfile, mode='a')
         for atoms, energy in zip(atoms_list, energies):
             traj.write(atoms=atoms, energy=energy)
@@ -504,9 +506,6 @@ class DataContainer:
                         if tag == 'seed':
                             continue
                         dc.add_parameter(tag, value)
-                elif key == 'observables':
-                    for value in reference_data[key]:
-                        dc.add_observable(value)
 
             # add runtime data from file
             runtime_data_file.write(
@@ -537,8 +536,7 @@ class DataContainer:
         ase_write(reference_atoms_file.name, self.atoms, format='json')
 
         # Save reference data
-        reference_data = {'observables': self._observables,
-                          'parameters': self._parameters,
+        reference_data = {'parameters': self._parameters,
                           'metadata': self._metadata,
                           'last_state': self._last_state}
 

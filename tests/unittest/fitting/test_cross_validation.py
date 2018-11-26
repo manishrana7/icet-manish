@@ -23,7 +23,7 @@ class TestCrossValidationEstimator(unittest.TestCase):
         self.y = np.dot(self.A, self.x) + self.noise
 
     def shortDescription(self):
-        """Silences unittest from printing the docstrings in test cases."""
+        """Prevents unittest from printing docstring in test cases."""
         return None
 
     def test_init(self):
@@ -58,7 +58,7 @@ class TestCrossValidationEstimator(unittest.TestCase):
         n_splits = 7
         for validation_method in validation_methods:
             cve = CrossValidationEstimator(
-                (self.A, self.y), number_of_splits=n_splits,
+                (self.A, self.y), n_splits=n_splits,
                 validation_method=validation_method)
 
             self.assertIsNone(cve._rmse_train_splits)

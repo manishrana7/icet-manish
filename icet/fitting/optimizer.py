@@ -25,15 +25,16 @@ class Optimizer(BaseOptimizer):
 
     Parameters
     ----------
-    fit_data : tuple of NumPy (N, M) array and NumPy (N) array
+    fit_data : tupe(numpy.ndarray, numpy.ndarray)
         the first element of the tuple represents the fit matrix `A`
-        whereas the second element represents the vector of target
-        values `y`; here `N` (=rows of `A`, elements of `y`) equals the number
-        of target values and `M` (=columns of `A`) equals the number of
-        parameters
-    fit_method : string
+        (`N, M` array) while the second element represents the vector
+        of target values `y` (`N` array); here `N` (=rows of `A`,
+        elements of `y`) equals the number of target values and `M`
+        (=columns of `A`) equals the number of parameters
+    fit_method : str
         method to be used for training; possible choice are
-        "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
+        "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr",
+        "rfe-l2", "split-bregman"
     standardize : bool
         whether or not to standardize the fit matrix before fitting
     train_size : float or int
@@ -44,9 +45,9 @@ class Optimizer(BaseOptimizer):
         If float represents the fraction of `fit_data` (rows) to be used for
         testing. If int, represents the absolute number of rows to be used for
         testing.
-    train_set : tuple/list of ints
+    train_set : tuple or list(int)
         indices of rows of `A`/`y` to be used for training
-    test_set : tuple/list of ints
+    test_set : tuple or list(int)
         indices of rows of `A`/`y` to be used for testing
     seed : int
         seed for pseudo random number generator
@@ -80,7 +81,7 @@ class Optimizer(BaseOptimizer):
         self.test_scatter_data = None
 
     def train(self):
-        """ Carry out training. """
+        """ Carries out training. """
 
         # select training data
         A_train = self._A[self.train_set, :]
@@ -106,7 +107,7 @@ class Optimizer(BaseOptimizer):
 
     def _setup_rows(self, train_size, test_size, train_set, test_set):
         """
-        Set up train and test rows depending on which arguments are
+        Sets up train and test rows depending on which arguments are
         specified.
 
         If `train_set` and `test_set` are `None` then `train_size` and
@@ -169,7 +170,7 @@ class Optimizer(BaseOptimizer):
 
     @property
     def summary(self):
-        """ dict : Comprehensive information about the optimizer. """
+        """ dict : comprehensive information about the optimizer """
         info = super().summary
 
         # Add class specific data
@@ -202,56 +203,56 @@ class Optimizer(BaseOptimizer):
 
     @property
     def rmse_train(self):
-        """ float : root mean squared error for training set. """
+        """ float : root mean squared error for training set """
         return self._rmse_train
 
     @property
     def rmse_test(self):
-        """ float : root mean squared error for test set. """
+        """ float : root mean squared error for test set """
         return self._rmse_test
 
     @property
     def contributions_train(self):
-        """ NumPy array : the average contribution to the predicted values for
-                          the train set from each parameter."""
+        """ numpy.ndarray : average contribution to the predicted values for
+        the train set from each parameter """
         return self._contributions_train
 
     @property
     def contributions_test(self):
-        """ NumPy array : the average contribution to the predicted values for
-                          the test set from each parameter."""
+        """ numpy.ndarray : average contribution to the predicted values for
+        the test set from each parameter """
         return self._contributions_test
 
     @property
     def train_set(self):
-        """ list : indices of the rows included in the training set. """
+        """ list : indices of rows included in the training set """
         return self._train_set
 
     @property
     def test_set(self):
-        """ list : indices of the rows included in the test set. """
+        """ list : indices of rows included in the test set """
         return self._test_set
 
     @property
     def train_size(self):
-        """ int : number of rows included in training set. """
+        """ int : number of rows included in training set """
         return len(self.train_set)
 
     @property
     def train_fraction(self):
-        """ float : fraction of rows included in training set. """
+        """ float : fraction of rows included in training set """
         return self.train_size / self._n_rows
 
     @property
     def test_size(self):
-        """ int : number of rows included in test set. """
+        """ int : number of rows included in test set """
         if self.test_set is None:
             return 0
         return len(self.test_set)
 
     @property
     def test_fraction(self):
-        """ float : fraction of rows included in test set. """
+        """ float : fraction of rows included in test set """
         if self.test_set is None:
             return 0.0
         return self.test_size / self._n_rows

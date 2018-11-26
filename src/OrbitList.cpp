@@ -827,7 +827,7 @@ void OrbitList::transformSiteToSupercell(LatticeSite &site, const Structure &sup
     site.setUnitcellOffset(supercellSite.unitcellOffset());
 }
 
-///Create and return a "local" orbitList by offsetting each site in the primitve by cellOffset
+///Create and return a "local" orbitList by offsetting each site in the primitive cell by cellOffset
 OrbitList OrbitList::getLocalOrbitList(const Structure &superCell, const Vector3d &cellOffset, std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap) const
 {
     OrbitList localOrbitList = OrbitList();
