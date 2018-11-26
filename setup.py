@@ -144,19 +144,23 @@ if sys.version_info < (3, 5, 0, 'final', 0):
 with open('README.md', encoding="utf-8") as fd:
     long_description = fd.read()
 
-with open('icet/__init__.py', encoding="utf-8") as fd:
+with open('icet/__init__.py', encoding='utf-8') as fd:
     try:
-        lines = '\n'.join(fd.readlines())
+        lines = ''
+        for item in fd.readlines():
+            lines += item +"\n"
+        print(lines)
+        # lines_something = '\n'.join( [ item.encode('utf-8') for item in fd.readlines()] )
+        # lines = '\n'.join([item.encode('utf-8') for item in fd.readlines()])
+        # lines = '\n'.join(lines_utf8)
     except Exception as e:
         raise Exception("Caught exception {}".format(e))
-
 version = re.search("__version__ = '(.*)'", lines).group(1)
 maintainer = re.search("__maintainer__ = '(.*)'", lines).group(1)
 url = re.search("__url__ = '(.*)'", lines).group(1)
 email = re.search("__email__ = '(.*)'", lines).group(1)
 description = re.search("__description__ = '(.*)'", lines).group(1)
-authors = u'Mattias Ångqvist William Armando Muñoz Thomas Holm Rod and Paul Erhart'.encode(
-    'utf-8')
+authors = 'Mattias Ångqvist William Armando Muñoz Thomas Holm Rod and Paul Erhart'
 
 
 classifiers = [
@@ -219,9 +223,9 @@ def setup_python_mchammer():
 
 if __name__ == '__main__':
     # Install cpp
-    install_cpp_process = Process(target=setup_cpp)
-    install_cpp_process.start()
-    install_cpp_process.join()
+    # install_cpp_process = Process(target=setup_cpp)
+    # install_cpp_process.start()
+    # install_cpp_process.join()
 
     # Install python icet
     install_icet_process = Process(target=setup_python_icet)
