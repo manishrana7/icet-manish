@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
@@ -24,6 +25,7 @@ def find_eigen(hint=None):
         "/usr/include/eigen3",
         "/usr/include/local",
         "/usr/include",
+        "src/3rdparty/eigen3/"
     ]
 
     # Loop over search paths and check for the existence of the Eigen/Dense
@@ -73,6 +75,7 @@ ext_modules = [
         include_dirs=[
             # Path to pybind11 headers
             'src/3rdparty/pybind11/include/',
+            'src/3rdparty/boost_1_68_0/',
             eigen_include,
         ],
         language='c++'
@@ -141,6 +144,7 @@ class BuildExt(build_ext):
 if sys.version_info < (3, 5, 0, 'final', 0):
     raise SystemExit('Python 3.5 or later is required!')
 
+
 with open('README.md', encoding="utf-8") as fd:
     long_description = fd.read()
 
@@ -148,20 +152,21 @@ with open('icet/__init__.py', encoding='utf-8') as fd:
     try:
         lines = ''
         for item in fd.readlines():
-            lines += item +"\n"
-        print(lines)
-        # lines_something = '\n'.join( [ item.encode('utf-8') for item in fd.readlines()] )
-        # lines = '\n'.join([item.encode('utf-8') for item in fd.readlines()])
-        # lines = '\n'.join(lines_utf8)
+            item = item
+            lines += item + "\n"
     except Exception as e:
         raise Exception("Caught exception {}".format(e))
+
+
 version = re.search("__version__ = '(.*)'", lines).group(1)
 maintainer = re.search("__maintainer__ = '(.*)'", lines).group(1)
-url = re.search("__url__ = '(.*)'", lines).group(1)
 email = re.search("__email__ = '(.*)'", lines).group(1)
 description = re.search("__description__ = '(.*)'", lines).group(1)
-authors = 'Mattias Ångqvist William Armando Muñoz Thomas Holm Rod and Paul Erhart'
+authors = 'Mattias Ångqvist, William A. Muñoz, J. Magnus Rahm, Erik Fransson, Céline Durniak, Piotr Rozyczko, Thomas Holm Rod and Paul Erhart'
+# authors = 'Mattias Ångqvist, William Armando Muñoz, Thomas Holm Rod and Paul Erhart'
 
+homepage = 'https://gitlab.com/materials-modeling/icet'
+license = 'Mozilla Public License Version 2.0'
 
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -173,6 +178,10 @@ classifiers = [
     'Programming Language :: Python :: 3.7',
     'Intended Audience :: Science/Research',
     'License :: OSI Approved :: MIT License',
+    'Operating System :: MacOS :: MacOS X',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: UNIX',
+    'Operating System :: LINUX',
     'Topic :: Scientific/Engineering :: Physics']
 
 
@@ -185,10 +194,20 @@ def setup_cpp():
         description=description,
         long_description=long_description,
         ext_modules=ext_modules,
-        install_requires=['pybind11>=2.2'],
+        install_requires=['pybind11>=2.2',
+                          'ase',
+                          'numpy',
+                          'scipy',
+                          'sklearn',
+                          'pandas>=0.23',
+                          'spglib>1.11.0.19'],
+
+        packages=find_packages(),
         cmdclass={'build_ext': BuildExt},
         zip_safe=False,
         classifiers=classifiers,
+        license=license,
+        url=homepage,
     )
 
 
@@ -200,10 +219,16 @@ def setup_python_icet():
         author_email=email,
         description=description,
         long_description=long_description,
-        install_requires=['numpy', 'ase', 'scipy', 'sklearn', 'pandas>=0.23'],
+        install_requires=['ase',
+                          'numpy',
+                          'scipy',
+                          'sklearn',
+                          'pandas>=0.23',
+                          'spglib>1.11.0.19'],
         packages=find_packages(),
         classifiers=classifiers,
-
+        license=license,
+        url=homepage,
     )
 
 
@@ -214,18 +239,21 @@ def setup_python_mchammer():
         author=authors,
         author_email=email,
         description=description,
-        packages=find_packages(),
         long_description=long_description,
+        install_requires=['ase',
+                          'numpy',
+                          'scipy',
+                          'sklearn',
+                          'pandas>=0.23',
+                          'spglib>1.11.0.19'],
+        packages=find_packages(),
         classifiers=classifiers,
-
+        license=license,
+        url=homepage,
     )
 
 
 if __name__ == '__main__':
-    # Install cpp
-    # install_cpp_process = Process(target=setup_cpp)
-    # install_cpp_process.start()
-    # install_cpp_process.join()
 
     # Install python icet
     install_icet_process = Process(target=setup_python_icet)
@@ -236,3 +264,8 @@ if __name__ == '__main__':
     install_mchammer_process = Process(target=setup_python_mchammer)
     install_mchammer_process.start()
     install_mchammer_process.join()
+
+    # Install cpp
+    install_cpp_process = Process(target=setup_cpp)
+    install_cpp_process.start()
+    install_cpp_process.join()
