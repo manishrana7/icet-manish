@@ -2,21 +2,14 @@
 FROM ubuntu:18.10
 
 # Install required packages
-RUN apt-get update -qy
-RUN apt-get upgrade -qy
+RUN apt update -qy
+RUN apt upgrade -qy
 
-RUN apt-get install -qy \
-        build-essential \
-    	cmake \
-        libboost-dev \
-        libeigen3-dev \
-        python3-dev
-
-RUN apt-get install -qy \
+RUN apt install -qy \
         doxygen \
         graphviz
 
-RUN apt-get install -qy \
+RUN apt install -qy \
         python3-pip
 
 # Set up some Python3 packages via pip

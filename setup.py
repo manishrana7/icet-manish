@@ -1,58 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from setuptools import setup, Extension, find_packages
-from setuptools.command.build_ext import build_ext
-import sys
-import setuptools
+
+import glob
 import os
 import re
+import sys
 from multiprocessing import Process
-import glob
 
-
-def find_eigen(hint=None):
-    """
-    Find the location of the Eigen 3 include directory. This will return
-    ``None`` on failure.
-    """
-    # List the standard locations including a user supplied hint.
-    search_dirs = [] if hint is None else hint
-    search_dirs += [
-        "/usr/local/include/eigen3",
-        "/usr/local/homebrew/include/eigen3",
-        "/opt/local/var/macports/software/eigen3",
-        "/opt/local/include/eigen3",
-        "/usr/include/eigen3",
-        "/usr/include/local",
-        "/usr/include",
-        "src/3rdparty/eigen3/"
-    ]
-
-    # Loop over search paths and check for the existence of the Eigen/Dense
-    # header.
-    for d in search_dirs:
-        path = os.path.join(d, "Eigen", "Dense")
-        if os.path.exists(path):
-            # Determine the version.
-            vf = os.path.join(d, "Eigen", "src", "Core", "util", "Macros.h")
-            if not os.path.exists(vf):
-                continue
-            src = open(vf, "r").read()
-            v1 = re.findall("#define EIGEN_WORLD_VERSION (.+)", src)
-            v2 = re.findall("#define EIGEN_MAJOR_VERSION (.+)", src)
-            v3 = re.findall("#define EIGEN_MINOR_VERSION (.+)", src)
-            if not len(v1) or not len(v2) or not len(v3):
-                continue
-            v = "{0}.{1}.{2}".format(v1[0], v2[0], v3[0])
-            print("Found Eigen version {0} in: {1}".format(v, d))
-            return d
-    return None
-
-
-eigen_include = find_eigen()
-if eigen_include is None:
-    raise RuntimeError("Required library Eigen not found. "
-                       "Check the documentation for solutions.")
+import setuptools
+from setuptools import Extension, find_packages, setup
+from setuptools.command.build_ext import build_ext
 
 
 ext_modules = [
@@ -73,10 +30,9 @@ ext_modules = [
          'src/Structure.cpp',
          'src/Symmetry.cpp'],
         include_dirs=[
-            # Path to pybind11 headers
             'src/3rdparty/pybind11/include/',
             'src/3rdparty/boost_1_68_0/',
-            eigen_include,
+            'src/3rdparty/eigen3/'
         ],
         language='c++'
     ),
@@ -86,7 +42,8 @@ ext_modules = [
 # As of Python 3.6, CCompiler has a `has_flag` method.
 # cf http://bugs.python.org/issue26689
 def has_flag(compiler, flagname):
-    """Return a boolean indicating whether a flag name is supported on
+    """
+    Returns a boolean indicating whether a flag name is supported on
     the specified compiler.
     """
     import tempfile
@@ -100,7 +57,8 @@ def has_flag(compiler, flagname):
 
 
 def cpp_flag(compiler):
-    """Return the -std=c++[11/14] compiler flag.
+    """
+    Returns the -std=c++[11/14] compiler flag.
 
     The c++14 is prefered over c++11 (when it is available).
     """
@@ -127,15 +85,15 @@ class BuildExt(build_ext):
         ct = self.compiler.compiler_type
         opts = self.c_opts.get(ct, [])
         if ct == 'unix':
-            opts.append('-DVERSION_INFO="%s"' %
-                        self.distribution.get_version())
+            opts.append("-DVERSION_INFO='{}'".format(
+                        self.distribution.get_version()))
             opts.append(cpp_flag(self.compiler))
             opts.append('-O3')
             if has_flag(self.compiler, '-fvisibility=hidden'):
                 opts.append('-fvisibility=hidden')
         elif ct == 'msvc':
-            opts.append('/DVERSION_INFO=\\"%s\\"' %
-                        self.distribution.get_version())
+            opts.append("/DVERSION_INFO=\\'{}\\'".format(
+                        self.distribution.get_version()))
         for ext in self.extensions:
             ext.extra_compile_args = opts
         build_ext.build_extensions(self)
@@ -145,7 +103,7 @@ if sys.version_info < (3, 5, 0, 'final', 0):
     raise SystemExit('Python 3.5 or later is required!')
 
 
-with open('README.md', encoding="utf-8") as fd:
+with open('README.md', encoding='utf-8') as fd:
     long_description = fd.read()
 
 with open('icet/__init__.py', encoding='utf-8') as fd:
@@ -153,17 +111,24 @@ with open('icet/__init__.py', encoding='utf-8') as fd:
         lines = ''
         for item in fd.readlines():
             item = item
-            lines += item + "\n"
+            lines += item + '\n'
     except Exception as e:
-        raise Exception("Caught exception {}".format(e))
+        raise Exception('Caught exception {}'.format(e))
 
 
 version = re.search("__version__ = '(.*)'", lines).group(1)
 maintainer = re.search("__maintainer__ = '(.*)'", lines).group(1)
 email = re.search("__email__ = '(.*)'", lines).group(1)
 description = re.search("__description__ = '(.*)'", lines).group(1)
-authors = 'Mattias Ångqvist, William A. Muñoz, J. Magnus Rahm, Erik Fransson, Céline Durniak, Piotr Rozyczko, Thomas Holm Rod and Paul Erhart'
-# authors = 'Mattias Ångqvist, William Armando Muñoz, Thomas Holm Rod and Paul Erhart'
+author_list = ['Mattias Ångqvist',
+               'William A. Muñoz',
+               'J. Magnus Rahm',
+               'Erik Fransson',
+               'Céline Durniak',
+               'Piotr Rozyczko',
+               'Thomas Holm Rod',
+               'Paul Erhart']
+authors = ', '.join(author_list[:-1]) + 'and ' + author_list[-1]
 
 homepage = 'https://gitlab.com/materials-modeling/icet'
 license = 'Mozilla Public License Version 2.0'
@@ -201,7 +166,6 @@ def setup_cpp():
                           'sklearn',
                           'pandas>=0.23',
                           'spglib>1.11.0.19'],
-
         packages=find_packages(),
         cmdclass={'build_ext': BuildExt},
         zip_safe=False,
@@ -255,6 +219,11 @@ def setup_python_mchammer():
 
 if __name__ == '__main__':
 
+    # Install cpp
+    install_cpp_process = Process(target=setup_cpp)
+    install_cpp_process.start()
+    install_cpp_process.join()
+
     # Install python icet
     install_icet_process = Process(target=setup_python_icet)
     install_icet_process.start()
@@ -264,8 +233,3 @@ if __name__ == '__main__':
     install_mchammer_process = Process(target=setup_python_mchammer)
     install_mchammer_process.start()
     install_mchammer_process.join()
-
-    # Install cpp
-    install_cpp_process = Process(target=setup_cpp)
-    install_cpp_process.start()
-    install_cpp_process.join()
