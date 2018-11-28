@@ -4,13 +4,11 @@ FROM ubuntu:18.10
 # Install required packages
 RUN apt update -qy
 RUN apt upgrade -qy
-
+RUN apt install -qy \
+        python3-pip
 RUN apt install -qy \
         doxygen \
         graphviz
-
-RUN apt install -qy \
-        python3-pip
 
 # Set up some Python3 packages via pip
 RUN pip3 install --upgrade pip

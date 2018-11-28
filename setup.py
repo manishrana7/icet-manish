@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import glob
-import os
 import re
 import sys
 from multiprocessing import Process
@@ -85,15 +83,15 @@ class BuildExt(build_ext):
         ct = self.compiler.compiler_type
         opts = self.c_opts.get(ct, [])
         if ct == 'unix':
-            opts.append("-DVERSION_INFO='{}'".format(
-                        self.distribution.get_version()))
+            opts.append("-DVERSION_INFO='{}'"
+                        .format(self.distribution.get_version()))
             opts.append(cpp_flag(self.compiler))
             opts.append('-O3')
             if has_flag(self.compiler, '-fvisibility=hidden'):
                 opts.append('-fvisibility=hidden')
         elif ct == 'msvc':
-            opts.append("/DVERSION_INFO=\\'{}\\'".format(
-                        self.distribution.get_version()))
+            opts.append("/DVERSION_INFO=\\'{}\\'"
+                        .format(self.distribution.get_version()))
         for ext in self.extensions:
             ext.extra_compile_args = opts
         build_ext.build_extensions(self)
@@ -112,14 +110,10 @@ with open('icet/__init__.py', encoding='utf-8') as fd:
         for item in fd.readlines():
             item = item
             lines += item + '\n'
-    except Exception as e:
-        raise Exception('Caught exception {}'.format(e))
+    except Exception as exc:
+        raise Exception('Caught exception {}'.format(exc))
 
 
-version = re.search("__version__ = '(.*)'", lines).group(1)
-maintainer = re.search("__maintainer__ = '(.*)'", lines).group(1)
-email = re.search("__email__ = '(.*)'", lines).group(1)
-description = re.search("__description__ = '(.*)'", lines).group(1)
 author_list = ['Mattias Ångqvist',
                'William A. Muñoz',
                'J. Magnus Rahm',
@@ -130,8 +124,12 @@ author_list = ['Mattias Ångqvist',
                'Paul Erhart']
 authors = ', '.join(author_list[:-1]) + 'and ' + author_list[-1]
 
-homepage = 'https://gitlab.com/materials-modeling/icet'
-license = 'Mozilla Public License Version 2.0'
+version = re.search("__version__ = '(.*)'", lines).group(1)
+maintainer = re.search("__maintainer__ = '(.*)'", lines).group(1)
+email = re.search("__email__ = '(.*)'", lines).group(1)
+description = re.search("__description__ = '(.*)'", lines).group(1)
+url = re.search("__url__ = '(.*)'", lines).group(1)
+license = re.search("__license__ = '(.*)'", lines).group(1)
 
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -142,7 +140,7 @@ classifiers = [
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Intended Audience :: Science/Research',
-    'License :: OSI Approved :: MIT License',
+    'License :: OSI Approved :: {}'.format(license),
     'Operating System :: MacOS :: MacOS X',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: UNIX',
@@ -171,7 +169,7 @@ def setup_cpp():
         zip_safe=False,
         classifiers=classifiers,
         license=license,
-        url=homepage,
+        url=url,
     )
 
 
@@ -192,7 +190,7 @@ def setup_python_icet():
         packages=find_packages(),
         classifiers=classifiers,
         license=license,
-        url=homepage,
+        url=url,
     )
 
 
@@ -213,23 +211,23 @@ def setup_python_mchammer():
         packages=find_packages(),
         classifiers=classifiers,
         license=license,
-        url=homepage,
+        url=url,
     )
 
 
 if __name__ == '__main__':
 
     # Install cpp
-    install_cpp_process = Process(target=setup_cpp)
-    install_cpp_process.start()
-    install_cpp_process.join()
+    install_process = Process(target=setup_cpp)
+    install_process.start()
+    install_process.join()
 
     # Install python icet
-    install_icet_process = Process(target=setup_python_icet)
-    install_icet_process.start()
-    install_icet_process.join()
+    install_process = Process(target=setup_python_icet)
+    install_process.start()
+    install_process.join()
 
     # setup_python mchammer
-    install_mchammer_process = Process(target=setup_python_mchammer)
-    install_mchammer_process.start()
-    install_mchammer_process.join()
+    install_process = Process(target=setup_python_mchammer)
+    install_process.start()
+    install_process.join()
