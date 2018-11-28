@@ -8,7 +8,7 @@ build_linux:
   script:
     - mkdir build
     - cd build
-    - python3 -m pip install .. -t . -v
+    - python3 -m pip install .. -t . -v --no-cache-dir
   artifacts:
     expire_in: 14 days
     paths:
