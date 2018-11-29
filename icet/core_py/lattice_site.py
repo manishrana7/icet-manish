@@ -192,14 +192,12 @@ class LatticeSiteLean(list):
 
         return self.__str__()
 
-<<<<<<< HEAD
     def __hash__(self):
         """
         Generate a hash based on index and unitcell_offset.
         """
         return hash((self.index, self.unitcell_offset[0],
                      self.unitcell_offset[1], self.unitcell_offset[2]))
-=======
     def __add__(self, other):
         """
         Define the add operator.
@@ -274,4 +272,3 @@ def cmp_to_key(mycmp):
         def __ne__(self, other):
             return mycmp(self.obj, other.obj)
     return K
->>>>>>> master
