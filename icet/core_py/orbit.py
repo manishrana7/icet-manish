@@ -12,21 +12,22 @@ class Orbit(object):
     contains a sorted Cluster for representation
     Can be compared to other orbits.
 
+    parameters
+    ----------
+    cluster : icet cluster object
     TODO
     ----
     * think about adding __hash__ ?
     * think about overloading orbit + orbit
-    Blocked TODO's by Cluster class:
-    * geometrical_size() (returns -1 now so we can test it)
-    * representative_cluster
     """
 
-    def __init__(self):
+    def __init__(self, cluster):
         self._equivalent_sites = []
         self._representative_cluster = None
-        self.geometrical_size_tolerance = 1e-5
+        self.radius_tolerance = 1e-5
         self._allowed_permutations = []
         self._permutations_to_representative = []
+        self._representative_cluster = cluster
 
     @property
     def equivalent_sites(self):
@@ -82,15 +83,16 @@ class Orbit(object):
         return len(self.equivalent_sites)
 
     @property
-    def geometrical_size(self):
+    def radius(self):
         """
         Returns the geometrical size of the
         representative cluster.
+
         TODO
         ----
         * Implement this when cluster is available.
         """
-        return -1
+        return self.representative_cluster.radius
 
     def sort(self):
         """
@@ -118,12 +120,11 @@ class Orbit(object):
         if self.order != other.order:
             return self.order < other.order
 
-        if np.abs(self.geometrical_size -
-                  other.geometrical_size) > self.geometrical_size_tolerance:
-            return self.geometrical_size < other.geometrical_size
+        if np.abs(self.radius - other.radius) > self.radius_tolerance:
+            return self.radius < other.radius
 
         if len(self) != len(other):
-            return len(self) < len(other.orbit)
+            return len(self) < len(other)
 
         return self.equivalent_sites < other.equivalent_sites
 
@@ -136,7 +137,7 @@ class Orbit(object):
         if not isinstance(other, type(np.array([1, 1, 1]))) or len(other) != 3:
             raise TypeError("Adding orbit with {}".format(other))
 
-        orbit = Orbit()
+        orbit = Orbit(self.representative_cluster)
         orbit.equivalent_sites = copy.deepcopy(self.equivalent_sites)
         for sites in orbit.equivalent_sites:
             for site in sites:
@@ -151,12 +152,10 @@ class Orbit(object):
         takes self.equivalent_sites[i] to
         the same order as self.representative_sites.
 
-        Explanation
-        -------
         This can be used if you for example want to
         count elements and are interested in difference
         between ABB, BAB, BBA and so on. If you count the
-        lattice sites that are permutated according to
+        lattice sites that are permuted according to
         these permutations then you will get the correct
         counts.
 
@@ -178,8 +177,6 @@ class Orbit(object):
         Get the list of equivalent permutations
         for this orbit.
 
-        Explanation
-        -------
         If this orbit is a triplet
         and the permutation [0,2,1]
         exists this means that
@@ -203,16 +200,16 @@ class Orbit(object):
         self._allowed_permutations = permutations
 
     @property
-    def permutated_sites(self):
+    def permuted_sites(self):
         """
-        Get the equivalent sites but permutated
+        Get the equivalent sites but permuted
         to representative site.
         """
-        return [self.get_permutated_sites(index) for index in range(len(self))]
+        return [self.get_permuted_sites(index) for index in range(len(self))]
 
-    def get_permutated_sites(self, index):
+    def get_permuted_sites(self, index):
         """
-        Return the permutated to representative
+        Return the permuted to representative
         sites of equivalent_sites[index].
         """
         return get_permutation(self.equivalent_sites[index],
@@ -241,14 +238,14 @@ class Orbit(object):
         all_possible_mc_vectors.sort()
         mc_vectors = []
         for mc_vector in all_possible_mc_vectors:
-            permutated_mc_vector = []
+            permuted_mc_vector = []
             for allowed_permutation in self.allowed_permutations:
-                permutated_mc_vector.append(
+                permuted_mc_vector.append(
                     tuple(get_permutation(mc_vector, allowed_permutation))
                 )
             # If this mc vector or any of its allowed permutations
             # exist in mc_vectors append this to the mc vectors
-            if set(permutated_mc_vector).isdisjoint(mc_vectors):
+            if set(permuted_mc_vector).isdisjoint(mc_vectors):
                 mc_vectors.append(mc_vector)
         return mc_vectors
 

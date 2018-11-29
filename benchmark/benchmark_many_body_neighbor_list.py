@@ -1,6 +1,5 @@
 import time
 from ase.build import bulk
-import ase.neighborlist as asenl
 from icet import Structure
 from icet.core.neighbor_list import NeighborList
 from icet.core_py.many_body_neighbor_list import (
@@ -34,20 +33,14 @@ def build_many_body_neighbor_list_python(atoms, order, cutoff):
     Build a many-body neighbor list up to `order` based on the
     Python implementation from ASE.
     '''
-    mbnl_T = TestManyBodyNeighborList()
-    ase_nl = asenl.NeighborList(len(atoms) * [cutoff / 2.0], skin=1e-8,
-                                bothways=True, self_interaction=False)
-    ase_nl.update(atoms)
+
     cutoffs = (order - 1) * [cutoff]
-    neighbor_lists = []
-    for co in cutoffs:
-        ase_nl.update(structure)
-        neighbor_lists.append(ase_nl)
+    mbnl_T = TestManyBodyNeighborList(atoms, cutoffs)
 
     bothways = False
     t = time.process_time()
     for i in range(len(atoms)):
-        mbnl_T.build(neighbor_lists, i, bothways=bothways)
+        mbnl_T.build(i, bothways=bothways)
     elapsed_time = time.process_time() - t
     return elapsed_time
 

@@ -1,7 +1,7 @@
 import os
 import sys
 import unittest
-from icet.io.logging import set_config
+from icet.io.logging import set_log_config
 
 
 class ScriptTestCase(unittest.TestCase):
@@ -51,9 +51,11 @@ def find_script_tests(suite, script_dir):
 
 if __name__ == "__main__":
 
-    import generate_structures_for_testing  # noqa
+    from generate_structures_for_testing import create_database
 
-    set_config(level=40)
+    create_database()
+
+    set_log_config(level='ERROR')
 
     # Find testing dirs
     main_dir = os.path.dirname(__file__)
@@ -66,4 +68,7 @@ if __name__ == "__main__":
 
     # Run tests
     ttr = unittest.TextTestRunner(stream=sys.stdout, verbosity=2)
-    ttr.run(suite)
+    results = ttr.run(suite)
+
+    assert len(results.failures) == 0, "At least one test failed"
+    assert len(results.errors) == 0, "At least one test failed"

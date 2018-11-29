@@ -1,20 +1,12 @@
 #pragma once
 
-#include <pybind11/pybind11.h>
-#include <iostream>
-#include <pybind11/eigen.h>
-#include <Eigen/Dense>
 #include <vector>
 #include "LatticeSite.hpp"
 #include "Structure.hpp"
 
+namespace icet {
 
-namespace icet
-{
-
-/// Returns the geomtetrical radius from the vectors of latticeneighbors and a unitcell
-double getGeometricalRadius(const std::vector<LatticeSite> &, const Structure &);
-
-
+    /// Returns the geometrical radius of a cluster.
+    double getGeometricalRadius(const std::vector<LatticeSite> &, const Structure &);
 
 }

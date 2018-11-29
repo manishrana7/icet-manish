@@ -35,12 +35,9 @@ Cluster::Cluster(const Structure &structure,
     _sites = sites;
     _distances = distances;
     _tag = tag;
-    _geometricalSize = icet::getGeometricalRadius(latticeSites, structure);
+    _radius = icet::getGeometricalRadius(latticeSites, structure);
     _sorted = sorted;
-    if (_sorted)
-    {
-        sort();
-    }
+    if (_sorted) sort();
 }
 
 /**
@@ -118,7 +115,7 @@ void Cluster::sort()
     std::vector<int> min_sites;
     std::vector<int> min_indices;
 
-    auto equal_minimum_first_sites = getEqual_minimum_first_sites(localEnvironments);
+    auto equal_minimum_first_sites = getEqualMinimumFirstSites(localEnvironments);
     if (equal_minimum_first_sites.size() > 1)
     {
         // Case 1
@@ -157,7 +154,7 @@ void Cluster::sort()
 
 
 /// Brute force attempt to find minimum clusters
-std::tuple<std::vector<int>, std::vector<double>, std::vector<int>> Cluster::getNumberOfAllowedComponentsnimumStateBruteForce()
+std::tuple<std::vector<int>, std::vector<double>, std::vector<int>> Cluster::findMinimumClusterByBruteForce()
 {
 
     std::vector<int> atomic_order(_sites.size());
@@ -193,7 +190,7 @@ combinations of sites and sees if there is a lower state of the cluster.
 void Cluster::validateSorting()
 {
 
-    auto minBruteForce = getNumberOfAllowedComponentsnimumStateBruteForce();
+    auto minBruteForce = findMinimumClusterByBruteForce();
     auto bruteforce_order = std::get<0>(minBruteForce);
     auto bruteForceDists = std::get<1>(minBruteForce);
     auto bruteForceSites = std::get<2>(minBruteForce);
@@ -237,7 +234,7 @@ void Cluster::validateSorting()
 Get all equal nearestNeighborDistances that are identical to the minimum one
 Equality means all distances and sites are equal.
 */
-std::vector<LocalEnvironment> Cluster::getEqual_minimum_first_sites(const std::vector<LocalEnvironment> &i_neighbors) const
+std::vector<LocalEnvironment> Cluster::getEqualMinimumFirstSites(const std::vector<LocalEnvironment> &i_neighbors) const
 {
     std::vector<LocalEnvironment> equalFirstDists;
     equalFirstDists.push_back(i_neighbors[0]);
@@ -353,7 +350,7 @@ std::tuple<std::vector<double>, std::vector<int>, std::vector<int>> Cluster::cas
 
 
 /**
-Rearranges distances and sites to the order given in minimumOrder
+@details Rearranges distances and sites to the order given in minimumOrder.
 
 example:
 -------
@@ -813,7 +810,7 @@ void Cluster::print() const
     {
         std::cout << s << " ";
     }
-    std::cout<< _geometricalSize<< " ";
+    std::cout << _radius << " ";
     std::cout << std::endl;
 
 }

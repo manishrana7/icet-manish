@@ -31,8 +31,8 @@ for row in db.select():
         assert (np.abs(ase_pos - struct_pos) < _tolerance).all(), msg
 
     ''' Test that chemical symbols are equal '''
-    for ase_symbol, struct_symbol in zip(atoms_row.get_atomic_numbers(),
-                                         structure.get_atomic_numbers()):
+    for ase_symbol, struct_symbol in zip(atoms_row.get_chemical_symbols(),
+                                         structure.get_chemical_symbols()):
         msg = 'Test for atomic numbers failed for structure {}'.format(row.tag)
         msg += '; {} != {}'.format(ase_symbol, struct_symbol)
         assert ase_symbol == struct_symbol, msg

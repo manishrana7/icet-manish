@@ -1,15 +1,15 @@
-'''
+"""
 Handling of Hermite Normal Form matrices
-'''
+"""
 
 import numpy as np
 from .smith_normal_form import SmithNormalForm
 
 
 class HermiteNormalForm(object):
-    '''
+    """
     Hermite Normal Form matrix.
-    '''
+    """
 
     def __init__(self, H, rotations, translations, basis_shifts):
         self.H = H
@@ -19,7 +19,7 @@ class HermiteNormalForm(object):
 
     def compute_transformations(self, rotations, translations, basis_shifts,
                                 tol=1e-3):
-        '''
+        """
         Save transformations (based on rotations) that turns the supercell
         into an equivalent supercell. Precompute these transformations,
         consisting of permutation as well as translation and basis shift, for
@@ -30,7 +30,7 @@ class HermiteNormalForm(object):
         rotations : list of ndarrays
         translations : list of ndarrays
         basis_shifts : ndarray
-        '''
+        """
 
         for R, T, basis_shift in zip(rotations, translations,
                                      basis_shifts):
@@ -46,36 +46,70 @@ class HermiteNormalForm(object):
                 self.transformations.append([LRL, LT, basis_shift])
 
 
-def yield_hermite_normal_forms(det):
-    '''
+def yield_hermite_normal_forms(det, pbc):
+    """
     Yield all Hermite Normal Form matrices with determinant det.
 
     Parameters
     ----------
     det : int
         Target determinant of HNFs
+    pbc : list of bools
+        Periodic boundary conditions of the primitive structure
 
     Yields
     ------
     ndarray
         3x3 HNF matrix
-    '''
-    for a in range(1, det + 1):
-        if det % a == 0:
-            for c in range(1, det // a + 1):
-                if det // a % c == 0:
-                    f = det // (a * c)
-                    for b in range(0, c):
-                        for d in range(0, f):
-                            for e in range(0, f):
-                                hnf = [[a, 0, 0],
-                                       [b, c, 0],
-                                       [d, e, f]]
-                                yield np.array(hnf)
+    """
+
+    # 1D
+    if sum(pbc) == 1:
+        hnf = np.eye(3, dtype=int)
+        for i, bc in enumerate(pbc):
+            if bc:
+                hnf[i, i] = det
+                break
+        yield hnf
+
+    # 2D
+    elif sum(pbc) == 2:
+        for a in range(1, det + 1):
+            if det % a == 0:
+                c = det // a
+                for b in range(0, c):
+                    if not pbc[0]:
+                        hnf = [[1, 0, 0],
+                               [0, a, 0],
+                               [0, b, c]]
+                    elif not pbc[1]:
+                        hnf = [[a, 0, 0],
+                               [0, 1, 0],
+                               [b, 0, c]]
+                    else:
+                        hnf = [[a, 0, 0],
+                               [b, c, 0],
+                               [0, 0, 1]]
+                    yield np.array(hnf)
+
+    # 3D
+    else:
+        for a in range(1, det + 1):
+            if det % a == 0:
+                for c in range(1, det // a + 1):
+                    if det // a % c == 0:
+                        f = det // (a * c)
+                        for b in range(0, c):
+                            for d in range(0, f):
+                                for e in range(0, f):
+                                    hnf = [[a, 0, 0],
+                                           [b, c, 0],
+                                           [d, e, f]]
+                                    yield np.array(hnf)
 
 
-def get_reduced_hnfs(ncells, symmetries, tol=1e-3):
-    '''
+def get_reduced_hnfs(ncells, symmetries, pbc, tol=1e-3):
+    """
     For a fixed determinant N (i.e., a number of atoms N), yield all
     Hermite Normal Forms (HNF) that are inequivalent under symmetry
     operations of the parent lattice.'
@@ -86,17 +120,19 @@ def get_reduced_hnfs(ncells, symmetries, tol=1e-3):
         Determinant (or, equivalently, the number of atoms) of the HNF.
     symmetries : dict of lists
         Symmetry operations of the parent lattice.
+    pbc : list of bools
+        Periodic boundary conditions of the primitive structure
 
     Returns
     ------
     list of ndarrays
         Symmetrically inequivalent HNFs with determinant N.
-    '''
+    """
     rotations = symmetries['rotations']
     translations = symmetries['translations']
     basis_shifts = symmetries['basis_shifts']
     hnfs = []
-    for hnf in yield_hermite_normal_forms(ncells):
+    for hnf in yield_hermite_normal_forms(ncells, pbc):
 
         # Throw away HNF:s that yield equivalent supercells
         hnf_inv = np.linalg.inv(hnf)

@@ -1,25 +1,29 @@
 #include "Geometry.hpp"
 
-
 namespace icet
 {
-/// Returns the geomtetrical radius from the vectors of latticeneighbors and a unitcell
-double getGeometricalRadius(const std::vector<LatticeSite> &latticeNeigbhors, const Structure &structure)
-{
-    Vector3d centerPosition = {0.0, 0.0, 0.0};
-    for(const auto &latnbr : latticeNeigbhors)
+
+    /**
+     @details This function computes the geometrical radius of a cluster that is defined in terms of lattice sites.
+    @param latticeSites a list of lattice sites
+    @param structure atomic configuration used to convert information in latticeSites to Cartesian coordinates
+    */
+    double getGeometricalRadius(const std::vector<LatticeSite> &latticeSites, const Structure &structure)
     {
-        centerPosition += structure.getPosition(latnbr)/latticeNeigbhors.size();
+        // Compute the center of the cluster.
+        Vector3d centerPosition = {0.0, 0.0, 0.0};
+        for(const auto &latnbr : latticeSites)
+        {
+            centerPosition += structure.getPosition(latnbr) / latticeSites.size();
+        }
+
+        // Compute the average distance of the points in the cluster to its center.
+        double avgDistanceToCenter = 0.0;
+        for(const auto &latnbr : latticeSites)
+        {
+            avgDistanceToCenter += (centerPosition - structure.getPosition(latnbr)).norm() / latticeSites.size();
+        }
+        return avgDistanceToCenter;
     }
-
-    double avgDistanceToCenter = 0.0;
-    for(const auto &latnbr : latticeNeigbhors)
-    {
-        avgDistanceToCenter += (centerPosition-structure.getPosition(latnbr)).norm()/latticeNeigbhors.size();
-    }
-    return avgDistanceToCenter;
-}
-
-
 
 }

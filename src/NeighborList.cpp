@@ -100,7 +100,7 @@ void NeighborList::build(const Structure &conf)
                         {
                             Vector3d noOffset(0, 0, 0);
                             double distance_ij = conf.getDistance(i, j, noOffset, extVector);
-                            if (distance_ij <= _cutoff && distance_ij > 2 * DISTTOL)
+                            if (distance_ij <= _cutoff + DISTTOL && distance_ij > 2 * DISTTOL)
                             {
                                 LatticeSite neighbor = LatticeSite(j, extVector);
                                 auto find_neighbor = std::find(_neighbors[i].begin(),_neighbors[i].end(), neighbor);

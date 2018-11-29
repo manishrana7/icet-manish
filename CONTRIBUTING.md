@@ -124,6 +124,55 @@ Good job, you are still reading! [Will you make it to the
 end?](https://xkcd.com/169/)
 
 
+Logging usage
+-------------
+We use the [standard python logging
+library](https://docs.python.org/3/library/logging.html)
+to write verbose error, warnings, information and debug messages. We strongly
+encourage the use of it, in particular to replace `print()` statements that
+displays on console debugging information.
+
+Adding a logger to a python module can be done easily
+at the top the module following this example:
+```python
+from icet.io.logging import logger
+logger = logger.getChild('icetmodulename')
+```
+Configuring logging is done for the whole suite in icet/io/logging.py file:
+```python
+import logging
+logger = logging.getLogger('icet')
+logger.setLevel(logging.DEBUG)
+```
+Note that logger's level is default to DEBUG. However, only
+log events with WARNING level or higher (like ERROR or CRITICAL)
+will be displayed on console like this:
+```
+icet.fit_methods: WARNING - Failed to import scikit-learn; several optimizers will fail
+```
+Any logging customization can be done by setting up the
+logger's configuration either in the logging.py file or by using the
+`set_log_config()` function:
+```python
+from icet.io.logging import set_log_config
+set_log_config(level='INFO')
+```
+In which case the output will show an info messages on console as follows:
+```
+icet.orbit_list: INFO - Finished construction of orbit list.
+```
+In the same way, log events above certain level can be written to a file:
+```python
+set_log_config(filename='logger.log', level='DEBUG')
+```
+Most advanced features allow you to write different logging events to separate
+files as in the following example:
+```python
+set_log_config(filename='info.log', level='INFO', restricted=True)
+set_log_config(filename='debug.log', level='DEBUG', restricted=True)
+```
+
+
 Please use spaces
 -----------------
 

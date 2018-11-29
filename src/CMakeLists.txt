@@ -13,7 +13,7 @@ SET(SourceFiles
   NeighborList.cpp
   ManyBodyNeighborList.cpp
   Cluster.cpp
-  PermutationMap.cpp
+  PermutationMatrix.cpp
   ClusterCounts.cpp
   Orbit.cpp
   OrbitList.cpp
@@ -21,6 +21,7 @@ SET(SourceFiles
   ClusterSpace.cpp
   Symmetry.cpp
   Geometry.cpp
+  ClusterExpansionCalculator.cpp
 )
 
 PYBIND11_ADD_MODULE(_icet ${SourceFiles})
