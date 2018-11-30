@@ -105,6 +105,15 @@ class TestEnsemble(unittest.TestCase):
         self.assertTrue("Missing required keyword argument: calculator"
                         in str(context.exception))
 
+        # wrong path to data container file
+        with self.assertRaises(FileNotFoundError) as context:
+            ConcreteEnsemble(calculator=self.calculator,
+                             atoms=self.atoms,
+                             data_container='path/to/nowhere/mydc')
+
+        self.assertTrue('Path to data container file does not exist:'
+                        ' path/to/nowhere' in str(context.exception))
+
     def test_property_name(self):
         """Tests name property."""
         self.assertEqual('test-ensemble', self.ensemble.name)
