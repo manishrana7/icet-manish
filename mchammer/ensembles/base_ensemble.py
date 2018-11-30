@@ -123,8 +123,8 @@ class BaseEnsemble(ABC):
         else:
             if data_container is not None:
                 # check if path to file exists
-                filedir = os.path.split(data_container)[0]
-                if filedir and not os.path.exists(filedir):
+                filedir = os.path.dirname(data_container)
+                if filedir and not os.path.isdir(filedir):
                     raise FileNotFoundError('Path to data container file does'
                                             ' not exist: {}'.format(filedir))
             self._data_container = \
