@@ -72,53 +72,56 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
 
     Parameters
     ----------
-    temperature : float temperature :math:`T` in appropriate units [commonly
-        Kelvin] boltzmann_constant : float Boltzmann constant :math:`k_B` in
-        appropriate units, i.e. units that are consistent with the underlying
-        cluster expansion and the temperature units [default: eV/K]
-        chemical_potentials : Dict[str, float] chemical potential for each
-        species :math:`\\mu_i`; the key denotes the species, the value
-        specifies the chemical potential in units that are consistent with the
-        underlying cluster expansion calculator : :class:`BaseCalculator`
-        calculator to be used for calculating the potential changes that enter
-        the evaluation of the Metropolis criterion atoms : :class:`ase:Atoms`
-        atomic configuration to be used in the Monte Carlo simulation; also
-        defines the initial occupation vector name : str human-readable
-        ensemble name [default: `BaseEnsemble`] data_container : str name of
-        file the data container associated with the ensemble will be written
-        to; if the file exists it will be read, the data container will be
-        appended, and the file will be updated/overwritten
-        ensemble_data_write_interval : int interval at which data is written to
-        the data container; this includes for example the current value of the
-        calculator (i.e. usually the energy) as well as ensembles specific
-        fields such as tepythomperature or the number of atoms of different
-        species data_containerpytho_write_period : float period in pythounits
-        of seconds at which the data container is written to file; writing
-        periodically to file provides both a way to examine the progress of the
-        simulation and to back up the data [default: np.inf]
-        trajectory_write_interval : int interval at which the current
-        occupation vector of the atomic configuration is written to the data
-        container. random_seed : int seed for the random number generator used
-        in the Monte Carlo simulation
-
-    Attributes
-    ----------
-    temperature : float temperature :math:`T` (see parameters section above)
-        boltzmann_constant : float Boltzmann constant :math:`k_B` (see
-        parameters section above) accepted_trials : int number of accepted
-        trial steps total_trials : int number of total trial steps
-        data_container_write_period : int period in units of seconds at which
-        the data container is written to file
+    atoms : :class:`ase:Atoms`
+        atomic configuration to be used in the Monte Carlo simulation;
+        also defines the initial occupation vector
+    calculator : :class:`BaseCalculator`
+        calculator to be used for calculating the potential changes
+        that enter the evaluation of the Metropolis criterion
+    name : str
+        human-readable ensemble name [default: `BaseEnsemble`]
+    data_container : str
+        name of file the data container associated with the ensemble
+        will be written to; if the file exists it will be read, the
+        data container will be appended, and the file will be
+        updated/overwritten
+    random_seed : int
+        seed for the random number generator used in the Monte Carlo
+        simulation
+    ensemble_data_write_interval : int
+        interval at which data is written to the data container; this
+        includes for example the current value of the calculator
+        (i.e. usually the energy) as well as ensembles specific fields
+        such as temperature or the number of atoms of different species
+    data_container_write_period : float
+        period in units of seconds at which the data container is
+        written to file; writing periodically to file provides both
+        a way to examine the progress of the simulation and to back up
+        the data [default: np.inf]
+    trajectory_write_interval : int
+        interval at which the current occupation vector of the atomic
+        configuration is written to the data container.
+    boltzmann_constant : float
+        Boltzmann constant :math:`k_B` in appropriate
+        units, i.e. units that are consistent
+        with the underlying cluster expansion
+        and the temperature units [default: eV/K]
+    temperature : float
+        temperature :math:`T` in appropriate units [commonly Kelvin]
+    chemical_potentials : Dict[str, float]
+        chemical potential for each species :math:`\\mu_i`; the key
+        denotes the species, the value specifies the chemical potential in
+        units that are consistent with the underlying cluster expansion
     """
 
-    def __init__(self, atoms: Atoms = None, calculator: BaseCalculator = None,
+    def __init__(self, atoms: Atoms, calculator: BaseCalculator,
                  name: str = 'Semi-grand canonical ensemble',
                  data_container: DataContainer = None, random_seed: int = None,
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None,
-                 boltzmann_constant: float = kB, *, temperature: float,
-                 chemical_potentials: Dict[str, float]) -> None:
+                 boltzmann_constant: float = kB, temperature: float = None,
+                 chemical_potentials: Dict[str, float] = None) -> None:
 
         super().__init__(
             atoms=atoms, calculator=calculator, name=name,
@@ -128,15 +131,31 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
             ensemble_data_write_interval=ensemble_data_write_interval,
             trajectory_write_interval=trajectory_write_interval)
 
-        self.temperature = temperature
-        self.boltzmann_constant = boltzmann_constant
+        if temperature is None:
+            raise TypeError('Missing required keyword argument: temperature')
+        self._temperature = temperature
+
+        self._boltzmann_constant = boltzmann_constant
 
         self._chemical_potentials = None
-        self.chemical_potentials = chemical_potentials
+        if chemical_potentials is None:
+            raise TypeError('Missing required keyword argument:'
+                            ' chemical_potentials')
+        self._set_chemical_potentials(chemical_potentials)
+
+    @property
+    def temperature(self) -> float:
+        """ temperature :math:`T` (see parameters section above) """
+        return self._temperature
+
+    @property
+    def boltzmann_constant(self) -> float:
+        """ Boltzmann constant :math:`k_B` (see parameters section above) """
+        return self._boltzmann_constant
 
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
-        self.total_trials += 1
+        self._total_trials += 1
 
         # energy change
         sublattice_index = self.get_random_sublattice_index()
@@ -152,7 +171,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
         potential_diff += chemical_potential_diff
 
         if self._acceptance_condition(potential_diff):
-            self.accepted_trials += 1
+            self._accepted_trials += 1
             self.update_occupations([index], [species])
 
     def _acceptance_condition(self, potential_diff: float) -> bool:
@@ -174,14 +193,18 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
 
     @property
     def chemical_potentials(self) -> Dict[int, float]:
-        """ chemical potentials :math:`\\mu_i` """
+        """
+        chemical potentials :math:`\\mu_i` (see parameters section above)
+        """
         return self._chemical_potentials
 
-    @chemical_potentials.setter
-    def chemical_potentials(self,
-                            chemical_potentials: Dict[Union[int, str], float]):
+    def _set_chemical_potentials(self,
+                                 chemical_potentials:
+                                 Dict[Union[int, str], float]):
+        """ Sets values of chemical potentials. """
         if not isinstance(chemical_potentials, dict):
-            raise TypeError('chemical_potentials has the wrong type')
+            raise TypeError('chemical_potentials has the wrong type: {}'
+                            .format(type(chemical_potentials)))
 
         cps = OrderedDict([(key, val) if isinstance(key, int)
                            else (atomic_numbers[key], val)
@@ -194,8 +217,8 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
             for num in cps:
                 if num not in self._chemical_potentials:
                     raise ValueError(
-                        'Unknown species {} in chemical_potentials'.
-                        format(num))
+                        'Unknown species {} in chemical_potentials'
+                        .format(num))
             self._chemical_potentials.update(cps)
 
     def _get_ensemble_data(self) -> Dict:

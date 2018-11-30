@@ -34,19 +34,20 @@ class TestEnsemble(unittest.TestCase):
         """Setup before each test."""
         self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
         self.ensemble = CanonicalEnsemble(
-            calculator=self.calculator, atoms=self.atoms,
+            atoms=self.atoms,
+            calculator=self.calculator,
             name='test-ensemble', random_seed=42,
             data_container_write_period=499.0,
             ensemble_data_write_interval=25,
             trajectory_write_interval=40,
             temperature=self.temperature)
 
-    def test_temperature_attribute(self):
-        """Tests temperature attribute."""
-
-        self.assertEqual(self.ensemble.temperature, self.temperature)
-        self.ensemble.temperature = 300
-        self.assertEqual(self.ensemble.temperature, 300)
+    def test_init(self):
+        """ Tests exceptions are raised during initialization. """
+        with self.assertRaises(TypeError) as context:
+            CanonicalEnsemble(atoms=self.atoms, calculator=self.calculator)
+        self.assertTrue('Missing required keyword argument: temperature' in
+                        str(context.exception))
 
     def test_do_trial_step(self):
         """Tests the do trial step."""
@@ -55,7 +56,7 @@ class TestEnsemble(unittest.TestCase):
         for _ in range(10):
             self.ensemble._do_trial_step()
 
-        self.assertEqual(self.ensemble.total_trials, 10)
+        self.assertEqual(self.ensemble._total_trials, 10)
 
     def test_acceptance_condition(self):
         """Tests the acceptance condition method."""
@@ -69,16 +70,24 @@ class TestEnsemble(unittest.TestCase):
         """Tests init with explicit Boltzmann constant."""
         from ase.units import kB
         ens = CanonicalEnsemble(
-            calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
+            atoms=self.atoms,
+            calculator=self.calculator,
+            name='test-ensemble',
             random_seed=42, temperature=100.0)
         self.assertAlmostEqual(kB, ens.boltzmann_constant)
 
         ens = CanonicalEnsemble(
-            calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
+            atoms=self.atoms,
+            calculator=self.calculator,
+            name='test-ensemble',
             random_seed=42, temperature=100.0, boltzmann_constant=1.0)
         self.assertAlmostEqual(1.0, ens.boltzmann_constant)
 
-    def test__get_ensemble_data(self):
+    def test_property_temperature(self):
+        """Tests property temperature."""
+        self.assertEqual(self.ensemble.temperature, self.temperature)
+
+    def test_get_ensemble_data(self):
         """Tests the get ensemble data method."""
         data = self.ensemble._get_ensemble_data()
 
