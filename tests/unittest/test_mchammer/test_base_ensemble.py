@@ -111,8 +111,8 @@ class TestEnsemble(unittest.TestCase):
                              atoms=self.atoms,
                              data_container='path/to/nowhere/mydc')
 
-        self.assertTrue("Path to data container file does not exist:"
-                        " path/to/nowhere" in str(context.exception))
+        self.assertTrue('Path to data container file does not exist:'
+                        ' path/to/nowhere' in str(context.exception))
 
     def test_property_name(self):
         """Tests name property."""
