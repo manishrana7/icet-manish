@@ -6,7 +6,7 @@ import unittest
 from ase.build import bulk
 from ase.neighborlist import NeighborList
 
-from icet.core_py.lattice_site import LatticeSite as LatticeSite_py
+from icet.core.lattice_site import LatticeSite
 from icet.tools.geometry import get_fractional_positions_from_ase_neighbor_list
 from icet.tools.geometry import find_lattice_site_by_position
 from icet.tools.geometry import get_position_from_lattice_site
@@ -75,7 +75,7 @@ class TestGeometry(unittest.TestCase):
         for j in range(500):
             offset = [random.randint(-unit_cell_range, unit_cell_range)
                       for i in range(3)]
-            lattice_sites.append(LatticeSite_py(0, offset))
+            lattice_sites.append(LatticeSite(0, offset))
 
         positions = []
         for site in lattice_sites:
@@ -102,7 +102,7 @@ class TestGeometry(unittest.TestCase):
             offset = [random.randint(-unit_cell_range, unit_cell_range)
                       for i in range(3)]
             index = random.randint(0, len(atoms) - 1)
-            lattice_sites.append(LatticeSite_py(index, offset))
+            lattice_sites.append(LatticeSite(index, offset))
 
         positions = []
         for site in lattice_sites:
@@ -135,7 +135,7 @@ class TestGeometry(unittest.TestCase):
                       for i in range(3)]
             offset[2] = 0
             index = random.randint(0, len(atoms) - 1)
-            lattice_sites.append(LatticeSite_py(index, offset))
+            lattice_sites.append(LatticeSite(index, offset))
 
         positions = []
         for site in lattice_sites:
