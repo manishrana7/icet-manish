@@ -42,12 +42,13 @@ class DictObserver(BaseObserver):
 
 class ConcreteEnsemble(BaseEnsemble):
 
-    def __init__(self, calculator, atoms=None, name=None, data_container=None,
+    def __init__(self, atoms, calculator, name=None, data_container=None,
                  data_container_write_period=np.inf, random_seed=None,
                  ensemble_data_write_interval=None,
                  trajectory_write_interval=None):
         super().__init__(
-            calculator, atoms=atoms, name=name, data_container=data_container,
+            atoms=atoms, calculator=calculator, name=name,
+            data_container=data_container,
             data_container_write_period=data_container_write_period,
             random_seed=random_seed,
             ensemble_data_write_interval=ensemble_data_write_interval,
@@ -78,7 +79,7 @@ class TestEnsemble(unittest.TestCase):
         """Setup before each test."""
         self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
         self.ensemble = ConcreteEnsemble(
-            calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
+            atoms=self.atoms, calculator=self.calculator, name='test-ensemble',
             random_seed=42)
 
         # Create an observer for testing.
@@ -89,26 +90,21 @@ class TestEnsemble(unittest.TestCase):
 
     def test_init(self):
         """Tests exceptions are raised in initialization."""
-        # without atoms parameters
-        with self.assertRaises(Exception) as context:
-            ConcreteEnsemble(calculator=self.calculator, atoms=None,
-                             name='test-ensemble', random_seed=42)
 
-        self.assertTrue("Missing required keyword argument: atoms"
-                        in str(context.exception))
+        with self.assertRaises(TypeError) as context:
+            ConcreteEnsemble(calculator=self.calculator)
+        self.assertIn("required positional argument: 'atoms'",
+                      str(context.exception))
 
-        # without calculator
-        with self.assertRaises(Exception) as context:
-            ConcreteEnsemble(calculator=None, atoms=self.atoms,
-                             name='test-ensemble', random_seed=42)
-
-        self.assertTrue("Missing required keyword argument: calculator"
-                        in str(context.exception))
+        with self.assertRaises(TypeError) as context:
+            ConcreteEnsemble(atoms=self.atoms)
+        self.assertIn("required positional argument: 'calculator'",
+                      str(context.exception))
 
         # wrong path to data container file
         with self.assertRaises(FileNotFoundError) as context:
-            ConcreteEnsemble(calculator=self.calculator,
-                             atoms=self.atoms,
+            ConcreteEnsemble(atoms=self.atoms,
+                             calculator=self.calculator,
                              data_container='path/to/nowhere/mydc')
 
         self.assertTrue('Path to data container file does not exist:'
@@ -128,20 +124,26 @@ class TestEnsemble(unittest.TestCase):
 
     def test_property_accepted_trials(self):
         """Tests property accepted trials."""
-        self.assertEqual(self.ensemble.accepted_trials, 0)
-        self.ensemble.accepted_trials += 1
-        self.assertEqual(self.ensemble.accepted_trials, 1)
+        self.assertEqual(self.ensemble._accepted_trials, 0)
+        self.ensemble._accepted_trials += 1
+        self.assertEqual(self.ensemble._accepted_trials, 1)
 
     def test_property_totals_trials(self):
         """Tests property accepted trials."""
-        self.assertEqual(self.ensemble.total_trials, 0)
-        self.ensemble.total_trials += 1
-        self.assertEqual(self.ensemble.total_trials, 1)
+        self.assertEqual(self.ensemble._total_trials, 0)
+        self.ensemble._total_trials += 1
+        self.assertEqual(self.ensemble._total_trials, 1)
+
+    def test_property_step(self):
+        """Tests property accepted trials."""
+        self.assertEqual(self.ensemble._step, 0)
+        self.ensemble._step += 1
+        self.assertEqual(self.ensemble._step, 1)
 
     def test_property_acceptance_ratio(self):
         """Tests property acceptance ratio."""
-        self.ensemble.total_trials = 30
-        self.ensemble.accepted_trials = 15
+        self.ensemble._total_trials = 30
+        self.ensemble._accepted_trials = 15
         self.assertEqual(self.ensemble.acceptance_ratio, 0.5)
 
     def test_property_calculator(self):
@@ -158,7 +160,7 @@ class TestEnsemble(unittest.TestCase):
 
         n_iters = 364
         self.ensemble.run(n_iters)
-        self.assertEqual(self.ensemble.step, n_iters)
+        self.assertEqual(self.ensemble._step, n_iters)
         dc_data = self.ensemble.data_container.get_data('Apple2')
 
         number_of_observations = len([x for x in dc_data if x is not None])
@@ -170,13 +172,13 @@ class TestEnsemble(unittest.TestCase):
         # run it again to check that step is the same
         n_iters = 50
         self.ensemble.run(n_iters, reset_step=True)
-        self.assertEqual(self.ensemble.step, 50)
+        self.assertEqual(self.ensemble._step, 50)
 
         # run it yet again to check that step accumulates
         n_iters = 10
         self.ensemble.run(n_iters, reset_step=False)
         self.ensemble.run(n_iters, reset_step=False)
-        self.assertEqual(self.ensemble.step, 70)
+        self.assertEqual(self.ensemble._step, 70)
 
         # Do a number of steps of continuous runs and see that
         # we get the expected number of parakeet observations.
@@ -187,7 +189,7 @@ class TestEnsemble(unittest.TestCase):
                 self.ensemble.run(n_iter)
             total_iters = sum(run_iters)
             # Check that the number of iters are correct
-            self.assertEqual(self.ensemble.step, total_iters)
+            self.assertEqual(self.ensemble._step, total_iters)
             dc_data = self.ensemble.data_container.get_data('Apple2')
             number_of_observations = len(
                 [x for x in dc_data if x is not None])
@@ -203,7 +205,7 @@ class TestEnsemble(unittest.TestCase):
 
         n_iters = 364
         self.ensemble.run(n_iters)
-        self.assertEqual(self.ensemble.step, n_iters)
+        self.assertEqual(self.ensemble._step, n_iters)
         dc_data = \
             self.ensemble.data_container.get_data('value_1', 'value_2')
 
@@ -218,8 +220,8 @@ class TestEnsemble(unittest.TestCase):
     def test_backup_file(self):
         """Tests data is being saved and can be read by the ensemble."""
         # set-up ensemble with a non-inf write period
-        ensemble = ConcreteEnsemble(calculator=self.calculator,
-                                    atoms=self.atoms,
+        ensemble = ConcreteEnsemble(atoms=self.atoms,
+                                    calculator=self.calculator,
                                     name='this-ensemble',
                                     data_container='my-datacontainer.dc',
                                     data_container_write_period=1e-2,
@@ -250,8 +252,8 @@ class TestEnsemble(unittest.TestCase):
 
         # initialise a new ensemble with dc file
         ensemble_reloaded = \
-            ConcreteEnsemble(calculator=self.calculator,
-                             atoms=self.atoms,
+            ConcreteEnsemble(atoms=self.atoms,
+                             calculator=self.calculator,
                              data_container=temp_container_file.name,
                              ensemble_data_write_interval=14,
                              trajectory_write_interval=56)
@@ -355,6 +357,13 @@ class TestEnsemble(unittest.TestCase):
         data = self.ensemble._get_ensemble_data()
 
         self.assertIn('potential', data.keys())
+
+    def test_data_container_write_period(self):
+        """Tests property data container write container."""
+        self.assertTrue(np.isinf(self.ensemble.data_container_write_period))
+
+        self.ensemble.data_container_write_period = 1e-2
+        self.assertAlmostEqual(self.ensemble.data_container_write_period, 1e-2)
 
 
 if __name__ == '__main__':
