@@ -81,6 +81,12 @@ PYBIND11_MODULE(_icet, m)
            :members:
            :undoc-members:
 
+        _OrbitList
+        ----------
+        .. autoclass:: _OrbitList
+           :members:
+           :undoc-members:
+
         PermutationMatrix
         -----------------
         .. autoclass:: PermutationMatrix
@@ -244,7 +250,7 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             numbersOfAllowedSpecies : list of int        
+             numbersOfAllowedSpecies : list of int
          )pbdoc")
         .def("set_number_of_allowed_species",
             (void (Structure::*)(const int)) &Structure::setNumberOfAllowedSpecies,
@@ -257,7 +263,7 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             numbersOfAllowedSpecies : int        
+             numbersOfAllowedSpecies : int
          )pbdoc")
 
         .def_property("unique_sites",
@@ -852,7 +858,7 @@ PYBIND11_MODULE(_icet, m)
              orbit_list : icet.OrbitList
                 an orbit list set up from a primitive structure
              supercell : icet.Structure
-                supercell build up from the same primitive structure used to set the input orbit list 
+                supercell build up from the same primitive structure used to set the input orbit list
              )pbdoc",
              py::arg("orbit_list"),
              py::arg("supercell"))
@@ -860,7 +866,7 @@ PYBIND11_MODULE(_icet, m)
              R"pbdoc(
              Generates and returns the local orbit list from an input index corresponding a specific offset of
              the primitive structure.
-                 
+
              Parameters
              ----------
              index : int
@@ -879,7 +885,7 @@ PYBIND11_MODULE(_icet, m)
              py::arg("unique_offset"))
         .def("generate_full_orbit_list", &LocalOrbitListGenerator::getFullOrbitList,
              R"pbdoc(
-             Generates and returns a local orbit list, which orbits included the equivalent sites 
+             Generates and returns a local orbit list, which orbits included the equivalent sites
              of all local orbit list in the supercell.
              )pbdoc")
         .def("clear", &LocalOrbitListGenerator::clear,
