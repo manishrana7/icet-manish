@@ -101,7 +101,7 @@ if sys.version_info < (3, 5, 0, 'final', 0):
     raise SystemExit('Python 3.5 or later is required!')
 
 
-with open('README.md', encoding='utf-8') as fd:
+with open('README.rst', encoding='utf-8') as fd:
     long_description = fd.read()
 
 with open('icet/__init__.py', encoding='utf-8') as fd:

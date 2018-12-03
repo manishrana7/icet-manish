@@ -59,12 +59,6 @@ This approach has been tested using the latest `Ubuntu Docker image <https://hub
         python3-pip
 
 
-.. warning::
-
-    The latest versions of Debian (Stretch)
-    and `Mint <https://hub.docker.com/r/vcatechnology/linux-mint/>`_
-    include only Python 3.5, which is `currently not supported <https://gitlab.com/materials-modeling/icet/issues/269>`_.
-
 Fedora
 ^^^^^^
 
