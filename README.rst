@@ -21,8 +21,8 @@ illustrates how one can train a cluster expansion:
    opt.train()
    ce = ClusterExpansion(cs, opt.parameters)
 
-after wich it can be used in various ways, e.g., for finding ground
-state structures or running Monte Carlo simulations.
+Afterwards the cluster expansion can be used in various ways, e.g., for finding
+ground state structures or for running Monte Carlo simulations.
 
 
 Installation
