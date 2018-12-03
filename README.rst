@@ -29,7 +29,9 @@ Installation
 ------------
 
 **icet** can be installed by cloning the repository and running the
- ``setup.py`` script:
+``setup.py`` script:
+
+.. code-block:: bash
 
   git clone git@gitlab.com:materials-modeling/icet.git
   cd icet
@@ -49,7 +51,7 @@ Authors
 -------
 * Mattias Ångqvist
 * William A. Muñoz
-* J. Magnus Rahm
+* Magnus Rahm
 * Erik Fransson
 * Céline Durniak
 * Piotr Rozyczko
