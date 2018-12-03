@@ -3,10 +3,16 @@ doc/_build/
 doc/userguide/build*
 __pycache__/
 
+# pypi/setup.py installation related
+*.egg-info
+dist
+
+# typical local/temporary files and directories
 local
 html/
 latex/
 xml/
+tmp/
 
 .mypy_cache/
 .vscode
