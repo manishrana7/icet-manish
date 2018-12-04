@@ -217,12 +217,13 @@ class DataContainer:
             data = self._data.loc[::interval, tags]
         else:
             data = self._data.set_index(self._data.mctrial)
+            # slice and pass a copy to avoid slowing down dropna method below
             if start is None:
-                data = data.loc[:stop:interval, tags]
+                data = data.loc[:stop:interval, tags].copy()
             elif stop is None:
-                data = data.loc[start::interval, tags]
+                data = data.loc[start::interval, tags].copy()
             else:
-                data = data.loc[start:stop:interval, tags]
+                data = data.loc[start:stop:interval, tags].copy()
 
         if fill_method is not None:
             if fill_method not in fill_methods:
