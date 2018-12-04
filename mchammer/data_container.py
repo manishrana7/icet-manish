@@ -10,7 +10,6 @@ from ase.io import Trajectory
 from ase.io import write as ase_write, read as ase_read
 from collections import OrderedDict
 from datetime import datetime
-from icet import __version__ as icet_version
 from typing import BinaryIO, Dict, List, TextIO, Tuple, Union
 
 
