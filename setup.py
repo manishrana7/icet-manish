@@ -3,6 +3,7 @@
 
 import re
 import sys
+from glob import glob
 from multiprocessing import Process
 
 import setuptools
@@ -10,31 +11,15 @@ from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext
 
 
-ext_modules = [
-    Extension(
-        '_icet',
-        ['src/ClusterCounts.cpp',
-         'src/Cluster.cpp',
-         'src/ClusterExpansionCalculator.cpp',
-         'src/ClusterSpace.cpp',
-         'src/Geometry.cpp',
-         'src/LocalOrbitListGenerator.cpp',
-         'src/ManyBodyNeighborList.cpp',
-         'src/NeighborList.cpp',
-         'src/Orbit.cpp',
-         'src/OrbitList.cpp',
-         'src/PermutationMatrix.cpp',
-         'src/PyBinding.cpp',
-         'src/Structure.cpp',
-         'src/Symmetry.cpp'],
-        include_dirs=[
-            'src/3rdparty/pybind11/include/',
-            'src/3rdparty/boost_1_68_0/',
-            'src/3rdparty/eigen3/'
-        ],
-        language='c++'
-    ),
-]
+icet_cpp_module = Extension(
+    '_icet',
+    glob('src/*.cpp'),
+    include_dirs=[
+        'src/3rdparty/pybind11/include/',
+        'src/3rdparty/boost_1_68_0/',
+        'src/3rdparty/eigen3/'
+    ],
+    language='c++')
 
 
 # As of Python 3.6, CCompiler has a `has_flag` method.
@@ -122,7 +107,7 @@ author_list = ['Mattias Ångqvist',
                'Piotr Rozyczko',
                'Thomas Holm Rod',
                'Paul Erhart']
-authors = ', '.join(author_list[:-1]) + 'and ' + author_list[-1]
+authors = ', '.join(author_list[:-1]) + ', and ' + author_list[-1]
 
 version = re.search("__version__ = '(.*)'", lines).group(1)
 maintainer = re.search("__maintainer__ = '(.*)'", lines).group(1)
@@ -141,22 +126,19 @@ classifiers = [
     'Programming Language :: Python :: 3.7',
     'Intended Audience :: Science/Research',
     'License :: OSI Approved :: {}'.format(license),
-    'Operating System :: MacOS :: MacOS X',
-    'Operating System :: Microsoft :: Windows',
-    'Operating System :: UNIX',
-    'Operating System :: LINUX',
     'Topic :: Scientific/Engineering :: Physics']
 
 
-def setup_cpp():
+if __name__ == '__main__':
+
     setup(
-        name='icet_cpp',
+        name='icet',
         version=version,
         author=authors,
         author_email=email,
         description=description,
         long_description=long_description,
-        ext_modules=ext_modules,
+        ext_modules=[icet_cpp_module],
         install_requires=['pybind11>=2.2',
                           'ase',
                           'numpy',
@@ -171,63 +153,3 @@ def setup_cpp():
         license=license,
         url=url,
     )
-
-
-def setup_python_icet():
-    setup(
-        name='icet',
-        version=version,
-        author=authors,
-        author_email=email,
-        description=description,
-        long_description=long_description,
-        install_requires=['ase',
-                          'numpy',
-                          'scipy',
-                          'sklearn',
-                          'pandas>=0.23',
-                          'spglib>1.11.0.19'],
-        packages=find_packages(),
-        classifiers=classifiers,
-        license=license,
-        url=url,
-    )
-
-
-def setup_python_mchammer():
-    setup(
-        name='mchammer',
-        version=version,
-        author=authors,
-        author_email=email,
-        description=description,
-        long_description=long_description,
-        install_requires=['ase',
-                          'numpy',
-                          'scipy',
-                          'sklearn',
-                          'pandas>=0.23',
-                          'spglib>1.11.0.19'],
-        packages=find_packages(),
-        classifiers=classifiers,
-        license=license,
-        url=url,
-    )
-
-
-if __name__ == '__main__':
-
-    # Install cpp
-    install_process = Process(target=setup_cpp)
-    install_process.start()
-    install_process.join()
-
-    # Install python icet
-    install_process = Process(target=setup_python_icet)
-    install_process.start()
-    install_process.join()
-
-    # setup_python mchammer
-    install_process = Process(target=setup_python_mchammer)
-    install_process.start()
-    install_process.join()
