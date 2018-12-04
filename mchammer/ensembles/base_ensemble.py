@@ -1,5 +1,7 @@
 import os
+import getpass
 import random
+import socket
 from abc import ABC, abstractmethod
 from math import gcd
 from time import time
@@ -9,6 +11,9 @@ import numpy as np
 
 from ase import Atoms
 from ase.data import chemical_symbols
+from collections import OrderedDict
+from datetime import datetime
+from icet import __version__ as icet_version
 
 from ..calculators.base_calculator import BaseCalculator
 from ..configuration_manager import ConfigurationManager
@@ -96,6 +101,10 @@ class BaseEnsemble(ABC):
             self._random_seed = random_seed
         random.seed(a=self._random_seed)
 
+        # metadata and ensemble parameters
+        metadata = self._get_metada()
+        ensemble_parameters = self._get_ensemble_parameters()
+
         # data container
         self._data_container_write_period = data_container_write_period
 
@@ -110,10 +119,11 @@ class BaseEnsemble(ABC):
                 filedir = os.path.dirname(data_container)
                 if filedir and not os.path.isdir(filedir):
                     raise FileNotFoundError('Path to data container file does'
-                                            ' not exist: {}'.format(filedir))
+                                            ' not exist: {}'.format(filedir))       
             self._data_container = \
-                DataContainer(atoms=atoms, ensemble_name=name,
-                              random_seed=self._random_seed)
+                DataContainer(atoms=atoms,
+                              ensemble_parameters=ensemble_parameters,
+                              metadata=metadata)
 
         # interval for writing data and further preparation of data container
         default_interval = max(1, 10 * round(len(atoms) / 10))
@@ -471,3 +481,21 @@ class BaseEnsemble(ABC):
             random_state=random.getstate())
 
         self.data_container.write(self._data_container_filename)
+
+    def _get_metada(self):
+        """Collects and returns all metadata to be saved in DataContainer."""
+        metadata = OrderedDict()
+
+        metadata['seed'] =  self.random_seed
+        metadata['ensemble_name'] = self.name
+        metadata['date_created'] = \
+            datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        metadata['username'] = getpass.getuser()
+        metadata['hostname'] = socket.gethostname()
+        metadata['icet_version'] = icet_version
+
+        return metadata
+        
+    def _get_ensemble_parameters(self) -> dict:
+        """Returns static data associated with the ensemble."""
+        return {'number_of_atoms': len(self.configuration.atoms)}
