@@ -10,7 +10,7 @@ extensive tutorial can be found in the `user guide
 first-principles codes and analysis tools accessible from Python, and allows
 for a simple and intuitive user interface. All computationally demanding parts
 are, however, written in C++ providing performance while maintaining
-portability.  The following snippet illustrates how one can train a cluster
+portability. The following snippet illustrates how one can train a cluster
 expansion:
 
 .. code-block:: python
@@ -50,7 +50,7 @@ libraries including
 `spglib <https://atztogo.github.io/spglib/>`_.
 
 
-Authors
+Credits
 -------
 
 * Mattias Ångqvist
@@ -69,3 +69,9 @@ collaboration with the Data Analysis group at the `Data Management and Software
 Center of the European Spallation Source
 <https://europeanspallationsource.se/data-management-software#data-analysis-modelling>`_
 in Copenhagen (Denmark).
+
+**icet** and its development are hosted on `gitlab <https://gitlab.com
+/materials-modeling/icet>`_. Bugs and feature requests are ideally submitted
+via the `gitlab issue tracker <https://gitlab.com/materials-
+modeling/icet/issues>`_. The development team can also be reached by email via
+icet@materialsmodeling.org.
