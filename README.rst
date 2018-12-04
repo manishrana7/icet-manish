@@ -28,14 +28,13 @@ structures, or sampled via Monte Carlo simulations.
 Installation
 ------------
 
-In the most simple case, **icet** can be installed using pip as follows:
-```shell
-pip3 install icet --user
-```
-or alternatively
-```shell
-python3 -m pip install icet --user
-```
+In the most simple case, **icet** can be installed using pip as follows::
+
+    pip3 install icet --user
+
+or alternatively::
+
+    python3 -m pip install icet --user
 
 **icet** requires Python3 and invokes functionality from several external
 libraries including the
