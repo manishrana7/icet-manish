@@ -22,7 +22,6 @@ tests:
   dependencies:
     - build_linux
   script:
-    - export PATH=${PATH}:${HOME}/.local/bin
     - export PYTHONPATH=$PWD:$PWD/build/:$PYTHONPATH
     - coverage run tests/main.py
     - coverage report -m
@@ -65,7 +64,7 @@ pages:
     - cd ../..
     - mv doc/apidoc/html/ public/apidoc/
     # user guide (sphinx)
-    - export PYTHONPATH=$PWD:$PWD/build/src/:$PYTHONPATH
+    - export PYTHONPATH=$PWD:$PWD/build/:$PYTHONPATH
     - sphinx-build doc/userguide/source/ public/
     # make tests and tutorial downloadable
     - zip -rj public/basic_tutorial.zip tutorial/basic/
