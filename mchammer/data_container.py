@@ -486,7 +486,8 @@ class DataContainer:
             reference_data_file.write(
                 tar_file.extractfile('reference_data').read())
             reference_data_file.seek(0)
-            reference_data = json.load(reference_data_file)
+            with open(reference_data_file.name, encoding='utf-8') as fd:
+                reference_data = json.load(fd)
 
             # init DataContainer
             dc = DataContainer(atoms,
