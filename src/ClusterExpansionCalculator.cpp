@@ -179,7 +179,8 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
 
     // Count clusters and get cluster count map
     clusterCounts.countOrbitList(_superCell, translatedOrbitList, orderIntact, permuteSites);
-    const auto clusterMap = clusterCounts.getClusterCounts();
+
+    const auto clusterMap = clusterCounts._clusterCounts;
 
     // Finally begin occupying the cluster vector
     int orbitIndex = -1;
@@ -212,11 +213,10 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
         }
         auto representativeSites = _clusterSpace._orbitList._orbitList[i].getRepresentativeSites();
         std::vector<int> representativeSitesIndices;
-        for(const auto site : representativeSites)
+        for (const auto site : representativeSites)
         {
             representativeSitesIndices.push_back(site.index());
         }
-
 
         const auto &mcVectors = _clusterSpace._multiComponentVectors[i];
         const auto &elementPermutations = _clusterSpace._sitePermutations[i];
@@ -246,7 +246,6 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
                     const auto &permutedMCVector = icet::getPermutedVector(mcVectors[currentMCVectorIndex], perm);
                     const auto &permutedAllowedOccupations = icet::getPermutedVector(allowedOccupations, perm);
                     const auto &permutedRepresentativeIndices = icet::getPermutedVector(representativeSitesIndices, perm);
-
 
                     clusterVectorElement += _clusterSpace.evaluateClusterProduct(permutedMCVector, permutedAllowedOccupations, elementsCountPair.first, permutedRepresentativeIndices) * elementsCountPair.second;
                 }
