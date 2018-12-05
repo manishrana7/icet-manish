@@ -260,7 +260,8 @@ class TestEnsemble(unittest.TestCase):
 
         assert_frame_equal(ensemble.data_container.data,
                            ensemble_reloaded.data_container.data,
-                           check_dtype=False)
+                           check_dtype=False,
+                           check_like=True)
 
         # run old and new ensemble and check both data containers are equal
         try:
@@ -274,7 +275,8 @@ class TestEnsemble(unittest.TestCase):
 
         assert_frame_equal(ensemble.data_container.data,
                            ensemble_reloaded.data_container.data,
-                           check_dtype=False)
+                           check_dtype=False,
+                           check_like=True)
 
         self.assertEqual(
             ensemble_reloaded.data_container.last_state['last_step'],
