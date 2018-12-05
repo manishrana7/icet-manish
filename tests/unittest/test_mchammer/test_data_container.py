@@ -28,7 +28,7 @@ class TestDataContainer(unittest.TestCase):
         self.ensemble_parameters = {'number_of_atoms': len(self.atoms),
                                     'temperature': 375.15}
         self.metadata = OrderedDict([('ensemble_name', 'test-ensemble'),
-                                      ('seed', 44)])
+                                     ('seed', 44)])
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
@@ -145,7 +145,7 @@ class TestDataContainer(unittest.TestCase):
         """Tests parameters property."""
         self.assertEqual(self.dc.ensemble_parameters,
                          self.ensemble_parameters)
-                         
+
     def test_property_observables(self):
         """Tests observables property."""
         self.dc.append(mctrial=100,

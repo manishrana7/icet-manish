@@ -31,7 +31,7 @@ class DataContainer:
     """
 
     def __init__(self, atoms: Atoms, ensemble_parameters: dict,
-                 metadata : dict):
+                 metadata: dict):
         """
         Initializes a DataContainer object.
         """
@@ -70,7 +70,7 @@ class DataContainer:
         if not isinstance(value, (int, float, list)):
             raise TypeError('value has the wrong type: {}'
                             .format(type(value)))
-        #self._parameters[tag] = copy.deepcopy(value)
+        self._parameters[tag] = copy.deepcopy(value)
 
     def append(self, mctrial: int,
                record: Dict[str, Union[int, float, list]]):

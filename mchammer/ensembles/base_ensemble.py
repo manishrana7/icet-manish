@@ -119,7 +119,7 @@ class BaseEnsemble(ABC):
                 filedir = os.path.dirname(data_container)
                 if filedir and not os.path.isdir(filedir):
                     raise FileNotFoundError('Path to data container file does'
-                                            ' not exist: {}'.format(filedir))       
+                                            ' not exist: {}'.format(filedir))
             self._data_container = \
                 DataContainer(atoms=atoms,
                               ensemble_parameters=ensemble_parameters,
@@ -482,11 +482,11 @@ class BaseEnsemble(ABC):
 
         self.data_container.write(self._data_container_filename)
 
-    def _get_metada(self):
+    def _get_metada(self) -> dict:
         """Collects and returns all metadata to be saved in DataContainer."""
         metadata = OrderedDict()
 
-        metadata['seed'] =  self.random_seed
+        metadata['seed'] = self.random_seed
         metadata['ensemble_name'] = self.name
         metadata['date_created'] = \
             datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
@@ -495,7 +495,7 @@ class BaseEnsemble(ABC):
         metadata['icet_version'] = icet_version
 
         return metadata
-        
+
     def _get_ensemble_parameters(self) -> dict:
         """Returns static data associated with the ensemble."""
-        return {'number_of_atoms': len(self.configuration.atoms)}
+        return {'size_atoms': len(self.configuration.atoms)}
