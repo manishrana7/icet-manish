@@ -115,13 +115,19 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
     """
 
     def __init__(self, atoms: Atoms, calculator: BaseCalculator,
+                 temperature: float, chemical_potentials: Dict[str, float],
                  name: str = 'Semi-grand canonical ensemble',
                  data_container: DataContainer = None, random_seed: int = None,
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None,
-                 boltzmann_constant: float = kB, temperature: float = None,
-                 chemical_potentials: Dict[str, float] = None) -> None:
+                 boltzmann_constant: float = kB) -> None:
+
+        self._temperature = temperature
+        self._boltzmann_constant = boltzmann_constant
+
+        self._chemical_potentials = None
+        self._set_chemical_potentials(chemical_potentials)
 
         super().__init__(
             atoms=atoms, calculator=calculator, name=name,
@@ -130,18 +136,6 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
             data_container_write_period=data_container_write_period,
             ensemble_data_write_interval=ensemble_data_write_interval,
             trajectory_write_interval=trajectory_write_interval)
-
-        if temperature is None:
-            raise TypeError('Missing required keyword argument: temperature')
-        self._temperature = temperature
-
-        self._boltzmann_constant = boltzmann_constant
-
-        self._chemical_potentials = None
-        if chemical_potentials is None:
-            raise TypeError('Missing required keyword argument:'
-                            ' chemical_potentials')
-        self._set_chemical_potentials(chemical_potentials)
 
     @property
     def temperature(self) -> float:
@@ -223,18 +217,10 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
 
     def _get_ensemble_data(self) -> Dict:
         """Returns the data associated with the ensemble. For the SGC
-        ensemble this specifically includes the temperature and the
-        species counts.
+        ensemble this specifically includes the species counts.
         """
         # generic data
         data = super()._get_ensemble_data()
-
-        # temperature
-        data['temperature'] = self.temperature
-
-        # chemical potentials
-        for atnum, chempot in self.chemical_potentials.items():
-            data['mu_{}'.format(chemical_symbols[atnum])] = chempot
 
         # species counts
         atoms = self.configuration.atoms
@@ -246,3 +232,18 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
             data['{}_count'.format(chemical_symbols[atnum])] = count
 
         return data
+
+    def _get_ensemble_parameters(self) -> Dict:
+        """Returns the static data associated with the ensemble. For the SGC
+        ensemble this includes the temperature and the chemical potential."""
+
+        parameters = super()._get_ensemble_parameters()
+
+        # temperature
+        parameters['temperature'] = self.temperature
+
+        # chemical potentials
+        for atnum, chempot in self.chemical_potentials.items():
+            parameters['mu_{}'.format(chemical_symbols[atnum])] = chempot
+
+        return parameters

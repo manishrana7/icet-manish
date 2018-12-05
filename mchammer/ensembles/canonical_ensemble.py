@@ -91,13 +91,15 @@ class CanonicalEnsemble(BaseEnsemble):
     """
 
     def __init__(self, atoms: Atoms, calculator: BaseCalculator,
-                 name: str = 'Canonical ensemble',
+                 temperature: float, name: str = 'Canonical ensemble',
+                 boltzmann_constant: float = kB,
                  data_container: DataContainer = None, random_seed: int = None,
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
-                 trajectory_write_interval: int = None,
-                 boltzmann_constant: float = kB,
-                 temperature: float = None) -> None:
+                 trajectory_write_interval: int = None) -> None:
+
+        self._temperature = temperature
+        self._boltzmann_constant = boltzmann_constant
 
         super().__init__(
             atoms=atoms, calculator=calculator, name=name,
@@ -106,11 +108,6 @@ class CanonicalEnsemble(BaseEnsemble):
             data_container_write_period=data_container_write_period,
             ensemble_data_write_interval=ensemble_data_write_interval,
             trajectory_write_interval=trajectory_write_interval)
-
-        if temperature is None:
-            raise TypeError('Missing required keyword argument: temperature')
-        self._temperature = temperature
-        self._boltzmann_constant = boltzmann_constant
 
     @property
     def temperature(self) -> float:
@@ -153,11 +150,11 @@ class CanonicalEnsemble(BaseEnsemble):
                 self.boltzmann_constant * self.temperature)) > \
                 self._next_random_number()
 
-    def _get_ensemble_data(self) -> Dict:
-        """
-        Returns the data associated with the ensemble. For the SGC ensemble
-        this specifically includes the temperature and the species counts.
-        """
-        data = super()._get_ensemble_data()
-        data['temperature'] = self.temperature
-        return data
+    def _get_ensemble_parameters(self) -> Dict:
+        """Returns the data associated with the ensemble. For the current
+        ensemble this specifically includes the temperature."""
+
+        parameters = super()._get_ensemble_parameters()
+        parameters['temperature'] = self.temperature
+
+        return parameters

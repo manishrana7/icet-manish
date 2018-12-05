@@ -46,7 +46,7 @@ class TestEnsemble(unittest.TestCase):
         """ Tests exceptions are raised during initialization. """
         with self.assertRaises(TypeError) as context:
             CanonicalEnsemble(atoms=self.atoms, calculator=self.calculator)
-        self.assertTrue('Missing required keyword argument: temperature' in
+        self.assertTrue("required positional argument: 'temperature'" in
                         str(context.exception))
 
     def test_do_trial_step(self):
@@ -90,11 +90,13 @@ class TestEnsemble(unittest.TestCase):
     def test_get_ensemble_data(self):
         """Tests the get ensemble data method."""
         data = self.ensemble._get_ensemble_data()
-
         self.assertIn('potential', data.keys())
-        self.assertIn('temperature', data.keys())
 
-        self.assertEqual(data['temperature'], 100.0)
+    def test_get_ensemble_parameters(self):
+        """Tests the get ensemble parameters method."""
+        parameters = self.ensemble._get_ensemble_parameters()
+        self.assertEqual(parameters['size_atoms'], len(self.atoms))
+        self.assertEqual(parameters['temperature'], self.temperature)
 
     def test_write_interval_and_period(self):
         """Tests interval and period for writing data from ensemble."""

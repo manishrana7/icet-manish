@@ -39,27 +39,27 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble = VCSGCEnsemble(
             atoms=self.atoms,
             calculator=self.calculator,
-            name='test-ensemble', random_seed=42,
-            data_container_write_period=499.0,
-            ensemble_data_write_interval=25,
-            trajectory_write_interval=40,
             temperature=self.temperature,
             phis=self.phis,
             kappa=self.kappa,
-            boltzmann_constant=1e-5)
+            boltzmann_constant=1e-5,
+            name='test-ensemble', random_seed=42,
+            data_container_write_period=499.0,
+            ensemble_data_write_interval=25,
+            trajectory_write_interval=40)
 
     def test_init(self):
         """ Tests exceptions are raised during initialization. """
         with self.assertRaises(TypeError) as context:
             VCSGCEnsemble(atoms=self.atoms, calculator=self.calculator)
-        self.assertTrue('Missing required keyword argument: temperature' in
+        self.assertTrue("required positional arguments: 'temperature'" in
                         str(context.exception))
 
         with self.assertRaises(TypeError) as context:
             VCSGCEnsemble(atoms=self.atoms,
                           calculator=self.calculator,
                           temperature=self.temperature)
-        self.assertTrue('Missing required keyword argument: phis'
+        self.assertTrue("required positional arguments: 'phis'"
                         in str(context.exception))
 
         with self.assertRaises(TypeError) as context:
@@ -67,7 +67,7 @@ class TestEnsemble(unittest.TestCase):
                           calculator=self.calculator,
                           temperature=self.temperature,
                           phis=self.phis)
-        self.assertTrue('Missing required keyword argument: kappa'
+        self.assertTrue("required positional argument: 'kappa'"
                         in str(context.exception))
 
     def test_property_phis(self):
@@ -87,9 +87,9 @@ class TestEnsemble(unittest.TestCase):
         self.assertEqual(retval, target)
 
         # test exceptions
-        with self.assertRaises(ValueError) as context:
-            self.ensemble._set_phis({13: -2.0})
-        self.assertTrue('phis were not set' in str(context.exception))
+        # with self.assertRaises(ValueError) as context:
+        #    self.ensemble._set_phis({13: -2.0})
+        # self.assertTrue('phis were not set' in str(context.exception))
 
         with self.assertRaises(TypeError) as context:
             self.ensemble._set_phis('xyz')
@@ -154,17 +154,19 @@ class TestEnsemble(unittest.TestCase):
         self.assertIn('potential', data.keys())
         self.assertIn('Al_count', data.keys())
         self.assertIn('Ga_count', data.keys())
-        self.assertIn('phi_Al', data.keys())
-        self.assertIn('phi_Ga', data.keys())
-        self.assertIn('kappa', data.keys())
-        self.assertIn('temperature', data.keys())
 
         self.assertEqual(data['Al_count'], 13)
         self.assertEqual(data['Ga_count'], 14)
-        self.assertEqual(data['temperature'], 100.0)
-        self.assertAlmostEqual(data['phi_Al'], -1.3)
-        self.assertAlmostEqual(data['phi_Ga'], -0.7)
-        self.assertEqual(data['kappa'], 10)
+
+    def test_get_ensemble_parameters(self):
+        """Tests the get ensemble parameters method."""
+        parameters = self.ensemble._get_ensemble_parameters()
+
+        self.assertEqual(parameters['size_atoms'], len(self.atoms))
+        self.assertEqual(parameters['temperature'], self.temperature)
+        self.assertAlmostEqual(parameters['phi_Al'], -1.3)
+        self.assertAlmostEqual(parameters['phi_Ga'], -0.7)
+        self.assertEqual(parameters['kappa'], 10)
 
     def test_write_interval_and_period(self):
         """

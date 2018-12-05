@@ -127,16 +127,20 @@ class VCSGCEnsemble(BaseEnsemble):
     """
 
     def __init__(self, atoms: Atoms, calculator: BaseCalculator,
+                 temperature: float, phis: Dict[str, float],
+                 kappa: float, boltzmann_constant: float = kB,
                  name: str = 'Variance-constrained '
                  'semi-grand canonical ensemble',
                  data_container: DataContainer = None,
                  random_seed: int = None,
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
-                 trajectory_write_interval: int = None,
-                 boltzmann_constant: float = kB, temperature: float = None,
-                 phis: Dict[str, float] = None,
-                 kappa: float = None) -> None:
+                 trajectory_write_interval: int = None) -> None:
+
+        self._temperature = temperature
+        self._boltzmann_constant = boltzmann_constant
+        self._set_phis(phis)
+        self._kappa = kappa
 
         super().__init__(
             atoms=atoms, calculator=calculator, name=name,
@@ -146,24 +150,13 @@ class VCSGCEnsemble(BaseEnsemble):
             ensemble_data_write_interval=ensemble_data_write_interval,
             trajectory_write_interval=trajectory_write_interval)
 
-        if temperature is None:
-            raise TypeError('Missing required keyword argument: temperature')
-        self._temperature = temperature
-
-        self._boltzmann_constant = boltzmann_constant
-
-        if phis is None:
-            raise TypeError('Missing required keyword argument: phis')
-        self._set_phis(phis)
-
-        if kappa is None:
-            raise TypeError('Missing required keyword argument: kappa')
-        self._kappa = kappa
-
         if len(self.configuration._allowed_species) > 2:
             raise NotImplementedError('VCSGCEnsemble does not yet support '
                                       'cluster spaces with more than two '
                                       'species.')
+
+        if set(self.configuration._allowed_species) != set(self.phis.keys()):
+            raise ValueError('phis were not set for all species')
 
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
@@ -252,23 +245,13 @@ class VCSGCEnsemble(BaseEnsemble):
                 self._phis[atomic_number] = phi
             elif isinstance(key, int):
                 self._phis[key] = phi
-        if set(self.configuration._allowed_species) != set(self._phis.keys()):
-            raise ValueError('phis were not set for all species')
 
     def _get_ensemble_data(self) -> Dict:
         """
         Returns a dict with the default data of the ensemble. This includes
-        temperature, :math:`kappa`, :math:`phi` for every species, atom counts
-        and free energy derivative.
+        atom counts and free energy derivative.
         """
         data = super()._get_ensemble_data()
-
-        # concentration parameters (phis)
-        for atnum, phi in self.phis.items():
-            data['phi_{}'.format(chemical_symbols[atnum])] = phi
-
-        # variance parameter (kappa)
-        data['kappa'] = self.kappa
 
         # free energy derivative
         atnum_1 = min(self.phis.keys())
@@ -277,9 +260,6 @@ class VCSGCEnsemble(BaseEnsemble):
         data['free_energy_derivative'] = self.kappa * \
             self.boltzmann_constant * self.temperature * \
             (- 2 * concentration - self.phis[atnum_1])
-
-        # temperature
-        data['temperature'] = self.temperature
 
         # species counts
         atoms = self.configuration.atoms
@@ -291,3 +271,22 @@ class VCSGCEnsemble(BaseEnsemble):
             data['{}_count'.format(chemical_symbols[atnum])] = count
 
         return data
+
+    def _get_ensemble_parameters(self) -> Dict:
+        """
+        Returns static data associated with the current ensemble. This includes
+        temperature, :math:`kappa` and :math:`phi` for every species,
+        """
+        parameters = super()._get_ensemble_parameters()
+
+        # temperature
+        parameters['temperature'] = self.temperature
+
+        # concentration parameters (phis)
+        for atnum, phi in self.phis.items():
+            parameters['phi_{}'.format(chemical_symbols[atnum])] = phi
+
+        # variance parameter (kappa)
+        parameters['kappa'] = self.kappa
+
+        return parameters
