@@ -37,7 +37,7 @@ void ClusterCounts::count(const Structure &structure,
     std::vector<int> elements(clusterSize);
     for (size_t i = 0; i < latticeNeighbors.size(); i++)
     {
-        elements[i] = structure.getAtomicNumber(latticeNeighbors[i].index());
+        elements[i] = structure._atomicNumbers[latticeNeighbors[i].index()];
     }
 
     // Don't do intact order since there is no reason for it
@@ -55,13 +55,12 @@ void ClusterCounts::count(const Structure &structure,
 void ClusterCounts::count(const Structure &structure, const std::vector<std::vector<LatticeSite>> &latticeSites,
                           const Cluster &cluster, bool orderIntact)
 {
-
+    std::vector<int> elements(latticeSites[0].size());
     for (const auto &sites : latticeSites)
     {
-        std::vector<int> elements(sites.size());
         for (size_t i = 0; i < sites.size(); i++)
         {
-            elements[i] = structure.getAtomicNumber(sites[i].index());
+            elements[i] = structure._atomicNumbers[sites[i].index()];
         }
         countCluster(cluster, elements, orderIntact);
     }

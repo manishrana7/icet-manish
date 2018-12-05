@@ -116,6 +116,8 @@ class Structure
     /// Returns tolerance applied when comparing positions.
     double getTolerance() const { return _tolerance; }
 
+    /// List of atomic numbers.
+    std::vector<int> _atomicNumbers;
 
   private:
 
@@ -129,7 +131,7 @@ class Structure
     /// @todo move to a more general location.
     double roundFloat(const double &val, const double rounding_tolerance = 1e-7) const
     {
-        return round(val * 1.0 / rounding_tolerance) / (1.0 / rounding_tolerance);
+        return round(val / rounding_tolerance) * rounding_tolerance;
     }
 
 
@@ -140,9 +142,6 @@ class Structure
 
     /// Cell metric.
     Eigen::Matrix3d _cell;
-
-    /// List of atomic numbers.
-    std::vector<int> _atomicNumbers;
 
     /// Periodic boundary conditions.
     std::vector<bool> _pbc;
