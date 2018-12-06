@@ -23,11 +23,11 @@ class DataContainer:
     atoms : ASE Atoms object
         reference atomic structure associated with the data container
 
-    name_ensemble : str
-        name of associated ensemble
+    ensemble_parameters : dict
+        parameters associated with the underlying ensemble
 
-    random_seed : int
-        seed used in random number generator
+    metadata : dict
+        metadata associated with data container
     """
 
     def __init__(self, atoms: Atoms, ensemble_parameters: dict,
@@ -45,32 +45,6 @@ class DataContainer:
         self._last_state = {}
 
         self._data = pd.DataFrame(columns=['mctrial'])
-
-    def add_parameter(self, tag: str,
-                      value: Union[int, float, List[int], List[float]]):
-        """
-        Adds parameter associated with underlying ensemble.
-
-        Parameters
-        ----------
-        tag
-            parameter name
-        value
-            parameter value
-
-        Raises
-        ------
-        TypeError
-            if input parameters have the wrong type
-        """
-        import copy
-        if not isinstance(tag, str):
-            raise TypeError('tag has the wrong type: {}'
-                            .format(type(tag)))
-        if not isinstance(value, (int, float, list)):
-            raise TypeError('value has the wrong type: {}'
-                            .format(type(value)))
-        self._parameters[tag] = copy.deepcopy(value)
 
     def append(self, mctrial: int,
                record: Dict[str, Union[int, float, list]]):
