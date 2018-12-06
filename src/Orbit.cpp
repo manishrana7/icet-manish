@@ -98,7 +98,7 @@ std::vector<std::vector<int>> Orbit::getAllPossibleMultiComponentVectorPermutati
     do
     {
         allPossibleMCPermutations.push_back(firstVector);
-    } while (icet::next_cartesian_product(cartesianFactors, firstVector));
+    } while (icet::nextCartesianProduct(cartesianFactors, firstVector));
 
     return allPossibleMCPermutations;
 }
