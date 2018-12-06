@@ -1,6 +1,5 @@
 """Definition of the canonical ensemble class."""
 
-from typing import Dict
 import numpy as np
 
 from ase import Atoms
@@ -98,7 +97,8 @@ class CanonicalEnsemble(BaseEnsemble):
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None) -> None:
 
-        self._temperature = temperature
+        self._ensemble_parameters = dict(size_atoms=len(atoms),
+                                         temperature=temperature)
         self._boltzmann_constant = boltzmann_constant
 
         super().__init__(
@@ -112,7 +112,7 @@ class CanonicalEnsemble(BaseEnsemble):
     @property
     def temperature(self) -> float:
         """ temperature :math:`T` (see parameters section above) """
-        return self._temperature
+        return self._ensemble_parameters['temperature']
 
     @property
     def boltzmann_constant(self) -> float:
@@ -149,13 +149,3 @@ class CanonicalEnsemble(BaseEnsemble):
             return np.exp(-potential_diff / (
                 self.boltzmann_constant * self.temperature)) > \
                 self._next_random_number()
-
-    def _get_ensemble_parameters(self) -> Dict:
-        """Returns the parameters associated with the ensemble. For the
-        current ensemble this includes the number of atoms and the
-        temperature."""
-
-        parameters = super()._get_ensemble_parameters()
-        parameters['temperature'] = self.temperature
-
-        return parameters

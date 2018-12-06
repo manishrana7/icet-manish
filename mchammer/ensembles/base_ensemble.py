@@ -101,10 +101,6 @@ class BaseEnsemble(ABC):
             self._random_seed = random_seed
         random.seed(a=self._random_seed)
 
-        # metadata and ensemble parameters
-        metadata = self._get_metada()
-        ensemble_parameters = self._get_ensemble_parameters()
-
         # data container
         self._data_container_write_period = data_container_write_period
 
@@ -112,6 +108,13 @@ class BaseEnsemble(ABC):
 
         if data_container is not None and os.path.isfile(data_container):
             self._data_container = DataContainer.read(data_container)
+
+            dc_ensemble_parameters = self.data_container.ensemble_parameters
+            if self.ensemble_parameters != dc_ensemble_parameters:
+                raise ValueError('Ensemble parameters do not match with those'
+                                 ' stored in DataContainer file: {}'.format(
+                                     set(dc_ensemble_parameters.items()) -
+                                     set(self.ensemble_parameters.items())))
             self._restart_ensemble()
         else:
             if data_container is not None:
@@ -122,8 +125,8 @@ class BaseEnsemble(ABC):
                                             ' not exist: {}'.format(filedir))
             self._data_container = \
                 DataContainer(atoms=atoms,
-                              ensemble_parameters=ensemble_parameters,
-                              metadata=metadata)
+                              ensemble_parameters=self.ensemble_parameters,
+                              metadata=self.metadata)
 
         # interval for writing data and further preparation of data container
         default_interval = max(1, 10 * round(len(atoms) / 10))
@@ -482,7 +485,8 @@ class BaseEnsemble(ABC):
 
         self.data_container.write(self._data_container_filename)
 
-    def _get_metada(self) -> Dict:
+    @property
+    def metadata(self) -> Dict:
         """Collects and returns all metadata to be saved in DataContainer."""
         metadata = OrderedDict()
 
@@ -496,6 +500,7 @@ class BaseEnsemble(ABC):
 
         return metadata
 
-    def _get_ensemble_parameters(self) -> Dict:
+    @property
+    def ensemble_parameters(self):
         """Returns parameters associated with the ensemble."""
-        return {'size_atoms': len(self.configuration.atoms)}
+        return self._ensemble_parameters

@@ -144,12 +144,23 @@ class TestEnsemble(unittest.TestCase):
 
     def test_get_ensemble_parameters(self):
         """Tests the get ensemble parameters method."""
-        parameters = self.ensemble._get_ensemble_parameters()
+        self.assertEqual(self.ensemble.ensemble_parameters['size_atoms'],
+                         len(self.atoms))
+        self.assertEqual(self.ensemble.ensemble_parameters['temperature'],
+                         self.temperature)
+        self.assertEqual(self.ensemble.ensemble_parameters['mu_Al'], 5)
+        self.assertEqual(self.ensemble.ensemble_parameters['mu_Ga'], 0)
 
-        self.assertEqual(parameters['size_atoms'], len(self.atoms))
-        self.assertEqual(parameters['temperature'], self.temperature)
-        self.assertEqual(parameters['mu_Al'], 5)
-        self.assertEqual(parameters['mu_Ga'], 0)
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['size_atoms'],
+            len(self.atoms))
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['temperature'],
+            self.temperature)
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['mu_Al'], 5)
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['mu_Ga'], 0)
 
     def test_write_interval_and_period(self):
         """Tests interval and period for writing data from ensemble."""

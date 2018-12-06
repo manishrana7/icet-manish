@@ -161,15 +161,28 @@ class TestEnsemble(unittest.TestCase):
         self.assertEqual(data['Al_count'], 13)
         self.assertEqual(data['Ga_count'], 14)
 
-    def test_get_ensemble_parameters(self):
+    def test_ensemble_parameters(self):
         """Tests the get ensemble parameters method."""
-        parameters = self.ensemble._get_ensemble_parameters()
+        self.assertEqual(self.ensemble.ensemble_parameters['size_atoms'],
+                         len(self.atoms))
+        self.assertEqual(self.ensemble.ensemble_parameters['temperature'],
+                         self.temperature)
+        self.assertEqual(self.ensemble.ensemble_parameters['phi_Al'], -1.3)
+        self.assertEqual(self.ensemble.ensemble_parameters['phi_Ga'], -0.7)
+        self.assertEqual(self.ensemble.ensemble_parameters['kappa'], 10)
 
-        self.assertEqual(parameters['size_atoms'], len(self.atoms))
-        self.assertEqual(parameters['temperature'], self.temperature)
-        self.assertAlmostEqual(parameters['phi_Al'], -1.3)
-        self.assertAlmostEqual(parameters['phi_Ga'], -0.7)
-        self.assertEqual(parameters['kappa'], 10)
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['size_atoms'],
+            len(self.atoms))
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['temperature'],
+            self.temperature)
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['phi_Al'], -1.3)
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['phi_Ga'], -0.7)
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['kappa'], 10)
 
     def test_write_interval_and_period(self):
         """

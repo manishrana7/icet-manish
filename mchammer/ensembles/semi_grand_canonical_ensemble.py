@@ -123,11 +123,16 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
                  trajectory_write_interval: int = None,
                  boltzmann_constant: float = kB) -> None:
 
-        self._temperature = temperature
-        self._boltzmann_constant = boltzmann_constant
+        self._ensemble_parameters = dict(size_atoms=len(atoms),
+                                         temperature=temperature)
 
         self._chemical_potentials = None
         self._set_chemical_potentials(chemical_potentials)
+        for atnum, chempot in self.chemical_potentials.items():
+            mu_sym = 'mu_{}'.format(chemical_symbols[atnum])
+            self._ensemble_parameters[mu_sym] = chempot
+
+        self._boltzmann_constant = boltzmann_constant
 
         super().__init__(
             atoms=atoms, calculator=calculator, name=name,
@@ -140,7 +145,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
     @property
     def temperature(self) -> float:
         """ temperature :math:`T` (see parameters section above) """
-        return self._temperature
+        return self.ensemble_parameters['temperature']
 
     @property
     def boltzmann_constant(self) -> float:
@@ -232,18 +237,3 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
             data['{}_count'.format(chemical_symbols[atnum])] = count
 
         return data
-
-    def _get_ensemble_parameters(self) -> Dict:
-        """Returns the parameters associated with the ensemble. For the SGC
-        ensemble this includes the number of atoms, the temperature and the
-        chemical potential for every species."""
-        parameters = super()._get_ensemble_parameters()
-
-        # temperature
-        parameters['temperature'] = self.temperature
-
-        # chemical potentials
-        for atnum, chempot in self.chemical_potentials.items():
-            parameters['mu_{}'.format(chemical_symbols[atnum])] = chempot
-
-        return parameters

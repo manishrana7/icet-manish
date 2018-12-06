@@ -42,10 +42,12 @@ class DictObserver(BaseObserver):
 
 class ConcreteEnsemble(BaseEnsemble):
 
-    def __init__(self, atoms, calculator, name=None, data_container=None,
+    def __init__(self, atoms, calculator, temperature=None,
+                 name=None, data_container=None,
                  data_container_write_period=np.inf, random_seed=None,
                  ensemble_data_write_interval=None,
                  trajectory_write_interval=None):
+        self._ensemble_parameters = dict(temperature=temperature)
         super().__init__(
             atoms=atoms, calculator=calculator, name=name,
             data_container=data_container,
@@ -79,8 +81,8 @@ class TestEnsemble(unittest.TestCase):
         """Setup before each test."""
         self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
         self.ensemble = ConcreteEnsemble(
-            atoms=self.atoms, calculator=self.calculator, name='test-ensemble',
-            random_seed=42)
+            atoms=self.atoms, calculator=self.calculator, temperature=1000,
+            name='test-ensemble', random_seed=42)
 
         # Create an observer for testing.
         observer = AppleObserver(interval=7)
@@ -280,6 +282,23 @@ class TestEnsemble(unittest.TestCase):
             ensemble_reloaded.data_container.last_state['last_step'],
             182 + 50)
 
+    def test_restart_different_parameters(self):
+        """Tests that restarting ensemble from data container with different
+        ensemble parameters fails."""
+        n_iters = 10
+        self.ensemble.run(n_iters)
+        ensemble_T1000 = tempfile.NamedTemporaryFile()
+        self.ensemble.data_container.write(ensemble_T1000.name)
+
+        with self.assertRaises(ValueError) as context:
+            ConcreteEnsemble(atoms=self.atoms,
+                             calculator=self.calculator,
+                             temperature=3000,
+                             data_container=ensemble_T1000.name)
+        self.assertIn("Ensemble parameters do not match with those stored in"
+                      " DataContainer file: {('temperature', 1000)}",
+                      str(context.exception))
+
     def test_internal_run(self):
         """Tests the _run method."""
         pass
@@ -364,7 +383,7 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble.data_container_write_period = 1e-2
         self.assertAlmostEqual(self.ensemble.data_container_write_period, 1e-2)
 
-    def test_get_metadata(self):
+    def test_property_metadata(self):
         """Tests get metadata method."""
         metadata = self.ensemble.data_container.metadata
         self.assertIn('seed', metadata.keys())
@@ -372,11 +391,6 @@ class TestEnsemble(unittest.TestCase):
         self.assertIn('username', metadata.keys())
         self.assertIn('hostname', metadata.keys())
         self.assertIn('icet_version', metadata.keys())
-
-    def test_get_ensemble_parameters(self):
-        """Tests get ensemble parameters method."""
-        parameters = self.ensemble._get_ensemble_parameters()
-        self.assertEqual(parameters['size_atoms'], len(self.atoms))
 
 
 if __name__ == '__main__':

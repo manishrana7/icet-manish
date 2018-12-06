@@ -137,10 +137,15 @@ class VCSGCEnsemble(BaseEnsemble):
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None) -> None:
 
-        self._temperature = temperature
-        self._boltzmann_constant = boltzmann_constant
+        self._ensemble_parameters = dict(size_atoms=len(atoms),
+                                         temperature=temperature,
+                                         kappa=kappa)
         self._set_phis(phis)
-        self._kappa = kappa
+        for atnum, phi in self.phis.items():
+            phi_sym = 'phi_{}'.format(chemical_symbols[atnum])
+            self._ensemble_parameters[phi_sym] = phi
+
+        self._boltzmann_constant = boltzmann_constant
 
         super().__init__(
             atoms=atoms, calculator=calculator, name=name,
@@ -176,7 +181,7 @@ class VCSGCEnsemble(BaseEnsemble):
         potential_diff -= occupations.count(old_species)
         potential_diff -= 0.5 * N * self.phis[old_species]
         potential_diff += occupations.count(new_species)
-        potential_diff += 0.5 * N * self._phis[new_species]
+        potential_diff += 0.5 * N * self.phis[new_species]
         potential_diff *= self.kappa
         potential_diff *= self.boltzmann_constant * self.temperature
         potential_diff /= N
@@ -207,7 +212,7 @@ class VCSGCEnsemble(BaseEnsemble):
     @property
     def temperature(self) -> float:
         """ temperature :math:`T` (see parameters section above) """
-        return self._temperature
+        return self.ensemble_parameters['temperature']
 
     @property
     def boltzmann_constant(self) -> float:
@@ -228,7 +233,7 @@ class VCSGCEnsemble(BaseEnsemble):
         kappa :math:`\\bar{\\kappa}` constrain parameter
         (see parameters section above)
         """
-        return self._kappa
+        return self._ensemble_parameters['kappa']
 
     def _set_phis(self, phis: Dict[Union[int, str], float]):
         """ Sets values of phis."""
@@ -238,7 +243,6 @@ class VCSGCEnsemble(BaseEnsemble):
             raise ValueError('The sum of all phis must equal to -2')
 
         self._phis = {}
-
         for key, phi in phis.items():
             if isinstance(key, str):
                 atomic_number = atomic_numbers[key]
@@ -271,23 +275,3 @@ class VCSGCEnsemble(BaseEnsemble):
             data['{}_count'.format(chemical_symbols[atnum])] = count
 
         return data
-
-    def _get_ensemble_parameters(self) -> Dict:
-        """
-        Returns the parameters associated with the current ensemble.
-        This includes number of atoms, temperature, :math:`kappa` and
-        :math:`phi` for every species.
-        """
-        parameters = super()._get_ensemble_parameters()
-
-        # temperature
-        parameters['temperature'] = self.temperature
-
-        # concentration parameters (phis)
-        for atnum, phi in self.phis.items():
-            parameters['phi_{}'.format(chemical_symbols[atnum])] = phi
-
-        # variance parameter (kappa)
-        parameters['kappa'] = self.kappa
-
-        return parameters

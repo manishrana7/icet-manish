@@ -92,11 +92,19 @@ class TestEnsemble(unittest.TestCase):
         data = self.ensemble._get_ensemble_data()
         self.assertIn('potential', data.keys())
 
-    def test_get_ensemble_parameters(self):
+    def test_ensemble_parameters(self):
         """Tests the get ensemble parameters method."""
-        parameters = self.ensemble._get_ensemble_parameters()
-        self.assertEqual(parameters['size_atoms'], len(self.atoms))
-        self.assertEqual(parameters['temperature'], self.temperature)
+        self.assertEqual(self.ensemble.ensemble_parameters['size_atoms'],
+                         len(self.atoms))
+        self.assertEqual(self.ensemble.ensemble_parameters['temperature'],
+                         self.temperature)
+
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['size_atoms'],
+            len(self.atoms))
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['temperature'],
+            self.temperature)
 
     def test_write_interval_and_period(self):
         """Tests interval and period for writing data from ensemble."""
