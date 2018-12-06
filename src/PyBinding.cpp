@@ -935,7 +935,8 @@ PYBIND11_MODULE(_icet, m)
         )pbdoc",
              py::arg("cluster_space"),
              py::arg("structure"))
-        .def("get_local_cluster_vector", [](ClusterExpansionCalculator &ceCalc, const std::vector<int> &occupations, const int index, const std::vector<int> indices) {
+        .def("get_local_cluster_vector",
+            [](ClusterExpansionCalculator &ceCalc, const std::vector<int> &occupations, const int index, const std::vector<size_t> indices) {
             auto cv = ceCalc.getLocalClusterVector(occupations, index, indices);
             return py::array(cv.size(), cv.data());
         },
