@@ -115,13 +115,13 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             positions : list of vectors
-                 list of positions in Cartesian coordinates
-             chemical_symbols : list of strings
+             positions : list(list(float))
+                 positions in Cartesian coordinates
+             chemical_symbols : list(str)
                  chemical symbol of each case
-             cell : 3x3 array
+             cell : numpy.ndarray
                   cell metric
-             pbc : list of booleans
+             pbc : list(bool)
                  periodic boundary conditions
              tolerance : float
                  numerical tolerance imposed when testing for equality of
@@ -164,7 +164,7 @@ PYBIND11_MODULE(_icet, m)
 
              Returns
              -------
-             list of NumPy arrays
+             list(numpy.ndarray)
          )pbdoc")
         .def("set_positions",
              &Structure::setPositions,
@@ -174,13 +174,13 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             positions : list of NumPy arrays
+             positions : list(numpy.ndarray)
                  new positions in Cartesian coordinates
          )pbdoc")
         .def_property("positions",
                       &Structure::getPositions,
                       &Structure::setPositions,
-                      "list of lists : atomic positions in Cartesian coordinates")
+                      "list(list(float)) : atomic positions in Cartesian coordinates")
         .def("get_atomic_numbers",
              &Structure::getAtomicNumbers,
              "Returns a list of the species occupying each site by atomic number.")
@@ -192,13 +192,13 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             atomic_numbers : list of ints
+             atomic_numbers : list(int)
                 new species by atomic number
          )pbdoc")
         .def_property("atomic_numbers",
                       &Structure::getAtomicNumbers,
                       &Structure::setAtomicNumbers,
-                      "list of ints : atomic numbers of species on each site")
+                      "list(int) : atomic numbers of species on each site")
         .def("get_chemical_symbols",
              &Structure::getChemicalSymbols,
              "Returns a list of the species occupying each site by chemical symbol.")
@@ -210,13 +210,13 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             chemical_symbols : list of strings
+             chemical_symbols : list(str)
                 new species by chemical symbol
          )pbdoc")
         .def_property("chemical_symbols",
                       &Structure::getChemicalSymbols,
                       &Structure::setChemicalSymbols,
-                      "list of strings : chemical symbols of species on each site")
+                      "list(str) : chemical symbols of species on each site")
         .def("set_unique_sites",
              &Structure::setUniqueSites,
              py::arg("unique_sites"),
@@ -228,7 +228,7 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             unique_sites : list of ints
+             unique_sites : list(int)
                 site of interest
          )pbdoc")
         .def("get_unique_sites",
@@ -238,9 +238,10 @@ PYBIND11_MODULE(_icet, m)
 
              Returns
              -------
-             list of ints
+             list(int)
          )pbdoc")
-        .def("set_number_of_allowed_species", (void (Structure::*)(const std::vector<int> &)) &Structure::setNumberOfAllowedSpecies,
+        .def("set_number_of_allowed_species",
+	     (void (Structure::*)(const std::vector<int> &)) &Structure::setNumberOfAllowedSpecies,
              py::arg("numbersOfAllowedSpecies"),
              R"pbdoc(
              Sets the number of allowed species on each site.
@@ -250,7 +251,7 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             numbersOfAllowedSpecies : list of int
+             numbersOfAllowedSpecies : list(int)
          )pbdoc")
         .def("set_number_of_allowed_species",
             (void (Structure::*)(const int)) &Structure::setNumberOfAllowedSpecies,
@@ -269,7 +270,7 @@ PYBIND11_MODULE(_icet, m)
         .def_property("unique_sites",
                       &Structure::getUniqueSites,
                       &Structure::setUniqueSites,
-                      "list of ints : unique sites")
+                      "list(int) : unique sites")
         .def("get_unique_site",
              &Structure::getUniqueSite,
              py::arg("index"),
@@ -367,12 +368,12 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             positions : list of lists/NumPy arrays
-                 list of positions in Cartesian coordinates
+             positions : list(list) or list(numpy.ndarray)
+                 positions in Cartesian coordinates
              Returns
              -------
-             list of LatticeSite object
-                 list of lattice sites
+             list(LatticeSite)
+                 lattice sites
          )pbdoc")
         .def("__len__", &Structure::size);
 
@@ -416,7 +417,7 @@ PYBIND11_MODULE(_icet, m)
                  offset between the two sites in units of lattice vectors
              Returns
              -------
-                 boolean
+             bool
          )pbdoc")
         .def("get_neighbors",
              &NeighborList::getNeighbors,
@@ -430,7 +431,7 @@ PYBIND11_MODULE(_icet, m)
                  index of site in structure for which neighbor list was build
              Returns
              -------
-             list of LatticeSite instances
+             list(LatticeSite)
          )pbdoc")
         .def("__len__", &NeighborList::size);
 
@@ -453,11 +454,11 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             structure : icet Structure instance
+             structure : icet.Structure
                  atomic configuration
-             lattice_sites : list of int
-                 list of lattice sites that form the cluster
-             sorted_cluster : boolean
+             lattice_sites : list(int)
+                 lattice sites that form the cluster
+             sorted_cluster : bool
                  True if the cluster is sorted
              tag : int
                  cluster tag
@@ -465,13 +466,13 @@ PYBIND11_MODULE(_icet, m)
         .def("print", &Cluster::print)
         .def_property_readonly("sites",
                                &Cluster::sites,
-                               "list of ints : site indices")
+                               "list(int) : site indices")
         .def_property_readonly("distances",
                                &Cluster::distances,
-                               "list of floats : list of distances between sites")
+                               "list(float) : distances between sites")
         .def_property_readonly("sorted",
                                &Cluster::isSorted,
-                               "boolean : True/False if the cluster is sorted/unsorted")
+                               "bool : True/False if the cluster is sorted/unsorted")
         .def_property_readonly("tag",
                                &Cluster::tag,
                                "int : cluster tag (defined for sorted cluster)")
@@ -516,7 +517,7 @@ PYBIND11_MODULE(_icet, m)
         .def_property("unitcell_offset",
                       &LatticeSite::unitcellOffset,
                       &LatticeSite::setUnitcellOffset,
-                      "list of three ints : unit cell offset (in units of the cell vectors)")
+                      "list(int) : unit cell offset (in units of the cell vectors)")
         .def(py::self < py::self)
         .def(py::self == py::self)
         .def(py::self + Eigen::Vector3d())
@@ -536,7 +537,7 @@ PYBIND11_MODULE(_icet, m)
             ----------
             structure : icet Structure
                structure that will have its clusters counted
-            latticeSites : list of list of LatticeSite objects
+            latticeSites : list(list(LatticeSite))
                group of sites, represented by `cluster` that will be counted
             cluster : icet Cluster
                cluster used as identification on what sites the clusters belong to
@@ -623,9 +624,9 @@ PYBIND11_MODULE(_icet, m)
         .def_property("permutations_to_representative", &Orbit::getPermutationsOfEquivalentSites, &Orbit::setEquivalentSitesPermutations,
                       R"pbdoc(
         Get the list of permutations.
-        Where permutations_to_representative[i]
-        takes self.equivalent_sites[i] to
-        the same order as self.representative_sites.
+        Where permutations_to_representative[i] takes
+        self.equivalent_sites[i] to the same order as
+        self.representative_sites.
 
         This can be used if you for example want to
         count elements and are interested in difference
@@ -650,16 +651,13 @@ PYBIND11_MODULE(_icet, m)
         to representative site.)pbdoc")
         .def_property_readonly("representative_sites", &Orbit::getRepresentativeSites,
                                R"pbdoc(
-        The representative sites
-        is a list of lattice sites
-        that are uniquely picked out
-        for this orbit which can be
-        used to represent and distinguish
-        between orbits.
+        The representative sites is a list of lattice sites
+        that are uniquely picked out for this orbit which can
+        be used to represent and distinguish between orbits.
         )pbdoc")
         .def_property("equivalent_sites", &Orbit::getEquivalentSites, &Orbit::setEquivalentSites,
                       R"pbdoc(
-        List of equivalent Lattice Sites
+        List of equivalent lattice ites
         )pbdoc")
         .def("get_sites_with_permutation", &Orbit::getSitesWithPermutation,
              R"pbdoc(Return the permuted to representative
@@ -667,21 +665,28 @@ PYBIND11_MODULE(_icet, m)
         // .def("get_number_of_duplicates", &Orbit::getNumberOfDuplicates, py::arg("verbosity") = 0)
         .def("get_mc_vectors", &Orbit::getMultiComponentVectors,
              R"pbdoc(
-        Return the mc vectors for this orbit given the allowed components.
-        The mc vectors are returned as a list of tuples
+        Return the multi-component vectors for this orbit
+        given the allowed components.
 
         Parameters
         ----------
-        allowed_components : list of int
+        allowed_components : list(int)
            The allowed components for the lattice sites,
            allowed_components[i] correspond to the number
            of allowed compoments at lattice site
-           orbit.representative_sites[i].)pbdoc")
+           orbit.representative_sites[i].
+
+        Returns
+        -------
+        list(tuple)
+            multi-component vectors
+        )pbdoc")
         .def("sort", &Orbit::sortOrbit,
              R"pbdoc(
         Sort the equivalent sites list.
         )pbdoc")
-        .def("get_all_possible_mc_vector_permutations", &Orbit::getAllPossibleMultiComponentVectorPermutations,
+        .def("get_all_possible_mc_vector_permutations",
+	     &Orbit::getAllPossibleMultiComponentVectorPermutations,
              R"pbdoc(
         Similar to get all permutations but
         needs to be filtered through the
@@ -689,12 +694,12 @@ PYBIND11_MODULE(_icet, m)
 
         Parameters
         ----------
-        allowed_components : list of int
+        allowed_components : list(int)
             The allowed components for the lattice sites,
             allowed_components[i] correspond to the lattice site
             self.representative_sites[i].
 
-        returns all_mc_vectors : list of tuples of int
+        returns all_mc_vectors : list(tuple) or list(int)
         )pbdoc")
         .def_property("allowed_permutations", [](const Orbit &orbit) {
              auto permutationSet = orbit.getAllowedSitesPermutations();
@@ -747,9 +752,9 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             neighbor_lists : list of NeighborList objects
-                list of neighbor list for the atomic configuration under different cutoffs.
-             structure : icet Structure object
+             neighbor_lists : list(NeighborList)
+                neighbor list for the atomic configuration under different cutoffs
+             structure : icet.Structure
                 primitive atomic structure
         )pbdoc",
              py::arg("neigbor_lists"),
@@ -761,9 +766,9 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             permutation_matrix : vector of vector of LatticeSite objects
+             permutation_matrix : list(list(LatticeSite))
                  permutation matrix with lattice sites
-             structure : icet Structure object
+             structure : icet.Structure
                  primitive atomic structure
         )pbdoc",
              py::arg("structure"),
@@ -797,9 +802,9 @@ PYBIND11_MODULE(_icet, m)
 
             Parameters
             ----------
-            taken_rows: set of tuple of ints
-                Unique collection of row index
-            rows: list of ints
+            taken_rows: set(tuple(int))
+                unique collection of row index
+            rows: list(int)
                 row indices
              )pbdoc",
              py::arg("taken_rows"),
@@ -813,10 +818,10 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             lattice_neighbors: list of icet LatticeSite objects
-                set of lattice sites that might be representative for a cluster
+             lattice_neighbors: list(LatticeSite)
+                set of lattice sites that are representative for a cluster
              sort_it: bool
-                If true sort translasted sites.
+                if True sort translasted sites
              )pbdoc",
              py::arg("lattice_neighbors"),
              py::arg("sort_it"))
@@ -827,11 +832,11 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             sites : list of icet LatticeSite objects
+             sites : list(LatticeSite)
                 sites that define the columns that will be returned
-             column1 : list of icet LatticeSite objects
+             column1 : list(LatticeSite)
                 first column of permutation matrix
-             permutation_matrix : list of list of LatticeSite objects
+             permutation_matrix : list(list(LatticeSite))
                 permutation matrix
              )pbdoc",
              py::arg("sites"),
@@ -842,9 +847,7 @@ PYBIND11_MODULE(_icet, m)
         .def("__len__", &OrbitList::size,
              "Returns the total number of orbits counted in the OrbitList instance")
         .def_property_readonly("permutation_matrix", &OrbitList::getPermutationMatrix,
-             "list of list of icet LatticeSite objects: permutation_matrix")
-        // .def("print", &OrbitList::print, py::arg("verbosity") = 0)
-        // .def("get_supercell_orbit_list", &OrbitList::getSupercellOrbitList)
+             "list(list(LatticeSite)) : permutation_matrix")
         ;
 
     py::class_<LocalOrbitListGenerator>(m, "LocalOrbitListGenerator")
@@ -862,8 +865,7 @@ PYBIND11_MODULE(_icet, m)
              )pbdoc",
              py::arg("orbit_list"),
              py::arg("supercell"))
-        .def("generate_local_orbit_list",
-             (OrbitList(LocalOrbitListGenerator::*)(const size_t)) & LocalOrbitListGenerator::getLocalOrbitList,
+        .def("generate_local_orbit_list", (OrbitList(LocalOrbitListGenerator::*)(const size_t)) & LocalOrbitListGenerator::getLocalOrbitList,
              R"pbdoc(
              Generates and returns the local orbit list from an input index corresponding a specific offset of
              the primitive structure.
@@ -874,8 +876,7 @@ PYBIND11_MODULE(_icet, m)
                 index of the unique offsets list
              )pbdoc",
              py::arg("index"))
-        .def("generate_local_orbit_list",
-             (OrbitList(LocalOrbitListGenerator::*)(const Vector3d &)) & LocalOrbitListGenerator::getLocalOrbitList,
+        .def("generate_local_orbit_list", (OrbitList(LocalOrbitListGenerator::*)(const Vector3d &)) & LocalOrbitListGenerator::getLocalOrbitList,
              R"pbdoc(
              Generates and returns the local orbit list from a specific offset of the primitive structure.
 
@@ -891,13 +892,13 @@ PYBIND11_MODULE(_icet, m)
              of all local orbit list in the supercell.
              )pbdoc")
         .def("clear", &LocalOrbitListGenerator::clear,
-             "Clears the list of offsets and primitive-to-supercell map of the LocalOrbitListGenerator object")
-        .def("get_unique_offsets_count", &LocalOrbitListGenerator::getNumberOfUniqueOffsets,
-             "Returns the number of unique offsets")
+             "Clears the list of offsets and primitive-to-supercell map of the LocalOrbitListGenerator object.")
+        .def("get_number_of_unique_offsets", &LocalOrbitListGenerator::getNumberOfUniqueOffsets,
+             "Returns the number of unique offsets.")
         .def("_get_primitive_to_supercell_map", &LocalOrbitListGenerator::getMapFromPrimitiveToSupercell,
-             "Returns the primitive to supercell mapping")
+             "Returns the primitive to supercell mapping.")
         .def("_get_unique_primcell_offsets", &LocalOrbitListGenerator::getUniquePrimitiveCellOffsets,
-             "Returns a list with offsets of primitive structure that span to position of atoms in the supercell");
+             "Returns a list with offsets of primitive structure that span to position of atoms in the supercell.");
 
     /// @todo Check which of the following members must actually be exposed.
     /// @todo Turn getters into properties if possible. (Some might require massaging in cluster_space.py.)
@@ -919,8 +920,6 @@ PYBIND11_MODULE(_icet, m)
         .def("get_number_of_allowed_species_by_site", &ClusterSpace::getNumberOfAllowedSpeciesBySite)
         .def("__len__", &ClusterSpace::getClusterSpaceSize);
 
-    // ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clusterSpace, const Structure &structure)
-
     py::class_<ClusterExpansionCalculator>(m, "_ClusterExpansionCalculator")
         .def(py::init<const ClusterSpace &, const Structure &>(),
              R"pbdoc(
@@ -930,27 +929,27 @@ PYBIND11_MODULE(_icet, m)
              ----------
              cluster_space : icet.ClusterSpace
                 defines the cluster space
-             structure : icet Structure object
-                the supercell the calculator will operate on
-        )pbdoc",
+             structure : icet.Structure
+                supercell the calculator will operate on
+             )pbdoc",
              py::arg("cluster_space"),
              py::arg("structure"))
         .def("get_local_cluster_vector",
-            [](ClusterExpansionCalculator &ceCalc, const std::vector<int> &occupations, const int index, const std::vector<size_t> indices) {
-            auto cv = ceCalc.getLocalClusterVector(occupations, index, indices);
-            return py::array(cv.size(), cv.data());
-        },
+	         [](ClusterExpansionCalculator &ceCalc, const std::vector<int> &occupations, const int index, const std::vector<size_t> indices) {
+	            auto clusterVector = ceCalc.getLocalClusterVector(occupations, index, indices);
+	            return py::array(clusterVector.size(), clusterVector.data());
+	         },
              R"pbdoc(
              Returns a cluster vector that only considers clusters that contain the input index.
 
              Parameters
              ----------
-             occupations : list of int
+             occupations : list(int)
                  the occupation vector for the supercell
              index : int
                  local index of the supercell
-             ignoredIndices : list of int
+             ignored_indices : list(int)
                 list of indices that have already had their local energy calculated;
                 this is required to prevent double counting
-        )pbdoc");
+             )pbdoc");
 }
