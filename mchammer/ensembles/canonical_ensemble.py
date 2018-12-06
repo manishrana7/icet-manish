@@ -58,6 +58,13 @@ class CanonicalEnsemble(BaseEnsemble):
     calculator : :class:`BaseCalculator`
         calculator to be used for calculating the potential changes
         that enter the evaluation of the Metropolis criterion
+    temperature : float
+        temperature :math:`T` in appropriate units [commonly Kelvin]
+    boltzmann_constant : float
+        Boltzmann constant :math:`k_B` in appropriate
+        units, i.e. units that are consistent
+        with the underlying cluster expansion
+        and the temperature units [default: eV/K]
     name : str
         human-readable ensemble name [default: `BaseEnsemble`]
     data_container : str
@@ -81,13 +88,6 @@ class CanonicalEnsemble(BaseEnsemble):
     trajectory_write_interval : int
         interval at which the current occupation vector of the atomic
         configuration is written to the data container.
-    boltzmann_constant : float
-        Boltzmann constant :math:`k_B` in appropriate
-        units, i.e. units that are consistent
-        with the underlying cluster expansion
-        and the temperature units [default: eV/K]
-    temperature : float
-        temperature :math:`T` in appropriate units [commonly Kelvin]
     """
 
     def __init__(self, atoms: Atoms, calculator: BaseCalculator,
@@ -151,8 +151,9 @@ class CanonicalEnsemble(BaseEnsemble):
                 self._next_random_number()
 
     def _get_ensemble_parameters(self) -> Dict:
-        """Returns the data associated with the ensemble. For the current
-        ensemble this specifically includes the temperature."""
+        """Returns the parameters associated with the ensemble. For the
+        current ensemble this includes the number of atoms and the
+        temperature."""
 
         parameters = super()._get_ensemble_parameters()
         parameters['temperature'] = self.temperature

@@ -482,7 +482,7 @@ class BaseEnsemble(ABC):
 
         self.data_container.write(self._data_container_filename)
 
-    def _get_metada(self) -> dict:
+    def _get_metada(self) -> Dict:
         """Collects and returns all metadata to be saved in DataContainer."""
         metadata = OrderedDict()
 
@@ -496,6 +496,6 @@ class BaseEnsemble(ABC):
 
         return metadata
 
-    def _get_ensemble_parameters(self) -> dict:
-        """Returns static data associated with the ensemble."""
+    def _get_ensemble_parameters(self) -> Dict:
+        """Returns parameters associated with the ensemble."""
         return {'size_atoms': len(self.configuration.atoms)}

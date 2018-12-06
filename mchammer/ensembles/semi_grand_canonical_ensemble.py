@@ -78,6 +78,17 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
     calculator : :class:`BaseCalculator`
         calculator to be used for calculating the potential changes
         that enter the evaluation of the Metropolis criterion
+    temperature : float
+        temperature :math:`T` in appropriate units [commonly Kelvin]
+    chemical_potentials : Dict[str, float]
+        chemical potential for each species :math:`\\mu_i`; the key
+        denotes the species, the value specifies the chemical potential in
+        units that are consistent with the underlying cluster expansion
+    boltzmann_constant : float
+        Boltzmann constant :math:`k_B` in appropriate
+        units, i.e. units that are consistent
+        with the underlying cluster expansion
+        and the temperature units [default: eV/K]
     name : str
         human-readable ensemble name [default: `BaseEnsemble`]
     data_container : str
@@ -101,17 +112,6 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
     trajectory_write_interval : int
         interval at which the current occupation vector of the atomic
         configuration is written to the data container.
-    boltzmann_constant : float
-        Boltzmann constant :math:`k_B` in appropriate
-        units, i.e. units that are consistent
-        with the underlying cluster expansion
-        and the temperature units [default: eV/K]
-    temperature : float
-        temperature :math:`T` in appropriate units [commonly Kelvin]
-    chemical_potentials : Dict[str, float]
-        chemical potential for each species :math:`\\mu_i`; the key
-        denotes the species, the value specifies the chemical potential in
-        units that are consistent with the underlying cluster expansion
     """
 
     def __init__(self, atoms: Atoms, calculator: BaseCalculator,
@@ -234,9 +234,9 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
         return data
 
     def _get_ensemble_parameters(self) -> Dict:
-        """Returns the static data associated with the ensemble. For the SGC
-        ensemble this includes the temperature and the chemical potential."""
-
+        """Returns the parameters associated with the ensemble. For the SGC
+        ensemble this includes the number of atoms, the temperature and the
+        chemical potential for every species."""
         parameters = super()._get_ensemble_parameters()
 
         # temperature

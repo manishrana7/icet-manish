@@ -87,6 +87,20 @@ class VCSGCEnsemble(BaseEnsemble):
     calculator : :class:`BaseCalculator`
         calculator to be used for calculating the potential changes
         that enter the evaluation of the Metropolis criterion
+    temperature : float
+        temperature :math:`T` in appropriate units [commonly Kelvin]
+    phis : Dict[str, float]
+        average constraint parameters :math:`\\phi_i`; the key denotes the
+        species; there must be one entry for each species but their sum must be
+        :math:`-2.0` (referred to as :math:`\\bar{\\phi}` in [SadErh12]_)
+    kappa : float
+        parameter that constrains the variance of the concentration
+        (referred to as :math:`\\bar{\\kappa}` in [SadErh12]_)
+    boltzmann_constant : float
+        Boltzmann constant :math:`k_B` in appropriate
+        units, i.e. units that are consistent
+        with the underlying cluster expansion
+        and the temperature units [default: eV/K]
     name : str
         human-readable ensemble name [default: `BaseEnsemble`]
     data_container : str
@@ -110,20 +124,6 @@ class VCSGCEnsemble(BaseEnsemble):
     trajectory_write_interval : int
         interval at which the current occupation vector of the atomic
         configuration is written to the data container.
-    boltzmann_constant : float
-        Boltzmann constant :math:`k_B` in appropriate
-        units, i.e. units that are consistent
-        with the underlying cluster expansion
-        and the temperature units [default: eV/K]
-    temperature : float
-        temperature :math:`T` in appropriate units [commonly Kelvin]
-    phis : Dict[str, float]
-        average constraint parameters :math:`\\phi_i`; the key denotes the
-        species; there must be one entry for each species but their sum must be
-        :math:`-2.0` (referred to as :math:`\\bar{\\phi}` in [SadErh12]_)
-    kappa : float
-        parameter that constrains the variance of the concentration
-        (referred to as :math:`\\bar{\\kappa}` in [SadErh12]_)
     """
 
     def __init__(self, atoms: Atoms, calculator: BaseCalculator,
@@ -274,8 +274,9 @@ class VCSGCEnsemble(BaseEnsemble):
 
     def _get_ensemble_parameters(self) -> Dict:
         """
-        Returns static data associated with the current ensemble. This includes
-        temperature, :math:`kappa` and :math:`phi` for every species,
+        Returns the parameters associated with the current ensemble.
+        This includes number of atoms, temperature, :math:`kappa` and
+        :math:`phi` for every species.
         """
         parameters = super()._get_ensemble_parameters()
 

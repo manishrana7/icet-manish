@@ -70,6 +70,14 @@ class TestEnsemble(unittest.TestCase):
         self.assertTrue("required positional argument: 'kappa'"
                         in str(context.exception))
 
+        with self.assertRaises(ValueError) as context:
+            VCSGCEnsemble(atoms=self.atoms,
+                          calculator=self.calculator,
+                          temperature=self.temperature,
+                          phis={13: -2.0},
+                          kappa=self.kappa)
+        self.assertTrue('phis were not set' in str(context.exception))
+
     def test_property_phis(self):
         """Tests phis property."""
         retval = self.ensemble.phis
@@ -85,11 +93,6 @@ class TestEnsemble(unittest.TestCase):
         retval = self.ensemble.phis
         target = {13: -2.2, 31: 0.2}
         self.assertEqual(retval, target)
-
-        # test exceptions
-        # with self.assertRaises(ValueError) as context:
-        #    self.ensemble._set_phis({13: -2.0})
-        # self.assertTrue('phis were not set' in str(context.exception))
 
         with self.assertRaises(TypeError) as context:
             self.ensemble._set_phis('xyz')

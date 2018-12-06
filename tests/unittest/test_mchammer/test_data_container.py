@@ -57,26 +57,6 @@ class TestDataContainer(unittest.TestCase):
         """Tests reference atoms property."""
         self.assertEqual(self.dc.atoms, self.atoms)
 
-    @unittest.SkipTest
-    def test_add_parameter(self):
-        """Tests add parameter functionality."""
-        self.dc.add_parameter('sro', -0.1)
-
-        # add a list as parameters
-        index_atoms = [i for i in range(len(self.atoms))]
-        self.dc.add_parameter('index_atoms', index_atoms)
-        self.assertEqual(len(self.dc.parameters), 4)
-
-        # test whether method raises Exceptions
-        with self.assertRaises(TypeError) as context:
-            self.dc.add_parameter(1, 'tst')
-        self.assertTrue('tag has the wrong type'
-                        in str(context.exception))
-        with self.assertRaises(TypeError) as context:
-            self.dc.add_parameter('tst', 'tst')
-        self.assertTrue('value has the wrong type'
-                        in str(context.exception))
-
     def test_append_data(self):
         """Tests append data functionality."""
         observers = [ConcreteObserver(interval=10, tag='obs1'),

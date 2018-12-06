@@ -355,7 +355,6 @@ class TestEnsemble(unittest.TestCase):
     def test__get_ensemble_data(self):
         """Tests the get ensemble data method."""
         data = self.ensemble._get_ensemble_data()
-
         self.assertIn('potential', data.keys())
 
     def test_data_container_write_period(self):
@@ -364,6 +363,20 @@ class TestEnsemble(unittest.TestCase):
 
         self.ensemble.data_container_write_period = 1e-2
         self.assertAlmostEqual(self.ensemble.data_container_write_period, 1e-2)
+
+    def test_get_metadata(self):
+        """Tests get metadata method."""
+        metadata = self.ensemble.data_container.metadata
+        self.assertIn('seed', metadata.keys())
+        self.assertIn('ensemble_name', metadata.keys())
+        self.assertIn('username', metadata.keys())
+        self.assertIn('hostname', metadata.keys())
+        self.assertIn('icet_version', metadata.keys())
+
+    def test_get_ensemble_parameters(self):
+        """Tests get ensemble parameters method."""
+        parameters = self.ensemble._get_ensemble_parameters()
+        self.assertEqual(parameters['size_atoms'], len(self.atoms))
 
 
 if __name__ == '__main__':
