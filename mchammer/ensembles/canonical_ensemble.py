@@ -112,7 +112,7 @@ class CanonicalEnsemble(BaseEnsemble):
     @property
     def temperature(self) -> float:
         """ temperature :math:`T` (see parameters section above) """
-        return self._ensemble_parameters['temperature']
+        return self.ensemble_parameters['temperature']
 
     @property
     def boltzmann_constant(self) -> float:

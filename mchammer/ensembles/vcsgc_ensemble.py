@@ -233,7 +233,7 @@ class VCSGCEnsemble(BaseEnsemble):
         kappa :math:`\\bar{\\kappa}` constrain parameter
         (see parameters section above)
         """
-        return self._ensemble_parameters['kappa']
+        return self.ensemble_parameters['kappa']
 
     def _set_phis(self, phis: Dict[Union[int, str], float]):
         """ Sets values of phis."""
