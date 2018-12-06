@@ -862,7 +862,8 @@ PYBIND11_MODULE(_icet, m)
              )pbdoc",
              py::arg("orbit_list"),
              py::arg("supercell"))
-        .def("generate_local_orbit_list", (OrbitList(LocalOrbitListGenerator::*)(const unsigned int)) & LocalOrbitListGenerator::getLocalOrbitList,
+        .def("generate_local_orbit_list",
+             (OrbitList(LocalOrbitListGenerator::*)(const size_t)) & LocalOrbitListGenerator::getLocalOrbitList,
              R"pbdoc(
              Generates and returns the local orbit list from an input index corresponding a specific offset of
              the primitive structure.
@@ -873,7 +874,8 @@ PYBIND11_MODULE(_icet, m)
                 index of the unique offsets list
              )pbdoc",
              py::arg("index"))
-        .def("generate_local_orbit_list", (OrbitList(LocalOrbitListGenerator::*)(const Vector3d &)) & LocalOrbitListGenerator::getLocalOrbitList,
+        .def("generate_local_orbit_list",
+             (OrbitList(LocalOrbitListGenerator::*)(const Vector3d &)) & LocalOrbitListGenerator::getLocalOrbitList,
              R"pbdoc(
              Generates and returns the local orbit list from a specific offset of the primitive structure.
 
