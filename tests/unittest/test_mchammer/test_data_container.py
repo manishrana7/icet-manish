@@ -1,7 +1,6 @@
 import unittest
 import tempfile
 import random
-from collections import OrderedDict
 import numpy as np
 import pandas as pd
 from ase.build import bulk
@@ -27,8 +26,6 @@ class TestDataContainer(unittest.TestCase):
         self.atoms = bulk('Al').repeat(2)
         self.ensemble_parameters = {'number_of_atoms': len(self.atoms),
                                     'temperature': 375.15}
-        self.metadata = OrderedDict([('ensemble_name', 'test-ensemble'),
-                                     ('seed', 44)])
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
@@ -133,11 +130,6 @@ class TestDataContainer(unittest.TestCase):
         self.dc.append(mctrial=100,
                        record=dict(obs1=13, potential=-0.123))
         self.assertListEqual(self.dc.observables, ['obs1', 'potential'])
-
-    def test_property_metadata(self):
-        """Tests metadata property."""
-        self.assertEqual(self.dc.metadata, self.metadata)
-
 
     def test_property_metadata(self):
         """Tests get metadata method."""

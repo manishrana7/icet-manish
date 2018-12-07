@@ -189,7 +189,6 @@ class TestEnsemble(unittest.TestCase):
             self.ensemble.data_container.ensemble_parameters['ensemble_name'],
             'VCSGCEnsemble')
 
-
     def test_write_interval_and_period(self):
         """
         Tests interval and period for writing data from ensemble.

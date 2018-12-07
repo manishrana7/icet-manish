@@ -8,8 +8,6 @@ import numpy as np
 
 from ase import Atoms
 from ase.data import chemical_symbols
-from collections import OrderedDict
-from datetime import datetime
 
 from ..calculators.base_calculator import BaseCalculator
 from ..configuration_manager import ConfigurationManager
