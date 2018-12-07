@@ -8,6 +8,7 @@ import numpy as np
 
 from ase import Atoms
 from ase.data import chemical_symbols
+from collections import OrderedDict
 
 from ..calculators.base_calculator import BaseCalculator
 from ..configuration_manager import ConfigurationManager
@@ -120,8 +121,8 @@ class BaseEnsemble(ABC):
             self._data_container = \
                 DataContainer(atoms=atoms,
                               ensemble_parameters=self.ensemble_parameters,
-                              ensemble_name=self.name,
-                              seed=self.random_seed)
+                              metadata=OrderedDict(ensemble_name=self.name,
+                                                   seed=self.random_seed))
 
         # interval for writing data and further preparation of data container
         default_interval = max(1, 10 * round(len(atoms) / 10))
