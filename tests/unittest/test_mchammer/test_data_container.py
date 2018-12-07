@@ -38,7 +38,8 @@ class TestDataContainer(unittest.TestCase):
         """Setup before each test case."""
         self.dc = DataContainer(atoms=self.atoms,
                                 ensemble_parameters=self.ensemble_parameters,
-                                metadata=self.metadata)
+                                ensemble_name='test-ensemble',
+                                seed=144)
 
     def test_init(self):
         """Tests initializing DataContainer."""
@@ -48,7 +49,8 @@ class TestDataContainer(unittest.TestCase):
         with self.assertRaises(TypeError) as context:
             DataContainer(atoms='atoms',
                           ensemble_parameters=self.ensemble_parameters,
-                          metadata=self.metadata)
+                          ensemble_name='test-ensemble',
+                                seed=144)
 
         self.assertTrue('atoms is not an ASE Atoms object'
                         in str(context.exception))
@@ -135,6 +137,16 @@ class TestDataContainer(unittest.TestCase):
     def test_property_metadata(self):
         """Tests metadata property."""
         self.assertEqual(self.dc.metadata, self.metadata)
+
+
+    def test_property_metadata(self):
+        """Tests get metadata method."""
+        metadata = self.dc.metadata
+        self.assertIn('seed', metadata.keys())
+        self.assertIn('ensemble_name', metadata.keys())
+        self.assertIn('username', metadata.keys())
+        self.assertIn('hostname', metadata.keys())
+        self.assertIn('icet_version', metadata.keys())
 
     def test_property_last_state(self):
         """Tests last_state property."""

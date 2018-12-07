@@ -163,16 +163,18 @@ class TestEnsemble(unittest.TestCase):
 
     def test_ensemble_parameters(self):
         """Tests the get ensemble parameters method."""
-        self.assertEqual(self.ensemble.ensemble_parameters['size_atoms'],
+        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'],
                          len(self.atoms))
         self.assertEqual(self.ensemble.ensemble_parameters['temperature'],
                          self.temperature)
         self.assertEqual(self.ensemble.ensemble_parameters['phi_Al'], -1.3)
         self.assertEqual(self.ensemble.ensemble_parameters['phi_Ga'], -0.7)
         self.assertEqual(self.ensemble.ensemble_parameters['kappa'], 10)
+        self.assertEqual(self.ensemble.ensemble_parameters['ensemble_name'],
+                         'VCSGCEnsemble')
 
         self.assertEqual(
-            self.ensemble.data_container.ensemble_parameters['size_atoms'],
+            self.ensemble.data_container.ensemble_parameters['n_atoms'],
             len(self.atoms))
         self.assertEqual(
             self.ensemble.data_container.ensemble_parameters['temperature'],
@@ -183,6 +185,10 @@ class TestEnsemble(unittest.TestCase):
             self.ensemble.data_container.ensemble_parameters['phi_Ga'], -0.7)
         self.assertEqual(
             self.ensemble.data_container.ensemble_parameters['kappa'], 10)
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['ensemble_name'],
+            'VCSGCEnsemble')
+
 
     def test_write_interval_and_period(self):
         """

@@ -383,15 +383,6 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble.data_container_write_period = 1e-2
         self.assertAlmostEqual(self.ensemble.data_container_write_period, 1e-2)
 
-    def test_property_metadata(self):
-        """Tests get metadata method."""
-        metadata = self.ensemble.data_container.metadata
-        self.assertIn('seed', metadata.keys())
-        self.assertIn('ensemble_name', metadata.keys())
-        self.assertIn('username', metadata.keys())
-        self.assertIn('hostname', metadata.keys())
-        self.assertIn('icet_version', metadata.keys())
-
 
 if __name__ == '__main__':
     unittest.main()

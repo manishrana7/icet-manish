@@ -1,19 +1,15 @@
 import os
-import getpass
 import random
-import socket
 from abc import ABC, abstractmethod
 from math import gcd
 from time import time
 from typing import Dict, List
-
 import numpy as np
 
 from ase import Atoms
 from ase.data import chemical_symbols
 from collections import OrderedDict
 from datetime import datetime
-from icet import __version__ as icet_version
 
 from ..calculators.base_calculator import BaseCalculator
 from ..configuration_manager import ConfigurationManager
@@ -123,11 +119,11 @@ class BaseEnsemble(ABC):
                 if filedir and not os.path.isdir(filedir):
                     raise FileNotFoundError('Path to data container file does'
                                             ' not exist: {}'.format(filedir))
-            self._generate_default_metadata()
             self._data_container = \
                 DataContainer(atoms=atoms,
                               ensemble_parameters=self.ensemble_parameters,
-                              metadata=self._metadata)
+                              ensemble_name=self.name,
+                              seed=self.random_seed)
 
         # interval for writing data and further preparation of data container
         default_interval = max(1, 10 * round(len(atoms) / 10))
@@ -486,19 +482,8 @@ class BaseEnsemble(ABC):
 
         self.data_container.write(self._data_container_filename)
 
-    def _generate_default_metadata(self):
-        """Collects and returns all metadata to be saved in DataContainer."""
-        self._metadata = OrderedDict()
-
-        self._metadata['seed'] = self.random_seed
-        self._metadata['ensemble_name'] = self.name
-        self._metadata['date_created'] = \
-            datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-        self._metadata['username'] = getpass.getuser()
-        self._metadata['hostname'] = socket.gethostname()
-        self._metadata['icet_version'] = icet_version
-
     @property
     def ensemble_parameters(self):
         """Returns parameters associated with the ensemble."""
+        self._ensemble_parameters['n_atoms'] = len(self.atoms)
         return self._ensemble_parameters

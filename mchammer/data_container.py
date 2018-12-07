@@ -1,9 +1,11 @@
+import getpass
 import json
 import numbers
 import numpy as np
 import pandas as pd
 import tarfile
 import tempfile
+import socket
 
 from ase import Atoms
 from ase.io import Trajectory
@@ -11,6 +13,7 @@ from ase.io import write as ase_write, read as ase_read
 from collections import OrderedDict
 from datetime import datetime
 from typing import BinaryIO, Dict, List, TextIO, Tuple, Union
+from icet import __version__ as icet_version
 
 
 class DataContainer:
@@ -26,12 +29,15 @@ class DataContainer:
     ensemble_parameters : dict
         parameters associated with the underlying ensemble
 
-    metadata : dict
-        metadata associated with data container
+    ensemble_name : str
+        name of associated ensemble
+
+    seed : int
+        seed used in random number generator
     """
 
     def __init__(self, atoms: Atoms, ensemble_parameters: dict,
-                 metadata: dict):
+                 ensemble_name: str, seed: int):
         """
         Initializes a DataContainer object.
         """
@@ -39,9 +45,8 @@ class DataContainer:
             raise TypeError('atoms is not an ASE Atoms object')
 
         self.atoms = atoms.copy()
-
         self._ensemble_parameters = ensemble_parameters
-        self._metadata = metadata
+        self._generate_default_metadata(seed, ensemble_name)
         self._last_state = {}
 
         self._data = pd.DataFrame(columns=['mctrial'])
@@ -454,7 +459,11 @@ class DataContainer:
             # init DataContainer
             dc = DataContainer(atoms,
                                reference_data['parameters'],
-                               reference_data['metadata'])
+                               reference_data['metadata']['ensemble_name'],
+                               reference_data['metadata']['seed'])
+
+            # overwrite metadata
+            dc._metadata = reference_data['metadata']
 
             for tag, value in reference_data['last_state'].items():
                 if tag == 'random_state':
@@ -509,3 +518,15 @@ class DataContainer:
             handle.add(reference_data_file.name, arcname='reference_data')
             handle.add(runtime_data_file.name, arcname='runtime_data')
         runtime_data_file.close()
+
+    def _generate_default_metadata(self, seed, ensemble_name):
+        """Collects and returns all metadata to be saved in DataContainer."""
+        self._metadata = OrderedDict()
+
+        self._metadata['seed'] = seed
+        self._metadata['ensemble_name'] = ensemble_name
+        self._metadata['date_created'] = \
+            datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        self._metadata['username'] = getpass.getuser()
+        self._metadata['hostname'] = socket.gethostname()
+        self._metadata['icet_version'] = icet_version

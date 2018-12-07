@@ -97,8 +97,9 @@ class CanonicalEnsemble(BaseEnsemble):
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None) -> None:
 
-        self._ensemble_parameters = dict(size_atoms=len(atoms),
+        self._ensemble_parameters = dict(ensemble_name=self.__class__.__name__,
                                          temperature=temperature)
+
         self._boltzmann_constant = boltzmann_constant
 
         super().__init__(

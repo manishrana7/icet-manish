@@ -123,7 +123,7 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
                  trajectory_write_interval: int = None,
                  boltzmann_constant: float = kB) -> None:
 
-        self._ensemble_parameters = dict(size_atoms=len(atoms),
+        self._ensemble_parameters = dict(ensemble_name=self.__class__.__name__,
                                          temperature=temperature)
 
         self._chemical_potentials = None
