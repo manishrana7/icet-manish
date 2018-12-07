@@ -850,8 +850,8 @@ PYBIND11_MODULE(_icet, m)
     py::class_<LocalOrbitListGenerator>(m, "LocalOrbitListGenerator")
         .def(py::init<const OrbitList &, const Structure &>(),
              R"pbdoc(
-             Constructs a LocalOrbitListGenerator object from an OrbitList instance
-             and a Structure instance.
+             Constructs a LocalOrbitListGenerator object from an orbit list
+             and a structure.
 
              Parameters
              ----------
@@ -862,7 +862,8 @@ PYBIND11_MODULE(_icet, m)
              )pbdoc",
              py::arg("orbit_list"),
              py::arg("supercell"))
-        .def("generate_local_orbit_list", (OrbitList(LocalOrbitListGenerator::*)(const unsigned int)) & LocalOrbitListGenerator::getLocalOrbitList,
+        .def("generate_local_orbit_list",
+             (OrbitList(LocalOrbitListGenerator::*)(const size_t)) & LocalOrbitListGenerator::getLocalOrbitList,
              R"pbdoc(
              Generates and returns the local orbit list from an input index corresponding a specific offset of
              the primitive structure.
