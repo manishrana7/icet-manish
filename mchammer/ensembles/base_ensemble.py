@@ -123,10 +123,11 @@ class BaseEnsemble(ABC):
                 if filedir and not os.path.isdir(filedir):
                     raise FileNotFoundError('Path to data container file does'
                                             ' not exist: {}'.format(filedir))
+            self._generate_default_metadata()
             self._data_container = \
                 DataContainer(atoms=atoms,
                               ensemble_parameters=self.ensemble_parameters,
-                              metadata=self.metadata)
+                              metadata=self._metadata)
 
         # interval for writing data and further preparation of data container
         default_interval = max(1, 10 * round(len(atoms) / 10))
@@ -485,20 +486,17 @@ class BaseEnsemble(ABC):
 
         self.data_container.write(self._data_container_filename)
 
-    @property
-    def metadata(self) -> Dict:
+    def _generate_default_metadata(self):
         """Collects and returns all metadata to be saved in DataContainer."""
-        metadata = OrderedDict()
+        self._metadata = OrderedDict()
 
-        metadata['seed'] = self.random_seed
-        metadata['ensemble_name'] = self.name
-        metadata['date_created'] = \
+        self._metadata['seed'] = self.random_seed
+        self._metadata['ensemble_name'] = self.name
+        self._metadata['date_created'] = \
             datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-        metadata['username'] = getpass.getuser()
-        metadata['hostname'] = socket.gethostname()
-        metadata['icet_version'] = icet_version
-
-        return metadata
+        self._metadata['username'] = getpass.getuser()
+        self._metadata['hostname'] = socket.gethostname()
+        self._metadata['icet_version'] = icet_version
 
     @property
     def ensemble_parameters(self):
