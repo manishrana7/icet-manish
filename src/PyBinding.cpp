@@ -891,7 +891,8 @@ PYBIND11_MODULE(_icet, m)
              )pbdoc")
         .def("clear", &LocalOrbitListGenerator::clear,
              "Clears the list of offsets and primitive-to-supercell map of the LocalOrbitListGenerator object")
-        .def("get_unique_offsets_count", &LocalOrbitListGenerator::getNumberOfUniqueOffsets,
+        .def("get_number_of_unique_offsets",
+	     &LocalOrbitListGenerator::getNumberOfUniqueOffsets,
              "Returns the number of unique offsets")
         .def("_get_primitive_to_supercell_map", &LocalOrbitListGenerator::getMapFromPrimitiveToSupercell,
              "Returns the primitive to supercell mapping")
