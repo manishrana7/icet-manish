@@ -101,8 +101,8 @@ class VCSGCEnsemble(BaseEnsemble):
         units, i.e. units that are consistent
         with the underlying cluster expansion
         and the temperature units [default: eV/K]
-    name : str
-        human-readable ensemble name [default: `BaseEnsemble`]
+    user_tag : str
+        human-readable tag for ensemble [default: None]
     data_container : str
         name of file the data container associated with the ensemble
         will be written to; if the file exists it will be read, the

@@ -28,7 +28,7 @@ class BaseEnsemble(ABC):
         atomic configuration to be used in the Monte Carlo simulation;
         also defines the initial occupation vector
     user_tag : str
-        human-readable user tag
+        human-readable tag for ensemble [default: None]
     data_container : str
         name of file the data container associated with the ensemble
         will be written to; if the file exists it will be read, the
@@ -300,7 +300,7 @@ class BaseEnsemble(ABC):
 
     @property
     def user_tag(self) -> str:
-        """ user tag used for labeling the ensemble """
+        """ tag used for labeling the ensemble """
         return self._user_tag
 
     @property
