@@ -29,15 +29,12 @@ class DataContainer:
     ensemble_parameters : dict
         parameters associated with the underlying ensemble
 
-    ensemble_name : str
-        name of associated ensemble
-
-    seed : int
-        seed used in random number generator
+    metadata : dict
+        metadata associated with the data container
     """
 
     def __init__(self, atoms: Atoms, ensemble_parameters: dict,
-                 metadata: dict):
+                 metadata: dict = OrderedDict()):
         """
         Initializes a DataContainer object.
         """
@@ -460,8 +457,7 @@ class DataContainer:
             # init DataContainer
             dc = \
                 DataContainer(atoms=atoms,
-                              ensemble_parameters=reference_data['parameters'],
-                              metadata=OrderedDict())
+                              ensemble_parameters=reference_data['parameters'])
 
             # overwrite metadata
             dc._metadata = reference_data['metadata']
