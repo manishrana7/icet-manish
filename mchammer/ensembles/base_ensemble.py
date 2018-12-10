@@ -486,6 +486,6 @@ class BaseEnsemble(ABC):
         self.data_container.write(self._data_container_filename)
 
     @property
-    def ensemble_parameters(self):
+    def ensemble_parameters(self) -> dict:
         """Returns parameters associated with the ensemble."""
-        return self._ensemble_parameters
+        return self._ensemble_parameters.copy()
