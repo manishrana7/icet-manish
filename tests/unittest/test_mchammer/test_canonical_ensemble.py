@@ -98,14 +98,14 @@ class TestEnsemble(unittest.TestCase):
                          len(self.atoms))
         self.assertEqual(self.ensemble.ensemble_parameters['temperature'],
                          self.temperature)
-    
+
         self.assertEqual(
             self.ensemble.data_container.ensemble_parameters['n_atoms'],
             len(self.atoms))
         self.assertEqual(
             self.ensemble.data_container.ensemble_parameters['temperature'],
-            self.temperature)    
-    
+            self.temperature)
+
     def test_write_interval_and_period(self):
         """Tests interval and period for writing data from ensemble."""
         self.assertEqual(self.ensemble.data_container_write_period, 499.0)

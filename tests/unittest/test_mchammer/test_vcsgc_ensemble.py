@@ -135,8 +135,9 @@ class TestEnsemble(unittest.TestCase):
 
         phis = {13: -1, 31: -1}
         ensemble = VCSGCEnsemble(
-            atoms=self.atoms, calculator=self.calculator, user_tag='test-ensemble',
-            random_seed=42, temperature=self.temperature,
+            atoms=self.atoms, calculator=self.calculator,
+            user_tag='test-ensemble', random_seed=42,
+            temperature=self.temperature,
             phis=phis,
             kappa=self.kappa)
         ensemble._do_trial_step()
@@ -144,8 +145,9 @@ class TestEnsemble(unittest.TestCase):
         # Test both int and str
         phis = {'Al': -1, 31: -1}
         ensemble = VCSGCEnsemble(
-            atoms=self.atoms, calculator=self.calculator, user_tag='test-ensemble',
-            random_seed=42, temperature=self.temperature,
+            atoms=self.atoms, calculator=self.calculator,
+            user_tag='test-ensemble', random_seed=42,
+            temperature=self.temperature,
             phis=phis,
             kappa=self.kappa)
         ensemble._do_trial_step()

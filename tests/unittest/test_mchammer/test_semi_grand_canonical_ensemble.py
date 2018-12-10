@@ -118,7 +118,8 @@ class TestEnsemble(unittest.TestCase):
 
         chemical_potentials = {13: 5, 31: 0}
         ensemble = SemiGrandCanonicalEnsemble(
-            atoms=self.atoms, calculator=self.calculator, user_tag='test-ensemble',
+            atoms=self.atoms, calculator=self.calculator,
+            user_tag='test-ensemble',
             random_seed=42, temperature=self.temperature,
             chemical_potentials=chemical_potentials)
         ensemble._do_trial_step()
@@ -126,7 +127,8 @@ class TestEnsemble(unittest.TestCase):
         # Test both int and str
         chemical_potentials = {'Al': 5, 31: 0}
         ensemble = SemiGrandCanonicalEnsemble(
-            atoms=self.atoms, calculator=self.calculator, user_tag='test-ensemble',
+            atoms=self.atoms, calculator=self.calculator,
+            user_tag='test-ensemble',
             random_seed=42, temperature=self.temperature,
             chemical_potentials=chemical_potentials)
         ensemble._do_trial_step()
