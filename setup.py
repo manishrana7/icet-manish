@@ -78,6 +78,7 @@ class BuildExt(build_ext):
                         .format(self.distribution.get_version()))
         for ext in self.extensions:
             ext.extra_compile_args = opts
+            ext.extra_link_args = opts
         build_ext.build_extensions(self)
 
 
