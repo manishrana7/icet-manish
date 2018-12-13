@@ -44,15 +44,21 @@ class EnsembleOptimizer(BaseOptimizer):
         training.
     bootstrap : bool
         if True sampling will be carried out with replacement
+    check_condition : bool
+        whether or not to carry out a check of the condition number
+
+        N.B.: This can be sligthly more time consuming for larger
+        matrices.
     seed : int
         seed for pseudo random number generator
     """
 
     def __init__(self, fit_data, fit_method='least-squares', standardize=True,
-                 ensemble_size=50, train_size=1.0, bootstrap=True, seed=42,
-                 **kwargs):
+                 ensemble_size=50, train_size=1.0, bootstrap=True,
+                 check_condition=True, seed=42, **kwargs):
 
-        super().__init__(fit_data, fit_method, standardize, seed)
+        super().__init__(fit_data, fit_method, standardize, check_condition,
+                         seed)
 
         # set training size
         if isinstance(train_size, float):
@@ -94,9 +100,10 @@ class EnsembleOptimizer(BaseOptimizer):
                 range(self.n_target_values), train_set)
 
             # train
-            opt = Optimizer(
-                (self._A, self._y), self.fit_method, train_set=train_set,
-                test_set=test_set, **self._kwargs)
+            opt = Optimizer((self._A, self._y), self.fit_method,
+                            train_set=train_set, test_set=test_set,
+                            check_condition=self._check_condition,
+                            **self._kwargs)
             opt.train()
             optimizers.append(opt)
 
