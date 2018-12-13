@@ -13,6 +13,7 @@ html/
 latex/
 xml/
 tmp/
+NOTES*
 
 .mypy_cache/
 .vscode

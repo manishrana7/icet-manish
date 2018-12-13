@@ -22,7 +22,8 @@ As the package is provided as a `source distribution
 <https://packaging.python.org/glossary/#term-source-distribution-or-sdist>`_
 the C++ core library is compiled as part of the installation. This requires a
 C++11 compliant compiler to be installed on your system, e.g., `GCC 4.8.1 and
-above <https://gcc.gnu.org/projects/cxx-status.html#cxx11>`_.
+above <https://gcc.gnu.org/projects/cxx-status.html#cxx11>`_ or
+`Clang 3.3 and above <https://clang.llvm.org/cxx_status.html>`_.
 
 
 Installation via ``setup.py``
@@ -92,7 +93,6 @@ libraries, including
 `scipy <https://www.scipy.org/>`_,
 `scitkit-learn <http://scikit-learn.org/>`_, and
 `spglib <https://atztogo.github.io/spglib/>`_.
-
 The :program:`icet` C++ core library depends on
 `Eigen <eigen.tuxfamily.org/>`_,
 `boost <https://www.boost.org/>`_, and
