@@ -472,9 +472,9 @@ PYBIND11_MODULE(_icet, m)
         .def_property_readonly("sorted",
                                &Cluster::isSorted,
                                "boolean : True/False if the cluster is sorted/unsorted")
-        .def_property_readonly("tag",
-                               &Cluster::tag,
-                               "int : cluster tag (defined for sorted cluster)")
+        .def_property("tag",
+                            &Cluster::tag,
+                            "int : cluster tag (defined for sorted cluster)")
         .def_property_readonly("radius",
                                &Cluster::radius,
                                "float : the radius of the cluster")

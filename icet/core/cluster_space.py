@@ -321,6 +321,27 @@ class ClusterSpace(_ClusterSpace):
         """Orbit list that defines the cluster in the cluster space"""
         return self._orbit_list
 
+    def get_possible_orbit_decorations(self, orbit_index: int) -> List[List[str]]:
+        """Returns possible decorations on the orbit
+        
+        Parameters
+        ----------
+        orbit_index
+        """
+        orbit = self.orbit_list.orbits[orbit_index]
+
+        indices = [lattice_site.index for lattice_site in orbit.representative_sites]
+
+        allowed_species = [self.chemical_symbols[index] for index in indices]
+        print(indices)
+        print(orbit.representative_sites)
+        print(allowed_species)
+        possible_decorations = []
+        import itertools
+        for element in itertools.product(*allowed_species):
+            possible_decorations.append(element)
+        return possible_decorations
+
     def write(self, filename: str):
         """
         Saves cluster space to a file.

@@ -343,6 +343,11 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         self.cs._prune_orbit_list(indices=prune_indices)
         self.assertEqual(orig_size-len(prune_indices), len(self.cs.orbit_list))
 
+    def test_get_possible_orbit_decorations(self):
+        """Tests get possible orbit decorations."""
+
+        decorations = self.cs.get_possible_orbit_decorations(orbit_index=3)
+        print(decorations)
 
 class TestClusterSpaceSurface(unittest.TestCase):
     """
