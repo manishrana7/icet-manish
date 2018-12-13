@@ -34,7 +34,7 @@ from sklearn.preprocessing import StandardScaler
 logger = logger.getChild('fit_methods')
 
 
-def fit(X, y, fit_method, standardize=True, **kwargs):
+def fit(X, y, fit_method, standardize=True, check_condition=True, **kwargs):
     """ Wrapper function for all available fit methods.
 
     Parameters
@@ -48,6 +48,11 @@ def fit(X, y, fit_method, standardize=True, **kwargs):
         "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
     standardize : bool
         whether or not to standardize the fit matrix before fitting
+    check_condition : bool
+        whether or not to carry out a check of the condition number
+
+        N.B.: This can be sligthly more time consuming for larger
+        matrices.
 
     Returns
     ----------
@@ -61,6 +66,11 @@ def fit(X, y, fit_method, standardize=True, **kwargs):
         for key in available_fit_methods:
             msg += [' * ' + key]
         raise ValueError('\n'.join(msg))
+
+    if check_condition:
+        cond = np.linalg.cond(X)
+        if cond > 1e10:
+            logger.warning('Condition number is large, {}'.format(cond))
 
     if standardize:
         ss = StandardScaler(copy=False, with_mean=False, with_std=True)
@@ -322,10 +332,9 @@ def _fit_ardr(X, y, threshold_lambda=1e6, fit_intercept=False, **kwargs):
 def _fit_rfe_l2(X, y, n_features=None, step=None, **kwargs):
     """Recursive feature elimination (RFE) L2 fitting
 
-    RFE - L2 fitting is a mix between first obtaining the important
-    features using recursive feature elimination (RFE) as implemented
-    in scikit-learn and then carrying out an ordinary least-square fit
-    using the selected features.
+    RFE - L2 fitting is a method which runs recusrive feature elimination
+    (as implemented in scikit-learn) with least-square fitting. The final model
+    is obtained via a least-square fit using the selected features.
 
     Parameters
     -----------
@@ -370,8 +379,8 @@ def _fit_rfe_l2(X, y, n_features=None, step=None, **kwargs):
 def _fit_rfe_l2_CV(X, y, step=None, rank=1, n_jobs=-1, **kwargs):
     """Recursive feature elimination (RFE) L2 fitting with cross-validation (CV).
 
-    Recursive feature elimination - L2 fitting using cross-validation
-    for optimizing the number of features.
+    Recursive feature elimination with least-squares fitting using
+    cross-validation for optimizing the number of features.
 
     Parameters
     -----------

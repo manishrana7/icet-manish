@@ -10,7 +10,7 @@ from .tools import ScatterData
 
 class Optimizer(BaseOptimizer):
     """
-    Optimizer for single `Ax = y` fit.
+    Optimizer for single :math:`Ax = y` fit.
 
     One has to specify either `train_size`/`test_size` or
     `train_set`/`test_set` If either `train_set` or `test_set` (or both)
@@ -49,6 +49,11 @@ class Optimizer(BaseOptimizer):
         indices of rows of `A`/`y` to be used for training
     test_set : tuple or list(int)
         indices of rows of `A`/`y` to be used for testing
+    check_condition : bool
+        whether or not to carry out a check of the condition number
+
+        N.B.: This can be sligthly more time consuming for larger
+        matrices.
     seed : int
         seed for pseudo random number generator
 
@@ -62,15 +67,15 @@ class Optimizer(BaseOptimizer):
 
     def __init__(self, fit_data, fit_method='least-squares', standardize=True,
                  train_size=0.75, test_size=None, train_set=None,
-                 test_set=None, seed=42, **kwargs):
+                 test_set=None, check_condition=True, seed=42, **kwargs):
 
-        super().__init__(fit_data, fit_method, standardize, seed)
+        super().__init__(fit_data, fit_method, standardize, check_condition,
+                         seed)
 
         self._kwargs = kwargs
 
         # setup train and test sets
-        self._setup_rows(train_size, test_size,
-                         train_set, test_set)
+        self._setup_rows(train_size, test_size, train_set, test_set)
 
         # will be populate once running train
         self._rmse_train = None
@@ -89,7 +94,8 @@ class Optimizer(BaseOptimizer):
 
         # perform training
         self._fit_results = fit(A_train, y_train, self.fit_method,
-                                self.standardize, **self._kwargs)
+                                self.standardize, self._check_condition,
+                                **self._kwargs)
         self._rmse_train = self.compute_rmse(A_train, y_train)
         self._contributions_train = self.get_contributions(A_train)
         self.train_scatter_data = ScatterData(y_train, self.predict(A_train))
