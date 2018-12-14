@@ -333,9 +333,7 @@ class ClusterSpace(_ClusterSpace):
         indices = [lattice_site.index for lattice_site in orbit.representative_sites]
 
         allowed_species = [self.chemical_symbols[index] for index in indices]
-        print(indices)
-        print(orbit.representative_sites)
-        print(allowed_species)
+        
         possible_decorations = []
         import itertools
         for element in itertools.product(*allowed_species):
