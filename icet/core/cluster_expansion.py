@@ -19,7 +19,7 @@ class ClusterExpansion:
     ----------
     cluster_space : icet.ClusterSpace
         cluster space that was used for constructing the cluster expansion
-    parameters : numpy.ndarray
+    parameters : np.ndarray
         effective cluster interactions (ECIs)
 
     Example
