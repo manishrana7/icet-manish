@@ -23,7 +23,7 @@ except FileExistsError:
     pass
 for temperature in [900, 300]:
     # Evolve configuration through the entire composition range
-    for phi in arange(-2.1, 0.11, 0.1):
+    for phi in arange(-2.1, 0.11, 0.08):
         # Initialize MC ensemble
         mc = VCSGCEnsemble(
             atoms=atoms,
@@ -34,4 +34,4 @@ for temperature in [900, 300]:
             phis={chemical_symbols[0]: -2.0 - phi, chemical_symbols[1]: phi},
             kappa=200)
 
-        mc.run(number_of_trial_steps=len(atoms) * 30)
+        mc.run(number_of_trial_steps=len(atoms) * 100)
