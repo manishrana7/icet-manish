@@ -16,6 +16,7 @@ atoms.set_chemical_symbols([chemical_symbols[0]] * len(atoms))
 calculator = ClusterExpansionCalculator(atoms, ce)
 
 # step 2: Carry out Monte Carlo simulations
+# Make sure output directory exists
 output_directory = 'monte_carlo_data'
 try:
     mkdir(output_directory)
