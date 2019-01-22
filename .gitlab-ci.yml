@@ -35,6 +35,20 @@ tests:
       - coverage/
 
 
+test_benchmarks_tutorial:
+  stage: test
+  only:
+    - schedules
+  tags:
+    - linux
+  dependencies:
+    - build_linux
+  script:
+    - export PYTHONPATH=$PWD:$PWD/build/:$PYTHONPATH
+    - for f in benchmark/*.py; do echo $f ; python3 $f ; done
+    - for f in $(ls tutorial/*/*.py | grep -v parallel_monte_carlo.py); do echo $f ; python3 $f ; done
+
+
 style_check:
   stage: test
   tags:
