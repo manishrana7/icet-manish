@@ -45,7 +45,7 @@ test_benchmarks_tutorial:
   script:
     - export PYTHONPATH=$PWD:$PWD/build/:$PYTHONPATH
     - for f in benchmark/*.py; do echo $f ; python3 $f ; done
-    - for f in $(ls tutorial/*/*.py | grep -v __*.py | grep -v parallel_monte_carlo); do echo $f ; cd `dirname $f` ; python3 `basename $f` ; cd ../../ ; done
+    - for f in $(ls tutorial/*/*.py | grep -v __ | grep -v parallel_monte_carlo); do echo $f ; cd `dirname $f` ; python3 `basename $f` ; cd ../../ ; done
 
 
 style_check:
