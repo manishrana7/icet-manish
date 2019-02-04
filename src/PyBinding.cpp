@@ -778,14 +778,8 @@ PYBIND11_MODULE(_icet, m)
              "Returns the number of orbits in the OrbitList")
         .def("get_orbit", &OrbitList::getOrbit,
              "Returns a copy of the orbit at the position i in the OrbitList")
-<<<<<<< HEAD
         .def("_remove_inactive_orbits", &OrbitList::removeInactiveOrbits)
-=======
-        .def("_remove_inactive_orbits",
-	     &OrbitList::removeInactiveOrbits)
->>>>>>> master
-        .def("clear", &OrbitList::clear,
-             "Clears the list of orbits.")
+        .def("clear", &OrbitList::clear, "Clears the list of orbits.")
         .def("sort", &OrbitList::sort,
              "Sorts the orbits by orbit comparison")
         .def(
@@ -810,13 +804,8 @@ PYBIND11_MODULE(_icet, m)
 //             )pbdoc",
 //             py::arg("cluster"))
         .def("_is_row_taken", &OrbitList::isRowsTaken,
-<<<<<<< HEAD
-             R"pbdoc(
-                Returns true if rows exist in taken_rows.
-=======
             R"pbdoc(
             Returns true if rows exist in taken_rows.
->>>>>>> master
 
             Parameters
             ----------
