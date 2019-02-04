@@ -16,6 +16,13 @@ from typing import BinaryIO, Dict, List, TextIO, Tuple, Union
 from icet import __version__ as icet_version
 
 
+class Int64Encoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.int64):
+            return int(obj)
+        return json.JSONEncoder.default(self, obj)
+
+
 class DataContainer:
     """
     Data container for storing information concerned with
@@ -47,7 +54,8 @@ class DataContainer:
         self._add_default_metadata()
         self._last_state = {}
 
-        self._data = pd.DataFrame(columns=['mctrial'])
+        self._observables = set()
+        self._data_list = []
 
     def append(self, mctrial: int,
                record: Dict[str, Union[int, float, list]]):
@@ -66,16 +74,13 @@ class DataContainer:
         TypeError
             if input parameters have the wrong type
 
-        Todo
-        ----
-        * This might be a quite expensive way to add data to the data
-          frame. Testing and profiling to be carried out later.
         """
         if not isinstance(mctrial, numbers.Integral):
             raise TypeError('mctrial has the wrong type: {}'
                             .format(type(mctrial)))
-        if not self._data.mctrial.empty:
-            if self._data.mctrial.iloc[-1] > mctrial:
+
+        if self._data_list:
+            if self._data_list[-1]['mctrial'] > mctrial:
                 raise ValueError('mctrial values should be given in ascending'
                                  ' order. This error can for example occur'
                                  ' when trying to append to an existing data'
@@ -86,11 +91,14 @@ class DataContainer:
         if not isinstance(record, dict):
             raise TypeError('record has the wrong type: {}'
                             .format(type(record)))
+
+        for tag in record.keys():
+            self._observables.add(tag)
+
         row_data = OrderedDict()
         row_data['mctrial'] = mctrial
         row_data.update(record)
-        self._data = self._data.append(row_data, ignore_index=True)
-        self._data.mctrial = self._data.mctrial.astype('int')
+        self._data_list.append(row_data)
 
     def _update_last_state(self, last_step: int, occupations: List[int],
                            accepted_trials: int, random_state: tuple):
@@ -175,14 +183,19 @@ class DataContainer:
                                         interval=interval)
 
         for tag in tags:
-            if tag not in self._data:
+            if tag is 'mctrial':
+                continue
+            if tag not in self.observables:
                 raise ValueError('No observable named {} in data'
                                  ' container'.format(tag))
 
+        mctrials = [row_dict['mctrial'] for row_dict in self._data_list]
+        data = pd.DataFrame.from_records(self._data_list,
+                                         index=mctrials,
+                                         columns=tags)
         if start is None and stop is None:
-            data = self._data.loc[::interval, tags]
+            data = data.loc[::interval, tags].copy()
         else:
-            data = self._data.set_index(self._data.mctrial)
             # slice and pass a copy to avoid slowing down dropna method below
             if start is None:
                 data = data.loc[:stop:interval, tags].copy()
@@ -239,7 +252,11 @@ class DataContainer:
     @property
     def data(self) -> pd.DataFrame:
         """ pandas data frame (see :class:`pandas.DataFrame`) """
-        return self._data
+        if self._data_list:
+            return pd.DataFrame.from_records(self._data_list,
+                                             exclude=['occupations'])
+        else:
+            return pd.DataFrame()
 
     @property
     def ensemble_parameters(self) -> dict:
@@ -249,7 +266,7 @@ class DataContainer:
     @property
     def observables(self) -> List[str]:
         """ observable names """
-        return [col for col in self._data.columns.tolist() if col != 'mctrial']
+        return list(self._observables)
 
     @property
     def metadata(self) -> dict:
@@ -262,9 +279,9 @@ class DataContainer:
         return self._last_state
 
     def reset(self):
-        """ Resets (clears) data frame of data container. """
-        self._data = pd.DataFrame(columns=['mctrial'])
-        self._data = self._data.astype({'mctrial': int})
+        """ Resets (clears) internal data list of data container. """
+        self._data_list.clear()
+        self._observables.clear()
 
     def get_number_of_entries(self, tag: str = None) -> int:
         """
@@ -281,13 +298,14 @@ class DataContainer:
         ValueError
             if observable is requested that is not in data container
         """
+        data = pd.DataFrame.from_records(self._data_list)
         if tag is None:
-            return len(self._data)
+            return len(data)
         else:
-            if tag not in self._data:
+            if tag not in data:
                 raise ValueError('No observable named {}'
                                  ' in data container'.format(tag))
-            return self._data[tag].count()
+            return data[tag].count()
 
     def get_average(self, tag: str,
                     start: int = None, stop: int = None) -> float:
@@ -413,7 +431,7 @@ class DataContainer:
         traj.close()
 
     @staticmethod
-    def read(infile: Union[str, BinaryIO, TextIO]):
+    def read(infile: Union[str, BinaryIO, TextIO], old_format: bool = False):
         """
         Reads DataContainer object from file.
 
@@ -421,6 +439,8 @@ class DataContainer:
         ----------
         infile
             file from which to read
+        old_format
+            If true use old json format to read runtime data; default to false
 
         Raises
         ------
@@ -473,16 +493,21 @@ class DataContainer:
             # add runtime data from file
             runtime_data_file.write(
                 tar_file.extractfile('runtime_data').read())
-
             runtime_data_file.seek(0)
-            runtime_data = pd.read_json(runtime_data_file)
-            dc._data = runtime_data.sort_index(ascending=True)
-            dc._data.occupations = \
-                dc._data.occupations.replace({None: np.nan})
+            if old_format:
+                runtime_data = pd.read_json(runtime_data_file)
+                data = runtime_data.sort_index(ascending=True)
+                dc._data_list = \
+                    data.T.apply(lambda x: x.dropna().to_dict()).tolist()
+            else:
+                dc._data_list = np.load(runtime_data_file)['arr_0'].tolist()
+
+        dc._observables = set([key for data in dc._data_list for key in data])
+        dc._observables = dc._observables - {'mctrial'}
 
         return dc
 
-    def write(self, outfile: Union[str, BinaryIO, TextIO]):
+    def _write(self, outfile: Union[str, BinaryIO, TextIO]):
         """
         Writes DataContainer object to file.
 
@@ -505,11 +530,11 @@ class DataContainer:
 
         reference_data_file = tempfile.NamedTemporaryFile()
         with open(reference_data_file.name, 'w') as handle:
-            json.dump(reference_data, handle)
+            json.dump(reference_data, handle, cls=Int64Encoder)
 
-        # Save pandas DataFrame
+        # Save runtime data
         runtime_data_file = tempfile.NamedTemporaryFile()
-        self._data.to_json(runtime_data_file.name, double_precision=15)
+        np.savez_compressed(runtime_data_file, self._data_list)
 
         with tarfile.open(outfile, mode='w') as handle:
             handle.add(reference_atoms_file.name, arcname='atoms')
