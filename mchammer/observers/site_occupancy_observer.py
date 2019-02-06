@@ -6,7 +6,7 @@ from typing import List, Dict
 import numpy as np
 
 
-class SiteOccupancyFactor(BaseObserver):
+class SiteOccupancyObserver(BaseObserver):
     """
     This class represents a site occupation factor (SOF) observer.
 
@@ -26,9 +26,6 @@ class SiteOccupancyFactor(BaseObserver):
         an atoms object that represents a typical super cell, which is used to
         determine the allowed species
 
-    tag : str
-        human readable observer name (default: `SiteOccupancyFactor`)
-
     interval : int
         observation interval during the Monte Carlo simulation
 
@@ -45,7 +42,8 @@ class SiteOccupancyFactor(BaseObserver):
                  sites: Dict[str, List[int]],
                  super_cell: Atoms,
                  interval: int) -> None:
-        super().__init__(interval=interval, return_type=dict, tag=None)
+        super().__init__(interval=interval, return_type=dict,
+                         tag='SiteOccupancyObserver')
 
         self._sites = {site: sorted(indices)
                        for site, indices in sites.items()}
