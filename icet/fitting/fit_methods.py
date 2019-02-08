@@ -15,10 +15,7 @@ http://scikit-learn.org/stable/modules/linear_model.html
 """
 
 import numpy as np
-from ..io.logging import logger
 from collections import OrderedDict
-from .split_bregman import fit_split_bregman
-
 from sklearn.linear_model import (Lasso,
                                   LinearRegression,
                                   LassoCV,
@@ -29,35 +26,41 @@ from sklearn.linear_model import (Lasso,
 from sklearn.model_selection import ShuffleSplit
 from sklearn.feature_selection import RFE, RFECV
 from sklearn.preprocessing import StandardScaler
+from typing import Any, Dict, List, Union
+from ..io.logging import logger
+from .split_bregman import fit_split_bregman
 
 
 logger = logger.getChild('fit_methods')
 
 
-def fit(X, y, fit_method, standardize=True, check_condition=True, **kwargs):
-    """ Wrapper function for all available fit methods.
+def fit(X: Union[np.ndarray, List[List[float]]],
+        y: np.ndarray,
+        fit_method: str,
+        standardize: bool = True,
+        check_condition: bool = True,
+        **kwargs) -> Dict[str, Any]:
+    """
+    Wrapper function for all available fit methods.  The function
+    returns parameters and other pertinent information in the form of
+    a dictionary.
 
     Parameters
     -----------
-    X : np.ndarray or list(list(float))
+    X
         fit matrix
-    y : np.ndarray
+    y
         target array
-    fit_method : str
+    fit_method
         method to be used for training; possible choice are
-        "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr"
+        "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr",
+        "rfe-l2", "split-bregman"
     standardize : bool
-        whether or not to standardize the fit matrix before fitting
+        if True the fit matrix is standardized before fitting
     check_condition : bool
-        whether or not to carry out a check of the condition number
-
-        N.B.: This can be sligthly more time consuming for larger
-        matrices.
-
-    Returns
-    ----------
-    results : dict
-        parameters and other pertinent information
+        if True the condition number will be checked
+        (this can be sligthly more time consuming for larger
+        matrices)
     """
 
     if fit_method not in available_fit_methods:
@@ -83,56 +86,50 @@ def fit(X, y, fit_method, standardize=True, check_condition=True, **kwargs):
     return results
 
 
-def _fit_least_squares(X, y):
+def _fit_least_squares(X: np.ndarray, y: np.ndarray) -> Dict[str, Any]:
     """
-    Returns the least-squares solution `a` to the linear problem `Xa=y`.
+    Returns the least-squares solution `a` to the linear problem
+    `Xa=y` in the form of a dictionary with a key named `parameters`.
 
     This function is a wrapper to the `linalg.lstsq` function in NumPy.
 
     Parameters
     -----------
-    X : np.ndarray
+    X
         fit matrix
-    y : np.ndarray
+    y
         target array
-
-    Returns
-    ----------
-    results : dict
-        parameters
     """
     results = dict()
     results['parameters'] = np.linalg.lstsq(X, y, rcond=-1)[0]
     return results
 
 
-def _fit_lasso(X, y, alpha=None, fit_intercept=False, **kwargs):
+def _fit_lasso(X: np.ndarray, y: np.ndarray,
+               alpha: float = None, fit_intercept: bool = False,
+               **kwargs) -> Dict[str, Any]:
     """
-    Return the solution `a` to the linear problem `Xa=y` obtained by using
-    the LASSO method as implemented in scitkit-learn.
+    Returns the solution `a` to the linear problem `Xa=y` obtained by
+    using the LASSO method as implemented in scitkit-learn in the form
+    of a dictionary with a key named `parameters`.
 
     LASSO optimizes the following problem::
 
         (1 / (2 * n_samples)) * ||y - Xw||^2_2 + alpha * ||w||_1
 
-    If `alpha` is `None` this function will call the fit_lassoCV which attempts
-    to find the optimal alpha via sklearn LassoCV class.
+    If `alpha` is `None` this function will call `fit_lassoCV` which attempts
+    to find the optimal alpha via sklearn's `LassoCV` class.
 
     Parameters
-    -----------
-    X : np.ndarray
-        fit matrix
-    y : np.ndarray
-        target array
-    alpha : float
-        alpha value
-    fit_intercept : bool
-        center data or not, forwarded to sklearn
-
-    Returns
     ----------
-    results : dict
-        parameters
+    X
+        fit matrix
+    y
+        target array
+    alpha
+        alpha value
+    fit_intercept
+        center data or not, forwarded to sklearn
     """
     if alpha is None:
         return _fit_lassoCV(X, y, fit_intercept=fit_intercept, **kwargs)
@@ -144,34 +141,41 @@ def _fit_lasso(X, y, alpha=None, fit_intercept=False, **kwargs):
         return results
 
 
-def _fit_lassoCV(X, y, alphas=None, fit_intercept=False, cv=10, n_jobs=-1,
-                 **kwargs):
+def _fit_lassoCV(X: np.ndarray,
+                 y: np.ndarray,
+                 alphas: List[float] = None,
+                 fit_intercept: bool = False,
+                 cv: int = 10,
+                 n_jobs: int = -1,
+                 **kwargs) -> Dict[str, Any]:
     """
-    Returns the solution `a` to the linear problem `Xa=y` obtained by using
-    the LassoCV method as implemented in scitkit-learn.
+    Returns the solution `a` to the linear problem `Xa=y` obtained by
+    using the LassoCV method as implemented in scitkit-learn in the
+    form of a dictionary with a key named `parameters`.
+
+    The dictionary will also contain the keys `alpha_optimal` (alpha
+    value that yields the lowest validation RMSE), `alpha_path` (all
+    tested alpha values), and `mse_path` (MSE for validation set for
+    each alpha).
 
     Parameters
     -----------
-    X : np.ndarray
+    X
         fit matrix
-    y : np.ndarray
+    y
         target array
-    alphas : list / array
+    alphas
         list of alpha values to be evaluated during regularization path
-    fit_intercept : bool
+    fit_intercept
         center data or not, forwarded to sklearn
-    cv : int
+    cv
         how many folds to carry out in cross-validation
-
-    Returns
-    -------
-    results : dict
-        parameters as well as
-        `alpha_optimal` (alpha value that yields the lowest validation RMSE),
-        `alpha_path` (all tested alpha values),
-        `mse_path` (MSE for validation set for each alpha)
+    n_jobs
+        number of cores to use during the cross validation.
+        None means 1 unless in a joblib.parallel_backend context.
+        -1 means using all processors.
+        See sklearn's glossary for more details.
     """
-
     if alphas is None:
         alphas = np.logspace(-8, -0.3, 100)
 
@@ -186,29 +190,27 @@ def _fit_lassoCV(X, y, alphas=None, fit_intercept=False, cv=10, n_jobs=-1,
     return results
 
 
-def _fit_elasticnet(X, y, alpha=None, fit_intercept=False, **kwargs):
+def _fit_elasticnet(X: np.ndarray, y: np.ndarray,
+                    alpha: float = None, fit_intercept: bool = False,
+                    **kwargs) -> Dict[str, Any]:
     """
-    Return the solution `a` to the linear problem `Xa=y` obtained by using
-    the ElasticNet method as implemented in scitkit-learn.
+    Returns the solution `a` to the linear problem `Xa=y` obtained by using
+    the ElasticNet method as implemented in scitkit-learn in the
+    form of a dictionary with a key named `parameters`.
 
     If `alpha` is `None` this function will call the fit_lassoCV which attempts
     to find the optimal alpha via sklearn ElasticNetCV class.
 
     Parameters
     -----------
-    X : np.ndarray
+    X
         fit matrix
-    y : np.ndarray
+    y
         target array
-    alpha : float
+    alpha
         alpha value
-    fit_intercept : bool
+    fit_intercept
         center data or not, forwarded to sklearn
-
-    Returns
-    ----------
-    results : dict
-        parameters
     """
     if alpha is None:
         return _fit_elasticnetCV(X, y, fit_intercept=fit_intercept, **kwargs)
@@ -221,36 +223,45 @@ def _fit_elasticnet(X, y, alpha=None, fit_intercept=False, **kwargs):
         return results
 
 
-def _fit_elasticnetCV(X, y, alphas=None, l1_ratio=None, fit_intercept=False,
-                      cv=10, n_jobs=-1, **kwargs):
+def _fit_elasticnetCV(X: np.ndarray,
+                      y: np.ndarray,
+                      alphas: List[float] = None,
+                      l1_ratio: Union[float, List[float]] = None,
+                      fit_intercept: bool = False,
+                      cv: int = 10,
+                      n_jobs: int = -1,
+                      **kwargs) -> Dict[str, Any]:
     """
     Returns the solution `a` to the linear problem `Xa=y` obtained by using
-    the ElasticNetCV method as implemented in scitkit-learn.
+    the ElasticNetCV method as implemented in scitkit-learn in the
+    form of a dictionary with a key named `parameters`.
+
+    The dictionary returned by this function will also contain the
+    fields `alpha_optimal` (alpha value that yields the lowest
+    validation RMSE), `alpha_path` (all tested alpha values),
+    `l1_ratio_optmal` (alpha value that yields the lowest validation
+    RMSE), `l1_ratio_path` (all tested `l1_ratio` values) `mse_path`
+    (MSE for validation set for each alpha and `l1_ratio`)
 
     Parameters
     -----------
-    X : np.ndarray
+    X
         fit matrix
-    y : np.ndarray
+    y
         target array
-    alphas : list or np.ndarray
+    alphas
         list of alpha values to be evaluated during regularization path
-    l1_ratio : float or list(float)
+    l1_ratio
         l1_ratio values to be evaluated during regularization path
-    fit_intercept : bool
+    fit_intercept
         center data or not, forwarded to sklearn
-    cv : int
+    cv
         how many folds to carry out in cross-validation
-
-    Returns
-    -------
-    results : dict
-        parameters as well as
-        `alpha_optimal` (alpha value that yields the lowest validation RMSE),
-        `alpha_path` (all tested alpha values),
-        `l1_ratio_optmal` (alpha value that yields the lowest validation RMSE),
-        `l1_ratio_path` (all tested `l1_ratio` values)
-        `mse_path` (MSE for validation set for each alpha and `l1_ratio`)
+    n_jobs
+        number of cores to use during the cross validation.
+        None means 1 unless in a joblib.parallel_backend context.
+        -1 means using all processors.
+        See sklearn's glossary for more details.
     """
 
     if alphas is None:
@@ -273,24 +284,22 @@ def _fit_elasticnetCV(X, y, alphas=None, l1_ratio=None, fit_intercept=False,
     return results
 
 
-def _fit_bayesian_ridge(X, y, fit_intercept=False, **kwargs):
+def _fit_bayesian_ridge(X: np.ndarray, y: np.ndarray,
+                        fit_intercept: bool = False,
+                        **kwargs) -> Dict[str, Any]:
     """
     Returns the solution `a` to the linear problem `Xa=y` obtained by using
-    Bayesian ridge regression as implemented in scitkit-learn.
+    Bayesian ridge regression as implemented in scitkit-learn in the
+    form of a dictionary with a key named `parameters`.
 
     Parameters
     -----------
-    X : np.ndarray
+    X
         fit matrix
-    y : np.ndarray
+    y
         target array
-    fit_intercept : bool
+    fit_intercept
         center data or not, forwarded to sklearn
-
-    Returns
-    ----------
-    results : dict
-        parameters
     """
     brr = BayesianRidge(fit_intercept=fit_intercept, **kwargs)
     brr.fit(X, y)
@@ -299,27 +308,25 @@ def _fit_bayesian_ridge(X, y, fit_intercept=False, **kwargs):
     return results
 
 
-def _fit_ardr(X, y, threshold_lambda=1e6, fit_intercept=False, **kwargs):
+def _fit_ardr(X: np.ndarray, y: np.ndarray,
+              threshold_lambda: float = 1e6, fit_intercept: bool = False,
+              **kwargs) -> Dict[str, Any]:
     """
-    Returns the solution `a` to the linear problem `Xa=y` obtained by using
-    the automatic relevance determination regression (ARDR) method as
-    implemented in scitkit-learn.
+    Returns the solution `a` to the linear problem `Xa=y` obtained by
+    using the automatic relevance determination regression (ARDR)
+    method as implemented in scitkit-learn in the form of a dictionary
+    with a key named `parameters`.
 
     Parameters
     -----------
-    X : np.ndarray
+    X
         fit matrix
-    y : np.ndarray
+    y
         target array
-    threshold_lambda : float
+    threshold_lambda
         threshold lambda parameter forwarded to sklearn
-    fit_intercept : bool
+    fit_intercept
         center data or not, forwarded to sklearn
-
-    Returns
-    ----------
-    results : dict
-        parameters
     """
     ardr = ARDRegression(threshold_lambda=threshold_lambda,
                          fit_intercept=fit_intercept, **kwargs)
@@ -329,29 +336,31 @@ def _fit_ardr(X, y, threshold_lambda=1e6, fit_intercept=False, **kwargs):
     return results
 
 
-def _fit_rfe_l2(X, y, n_features=None, step=None, **kwargs):
-    """Recursive feature elimination (RFE) L2 fitting
+def _fit_rfe_l2(X: np.ndarray, y: np.ndarray,
+                n_features: int = None, step: int = None,
+                **kwargs) -> Dict[str, Any]:
+    """
+    Returns the solution `a` to the linear problem `Xa=y` obtained by
+    recursive feature elimination (RFE) with least-squares fitting as
+    implemented in scikit-learn. The final model is
+    obtained via a least-square fit using the selected features.
 
-    RFE - L2 fitting is a method which runs recusrive feature elimination
-    (as implemented in scikit-learn) with least-square fitting. The final model
-    is obtained via a least-square fit using the selected features.
+    The solution is returned in the form of a dictionary with a key
+    named `parameters`. The dictionary also contains the selected
+    features.
 
     Parameters
     -----------
-    X : np.ndarray
+    X
         fit matrix
-    y : np.ndarray
+    y
         target array
-    n_features : int
-        number of features to select, if None RFECV will be used to determine
+    n_features
+        number of features to select, if None
+        sklearn.feature_selection.RFECV will be used to determine
         the optimal number of features
-    step : int
+    step
         number of parameters to eliminate in each iteration
-
-    Returns
-    ----------
-    results : dict
-        parameters and selected features
     """
 
     n_params = X.shape[1]
@@ -376,28 +385,36 @@ def _fit_rfe_l2(X, y, n_features=None, step=None, **kwargs):
         return results
 
 
-def _fit_rfe_l2_CV(X, y, step=None, rank=1, n_jobs=-1, **kwargs):
-    """Recursive feature elimination (RFE) L2 fitting with cross-validation (CV).
+def _fit_rfe_l2_CV(X: np.ndarray, y: np.ndarray,
+                   step: np.ndarray = None,
+                   rank: int = 1, n_jobs: int = -1,
+                   **kwargs) -> Dict[str, Any]:
+    """
+    Returns the solution `a` to the linear problem `Xa=y` obtained by
+    recursive feature elimination (RFE) with least-squares fitting and
+    cross-validation (CV) as implemented in scikit-learn. The final
+    model is obtained via a least-square fit using the selected
+    features.
 
-    Recursive feature elimination with least-squares fitting using
-    cross-validation for optimizing the number of features.
+    The solution is returned in the form of a dictionary with a key
+    named `parameters`. The dictionary also contains the selected
+    features.
 
     Parameters
     -----------
-    X : np.ndarray
+    X
         fit matrix
-    y : np.ndarray
+    y
         target array
-    step : int
+    step
         number of parameters to eliminate in each iteration
-    rank : int
+    rank
         rank to use when selecting features
-
-    Returns
-    ----------
-    results : dict
-        parameters and selected features
-
+    n_jobs
+        number of cores to use during the cross validation.
+        None means 1 unless in a joblib.parallel_backend context.
+        -1 means using all processors.
+        See sklearn's glossary for more details.
     """
 
     n_params = X.shape[1]
