@@ -20,13 +20,13 @@ ClusterExpansionObserver
 
       
 .. index::
-   single: Class reference; SiteOccupancyFactor
-   single: Monte Carlo; Site occupancy factor observer
+   single: Class reference; SiteOccupancyObserver
+   single: Monte Carlo; Site occupancy observer
 
-SiteOccupancyFactor
--------------------
+SiteOccupancyObserver
+---------------------
 
-.. autoclass:: SiteOccupancyFactor
+.. autoclass:: SiteOccupancyObserver
    :members:
    :undoc-members:
    :inherited-members:
