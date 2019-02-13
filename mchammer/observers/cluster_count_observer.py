@@ -13,35 +13,32 @@ ClusterCountInfo = namedtuple("ClusterCountInfo", ['counts', 'dc_tags'])
 
 class ClusterCountObserver(BaseObserver):
     """
-    This class represents a cluster expansion (CE) observer.
+    This class represents a cluster count observer.
 
-    A CE observer allows to compute a property described by a CE along the
-    trajectory sampled by a Monte Carlo (MC) simulation. In general this CE
-    differs from the CE that is used to generate the trajectory. For example in
-    a canonical MC simulation the latter would usually represent an energy
-    (total or mixing energy) whereas the former CE(s) could map lattice
-    constant or band gap.
+    A cluster count observer allows to count the decorations of 
+    clusters along the trajectory sampled by a Monte Carlo (MC)
+    simulation. For example several canonical MC simulations could
+    be executed at different temperatures and the temperature dependence of
+    the number of nearest neigbhors of a particular species could
+    accessed with this observer.
 
     Parameters
     ----------
-    cluster_expansion : :class:`icet.ClusterExpansion` cluster expansion model
-        to be used for observation
-    tag : str
-        human readable observer name (default: `ClusterExpansionObserver`)
+    cluster_space : :class:`icet.ClusterSpace` cluster space to define
+        the cluster to be counted
     interval : int
         observation interval during the Monte Carlo simulation
 
     Attributes
     ----------
     tag : str
-        name of observer
+        human readable observer name (`ClusterCountObserver`)
     interval : int
         observation interval
     """
 
     def __init__(self, cluster_space, atoms: Atoms,
-                 interval: int,
-                 tag: str = 'ClusterCountObserver') -> None:
+                 interval: int) -> None:
 
         structure = Structure.from_atoms(atoms)
         self._cluster_space = cluster_space
@@ -57,7 +54,7 @@ class ClusterCountObserver(BaseObserver):
             cluster.tag = i
             self._cluster_keys.append(cluster)
 
-        super().__init__(interval=interval, return_type=dict, tag=tag)
+        super().__init__(interval=interval, return_type=dict, tag= 'ClusterCountObserver')
         self._get_empty_counts()
 
     def _get_empty_counts(self):
@@ -72,7 +69,7 @@ class ClusterCountObserver(BaseObserver):
                 tag = "{}_{}".format(i, '_'.join(decoration))
                 dc_tags.append(tag)
             assert order == len(
-                possible_decorations[0]), f"{order} is not {len(possible_decorations[0])}, {possible_decorations}, {cluster}"
+                possible_decorations[0]), "{} is not {}, {}, {}".format(order,len(possible_decorations[0]),possible_decorations)
             counts_for_this_cluster = {
                 decoration: 0 for decoration in possible_decorations}
             count_info = ClusterCountInfo(
@@ -92,8 +89,6 @@ class ClusterCountObserver(BaseObserver):
         structure = Structure.from_atoms(atoms)
         self._cluster_counts_cpp.count_orbit_list(structure,
                                                   self._full_orbit_list, False, True)
-
-        # self._cluster_counts_cpp.setup_cluster_counts_info()
 
         empty_counts = self._get_empty_counts()
         observable_dict = {}
