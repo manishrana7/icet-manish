@@ -91,7 +91,7 @@ class ClusterSpace(_ClusterSpace):
 
         # sanity check chemical symbols
         for symbols in self._chemical_symbols:
-            if len(symbols) != len(set(self._chemical_symbols)):
+            if len(symbols) != len(set(symbols)):
                 raise ValueError('Found duplicates in chemical_symbols')
 
         decorated_primitive, primitive_chemical_symbols = \
