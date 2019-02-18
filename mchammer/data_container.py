@@ -16,6 +16,7 @@ from typing import BinaryIO, Dict, List, TextIO, Tuple, Union
 from icet import __version__ as icet_version
 from .observers.base_observer import BaseObserver
 
+
 class Int64Encoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.int64):
