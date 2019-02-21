@@ -16,7 +16,7 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
         self.atoms = self.atoms.repeat(2)
 
         cutoffs = [3]
-        subelements = [['Au', 'Pd'],['H','V']]*(len(self.atoms)//2)
+        subelements = [['Au', 'Pd'],['H']]*(len(self.atoms)//2)
         self.cs = ClusterSpace(self.atoms, cutoffs, subelements)
         self.interval = 10
         self.radius = 5
@@ -44,20 +44,19 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
         t0 = time.time()
         counts = self.observer.get_observable(self.atoms)
         t1 = time.time()
-        print("print observable")
-        print("Time taken: {}".format(t1-t0))
-        for tag, count in counts.items():
-            print(tag, count)
+        # print("print observable")
+        # print("Time taken: {}".format(t1-t0))
+        # for tag, count in counts.items():
+        #     print(tag, count)
 
-        print("print observable")
+        # print("print observable")
 
     def test_get_concentrations(self):        
         conc = self.observer._get_concentrations(self.atoms)
 
         self.assertEqual(conc['Au'], 1.0)
         self.assertEqual(conc['Pd'], 0.0)
-        self.assertEqual(conc['H'], 1.0)
-        self.assertEqual(conc['V'], 0.0)
+        self.assertEqual(conc['H'], 1.0)        
 
 if __name__ == '__main__':
     unittest.main()
