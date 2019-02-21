@@ -107,7 +107,7 @@ class ClusterCountObserver(BaseObserver):
                 pandas_row['dc_tag'] = "{}_{}".format(
                     cluster_key.tag, '_'.join(chemical_symbols))
                 pandas_row['decoration'] = chemical_symbols
-                pandas_row['count'] = count
+                pandas_row['cluster_count'] = count
                 pandas_row['orbit_index'] = cluster_key.tag
                 pandas_row['order'] = len(cluster_key)
                 pandas_row['radius'] = cluster_key.radius
@@ -127,6 +127,6 @@ class ClusterCountObserver(BaseObserver):
         """
         self._generate_counts(atoms)
 
-        count_dict = {row['dc_tag']: row['count']
+        count_dict = {row['dc_tag']: row['cluster_count']
                       for i, row in self.count_frame.iterrows()}
         return count_dict

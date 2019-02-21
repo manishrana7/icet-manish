@@ -76,13 +76,26 @@ class BinaryShortRangeOrderObserver(BaseObserver):
 
         self._cluster_space = ClusterSpace(atoms=cluster_space.primitive_structure, cutoffs=[
                                            radius], chemical_symbols=cluster_space.chemical_symbols)
-
+        print(self._cluster_space)
         self._cluster_count_observer = ClusterCountObserver(
             cluster_space=self._cluster_space, atoms=structure, interval=interval)
 
         self._sublattices = self._cluster_space.get_sublattices(structure)
+        binary_sublattice_counts = 0        
+        for symbols in self._sublattices.allowed_species:
+            if len(symbols) == 2:
+                binary_sublattice_counts += 1
+                self._symbols = sorted(symbols)
+            elif len(symbols) > 2:
+                raise ValueError("The system have more than two allowed species"
+                                 " on a sublattice. "
+                                 "Allowed species: {}".format(symbols))
+        if binary_sublattice_counts != 1:
+            raise ValueError("Number of binary sublattices must equal one, not"
+                             " {}".format(binary_sublattice_counts))
 
-        super().__init__(interval=interval, return_type=dict, tag='BinaryShortRangeOrderObserver')
+        super().__init__(interval=interval, return_type=dict,
+                         tag='BinaryShortRangeOrderObserver')
 
     def get_observable(self, atoms: Atoms) -> Dict:
         """
@@ -95,8 +108,27 @@ class BinaryShortRangeOrderObserver(BaseObserver):
             input atomic structure.
         """
         self._cluster_count_observer._generate_counts(atoms)
-        count_frame = self._cluster_count_observer.count_frame
-        return count_frame
+        df = self._cluster_count_observer.count_frame
+        print(df['orbit_index'].tolist())
+        pair_orbit_indices = set(df.loc[df['order']==2]['orbit_index'].tolist())
+
+        sro_parameters = {}
+        for k, orbit_index in enumerate(sorted(pair_orbit_indices)):
+            orbit_df = df.loc[df['orbit_index']==k]
+            A_B_pair_count  = 0
+            total_count = 0
+            for i, row in orbit_df.iterrows():
+                total_count += row.cluster_count
+                if self._symbols[0] in row.decoration and self._symbols[1] in row.decoration:
+                    A_B_pair_count += row.cluster_count
+            
+
+            key = 'sro_{}_{}'.format(self._symbols[0], k)
+            concentration_B = self._get_concentrations(atoms)[self._symbols[1]]
+            value = 1 - A_B_pair_count/(total_count*(1-concentration_B))
+            sro_parameters[key] = value
+
+        return sro_parameters
 
     def _get_concentrations(self, structure: Atoms) -> Dict[str, float]:
         """ Returns concentrations for each species in the structure
