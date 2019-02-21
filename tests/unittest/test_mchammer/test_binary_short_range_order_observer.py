@@ -9,14 +9,15 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
     """Container for tests of the class functionality."""
 
     def __init__(self, *args, **kwargs):
-        super(TestBinaryShortRangeOrderObserver, self).__init__(*args, **kwargs)
+        super(TestBinaryShortRangeOrderObserver,
+              self).__init__(*args, **kwargs)
 
-        self.atoms = bulk('Au').repeat([2,1,1])
+        self.atoms = bulk('Au').repeat([2, 1, 1])
         self.atoms[1].symbol = 'H'
         self.atoms = self.atoms.repeat(2)
 
         cutoffs = [3]
-        subelements = [['Au', 'Pd'],['H']]*(len(self.atoms)//2)
+        subelements = [['Au', 'Pd'], ['H']]*(len(self.atoms)//2)
         self.cs = ClusterSpace(self.atoms, cutoffs, subelements)
         self.interval = 10
         self.radius = 5
@@ -40,23 +41,19 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
 
     def test_get_observable(self):
         """Tests observable is returned accordingly."""
-        import time
-        t0 = time.time()
-        counts = self.observer.get_observable(self.atoms)
-        t1 = time.time()
-        # print("print observable")
-        # print("Time taken: {}".format(t1-t0))
-        # for tag, count in counts.items():
-        #     print(tag, count)
+        sro_parameters = self.observer.get_observable(self.atoms)
 
-        # print("print observable")
+        self.assertEqual(sro_parameters['sro_Au_1'], 1.0)
+        self.assertEqual(sro_parameters['sro_Au_2'], 1.0)
+        self.assertEqual(sro_parameters['sro_Au_3'], 1.0)
 
-    def test_get_concentrations(self):        
+    def test_get_concentrations(self):
         conc = self.observer._get_concentrations(self.atoms)
 
         self.assertEqual(conc['Au'], 1.0)
         self.assertEqual(conc['Pd'], 0.0)
-        self.assertEqual(conc['H'], 1.0)        
+        self.assertEqual(conc['H'], 1.0)
+
 
 if __name__ == '__main__':
     unittest.main()

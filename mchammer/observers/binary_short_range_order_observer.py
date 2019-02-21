@@ -81,7 +81,7 @@ class BinaryShortRangeOrderObserver(BaseObserver):
             cluster_space=self._cluster_space, atoms=structure, interval=interval)
 
         self._sublattices = self._cluster_space.get_sublattices(structure)
-        binary_sublattice_counts = 0        
+        binary_sublattice_counts = 0
         for symbols in self._sublattices.allowed_species:
             if len(symbols) == 2:
                 binary_sublattice_counts += 1
@@ -97,7 +97,7 @@ class BinaryShortRangeOrderObserver(BaseObserver):
         super().__init__(interval=interval, return_type=dict,
                          tag='BinaryShortRangeOrderObserver')
 
-    def get_observable(self, atoms: Atoms) -> Dict:
+    def get_observable(self, atoms: Atoms) -> Dict[str, float]:
         """
         Returns the value of the property from a cluster expansion model
         for a given atomic configuration.
@@ -110,20 +110,20 @@ class BinaryShortRangeOrderObserver(BaseObserver):
         self._cluster_count_observer._generate_counts(atoms)
         df = self._cluster_count_observer.count_frame
         print(df['orbit_index'].tolist())
-        pair_orbit_indices = set(df.loc[df['order']==2]['orbit_index'].tolist())
+        pair_orbit_indices = set(
+            df.loc[df['order'] == 2]['orbit_index'].tolist())
 
         sro_parameters = {}
         for k, orbit_index in enumerate(sorted(pair_orbit_indices)):
-            orbit_df = df.loc[df['orbit_index']==k]
-            A_B_pair_count  = 0
+            orbit_df = df.loc[df['orbit_index'] == k]
+            A_B_pair_count = 0
             total_count = 0
             for i, row in orbit_df.iterrows():
                 total_count += row.cluster_count
                 if self._symbols[0] in row.decoration and self._symbols[1] in row.decoration:
                     A_B_pair_count += row.cluster_count
-            
 
-            key = 'sro_{}_{}'.format(self._symbols[0], k)
+            key = 'sro_{}_{}'.format(self._symbols[0], k+1)
             concentration_B = self._get_concentrations(atoms)[self._symbols[1]]
             value = 1 - A_B_pair_count/(total_count*(1-concentration_B))
             sro_parameters[key] = value
