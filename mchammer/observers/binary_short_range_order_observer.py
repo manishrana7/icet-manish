@@ -16,7 +16,7 @@ from mchammer.observers.base_observer import BaseObserver
 ClusterCountInfo = namedtuple("ClusterCountInfo", ['counts', 'dc_tags'])
 
 
-class ShortRangeOrderObserver(BaseObserver):
+class BinaryShortRangeOrderObserver(BaseObserver):
     """
     This class represents a cluster expansion (CE) observer.
 
@@ -82,7 +82,7 @@ class ShortRangeOrderObserver(BaseObserver):
 
         self._sublattices = self._cluster_space.get_sublattices(structure)
 
-        super().__init__(interval=interval, return_type=dict, tag='ShortRangeOrderObserver')
+        super().__init__(interval=interval, return_type=dict, tag='BinaryShortRangeOrderObserver')
 
     def get_observable(self, atoms: Atoms) -> Dict:
         """
@@ -96,7 +96,7 @@ class ShortRangeOrderObserver(BaseObserver):
         """
         self._cluster_count_observer._generate_counts(atoms)
         count_frame = self._cluster_count_observer.count_frame
-        return count_dict
+        return count_frame
 
     def _get_concentrations(self, structure: Atoms) -> Dict[str, float]:
         """ Returns concentrations for each species in the structure

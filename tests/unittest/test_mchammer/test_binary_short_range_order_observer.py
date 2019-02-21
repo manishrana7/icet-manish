@@ -2,14 +2,14 @@ import unittest
 
 from ase.build import bulk
 from icet import ClusterSpace
-from mchammer.observers import ShortRangeOrderObserver
+from mchammer.observers import BinaryShortRangeOrderObserver
 
 
-class TestShortRangeOrderObserver(unittest.TestCase):
+class TestBinaryShortRangeOrderObserver(unittest.TestCase):
     """Container for tests of the class functionality."""
 
     def __init__(self, *args, **kwargs):
-        super(TestShortRangeOrderObserver, self).__init__(*args, **kwargs)
+        super(TestBinaryShortRangeOrderObserver, self).__init__(*args, **kwargs)
 
         self.atoms = bulk('Au').repeat([2,1,1])
         self.atoms[1].symbol = 'H'
@@ -27,12 +27,12 @@ class TestShortRangeOrderObserver(unittest.TestCase):
 
     def setUp(self):
         """Set up observer before each test."""
-        self.observer = ShortRangeOrderObserver(
+        self.observer = BinaryShortRangeOrderObserver(
             cluster_space=self.cs, structure=self.atoms, interval=self.interval, radius=self.radius)
 
     def test_property_tag(self):
         """Tests property tag."""
-        self.assertEqual(self.observer.tag, "ShortRangeOrderObserver")
+        self.assertEqual(self.observer.tag, "BinaryShortRangeOrderObserver")
 
     def test_property_interval(self):
         """Tests property interval."""
