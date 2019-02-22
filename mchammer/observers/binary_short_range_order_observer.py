@@ -110,7 +110,6 @@ class BinaryShortRangeOrderObserver(BaseObserver):
         """ Returns concentrations for each species on its sublattce in
             the structure.
 
-
             Parameters
             ----------
             structure
