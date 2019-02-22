@@ -4,4 +4,6 @@ from .binary_short_range_order_observer import BinaryShortRangeOrderObserver
 from .site_occupancy_observer import SiteOccupancyObserver
 
 __all__ = ['ClusterExpansionObserver',
-           'ClusterCountObserver', 'BinaryShortRangeOrderObserver', 'SiteOccupancyObserver']
+           'ClusterCountObserver',
+           'BinaryShortRangeOrderObserver',
+           'SiteOccupancyObserver']

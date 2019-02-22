@@ -76,7 +76,7 @@ class Sublattices:
         """Lists of the allowed species on each sublattice, in order"""
         return deepcopy(self._allowed_species)
 
-    def get_sublattice_sites(self, index : int) ->List[int]:
+    def get_sublattice_sites(self, index: int) ->List[int]:
         """Returns the sites that belong to the sublattice with the
             corresponding index
 
