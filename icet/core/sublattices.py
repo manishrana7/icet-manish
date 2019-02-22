@@ -26,7 +26,8 @@ class Sublattices:
     def __init__(self, allowed_species: List[List[str]],
                  primitive_structure: Atoms, structure: Atoms):
 
-        unique_sites = list(set(tuple(sorted(symbols)) for symbols in allowed_species))
+        unique_sites = list(set(tuple(sorted(symbols))
+                                for symbols in allowed_species))
 
         # sorted unique sites, this basically decides A, B, C... sublattices
         self._allowed_species = sorted(unique_sites)
