@@ -37,18 +37,10 @@ class TestClusterCountObserver(unittest.TestCase):
         self.assertEqual(self.observer.interval, self.interval)
 
     def test_get_observable(self):
-        """Tests observable is returned accordingly."""
-        import time
-        t0 = time.time()
+        """Tests observable is returned accordingly."""        
+        
         counts = self.observer.get_observable(self.atoms)
-        t1 = time.time()
-        print("print observable")
-        print("Time taken: {}".format(t1-t0))
-        for tag, count in counts.items():
-            print(tag, count)
-
-        print("print observable")
-
+        print(counts)
 
 if __name__ == '__main__':
     unittest.main()

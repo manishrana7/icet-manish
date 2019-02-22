@@ -73,7 +73,6 @@ class BinaryShortRangeOrderObserver(BaseObserver):
             atoms=cluster_space.primitive_structure,
             cutoffs=[radius],
             chemical_symbols=cluster_space.chemical_symbols)
-        print(self._cluster_space)
         self._cluster_count_observer = ClusterCountObserver(
             cluster_space=self._cluster_space, atoms=structure,
             interval=interval)
@@ -105,15 +104,16 @@ class BinaryShortRangeOrderObserver(BaseObserver):
         atoms
             input atomic structure.
         """
+        
         self._cluster_count_observer._generate_counts(atoms)
         df = self._cluster_count_observer.count_frame
-        print(df['orbit_index'].tolist())
+        
         pair_orbit_indices = set(
             df.loc[df['order'] == 2]['orbit_index'].tolist())
-
+        
         sro_parameters = {}
         for k, orbit_index in enumerate(sorted(pair_orbit_indices)):
-            orbit_df = df.loc[df['orbit_index'] == k]
+            orbit_df = df.loc[df['orbit_index'] == orbit_index]
             A_B_pair_count = 0
             total_count = 0
             for i, row in orbit_df.iterrows():
@@ -121,10 +121,16 @@ class BinaryShortRangeOrderObserver(BaseObserver):
                 if self._symbols[0] in row.decoration and \
                         self._symbols[1] in row.decoration:
                     A_B_pair_count += row.cluster_count
-
+            
             key = 'sro_{}_{}'.format(self._symbols[0], k+1)
             conc_B = self._get_concentrations(atoms)[self._symbols[1]]
-            value = 1 - A_B_pair_count/(total_count*(1-conc_B))
+            try:
+                value = 1 - A_B_pair_count/(total_count*(1-conc_B))
+            except ZeroDivisionError:
+                if A_B_pair_count != 0:
+                    raise Exception("Division by zero {}/{}".format(A_B_pair_count,total_count*(1-conc_B)))
+                else:
+                    value = 1
             sro_parameters[key] = value
 
         return sro_parameters

@@ -26,10 +26,7 @@ class Sublattices:
     def __init__(self, allowed_species: List[List[str]],
                  primitive_structure: Atoms, structure: Atoms):
 
-        unique_sites = list(set(tuple(symbols) for symbols in allowed_species))
-
-        for symbols in unique_sites:
-            symbols = sorted(symbols)
+        unique_sites = list(set(tuple(sorted(symbols)) for symbols in allowed_species))
 
         # sorted unique sites, this basically decides A, B, C... sublattices
         self._allowed_species = sorted(unique_sites)
@@ -41,7 +38,6 @@ class Sublattices:
             for symbol in symbols:
                 self._species_to_sublattice[symbol] = i
 
-        print(self._species_to_sublattice)
         cpp_prim_structure = Structure.from_atoms(primitive_structure)
 
         self._sublattice_to_indices = [[] for _ in range(n_sublattices)]
@@ -50,7 +46,6 @@ class Sublattices:
                 position)
             species = allowed_species[lattice_site.index]
 
-            print(lattice_site.index)
             sublattice = self._allowed_species.index(tuple(sorted(species)))
             self._index_to_sublattice[index] = sublattice
             self._sublattice_to_indices[sublattice].append(index)
