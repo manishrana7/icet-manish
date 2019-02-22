@@ -55,7 +55,8 @@ class Sublattices:
             self._index_to_sublattice[index] = sublattice
             self._sublattice_to_indices[sublattice].append(index)
 
-    def get_sublattice_index(self, symbol: str=None, index: int=None) -> int:
+    def get_sublattice_index(self, symbol: str = None,
+                             index: int = None) -> int:
         """ Returns the index of the sublattice the symbol
             or index in the structure belongs to
 
