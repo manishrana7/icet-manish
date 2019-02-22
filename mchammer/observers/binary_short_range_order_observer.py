@@ -13,14 +13,9 @@ ClusterCountInfo = namedtuple("ClusterCountInfo", ['counts', 'dc_tags'])
 
 class BinaryShortRangeOrderObserver(BaseObserver):
     """
-    This class represents a cluster expansion (CE) observer.
+    This class represents a short range order (SRO) observer for a
+    binary system.
 
-    A CE observer allows to compute a property described by a CE along the
-    trajectory sampled by a Monte Carlo (MC) simulation. In general this CE
-    differs from the CE that is used to generate the trajectory. For example in
-    a canonical MC simulation the latter would usually represent an energy
-    (total or mixing energy) whereas the former CE(s) could map lattice
-    constant or band gap.
 
     Parameters
     ----------
@@ -36,32 +31,6 @@ class BinaryShortRangeOrderObserver(BaseObserver):
         human readable observer name (`ClusterExpansionObserver`)
     interval : int
         observation interval
-
-
-
-    Approach:
-    Find all sublattices, A, B, C etc...
-    Example:
-
-    A: Pd, Au, ...
-    B: H, He, ...
-
-    Map this
-    Pd -> A
-    Au -> A
-
-    H -> B
-    He -> B
-
-
-    Also know the sites for the different lattices:
-    A : [0, 2, 4, 6]
-    B : [1, 3, 5, 7]
-
-
-    Implement
-    _get_concentrations() -> Dict[str, float]
-    returns concentrations for each element
     """
 
     def __init__(self, cluster_space, structure: Atoms,
