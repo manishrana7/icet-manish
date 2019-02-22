@@ -15,8 +15,8 @@ from icet.core.sublattices import Sublattices
 
 class ClusterSpace(_ClusterSpace):
     """
-    This class provides functionality for generating and maintaining cluster
-    spaces.
+    This class provides functionality for generating and maintaining
+    cluster spaces.
 
     Parameters
     ----------
@@ -68,6 +68,16 @@ class ClusterSpace(_ClusterSpace):
         cs = ClusterSpace(atoms=prim, cutoffs=[7.0, 5.0],
                           chemical_symbols=[['Au', 'Cu', 'Pd']])
         print(cs)
+
+
+    Using non-pbc structures
+    ------------------------
+    In icet all ase.Atoms objects must have periodic boundary
+    conditions. When carrying out cluster-expansions for surfaces and
+    nano-particles it is therefore recommended to embed the atoms
+    object in a vacuum and use periodic boundary conditions. This can
+    be done using e.g. atoms.center()
+
     """
 
     def __init__(self, atoms: Atoms, cutoffs: List[float],
@@ -76,6 +86,9 @@ class ClusterSpace(_ClusterSpace):
         if not isinstance(atoms, Atoms):
             raise TypeError('Input configuration must be an ASE Atoms object'
                             ', not type {}'.format(type(atoms)))
+        if not all(atoms.pbc):
+            raise ValueError('Input structure must have periodic boundary '
+                             'condition')
 
         self._atoms = atoms.copy()
         self._cutoffs = cutoffs
@@ -85,11 +98,15 @@ class ClusterSpace(_ClusterSpace):
         # handle occupations
         if all(isinstance(i, str) for i in self._chemical_symbols):
             self._chemical_symbols = [self._chemical_symbols]*len(self._atoms)
-
         elif not all(isinstance(i, list) for i in self._chemical_symbols):
             raise TypeError("chemical_symbols must be"
                             " List[str] or List[List[str]],"
                             " not {}".format(type(self._chemical_symbols)))
+
+        # sanity check chemical symbols
+        for symbols in self._chemical_symbols:
+            if len(symbols) != len(set(symbols)):
+                raise ValueError('Found duplicates in chemical_symbols')
 
         decorated_primitive, primitive_chemical_symbols = \
             get_decorated_primitive_structure(
@@ -331,7 +348,11 @@ class ClusterSpace(_ClusterSpace):
         """
         Primitive structure on which the cluster space is based
         """
-        return self._get_primitive_structure().to_atoms()
+        atoms = self._get_primitive_structure().to_atoms()
+        # Decorate with the "real" symbols (instead of H, He, Li etc)
+        for atom, symbols in zip(atoms, self._primitive_chemical_symbols):
+            atom.symbol = min(symbols)
+        return atoms
 
     @property
     def chemical_symbols(self) -> List[List[str]]:

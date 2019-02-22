@@ -11,7 +11,6 @@ atoms = make_supercell(ce.cluster_space.primitive_structure,
                        3 * np.array([[-1, 1, 1],
                                      [1, -1, 1],
                                      [1, 1, -1]]))
-atoms.set_chemical_symbols(['Ag'] * len(atoms))
 calculator = ClusterExpansionCalculator(atoms, ce)
 
 # step 2: Carry out Monte Carlo simulations
@@ -23,7 +22,7 @@ except FileExistsError:
     pass
 for temperature in [900, 300]:
     # Evolve configuration through the entire composition range
-    for dmu in np.arange(-0.6, 0.51, 0.05):
+    for dmu in np.arange(-0.7, 0.51, 0.05):
         # Initialize MC ensemble
         mc = SemiGrandCanonicalEnsemble(
             atoms=atoms,

@@ -14,6 +14,8 @@ from collections import OrderedDict
 from datetime import datetime
 from typing import BinaryIO, Dict, List, TextIO, Tuple, Union
 from icet import __version__ as icet_version
+from .data_analysis import analyze_data
+from .observers.base_observer import BaseObserver
 
 
 class Int64Encoder(json.JSONEncoder):
@@ -120,6 +122,27 @@ class DataContainer:
         self._last_state['occupations'] = occupations
         self._last_state['accepted_trials'] = accepted_trials
         self._last_state['random_state'] = random_state
+
+    def update_from_observer(self, observer: BaseObserver):
+        """ Adds observer data from observer to data container.
+
+        The observer will only be run for the mctrials for which the
+        trajectory have been saved.
+
+        The interval of the observer is ignored.
+
+        Parameters
+        ----------
+        observer
+            observer to be used
+        """
+        for row_data in self._data_list:
+            if 'occupations' in row_data:
+                atoms = self.atoms.copy()
+                atoms.numbers = row_data['occupations']
+                record = {observer.tag: observer.get_observable(atoms)}
+                row_data.update(record)
+                self._observables.add(observer.tag)
 
     def get_data(self, *tags,
                  start: int = None,
@@ -307,6 +330,55 @@ class DataContainer:
                                  ' in data container'.format(tag))
             return data[tag].count()
 
+    def analyze_data(self, tag: str, start: int = None,
+                     stop: int = None, max_lag: int = None) -> dict:
+        """
+        Returns detailed analysis of a scalar observerable.
+
+        Parameters
+        ----------
+        tag
+            tag of field over which to average
+        start
+            minimum value of trial step to consider; by default the
+            smallest value in the mctrial column will be used.
+        stop
+            maximum value of trial step to consider; by default the
+            largest value in the mctrial column will be used.
+        max_lag
+            maximum lag between two points in data series, by default the
+            largest length of the data series will be used.
+            Used for computing autocorrelation
+        Raises
+        ------
+        ValueError
+            if observable is requested that is not in data container
+        ValueError
+            if observable is not scalar
+        ValueError
+            if observations is not evenly spaced
+
+        Returns
+        -------
+        dict
+            calculated properties of the data including mean,
+            standard_deviation, correlation_length and error_estimate
+            (95% confidence)
+        """
+        if tag in ['trajectory', 'occupations']:
+            raise ValueError('{} is not scalar'.format(tag))
+        steps, data = self.get_data('mctrial', tag, start=start, stop=stop)
+
+        # check that steps are evenly spaced
+        diff = np.diff(steps)
+        step_length = diff[0]
+        if not np.allclose(step_length, diff):
+            raise ValueError('data records must be evenly spaced.')
+
+        summary = analyze_data(data)
+        summary['correlation_length'] *= step_length  # in mc-trials
+        return summary
+
     def get_average(self, tag: str,
                     start: int = None, stop: int = None) -> float:
         """
@@ -334,35 +406,6 @@ class DataContainer:
             raise ValueError('{} is not scalar'.format(tag))
         data = self.get_data(tag, start=start, stop=stop)
         return np.mean(data)
-
-    def get_standard_deviation(self, tag: str, start: int = None,
-                               stop: int = None) -> float:
-        """
-        Returns standard deviation of a scalar observable, calculated using
-        numpy.
-
-        Parameters
-        ----------
-        tag
-            tag of field over which to average
-        start
-            minimum value of trial step to consider; by default the
-            smallest value in the mctrial column will be used.
-        stop
-            maximum value of trial step to consider; by default the
-            largest value in the mctrial column will be used.
-
-        Raises
-        ------
-        ValueError
-            if observable is requested that is not in data container
-        ValueError
-            if observable is not scalar
-        """
-        if tag in ['trajectory', 'occupations']:
-            raise ValueError('{} is not scalar'.format(tag))
-        data = self.get_data(tag, start=start, stop=stop)
-        return np.std(data)
 
     def _get_trajectory(self, *tags, start: int = None, stop: int = None,
                         interval: int = 1) \
