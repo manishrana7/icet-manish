@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 import pandas as pd
-
+from typing import Dict
 from _icet import ClusterCounts as _ClusterCounts
 from ase import Atoms
 from icet.core.cluster import Cluster
@@ -61,7 +61,7 @@ class ClusterCountObserver(BaseObserver):
                          tag='ClusterCountObserver')
         self._get_empty_counts()
 
-    def _get_empty_counts(self) -> dict[Cluster, ClusterCountInfo]:
+    def _get_empty_counts(self) -> Dict[Cluster, ClusterCountInfo]:
         """Returns the object which will be filled with counts"""
         counts = {}
         for i, cluster in enumerate(self._cluster_keys):

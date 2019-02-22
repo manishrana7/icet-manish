@@ -38,9 +38,7 @@ class TestClusterCountObserver(unittest.TestCase):
 
     def test_get_observable(self):
         """Tests observable is returned accordingly."""
-
         counts = self.observer.get_observable(self.atoms)
-        print(counts)
 
 
 if __name__ == '__main__':
