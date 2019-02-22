@@ -349,6 +349,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         decorations = self.cs.get_possible_orbit_decorations(orbit_index=3)
         print(decorations)
 
+
 class TestClusterSpaceSurface(unittest.TestCase):
     """
     Container for tests of the class functionality for non-periodic structures.

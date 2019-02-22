@@ -29,7 +29,8 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
     def setUp(self):
         """Set up observer before each test."""
         self.observer = BinaryShortRangeOrderObserver(
-            cluster_space=self.cs, structure=self.atoms, interval=self.interval, radius=self.radius)
+            cluster_space=self.cs, structure=self.atoms,
+            interval=self.interval, radius=self.radius)
 
     def test_property_tag(self):
         """Tests property tag."""

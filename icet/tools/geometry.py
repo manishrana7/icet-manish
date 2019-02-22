@@ -330,6 +330,7 @@ def chemical_number_to_chemical_symbol(numbers: List[int]) -> List[str]:
     symbols = [chemical_symbols[number] for number in numbers]
     return symbols
 
+
 def chemical_symbols_to_numbers(symbols: List[str]) -> List[int]:
     """Returns the chemical numbers equivalent of the input chemical
         symbols.
@@ -342,4 +343,3 @@ def chemical_symbols_to_numbers(symbols: List[str]) -> List[int]:
 
     numbers = [chemical_symbols.index(symbols) for symbols in symbols]
     return numbers
-

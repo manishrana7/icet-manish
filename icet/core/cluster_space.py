@@ -12,6 +12,7 @@ from icet.tools.geometry import (add_vacuum_in_non_pbc,
                                  get_decorated_primitive_structure)
 from icet.core.sublattices import Sublattices
 
+
 class ClusterSpace(_ClusterSpace):
     """
     This class provides functionality for generating and maintaining cluster
@@ -353,34 +354,37 @@ class ClusterSpace(_ClusterSpace):
         """Orbit list that defines the cluster in the cluster space"""
         return self._orbit_list
 
-    def get_possible_orbit_decorations(self, orbit_index: int) -> List[List[str]]:
+    def get_possible_orbit_decorations(self, orbit_index: int) \
+            -> List[List[str]]:
         """Returns possible decorations on the orbit
-        
+
         Parameters
         ----------
         orbit_index
         """
         orbit = self.orbit_list.orbits[orbit_index]
 
-        indices = [lattice_site.index for lattice_site in orbit.representative_sites]
+        indices = [
+            lattice_site.index for lattice_site in orbit.representative_sites]
 
         allowed_species = [self.chemical_symbols[index] for index in indices]
-        
+
         possible_decorations = []
         import itertools
         for element in itertools.product(*allowed_species):
             possible_decorations.append(element)
         return possible_decorations
 
-    def get_sublattices(self, structure : Atoms) -> Sublattices:
+    def get_sublattices(self, structure: Atoms) -> Sublattices:
         """ Returns the sublattices of the input structure
 
         Parameters
         ----------
-        structure 
-            structure the sublattices are based on        
+        structure
+            structure the sublattices are based on
         """
-        sl = Sublattices(self.chemical_symbols, self.primitive_structure, structure)
+        sl = Sublattices(self.chemical_symbols,
+                         self.primitive_structure, structure)
         return sl
 
     def write(self, filename: str):

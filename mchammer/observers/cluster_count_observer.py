@@ -1,13 +1,14 @@
-from ase import Atoms
-from icet import ClusterExpansion
-from mchammer.observers.base_observer import BaseObserver
-from icet.core.structure import Structure
-from icet.core.local_orbit_list_generator import LocalOrbitListGenerator
-from _icet import ClusterCounts as _ClusterCounts
-from typing import List
-from collections import namedtuple, OrderedDict
-from icet.tools.geometry import chemical_number_to_chemical_symbol, chemical_symbols_to_numbers
+from collections import namedtuple
+
 import pandas as pd
+
+from _icet import ClusterCounts as _ClusterCounts
+from ase import Atoms
+from icet.core.local_orbit_list_generator import LocalOrbitListGenerator
+from icet.core.structure import Structure
+from icet.tools.geometry import chemical_symbols_to_numbers
+from mchammer.observers.base_observer import BaseObserver
+
 ClusterCountInfo = namedtuple("ClusterCountInfo", ['counts', 'dc_tags'])
 
 
@@ -15,7 +16,7 @@ class ClusterCountObserver(BaseObserver):
     """
     This class represents a cluster count observer.
 
-    A cluster count observer allows to count the decorations of 
+    A cluster count observer allows to count the decorations of
     clusters along the trajectory sampled by a Monte Carlo (MC)
     simulation. For example several canonical MC simulations could
     be executed at different temperatures and the temperature dependence of
@@ -45,7 +46,8 @@ class ClusterCountObserver(BaseObserver):
         local_orbit_list_generator = LocalOrbitListGenerator(
             cluster_space.orbit_list, structure)
 
-        self._full_orbit_list = local_orbit_list_generator.generate_full_orbit_list()
+        self._full_orbit_list = \
+            local_orbit_list_generator.generate_full_orbit_list()
         self._cluster_counts_cpp = _ClusterCounts()
 
         self._cluster_keys = []
@@ -54,7 +56,8 @@ class ClusterCountObserver(BaseObserver):
             cluster.tag = i
             self._cluster_keys.append(cluster)
 
-        super().__init__(interval=interval, return_type=dict, tag= 'ClusterCountObserver')
+        super().__init__(interval=interval, return_type=dict,
+                         tag='ClusterCountObserver')
         self._get_empty_counts()
 
     def _get_empty_counts(self):
@@ -63,13 +66,15 @@ class ClusterCountObserver(BaseObserver):
         for i, cluster in enumerate(self._cluster_keys):
             order = len(cluster)
             dc_tags = []
-            possible_decorations = self._cluster_space.get_possible_orbit_decorations(
-                cluster.tag)
+            possible_decorations =\
+                self._cluster_space.get_possible_orbit_decorations(
+                    cluster.tag)
             for decoration in possible_decorations:
                 tag = "{}_{}".format(i, '_'.join(decoration))
                 dc_tags.append(tag)
             assert order == len(
-                possible_decorations[0]), "{} is not {}, {}, {}".format(order,len(possible_decorations[0]),possible_decorations)
+                possible_decorations[0]), "{} is not {}, {}, {}".format(
+                    order, len(possible_decorations[0]), possible_decorations)
             counts_for_this_cluster = {
                 decoration: 0 for decoration in possible_decorations}
             count_info = ClusterCountInfo(
@@ -78,7 +83,7 @@ class ClusterCountObserver(BaseObserver):
             counts[cluster] = count_info
         return counts
 
-    def _generate_counts(self, atoms):
+    def _generate_counts(self, atoms: Atoms) ->None:
         """Generates the counts into a pandas dataframe
 
         Parameters
@@ -87,18 +92,17 @@ class ClusterCountObserver(BaseObserver):
             input atomic structure.
         """
         structure = Structure.from_atoms(atoms)
-        self._cluster_counts_cpp.count_orbit_list(structure,
-                                                  self._full_orbit_list, False, True)
+        self._cluster_counts_cpp.count_orbit_list(
+            structure, self._full_orbit_list, False, True)
 
         empty_counts = self._get_empty_counts()
-        observable_dict = {}
         pandas_rows = []
 
         # std::unordered_map<Cluster, std::map<std::vector<int>, int>>
         cluster_counts = self._cluster_counts_cpp.get_cluster_counts()
-        for cluster_key, chemical_number_counts_dict in cluster_counts.items():
+        for cluster_key, chemical_number_counts_dict in \
+                cluster_counts.items():
 
-            # for chemical_numbers, count in chemical_number_counts_dict.items():
             for chemical_symbols in empty_counts[cluster_key].counts.keys():
                 chemical_numbers = tuple(
                     chemical_symbols_to_numbers(chemical_symbols))
@@ -115,7 +119,7 @@ class ClusterCountObserver(BaseObserver):
         self._cluster_counts_cpp.reset()
         self.count_frame = pd.DataFrame(pandas_rows)
 
-    def get_observable(self, atoms: Atoms) -> float:
+    def get_observable(self, atoms: Atoms) -> dict:
         """
         Returns the value of the property from a cluster expansion model
         for a given atomic configuration.

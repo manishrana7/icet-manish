@@ -188,7 +188,7 @@ class BaseEnsemble(ABC):
         return self._data_container_write_period
 
     @data_container_write_period.setter
-    def data_container_write_period(self, data_container_write_period):        
+    def data_container_write_period(self, data_container_write_period):
         self._data_container_write_period = data_container_write_period
 
     def run(self, number_of_trial_steps: int, reset_step: bool = False):

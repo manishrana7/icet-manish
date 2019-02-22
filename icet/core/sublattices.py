@@ -23,7 +23,8 @@ class Sublattices:
         the structure that the sublattices will be based on
     """
 
-    def __init__(self, allowed_species: List[List[str]], primitive_structure: Atoms, structure: Atoms):
+    def __init__(self, allowed_species: List[List[str]],
+                 primitive_structure: Atoms, structure: Atoms):
 
         unique_sites = list(set(tuple(symbols) for symbols in allowed_species))
 

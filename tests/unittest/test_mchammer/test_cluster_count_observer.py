@@ -11,11 +11,11 @@ class TestClusterCountObserver(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestClusterCountObserver, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk('Al').repeat([2,1,1])
-        self.atoms[1].symbol = 'Ge'        
+        self.atoms = bulk('Al').repeat([2, 1, 1])
+        self.atoms[1].symbol = 'Ge'
 
         cutoffs = [3]
-        subelements = ['Al', 'Ge','Si']
+        subelements = ['Al', 'Ge', 'Si']
         self.cs = ClusterSpace(self.atoms, cutoffs, subelements)
         self.interval = 10
 

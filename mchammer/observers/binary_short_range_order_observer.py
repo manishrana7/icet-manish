@@ -1,15 +1,10 @@
-from collections import OrderedDict, namedtuple
-from typing import Dict, List
+from collections import namedtuple
+from typing import Dict
 
 import numpy as np
-import pandas as pd
 
 from ase import Atoms
 from icet import ClusterSpace
-from icet.core.local_orbit_list_generator import LocalOrbitListGenerator
-from icet.core.structure import Structure
-from icet.tools.geometry import (chemical_number_to_chemical_symbol,
-                                 chemical_symbols_to_numbers)
 from mchammer.observers import ClusterCountObserver
 from mchammer.observers.base_observer import BaseObserver
 
@@ -74,11 +69,14 @@ class BinaryShortRangeOrderObserver(BaseObserver):
 
         self._structure = structure
 
-        self._cluster_space = ClusterSpace(atoms=cluster_space.primitive_structure, cutoffs=[
-                                           radius], chemical_symbols=cluster_space.chemical_symbols)
+        self._cluster_space = ClusterSpace(
+            atoms=cluster_space.primitive_structure,
+            cutoffs=[radius],
+            chemical_symbols=cluster_space.chemical_symbols)
         print(self._cluster_space)
         self._cluster_count_observer = ClusterCountObserver(
-            cluster_space=self._cluster_space, atoms=structure, interval=interval)
+            cluster_space=self._cluster_space, atoms=structure,
+            interval=interval)
 
         self._sublattices = self._cluster_space.get_sublattices(structure)
         binary_sublattice_counts = 0
@@ -87,20 +85,20 @@ class BinaryShortRangeOrderObserver(BaseObserver):
                 binary_sublattice_counts += 1
                 self._symbols = sorted(symbols)
             elif len(symbols) > 2:
-                raise ValueError("The system have more than two allowed species"
-                                 " on a sublattice. "
+                raise ValueError("Cluster space have more than two allowed"
+                                 " species on a sublattice. "
                                  "Allowed species: {}".format(symbols))
         if binary_sublattice_counts != 1:
-            raise ValueError("Number of binary sublattices must equal one, not"
-                             " {}".format(binary_sublattice_counts))
+            raise ValueError("Number of binary sublattices must equal one,"
+                             " not {}".format(binary_sublattice_counts))
 
         super().__init__(interval=interval, return_type=dict,
                          tag='BinaryShortRangeOrderObserver')
 
     def get_observable(self, atoms: Atoms) -> Dict[str, float]:
         """
-        Returns the value of the property from a cluster expansion model
-        for a given atomic configuration.
+        Returns the value of the property from a cluster expansion
+        model for a given atomic configuration.
 
         Parameters
         ----------
@@ -120,12 +118,13 @@ class BinaryShortRangeOrderObserver(BaseObserver):
             total_count = 0
             for i, row in orbit_df.iterrows():
                 total_count += row.cluster_count
-                if self._symbols[0] in row.decoration and self._symbols[1] in row.decoration:
+                if self._symbols[0] in row.decoration and \
+                        self._symbols[1] in row.decoration:
                     A_B_pair_count += row.cluster_count
 
             key = 'sro_{}_{}'.format(self._symbols[0], k+1)
-            concentration_B = self._get_concentrations(atoms)[self._symbols[1]]
-            value = 1 - A_B_pair_count/(total_count*(1-concentration_B))
+            conc_B = self._get_concentrations(atoms)[self._symbols[1]]
+            value = 1 - A_B_pair_count/(total_count*(1-conc_B))
             sro_parameters[key] = value
 
         return sro_parameters
