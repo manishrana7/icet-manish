@@ -4,6 +4,7 @@ import pandas as pd
 
 from _icet import ClusterCounts as _ClusterCounts
 from ase import Atoms
+from icet.core.cluster import Cluster
 from icet.core.local_orbit_list_generator import LocalOrbitListGenerator
 from icet.core.structure import Structure
 from icet.tools.geometry import chemical_symbols_to_numbers
@@ -60,7 +61,7 @@ class ClusterCountObserver(BaseObserver):
                          tag='ClusterCountObserver')
         self._get_empty_counts()
 
-    def _get_empty_counts(self):
+    def _get_empty_counts(self) -> dict[Cluster, ClusterCountInfo]:
         """Returns the object which will be filled with counts"""
         counts = {}
         for i, cluster in enumerate(self._cluster_keys):
@@ -83,8 +84,9 @@ class ClusterCountObserver(BaseObserver):
             counts[cluster] = count_info
         return counts
 
-    def _generate_counts(self, atoms: Atoms) ->None:
+    def _generate_counts(self, atoms: Atoms) -> None:
         """Generates the counts into a pandas dataframe
+            and store it in self.count_frame
 
         Parameters
         ----------

@@ -107,7 +107,9 @@ class BinaryShortRangeOrderObserver(BaseObserver):
         return sro_parameters
 
     def _get_concentrations(self, structure: Atoms) -> Dict[str, float]:
-        """ Returns concentrations for each species in the structure
+        """ Returns concentrations for each species on its sublattce in
+            the structure.
+
 
             Parameters
             ----------
