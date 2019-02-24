@@ -124,8 +124,8 @@ class LabelingGenerator():
             for species, conc_range in self.concentrations.items():
                 if counts[species] / natoms < conc_range[0] - self.tol or \
                    counts[species] / natoms > conc_range[1] + self.tol:
-                   conc_restr_violation = True
-                   break
+                    conc_restr_violation = True
+                    break
             if not conc_restr_violation:
                 yield product
 
