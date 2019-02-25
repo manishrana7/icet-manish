@@ -81,7 +81,7 @@ pages:
     - sphinx-build doc/userguide/source/ public/
     # make tests and tutorial downloadable
     - for tag in `git tag | tail -3` ; do \
-        echo "tag= ${tag} ; \
+        echo "tag= ${tag}" ; \
         git checkout $tag ; \
         zip -rj public/basic_tutorial_${tag}.zip tutorial/basic/ ; \
         zip -rj public/advanced_tutorial_${tag}.zip tutorial/advanced/ ; \
