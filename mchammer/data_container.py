@@ -206,7 +206,7 @@ class DataContainer:
                                         interval=interval)
 
         for tag in tags:
-            if tag is 'mctrial':
+            if tag == 'mctrial':
                 continue
             if tag not in self.observables:
                 raise ValueError('No observable named {} in data'
@@ -236,7 +236,7 @@ class DataContainer:
                 apply_to = tags
 
             # retrieve only valid observations
-            if fill_method is 'skip_none':
+            if fill_method == 'skip_none':
                 data.dropna(inplace=True, subset=apply_to)
 
             else:
@@ -245,16 +245,16 @@ class DataContainer:
                 data.dropna(inplace=True, subset=subset)
 
                 # fill NaN with the next valid observation
-                if fill_method is 'fill_backward':
+                if fill_method == 'fill_backward':
                     data.fillna(method='bfill', inplace=True)
 
                 # fill NaN with the last valid observation
-                elif fill_method is 'fill_forward':
+                elif fill_method == 'fill_forward':
                     data.fillna(method='ffill', inplace=True)
 
                 # fill NaN with the linear interpolation of the last and
                 # next valid observations
-                elif fill_method is 'linear_interpolate':
+                elif fill_method == 'linear_interpolate':
                     data.interpolate(limit_area='inside', inplace=True)
 
                 # drop any left-over nan values
