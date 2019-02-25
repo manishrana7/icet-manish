@@ -17,6 +17,13 @@ class ClusterSpace(_ClusterSpace):
     This class provides functionality for generating and maintaining
     cluster spaces.
 
+    **Note:**
+    In icet all :class:`ase.Atoms` objects must have periodic boundary
+    conditions. When carrying out cluster-expansions for surfaces and
+    nano-particles it is therefore recommended to embed the atoms
+    object in a vacuum and use periodic boundary conditions. This can
+    be done using e.g., :func:`ase.Atoms.center`.
+
     Parameters
     ----------
     atoms : ase.Atoms
@@ -68,14 +75,6 @@ class ClusterSpace(_ClusterSpace):
                           chemical_symbols=[['Au', 'Cu', 'Pd']])
         print(cs)
 
-
-    Using non-pbc structures
-    ------------------------
-    In icet all ase.Atoms objects must have periodic boundary
-    conditions. When carrying out cluster-expansions for surfaces and
-    nano-particles it is therefore recommended to embed the atoms
-    object in a vacuum and use periodic boundary conditions. This can
-    be done using e.g. atoms.center()
 
     """
 

@@ -21,19 +21,14 @@ module provides simplified interfaces for various linear model regression
 methods. These methods are set up in a way that work out of the box for typical
 problems in cluster expansion and force constant potential construction,
 including slight adjustments to scikit-learn default values.
-
 If you need more flexibility, extended functionality or the ability to
 fine-tune parameters that are not included in this interface, it is possible to
-use scikit-learn directly as demonstrated by :ref:`an example in the additional
-topics section <additional_topics_interface_sklearn>`.
+use scikit-learn directly.
 
 The most commonly used fit methods in the present context are :term:`LASSO`,
 :term:`automatic relevance determination regression (ARDR) <ARDR>`,
 :term:`recursive feature elimination <RFE>` with :math:`\ell_2`-fitting
-(RFE-L2) as well as ordinary least-squares optimization (OLS). Their usage and
-performance is illustrated by the :ref:`feature selection <feature_selection>`
-and :ref:`learning curve <additional_topics_learning_curve>` examples in the
-:ref:`additional topics section <additional_topics>`. Below follows a
+(RFE-L2) as well as ordinary least-squares optimization (OLS). Below follows a
 short summary of the main algorithms. More information about the available
 linear models can be found in the `scikit-learn documentation
 <http://scikit-learn.org/stable/modules/linear_model.html>`_.
@@ -156,7 +151,7 @@ the full set of parameters and then iteratively eliminating the less important
 ones. RFE needs to be combined with a specific fit method. Since RFE may
 require many hundreds of single fits its often advisable to use ordinary
 least-squares as training method, which is the default behavior. The present
-implementation is based on `scikit-learn
+implementation is based on the `implementation of feature selection in scikit-learn
 <https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.RFE.html>`_.
 
 The RFE optimizer is chosen by setting the ``fit_method`` keyword to
