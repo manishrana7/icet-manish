@@ -25,7 +25,6 @@ C++11 compliant compiler to be installed on your system, e.g., `GCC 4.8.1 and
 above <https://gcc.gnu.org/projects/cxx-status.html#cxx11>`_ or
 `Clang 3.3 and above <https://clang.llvm.org/cxx_status.html>`_.
 
-
 Installation via ``setup.py``
 -----------------------------
 
@@ -37,7 +36,6 @@ If installation via pip fails or if you want to use the most recent
     cd icet
     python3 setup.py install --user
 
-
 Testing
 -------
 
@@ -45,9 +43,12 @@ It is always a good idea to test that your installation works as advertised. To
 this end, you should run the :program:`icet` test suite, which can be
 accomplished as follows::
 
-    curl -O https://icet.materialsmodeling.org/tests.zip
-    unzip tests.zip
+    curl -O https://icet.materialsmodeling.org/tests_<version>.zip
+    unzip tests_<version>.zip
     python3 tests/main.py
+
+Here, ``<version>`` has to be replaced by the :program:`icet` version that is
+installed.
 
 
 Developers
