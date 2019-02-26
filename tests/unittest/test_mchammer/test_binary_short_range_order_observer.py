@@ -113,7 +113,7 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
             values.append(sro_parameters['sro_Au_1'])
         values = sorted(values)
         self.assertEqual(values[-1], 1.0)
-        self.assertEqual(values[0], -1.0)
+        self.assertEqual(values[0], 1.0)
 
     def setUp(self):
         """Set up observer before each test."""
@@ -133,9 +133,9 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
         """Tests observable is returned accordingly."""
         sro_parameters = self.observer.get_observable(self.atoms)
 
-        self.assertEqual(sro_parameters['sro_Au_1'], 0)
-        self.assertEqual(sro_parameters['sro_Au_2'], -1.0)
-        self.assertEqual(sro_parameters['sro_Au_3'], 0.0)
+        self.assertEqual(sro_parameters['sro_Au_1'], 1.0)
+        self.assertEqual(sro_parameters['sro_Au_2'], 1.0)
+        self.assertEqual(sro_parameters['sro_Au_3'], 1.0)
 
     def test_get_concentrations(self):
         conc = self.observer._get_concentrations(self.atoms)
