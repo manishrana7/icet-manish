@@ -409,7 +409,7 @@ class ClusterSpace(_ClusterSpace):
         sl = Sublattices(self.chemical_symbols,
                          self.primitive_structure, structure)
         return sl
-    
+
     def write(self, filename: str) -> None:
         """
         Saves cluster space to a file.
