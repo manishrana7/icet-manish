@@ -377,7 +377,6 @@ class ClusterSpace(_ClusterSpace):
         """Orbit list that defines the cluster in the cluster space"""
         return self._orbit_list
 
-<<<<<<< HEAD
     def get_possible_orbit_decorations(self, orbit_index: int) \
             -> List[List[str]]:
         """Returns possible decorations on the orbit
@@ -410,11 +409,8 @@ class ClusterSpace(_ClusterSpace):
         sl = Sublattices(self.chemical_symbols,
                          self.primitive_structure, structure)
         return sl
-
-    def write(self, filename: str):
-=======
+    
     def write(self, filename: str) -> None:
->>>>>>> master
         """
         Saves cluster space to a file.
 
