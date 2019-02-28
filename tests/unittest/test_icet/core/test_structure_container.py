@@ -129,7 +129,7 @@ class TestStructureContainer(unittest.TestCase):
 
         # check inputs with wrong format are skipped
         with self.assertLogs('icet.structure_container') as cm:
-                StructureContainer(self.cs, ['atoms'])
+            StructureContainer(self.cs, ['atoms'])
         self.assertIn('Skipping structure 0;', cm.output[0])
         self.assertIn('atoms must be an ASE Atoms object', cm.output[0])
 

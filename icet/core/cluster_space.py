@@ -18,6 +18,13 @@ class ClusterSpace(_ClusterSpace):
     This class provides functionality for generating and maintaining
     cluster spaces.
 
+    **Note:**
+    In icet all :class:`ase.Atoms` objects must have periodic boundary
+    conditions. When carrying out cluster-expansions for surfaces and
+    nano-particles it is therefore recommended to embed the atoms
+    object in a vacuum and use periodic boundary conditions. This can
+    be done using e.g., :func:`ase.Atoms.center`.
+
     Parameters
     ----------
     atoms : ase.Atoms
@@ -70,17 +77,11 @@ class ClusterSpace(_ClusterSpace):
         print(cs)
 
 
-    Using non-pbc structures
-    ------------------------
-    In icet all ase.Atoms objects must have periodic boundary
-    conditions. When carrying out cluster-expansions for surfaces and
-    nano-particles it is therefore recommended to embed the atoms
-    object in a vacuum and use periodic boundary conditions. This can
-    be done using e.g. atoms.center()
-
     """
 
-    def __init__(self, atoms: Atoms, cutoffs: List[float],
+    def __init__(self,
+                 atoms: Atoms,
+                 cutoffs: List[float],
                  chemical_symbols: Union[List[str], List[List[str]]]) -> None:
 
         if not isinstance(atoms, Atoms):
@@ -152,7 +153,8 @@ class ClusterSpace(_ClusterSpace):
                 nice_str += '{} '.format(s)
         return nice_str
 
-    def _get_string_representation(self, print_threshold: int = None,
+    def _get_string_representation(self,
+                                   print_threshold: int = None,
                                    print_minimum: int = 10) -> str:
         """
         String representation of the cluster space that provides an overview of
@@ -230,7 +232,8 @@ class ClusterSpace(_ClusterSpace):
         return self._get_string_representation(print_threshold=50)
 
     def print_overview(self,
-                       print_threshold: int = None, print_minimum: int = 10):
+                       print_threshold: int = None,
+                       print_minimum: int = 10) -> None:
         """
         Print an overview of the cluster space in terms of the orbits (order,
         radius, multiplicity etc).
@@ -247,9 +250,9 @@ class ClusterSpace(_ClusterSpace):
                                               print_minimum=print_minimum))
 
     @property
-    def orbit_data(self):
+    def orbit_data(self) -> List[dict]:
         """
-        list of dicts : list of orbits ith information regarding
+        list of orbits with information regarding
         order, radius, multiplicity etc
         """
         data = []
@@ -290,15 +293,14 @@ class ClusterSpace(_ClusterSpace):
 
     def get_number_of_orbits_by_order(self) -> OrderedDict:
         """
-        Return the number of orbits by order.
+        Returns the number of orbits by order.
 
         Returns
         -------
-        dictionary (ordered)
-            the key represents the order, the value represents the number of
-            orbits
+        an ordered dictionary where keys and values represent order and number
+        of orbits, respectively
         """
-        count_orbits = {}  # type: Dict[int, int]
+        count_orbits = {}  # type: dict[int, int]
         for orbit in self.orbit_data:
             k = orbit['order']
             count_orbits[k] = count_orbits.get(k, 0) + 1
@@ -375,6 +377,7 @@ class ClusterSpace(_ClusterSpace):
         """Orbit list that defines the cluster in the cluster space"""
         return self._orbit_list
 
+<<<<<<< HEAD
     def get_possible_orbit_decorations(self, orbit_index: int) \
             -> List[List[str]]:
         """Returns possible decorations on the orbit
@@ -409,6 +412,9 @@ class ClusterSpace(_ClusterSpace):
         return sl
 
     def write(self, filename: str):
+=======
+    def write(self, filename: str) -> None:
+>>>>>>> master
         """
         Saves cluster space to a file.
 
@@ -445,7 +451,8 @@ class ClusterSpace(_ClusterSpace):
                             parameters['chemical_symbols'])
 
 
-def get_singlet_info(atoms: Atoms, return_cluster_space: bool = False):
+def get_singlet_info(atoms: Atoms,
+                     return_cluster_space: bool = False):
     """
     Retrieves information concerning the singlets in the input structure.
 

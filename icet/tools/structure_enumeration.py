@@ -15,8 +15,10 @@ from typing import Dict, List, Tuple, Generator
 
 
 def _translate_labelings(
-        labeling: tuple, snf: SmithNormalForm, nsites: int,
-        include_self: bool = False)-> Generator[Tuple[int], None, None]:
+        labeling: tuple,
+        snf: SmithNormalForm,
+        nsites: int,
+        include_self: bool = False) -> Generator[Tuple[int], None, None]:
     """
     Yields labelings that are equivalent to the original labeling
     under translations as dictated by the Smith normal form (SNF) provided.

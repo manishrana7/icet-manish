@@ -115,7 +115,7 @@ class ConfigurationManager(object):
         return self._occupations.copy()
 
     @property
-    def occupation_constraints(self) ->List[List[int]]:
+    def occupation_constraints(self) -> List[List[int]]:
         """occupation constraints associated with configuration manager
         (copy); the outer list runs over sites with each inner list
         representing the species allowed on this site.

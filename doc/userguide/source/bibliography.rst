@@ -17,6 +17,12 @@ Bibliography
    | Signal Processing Magazine, IEEE **25**, 201 (2008)
    | `doi: 10.1109/MSP.2007.914731 <http://dx.doi.org/10.1109/MSP.2007.914731>`_
 
+.. [GolOsh09]
+   | T. Goldstein and S. Osher
+   | *The Split Bregman Method for L1-Regularized Problems*
+   | SIAM Journal of Imaging Science **2**, 323 (2009)
+   | `doi: 10.1137/080725891 <http://dx.doi.org/10.1137/080725891>`_
+
 .. [HarFor08]
    | G. L. W. Hart and R. W. Forcade
    | *Algorithm for generating derivative structures*
@@ -46,7 +52,7 @@ Bibliography
    | *Calculation of excess free energies of precipitates via direct thermodynamic integration across phase boundaries*
    | Phys. Rev. B **86**, 134204 (2012)
    | `doi: 10.1103/PhysRevB.86.134204 <http://dx.doi.org/10.1103/PhysRevB.86.134204>`_
-   
+
 .. [SanDucGra84]
    | J. M. Sanchez, F. Ducastelle, and D. Gratias
    | *Generalized cluster description of multicomponent systems*
