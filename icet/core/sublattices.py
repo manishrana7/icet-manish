@@ -15,7 +15,7 @@ class Sublattices:
     ----------
     allowed_species
         list of the allowed species on each site of the primitve
-        structure. For example this can be the chemical_symols from
+        structure. For example this can be the chemical_symbols from
         a cluster space
     primitive_structure
         the primitive structure the allowed species reference to
