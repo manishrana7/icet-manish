@@ -4,6 +4,8 @@ from typing import List, Union
 
 import numpy as np
 
+import itertools
+
 from _icet import ClusterSpace as _ClusterSpace
 from ase import Atoms
 from icet.core.orbit_list import OrbitList
@@ -392,11 +394,7 @@ class ClusterSpace(_ClusterSpace):
 
         allowed_species = [self.chemical_symbols[index] for index in indices]
 
-        possible_decorations = []
-        import itertools
-        for element in itertools.product(*allowed_species):
-            possible_decorations.append(element)
-        return possible_decorations
+        return list(itertools.product(*allowed_species))
 
     def get_sublattices(self, structure: Atoms) -> Sublattices:
         """ Returns the sublattices of the input structure
