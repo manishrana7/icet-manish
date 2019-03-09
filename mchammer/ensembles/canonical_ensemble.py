@@ -98,8 +98,13 @@ class CanonicalEnsemble(BaseEnsemble):
                  trajectory_write_interval: int = None) -> None:
 
         self._ensemble_parameters = dict(temperature=temperature)
-
         self._boltzmann_constant = boltzmann_constant
+
+        # add species count to ensemble parameters
+        for symbol in np.unique(calculator.occupation_constraints).tolist():
+            key = 'n_atoms_{}'.format(symbol)
+            count = atoms.get_chemical_symbols().count(symbol)
+            self._ensemble_parameters[key] = count
 
         super().__init__(
             atoms=atoms, calculator=calculator, user_tag=user_tag,
