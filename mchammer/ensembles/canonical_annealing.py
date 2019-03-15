@@ -12,22 +12,32 @@ from ..calculators.base_calculator import BaseCalculator
 
 
 class CanonicalAnnealing(BaseEnsemble):
-    """Instances of this class allow one to carry out simulated
-    annealing in the canonical ensemble, i.e. at constant composition but with variable
-    See canonical ensemble for more information about this ensemble.
+    """Instances of this class allow one to carry out simulated annealing
+    in the canonical ensemble, i.e. the temperature is varied in
+    pre-defined fashion while the composition is kept fixed.  See
+    :class:`mchammer.ensembles.CanonicalEnsemble` for more information
+    about the standard canonical ensemble.
 
-    This ensemble can be very useful when for example trying to find
-    ground-states or generating low energy configurations.
+    The canonical annealing ensemble can be useful, for example, for
+    finding ground states or generating low energy configurations.
 
-    The cooling scheme to be used can be chosen from the pre-defined
-    cooling functions, or a user-defined function can be used which
-    must then have the following interface
+    The temperature control scheme is selected via the
+    ``cooling_function`` keyword argument, while the initial and final
+    temperature are set via the ``T_start`` and ``T_stop`` arguments.
+    Several pre-defined temperature control schemes are available
+    including `linear` and `exponential`. In the latter case the
+    temperature varies logarithmatically as a function of the MC step,
+    emulating the exponential temperature dependence of the atomic
+    exchange rate encountered in many materials.  It is also possible
+    to provide a user defined cooling function via the keyword
+    argument.  This function must comply with the following function
+    header::
 
-    def cooling_function(step, T_start, T_stop, n_steps):
-        T = ...
-        return T
+        def cooling_function(step, T_start, T_stop, n_steps):
+            T = ...  # compute temperature
+            return T
 
-    where step refers to current mctrial step.
+    Here ``step`` refers to the current MC trial step.
 
     Parameters
     ----------
@@ -44,7 +54,7 @@ class CanonicalAnnealing(BaseEnsemble):
     n_steps : int
         number of steps to take in the annealing simulation
     cooling_function : str/function
-        to use the predefined cooling functions give a string
+        to use the predefined cooling functions provide a string
         `linear` or `exponential`, otherwise provide a function
     boltzmann_constant : float
         Boltzmann constant :math:`k_B` in appropriate
