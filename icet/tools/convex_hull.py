@@ -216,8 +216,8 @@ generated/scipy.spatial.ConvexHull.html>`_.
                                       Union[List[float],
                                             List[List[float]]],
                                       energies: List[float],
-                                      energy_tolerance: float, structures:
-                                      list=None) -> List[int]:
+                                      energy_tolerance: float,
+                                      structures: list = None) -> List[int]:
         """Returns structures that lie within a certain tolerance of the convex
         hull.
 
