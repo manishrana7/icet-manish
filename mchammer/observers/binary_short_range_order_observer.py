@@ -118,13 +118,11 @@ class BinaryShortRangeOrderObserver(BaseObserver):
         """
         decoration = np.array(structure.get_chemical_symbols())
         concentrations = {}
-        for symbols in self._sublattices.allowed_species:
-            for symbol in symbols:
-                sublattice_index = self._sublattices.get_sublattice_index(
-                    symbol=symbol)
-                indices = self._sublattices.get_sublattice_sites(
-                    sublattice_index)
-                symbol_count = decoration[indices].tolist().count(symbol)
-                concentration = symbol_count / len(indices)
+        for sublattice in self._sublattices:
+            if len(sublattice.chemical_symbols) == 1:
+                continue
+            for symbol in sublattice.chemical_symbols:
+                symbol_count = decoration[sublattice.indices].tolist().count(symbol)
+                concentration = symbol_count / len(sublattice.indices)
                 concentrations[symbol] = concentration
         return concentrations
