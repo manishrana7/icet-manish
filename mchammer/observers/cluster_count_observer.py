@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 import pandas as pd
-from typing import Dict
+from typing import Dict, List
 from _icet import ClusterCounts as _ClusterCounts
 from ase import Atoms
 from icet.core.cluster import Cluster
@@ -10,37 +10,40 @@ from icet.core.structure import Structure
 from icet.tools.geometry import chemical_symbols_to_numbers
 from mchammer.observers.base_observer import BaseObserver
 
-ClusterCountInfo = namedtuple("ClusterCountInfo", ['counts', 'dc_tags'])
-
 
 class ClusterCountObserver(BaseObserver):
     """
     This class represents a cluster count observer.
 
-    A cluster count observer allows to count the decorations of
-    clusters along the trajectory sampled by a Monte Carlo (MC)
-    simulation. For example several canonical MC simulations could
-    be executed at different temperatures and the temperature dependence of
-    the number of nearest neigbhors of a particular species could
-    accessed with this observer.
+    A cluster count observer enables one to keep track of the
+    decoration of clusters along the trajectory sampled by a Monte
+    Carlo (MC) simulation. For example, using this observer, several
+    canonical MC simulations could be carried out at different
+    temperatures and the temperature dependence of the number of
+    nearest neigbhors of a particular species could accessed with this
+    observer.
 
     Parameters
     ----------
-    cluster_space : :class:`icet.ClusterSpace` cluster space to define
-        the cluster to be counted
+    cluster_space : icet.ClusterSpace
+     cluster space to define the clusters to be counted 
+    atoms : ase.Atoms
+        defines the lattice that the observer will work on
     interval : int
         observation interval during the Monte Carlo simulation
 
     Attributes
     ----------
     tag : str
-        human readable observer name (`ClusterCountObserver`)
+        human readable observer name
     interval : int
         observation interval
     """
 
     def __init__(self, cluster_space, atoms: Atoms,
                  interval: int) -> None:
+        super().__init__(interval=interval, return_type=dict,
+                         tag='ClusterCountObserver')
 
         structure = Structure.from_atoms(atoms)
         self._cluster_space = cluster_space
@@ -57,36 +60,27 @@ class ClusterCountObserver(BaseObserver):
             cluster.tag = i
             self._cluster_keys.append(cluster)
 
-        super().__init__(interval=interval, return_type=dict,
-                         tag='ClusterCountObserver')
         self._get_empty_counts()
 
-    def _get_empty_counts(self) -> Dict[Cluster, ClusterCountInfo]:
-        """Returns the object which will be filled with counts"""
+    def _get_empty_counts(self) -> Dict[Cluster, Dict[List[str], int]]:
+        """Returns the object which will be filled with counts."""
         counts = {}
         for i, cluster in enumerate(self._cluster_keys):
             order = len(cluster)
-            dc_tags = []
             possible_decorations =\
                 self._cluster_space.get_possible_orbit_decorations(
                     cluster.tag)
-            for decoration in possible_decorations:
-                tag = "{}_{}".format(i, '_'.join(decoration))
-                dc_tags.append(tag)
             assert order == len(
-                possible_decorations[0]), "{} is not {}, {}, {}".format(
+                possible_decorations[0]), '{} is not {}, {}, {}'.format(
                     order, len(possible_decorations[0]), possible_decorations)
-            counts_for_this_cluster = {
-                decoration: 0 for decoration in possible_decorations}
-            count_info = ClusterCountInfo(
-                counts=counts_for_this_cluster, dc_tags=dc_tags)
 
-            counts[cluster] = count_info
+            counts[cluster] = {
+                decoration: 0 for decoration in possible_decorations}
         return counts
 
     def _generate_counts(self, atoms: Atoms) -> None:
-        """Generates the counts into a pandas dataframe
-            and store it in self.count_frame
+        """Counts the occurrence of different clusters and stores this
+        information in a pandas dataframe.
 
         Parameters
         ----------
@@ -105,7 +99,7 @@ class ClusterCountObserver(BaseObserver):
         for cluster_key, chemical_number_counts_dict in \
                 cluster_counts.items():
 
-            for chemical_symbols in empty_counts[cluster_key].counts.keys():
+            for chemical_symbols in empty_counts[cluster_key].keys():
                 chemical_numbers = tuple(
                     chemical_symbols_to_numbers(chemical_symbols))
                 count = chemical_number_counts_dict.get(chemical_numbers, 0)
@@ -129,7 +123,7 @@ class ClusterCountObserver(BaseObserver):
         Parameters
         ----------
         atoms
-            input atomic structure.
+            input atomic structure
         """
         self._generate_counts(atoms)
 

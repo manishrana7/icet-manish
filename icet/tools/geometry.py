@@ -331,14 +331,14 @@ def get_decorated_primitive_structure(
     return decorated_primitive, primitive_chemical_symbols
 
 
-def chemical_number_to_chemical_symbol(numbers: List[int]) -> List[str]:
-    """Returns the chemical symbols equivalent of the input chemical
-        numbers.
+def atomic_number_to_chemical_symbol(numbers: List[int]) -> List[str]:
+    """Returns the chemical symbols equivalent to the input atomic
+    numbers.
 
     Parameters
     ----------
     numbers
-        chemical numbers
+        atomic numbers
     """
 
     symbols = [chemical_symbols[number] for number in numbers]
@@ -346,8 +346,8 @@ def chemical_number_to_chemical_symbol(numbers: List[int]) -> List[str]:
 
 
 def chemical_symbols_to_numbers(symbols: List[str]) -> List[int]:
-    """Returns the chemical numbers equivalent of the input chemical
-        symbols.
+    """Returns the atomic numbers equivalent to the input chemical
+    symbols.
 
     Parameters
     ----------

@@ -8,7 +8,8 @@ from ase import Atoms
 class Sublattice:
     """
     This class stores and provides information about a specific
-    sublattice. A sublattice is always 
+    sublattice. A sublattice is always supercell specific since
+    it contains lattice indices.
 
     Parameters
     ----------
@@ -34,7 +35,7 @@ class Sublattice:
 class Sublattices(list):
     """
     This class stores and provides information about the sublattices
-    of a structure
+    of a structure.
 
 
     Parameters
@@ -83,30 +84,30 @@ class Sublattices(list):
 
     def get_sublattice_index(self, index: int) -> int:
         """ Returns the index of the sublattice the symbol
-            or index in the structure belongs to
+        or index in the structure belongs to.
 
-            Parameters
-            -----------
-            symbol
-                species symbol
-            index
-                index of site in the structure
+        Parameters
+        -----------
+        symbol
+            species symbol
+        index
+            index of site in the structure
         """
         return self._index_to_sublattice[index]
         
 
     @property
     def allowed_species(self) -> List[List[str]]:
-        """Lists of the allowed species on each sublattice, in order"""
+        """Lists of the allowed species on each sublattice, in order."""
         return deepcopy(self._allowed_species)
 
     def get_sublattice_sites(self, index: int) -> List[int]:
         """Returns the sites that belong to the sublattice with the
-            corresponding index
+        corresponding index.
 
-            Parameters
-            ----------
-            index
-                index of the sublattice
+        Parameters
+        ----------
+        index
+            index of the sublattice
         """
         return self._sublattice_to_indices[index]
