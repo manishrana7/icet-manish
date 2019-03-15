@@ -19,7 +19,8 @@ class Sublattice:
         the lattice indices the sublattice consists of
 
     """
-    def __init__(self, chemical_symbols : List[str], indices : List[int]):
+
+    def __init__(self, chemical_symbols: List[str], indices: List[int]):
         self._chemical_symbols = chemical_symbols
         self._indices = indices
 
@@ -50,7 +51,8 @@ class Sublattices(list):
         the structure that the sublattices will be based on
     """
 
-    def __init__(self, allowed_species: List[List[str]], primitive_structure: Atoms, structure: Atoms):
+    def __init__(self, allowed_species: List[List[str]], primitive_structure: Atoms,
+                 structure: Atoms):
 
         # sorted unique sites, this basically decides A, B, C... sublattices
         self._allowed_species = sorted(
@@ -94,7 +96,6 @@ class Sublattices(list):
             index of site in the structure
         """
         return self._index_to_sublattice[index]
-        
 
     @property
     def allowed_species(self) -> List[List[str]]:

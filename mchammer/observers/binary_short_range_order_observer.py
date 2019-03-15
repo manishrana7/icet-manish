@@ -65,7 +65,6 @@ class BinaryShortRangeOrderObserver(BaseObserver):
             raise ValueError('Number of binary sublattices must equal one,'
                              ' not {}'.format(binary_sublattice_counts))
 
-
     def get_observable(self, atoms: Atoms) -> Dict[str, float]:
         """Returns the value of the property from a cluster expansion
         model for a given atomic configurations.
@@ -97,14 +96,14 @@ class BinaryShortRangeOrderObserver(BaseObserver):
             conc_B = self._get_concentrations(atoms)[self._symbols[1]]
             if conc_B == 1 or total_count == 0:
                 value = 1
-            else:            
-                value = 1 - A_B_pair_count/(total_count*(1-conc_B))            
+            else:
+                value = 1 - A_B_pair_count/(total_count*(1-conc_B))
             sro_parameters[key] = value
 
         return sro_parameters
 
     def _get_concentrations(self, structure: Atoms) -> Dict[str, float]:
-        """ Returns concentrations for each species relative its 
+        """ Returns concentrations for each species relative its
         sublattice.
 
         Parameters
@@ -118,7 +117,8 @@ class BinaryShortRangeOrderObserver(BaseObserver):
             if len(sublattice.chemical_symbols) == 1:
                 continue
             for symbol in sublattice.chemical_symbols:
-                symbol_count = decoration[sublattice.indices].tolist().count(symbol)
+                symbol_count = decoration[sublattice.indices].tolist().count(
+                    symbol)
                 concentration = symbol_count / len(sublattice.indices)
                 concentrations[symbol] = concentration
         return concentrations

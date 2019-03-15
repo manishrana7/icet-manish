@@ -1,7 +1,7 @@
-from collections import namedtuple
+from typing import Dict, List
 
 import pandas as pd
-from typing import Dict, List
+
 from _icet import ClusterCounts as _ClusterCounts
 from ase import Atoms
 from icet.core.cluster import Cluster
@@ -26,7 +26,7 @@ class ClusterCountObserver(BaseObserver):
     Parameters
     ----------
     cluster_space : icet.ClusterSpace
-     cluster space to define the clusters to be counted 
+     cluster space to define the clusters to be counted
     atoms : ase.Atoms
         defines the lattice that the observer will work on
     interval : int
