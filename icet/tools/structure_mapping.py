@@ -85,6 +85,9 @@ def map_structure_to_reference(input_structure: Atoms,
         ('The periodic boundary conditions differ'
          ' between input and reference structure')
 
+    if logger.isEnabledFor(logging.DEBUG):
+        np.set_printoptions(suppress=True, precision=6)
+
     # Scale input cell and construct supercell of the reference structure
     scaled_cell = _get_scaled_cell(input_structure, reference_structure,
                                    vacancy_type=vacancy_type,
@@ -92,6 +95,7 @@ def map_structure_to_reference(input_structure: Atoms,
     P = _get_transformation_matrix(scaled_cell,
                                    reference_structure.cell,
                                    tolerance_cell=tolerance_cell)
+    logger.debug('P:\n {}'.format(P))
     scaled_structure, ideal_supercell = \
         _rescale_structures(input_structure,
                             reference_structure,
@@ -105,24 +109,22 @@ def map_structure_to_reference(input_structure: Atoms,
          'ideal: {}\ninput: {}'.format(len(ideal_supercell),
                                        len(scaled_structure)))
 
-    if logger.isEnabledFor(logging.DEBUG):
-        np.set_printoptions(suppress=True, precision=6)
-        logger.debug('Number of atoms in reference structure:'
-                     ' {}'.format(len(reference_structure)))
-        logger.debug('Number of atoms in input structure:'
-                     ' {}\n'.format(len(input_structure)))
-        logger.debug('Reference cell metric:\n'
-                     '{}'.format(reference_structure.cell))
-        logger.debug('Input cell metric:\n'
-                     '{}\n'.format(input_structure.cell))
-        logger.debug('Transformation matrix connecting reference structure'
-                     ' and idealized input structure:\n {}'.format(P))
-        logger.debug('Determinant of transformation matrix:'
-                     ' {:.3f}\n'.format(np.linalg.det(P)))
-        logger.debug('Cell metric of ideal supercell:\n'
-                     '{}'.format(ideal_supercell.cell))
-        logger.debug('Cell metric of rescaled input structure:\n'
-                     '{}\n'.format(scaled_structure.cell))
+    logger.debug('Number of atoms in reference structure:'
+                 ' {}'.format(len(reference_structure)))
+    logger.debug('Number of atoms in input structure:'
+                 ' {}\n'.format(len(input_structure)))
+    logger.debug('Reference cell metric:\n'
+                 '{}'.format(reference_structure.cell))
+    logger.debug('Input cell metric:\n'
+                 '{}\n'.format(input_structure.cell))
+    logger.debug('Transformation matrix connecting reference structure'
+                 ' and idealized input structure:\n {}'.format(P))
+    logger.debug('Determinant of transformation matrix:'
+                 ' {:.3f}\n'.format(np.linalg.det(P)))
+    logger.debug('Cell metric of ideal supercell:\n'
+                 '{}'.format(ideal_supercell.cell))
+    logger.debug('Cell metric of rescaled input structure:\n'
+                 '{}\n'.format(scaled_structure.cell))
 
     # map atoms in input structure to closest site in ideal supercell
     dr_max = 0.0
@@ -287,7 +289,12 @@ def _get_transformation_matrix(input_cell: np.ndarray,
     -------
     transformation matrix P of integers
     """
+    logger.debug('reference_cell:\n {}'.format(reference_cell))
+    logger.debug('input_cell:\n {}'.format(input_cell))
+    logger.debug('inv(reference_cell):\n {}'
+                 .format(np.linalg.inv(reference_cell)))
     P = np.dot(input_cell, np.linalg.inv(reference_cell))
+    logger.debug('P:\n {}'.format(P))
 
     # ensure that the transformation matrix does not deviate too
     # strongly from the nearest integer matrix
@@ -305,6 +312,7 @@ def _get_transformation_matrix(input_cell: np.ndarray,
 
     # reduce the (real) transformation matrix to the nearest integer one
     P = np.around(P)
+    logger.debug('P:\n {}'.format(P))
     return P
 
 
