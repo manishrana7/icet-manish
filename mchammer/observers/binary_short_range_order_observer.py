@@ -8,7 +8,7 @@ from icet import ClusterSpace
 from mchammer.observers import ClusterCountObserver
 from mchammer.observers.base_observer import BaseObserver
 
-ClusterCountInfo = namedtuple("ClusterCountInfo", ['counts', 'dc_tags'])
+ClusterCountInfo = namedtuple('ClusterCountInfo', ['counts', 'dc_tags'])
 
 
 class BinaryShortRangeOrderObserver(BaseObserver):
@@ -103,7 +103,7 @@ class BinaryShortRangeOrderObserver(BaseObserver):
         return sro_parameters
 
     def _get_concentrations(self, structure: Atoms) -> Dict[str, float]:
-        """ Returns concentrations for each species relative its
+        """Returns concentrations for each species relative its
         sublattice.
 
         Parameters

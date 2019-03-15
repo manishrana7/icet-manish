@@ -89,7 +89,7 @@ class Sublattices(list):
         or index in the structure belongs to.
 
         Parameters
-        -----------
+        ----------
         symbol
             species symbol
         index

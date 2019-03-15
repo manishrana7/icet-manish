@@ -63,7 +63,7 @@ class ClusterCountObserver(BaseObserver):
         self._get_empty_counts()
 
     def _get_empty_counts(self) -> Dict[Cluster, Dict[List[str], int]]:
-        """Returns the object which will be filled with counts."""
+        """ Returns the object which will be filled with counts. """
         counts = {}
         for i, cluster in enumerate(self._cluster_keys):
             order = len(cluster)
@@ -104,7 +104,7 @@ class ClusterCountObserver(BaseObserver):
 
                 count = chemical_number_counts_dict.get(chemical_symbols, 0)
                 pandas_row = {}
-                pandas_row['dc_tag'] = "{}_{}".format(
+                pandas_row['dc_tag'] = '{}_{}'.format(
                     cluster_key.tag, '_'.join(chemical_symbols))
                 pandas_row['decoration'] = chemical_symbols
                 pandas_row['cluster_count'] = count
