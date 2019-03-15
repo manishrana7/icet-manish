@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+Main module of the icet package.
+"""
+
 from __future__ import print_function, division
 
 from .core.cluster_space import ClusterSpace, get_singlet_info, view_singlets
@@ -9,10 +13,6 @@ from .core.structure_container import StructureContainer
 from .fitting import (Optimizer,
                       EnsembleOptimizer,
                       CrossValidationEstimator)
-
-"""
-icet module.
-"""
 
 __project__ = 'icet'
 __description__ = 'A Pythonic approach to cluster expansions'

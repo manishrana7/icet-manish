@@ -1,3 +1,9 @@
+"""
+This module provides the Structure class.
+"""
+
+from ase import Atoms
+
 from _icet import Structure
 
 
@@ -25,7 +31,7 @@ def __structure_from_atoms(self, conf):
 Structure.from_atoms = __structure_from_atoms
 
 
-def __structure_to_atoms(self):
+def __structure_to_atoms(self) -> Atoms:
     """
     Returns the structure as an ASE Atoms object.
 
@@ -47,7 +53,7 @@ def __structure_to_atoms(self):
 Structure.to_atoms = __structure_to_atoms
 
 
-def __repr_function(self):
+def __repr_function(self) -> str:
     s = ['Cell:']
     s += ['{}\n'.format(self.cell)]
     s += ['Element and positions:']

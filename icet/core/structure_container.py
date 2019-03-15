@@ -1,3 +1,7 @@
+"""
+This module provides the StructureContainer class.
+"""
+
 import tarfile
 import tempfile
 
@@ -110,11 +114,15 @@ class StructureContainer:
         """
 
         def repr_structure(structure, index=-1, header=False):
+            """
+            Helper function used to generate a representation string for a
+            single structure.
+            """
             from collections import OrderedDict
             fields = OrderedDict([
-                ('index',     '{:4}'.format(index)),
-                ('user_tag',  '{:21}'.format(structure.user_tag)),
-                ('natoms',    '{:5}'.format(len(structure))),
+                ('index', '{:4}'.format(index)),
+                ('user_tag', '{:21}'.format(structure.user_tag)),
+                ('natoms', '{:5}'.format(len(structure))),
                 ('chemical formula', structure._atoms.get_chemical_formula())])
             fields.update(sorted(structure.properties.items()))
             for key, value in fields.items():
@@ -280,19 +288,17 @@ class StructureContainer:
         cluster vectors and target properties for desired structures
         """
         if structure_indices is None:
-            cv_list = [s.cluster_vector
-                       for s in self._structure_list]
-            prop_list = [s.properties[key]
-                         for s in self._structure_list]
+            cv_list = [s.cluster_vector for s in self._structure_list]
+            prop_list = [s.properties[key] for s in self._structure_list]
         else:
             cv_list, prop_list = [], []
             for i in structure_indices:
                 cv_list.append(self._structure_list[i].cluster_vector)
                 prop_list.append(self._structure_list[i].properties[key])
 
-        if len(cv_list) == 0:
-            raise Exception('No available fit data for'
-                            ' {}'.format(structure_indices))
+        if cv_list is None:
+            raise Exception('No available fit data for {}'
+                            .format(structure_indices))
 
         return np.array(cv_list), np.array(prop_list)
 

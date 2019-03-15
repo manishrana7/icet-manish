@@ -1,10 +1,14 @@
+"""
+This module provides the ClusterCounts class.
+"""
+
+from collections import OrderedDict
+from _icet import ClusterCounts as _ClusterCounts
+from _icet import Cluster
 from ase import Atoms
 from icet.core.orbit_list import OrbitList
 from icet import Structure
-from _icet import ClusterCounts as _ClusterCounts
-from _icet import Cluster
 from .local_orbit_list_generator import LocalOrbitListGenerator
-from collections import OrderedDict
 
 
 class ClusterCounts(_ClusterCounts):
@@ -64,10 +68,11 @@ class ClusterCounts(_ClusterCounts):
 
     def __str__(self):
         """
-        String representation of cluster counts that provides an overview
-        of the clusters (cluster, chemical symbol, and count).
+        String representation of ClusterCounts object that provides an
+        overview of the clusters (cluster, chemical symbol, and count).
         """
-        tuplets = {1: 'Singlet', 2: 'Pair', 3: 'Triplet', 4: 'Quadruplet'}
+        tuplets = {1: 'Singlet', 2: 'Pair', 3: 'Triplet',
+                   4: 'Quadruplet', 5: 'Pentuplet'}
         width = 60
         s = ['{s:=^{n}}'.format(s=' Cluster Counts ', n=width)]
 
@@ -81,10 +86,9 @@ class ClusterCounts(_ClusterCounts):
             # Add a description of the orbit to the string
             tuplet_type = tuplets.get(len(cluster.sites),
                                       '{}-tuplet'.format(len(cluster.sites)))
-            s += ['{}: {} {:} {:.4f}'.format(tuplet_type,
-                                             cluster.sites,
-                                             cluster.distances,
-                                             cluster.radius)]
+            s += ['{}: {} {:} {:.4f}'
+                  .format(tuplet_type, cluster.sites,
+                          cluster.distances, cluster.radius)]
 
             # Print the actual counts together with the species they refer to
             for chemical_symbols, count in counts.items():
@@ -100,9 +104,9 @@ class ClusterCounts(_ClusterCounts):
 
         Parameters
         ----------
-        key : int / icet Cluster object (bi-optional)
-            If int, return the key:th counts, if Cluster, return the counts
-            belonging to that cluster.
+        key : int or icet.Cluster
+            if int, return the key-th counts;
+            if Cluster, return the counts belonging to that cluster
         """
         if isinstance(key, int):
             return list(self.cluster_counts.values())[key]

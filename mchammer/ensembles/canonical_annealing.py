@@ -13,7 +13,7 @@ from ..calculators.base_calculator import BaseCalculator
 
 class CanonicalAnnealing(BaseEnsemble):
     """Instances of this class allow one to carry out simulated
-    annealing in the canonical ensemble.
+    annealing in the canonical ensemble, i.e. at constant composition but with variable
     See canonical ensemble for more information about this ensemble.
 
     This ensemble can be very useful when for example trying to find

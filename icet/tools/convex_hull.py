@@ -1,9 +1,13 @@
+"""
+This module provides the ConvexHull class.
+"""
+
 import itertools
 import numpy as np
+from typing import List, Union
 from scipy.interpolate import griddata
 from scipy.spatial import ConvexHull as ConvexHullSciPy
 from scipy.spatial.qhull import QhullError
-from typing import List, Union
 
 
 class ConvexHull:
@@ -213,7 +217,7 @@ generated/scipy.spatial.ConvexHull.html>`_.
                                             List[List[float]]],
                                       energies: List[float],
                                       energy_tolerance: float, structures:
-                                      list = None) -> List[int]:
+                                      list=None) -> List[int]:
         """Returns structures that lie within a certain tolerance of the convex
         hull.
 

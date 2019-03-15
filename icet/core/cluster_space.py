@@ -1,3 +1,7 @@
+"""
+This module provides the ClusterSpace class.
+"""
+
 import pickle
 from collections import OrderedDict
 from typing import List, Union
