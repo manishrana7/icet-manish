@@ -87,15 +87,15 @@ class BinaryShortRangeOrderObserver(BaseObserver):
             A_B_pair_count = 0
             total_count = 0
             for i, row in orbit_df.iterrows():
-                total_count += row.cluster_count
+                total_count += row.cluster_count                
                 if self._symbols[0] in row.decoration and \
                         self._symbols[1] in row.decoration:
                     A_B_pair_count += row.cluster_count
 
             key = 'sro_{}_{}'.format(self._symbols[0], k+1)
-            conc_B = self._get_concentrations(atoms)[self._symbols[1]]
+            conc_B = self._get_concentrations(atoms)[self._symbols[0]]
             if conc_B == 1 or total_count == 0:
-                value = 1
+                value = -1
             else:
                 value = 1 - A_B_pair_count/(total_count*(1-conc_B))
             sro_parameters[key] = value

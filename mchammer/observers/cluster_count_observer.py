@@ -96,13 +96,13 @@ class ClusterCountObserver(BaseObserver):
 
         # std::unordered_map<Cluster, std::map<std::vector<int>, int>>
         cluster_counts = self._cluster_counts_cpp.get_cluster_counts()
+        
         for cluster_key, chemical_number_counts_dict in \
                 cluster_counts.items():
 
             for chemical_symbols in empty_counts[cluster_key].keys():
-                chemical_numbers = tuple(
-                    chemical_symbols_to_numbers(chemical_symbols))
-                count = chemical_number_counts_dict.get(chemical_numbers, 0)
+
+                count = chemical_number_counts_dict.get(chemical_symbols, 0)
                 pandas_row = {}
                 pandas_row['dc_tag'] = "{}_{}".format(
                     cluster_key.tag, '_'.join(chemical_symbols))
@@ -111,9 +111,9 @@ class ClusterCountObserver(BaseObserver):
                 pandas_row['orbit_index'] = cluster_key.tag
                 pandas_row['order'] = len(cluster_key)
                 pandas_row['radius'] = cluster_key.radius
-                pandas_rows.append(pandas_row)
-        self._cluster_counts_cpp.reset()
+                pandas_rows.append(pandas_row)        
         self.count_frame = pd.DataFrame(pandas_rows)
+        self._cluster_counts_cpp.reset()
 
     def get_observable(self, atoms: Atoms) -> dict:
         """
