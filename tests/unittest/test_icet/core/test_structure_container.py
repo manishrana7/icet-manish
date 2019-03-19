@@ -307,7 +307,7 @@ index |       user_tag        | natoms | chemical formula | Au atoms |  energy  
     def test_cluster_space(self):
         """Tests cluster space functionality."""
         cs_onlyread = self.sc.cluster_space
-        self.assertEqual(cs_onlyread, self.cs)
+        self.assertEqual(str(cs_onlyread), str(self.cs))
 
     def test_available_properties(self):
         """Tests available_properties property."""
