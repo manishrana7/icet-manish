@@ -70,8 +70,12 @@ class BaseEnsemble(ABC):
         self._calculator = calculator
         self._user_tag = user_tag
         strict_constraints_symbol = self.calculator.occupation_constraints
-        symbols = list({tuple(sym)
-                        for sym in strict_constraints_symbol if len(sym) > 1})
+        symbols = list(set(tuple(sym) for sym in strict_constraints_symbol if len(sym) > 1))
+        symbols_flat = [s for sub in symbols for s in sub]
+        if len(symbols_flat) != len(set(symbols_flat)):
+            bad_symbols = set([s for s in symbols_flat if symbols_flat.count(s) > 1])
+            raise ValueError('Symbols {} found on multiple active sublattices'.format(bad_symbols))
+
         sublattices = [[] for _ in symbols]
         for i, constraint in enumerate(strict_constraints_symbol):
             for j, sym in enumerate(symbols):
