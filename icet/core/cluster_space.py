@@ -428,7 +428,7 @@ class ClusterSpace(_ClusterSpace):
 
     def copy(self):
         """ Returns copy of ClusterSpace instance """
-        atoms = self._atoms
+        atoms = self._input_atoms
         cutoffs = self._cutoffs
         chemical_symbols = self._input_chemical_symbols
         return ClusterSpace(atoms, cutoffs, chemical_symbols)
