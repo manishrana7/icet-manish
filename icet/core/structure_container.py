@@ -278,11 +278,6 @@ class StructureContainer:
         return self._cluster_space
 
     @property
-    def fit_structures(self):
-        """List of the fit structures."""
-        return self._structure_list
-
-    @property
     def available_properties(self) -> List[str]:
         """List of the available properties."""
         return sorted(set([p for fs in self for p in fs.properties.keys()]))
@@ -302,10 +297,10 @@ class StructureContainer:
 
         # Write fit structures as an ASE db in tempfile
         temp_db_file = tempfile.NamedTemporaryFile()
-        if self.fit_structures:
+        if self._structure_list:
             db = ase.db.connect(temp_db_file.name, type='db', append=False)
 
-        for fit_structure in self.fit_structures:
+        for fit_structure in self._structure_list:
             data_dict = {'user_tag': fit_structure.user_tag,
                          'properties': fit_structure.properties,
                          'cluster_vector': fit_structure.cluster_vector}

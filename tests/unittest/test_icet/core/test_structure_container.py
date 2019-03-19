@@ -270,7 +270,7 @@ index |       user_tag        | natoms | chemical formula | Au atoms |  energy  
         self.assertEqual(len(self.sc), len(sc_read))
         self.assertEqual(self.sc.__str__(), sc_read.__str__())
 
-        for fs, fs_read in zip(self.sc.fit_structures, sc_read.fit_structures):
+        for fs, fs_read in zip(self.sc._structure_list, sc_read._structure_list):
             self.assertEqual(list(fs.cluster_vector),
                              list(fs_read.cluster_vector))
             self.assertEqual(fs.atoms, fs_read.atoms)
