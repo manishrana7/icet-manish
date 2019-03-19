@@ -113,7 +113,7 @@ class ClusterExpansion:
     @property
     def cluster_space(self) -> ClusterSpace:
         """ cluster space on which cluster expansion is based """
-        return self._cluster_space.copy()
+        return self._cluster_space
 
     @property
     def parameters(self) -> List[float]:

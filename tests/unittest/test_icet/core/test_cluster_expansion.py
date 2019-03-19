@@ -74,7 +74,7 @@ class TestClusterExpansion(unittest.TestCase):
 
     def test_property_clusterspace(self):
         """Tests cluster space property."""
-        self.assertEqual(self.ce.cluster_space, self.cs)
+        self.assertEqual(str(self.ce.cluster_space), str(self.cs))
 
     def test_property_parameters(self):
         """Tests parameters properties."""
