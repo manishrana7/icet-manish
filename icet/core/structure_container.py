@@ -394,7 +394,7 @@ class StructureContainer:
     @property
     def cluster_space(self) -> ClusterSpace:
         """Cluster space used to calculate the cluster vectors."""
-        return self._cluster_space
+        return self._cluster_space.copy()
 
     @property
     def fit_structures(self):

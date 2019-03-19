@@ -352,6 +352,11 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         self.cs._prune_orbit_list(indices=prune_indices)
         self.assertEqual(orig_size-len(prune_indices), len(self.cs.orbit_list))
 
+    def test_copy(self):
+        """ Test copy function """
+        cs_copy = self.cs.copy()
+        self.assertEqual(str(cs_copy), str(self.cs))
+
 
 class TestClusterSpaceTernary(unittest.TestCase):
     """

@@ -416,6 +416,13 @@ class ClusterSpace(_ClusterSpace):
                             parameters['cutoffs'],
                             parameters['chemical_symbols'])
 
+    def copy(self):
+        """ Returns copy of ClusterSpace instance """
+        atoms = self._atoms
+        cutoffs = self._cutoffs
+        chemical_symbols = self._input_chemical_symbols
+        return ClusterSpace(atoms, cutoffs, chemical_symbols)
+
 
 def get_singlet_info(atoms: Atoms,
                      return_cluster_space: bool = False):

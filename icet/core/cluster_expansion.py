@@ -71,7 +71,7 @@ class ClusterExpansion:
             raise ValueError('cluster_space ({}) and parameters ({}) must have'
                              ' the same length'.format(len(cluster_space),
                                                        len(parameters)))
-        self._cluster_space = cluster_space
+        self._cluster_space = cluster_space.copy()
         if isinstance(parameters, list):
             parameters = np.array(parameters)
         self._parameters = parameters
@@ -113,7 +113,7 @@ class ClusterExpansion:
     @property
     def cluster_space(self) -> ClusterSpace:
         """ cluster space on which cluster expansion is based """
-        return self._cluster_space
+        return self._cluster_space.copy()
 
     @property
     def parameters(self) -> List[float]:
