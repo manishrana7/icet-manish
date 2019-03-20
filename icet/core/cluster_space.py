@@ -100,6 +100,8 @@ class ClusterSpace(_ClusterSpace):
         self._input_chemical_symbols = copy.deepcopy(chemical_symbols)
         chemical_symbols = self._get_chemical_symbols()
 
+        self._prune_history = []
+
         # set up primitive
         decorated_primitive, primitive_chemical_symbols = get_decorated_primitive_structure(
                 self._input_atoms, chemical_symbols)
@@ -336,10 +338,9 @@ class ClusterSpace(_ClusterSpace):
             'input configuration must be an ASE Atoms object'
         if not atoms.pbc.all():
             add_vacuum_in_non_pbc(atoms)
-        return _ClusterSpace.get_cluster_vector(self,
-                                                Structure.from_atoms(atoms))
+        return _ClusterSpace.get_cluster_vector(self, Structure.from_atoms(atoms))
 
-    def _prune_orbit_list(self, indices: List[int]) -> None:
+    def prune_orbit_list(self, indices: List[int]) -> None:
         """
         Prunes the internal orbit list
 
@@ -351,12 +352,13 @@ class ClusterSpace(_ClusterSpace):
         size_before = len(self._orbit_list)
 
         self._prune_orbit_list_cpp(indices)
-
         for index in sorted(indices, reverse=True):
             self._orbit_list.remove_orbit(index)
         self._precompute_multi_component_vectors()
+
         size_after = len(self._orbit_list)
         assert size_before - len(indices) == size_after
+        self._prune_history = indices
 
     @property
     def primitive_structure(self) -> Atoms:

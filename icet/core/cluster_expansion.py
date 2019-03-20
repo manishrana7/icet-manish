@@ -223,7 +223,6 @@ class ClusterExpansion:
             orbits for which the absolute ECIs is/are within this
             value will be pruned
         """
-        self._pruning_history.append({'indices': indices, 'tol': tol})
 
         if indices is None:
             indices = [i for i, param in enumerate(
