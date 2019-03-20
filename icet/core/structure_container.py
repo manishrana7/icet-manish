@@ -5,7 +5,7 @@ This module provides the StructureContainer class.
 import tarfile
 import tempfile
 
-from typing import BinaryIO, Dict, List, TextIO, Tuple, Union
+from typing import BinaryIO, List, TextIO, Tuple, Union
 
 import numpy as np
 import ase.db
