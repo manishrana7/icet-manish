@@ -431,7 +431,10 @@ class ClusterSpace(_ClusterSpace):
         atoms = self._input_atoms
         cutoffs = self._cutoffs
         chemical_symbols = self._input_chemical_symbols
-        return ClusterSpace(atoms, cutoffs, chemical_symbols)
+        cs_copy = ClusterSpace(atoms, cutoffs, chemical_symbols)
+        if len(self) != len(cs_copy):
+            raise Exception('Can not copy pruned cluster space')
+        return cs_copy
 
 
 def get_singlet_info(atoms: Atoms,

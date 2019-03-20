@@ -93,14 +93,14 @@ class ClusterExpansion:
         float
             property value of predicted by the cluster expansion
         """
-        cluster_vector = self.cluster_space.get_cluster_vector(structure)
+        cluster_vector = self._cluster_space.get_cluster_vector(structure)
         prop = np.dot(cluster_vector, self.parameters)
         return prop
 
     @property
     def parameters_as_dataframe(self) -> pd.DataFrame:
         """ dataframe containing orbit data and ECIs """
-        rows = self.cluster_space.orbit_data
+        rows = self._cluster_space.orbit_data
         for row, eci in zip(rows, self.parameters):
             row['eci'] = eci
         return pd.DataFrame(rows)
@@ -108,12 +108,12 @@ class ClusterExpansion:
     @property
     def orders(self) -> List[int]:
         """ orders included in cluster expansion """
-        return list(range(len(self.cluster_space.cutoffs)+2))
+        return list(range(len(self._cluster_space.cutoffs)+2))
 
     @property
     def cluster_space(self) -> ClusterSpace:
         """ cluster space on which cluster expansion is based """
-        return self._cluster_space
+        return self._cluster_space.copy()
 
     @property
     def parameters(self) -> List[float]:
@@ -260,7 +260,7 @@ class ClusterExpansion:
         filename
             name of file to which to write
         """
-        self.cluster_space.write(filename)
+        self._cluster_space.write(filename)
 
         with open(filename, 'rb') as handle:
             data = pickle.load(handle)
