@@ -373,7 +373,7 @@ class FitStructure:
         self._atoms = atoms
         self._user_tag = user_tag
         self._cluster_vector = cv
-        self._properties = properties
+        self.properties = properties
 
     @property
     def cluster_vector(self) -> np.ndarray:
@@ -389,11 +389,6 @@ class FitStructure:
     def user_tag(self) -> str:
         """structure label"""
         return str(self._user_tag)
-
-    @property
-    def properties(self) -> Dict[str, Union[float, int]]:
-        """scalar properties of structure"""
-        return self._properties
 
     def __getattr__(self, key):
         """Accesses properties if possible and returns value"""
