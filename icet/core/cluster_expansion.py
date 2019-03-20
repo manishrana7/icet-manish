@@ -5,6 +5,8 @@ This module provides the ClusterExpansion class.
 import pandas as pd
 import numpy as np
 import pickle
+import tempfile
+import tarfile
 import re
 
 from icet import ClusterSpace
@@ -76,7 +78,6 @@ class ClusterExpansion:
             parameters = np.array(parameters)
         self._parameters = parameters
         self._original_parameters = parameters.copy()
-        self._pruning_history = []
 
     def predict(self, structure: Union[Atoms, Structure]) -> float:
         """
@@ -261,15 +262,21 @@ class ClusterExpansion:
         """
         self._cluster_space.write(filename)
 
-        with open(filename, 'rb') as handle:
-            data = pickle.load(handle)
+        items = dict()
+        items['parameters'] = self.parameters
 
-        data['parameters'] = self.parameters
-        data['original_parameters'] = self._original_parameters
-        data['pruning_history'] = self._pruning_history
+        with tarfile.open(name=filename, mode='w') as tar_file:
+            cs_file = tempfile.NamedTemporaryFile()
+            self.cluster_space.write(cs_file.name)
+            tar_file.add(cs_file.name, arcname='cluster_space')
 
-        with open(filename, 'wb') as handle:
-            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            # write items
+            temp_file = tempfile.TemporaryFile()
+            pickle.dump(items, temp_file)
+            temp_file.seek(0)
+            tar_info = tar_file.gettarinfo(arcname='items', fileobj=temp_file)
+            tar_file.addfile(tar_info, temp_file)
+            temp_file.close()
 
     @staticmethod
     def read(filename: str):
@@ -281,15 +288,15 @@ class ClusterExpansion:
         filename
             file from which to read
         """
-        cs = ClusterSpace.read(filename)
-        with open(filename, 'rb') as handle:
-            data = pickle.load(handle)
-        parameters = data['parameters']
-        pruning_history = data['pruning_history']
-        original_parameters = data['original_parameters']
-        ce = ClusterExpansion(cs, original_parameters)
-        for arg in pruning_history:
-            ce.prune(indices=arg['indices'], tol=arg['tol'])
+        with tarfile.open(name=filename, mode='r') as tar_file:
+            cs_file = tempfile.NamedTemporaryFile()
+            cs_file.write(tar_file.extractfile('cluster_space').read())
+            cs_file.seek(0)
+            cs = ClusterSpace.read(cs_file.name)
+            items = pickle.load(tar_file.extractfile('items'))
+
+        parameters = items['parameters']
+        ce = ClusterExpansion(cs, parameters)
 
         assert list(parameters) == list(ce.parameters)
         return ce

@@ -4,13 +4,17 @@ This module provides the ClusterSpace class.
 
 import copy
 import pickle
+import tempfile
+import tarfile
+import numpy as np
+
 from collections import OrderedDict
 from typing import List, Union
 
-import numpy as np
-
 from _icet import ClusterSpace as _ClusterSpace
 from ase import Atoms
+from ase.io import write as ase_write
+from ase.io import read as ase_read
 from icet.core.orbit_list import OrbitList
 from icet.core.structure import Structure
 from icet.tools.geometry import (add_vacuum_in_non_pbc,
@@ -100,7 +104,7 @@ class ClusterSpace(_ClusterSpace):
         self._input_chemical_symbols = copy.deepcopy(chemical_symbols)
         chemical_symbols = self._get_chemical_symbols()
 
-        self._prune_history = []
+        self._pruning_history = []
 
         # set up primitive
         decorated_primitive, primitive_chemical_symbols = get_decorated_primitive_structure(
@@ -358,7 +362,7 @@ class ClusterSpace(_ClusterSpace):
 
         size_after = len(self._orbit_list)
         assert size_before - len(indices) == size_after
-        self._prune_history = indices
+        self._pruning_history.append(indices)
 
     @property
     def primitive_structure(self) -> Atoms:
@@ -402,13 +406,24 @@ class ClusterSpace(_ClusterSpace):
             name of file to which to write
         """
 
-        parameters = {'atoms': self._input_atoms.copy(),
-                      'cutoffs': self._cutoffs,
-                      'chemical_symbols': self._input_chemical_symbols,
-                      'pruning_history': self._pruning_history}
+        with tarfile.open(name=filename, mode='w') as tar_file:
 
-        with open(filename, 'wb') as handle:
-            pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            # write items
+            items = dict(cutoffs=self._cutoffs, chemical_symbols=self._input_chemical_symbols,
+                         pruning_history=self._pruning_history)
+            temp_file = tempfile.TemporaryFile()
+            pickle.dump(items, temp_file)
+            temp_file.seek(0)
+            tar_info = tar_file.gettarinfo(arcname='items', fileobj=temp_file)
+            tar_file.addfile(tar_info, temp_file)
+            temp_file.close()
+
+            # write atoms
+            temp_file = tempfile.NamedTemporaryFile()
+            ase_write(temp_file.name, self._input_atoms, format='json')
+            temp_file.seek(0)
+            tar_info = tar_file.gettarinfo(arcname='atoms', fileobj=temp_file)
+            tar_file.addfile(tar_info, temp_file)
 
     @staticmethod
     def read(filename: str):
@@ -421,14 +436,25 @@ class ClusterSpace(_ClusterSpace):
             name of file from which to read cluster space
         """
         if isinstance(filename, str):
-            with open(filename, 'rb') as handle:
-                parameters = pickle.load(handle)
+            tar_file = tarfile.open(mode='r', name=filename)
         else:
-            parameters = pickle.load(filename)
+            tar_file = tarfile.open(mode='r', fileobj=filename)
 
-        return ClusterSpace(parameters['atoms'],
-                            parameters['cutoffs'],
-                            parameters['chemical_symbols'])
+        # read items
+        items = pickle.load(tar_file.extractfile('items'))
+
+        # read atoms
+        temp_file = tempfile.NamedTemporaryFile()
+        temp_file.write(tar_file.extractfile('atoms').read())
+        temp_file.seek(0)
+        atoms = ase_read(temp_file.name, format='json')
+
+        tar_file.close()
+        cs = ClusterSpace(
+            atoms=atoms, cutoffs=items['cutoffs'], chemical_symbols=items['chemical_symbols'])
+        for indices in items['pruning_history']:
+            cs._prune_orbit_list(indices)
+        return cs
 
     def copy(self):
         """ Returns copy of ClusterSpace instance """
@@ -436,8 +462,8 @@ class ClusterSpace(_ClusterSpace):
         cutoffs = self._cutoffs
         chemical_symbols = self._input_chemical_symbols
         cs_copy = ClusterSpace(atoms, cutoffs, chemical_symbols)
-        if len(self) != len(cs_copy):
-            raise Exception('Can not copy pruned cluster space')
+        for indices in self._pruning_history:
+            cs_copy._prune_orbit_list(indices)
         return cs_copy
 
 
