@@ -250,6 +250,7 @@ class ClusterExpansion:
         self._cluster_space._prune_orbit_list(indices=safe_to_remove_orbits)
         self._parameters = self._parameters[np.setdiff1d(
             np.arange(len(self._parameters)), safe_to_remove_params)]
+        assert len(self._parameters) == len(self._cluster_space)
 
     def write(self, filename: str):
         """
