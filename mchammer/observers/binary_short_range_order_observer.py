@@ -78,26 +78,32 @@ class BinaryShortRangeOrderObserver(BaseObserver):
         self._cluster_count_observer._generate_counts(atoms)
         df = self._cluster_count_observer.count_frame
 
+        symbol_counts = self._get_atom_count(atoms)
+        conc_B = self._get_concentrations(atoms)[self._symbols[0]]            
+
         pair_orbit_indices = set(
             df.loc[df['order'] == 2]['orbit_index'].tolist())
-
+        N = symbol_counts[self._symbols[0]] + symbol_counts[self._symbols[1]]
         sro_parameters = {}
         for k, orbit_index in enumerate(sorted(pair_orbit_indices)):
             orbit_df = df.loc[df['orbit_index'] == orbit_index]
             A_B_pair_count = 0
             total_count = 0
+            total_A_count = 0
             for i, row in orbit_df.iterrows():
-                total_count += row.cluster_count                
+                total_count += row.cluster_count
+                if self._symbols[0] in row.decoration:
+                    total_A_count += row.cluster_count
                 if self._symbols[0] in row.decoration and \
                         self._symbols[1] in row.decoration:
                     A_B_pair_count += row.cluster_count
 
             key = 'sro_{}_{}'.format(self._symbols[0], k+1)
-            conc_B = self._get_concentrations(atoms)[self._symbols[0]]
-            if conc_B == 1 or total_count == 0:
-                value = -1
+            Z_tot = symbol_counts[self._symbols[0]] * 2 * total_count / N
+            if conc_B == 1 or Z_tot == 0:
+                value = 0
             else:
-                value = 1 - A_B_pair_count/(total_count*(1-conc_B))
+                value = 1 - A_B_pair_count/(Z_tot * (1-conc_B))
             sro_parameters[key] = value
 
         return sro_parameters
@@ -122,3 +128,23 @@ class BinaryShortRangeOrderObserver(BaseObserver):
                 concentration = symbol_count / len(sublattice.indices)
                 concentrations[symbol] = concentration
         return concentrations
+
+    def _get_atom_count(self, structure: Atoms) -> Dict[str, float]:
+        """Returns atom counts for each species relative its
+        sublattice.
+
+        Parameters
+        ----------
+        structure
+            the configuration that will be analyzed
+        """
+        decoration = np.array(structure.get_chemical_symbols())
+        counts = {}
+        for sublattice in self._sublattices:
+            if len(sublattice.chemical_symbols) == 1:
+                continue
+            for symbol in sublattice.chemical_symbols:
+                symbol_count = decoration[sublattice.indices].tolist().count(
+                    symbol)
+                counts[symbol] = symbol_count
+        return counts
