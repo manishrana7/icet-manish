@@ -224,6 +224,7 @@ class ClusterExpansion:
             value will be pruned
         """
 
+        # find orbit indices to be rmoved
         if indices is None:
             indices = [i for i, param in enumerate(
                 self.parameters) if np.abs(param) <= tol and i > 0]
@@ -231,8 +232,7 @@ class ClusterExpansion:
         indices = list(set(indices))
 
         if 0 in indices:
-            raise ValueError('Orbit index cannot be 0 since'
-                             ' the zerolet may not be pruned.')
+            raise ValueError('Orbit index cannot be 0 since the zerolet may not be pruned.')
         orbit_candidates_for_removal = \
             df.orbit_index[np.array(indices)].tolist()
         safe_to_remove_orbits, safe_to_remove_params = [], []
@@ -243,9 +243,9 @@ class ClusterExpansion:
             oi_remove_count = orbit_candidates_for_removal.count(oi)
             if orbit_count <= oi_remove_count:
                 safe_to_remove_orbits.append(oi)
-                safe_to_remove_params += df.index[df['orbit_index']
-                                                  == oi].tolist()
+                safe_to_remove_params += df.index[df['orbit_index'] == oi].tolist()
 
+        # prune cluster space
         self._cluster_space._prune_orbit_list(indices=safe_to_remove_orbits)
         self._parameters = self._parameters[np.setdiff1d(
             np.arange(len(self._parameters)), safe_to_remove_params)]

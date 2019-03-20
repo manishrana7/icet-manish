@@ -340,7 +340,7 @@ class ClusterSpace(_ClusterSpace):
             add_vacuum_in_non_pbc(atoms)
         return _ClusterSpace.get_cluster_vector(self, Structure.from_atoms(atoms))
 
-    def prune_orbit_list(self, indices: List[int]) -> None:
+    def _prune_orbit_list(self, indices: List[int]) -> None:
         """
         Prunes the internal orbit list
 
@@ -404,7 +404,9 @@ class ClusterSpace(_ClusterSpace):
 
         parameters = {'atoms': self._input_atoms.copy(),
                       'cutoffs': self._cutoffs,
-                      'chemical_symbols': self._input_chemical_symbols}
+                      'chemical_symbols': self._input_chemical_symbols,
+                      'pruning_history': self._pruning_history}
+
         with open(filename, 'wb') as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
