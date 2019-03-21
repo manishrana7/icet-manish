@@ -426,8 +426,7 @@ class ClusterSpace(_ClusterSpace):
         structure
             structure the sublattices are based on
         """
-        sl = Sublattices(self.chemical_symbols,
-                         self.primitive_structure, structure)
+        sl = Sublattices(self.chemical_symbols, self.primitive_structure, structure)
         return sl
 
     def write(self, filename: str) -> None:
@@ -491,7 +490,7 @@ class ClusterSpace(_ClusterSpace):
         return cs
 
     def copy(self):
-        """ Returns copy of ClusterSpace instance """
+        """ Returns copy of ClusterSpace instance. """
         atoms = self._input_atoms
         cutoffs = self._cutoffs
         chemical_symbols = self._input_chemical_symbols
