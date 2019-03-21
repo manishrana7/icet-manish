@@ -20,7 +20,6 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
         cutoffs = [5]
         subelements = [['Au', 'Pd']]*len(self.atoms)
         self.cs = ClusterSpace(self.atoms, cutoffs, subelements)
-        print(self.cs)
         self.interval = 10
         self.radius = 5
 
@@ -97,11 +96,10 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
         """ Tests the sro values for a few systems where it is easily
         done by hand.
         """
-        structure = bulk('Au').repeat([3,3,2])
+        structure = bulk('Au').repeat([2, 2, 2])
         observer = BinaryShortRangeOrderObserver(
             cluster_space=self.cs, structure=structure,
             interval=self.interval, radius=self.radius)
-
 
         # 1 Pd in pure Au sro
         structure.symbols = ['Au'] * len(structure)
@@ -130,6 +128,36 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
         expected_sro = 1 - Z_Pd/(2*multiplicity*N_Au*(1-conc_Au))
         self.assertEqual(expected_sro, sro_parameters['sro_Au_1'])
 
+        structure = bulk('Au', cubic=True).repeat([10, 10, 1])
+        structure.wrap()
+        observer = BinaryShortRangeOrderObserver(
+            cluster_space=self.cs, structure=structure,
+            interval=self.interval, radius=self.radius)
+
+        for atom in structure:
+            if atom.position[1] > 4*5:
+                atom.symbol = 'Pd'
+        sro_parameters = observer.get_observable(structure)
+
+    def test_checkerboard_sro(self):
+        """Tests the SRO parameter values for a BCC structure with
+        checkerboard decoration.
+        """
+
+        atoms = bulk('Al', 'bcc', cubic=True, a=4)
+        atoms[1].symbol = 'Ge'
+        atoms = atoms.repeat(6)
+        cutoffs = [5]
+        subelements = [['Al', 'Ge']]*len(atoms)
+        cluster_space = ClusterSpace(atoms, cutoffs, subelements)
+
+        observer = BinaryShortRangeOrderObserver(
+            cluster_space=cluster_space, structure=atoms,
+            interval=self.interval, radius=self.radius)
+
+        sro_parameters = observer.get_observable(atoms)
+        self.assertEquals(sro_parameters['sro_Al_1'], -1.0)
+        self.assertEquals(sro_parameters['sro_Al_2'], 1.0)
 
     def setUp(self):
         """Set up observer before each test."""
@@ -144,14 +172,6 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
     def test_property_interval(self):
         """Tests property interval."""
         self.assertEqual(self.observer.interval, self.interval)
-
-    def test_get_observable(self):
-        """Tests observable is returned accordingly."""
-        sro_parameters = self.observer.get_observable(self.atoms)
-
-        # self.assertEqual(sro_parameters['sro_Au_1'], 1.0)
-        # self.assertEqual(sro_parameters['sro_Au_2'], 1.0)
-        # self.assertEqual(sro_parameters['sro_Au_3'], 1.0)
 
     def test_get_concentrations(self):
         conc = self.observer._get_concentrations(self.atoms)

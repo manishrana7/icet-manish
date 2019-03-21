@@ -4,7 +4,6 @@ from icet.core.structure import Structure
 from typing import List
 from ase import Atoms
 
-
 class Sublattice:
     """
     This class stores and provides information about a specific
@@ -26,7 +25,7 @@ class Sublattice:
 
     @property
     def chemical_symbols(self):
-        return self._chemical_symbols
+        return self._chemical_symbols.copy()
 
     @property
     def indices(self):
@@ -111,4 +110,4 @@ class Sublattices(list):
         index
             index of the sublattice
         """
-        return self._sublattice_to_indices[index]
+        return self[index].indices
