@@ -84,7 +84,7 @@ class Sublattices:
             for index in sublattice.indices:
                 self._index_to_sublattice[index] = k
 
-    def __getitem__(self, key:int) -> Sublattice:
+    def __getitem__(self, key: int) -> Sublattice:
         """Returns a sublattice according to key."""
         return self._sublattices[key]
 
