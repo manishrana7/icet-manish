@@ -1,4 +1,3 @@
-
 from copy import deepcopy
 from icet.core.structure import Structure
 from typing import List
@@ -68,7 +67,7 @@ class Sublattices:
                 position)
 
             # Get allowed species on this site
-            species = self._allowed_species[lattice_site.index]
+            species = allowed_species[lattice_site.index]
 
             # Get what sublattice those species correspond to
             sublattice = self._allowed_species.index(tuple(sorted(species)))
