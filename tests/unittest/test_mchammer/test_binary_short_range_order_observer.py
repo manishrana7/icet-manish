@@ -101,7 +101,7 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
             interval=self.interval, radius=self.radius)
 
         # 1 Pd in pure Au sro
-        structure.symbols = ['Au'] * len(structure)
+        structure.set_chemical_symbols(['Au'] * len(structure))
         structure[0].symbol = 'Pd'
         sro_parameters = observer.get_observable(structure)
         conc_Au = (len(structure) - 1)/len(structure)
@@ -115,7 +115,7 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
         self.assertEqual(expected_sro, sro_parameters['sro_Au_1'])
 
         # 1 Au in Pure Pd sro
-        structure.symbols = ['Pd'] * len(structure)
+        structure.set_chemical_symbols(['Pd'] * len(structure))
         structure[0].symbol = 'Au'
         sro_parameters = observer.get_observable(structure)
         conc_Au = 1/len(structure)

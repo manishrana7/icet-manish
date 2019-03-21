@@ -47,11 +47,10 @@ class TestClusterCountObserver(unittest.TestCase):
         observer = ClusterCountObserver(
             cluster_space=cs, atoms=structure, interval=self.interval)
 
-        structure.symbols = ['Au']*len(structure)
+        structure.set_chemical_symbols(['Au'] * len(structure))
         # 1 Pd in pure Au sro
         structure[0].symbol = 'Pd'
         counts = observer.get_observable(structure)
-        print(counts)
 
         # In total there will be 12 Pd neighboring an Au atom
         expected_Au_Pd_count = 12
@@ -78,10 +77,9 @@ class TestClusterCountObserver(unittest.TestCase):
         self.assertEqual(expected_Au_Au_count, actual_counts)
 
         # 1 Au in Pure Pd sro
-        structure.symbols = ['Pd'] * len(structure)
+        structure.set_chemical_symbols(['Pd'] * len(structure))
         structure[0].symbol = 'Au'
         counts = observer.get_observable(structure)
-        print(counts)
 
         # In total there will be 12 Pd neighboring an Au atom
         expected_Au_Pd_count = 12
