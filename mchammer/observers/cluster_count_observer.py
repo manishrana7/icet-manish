@@ -7,7 +7,6 @@ from ase import Atoms
 from icet.core.cluster import Cluster
 from icet.core.local_orbit_list_generator import LocalOrbitListGenerator
 from icet.core.structure import Structure
-from icet.tools.geometry import chemical_symbols_to_numbers
 from mchammer.observers.base_observer import BaseObserver
 
 
@@ -96,7 +95,7 @@ class ClusterCountObserver(BaseObserver):
 
         # std::unordered_map<Cluster, std::map<std::vector<int>, int>>
         cluster_counts = self._cluster_counts_cpp.get_cluster_counts()
-        
+
         for cluster_key, chemical_number_counts_dict in \
                 cluster_counts.items():
 
@@ -111,7 +110,7 @@ class ClusterCountObserver(BaseObserver):
                 pandas_row['orbit_index'] = cluster_key.tag
                 pandas_row['order'] = len(cluster_key)
                 pandas_row['radius'] = cluster_key.radius
-                pandas_rows.append(pandas_row)        
+                pandas_rows.append(pandas_row)
         self.count_frame = pd.DataFrame(pandas_rows)
         self._cluster_counts_cpp.reset()
 

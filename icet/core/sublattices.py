@@ -4,6 +4,7 @@ from icet.core.structure import Structure
 from typing import List
 from ase import Atoms
 
+
 class Sublattice:
     """
     This class stores and provides information about a specific

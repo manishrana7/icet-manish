@@ -3,7 +3,6 @@ import unittest
 from ase.build import bulk
 from icet import ClusterSpace
 from mchammer.observers import BinaryShortRangeOrderObserver
-import itertools
 
 
 class TestBinaryShortRangeOrderObserver(unittest.TestCase):

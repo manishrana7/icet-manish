@@ -1,9 +1,7 @@
 import unittest
 
 from ase.build import bulk
-from icet import ClusterSpace
 from icet.core.sublattices import Sublattices, Sublattice
-import itertools
 
 
 class TestSublattice(unittest.TestCase):

@@ -79,7 +79,7 @@ class BinaryShortRangeOrderObserver(BaseObserver):
         df = self._cluster_count_observer.count_frame
 
         symbol_counts = self._get_atom_count(atoms)
-        conc_B = self._get_concentrations(atoms)[self._symbols[0]]            
+        conc_B = self._get_concentrations(atoms)[self._symbols[0]]
 
         pair_orbit_indices = set(
             df.loc[df['order'] == 2]['orbit_index'].tolist())
