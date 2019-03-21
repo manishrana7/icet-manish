@@ -5,6 +5,7 @@ from typing import List
 from ase import Atoms
 import copy
 
+
 class Sublattice:
     """
     This class stores and provides information about a specific
