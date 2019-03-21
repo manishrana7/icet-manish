@@ -22,11 +22,7 @@ installed.
    :caption: Contents
 
    structure_enumeration
-   cluster_counts
-   cluster_space_info
-   cluster_vectors
    mapping_structures
-   cluster_vector_correlations
-   neighbor_list
-   permutation_matrix
    parallel_monte_carlo
+   cluster_counts
+   cluster_vectors
