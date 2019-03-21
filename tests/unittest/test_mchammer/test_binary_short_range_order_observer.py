@@ -27,7 +27,7 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
         return None
 
     def test_init_with_ternary(self):
-        """ Tests the init with ternaries (should fail)."""
+        """Tests the init with ternaries (should fail)."""
         # First a simple ternary
         subelements = [['Au', 'Pd', 'H']]*len(self.atoms)
         cutoffs = [3]
@@ -39,7 +39,7 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
                 cluster_space=cluster_space, structure=self.atoms,
                 interval=self.interval, radius=self.radius)
 
-        self.assertIn("Cluster space have more than two allowed species on a",
+        self.assertIn('Cluster space has more than two allowed species on a',
                       str(msg.exception))
 
         # Ternary with a binary sublattice
@@ -49,7 +49,7 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
             BinaryShortRangeOrderObserver(
                 cluster_space=cluster_space, structure=self.atoms,
                 interval=self.interval, radius=self.radius)
-        self.assertIn("Cluster space have more than two allowed species on a",
+        self.assertIn('Cluster space has more than two allowed species on a',
                       str(msg.exception))
 
         # Double Ternary
@@ -60,11 +60,11 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
             BinaryShortRangeOrderObserver(
                 cluster_space=cluster_space, structure=self.atoms,
                 interval=self.interval, radius=self.radius)
-        self.assertIn("Cluster space have more than two allowed species on a",
+        self.assertIn('Cluster space has more than two allowed species on a',
                       str(msg.exception))
 
     def test_init_with_sublattices(self):
-        """ Tests the init with ternaries (should fail)."""
+        """Tests the init of sublattices for different cases."""
         # First a binary with inactice sublattice (should work)
         subelements = [['Au', 'Pd'], ['H']]*(len(self.atoms)//2)
         cutoffs = [3]
@@ -88,11 +88,11 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
             BinaryShortRangeOrderObserver(
                 cluster_space=cluster_space, structure=self.atoms,
                 interval=self.interval, radius=self.radius)
-        self.assertIn("Number of binary sublattices must equal one, not 2",
+        self.assertIn('Number of binary sublattices must equal one, not 2',
                       str(msg.exception))
 
     def test_sro_values(self):
-        """ Tests the sro values for a few systems where it is easily
+        """Tests the sro values for a few systems where it is easily
         done by hand.
         """
         structure = bulk('Au').repeat([2, 2, 2])

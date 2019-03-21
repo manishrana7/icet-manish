@@ -38,7 +38,74 @@ class TestClusterCountObserver(unittest.TestCase):
 
     def test_get_observable(self):
         """Tests observable is returned accordingly."""
-        self.observer.get_observable(self.atoms)
+
+        prim = bulk('Au')
+        structure = prim.repeat(3)
+        cutoffs = [3]
+        subelements = ['Au', 'Pd']
+        cs = ClusterSpace(prim, cutoffs, subelements)
+        observer = ClusterCountObserver(
+            cluster_space=cs, atoms=structure, interval=self.interval)
+
+        structure.symbols = ['Au']*len(structure)
+        # 1 Pd in pure Au sro
+        structure[0].symbol = 'Pd'
+        counts = observer.get_observable(structure)
+        print(counts)
+
+        # In total there will be 12 Pd neighboring an Au atom
+        expected_Au_Pd_count = 12
+        actual_counts = 0
+        for count in counts.keys():
+            if 'Au' in count and '1' in count and 'Pd' in count:
+                actual_counts += counts[count]
+        self.assertEqual(expected_Au_Pd_count, actual_counts)
+
+        # Number of Au-Au neighbors should be
+        expected_Au_Au_count = 6 * len(structure) - 12
+        actual_counts = 0
+        for count in counts.keys():
+            if 'Au' in count and '1' in count and 'Pd' not in count:
+                actual_counts += counts[count]
+        self.assertEqual(expected_Au_Au_count, actual_counts)
+
+        # Number of Pd-Pd neighbors should be
+        expected_Au_Au_count = 0
+        actual_counts = 0
+        for count in counts.keys():
+            if 'Pd' in count and '1' in count and 'Au' not in count:
+                actual_counts += counts[count]
+        self.assertEqual(expected_Au_Au_count, actual_counts)
+
+        # 1 Au in Pure Pd sro
+        structure.symbols = ['Pd'] * len(structure)
+        structure[0].symbol = 'Au'
+        counts = observer.get_observable(structure)
+        print(counts)
+
+        # In total there will be 12 Pd neighboring an Au atom
+        expected_Au_Pd_count = 12
+        actual_counts = 0
+        for count in counts.keys():
+            if 'Au' in count and '1' in count and 'Pd' in count:
+                actual_counts += counts[count]
+        self.assertEqual(expected_Au_Pd_count, actual_counts)
+
+        # Number of Au-Au neighbors should be
+        expected_Au_Au_count = 0
+        actual_counts = 0
+        for count in counts.keys():
+            if 'Au' in count and '1' in count and 'Pd' not in count:
+                actual_counts += counts[count]
+        self.assertEqual(expected_Au_Au_count, actual_counts)
+
+        # Number of Pd-Pd neighbors should be
+        expected_Au_Au_count = 6 * len(structure) - 12
+        actual_counts = 0
+        for count in counts.keys():
+            if 'Pd' in count and '1' in count and 'Au' not in count:
+                actual_counts += counts[count]
+        self.assertEqual(expected_Au_Au_count, actual_counts)
 
 
 if __name__ == '__main__':

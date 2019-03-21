@@ -58,7 +58,7 @@ class BinaryShortRangeOrderObserver(BaseObserver):
                 binary_sublattice_counts += 1
                 self._symbols = sorted(symbols)
             elif len(symbols) > 2:
-                raise ValueError('Cluster space have more than two allowed'
+                raise ValueError('Cluster space has more than two allowed'
                                  ' species on a sublattice. '
                                  'Allowed species: {}'.format(symbols))
         if binary_sublattice_counts != 1:
