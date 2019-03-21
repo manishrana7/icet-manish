@@ -268,7 +268,7 @@ class ClusterExpansion:
 
         with tarfile.open(name=filename, mode='w') as tar_file:
             cs_file = tempfile.NamedTemporaryFile()
-            self.cluster_space.write(cs_file.name)
+            self._cluster_space.write(cs_file.name)
             tar_file.add(cs_file.name, arcname='cluster_space')
 
             # write items
