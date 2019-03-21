@@ -225,7 +225,7 @@ class ClusterExpansion:
             value will be pruned
         """
 
-        # find orbit indices to be rmoved
+        # find orbit indices to be removed
         if indices is None:
             indices = [i for i, param in enumerate(
                 self.parameters) if np.abs(param) <= tol and i > 0]
