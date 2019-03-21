@@ -26,14 +26,14 @@ class Sublattice:
 
     @property
     def chemical_symbols(self):
-        return self._chemical_symbols.copy()
+        return self._chemical_symbols
 
     @property
     def indices(self):
         return self._indices.copy()
 
 
-class Sublattices(list):
+class Sublattices:
     """
     This class stores and provides information about the sublattices
     of a structure.
@@ -59,7 +59,7 @@ class Sublattices(list):
             list(set(tuple(sorted(symbols)) for symbols in allowed_species)))
 
         cpp_prim_structure = Structure.from_atoms(primitive_structure)
-
+        self._sublattices = []
         sublattice_to_indices = [[] for _ in range(len(self._allowed_species))]
         for index, position in enumerate(structure.get_positions()):
 
@@ -76,13 +76,21 @@ class Sublattices(list):
 
         for species, indices in zip(self._allowed_species, sublattice_to_indices):
             sublattice = Sublattice(chemical_symbols=species, indices=indices)
-            self.append(sublattice)
+            self._sublattices.append(sublattice)
 
         # Map lattice index to sublattice index
         self._index_to_sublattice = {}
         for k, sublattice in enumerate(self):
             for index in sublattice.indices:
                 self._index_to_sublattice[index] = k
+
+    def __getitem__(self, key:int) -> Sublattice:
+        """Returns a sublattice according to key."""
+        return self._sublattices[key]
+
+    def __len__(self):
+        """Returns number of sublattices."""
+        return len(self._sublattices)
 
     def get_sublattice_index(self, index: int) -> int:
         """ Returns the index of the sublattice the symbol

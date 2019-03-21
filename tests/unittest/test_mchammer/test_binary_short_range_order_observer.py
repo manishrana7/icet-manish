@@ -155,8 +155,8 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
             interval=self.interval, radius=self.radius)
 
         sro_parameters = observer.get_observable(atoms)
-        self.assertEquals(sro_parameters['sro_Al_1'], -1.0)
-        self.assertEquals(sro_parameters['sro_Al_2'], 1.0)
+        self.assertEqual(sro_parameters['sro_Al_1'], -1.0)
+        self.assertEqual(sro_parameters['sro_Al_2'], 1.0)
 
     def setUp(self):
         """Set up observer before each test."""
