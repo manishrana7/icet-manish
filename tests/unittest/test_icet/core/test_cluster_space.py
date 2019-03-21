@@ -392,6 +392,28 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector
         cs_copy = self.cs.copy()
         self.assertEqual(str(cs_copy), str(self.cs))
 
+    def test_get_possible_orbit_decorations(self):
+        """Tests get possible orbit decorations."""
+
+        decoration_singlet = self.cs.get_possible_orbit_decorations(
+            orbit_index=0)
+        self.assertEqual(decoration_singlet, [('Ag',), ('Au',)])
+
+        decoration_pair = self.cs.get_possible_orbit_decorations(orbit_index=1)
+        self.assertEqual(decoration_pair, [
+                         ('Ag', 'Ag'), ('Ag', 'Au'), ('Au', 'Ag'), ('Au', 'Au')])
+
+        decoration_triplet = self.cs.get_possible_orbit_decorations(
+            orbit_index=2)
+        self.assertEqual(decoration_triplet, [('Ag', 'Ag', 'Ag'),
+                                              ('Ag', 'Ag', 'Au'),
+                                              ('Ag', 'Au', 'Ag'),
+                                              ('Ag', 'Au', 'Au'),
+                                              ('Au', 'Ag', 'Ag'),
+                                              ('Au', 'Ag', 'Au'),
+                                              ('Au', 'Au', 'Ag'),
+                                              ('Au', 'Au', 'Au')])
+
 
 class TestClusterSpaceTernary(unittest.TestCase):
     """
@@ -425,10 +447,9 @@ class TestClusterSpaceTernary(unittest.TestCase):
             The orbit which the mc vectors should be returned from.
         """
         orbit = cluster_space.get_orbit(orbit_index)
-        local_Mi = \
-            cluster_space.get_number_of_allowed_species_by_site(
-                cluster_space._get_primitive_structure(),
-                orbit.representative_sites)
+        local_Mi = cluster_space.get_number_of_allowed_species_by_site(
+            cluster_space._get_primitive_structure(),
+            orbit.representative_sites)
 
         mc_vectors = orbit.get_mc_vectors(local_Mi)
         return mc_vectors
