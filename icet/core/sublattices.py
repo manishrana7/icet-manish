@@ -57,7 +57,7 @@ class Sublattices:
 
         # sorted unique sites, this basically decides A, B, C... sublattices
         self._allowed_species = sorted(
-            list(set(tuple(sorted(symbols)) for symbols in allowed_species)))
+            set(tuple(sorted(symbols)) for symbols in allowed_species))
 
         cpp_prim_structure = Structure.from_atoms(primitive_structure)
         self._sublattices = []
@@ -99,8 +99,6 @@ class Sublattices:
 
         Parameters
         ----------
-        symbol
-            species symbol
         index
             index of site in the structure
         """
