@@ -1,6 +1,12 @@
+"""
+This module provides the ClusterExpansion class.
+"""
+
 import pandas as pd
 import numpy as np
 import pickle
+import tempfile
+import tarfile
 import re
 
 from icet import ClusterSpace
@@ -116,6 +122,26 @@ class ClusterExpansion:
         """ effective cluster interactions (ECIs) """
         return self._parameters
 
+    def plot_parameters(self, orders=None):
+        """ Plot ECIs for given orders, default plots for all orders """
+
+        if orders is None:
+            orders = self.orders
+        df = self.parameters_as_dataframe
+
+        # plotting
+        import matplotlib.pyplot as plt
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+        ax.axhline(y=0.0, c='k', lw=1)
+        for order in orders:
+            df_order = df.loc[df['order'] == order]
+            ax.plot(df_order.radius, df_order.eci, 'o', ms=8, label='order {}'.format(order))
+        ax.legend(loc='best')
+        ax.set_xlabel('Radius')
+        ax.set_ylabel('ECI')
+        plt.show()
+
     def __len__(self) -> int:
         return len(self._parameters)
 
@@ -162,6 +188,24 @@ class ClusterExpansion:
     def __repr__(self) -> str:
         """ string representation """
         return self._get_string_representation(print_threshold=50)
+
+    def print_overview(self,
+                       print_threshold: int = None,
+                       print_minimum: int = 10) -> None:
+        """
+        Print an overview of the cluster expansion in terms of the orbits (order,
+        radius, multiplicity, corresponding ECI etc).
+
+        Parameters
+        ----------
+        print_threshold
+            if the number of orbits exceeds this number print dots
+        print_minimum
+            number of lines printed from the top and the bottom of the orbit
+            list if `print_threshold` is exceeded
+        """
+        print(self._get_string_representation(print_threshold=print_threshold,
+                                              print_minimum=print_minimum))
 
     def prune(self, indices: List[int] = None, tol: float = 0):
         """
@@ -218,17 +262,24 @@ class ClusterExpansion:
         filename
             name of file to which to write
         """
-        self.cluster_space.write(filename)
 
-        with open(filename, 'rb') as handle:
-            data = pickle.load(handle)
+        items = dict()
+        items['parameters'] = self.parameters
+        items['original_parameters'] = self._original_parameters
+        items['pruning_history'] = self._pruning_history
 
-        data['parameters'] = self.parameters
-        data['original_parameters'] = self._original_parameters
-        data['pruning_history'] = self._pruning_history
+        with tarfile.open(name=filename, mode='w') as tar_file:
+            cs_file = tempfile.NamedTemporaryFile()
+            self.cluster_space.write(cs_file.name)
+            tar_file.add(cs_file.name, arcname='cluster_space')
 
-        with open(filename, 'wb') as handle:
-            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            # write items
+            temp_file = tempfile.TemporaryFile()
+            pickle.dump(items, temp_file)
+            temp_file.seek(0)
+            tar_info = tar_file.gettarinfo(arcname='items', fileobj=temp_file)
+            tar_file.addfile(tar_info, temp_file)
+            temp_file.close()
 
     @staticmethod
     def read(filename: str):
@@ -240,12 +291,16 @@ class ClusterExpansion:
         filename
             file from which to read
         """
-        cs = ClusterSpace.read(filename)
-        with open(filename, 'rb') as handle:
-            data = pickle.load(handle)
-        parameters = data['parameters']
-        pruning_history = data['pruning_history']
-        original_parameters = data['original_parameters']
+        with tarfile.open(name=filename, mode='r') as tar_file:
+            cs_file = tempfile.NamedTemporaryFile()
+            cs_file.write(tar_file.extractfile('cluster_space').read())
+            cs_file.seek(0)
+            cs = ClusterSpace.read(cs_file.name)
+            items = pickle.load(tar_file.extractfile('items'))
+
+        parameters = items['parameters']
+        pruning_history = items['pruning_history']
+        original_parameters = items['original_parameters']
         ce = ClusterExpansion(cs, original_parameters)
         for arg in pruning_history:
             ce.prune(indices=arg['indices'], tol=arg['tol'])

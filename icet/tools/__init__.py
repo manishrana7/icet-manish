@@ -1,3 +1,8 @@
+"""
+This module collects a number of different tools, e.g., for
+structure generation and analysis.
+"""
+
 from .convex_hull import ConvexHull
 from .structure_enumeration import (enumerate_structures,
                                     get_symmetry_operations)

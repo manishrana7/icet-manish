@@ -1,18 +1,26 @@
+"""
+This module provides the ClusterSpace class.
+"""
+
+import copy
+import itertools
 import pickle
+import tarfile
+import tempfile
 from collections import OrderedDict
 from typing import List, Union
 
 import numpy as np
 
-import itertools
-
 from _icet import ClusterSpace as _ClusterSpace
 from ase import Atoms
+from ase.io import read as ase_read
+from ase.io import write as ase_write
 from icet.core.orbit_list import OrbitList
 from icet.core.structure import Structure
+from icet.core.sublattices import Sublattices
 from icet.tools.geometry import (add_vacuum_in_non_pbc,
                                  get_decorated_primitive_structure)
-from icet.core.sublattices import Sublattices
 
 
 class ClusterSpace(_ClusterSpace):
@@ -93,30 +101,15 @@ class ClusterSpace(_ClusterSpace):
             raise ValueError('Input structure must have periodic boundary '
                              'condition')
 
-        self._atoms = atoms.copy()
-        self._cutoffs = cutoffs
-        self._chemical_symbols = chemical_symbols.copy()
-        self._input_chemical_symbols = chemical_symbols.copy()
+        self._cutoffs = cutoffs.copy()
+        self._input_atoms = atoms.copy()
+        self._input_chemical_symbols = copy.deepcopy(chemical_symbols)
+        chemical_symbols = self._get_chemical_symbols()
 
-        # handle occupations
-        if all(isinstance(i, str) for i in self._chemical_symbols):
-            self._chemical_symbols = [self._chemical_symbols]*len(self._atoms)
-        elif not all(isinstance(i, list) for i in self._chemical_symbols):
-            raise TypeError("chemical_symbols must be"
-                            " List[str] or List[List[str]],"
-                            " not {}".format(type(self._chemical_symbols)))
-
-        # sanity check chemical symbols
-        for symbols in self._chemical_symbols:
-            if len(symbols) != len(set(symbols)):
-                raise ValueError('Found duplicates in chemical_symbols')
-
-        decorated_primitive, primitive_chemical_symbols = \
-            get_decorated_primitive_structure(
-                self._atoms, self._chemical_symbols)
-
+        # set up primitive
+        decorated_primitive, primitive_chemical_symbols = get_decorated_primitive_structure(
+            self._input_atoms, chemical_symbols)
         self._primitive_chemical_symbols = primitive_chemical_symbols
-
         assert len(decorated_primitive) == len(primitive_chemical_symbols)
 
         # set up orbit list
@@ -126,6 +119,33 @@ class ClusterSpace(_ClusterSpace):
         # call (base) C++ constructor
         _ClusterSpace.__init__(
             self, primitive_chemical_symbols, self._orbit_list)
+
+    def _get_chemical_symbols(self):
+        """ Returns chemical symbols using input atoms and input
+        chemical symbols. Carries out multiple sanity checks. """
+
+        # setup chemical symbols as List[List[str]]
+        if all(isinstance(i, str) for i in self._input_chemical_symbols):
+            chemical_symbols = [
+                self._input_chemical_symbols] * len(self._input_atoms)
+        elif not all(isinstance(i, list) for i in self._input_chemical_symbols):
+            raise TypeError("chemical_symbols must be List[str] or List[List[str]], not {}".format(
+                type(self._input_chemical_symbols)))
+        elif len(self._input_chemical_symbols) != len(self._input_atoms):
+            raise ValueError('chemical_symbols must have same length as atoms')
+        else:
+            chemical_symbols = copy.deepcopy(self._input_chemical_symbols)
+
+        for symbols in chemical_symbols:
+            if len(symbols) != len(set(symbols)):
+                duplicates = [s for s in symbols if symbols.count(s) > 1]
+                raise ValueError(
+                    'Found duplicate symbols {}  on sublattice'.format(duplicates))
+
+        if len([tuple(sorted(s)) for s in chemical_symbols if len(s) > 1]) == 0:
+            raise ValueError('No active sites found')
+
+        return chemical_symbols
 
     def _get_chemical_symbol_representation(self):
         """Returns a str version of the chemical symbols that is
@@ -417,12 +437,24 @@ class ClusterSpace(_ClusterSpace):
         filename
             name of file to which to write
         """
+        with tarfile.open(name=filename, mode='w') as tar_file:
 
-        parameters = {'atoms': self._atoms.copy(),
-                      'cutoffs': self._cutoffs,
-                      'chemical_symbols': self._input_chemical_symbols}
-        with open(filename, 'wb') as handle:
-            pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            # write items
+            items = dict(cutoffs=self._cutoffs,
+                         chemical_symbols=self._input_chemical_symbols)
+            temp_file = tempfile.TemporaryFile()
+            pickle.dump(items, temp_file)
+            temp_file.seek(0)
+            tar_info = tar_file.gettarinfo(arcname='items', fileobj=temp_file)
+            tar_file.addfile(tar_info, temp_file)
+            temp_file.close()
+
+            # write atoms
+            temp_file = tempfile.NamedTemporaryFile()
+            ase_write(temp_file.name, self._input_atoms, format='json')
+            temp_file.seek(0)
+            tar_info = tar_file.gettarinfo(arcname='atoms', fileobj=temp_file)
+            tar_file.addfile(tar_info, temp_file)
 
     @staticmethod
     def read(filename: str):
@@ -435,14 +467,22 @@ class ClusterSpace(_ClusterSpace):
             name of file from which to read cluster space
         """
         if isinstance(filename, str):
-            with open(filename, 'rb') as handle:
-                parameters = pickle.load(handle)
+            tar_file = tarfile.open(mode='r', name=filename)
         else:
-            parameters = pickle.load(filename)
+            tar_file = tarfile.open(mode='r', fileobj=filename)
 
-        return ClusterSpace(parameters['atoms'],
-                            parameters['cutoffs'],
-                            parameters['chemical_symbols'])
+        # read items
+        items = pickle.load(tar_file.extractfile('items'))
+
+        # read atoms
+        temp_file = tempfile.NamedTemporaryFile()
+        temp_file.write(tar_file.extractfile('atoms').read())
+        temp_file.seek(0)
+        atoms = ase_read(temp_file.name, format='json')
+
+        tar_file.close()
+        return ClusterSpace(
+            atoms=atoms, cutoffs=items['cutoffs'], chemical_symbols=items['chemical_symbols'])
 
 
 def get_singlet_info(atoms: Atoms,

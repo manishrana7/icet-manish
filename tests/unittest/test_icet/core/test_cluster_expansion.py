@@ -4,6 +4,7 @@ from icet import ClusterSpace, ClusterExpansion
 from ase.build import bulk
 from io import StringIO
 import numpy as np
+import sys
 
 
 def strip_surrounding_spaces(input_string):
@@ -94,10 +95,10 @@ class TestClusterExpansion(unittest.TestCase):
         ce_read = ClusterExpansion.read(temp_file.name)
 
         # check cluster space
-        self.assertEqual(self.cs._atoms, ce_read.cluster_space._atoms)
+        self.assertEqual(self.cs._input_atoms, ce_read.cluster_space._input_atoms)
         self.assertEqual(self.cs._cutoffs, ce_read.cluster_space._cutoffs)
-        self.assertEqual(self.cs._chemical_symbols,
-                         ce_read.cluster_space._chemical_symbols)
+        self.assertEqual(
+            self.cs._input_chemical_symbols, ce_read.cluster_space._input_chemical_symbols)
 
         self.assertIsInstance(ce_read.parameters, np.ndarray)
         # check parameters
@@ -216,6 +217,14 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
 """  # noqa
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
+
+    def test_print_overview(self):
+        """Tests print_overview functionality."""
+        with StringIO() as capturedOutput:
+            sys.stdout = capturedOutput  # redirect stdout
+            self.ce.print_overview()
+            sys.stdout = sys.__stdout__  # reset redirect
+            self.assertTrue('Cluster Expansion' in capturedOutput.getvalue())
 
 
 class TestClusterExpansionTernary(unittest.TestCase):

@@ -276,8 +276,11 @@ class DataContainer:
     def data(self) -> pd.DataFrame:
         """ pandas data frame (see :class:`pandas.DataFrame`) """
         if self._data_list:
-            return pd.DataFrame.from_records(self._data_list,
-                                             exclude=['occupations'])
+            df = pd.DataFrame.from_records(self._data_list, index='mctrial',
+                                           exclude=['occupations'])
+            df.dropna(axis='index', how='all', inplace=True)
+            df.reset_index(inplace=True)
+            return df
         else:
             return pd.DataFrame()
 
@@ -375,7 +378,7 @@ class DataContainer:
         if not np.allclose(step_length, diff):
             raise ValueError('data records must be evenly spaced.')
 
-        summary = analyze_data(data)
+        summary = analyze_data(data, max_lag=max_lag)
         summary['correlation_length'] *= step_length  # in mc-trials
         return summary
 

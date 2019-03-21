@@ -67,8 +67,8 @@ class SemiGrandCanonicalEnsemble(BaseEnsemble):
     typically manifested by discontinuous jumps in concentration. Such jumps
     mark the phase boundaries of a multiphase region and can thus be used to
     construct the phase diagram. To recover the free energy, however, such
-    systems require sampling in other ensembles, such as the :ref:`variance-
-    constrained semi-grand canonical ensemble <sgc_ensemble>`.
+    systems require sampling in other ensembles, such as the
+    :ref:`variance-constrained semi-grand canonical ensemble <sgc_ensemble>`.
 
     Parameters
     ----------
