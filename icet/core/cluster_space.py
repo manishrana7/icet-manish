@@ -106,6 +106,8 @@ class ClusterSpace(_ClusterSpace):
         self._input_chemical_symbols = copy.deepcopy(chemical_symbols)
         chemical_symbols = self._get_chemical_symbols()
 
+        self._pruning_history = []
+
         # set up primitive
         decorated_primitive, primitive_chemical_symbols = get_decorated_primitive_structure(
             self._input_atoms, chemical_symbols)
@@ -345,8 +347,7 @@ class ClusterSpace(_ClusterSpace):
             'input configuration must be an ASE Atoms object'
         if not atoms.pbc.all():
             add_vacuum_in_non_pbc(atoms)
-        return _ClusterSpace.get_cluster_vector(self,
-                                                Structure.from_atoms(atoms))
+        return _ClusterSpace.get_cluster_vector(self, Structure.from_atoms(atoms))
 
     def _prune_orbit_list(self, indices: List[int]) -> None:
         """
@@ -360,12 +361,13 @@ class ClusterSpace(_ClusterSpace):
         size_before = len(self._orbit_list)
 
         self._prune_orbit_list_cpp(indices)
-
         for index in sorted(indices, reverse=True):
             self._orbit_list.remove_orbit(index)
         self._precompute_multi_component_vectors()
+
         size_after = len(self._orbit_list)
         assert size_before - len(indices) == size_after
+        self._pruning_history.append(indices)
 
     @property
     def primitive_structure(self) -> Atoms:
@@ -424,8 +426,7 @@ class ClusterSpace(_ClusterSpace):
         structure
             structure the sublattices are based on
         """
-        sl = Sublattices(self.chemical_symbols,
-                         self.primitive_structure, structure)
+        sl = Sublattices(self.chemical_symbols, self.primitive_structure, structure)
         return sl
 
     def write(self, filename: str) -> None:
@@ -437,11 +438,12 @@ class ClusterSpace(_ClusterSpace):
         filename
             name of file to which to write
         """
+
         with tarfile.open(name=filename, mode='w') as tar_file:
 
             # write items
-            items = dict(cutoffs=self._cutoffs,
-                         chemical_symbols=self._input_chemical_symbols)
+            items = dict(cutoffs=self._cutoffs, chemical_symbols=self._input_chemical_symbols,
+                         pruning_history=self._pruning_history)
             temp_file = tempfile.TemporaryFile()
             pickle.dump(items, temp_file)
             temp_file.seek(0)
@@ -481,8 +483,21 @@ class ClusterSpace(_ClusterSpace):
         atoms = ase_read(temp_file.name, format='json')
 
         tar_file.close()
-        return ClusterSpace(
+        cs = ClusterSpace(
             atoms=atoms, cutoffs=items['cutoffs'], chemical_symbols=items['chemical_symbols'])
+        for indices in items['pruning_history']:
+            cs._prune_orbit_list(indices)
+        return cs
+
+    def copy(self):
+        """ Returns copy of ClusterSpace instance. """
+        atoms = self._input_atoms
+        cutoffs = self._cutoffs
+        chemical_symbols = self._input_chemical_symbols
+        cs_copy = ClusterSpace(atoms, cutoffs, chemical_symbols)
+        for indices in self._pruning_history:
+            cs_copy._prune_orbit_list(indices)
+        return cs_copy
 
 
 def get_singlet_info(atoms: Atoms,

@@ -74,7 +74,7 @@ class TestClusterExpansion(unittest.TestCase):
 
     def test_property_clusterspace(self):
         """Tests cluster space property."""
-        self.assertEqual(self.ce.cluster_space, self.cs)
+        self.assertEqual(str(self.ce.cluster_space), str(self.cs))
 
     def test_property_parameters(self):
         """Tests parameters properties."""
@@ -111,14 +111,14 @@ class TestClusterExpansion(unittest.TestCase):
         self.ce.prune(indices=[2, 3])
         self.ce.prune(tol=3)
         pruned_params = self.ce.parameters
-        pruned_cs_len = len(self.ce.cluster_space)
+        pruned_cs_len = len(self.ce._cluster_space)
         self.ce.write(temp_file.name)
 
         # read from file
         temp_file.seek(0)
         ce_read = ClusterExpansion.read(temp_file.name)
         params_read = ce_read.parameters
-        cs_len_read = len(ce_read.cluster_space)
+        cs_len_read = len(ce_read._cluster_space)
 
         # check cluster space
         self.assertEqual(cs_len_read, pruned_cs_len)
