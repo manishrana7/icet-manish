@@ -231,7 +231,7 @@ class TestGeometry(unittest.TestCase):
         retval = chemical_symbols_to_numbers(symbols)
         self.assertEqual(expected_numbers, retval)
 
-    def test_chemical_symbols_to_numbers(self):
+    def test_atomic_number_to_chemical_symbol(self):
         """Tests chemical_symbols_to_numbers method."""
 
         numbers = [13, 1, 2]
