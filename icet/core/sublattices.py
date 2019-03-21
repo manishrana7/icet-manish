@@ -3,7 +3,7 @@ from copy import deepcopy
 from icet.core.structure import Structure
 from typing import List
 from ase import Atoms
-
+import copy
 
 class Sublattice:
     """
@@ -26,7 +26,7 @@ class Sublattice:
 
     @property
     def chemical_symbols(self):
-        return self._chemical_symbols
+        return copy.deepcopy(self._chemical_symbols)
 
     @property
     def indices(self):
