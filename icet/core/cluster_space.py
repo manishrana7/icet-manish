@@ -3,20 +3,22 @@ This module provides the ClusterSpace class.
 """
 
 import copy
+import itertools
 import pickle
-import tempfile
 import tarfile
-import numpy as np
-
+import tempfile
 from collections import OrderedDict
 from typing import List, Union
 
+import numpy as np
+
 from _icet import ClusterSpace as _ClusterSpace
 from ase import Atoms
-from ase.io import write as ase_write
 from ase.io import read as ase_read
+from ase.io import write as ase_write
 from icet.core.orbit_list import OrbitList
 from icet.core.structure import Structure
+from icet.core.sublattices import Sublattices
 from icet.tools.geometry import (add_vacuum_in_non_pbc,
                                  get_decorated_primitive_structure)
 
@@ -106,7 +108,7 @@ class ClusterSpace(_ClusterSpace):
 
         # set up primitive
         decorated_primitive, primitive_chemical_symbols = get_decorated_primitive_structure(
-                self._input_atoms, chemical_symbols)
+            self._input_atoms, chemical_symbols)
         self._primitive_chemical_symbols = primitive_chemical_symbols
         assert len(decorated_primitive) == len(primitive_chemical_symbols)
 
@@ -115,7 +117,8 @@ class ClusterSpace(_ClusterSpace):
         self._orbit_list.remove_inactive_orbits(primitive_chemical_symbols)
 
         # call (base) C++ constructor
-        _ClusterSpace.__init__(self, primitive_chemical_symbols, self._orbit_list)
+        _ClusterSpace.__init__(
+            self, primitive_chemical_symbols, self._orbit_list)
 
     def _get_chemical_symbols(self):
         """ Returns chemical symbols using input atoms and input
@@ -123,7 +126,8 @@ class ClusterSpace(_ClusterSpace):
 
         # setup chemical symbols as List[List[str]]
         if all(isinstance(i, str) for i in self._input_chemical_symbols):
-            chemical_symbols = [self._input_chemical_symbols] * len(self._input_atoms)
+            chemical_symbols = [
+                self._input_chemical_symbols] * len(self._input_atoms)
         elif not all(isinstance(i, list) for i in self._input_chemical_symbols):
             raise TypeError("chemical_symbols must be List[str] or List[List[str]], not {}".format(
                 type(self._input_chemical_symbols)))
@@ -135,7 +139,8 @@ class ClusterSpace(_ClusterSpace):
         for symbols in chemical_symbols:
             if len(symbols) != len(set(symbols)):
                 duplicates = [s for s in symbols if symbols.count(s) > 1]
-                raise ValueError('Found duplicate symbols {}  on sublattice'.format(duplicates))
+                raise ValueError(
+                    'Found duplicate symbols {}  on sublattice'.format(duplicates))
 
         if len([tuple(sorted(s)) for s in chemical_symbols if len(s) > 1]) == 0:
             raise ValueError('No active sites found')
@@ -394,6 +399,35 @@ class ClusterSpace(_ClusterSpace):
         """Orbit list that defines the cluster in the cluster space"""
         return self._orbit_list
 
+    def get_possible_orbit_decorations(self, orbit_index: int) \
+            -> List[List[str]]:
+        """Returns possible decorations on the orbit
+
+        Parameters
+        ----------
+        orbit_index
+        """
+        orbit = self.orbit_list.orbits[orbit_index]
+
+        indices = [
+            lattice_site.index for lattice_site in orbit.representative_sites]
+
+        allowed_species = [self.chemical_symbols[index] for index in indices]
+
+        return list(itertools.product(*allowed_species))
+
+    def get_sublattices(self, structure: Atoms) -> Sublattices:
+        """ Returns the sublattices of the input structure
+
+        Parameters
+        ----------
+        structure
+            structure the sublattices are based on
+        """
+        sl = Sublattices(self.chemical_symbols,
+                         self.primitive_structure, structure)
+        return sl
+
     def write(self, filename: str) -> None:
         """
         Saves cluster space to a file.
@@ -406,7 +440,8 @@ class ClusterSpace(_ClusterSpace):
         with tarfile.open(name=filename, mode='w') as tar_file:
 
             # write items
-            items = dict(cutoffs=self._cutoffs, chemical_symbols=self._input_chemical_symbols)
+            items = dict(cutoffs=self._cutoffs,
+                         chemical_symbols=self._input_chemical_symbols)
             temp_file = tempfile.TemporaryFile()
             pickle.dump(items, temp_file)
             temp_file.seek(0)
