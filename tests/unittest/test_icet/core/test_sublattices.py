@@ -67,6 +67,18 @@ class TestSublattices(unittest.TestCase):
         self.sublattices = Sublattices(allowed_species=self.allowed_species,
                                        primitive_structure=self.prim, structure=self.supercell)
 
+    def test_sublattice_ordering(self):
+        """Tests ordering of sublattices."""
+        allowed_species = [('H'), ['He'], ('Pd', 'Au'), ('H', 'V')]
+        prim = self.prim.repeat([2, 1, 1])
+        supercell = prim.repeat(3)
+        sublattices = Sublattices(allowed_species=allowed_species,
+                                  primitive_structure=prim, structure=supercell)
+
+        ret = sublattices.allowed_species
+        target = [('Au', 'Pd'), ('H', 'V'), ('H',), ('He',)]
+        self.assertEqual(ret, target)
+
     def test_allowed_species(self):
         """Tests the allowed species property."""
         # Note that the Au, Pd order has changed due to lexicographically sorted symbols
