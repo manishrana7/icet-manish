@@ -706,18 +706,7 @@ PYBIND11_MODULE(_icet, m)
 
         returns all_mc_vectors : list of tuples of int
         )pbdoc")
-        .def_property("allowed_permutations", [](const Orbit &orbit) {
-             auto permutationSet = orbit.getAllowedSitesPermutations();
-             std::vector<std::vector<int>> vectorPermutations;
-            for(auto vector : permutationSet)
-            {
-                vectorPermutations.push_back(vector);
-            }
-             return vectorPermutations; }, [](Orbit &orbit, const std::vector<std::vector<int>> &permutations) {
-
-                std::unordered_set<std::vector<int>, VectorHash> setPermutations;
-                setPermutations.insert(permutations.begin(),permutations.end());
-                 orbit.setAllowedSitesPermutations(setPermutations); },
+        .def_property_readonly("allowed_permutations",&Orbit::getAllowedSitesPermutations,
                       R"pbdoc(Get the list of equivalent permutations
         for this orbit.
 
