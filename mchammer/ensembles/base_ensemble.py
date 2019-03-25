@@ -135,16 +135,16 @@ class BaseEnsemble(ABC):
                               metadata=metadata)
 
         # interval for writing data and further preparation of data container
-        default_interval = max(1, 10 * round(len(atoms) / 10))
+        self._default_interval = len(atoms)
 
         if ensemble_data_write_interval is None:
-            self._ensemble_data_write_interval = default_interval
+            self._ensemble_data_write_interval = self._default_interval
         else:
             self._ensemble_data_write_interval = ensemble_data_write_interval
 
         # Handle trajectory writing
         if trajectory_write_interval is None:
-            self._trajectory_write_interval = default_interval
+            self._trajectory_write_interval = self._default_interval
         else:
             self._trajectory_write_interval = trajectory_write_interval
 
@@ -366,8 +366,10 @@ class BaseEnsemble(ABC):
             name used in data container
         """
         if not isinstance(observer, BaseObserver):
-            raise TypeError('observer has the wrong type: {}'
-                            .format(type(observer)))
+            raise TypeError('observer has the wrong type: {}'.format(type(observer)))
+
+        if observer.interval is None:
+            observer.interval = self._default_interval
 
         if tag is not None:
             observer.tag = tag
