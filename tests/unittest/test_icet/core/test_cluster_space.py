@@ -503,15 +503,14 @@ class TestClusterSpaceTernary(unittest.TestCase):
         self.assertEqual(mc_vector_retval, mc_vector_target)
 
         permutations_target = [[[0, 1, 2, 3]],
-                               [[0, 1, 2, 3], [0, 1, 3, 2], [
-                                   0, 3, 1, 2], [3, 0, 1, 2]],
-                               [[0, 1, 2, 3], [0, 2, 1, 3], [0, 2, 3, 1], [
-                                   2, 0, 1, 3], [2, 0, 3, 1], [2, 3, 0, 1]],
-                               [[0, 1, 2, 3], [1, 0, 2, 3], [
-                                   1, 2, 0, 3], [1, 2, 3, 0]],
+                               [[0, 1, 2, 3], [0, 1, 3, 2], [0, 3, 1, 2], [3, 0, 1, 2]],
+                               [[0, 1, 2, 3], [0, 2, 1, 3], [0, 2, 3, 1], [2, 0, 1, 3],
+                               [2, 0, 3, 1], [2, 3, 0, 1]],
+                               [[0, 1, 2, 3], [1, 0, 2, 3], [1, 2, 0, 3], [1, 2, 3, 0]],
                                [[0, 1, 2, 3]]]
         permutation_retval = self.cs.get_multi_component_vector_permutations(
             mc_vector_target, orbit_index)
+        
         self.assertEqual(permutations_target, permutation_retval)
 
 
