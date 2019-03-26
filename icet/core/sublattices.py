@@ -55,8 +55,12 @@ class Sublattices:
                  structure: Atoms):
 
         # sorted unique sites, this basically decides A, B, C... sublattices
-        self._allowed_species = sorted(
-            set(tuple(sorted(symbols)) for symbols in allowed_species))
+
+        active_lattices = sorted([tuple(sorted(symbols))
+                                  for symbols in allowed_species if len(symbols) > 1])
+        inactive_lattices = sorted(
+            [tuple(sorted(symbols)) for symbols in allowed_species if len(symbols) == 1])
+        self._allowed_species = active_lattices + inactive_lattices
 
         cpp_prim_structure = Structure.from_atoms(primitive_structure)
         self._sublattices = []
