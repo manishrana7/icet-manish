@@ -8,6 +8,7 @@ import pickle
 import tarfile
 import tempfile
 from collections import OrderedDict
+from string import ascii_uppercase
 from typing import List, Union
 
 import numpy as np
@@ -153,29 +154,16 @@ class ClusterSpace(_ClusterSpace):
         """Returns a str version of the chemical symbols that is
         easier on the eyes.
         """
-        nice_str = ''
-        if len(self.chemical_symbols) > 4:
-            last_symbol = self.chemical_symbols[0]
-            count = 1
-            for i in range(1, len(self.chemical_symbols)):
-                if self.chemical_symbols[i] == last_symbol:
-                    count += 1
-                    if i == len(self.chemical_symbols)-1:
-                        if count == 1:
-                            nice_str += '{} '.format(last_symbol)
-                        else:
-                            nice_str += '{}*{} '.format(count, last_symbol)
-                else:
-                    if count == 1:
-                        nice_str += '{} '.format(last_symbol)
-                    else:
-                        nice_str += '{}*{} '.format(count, last_symbol)
-                    count = 1
-                    last_symbol = self.chemical_symbols[i]
-        else:
-            for s in self.chemical_symbols:
-                nice_str += '{} '.format(s)
-        return nice_str
+        sublattices = self.get_sublattices(self.primitive_structure)
+        active_sublattices = [
+            sl.chemical_symbols for sl in sublattices.active_sublattices]
+        nice_str = []
+        for k, symbols in enumerate(active_sublattices):
+            sublattice_symbol = ascii_uppercase[k]
+
+            nice_str.append('{} (sublattice {})'.format(
+                list(symbols), sublattice_symbol))
+        return ', '.join(nice_str)
 
     def _get_string_representation(self,
                                    print_threshold: int = None,
@@ -204,7 +192,8 @@ class ClusterSpace(_ClusterSpace):
                        'multiplicity': '{:4}',
                        'index': '{:4}',
                        'orbit_index': '{:4}',
-                       'multi_component_vector': '{:}'}
+                       'multi_component_vector': '{:}',
+                       'sublattices': '{:}'}
             s = []
             for name, value in orbit.items():
                 str_repr = formats[name].format(value)
@@ -285,8 +274,9 @@ class ClusterSpace(_ClusterSpace):
                                ('radius', 0),
                                ('multiplicity', 1),
                                ('orbit_index', -1),
-                               ('multi_component_vector', '.')])
-
+                               ('multi_component_vector', '.'),
+                               ('sublattices', '.')])
+        sublattices = self.get_sublattices(self.primitive_structure)
         data.append(zerolet)
         index = 1
         while index < len(self):
@@ -294,6 +284,10 @@ class ClusterSpace(_ClusterSpace):
             orbit_index = cluster_space_info[0]
             mc_vector = cluster_space_info[1]
             orbit = self.get_orbit(orbit_index)
+            rep_sites = orbit.get_representative_sites()
+            orbit_sublattices = '-'.join(
+                [ascii_uppercase[sublattices.get_sublattice_index(ls.index)]
+                 for ls in rep_sites])
             local_Mi = self.get_number_of_allowed_species_by_site(
                 self._get_primitive_structure(), orbit.representative_sites)
             mc_vectors = orbit.get_mc_vectors(local_Mi)
@@ -302,6 +296,7 @@ class ClusterSpace(_ClusterSpace):
             mc_index = mc_vectors.index(mc_vector)
             mc_permutations_multiplicity = len(mc_permutations[mc_index])
             cluster = self.get_orbit(orbit_index).get_representative_cluster()
+
             multiplicity = len(self.get_orbit(
                 orbit_index).get_equivalent_sites())
             record = OrderedDict([('index', index),
@@ -311,6 +306,7 @@ class ClusterSpace(_ClusterSpace):
                                    mc_permutations_multiplicity),
                                   ('orbit_index', orbit_index)])
             record['multi_component_vector'] = mc_vector
+            record['sublattices'] = orbit_sublattices
             data.append(record)
             index += 1
         return data
@@ -426,7 +422,8 @@ class ClusterSpace(_ClusterSpace):
         structure
             structure the sublattices are based on
         """
-        sl = Sublattices(self.chemical_symbols, self.primitive_structure, structure)
+        sl = Sublattices(self.chemical_symbols,
+                         self.primitive_structure, structure)
         return sl
 
     def write(self, filename: str) -> None:
