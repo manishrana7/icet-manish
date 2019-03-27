@@ -67,6 +67,18 @@ class TestSublattices(unittest.TestCase):
         self.sublattices = Sublattices(allowed_species=self.allowed_species,
                                        primitive_structure=self.prim, structure=self.supercell)
 
+    def test_sublattice_ordering(self):
+        """Tests ordering of sublattices."""
+        allowed_species = [('H'), ['He'], ('Pd', 'Au'), ('H', 'V')]
+        prim = self.prim.repeat([2, 1, 1])
+        supercell = prim.repeat(3)
+        sublattices = Sublattices(allowed_species=allowed_species,
+                                  primitive_structure=prim, structure=supercell)
+
+        ret = sublattices.allowed_species
+        target = [('Au', 'Pd'), ('H', 'V'), ('H',), ('He',)]
+        self.assertEqual(ret, target)
+
     def test_allowed_species(self):
         """Tests the allowed species property."""
         # Note that the Au, Pd order has changed due to lexicographically sorted symbols
@@ -96,6 +108,33 @@ class TestSublattices(unittest.TestCase):
                 self.assertEqual(sublattice_index, 0)
             else:
                 self.assertEqual(sublattice_index, 1)
+
+    def test_active_sublattices(self):
+        """Tests the active sublattices property."""
+        active_sublattices = self.sublattices.active_sublattices
+
+        symbols_ret = [sl.chemical_symbols for sl in active_sublattices]
+        target = [('Au', 'Pd'), ('H', 'V')]
+        self.assertEqual(symbols_ret, target)
+
+    def test_inactive_sublattices(self):
+        """Tests the active sublattices property."""
+        inactive_sublattices = self.sublattices.inactive_sublattices
+
+        symbols_ret = [sl.chemical_symbols for sl in inactive_sublattices]
+        target = []
+        self.assertEqual(symbols_ret, target)
+
+        # Now create something that actually have inactive sublattices
+
+        sublattices = Sublattices(allowed_species=[['Au', 'Pd'], ['H']],
+                                  primitive_structure=self.prim, structure=self.supercell)
+
+        inactive_sublattices = sublattices.inactive_sublattices
+
+        symbols_ret = [sl.chemical_symbols for sl in inactive_sublattices]
+        target = [('H',)]
+        self.assertEqual(symbols_ret, target)
 
 
 if __name__ == '__main__':
