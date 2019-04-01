@@ -2,6 +2,7 @@ import unittest
 
 from ase.build import bulk
 from icet.core.sublattices import Sublattices, Sublattice
+from icet import ClusterSpace
 
 
 class TestSublattice(unittest.TestCase):
@@ -13,6 +14,7 @@ class TestSublattice(unittest.TestCase):
 
         self.chemical_symbols = ['Al', 'Ge', 'Si']
         self.indices = [1, 2, 3, 4, 5, 6, 7]
+        self.symbol = 'A'
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
@@ -21,7 +23,7 @@ class TestSublattice(unittest.TestCase):
     def setUp(self):
         """Set up sublattice before each test."""
         self.sublattice = Sublattice(
-            chemical_symbols=self.chemical_symbols, indices=self.indices)
+            chemical_symbols=self.chemical_symbols, indices=self.indices, symbol=self.symbol)
 
     def test_indices(self):
         """Tests indices property."""
@@ -43,6 +45,10 @@ class TestSublattice(unittest.TestCase):
         symbols[0] = 'H'
         symbols.append('Pt')
         self.assertEqual(self.sublattice.chemical_symbols, ['Al', 'Ge', 'Si'])
+
+    def test_symbol(self):
+        """Tests symbol property."""
+        self.assertEqual('A', self.sublattice.symbol)
 
 
 class TestSublattices(unittest.TestCase):
@@ -135,6 +141,20 @@ class TestSublattices(unittest.TestCase):
         symbols_ret = [sl.chemical_symbols for sl in inactive_sublattices]
         target = [('H',)]
         self.assertEqual(symbols_ret, target)
+
+    def test_sublattice_uniqueness(self):
+        """Tests that the number of sublattices are correct
+        in the case of the allowed species have duplicates in them.
+        """
+        atoms = bulk("Al").repeat(2)
+
+        chemical_symbols = [['H']] + [['Al', 'Ge']]*(len(atoms)-1)
+        cs = ClusterSpace(
+            atoms=atoms, chemical_symbols=chemical_symbols, cutoffs=[5])
+        sublattices = cs.get_sublattices(atoms)
+
+        self.assertEqual(len(sublattices), 2)
+        self.assertEqual(sublattices.allowed_species, [('Al', 'Ge'), ('H',)])
 
 
 if __name__ == '__main__':
