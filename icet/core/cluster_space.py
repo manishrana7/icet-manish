@@ -154,15 +154,12 @@ class ClusterSpace(_ClusterSpace):
         easier on the eyes.
         """
         sublattices = self.get_sublattices(self.primitive_structure)
-        active_sublattices = [
-            symbols for symbols in sublattices.allowed_species if len(symbols) > 1]
         nice_str = []
-        for k, symbols in enumerate(active_sublattices):
-            sublattice_symbol = str(
-                chr(sublattices.get_sublattice_index(k)+97).upper())
+        for sublattice in sublattices.active_sublattices:
+            sublattice_symbol = sublattice.symbol
 
             nice_str.append('{} (sublattice {})'.format(
-                list(symbols), sublattice_symbol))
+                list(sublattice.chemical_symbols), sublattice_symbol))
         return ', '.join(nice_str)
 
     def _get_string_representation(self,
@@ -286,7 +283,7 @@ class ClusterSpace(_ClusterSpace):
             orbit = self.get_orbit(orbit_index)
             rep_sites = orbit.get_representative_sites()
             orbit_sublattices = '-'.join(
-                [str(chr(sublattices.get_sublattice_index(ls.index)+97)).upper()
+                [sublattices[sublattices.get_sublattice_index(ls.index)].symbol
                  for ls in rep_sites])
             local_Mi = self.get_number_of_allowed_species_by_site(
                 self._get_primitive_structure(), orbit.representative_sites)
