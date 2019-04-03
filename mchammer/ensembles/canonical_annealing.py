@@ -98,6 +98,12 @@ class CanonicalAnnealing(BaseEnsemble):
 
         self._ensemble_parameters = dict(n_steps=n_steps)
 
+        # add species count to ensemble parameters
+        for symbol in np.unique(calculator.occupation_constraints).tolist():
+            key = 'n_atoms_{}'.format(symbol)
+            count = atoms.get_chemical_symbols().count(symbol)
+            self._ensemble_parameters[key] = count
+
         super().__init__(
             atoms=atoms, calculator=calculator, user_tag=user_tag,
             data_container=data_container,
