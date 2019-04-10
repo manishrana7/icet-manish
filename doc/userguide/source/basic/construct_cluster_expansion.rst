@@ -44,10 +44,10 @@ Preparing a cluster space
 In order to be able to build a cluster expansion, it is first necessary to
 create a :class:`ClusterSpace <icet.ClusterSpace>` object based on a prototype
 structure. When initiating the former, one must also provide cutoffs and a
-list of elements that should be considered. Cutoffs is a list of distances in
-Ångström, one element per order (pairs, triplets, quadruplets etc.). Each
-element in the list specifies the longest distance allowed between two atoms
-in the included clusters.
+list of chemical symbols that should be considered. Cutoffs is a list of
+distances in Ångström, one element per order (pairs, triplets, quadruplets
+etc.). Each element in the list specifies the longest distance allowed between
+two atoms in the included clusters.
 
 In the below example, the cluster space will contain all pairs of atoms that
 are 13.5 Å or closer to each other, all triplets among which the

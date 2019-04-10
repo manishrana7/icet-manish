@@ -86,8 +86,8 @@ illustrates the :ref:`basic construction of a cluster expansion
 can be decomposed. (An orbit is a set of symmetry equivalent clusters, see
 Figure below). Such a decomposition is referred to as a *cluster vector*.
 
-In simpler terms, a cluster vector is a numerical description of an alloy
-structure, and a cluster space enables such descriptions.
+In simpler terms, a cluster vector is a numerical representation of an alloy
+structure, and a cluster space enables such representations.
 
 .. figure:: _static/2d-clusters.svg
 
