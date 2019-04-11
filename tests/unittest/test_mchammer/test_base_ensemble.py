@@ -112,6 +112,16 @@ class TestEnsemble(unittest.TestCase):
         self.assertTrue('Path to data container file does not exist:'
                         ' path/to/nowhere' in str(context.exception))
 
+        # wrong occupations on atoms
+        wrong_atoms = self.atoms.copy()
+        wrong_atoms.numbers = [1]*len(self.atoms)
+        with self.assertRaises(ValueError) as context:
+            ConcreteEnsemble(atoms=wrong_atoms,
+                             calculator=self.calculator)
+
+        self.assertTrue('Occupations of structure not compatible with '
+                        'the sublattice' in str(context.exception))
+
     def test_init_fails_for_faulty_chemical_symbols(self):
         """Tests that initialization fails if species exists  on
         mutliple sublattices"""
@@ -386,6 +396,10 @@ class TestEnsemble(unittest.TestCase):
 
         input = [20, 15, 10]
         target = 5
+        self.assertEqual(self.ensemble._get_gcd(input), target)
+
+        input = [1]
+        target = 1
         self.assertEqual(self.ensemble._get_gcd(input), target)
 
     def test_get_property_change(self):

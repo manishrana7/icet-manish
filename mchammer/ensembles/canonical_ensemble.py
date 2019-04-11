@@ -99,9 +99,9 @@ class CanonicalEnsemble(BaseEnsemble):
 
         self._ensemble_parameters = dict(temperature=temperature)
         self._boltzmann_constant = boltzmann_constant
-
-        # add species count to ensemble parameters
-        for symbol in np.unique(calculator.occupation_constraints).tolist():
+        symbols = set(
+            [symbol for sub in calculator.sublattices for symbol in sub.chemical_symbols])
+        for symbol in symbols:
             key = 'n_atoms_{}'.format(symbol)
             count = atoms.get_chemical_symbols().count(symbol)
             self._ensemble_parameters[key] = count
@@ -113,6 +113,8 @@ class CanonicalEnsemble(BaseEnsemble):
             data_container_write_period=data_container_write_period,
             ensemble_data_write_interval=ensemble_data_write_interval,
             trajectory_write_interval=trajectory_write_interval)
+
+        # add species count to ensemble parameters
 
     @property
     def temperature(self) -> float:
@@ -129,8 +131,7 @@ class CanonicalEnsemble(BaseEnsemble):
         self._total_trials += 1
 
         sublattice_index = self.get_random_sublattice_index()
-        sites, species = \
-            self.configuration.get_swapped_state(sublattice_index)
+        sites, species = self.configuration.get_swapped_state(sublattice_index)
 
         potential_diff = self._get_property_change(sites, species)
 
@@ -151,8 +152,7 @@ class CanonicalEnsemble(BaseEnsemble):
         if potential_diff < 0:
             return True
         else:
-            return np.exp(-potential_diff / (
-                self.boltzmann_constant * self.temperature)) > \
+            return np.exp(-potential_diff / (self.boltzmann_constant * self.temperature)) > \
                 self._next_random_number()
 
     def get_random_sublattice_index(self) -> int:
@@ -161,17 +161,18 @@ class CanonicalEnsemble(BaseEnsemble):
 
         Todo
         ----
-        * fix this method
         * add unit test
         """
         probability_distribution = []
-        for sub in self._sublattices:
-            if len(set(self.configuration.occupations[sub])) <= 1:
+        for sl in self.sublattices:
+            if len(set(self.configuration.occupations[sl.indices])) <= 1 or \
+                    len(sl.chemical_symbols) == 1:
                 p = 0
             else:
-                p = len(sub)
+                p = len(sl.indices)
             probability_distribution.append(p)
         norm = sum(probability_distribution)
         probability_distribution = [p/norm for p in probability_distribution]
-        pick = np.random.choice(range(0, len(self._sublattices)), p=probability_distribution)
+        pick = np.random.choice(
+            range(0, len(self.sublattices)), p=probability_distribution)
         return pick

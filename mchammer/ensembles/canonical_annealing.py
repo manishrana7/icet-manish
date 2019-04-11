@@ -99,10 +99,11 @@ class CanonicalAnnealing(BaseEnsemble):
         self._ensemble_parameters = dict(n_steps=n_steps)
 
         # add species count to ensemble parameters
-        for symbol in np.unique(calculator.occupation_constraints).tolist():
-            key = 'n_atoms_{}'.format(symbol)
-            count = atoms.get_chemical_symbols().count(symbol)
-            self._ensemble_parameters[key] = count
+        for sl in calculator.sublattices:
+            for symbol in sl.chemical_symbols:
+                key = 'n_atoms_{}'.format(symbol)
+                count = atoms.get_chemical_symbols().count(symbol)
+                self._ensemble_parameters[key] = count
 
         super().__init__(
             atoms=atoms, calculator=calculator, user_tag=user_tag,
@@ -121,12 +122,14 @@ class CanonicalAnnealing(BaseEnsemble):
         if isinstance(cooling_function, str):
             available = sorted(available_cooling_functions.keys())
             if cooling_function not in available:
-                raise ValueError('Select from the available cooling_functions {}'.format(available))
+                raise ValueError(
+                    'Select from the available cooling_functions {}'.format(available))
             self._cooling_function = available_cooling_functions[cooling_function]
         elif callable(cooling_function):
             self._cooling_function = cooling_function
         else:
-            raise TypeError('cooling_function must be either str or a function')
+            raise TypeError(
+                'cooling_function must be either str or a function')
 
     @property
     def temperature(self) -> float:
@@ -209,15 +212,16 @@ class CanonicalAnnealing(BaseEnsemble):
         * add unit test
         """
         probability_distribution = []
-        for sub in self._sublattices:
-            if len(set(self.configuration.occupations[sub])) <= 1:
+        for sl in self.sublattices:
+            if len(set(self.configuration.occupations[sl.indices])) <= 1 or \
+                 len(sl.chemical_symbols) == 1:
                 p = 0
             else:
-                p = len(sub)
+                p = len(sl.indices)
             probability_distribution.append(p)
         norm = sum(probability_distribution)
         probability_distribution = [p/norm for p in probability_distribution]
-        pick = np.random.choice(range(0, len(self._sublattices)), p=probability_distribution)
+        pick = np.random.choice(range(0, len(self.sublattices)), p=probability_distribution)
         return pick
 
 
@@ -229,5 +233,4 @@ def _cooling_exponential(step, T_start, T_stop, n_steps):
     return T_start - (T_start - T_stop) * np.log(step+1) / np.log(n_steps)
 
 
-available_cooling_functions = dict(linear=_cooling_linear,
-                                   exponential=_cooling_exponential)
+available_cooling_functions = dict(linear=_cooling_linear, exponential=_cooling_exponential)
