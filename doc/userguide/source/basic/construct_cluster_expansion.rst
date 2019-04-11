@@ -43,17 +43,29 @@ Preparing a cluster space
 
 In order to be able to build a cluster expansion, it is first necessary to
 create a :class:`ClusterSpace <icet.ClusterSpace>` object based on a prototype
-structure. When initiating the former, one must also provide cutoffs and a
-list of chemical symbols that should be considered. Cutoffs is a list of
-distances in Ångström, one element per order (pairs, triplets, quadruplets
-etc.). Each element in the list specifies the longest distance allowed between
-two atoms in the included clusters.
+structure. When initiating the former, one must also provide cutoffs and the
+chemical elements that are allowed to occupy different lattice sites.
 
-In the below example, the cluster space will contain all pairs of atoms that
-are 13.5 Å or closer to each other, all triplets among which the
-longest distance is 6.0 Å or less, and all quadruplets among which the longest
-distance is 5.5 Å or less. If one wants higher orders (quintuplets etc.), one
-would simply provide a longer list.
+The *cutoffs* are specified in the form of a list with the different elements
+corresponding to clusters of increasing order (pairs, triplets, quadruplets,
+etc). The values then specify the longest distance allowed between any two
+atoms in clusters of the respective order. In the example below, the cluster
+space will contain all pairs of atoms that are 13.5 Å or closer to each other,
+all triplets among which the longest distance is 6.0 Å or less, and all
+quadruplets among which the longest distance is 5.5 Å or less. If higher-order
+clusters (quintuplets etc.) are to be included, one would simply extend the
+list.
+
+The *allowed chemical elements* are specified as a list. Two formats are
+possible. If all sites in the structure are to be occupied identically, it
+suffices to provide a simple list of chemical symbols, e.g., ``['Ag', 'Pd']``
+in the case below. If there are multiple sites that are to be occupied in
+different fashion, one has to provide instead a list of lists, where the outer
+list must contain as many elements as there are sites in the primitive
+structure and each "inner" list specifies the occupation for the respective
+site. Examples for this approach can be found in the :class:`ClusterSpace`
+documentation.
+
 
 .. literalinclude:: ../../../../tutorial/basic/1_construct_cluster_expansion.py
    :start-after: # step 2
@@ -104,7 +116,7 @@ output should look as follows::
   ==============================================================================
 
 .. note::
-  
+
   The ``radius`` is *not* the same as the longest distance between atoms in
   the cluster (which was the measure used for initialization via ``cutoffs``),
   but is the average distance from all atoms to the center of mass (assuming
@@ -170,16 +182,16 @@ Training CE parameters
 Since the :class:`StructureContainer <icet.StructureContainer>` object created
 in the previous section, contains all the information required for
 constructing a cluster expansion, the next step is to train the parameters,
-i.e. to fit the *effective cluster interactions* (ECIs) using the target data.
-More precisely, the goal is to achieve the best possible agreement with set of
-training structures, which represent a subset of all the structures in the
-:class:`StructureContainer <icet.fitting.StructureContainer>`. In practice,
-this is a two step process that involves the initiation of an optimizer object
-(here a :class:`CrossValidationEstimator
-<icet.fitting.CrossValidationEstimator>`) with a list of target properties
-produced by the :func:`get_fit_data() <icet.StructureContainer.get_fit_data>`
-method of the :class:`StructureContainer <icet.StructureContainer>` as input
-argument.
+i.e. to fit the *effective cluster interactions* (:term:`ECIs`) using the
+target data. More precisely, the goal is to achieve the best possible
+agreement with a set of training structures, which represent a subset of all
+the structures in the :class:`StructureContainer
+<icet.fitting.StructureContainer>`. In practice, this is a two step process
+that involves the initiation of an optimizer object (here a
+:class:`CrossValidationEstimator <icet.fitting.CrossValidationEstimator>`)
+with a list of target properties produced by the :func:`get_fit_data()
+<icet.StructureContainer.get_fit_data>` method of the
+:class:`StructureContainer <icet.StructureContainer>` as input argument.
 
 .. literalinclude:: ../../../../tutorial/basic/1_construct_cluster_expansion.py
    :start-after: # step 4
@@ -193,9 +205,7 @@ validation (:term:`CV`) score. This is achieved by calling the :func:`validate
 <icet.fitting.CrossValidationEstimator>` then randomly splits the available
 data into a training and a validation set. The effective cluster interactions
 (:term:`ECIs`) are then found using the :term:`LASSO` method (``fit_method``).
-This procedure is repeated 10 times (``number_of_splits``). (*You will likely
-see a few "Convergence errors" when executing this command. For the present
-purpose these can be ignored.*)
+This procedure is repeated 10 times (``number_of_splits``) [#]_.
 
 .. note::
 
@@ -204,6 +214,13 @@ purpose these can be ignored.*)
   under-determined. The performance and application area of different
   optimization algorithms are analyzed and compared in the advanced tutorial
   section.
+
+.. [#] You will likely see a few "Convergence errors" when executing this command.
+       For the present purpose these can be ignored. They arise since the internal
+       scikit-learn optimization loops have exceeded the number of iterations
+       without reaching the default target accuracy. It is possible to extend the
+       iterations but this increases the run time without a marked improvement in
+       the quality of the cluster expansion.
 
 The "final" CE is ultimately constructed using *all* available data by calling
 the :func:`train <icet.fitting.CrossValidationEstimator.train>` method. Once
@@ -264,7 +281,7 @@ can be displayed by using the :func:`print` function with the
    total number of orbits: 173
    number of orbits by order: 0= 1  1= 1  2= 8  3= 50  4= 113
   ------------------------------------------------------------------------------------------
-  index | order |  radius  | multiplicity | orbit_index | multi_component_vector |    ECI   
+  index | order |  radius  | multiplicity | orbit_index | multi_component_vector |    ECI
   ------------------------------------------------------------------------------------------
      0  |   0   |   0.0000 |        1     |      -1     |           .            |   -0.0438
      1  |   1   |   0.0000 |        1     |       0     |          [0]           |   -0.0348

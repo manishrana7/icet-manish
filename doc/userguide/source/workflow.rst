@@ -77,23 +77,23 @@ Cluster spaces
 --------------
 
 A cluster space (represented by the :class:`ClusterSpace <icet.ClusterSpace>`
-class) is defined by providing a prototype structure (usually a primtive
+class) is defined by providing a prototype structure (usually a primitive
 cell), the species allowed on each site, and a set of cutoffs for each
 (cluster) order to be included, as demonstrated in the tutorial section that
 illustrates the :ref:`basic construction of a cluster expansion
 <tutorial_construct_cluster_expansion>`. It contains the set of clusters
-(pairs, triplets, quadruplets etc) and orbits into which a structure
+(pairs, triplets, quadruplets etc.) and orbits into which a structure
 can be decomposed. (An orbit is a set of symmetry equivalent clusters, see
-Figure below). Such a decomposition is referred to as a *cluster vector*.
+figure below). Such a decomposition is referred to as a *cluster vector*.
 
 In simpler terms, a cluster vector is a numerical representation of an alloy
-structure, and a cluster space enables such representations.
+structure, and a cluster space enables such representations to be obtained.
 
 .. figure:: _static/2d-clusters.svg
 
-    Three different orbits: one pair, one triplet, and one quadruplet. Each
-    orbit consists of several clusters that are equivalent under the symmetry
-    operation of the underlying lattice.
+    Clusters representing different orbits: one pair, one triplet, and one
+    quadruplet. An orbit comprises all clusters that are equivalent under the
+    symmetry operation of the underlying lattice.
 
 .. _workflow_structure_container:
 
