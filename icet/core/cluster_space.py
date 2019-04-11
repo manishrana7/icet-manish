@@ -142,15 +142,18 @@ class ClusterSpace(_ClusterSpace):
             raise TypeError("chemical_symbols must be List[str] or List[List[str]], not {}".format(
                 type(self._input_chemical_symbols)))
         elif len(self._input_chemical_symbols) != len(self._input_atoms):
-            raise ValueError('chemical_symbols must have same length as atoms')
+            msg = 'chemical_symbols must have same length as atoms. '
+            msg += 'len(chemical_symbols = {}, len(atoms)= {}'.format(
+                len(self._input_chemical_symbols), len(self._input_atoms))
+            raise ValueError(msg)
         else:
             chemical_symbols = copy.deepcopy(self._input_chemical_symbols)
 
-        for symbols in chemical_symbols:
+        for i, symbols in enumerate(chemical_symbols):
             if len(symbols) != len(set(symbols)):
-                duplicates = [s for s in symbols if symbols.count(s) > 1]
                 raise ValueError(
-                    'Found duplicate symbols {}  on sublattice'.format(duplicates))
+                    'Found duplicates of allowed chemical symbols on site {}.'
+                    ' allowed species on  site {}= {}'.format(i, i, symbols))
 
         if len([tuple(sorted(s)) for s in chemical_symbols if len(s) > 1]) == 0:
             raise ValueError('No active sites found')
@@ -453,15 +456,8 @@ class ClusterSpace(_ClusterSpace):
                              'ClusterSpace.primitive_structure')
 
         # check occupations
-        symbols = structure.get_chemical_symbols()
         sublattices = self.get_sublattices(structure)
-        for sl in sublattices:
-            for i in sl.indices:
-                if not symbols[i] in sl.chemical_symbols:
-                    msg = 'Occupations of structure not compatible with ClusterSpace. '
-                    msg += 'Site {} with occupation {} not allowed on sublattice {}'.format(
-                        i, symbols[i], sl.chemical_symbols)
-                    raise ValueError(msg)
+        sublattices.assert_occupation_is_allowed(structure.get_chemical_symbols())
 
     def write(self, filename: str) -> None:
         """

@@ -46,6 +46,16 @@ class TestSublattice(unittest.TestCase):
         symbols.append('Pt')
         self.assertEqual(self.sublattice.chemical_symbols, ['Al', 'Ge', 'Si'])
 
+    def test_atomic_numbers(self):
+        """Tests chemical symbols property."""
+        self.assertEqual(self.sublattice.atomic_numbers, [13, 32, 14])
+
+        # Test that symbols are copied
+        numbers = self.sublattice.atomic_numbers
+        numbers[0] = 1
+        numbers.append(99)
+        self.assertEqual(self.sublattice.atomic_numbers, [13, 32, 14])
+
     def test_symbol(self):
         """Tests symbol property."""
         self.assertEqual('A', self.sublattice.symbol)
@@ -105,6 +115,22 @@ class TestSublattices(unittest.TestCase):
                                                        23, 25, 27, 29, 31, 33, 35, 37, 39, 41,
                                                        43, 45, 47, 49, 51, 53])
 
+    def test_allowed_numbers_on_site(self):
+        """Tests the get allowed numbers on site method."""
+
+        for atom in self.supercell:
+            sublattice_index = self.sublattices.get_sublattice_index(atom.index)
+            allowed_numbers = self.sublattices.get_allowed_numbers_on_site(atom.index)
+            self.assertEqual(allowed_numbers, self.sublattices[sublattice_index].atomic_numbers)
+
+    def test_allowed_symbols_on_site(self):
+        """Tests the get allowed numbers on site method."""
+
+        for atom in self.supercell:
+            sublattice_index = self.sublattices.get_sublattice_index(atom.index)
+            allowed_symbols = self.sublattices.get_allowed_symbols_on_site(atom.index)
+            self.assertEqual(allowed_symbols, self.sublattices[sublattice_index].chemical_symbols)
+
     def test_get_sublattice_index(self):
         """Tests the get sublattice index method."""
 
@@ -155,6 +181,26 @@ class TestSublattices(unittest.TestCase):
 
         self.assertEqual(len(sublattices), 2)
         self.assertEqual(sublattices.allowed_species, [('Al', 'Ge'), ('H',)])
+
+    def test_sublattice_assert_occupation(self):
+        """Tests the assert occupation method of sublattices."""
+
+        # Should work out of the box
+        self.sublattices.assert_occupation_is_allowed(self.supercell.get_chemical_symbols())
+
+        # This should not work...
+        chemical_symbols = self.supercell.get_chemical_symbols()
+        chemical_symbols[0] = 'Si'
+
+        with self.assertRaises(ValueError) as context:
+            self.sublattices.assert_occupation_is_allowed(chemical_symbols)
+        self.assertTrue(
+            'Occupations of structure not compatible with the sublattice' in str(context.exception))
+
+        # wrong length of chemical symbols should not work either
+        with self.assertRaises(ValueError) as context:
+            self.sublattices.assert_occupation_is_allowed(['Al', 'Ge'])
+        self.assertTrue('len of input chemical symbols (2)' in str(context.exception))
 
 
 if __name__ == '__main__':

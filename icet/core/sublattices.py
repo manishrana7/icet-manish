@@ -6,6 +6,7 @@ import copy
 from itertools import product
 from string import ascii_uppercase
 import numpy as np
+from icet.tools.geometry import chemical_symbols_to_numbers
 
 
 class Sublattice:
@@ -27,10 +28,15 @@ class Sublattice:
         self._chemical_symbols = chemical_symbols
         self._indices = indices
         self._symbol = symbol
+        self._numbers = chemical_symbols_to_numbers(chemical_symbols)
 
     @property
     def chemical_symbols(self):
         return copy.deepcopy(self._chemical_symbols)
+
+    @property
+    def atomic_numbers(self):
+        return self._numbers.copy()
 
     @property
     def indices(self):
@@ -62,7 +68,7 @@ class Sublattices:
 
     def __init__(self, allowed_species: List[List[str]], primitive_structure: Atoms,
                  structure: Atoms):
-
+        self._structure = structure
         # sorted unique sites, this basically decides A, B, C... sublattices
         active_lattices = sorted(set([tuple(sorted(symbols))
                                       for symbols in allowed_species if len(symbols) > 1]))
@@ -133,6 +139,26 @@ class Sublattices:
         """
         return self[index].indices
 
+    def get_allowed_symbols_on_site(self, index: int) -> List[str]:
+        """Returns the allowed symbols on the site.
+
+        Parameters
+        -----------
+        index
+            lattice site index
+        """
+        return self[self._index_to_sublattice[index]].chemical_symbols
+
+    def get_allowed_numbers_on_site(self, index: int) -> List[int]:
+        """Returns the allowed atomic numbers on the site.
+
+        Parameters
+        -----------
+        index
+            lattice site index
+        """
+        return self[self._index_to_sublattice[index]].atomic_numbers
+
     @property
     def active_sublattices(self) -> List[Sublattice]:
         """Lists of the active sublattices."""
@@ -142,3 +168,16 @@ class Sublattices:
     def inactive_sublattices(self) -> List[Sublattice]:
         """Lists of the active sublattices."""
         return [sl for sl in self if len(sl.chemical_symbols) == 1]
+
+    def assert_occupation_is_allowed(self, chemical_symbols: List[str]):
+        """Asserts that the current occupation obeys the sublattices."""
+        if len(chemical_symbols) != len(self._structure):
+            raise ValueError("len of input chemical symbols ({}) do not match len of supercell"
+                             " ({})".format(len(chemical_symbols), len(self._structure)))
+        for sl in self:
+            for i in sl.indices:
+                if not chemical_symbols[i] in sl.chemical_symbols:
+                    msg = 'Occupations of structure not compatible with the sublattice.'
+                    msg += ' Site {} with occupation {} not allowed on'
+                    msg += ' sublattice {}'.format(i, chemical_symbols[i], sl.chemical_symbols)
+                    raise ValueError(msg)

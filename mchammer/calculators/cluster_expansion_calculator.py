@@ -1,11 +1,12 @@
+from typing import List, Union
+
+import numpy as np
+
 from _icet import _ClusterExpansionCalculator
 from ase import Atoms
-from icet import ClusterExpansion
+from icet import ClusterExpansion, Structure
+from icet.core.sublattices import Sublattices
 from mchammer.calculators.base_calculator import BaseCalculator
-from typing import Union, List
-from icet import Structure
-from icet.tools.geometry import find_lattice_site_by_position
-import numpy as np
 
 
 class ClusterExpansionCalculator(BaseCalculator):
@@ -113,8 +114,7 @@ class ClusterExpansionCalculator(BaseCalculator):
 
         return local_contribution * self._property_scaling
 
-    def _calculate_local_contribution(self, index: int,
-                                      exclude_indices: List[int] = []):
+    def _calculate_local_contribution(self, index: int, exclude_indices: List[int] = []):
         """
         Internal method to calculate the local contribution for one
         index.
@@ -133,13 +133,7 @@ class ClusterExpansionCalculator(BaseCalculator):
         return np.dot(local_cv, self.cluster_expansion.parameters)
 
     @property
-    def occupation_constraints(self) -> List[List[int]]:
-        """ map from site to allowed species """
-        allowed_species_prim = \
-            self.cluster_expansion._cluster_space.chemical_symbols
-        primitive_structure = self.cluster_expansion.cluster_space.primitive_structure
-        indices_in_prim = [find_lattice_site_by_position(
-            primitive_structure,
-            position=pos).index for pos in self.atoms.positions]
-        allowed_species = [allowed_species_prim[i] for i in indices_in_prim]
-        return allowed_species
+    def sublattices(self) -> Sublattices:
+        """Sublattices of the calculators structure."""
+        sl = self.cluster_expansion._cluster_space.get_sublattices(self.atoms)
+        return sl
