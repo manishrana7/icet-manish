@@ -167,4 +167,3 @@ class ConfigurationManager(object):
 
         # Update occupation vector itself
         self._occupations[sites] = species
-

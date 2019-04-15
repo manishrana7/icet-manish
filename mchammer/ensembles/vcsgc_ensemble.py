@@ -81,10 +81,10 @@ class VCSGCEnsemble(BaseEnsemble):
 
     Parameters
     ----------
-    atoms : :class:`ase:Atoms`
+    atoms : :class:`Atoms <ase.Atoms>`
         atomic configuration to be used in the Monte Carlo simulation;
         also defines the initial occupation vector
-    calculator : :class:`BaseCalculator`
+    calculator : :class:`BaseCalculator <mchammer.calculators.ClusterExpansionCalculator>`
         calculator to be used for calculating the potential changes
         that enter the evaluation of the Metropolis criterion
     temperature : float
