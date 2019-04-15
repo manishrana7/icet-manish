@@ -183,7 +183,6 @@ def get_swap_sublattice_probabilities(cm):
             sublattice_probabilities.append(0)
     norm = sum(sublattice_probabilities)
     if norm == 0:
-        raise ValueError('No canonical swaps are possible'
-                         ' on any of the active sublattices.')
+        raise ValueError('No canonical swaps are possible on any of the active sublattices.')
     sublattice_probabilities = [p / norm for p in sublattice_probabilities]
     return sublattice_probabilities
