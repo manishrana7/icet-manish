@@ -25,7 +25,7 @@ class ClusterExpansionCalculator(BaseCalculator):
 
     Parameters
     ----------
-    atoms
+    atoms : ase.Atoms
         structure for which to set up the calculator
     cluster_expansion : ClusterExpansion
         cluster expansion from which to build calculator
@@ -40,7 +40,8 @@ class ClusterExpansionCalculator(BaseCalculator):
         set this option to `False`
     """
 
-    def __init__(self, atoms: Atoms, cluster_expansion: ClusterExpansion,
+    def __init__(self,
+                 atoms: Atoms, cluster_expansion: ClusterExpansion,
                  name: str = 'Cluster Expansion Calculator',
                  scaling: Union[float, int] = None,
                  use_local_energy_calculator: bool = True) -> None:

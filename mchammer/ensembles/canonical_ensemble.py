@@ -51,10 +51,10 @@ class CanonicalEnsemble(BaseEnsemble):
 
     Parameters
     ----------
-    atoms : :class:`ase:Atoms`
+    atoms : :class:`Atoms <ase.Atoms>`
         atomic configuration to be used in the Monte Carlo simulation;
         also defines the initial occupation vector
-    calculator : :class:`BaseCalculator`
+    calculator : :class:`BaseCalculator <mchammer.calculators.ClusterExpansionCalculator>`
         calculator to be used for calculating the potential changes
         that enter the evaluation of the Metropolis criterion
     temperature : float
@@ -99,8 +99,10 @@ class CanonicalEnsemble(BaseEnsemble):
 
         self._ensemble_parameters = dict(temperature=temperature)
         self._boltzmann_constant = boltzmann_constant
-        symbols = set(
-            [symbol for sub in calculator.sublattices for symbol in sub.chemical_symbols])
+
+        # add species count to ensemble parameters
+        symbols = set([symbol for sub in calculator.sublattices
+                       for symbol in sub.chemical_symbols])
         for symbol in symbols:
             key = 'n_atoms_{}'.format(symbol)
             count = atoms.get_chemical_symbols().count(symbol)
@@ -114,7 +116,8 @@ class CanonicalEnsemble(BaseEnsemble):
             ensemble_data_write_interval=ensemble_data_write_interval,
             trajectory_write_interval=trajectory_write_interval)
 
-        # add species count to ensemble parameters
+        # setup sublattice probabilities
+        self.sublattice_probabilities = get_swap_sublattice_probabilities(self.configuration)
 
     @property
     def temperature(self) -> float:
@@ -163,16 +166,23 @@ class CanonicalEnsemble(BaseEnsemble):
         ----
         * add unit test
         """
-        probability_distribution = []
-        for sl in self.sublattices:
-            if len(set(self.configuration.occupations[sl.indices])) <= 1 or \
-                    len(sl.chemical_symbols) == 1:
-                p = 0
-            else:
-                p = len(sl.indices)
-            probability_distribution.append(p)
-        norm = sum(probability_distribution)
-        probability_distribution = [p/norm for p in probability_distribution]
-        pick = np.random.choice(
-            range(0, len(self.sublattices)), p=probability_distribution)
+        pick = np.random.choice(range(0, len(self.sublattices)), p=self.sublattice_probabilities)
         return pick
+
+
+def get_swap_sublattice_probabilities(cm):
+    """
+    Returns the probabilities of picking a sublattice in a
+    ConfigurationManager for a canonical swap.
+    """
+    sublattice_probabilities = []
+    for i, sl in enumerate(cm.sublattices):
+        if cm.is_swap_possible(i):
+            sublattice_probabilities.append(len(sl.indices))
+        else:
+            sublattice_probabilities.append(0)
+    norm = sum(sublattice_probabilities)
+    if norm == 0:
+        raise ValueError('No canonical swaps are possible on any of the active sublattices.')
+    sublattice_probabilities = [p / norm for p in sublattice_probabilities]
+    return sublattice_probabilities
