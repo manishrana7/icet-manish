@@ -228,6 +228,14 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
             sys.stdout = sys.__stdout__  # reset redirect
             self.assertTrue('Cluster Expansion' in capturedOutput.getvalue())
 
+    def test_cluster_expansion_self_interacts(self):
+        """Tests self interaction test."""
+        atoms = self.atoms
+        self.assertTrue(self.ce.cluster_expansion_self_interacts(atoms))
+
+        atoms = self.atoms.repeat(4)
+        self.assertFalse(self.ce.cluster_expansion_self_interacts(atoms))
+
 
 class TestClusterExpansionTernary(unittest.TestCase):
     """Container for tests of the class functionality."""
