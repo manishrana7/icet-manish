@@ -167,5 +167,6 @@ class TestEnsemble(unittest.TestCase):
             get_swap_sublattice_probabilities(cm)
         self.assertIn('No canonical swaps are possible on any of the', str(context.exception))
 
+
 if __name__ == '__main__':
     unittest.main()
