@@ -44,7 +44,7 @@ class ClusterExpansionCalculator(BaseCalculator):
     def __init__(self,
                  atoms: Atoms, cluster_expansion: ClusterExpansion,
                  name: str = 'Cluster Expansion Calculator',
-                 scaling: Union[float, int] = None,
+                 scaling: Union[float, int]=None,
                  use_local_energy_calculator: bool = True) -> None:
         super().__init__(atoms=atoms, name=name)
 
@@ -62,9 +62,7 @@ class ClusterExpansionCalculator(BaseCalculator):
             self.cpp_calc = _ClusterExpansionCalculator(
                 cluster_expansion.cluster_space,
                 Structure.from_atoms(atoms_cpy))
-        
 
-        
         self._cluster_expansion = cluster_expansion
         if scaling is None:
             self._property_scaling = len(atoms)

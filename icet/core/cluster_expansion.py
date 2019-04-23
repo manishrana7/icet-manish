@@ -13,7 +13,6 @@ from icet import ClusterSpace
 from icet.core.structure import Structure
 from typing import List, Union
 from ase import Atoms
-from ase.neighborlist import NeighborList
 
 
 class ClusterExpansion:
@@ -302,6 +301,3 @@ class ClusterExpansion:
 
         assert list(parameters) == list(ce.parameters)
         return ce
-
-
-
