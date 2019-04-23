@@ -51,18 +51,20 @@ class ClusterExpansionCalculator(BaseCalculator):
         atoms_cpy = atoms.copy()
         cluster_expansion.prune()
 
+        if cluster_expansion._cluster_space.is_supercell_self_correlated(atoms):
+            logger.warning('The ClusterExpansionCalculator self-interacts, '
+                           'which may lead to erroneous results. To avoid '
+                           'self-interaction, use a larger supercell or a '
+                           'cluster space with shorter cutoffs.')
+
         self.use_local_energy_calculator = use_local_energy_calculator
         if self.use_local_energy_calculator:
             self.cpp_calc = _ClusterExpansionCalculator(
                 cluster_expansion.cluster_space,
                 Structure.from_atoms(atoms_cpy))
+        
 
-        if cluster_expansion.cluster_expansion_self_interacts(atoms):
-            logger.warning('The ClusterExpansionCalculator self-interacts, '
-                           'which may lead to erroneous results. To avoid '
-                           'self-interaction, use a large supercell or a '
-                           'cluster expansion with longer cutoffs.')
-
+        
         self._cluster_expansion = cluster_expansion
         if scaling is None:
             self._property_scaling = len(atoms)

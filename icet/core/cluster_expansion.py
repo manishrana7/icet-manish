@@ -136,8 +136,7 @@ class ClusterExpansion:
         ax.axhline(y=0.0, c='k', lw=1)
         for order in orders:
             df_order = df.loc[df['order'] == order]
-            ax.plot(df_order.radius, df_order.eci, 'o',
-                    ms=8, label='order {}'.format(order))
+            ax.plot(df_order.radius, df_order.eci, 'o', ms=8, label='order {}'.format(order))
         ax.legend(loc='best')
         ax.set_xlabel('Radius')
         ax.set_ylabel('ECI')
@@ -235,8 +234,7 @@ class ClusterExpansion:
         indices = list(set(indices))
 
         if 0 in indices:
-            raise ValueError(
-                'Orbit index cannot be 0 since the zerolet may not be pruned.')
+            raise ValueError('Orbit index cannot be 0 since the zerolet may not be pruned.')
         orbit_candidates_for_removal = \
             df.orbit_index[np.array(indices)].tolist()
         safe_to_remove_orbits, safe_to_remove_params = [], []
@@ -247,8 +245,7 @@ class ClusterExpansion:
             oi_remove_count = orbit_candidates_for_removal.count(oi)
             if orbit_count <= oi_remove_count:
                 safe_to_remove_orbits.append(oi)
-                safe_to_remove_params += df.index[
-                    df['orbit_index'] == oi].tolist()
+                safe_to_remove_params += df.index[df['orbit_index'] == oi].tolist()
 
         # prune cluster space
         self._cluster_space._prune_orbit_list(indices=safe_to_remove_orbits)
@@ -306,26 +303,5 @@ class ClusterExpansion:
         assert list(parameters) == list(ce.parameters)
         return ce
 
-    def cluster_expansion_self_interacts(self, atoms: Atoms) -> bool:
-        """
-        Check whether an atoms object self-interacts via periodic
-        boundary conditions.
 
-        Parameters
-        ----------
-        atoms
-            An atoms object to check self-interaction for
 
-        Returns
-        -------
-        bool
-            If True, the atoms object self-interacts via periodic
-            boundary conditions, otherwise False.
-        """
-        longest_cutoff = max(self._cluster_space.cutoffs)
-        cell = atoms.get_cell()
-        nl = NeighborList([longest_cutoff / 2], skin=1e-5,
-                          self_interaction=False)
-        nl.update(Atoms('H', positions=[(0, 0, 0)], cell=cell, pbc=True))
-        _, offsets = nl.get_neighbors(0)
-        return len(offsets) > 0

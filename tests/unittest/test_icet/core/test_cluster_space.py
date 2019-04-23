@@ -388,7 +388,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
         orig_size = len(self.cs.orbit_list)
         prune_indices = [0, 1, 3, 2]
         self.cs._prune_orbit_list(indices=prune_indices)
-        self.assertEqual(orig_size-len(prune_indices), len(self.cs.orbit_list))
+        self.assertEqual(orig_size - len(prune_indices), len(self.cs.orbit_list))
 
     def test_copy(self):
         """ Tests copy function. """
@@ -439,6 +439,15 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
                                               ('Au', 'Ag', 'Au'),
                                               ('Au', 'Au', 'Ag'),
                                               ('Au', 'Au', 'Au')])
+
+
+    def test_is_supercell_self_correlated(self):
+        """Tests self interaction test."""
+        atoms = self.atoms_prim
+        self.assertTrue(self.cs.is_supercell_self_correlated(atoms))
+
+        atoms = self.atoms_prim.repeat(4)
+        self.assertFalse(self.cs.is_supercell_self_correlated(atoms))
 
 
 class TestClusterSpaceTernary(unittest.TestCase):
@@ -545,6 +554,14 @@ class TestClusterSpaceTernary(unittest.TestCase):
             mc_vector_target, orbit_index)
         self.assertEqual(permutations_target, permutation_retval)
 
+    def test_is_supercell_self_correlated(self):
+        """Tests self interaction test."""
+        atoms = self.atoms_prim
+        self.assertTrue(self.cs.is_supercell_self_correlated(atoms))
+
+        atoms = self.atoms_prim.repeat(4)
+        self.assertFalse(self.cs.is_supercell_self_correlated(atoms))
+
 
 class TestClusterSpaceMultiSublattice(unittest.TestCase):
     """Container for test of the class functionality."""
@@ -614,6 +631,13 @@ class TestClusterSpaceMultiSublattice(unittest.TestCase):
         # sublattice-1 -> sublatice 1 and sublattice 2  -> sublattice 2
         self.assertEqual(pair_counts_binary[2.045] * 2, pair_counts[2.045])
 
+    def test_is_supercell_self_correlated(self):
+        """Tests self interaction test."""
+        atoms = self.atoms_prim
+        self.assertTrue(self.cs.is_supercell_self_correlated(atoms))
+
+        atoms = self.atoms_prim.repeat(4)
+        self.assertFalse(self.cs.is_supercell_self_correlated(atoms))
 
 if __name__ == '__main__':
     unittest.main()
