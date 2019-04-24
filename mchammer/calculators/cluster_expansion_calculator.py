@@ -3,6 +3,7 @@ from typing import List, Union
 import numpy as np
 
 from _icet import _ClusterExpansionCalculator
+from icet.io.logging import logger
 from ase import Atoms
 from icet import ClusterExpansion, Structure
 from icet.core.sublattices import Sublattices
@@ -49,6 +50,12 @@ class ClusterExpansionCalculator(BaseCalculator):
 
         atoms_cpy = atoms.copy()
         cluster_expansion.prune()
+
+        if cluster_expansion._cluster_space.is_supercell_self_correlated(atoms):
+            logger.warning('The ClusterExpansionCalculator self-interacts, '
+                           'which may lead to erroneous results. To avoid '
+                           'self-interaction, use a larger supercell or a '
+                           'cluster space with shorter cutoffs.')
 
         self.use_local_energy_calculator = use_local_energy_calculator
         if self.use_local_energy_calculator:
