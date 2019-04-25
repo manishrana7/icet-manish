@@ -245,6 +245,7 @@ For each orbit:
 void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeSite> &col1,
                                                   const std::vector<std::vector<LatticeSite>> &permutationMatrix)
 {
+    std::cout<<"\nRunning branch 271 (C++)"<<std::endl;
     _col1 = col1;
     _permutationMatrix = permutationMatrix;
 
