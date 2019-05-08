@@ -184,7 +184,7 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
             ensemble_data_write_interval=ensemble_data_write_interval,
             trajectory_write_interval=trajectory_write_interval,
             boltzmann_constant=boltzmann_constant
-            )
+        )
 
         if any([len(sl.chemical_symbols) > 2 for sl in self.sublattices]):
             raise NotImplementedError('VCSGCEnsemble does not yet support cluster'
@@ -255,8 +255,15 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
         return data
 
 
-def get_phis(phis: Dict[Union[int, str], float]):
-    """Get phis as used in the vcsgc ensemble."""
+def get_phis(phis: Dict[Union[int, str], float]) -> Dict[int, float]:
+    """Get phis as used in the vcsgc ensemble.
+
+    Parameters
+    ----------
+    phis
+        the phis that will be transformed to the format
+        the ensemble use.
+    """
     if not isinstance(phis, dict):
         raise TypeError('phis has the wrong type: {}'.format(type(phis)))
     if abs(sum(phis.values()) + 2) > 1e-6:

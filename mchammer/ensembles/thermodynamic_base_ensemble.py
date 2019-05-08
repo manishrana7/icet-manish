@@ -1,11 +1,14 @@
+from abc import abstractproperty
+from typing import Dict, List
+
 import numpy as np
 
 from ase import Atoms
 from ase.units import kB
+
 from .. import DataContainer
-from .base_ensemble import BaseEnsemble
 from ..calculators.base_calculator import BaseCalculator
-from abc import abstractproperty
+from .base_ensemble import BaseEnsemble
 
 
 class ThermodynamicBaseEnsemble(BaseEnsemble):
@@ -96,8 +99,14 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             p = np.exp(-potential_diff / (self.boltzmann_constant * self.temperature))
             return p > self._next_random_number()
 
-    def do_canonical_swap(self, sublattice_index=None):
-        """ Carries out one Monte Carlo trial step. """
+    def do_canonical_swap(self, sublattice_index: int = None) -> None:
+        """ Carries out one Monte Carlo trial step.
+
+        Parameters
+        ---------
+        sublattice_index
+            the sublattice the swap will act on
+         """
         self._total_trials += 1
         if sublattice_index is None:
             sublattice_index = self.get_random_sublattice_index_for_swaps()
@@ -108,8 +117,16 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             self._accepted_trials += 1
             self.update_occupations(sites, species)
 
-    def do_sgc_flip(self, chemical_potentials, sublattice_index=None):
-        """ Carries out one Monte Carlo trial step. """
+    def do_sgc_flip(self, chemical_potentials: Dict[int, float],
+                    sublattice_index: int = None) -> None:
+        """ Carries out one Monte Carlo trial step.
+
+        chemical_potentials
+            chemical potentials used to calculate the potential
+             difference
+        sublattice_index
+            the sublattice the flip will act on
+        """
         self._total_trials += 1
         if sublattice_index is None:
             sublattice_index = self.get_random_sublattice_index()
@@ -126,8 +143,19 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             self._accepted_trials += 1
             self.update_occupations([index], [species])
 
-    def do_vcsgc_flip(self, phis, kappa, sublattice_index=None):
-        """Carries out one Monte Carlo trial step."""
+    def do_vcsgc_flip(self, phis: Dict[int, float],
+                      kappa: float, sublattice_index: int = None) -> None:
+        """Carries out one Monte Carlo trial step.
+
+        Parameters
+        ----------
+        phis
+            average constraint parameters
+        kappa
+            parameter that constrains the variance of the concentration
+        sublattice_index
+            the sublattice the flip will act on
+        """
         self._total_trials += 1
         if sublattice_index is None:
             sublattice_index = self.get_random_sublattice_index()
@@ -154,13 +182,13 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             self._accepted_trials += 1
             self.update_occupations([index], [new_species])
 
-    def get_random_sublattice_index_for_swaps(self):
+    def get_random_sublattice_index_for_swaps(self) -> int:
         """ Returns a random sublattice index suitable for swaps."""
         sublattice_probabilities = self._get_swap_sublattice_probabilities()
         pick = np.random.choice(range(0, len(self.sublattices)), p=sublattice_probabilities)
         return pick
 
-    def _get_swap_sublattice_probabilities(self):
+    def _get_swap_sublattice_probabilities(self) -> List[float]:
         """ Returns sublattice probabilities suitable for swaps."""
         sublattice_probabilities = []
         for i, sl in enumerate(self.configuration.sublattices):
