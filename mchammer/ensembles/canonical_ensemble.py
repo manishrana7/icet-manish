@@ -148,9 +148,6 @@ class CanonicalEnsemble(ThermodynamicBaseEnsemble):
             trajectory_write_interval=trajectory_write_interval,
             boltzmann_constant=boltzmann_constant)
 
-        # setup sublattice probabilities
-        self.sublattice_probabilities = get_swap_sublattice_probabilities(self.configuration)
-
     @property
     def temperature(self) -> float:
         return self._ensemble_parameters['temperature']
@@ -158,32 +155,3 @@ class CanonicalEnsemble(ThermodynamicBaseEnsemble):
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
         self.do_canonical_swap()
-        
-    def get_random_sublattice_index(self) -> int:
-        """Returns a random sublattice index based on the weights of the
-        sublattice.
-
-        Todo
-        ----
-        * add unit test
-        """
-        pick = np.random.choice(range(0, len(self.sublattices)), p=self.sublattice_probabilities)
-        return pick
-
-
-def get_swap_sublattice_probabilities(cm):
-    """
-    Returns the probabilities of picking a sublattice in a
-    ConfigurationManager for a canonical swap.
-    """
-    sublattice_probabilities = []
-    for i, sl in enumerate(cm.sublattices):
-        if cm.is_swap_possible(i):
-            sublattice_probabilities.append(len(sl.indices))
-        else:
-            sublattice_probabilities.append(0)
-    norm = sum(sublattice_probabilities)
-    if norm == 0:
-        raise ValueError('No canonical swaps are possible on any of the active sublattices.')
-    sublattice_probabilities = [p / norm for p in sublattice_probabilities]
-    return sublattice_probabilities

@@ -9,6 +9,7 @@ from .base_ensemble import BaseEnsemble
 from ..calculators.base_calculator import BaseCalculator
 from abc import abstractproperty
 
+
 class ThermodynamicBaseEnsemble(BaseEnsemble):
     """
     Parameters
@@ -60,13 +61,12 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
 
     def __init__(self, atoms: Atoms, calculator: BaseCalculator,
                  user_tag: str = None,
-                boltzmann_constant: float = kB,
-                data_container: DataContainer = None, random_seed: int = None,
-                data_container_write_period: float = np.inf,
-                ensemble_data_write_interval: int = None,
-                trajectory_write_interval: int = None) -> None:
-        
-        
+                 boltzmann_constant: float = kB,
+                 data_container: DataContainer = None, random_seed: int = None,
+                 data_container_write_period: float = np.inf,
+                 ensemble_data_write_interval: int = None,
+                 trajectory_write_interval: int = None) -> None:
+
         self._boltzmann_constant = boltzmann_constant
 
         super().__init__(
@@ -77,8 +77,6 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             ensemble_data_write_interval=ensemble_data_write_interval,
             trajectory_write_interval=trajectory_write_interval)
 
-
-
     @abstractproperty
     @property
     def temperature(self) -> float:
@@ -88,7 +86,6 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
     def boltzmann_constant(self) -> float:
         """ Boltzmann constant :math:`k_B` (see parameters section above) """
         return self._boltzmann_constant
-
 
     def _acceptance_condition(self, potential_diff: float) -> bool:
         """
@@ -111,6 +108,8 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
     def do_canonical_swap(self, sublattice_index=None):
         """ Carries out one Monte Carlo trial step. """
         self._total_trials += 1
+        if sublattice_index == None:
+            sublattice_index = self.get_random_sublattice_index_for_swaps()
         sites, species = self.configuration.get_swapped_state(sublattice_index)
         potential_diff = self._get_property_change(sites, species)
 
@@ -118,24 +117,42 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             self._accepted_trials += 1
             self.update_occupations(sites, species)
 
-
     def do_sgc_flip(self, chemical_potentials, sublattice_index=None):
         """ Carries out one Monte Carlo trial step. """
         self._total_trials += 1
         if sublattice_index == None:
             sublattice_index = self.get_random_sublattice_index()
 
-        index, species = \
-            self.configuration.get_flip_state(sublattice_index)
+        index, species = self.configuration.get_flip_state(sublattice_index)
         potential_diff = self._get_property_change([index], [species])
 
         # change in chemical potential
         old_species = self.configuration.occupations[index]
-        chemical_potential_diff = \
-            chemical_potentials[old_species] - \
-            chemical_potentials[species]
+        chemical_potential_diff =  chemical_potentials[old_species] - chemical_potentials[species]
         potential_diff += chemical_potential_diff
 
         if self._acceptance_condition(potential_diff):
             self._accepted_trials += 1
             self.update_occupations([index], [species])
+
+    def get_random_sublattice_index_for_swaps(self):
+        """ Returns a random sublattice index suitable for swaps."""
+        sublattice_probabilities = self._get_swap_sublattice_probabilities()
+        pick = np.random.choice(range(0, len(self.sublattices)), p=sublattice_probabilities)
+        return pick
+    
+    def _get_swap_sublattice_probabilities(self):
+        """ Returns sublattice probabilities suitable for swaps."""
+        sublattice_probabilities = []
+        for i, sl in enumerate(self.configuration.sublattices):
+            if self.configuration.is_swap_possible(i):
+                sublattice_probabilities.append(len(sl.indices))
+            else:
+                sublattice_probabilities.append(0)
+        norm = sum(sublattice_probabilities)
+        if norm == 0:
+            raise ValueError('No canonical swaps are possible on any of the active sublattices.')
+        sublattice_probabilities = [p / norm for p in sublattice_probabilities]
+        return sublattice_probabilities
+
+

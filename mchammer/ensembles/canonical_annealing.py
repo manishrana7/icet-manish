@@ -8,7 +8,6 @@ from typing import Dict
 
 from .. import DataContainer
 from .base_ensemble import BaseEnsemble
-from .canonical_ensemble import get_swap_sublattice_probabilities
 from ..calculators.base_calculator import BaseCalculator
 from .thermodynamic_base_ensemble import ThermodynamicBaseEnsemble
 
@@ -178,18 +177,6 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
         data = super()._get_ensemble_data()
         data['temperature'] = self.temperature
         return data
-
-    def get_random_sublattice_index(self) -> int:
-        """Returns a random sublattice index based on the weights of the
-        sublattice.
-
-        Todo
-        ----
-        * add unit test
-        """
-        pick = np.random.choice(range(0, len(self.sublattices)), p=self.sublattice_probabilities)
-        return pick
-
 
 def _cooling_linear(step, T_start, T_stop, n_steps):
     return T_start + (T_stop-T_start) * step / (n_steps - 1)

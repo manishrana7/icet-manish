@@ -432,8 +432,7 @@ class BaseEnsemble(ABC):
         ----
         * add unit test
         """
-        total_active_sites = sum(
-            [len(sl.indices) for sl in self.sublattices.active_sublattices])
+        total_active_sites = sum([len(sl.indices) for sl in self.sublattices.active_sublattices])
         probability_distribution = [len(sl.indices) / total_active_sites for
                                     sl in self.sublattices.active_sublattices]
         pick = np.random.choice(

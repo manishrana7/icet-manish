@@ -180,7 +180,6 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
 
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
-        self._total_trials += 1
         self.do_sgc_flip(self.chemical_potentials)
 
     @property
