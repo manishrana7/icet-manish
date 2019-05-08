@@ -189,28 +189,13 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
         """
         return self._chemical_potentials
 
-    def _set_chemical_potentials(self,
-                                 chemical_potentials:
-                                 Dict[Union[int, str], float]):
+    def _set_chemical_potentials(self, chemical_potentials: Dict[Union[int, str], float]):
         """ Sets values of chemical potentials. """
         if not isinstance(chemical_potentials, dict):
             raise TypeError('chemical_potentials has the wrong type: {}'
                             .format(type(chemical_potentials)))
 
-        cps = OrderedDict([(key, val) if isinstance(key, int)
-                           else (atomic_numbers[key], val)
-                           for key, val in chemical_potentials.items()])
-
-        if self._chemical_potentials is None:
-            # TODO: add check with respect to configuration_manager
-            self._chemical_potentials = cps
-        else:
-            for num in cps:
-                if num not in self._chemical_potentials:
-                    raise ValueError(
-                        'Unknown species {} in chemical_potentials'
-                        .format(num))
-            self._chemical_potentials.update(cps)
+        self._chemical_potentials = get_chemical_potentials(chemical_potentials)
 
     def _get_ensemble_data(self) -> Dict:
         """Returns the data associated with the ensemble. For the SGC
@@ -230,3 +215,16 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
             data['{}_count'.format(chemical_symbols[atnum])] = count
 
         return data
+
+
+def get_chemical_potentials(self,chemical_potentials: Dict[Union[int, str], float]):
+    """ Gets values of chemical potentials."""
+    if not isinstance(chemical_potentials, dict):
+        raise TypeError('chemical_potentials has the wrong type: {}'
+                        .format(type(chemical_potentials)))
+
+    cps = OrderedDict([(key, val) if isinstance(key, int)
+                        else (atomic_numbers[key], val)
+                        for key, val in chemical_potentials.items()])
+
+    return cps
