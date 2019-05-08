@@ -6,9 +6,9 @@ from ase import Atoms
 from ase.units import kB
 
 from .. import DataContainer
-from .base_ensemble import BaseEnsemble
 from ..calculators.base_calculator import BaseCalculator
 from .thermodynamic_base_ensemble import ThermodynamicBaseEnsemble
+
 
 class CanonicalEnsemble(ThermodynamicBaseEnsemble):
     """Instances of this class allow one to simulate systems in the

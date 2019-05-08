@@ -11,7 +11,6 @@ from collections import OrderedDict
 from typing import Dict, Union
 
 from .. import DataContainer
-from .base_ensemble import BaseEnsemble
 from ..calculators.base_calculator import BaseCalculator
 from .thermodynamic_base_ensemble import ThermodynamicBaseEnsemble
 
@@ -170,7 +169,7 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
             random_seed=random_seed,
             data_container_write_period=data_container_write_period,
             ensemble_data_write_interval=ensemble_data_write_interval,
-            trajectory_write_interval=trajectory_write_interval,            
+            trajectory_write_interval=trajectory_write_interval,
             boltzmann_constant=boltzmann_constant)
 
     @property
@@ -217,14 +216,14 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
         return data
 
 
-def get_chemical_potentials(self,chemical_potentials: Dict[Union[int, str], float]):
+def get_chemical_potentials(self, chemical_potentials: Dict[Union[int, str], float]):
     """ Gets values of chemical potentials."""
     if not isinstance(chemical_potentials, dict):
         raise TypeError('chemical_potentials has the wrong type: {}'
                         .format(type(chemical_potentials)))
 
     cps = OrderedDict([(key, val) if isinstance(key, int)
-                        else (atomic_numbers[key], val)
-                        for key, val in chemical_potentials.items()])
+                       else (atomic_numbers[key], val)
+                       for key, val in chemical_potentials.items()])
 
     return cps

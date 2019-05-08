@@ -10,7 +10,6 @@ from ase.units import kB
 from typing import Dict, Union
 
 from .. import DataContainer
-from .base_ensemble import BaseEnsemble
 from ..calculators.base_calculator import BaseCalculator
 from .thermodynamic_base_ensemble import ThermodynamicBaseEnsemble
 
@@ -201,7 +200,7 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
                         chemical_symbols[number]))
 
     def _do_trial_step(self):
-        """ Carries out one Monte Carlo trial step. """        
+        """ Carries out one Monte Carlo trial step. """
         self.do_vcsgc_flip(phis=self.phis, kappa=self.kappa)
 
     @property
@@ -228,7 +227,7 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
     def _set_phis(self, phis: Dict[Union[int, str], float]):
         """ Sets values of phis."""
         self._phis = get_phis(phis)
-        
+
     def _get_ensemble_data(self) -> Dict:
         """
         Returns a dict with the default data of the ensemble. This includes

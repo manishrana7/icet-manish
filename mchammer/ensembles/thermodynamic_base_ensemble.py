@@ -2,8 +2,6 @@ import numpy as np
 
 from ase import Atoms
 from ase.units import kB
-from typing import Dict
-
 from .. import DataContainer
 from .base_ensemble import BaseEnsemble
 from ..calculators.base_calculator import BaseCalculator
@@ -108,7 +106,7 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
     def do_canonical_swap(self, sublattice_index=None):
         """ Carries out one Monte Carlo trial step. """
         self._total_trials += 1
-        if sublattice_index == None:
+        if sublattice_index is None:
             sublattice_index = self.get_random_sublattice_index_for_swaps()
         sites, species = self.configuration.get_swapped_state(sublattice_index)
         potential_diff = self._get_property_change(sites, species)
@@ -120,7 +118,7 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
     def do_sgc_flip(self, chemical_potentials, sublattice_index=None):
         """ Carries out one Monte Carlo trial step. """
         self._total_trials += 1
-        if sublattice_index == None:
+        if sublattice_index is None:
             sublattice_index = self.get_random_sublattice_index()
 
         index, species = self.configuration.get_flip_state(sublattice_index)
@@ -128,17 +126,17 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
 
         # change in chemical potential
         old_species = self.configuration.occupations[index]
-        chemical_potential_diff =  chemical_potentials[old_species] - chemical_potentials[species]
+        chemical_potential_diff = chemical_potentials[old_species] - chemical_potentials[species]
         potential_diff += chemical_potential_diff
 
         if self._acceptance_condition(potential_diff):
             self._accepted_trials += 1
             self.update_occupations([index], [species])
 
-    def do_vcsgc_flip(self,phis, kappa, sublattice_index=None):
+    def do_vcsgc_flip(self, phis, kappa, sublattice_index=None):
         """Carries out one Monte Carlo trial step."""
         self._total_trials += 1
-        if sublattice_index == None:
+        if sublattice_index is None:
             sublattice_index = self.get_random_sublattice_index()
 
         index, new_species = self.configuration.get_flip_state(sublattice_index)
@@ -168,7 +166,7 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         sublattice_probabilities = self._get_swap_sublattice_probabilities()
         pick = np.random.choice(range(0, len(self.sublattices)), p=sublattice_probabilities)
         return pick
-    
+
     def _get_swap_sublattice_probabilities(self):
         """ Returns sublattice probabilities suitable for swaps."""
         sublattice_probabilities = []
@@ -182,5 +180,3 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             raise ValueError('No canonical swaps are possible on any of the active sublattices.')
         sublattice_probabilities = [p / norm for p in sublattice_probabilities]
         return sublattice_probabilities
-
-

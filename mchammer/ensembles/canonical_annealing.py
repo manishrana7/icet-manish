@@ -7,7 +7,6 @@ from ase.units import kB
 from typing import Dict
 
 from .. import DataContainer
-from .base_ensemble import BaseEnsemble
 from ..calculators.base_calculator import BaseCalculator
 from .thermodynamic_base_ensemble import ThermodynamicBaseEnsemble
 
@@ -162,9 +161,8 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
         self._temperature = self._cooling_function(
-            self.total_trials, self.T_start, self.T_stop, self.n_steps)        
+            self.total_trials, self.T_start, self.T_stop, self.n_steps)
         self.do_canonical_swap()
-       
 
     def _get_ensemble_data(self) -> Dict:
         """Returns the data associated with the ensemble. For the
@@ -173,6 +171,7 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
         data = super()._get_ensemble_data()
         data['temperature'] = self.temperature
         return data
+
 
 def _cooling_linear(step, T_start, T_stop, n_steps):
     return T_start + (T_stop-T_start) * step / (n_steps - 1)

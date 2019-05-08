@@ -5,8 +5,8 @@ from ase.build import bulk
 
 from icet import ClusterExpansion, ClusterSpace
 from mchammer.calculators import ClusterExpansionCalculator
-from mchammer.configuration_manager import ConfigurationManager
 from mchammer.ensembles.canonical_ensemble import CanonicalEnsemble
+
 
 class TestEnsemble(unittest.TestCase):
     """Container for tests of the class functionality."""
@@ -145,11 +145,11 @@ class TestEnsemble(unittest.TestCase):
         chemical_symbols = [['Al'], ['Ag', 'Al']]
         cs = ClusterSpace(prim, cutoffs=[0], chemical_symbols=chemical_symbols)
         ce = ClusterExpansion(cs, [1]*len(cs))
-        
+
         supercell = prim.repeat(2)
         supercell[1].symbol = 'Ag'
-        ce_calc = ClusterExpansionCalculator(supercell,ce)
-        ensemble = CanonicalEnsemble(supercell, ce_calc,temperature=100)
+        ce_calc = ClusterExpansionCalculator(supercell, ce)
+        ensemble = CanonicalEnsemble(supercell, ce_calc, temperature=100)
 
         # test get_swap_sublattice_probabilities
         probs = ensemble._get_swap_sublattice_probabilities()
@@ -159,8 +159,8 @@ class TestEnsemble(unittest.TestCase):
 
         # test raise when swap not possible on either lattice
         supercell[1].symbol = 'Al'
-        ce_calc = ClusterExpansionCalculator(supercell,ce)
-        ensemble = CanonicalEnsemble(supercell, ce_calc,temperature=100)
+        ce_calc = ClusterExpansionCalculator(supercell, ce)
+        ensemble = CanonicalEnsemble(supercell, ce_calc, temperature=100)
 
         with self.assertRaises(ValueError) as context:
             ensemble._get_swap_sublattice_probabilities()
