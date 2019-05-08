@@ -253,19 +253,8 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
 
     def _set_phis(self, phis: Dict[Union[int, str], float]):
         """ Sets values of phis."""
-        if not isinstance(phis, dict):
-            raise TypeError('phis has the wrong type: {}'.format(type(phis)))
-        if abs(sum(phis.values()) + 2) > 1e-6:
-            raise ValueError('The sum of all phis must equal to -2')
-
-        self._phis = {}
-        for key, phi in phis.items():
-            if isinstance(key, str):
-                atomic_number = atomic_numbers[key]
-                self._phis[atomic_number] = phi
-            elif isinstance(key, int):
-                self._phis[key] = phi
-
+        self._phis = get_phis(phis)
+        
     def _get_ensemble_data(self) -> Dict:
         """
         Returns a dict with the default data of the ensemble. This includes
@@ -292,3 +281,20 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
             data['{}_count'.format(chemical_symbols[atnum])] = count
 
         return data
+
+
+def get_phis(phis: Dict[Union[int, str], float]):
+    """Get phis as used in the vcsgc ensemble."""
+    if not isinstance(phis, dict):
+        raise TypeError('phis has the wrong type: {}'.format(type(phis)))
+    if abs(sum(phis.values()) + 2) > 1e-6:
+        raise ValueError('The sum of all phis must equal to -2')
+
+    phis_ret = {}
+    for key, phi in phis.items():
+        if isinstance(key, str):
+            atomic_number = atomic_numbers[key]
+            phis_ret[atomic_number] = phi
+        elif isinstance(key, int):
+            phis_ret[key] = phi
+    return phis_ret
