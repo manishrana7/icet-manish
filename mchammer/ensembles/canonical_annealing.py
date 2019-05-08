@@ -168,14 +168,8 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
         self._temperature = self._cooling_function(
             self.total_trials, self.T_start, self.T_stop, self.n_steps)
         self._total_trials += 1
-
-        sublattice_index = self.get_random_sublattice_index()
-        sites, species = self.configuration.get_swapped_state(sublattice_index)
-        potential_diff = self._get_property_change(sites, species)
-
-        if self._acceptance_condition(potential_diff):
-            self._accepted_trials += 1
-            self.update_occupations(sites, species)
+        self.do_canonical_swap()
+       
 
     def _get_ensemble_data(self) -> Dict:
         """Returns the data associated with the ensemble. For the

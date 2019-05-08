@@ -158,16 +158,8 @@ class CanonicalEnsemble(ThermodynamicBaseEnsemble):
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
         self._total_trials += 1
-
-        sublattice_index = self.get_random_sublattice_index()
-        sites, species = self.configuration.get_swapped_state(sublattice_index)
-
-        potential_diff = self._get_property_change(sites, species)
-
-        if self._acceptance_condition(potential_diff):
-            self._accepted_trials += 1
-            self.update_occupations(sites, species)
-
+        self.do_canonical_swap()
+        
     def get_random_sublattice_index(self) -> int:
         """Returns a random sublattice index based on the weights of the
         sublattice.

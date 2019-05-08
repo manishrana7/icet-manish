@@ -107,3 +107,17 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         else:
             p = np.exp(-potential_diff / (self.boltzmann_constant * self.temperature))
             return p > self._next_random_number()
+
+    def do_canonical_swap(self, sublattice_index=None):
+        """ Carries out one Monte Carlo trial step. """
+
+        if sublattice_index == None:
+            sublattice_index = self.get_random_sublattice_index()
+
+        sites, species = self.configuration.get_swapped_state(sublattice_index)
+
+        potential_diff = self._get_property_change(sites, species)
+
+        if self._acceptance_condition(potential_diff):
+            self._accepted_trials += 1
+            self.update_occupations(sites, species)
