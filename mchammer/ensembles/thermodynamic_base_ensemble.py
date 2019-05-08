@@ -10,6 +10,8 @@ from abc import abstractproperty
 
 class ThermodynamicBaseEnsemble(BaseEnsemble):
     """
+    Thermodynamic base ensemble class.
+
     Parameters
     ----------
     atoms : :class:`Atoms <ase.Atoms>`
@@ -18,15 +20,6 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
     calculator : :class:`BaseCalculator <mchammer.calculators.ClusterExpansionCalculator>`
         calculator to be used for calculating the potential changes
         that enter the evaluation of the Metropolis criterion
-    T_start : float
-        temperature from which the annealing is started
-    T_stop : float
-        final temperature for annealing
-    n_steps : int
-        number of steps to take in the annealing simulation
-    cooling_function : str/function
-        to use the predefined cooling functions provide a string
-        `linear` or `exponential`, otherwise provide a function
     boltzmann_constant : float
         Boltzmann constant :math:`k_B` in appropriate
         units, i.e. units that are consistent

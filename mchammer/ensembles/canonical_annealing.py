@@ -129,8 +129,7 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
         elif callable(cooling_function):
             self._cooling_function = cooling_function
         else:
-            raise TypeError(
-                'cooling_function must be either str or a function')
+            raise TypeError('cooling_function must be either str or a function')
 
     @property
     def temperature(self) -> float:
