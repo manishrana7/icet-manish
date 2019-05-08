@@ -10,9 +10,10 @@ from .. import DataContainer
 from .base_ensemble import BaseEnsemble
 from .canonical_ensemble import get_swap_sublattice_probabilities
 from ..calculators.base_calculator import BaseCalculator
+from .thermodynamic_base_ensemble import ThermodynamicBaseEnsemble
 
 
-class CanonicalAnnealing(BaseEnsemble):
+class CanonicalAnnealing(ThermodynamicBaseEnsemble):
     """Instances of this class allow one to carry out simulated annealing
     in the canonical ensemble, i.e. the temperature is varied in
     pre-defined fashion while the composition is kept fixed.  See
@@ -112,9 +113,9 @@ class CanonicalAnnealing(BaseEnsemble):
             random_seed=random_seed,
             data_container_write_period=data_container_write_period,
             ensemble_data_write_interval=ensemble_data_write_interval,
-            trajectory_write_interval=trajectory_write_interval)
+            trajectory_write_interval=trajectory_write_interval,
+            boltzmann_constant=boltzmann_constant)
 
-        self._boltzmann_constant = boltzmann_constant
         self._temperature = T_start
         self._T_start = T_start
         self._T_stop = T_stop
@@ -156,11 +157,6 @@ class CanonicalAnnealing(BaseEnsemble):
         """ Number of steps to carry out """
         return self._n_steps
 
-    @property
-    def boltzmann_constant(self) -> float:
-        """ Boltzmann constant :math:`k_B` (see parameters section above) """
-        return self._boltzmann_constant
-
     def run(self):
         """ Runs the annealing. """
         if self.total_trials >= self.n_steps:
@@ -180,24 +176,6 @@ class CanonicalAnnealing(BaseEnsemble):
         if self._acceptance_condition(potential_diff):
             self._accepted_trials += 1
             self.update_occupations(sites, species)
-
-    def _acceptance_condition(self, potential_diff: float) -> bool:
-        """
-        Evaluates Metropolis acceptance criterion.
-
-        Parameters
-        ----------
-        potential_diff
-            change in the thermodynamic potential associated
-            with the trial step
-        """
-        if potential_diff < 0:
-            return True
-        elif abs(self.temperature) < 1e-6:  # temperature is numerically zero
-            return False
-        else:
-            p = np.exp(-potential_diff / (self.boltzmann_constant * self.temperature))
-            return p > self._next_random_number()
 
     def _get_ensemble_data(self) -> Dict:
         """Returns the data associated with the ensemble. For the

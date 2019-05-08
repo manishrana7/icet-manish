@@ -8,9 +8,9 @@ from ase.units import kB
 from .. import DataContainer
 from .base_ensemble import BaseEnsemble
 from ..calculators.base_calculator import BaseCalculator
+from .thermodynamic_base_ensemble import ThermodynamicBaseEnsemble
 
-
-class CanonicalEnsemble(BaseEnsemble):
+class CanonicalEnsemble(ThermodynamicBaseEnsemble):
     """Instances of this class allow one to simulate systems in the
     canonical ensemble (:math:`N_iVT`), i.e. at constant temperature
     (:math:`T`), number of atoms of each species (:math:`N_i`), and
@@ -130,7 +130,6 @@ class CanonicalEnsemble(BaseEnsemble):
                  trajectory_write_interval: int = None) -> None:
 
         self._ensemble_parameters = dict(temperature=temperature)
-        self._boltzmann_constant = boltzmann_constant
 
         # add species count to ensemble parameters
         symbols = set([symbol for sub in calculator.sublattices
@@ -146,20 +145,15 @@ class CanonicalEnsemble(BaseEnsemble):
             random_seed=random_seed,
             data_container_write_period=data_container_write_period,
             ensemble_data_write_interval=ensemble_data_write_interval,
-            trajectory_write_interval=trajectory_write_interval)
+            trajectory_write_interval=trajectory_write_interval,
+            boltzmann_constant=boltzmann_constant)
 
         # setup sublattice probabilities
         self.sublattice_probabilities = get_swap_sublattice_probabilities(self.configuration)
 
     @property
     def temperature(self) -> float:
-        """ temperature :math:`T` (see parameters section above) """
-        return self.ensemble_parameters['temperature']
-
-    @property
-    def boltzmann_constant(self) -> float:
-        """ Boltzmann constant :math:`k_B` (see parameters section above) """
-        return self._boltzmann_constant
+        return self._ensemble_parameters['temperature']
 
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
@@ -173,22 +167,6 @@ class CanonicalEnsemble(BaseEnsemble):
         if self._acceptance_condition(potential_diff):
             self._accepted_trials += 1
             self.update_occupations(sites, species)
-
-    def _acceptance_condition(self, potential_diff: float) -> bool:
-        """
-        Evaluates Metropolis acceptance criterion.
-
-        Parameters
-        ----------
-        potential_diff
-            change in the thermodynamic potential associated
-            with the trial step
-        """
-        if potential_diff < 0:
-            return True
-        else:
-            return np.exp(-potential_diff / (self.boltzmann_constant * self.temperature)) > \
-                self._next_random_number()
 
     def get_random_sublattice_index(self) -> int:
         """Returns a random sublattice index based on the weights of the

@@ -12,9 +12,10 @@ from typing import Dict, Union
 from .. import DataContainer
 from .base_ensemble import BaseEnsemble
 from ..calculators.base_calculator import BaseCalculator
+from .thermodynamic_base_ensemble import ThermodynamicBaseEnsemble
 
 
-class VCSGCEnsemble(BaseEnsemble):
+class VCSGCEnsemble(ThermodynamicBaseEnsemble):
     """Instances of this class allow one to simulate systems in the
     variance-constrained semi-grand canonical (VCSGC) ensemble
     (:math:`N\\phi\\kappa VT`), i.e. at constant temperature (:math:`T`), total
@@ -182,7 +183,9 @@ class VCSGCEnsemble(BaseEnsemble):
             random_seed=random_seed,
             data_container_write_period=data_container_write_period,
             ensemble_data_write_interval=ensemble_data_write_interval,
-            trajectory_write_interval=trajectory_write_interval)
+            trajectory_write_interval=trajectory_write_interval,
+            boltzmann_constant=boltzmann_constant
+            )
 
         if any([len(sl.chemical_symbols) > 2 for sl in self.sublattices]):
             raise NotImplementedError('VCSGCEnsemble does not yet support cluster'
@@ -226,32 +229,11 @@ class VCSGCEnsemble(BaseEnsemble):
             self._accepted_trials += 1
             self.update_occupations([index], [new_species])
 
-    def _acceptance_condition(self, potential_diff: float) -> bool:
-        """
-        Evaluates Metropolis acceptance criterion.
-
-        Parameters
-        ----------
-        potential_diff
-            the change in the thermodynamic potential associated
-            with the trial step
-        """
-        if potential_diff < 0:
-            return True
-        else:
-            return np.exp(-potential_diff / (
-                self.boltzmann_constant * self.temperature)) > \
-                self._next_random_number()
 
     @property
     def temperature(self) -> float:
         """ temperature :math:`T` (see parameters section above) """
         return self.ensemble_parameters['temperature']
-
-    @property
-    def boltzmann_constant(self) -> float:
-        """ Boltzmann constant :math:`k_B` (see parameters section above) """
-        return self._boltzmann_constant
 
     @property
     def phis(self) -> Dict[int, float]:
