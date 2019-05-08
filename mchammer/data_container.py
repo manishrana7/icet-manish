@@ -142,7 +142,7 @@ class DataContainer:
                 atoms.numbers = row_data['occupations']
                 record = dict()
                 if observer.return_type is dict:
-                    for key, value in observer.get_observable(self.calculator.atoms).items():
+                    for key, value in observer.get_observable(atoms).items():
                         record[key] = value
                 else:
                     record[observer.tag] = observer.get_observable(atoms)
