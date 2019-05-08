@@ -181,23 +181,7 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
         self._total_trials += 1
-
-        # energy change
-        sublattice_index = self.get_random_sublattice_index()
-        index, species = \
-            self.configuration.get_flip_state(sublattice_index)
-        potential_diff = self._get_property_change([index], [species])
-
-        # change in chemical potential
-        old_species = self.configuration.occupations[index]
-        chemical_potential_diff = \
-            self.chemical_potentials[old_species] - \
-            self.chemical_potentials[species]
-        potential_diff += chemical_potential_diff
-
-        if self._acceptance_condition(potential_diff):
-            self._accepted_trials += 1
-            self.update_occupations([index], [species])
+        self.do_sgc_flip(self.chemical_potentials)
 
     @property
     def chemical_potentials(self) -> Dict[int, float]:

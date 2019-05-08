@@ -111,8 +111,6 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
     def do_canonical_swap(self, sublattice_index=None):
         """ Carries out one Monte Carlo trial step. """
 
-        if sublattice_index == None:
-            sublattice_index = self.get_random_sublattice_index()
 
         sites, species = self.configuration.get_swapped_state(sublattice_index)
 
@@ -121,3 +119,25 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         if self._acceptance_condition(potential_diff):
             self._accepted_trials += 1
             self.update_occupations(sites, species)
+
+
+    def do_sgc_flip(self, chemical_potentials, sublattice_index=None):
+        """ Carries out one Monte Carlo trial step. """
+
+        if sublattice_index == None:
+            sublattice_index = self.get_random_sublattice_index()
+
+        index, species = \
+            self.configuration.get_flip_state(sublattice_index)
+        potential_diff = self._get_property_change([index], [species])
+
+        # change in chemical potential
+        old_species = self.configuration.occupations[index]
+        chemical_potential_diff = \
+            chemical_potentials[old_species] - \
+            chemical_potentials[species]
+        potential_diff += chemical_potential_diff
+
+        if self._acceptance_condition(potential_diff):
+            self._accepted_trials += 1
+            self.update_occupations([index], [species])
