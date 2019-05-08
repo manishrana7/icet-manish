@@ -157,7 +157,6 @@ class CanonicalEnsemble(ThermodynamicBaseEnsemble):
 
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
-        self._total_trials += 1
         self.do_canonical_swap()
         
     def get_random_sublattice_index(self) -> int:
