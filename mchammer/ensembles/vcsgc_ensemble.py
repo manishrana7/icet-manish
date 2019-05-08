@@ -196,8 +196,7 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
         for sl in self.sublattices.active_sublattices:
             for number in sl.atomic_numbers:
                 if number not in self.phis.keys():
-                    raise ValueError('phis were not set for {}'.format(
-                        chemical_symbols[number]))
+                    raise ValueError('phis were not set for {}'.format(chemical_symbols[number]))
 
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
