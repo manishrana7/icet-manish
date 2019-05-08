@@ -201,34 +201,8 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
                         chemical_symbols[number]))
 
     def _do_trial_step(self):
-        """ Carries out one Monte Carlo trial step. """
-        self._total_trials += 1
-
-        # choose flip
-        sublattice_index = self.get_random_sublattice_index()
-        index, new_species = \
-            self.configuration.get_flip_state(sublattice_index)
-        old_species = self.configuration.occupations[index]
-
-        # Calculate difference in VCSGC thermodynamic potential.
-        # Note that this assumes that only one atom was flipped.
-        N = len(self.atoms)
-        occupations = self.configuration._occupations.tolist()
-        potential_diff = 1.0  # dN
-        potential_diff -= occupations.count(old_species)
-        potential_diff -= 0.5 * N * self.phis[old_species]
-        potential_diff += occupations.count(new_species)
-        potential_diff += 0.5 * N * self.phis[new_species]
-        potential_diff *= self.kappa
-        potential_diff *= self.boltzmann_constant * self.temperature
-        potential_diff /= N
-
-        potential_diff += self._get_property_change([index], [new_species])
-
-        if self._acceptance_condition(potential_diff):
-            self._accepted_trials += 1
-            self.update_occupations([index], [new_species])
-
+        """ Carries out one Monte Carlo trial step. """        
+        self.do_vcsgc_flip(phis=self.phis, kappa=self.kappa)
 
     @property
     def temperature(self) -> float:
