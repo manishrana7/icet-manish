@@ -142,6 +142,10 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
                                         data_container='myrun_sgc.dc',
                                         chemical_potentials={'Ag': 0, 'Au': 0.8})
         mc.run(100)  # carry out 100 trial swaps
+
+    TODO
+    ----
+    * add check that chemical symbols in chemical potentials are allowed
     """
 
     def __init__(self, atoms: Atoms, calculator: BaseCalculator,

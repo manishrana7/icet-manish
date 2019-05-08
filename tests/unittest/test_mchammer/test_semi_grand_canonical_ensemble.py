@@ -72,30 +72,10 @@ class TestEnsemble(unittest.TestCase):
         target = {13: 5, 31: 0}
         self.assertEqual(retval, target)
 
-        self.ensemble._set_chemical_potentials({'Al': 4, 'Ga': 1})
-        retval = self.ensemble.chemical_potentials
-        target = {13: 4, 31: 1}
-        self.assertEqual(retval, target)
-
-        self.ensemble._set_chemical_potentials({13: 10, 31: -1})
-        retval = self.ensemble.chemical_potentials
-        target = {13: 10, 31: -1}
-        self.assertEqual(retval, target)
-
-        self.ensemble._set_chemical_potentials({13: 16})
-        retval = self.ensemble.chemical_potentials
-        target = {13: 16, 31: -1}
-        self.assertEqual(retval, target)
-
         # test exceptions
         with self.assertRaises(TypeError) as context:
             self.ensemble._set_chemical_potentials('xyz')
         self.assertTrue('chemical_potentials has the wrong type'
-                        in str(context.exception))
-
-        with self.assertRaises(ValueError) as context:
-            self.ensemble._set_chemical_potentials({'Ni': 3})
-        self.assertTrue('Unknown species'
                         in str(context.exception))
 
     def test_do_trial_step(self):
