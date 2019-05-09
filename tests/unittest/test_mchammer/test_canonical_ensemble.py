@@ -160,10 +160,9 @@ class TestEnsemble(unittest.TestCase):
         # test raise when swap not possible on either lattice
         supercell[1].symbol = 'Al'
         ce_calc = ClusterExpansionCalculator(supercell, ce)
-        ensemble = CanonicalEnsemble(supercell, ce_calc, temperature=100)
 
         with self.assertRaises(ValueError) as context:
-            ensemble._get_swap_sublattice_probabilities()
+            ensemble = CanonicalEnsemble(supercell, ce_calc, temperature=100)
         self.assertIn('No canonical swaps are possible on any of the', str(context.exception))
 
 

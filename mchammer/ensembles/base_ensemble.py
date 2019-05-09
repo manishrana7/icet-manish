@@ -424,20 +424,34 @@ class BaseEnsemble(ABC):
                 occupations=self.configuration.occupations),
                 'acceptance_ratio': self.acceptance_ratio}
 
-    def get_random_sublattice_index(self) -> int:
+    def get_random_sublattice_index(self, probability_distribution=None) -> int:
         """Returns a random sublattice index based on the weights of the
         sublattice.
 
+        Parameters
+        ----------
+        probability_distribution
+            probability distributions for the sublattices
         Todo
         ----
         * add unit test
         """
-        total_active_sites = sum([len(sl.indices) for sl in self.sublattices.active_sublattices])
-        probability_distribution = [len(sl.indices) / total_active_sites for
-                                    sl in self.sublattices.active_sublattices]
-        pick = np.random.choice(
-            range(0, len(self.sublattices.active_sublattices)),
-            p=probability_distribution)
+
+        if probability_distribution is None:
+            probability_distribution = []
+            for i, sl in enumerate(self.sublattices):
+                if len(sl.chemical_symbols) > 1:
+                    probability_distribution.append(len(sl.indices))
+                else:
+                    probability_distribution.append(0)
+
+            norm = sum(probability_distribution)
+            probability_distribution = [p / norm for p in probability_distribution]
+
+        if len(probability_distribution) != len(self.sublattices):
+            raise ValueError("probability_distribution should have the same size as sublattices")
+        pick = np.random.choice(range(0, len(self.sublattices)),
+                                p=probability_distribution)
         return pick
 
     def _restart_ensemble(self):

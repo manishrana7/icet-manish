@@ -191,7 +191,7 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
     def _get_swap_sublattice_probabilities(self) -> List[float]:
         """ Returns sublattice probabilities suitable for swaps."""
         sublattice_probabilities = []
-        for i, sl in enumerate(self.configuration.sublattices):
+        for i, sl in enumerate(self.sublattices):
             if self.configuration.is_swap_possible(i):
                 sublattice_probabilities.append(len(sl.indices))
             else:

@@ -148,10 +148,13 @@ class CanonicalEnsemble(ThermodynamicBaseEnsemble):
             trajectory_write_interval=trajectory_write_interval,
             boltzmann_constant=boltzmann_constant)
 
+        self._sublattice_probabilities = self._get_swap_sublattice_probabilities()
+
     @property
     def temperature(self) -> float:
         return self._ensemble_parameters['temperature']
 
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
-        self.do_canonical_swap()
+        sublattice_index = self.get_random_sublattice_index(self._sublattice_probabilities)
+        self.do_canonical_swap(sublattice_index=sublattice_index)
