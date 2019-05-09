@@ -169,10 +169,10 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         occupations = self.configuration._occupations.tolist()
         potential_diff = 1.0  # dN
         potential_diff -= occupations.count(old_species)
-        potential_diff -= 0.5 * N * self.phis[old_species]
+        potential_diff -= 0.5 * N * phis[old_species]
         potential_diff += occupations.count(new_species)
-        potential_diff += 0.5 * N * self.phis[new_species]
-        potential_diff *= self.kappa
+        potential_diff += 0.5 * N * phis[new_species]
+        potential_diff *= kappa
         potential_diff *= self.boltzmann_constant * self.temperature
         potential_diff /= N
 

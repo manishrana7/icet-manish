@@ -4,7 +4,7 @@ from ase.build import bulk
 from icet import ClusterExpansion, ClusterSpace
 from mchammer.calculators import ClusterExpansionCalculator
 from mchammer.ensembles import SemiGrandCanonicalEnsemble
-from mchammer.ensembles.thermodynamic_base_ensemble import ThermodynamicBaseEnsemble
+from mchammer.ensembles.vcsgc_ensemble import get_phis
 
 
 class TestEnsemble(unittest.TestCase):
@@ -78,8 +78,17 @@ class TestEnsemble(unittest.TestCase):
             self.ensemble.do_canonical_swap(sublattice_index=sl_index)
         self.assertEqual(self.ensemble._total_trials, 30)
 
+    def test_do_vcsgc_flip(self):
+        """Test the vcsgc flip."""
+        kappa = 200
+        phis = {'Al': -1, 'Ga': -1}
+        phis = get_phis(phis)
+        for _ in range(10):
+            self.ensemble.do_vcsgc_flip(phis=phis, kappa=kappa)
+        self.assertEqual(self.ensemble._total_trials, 10)
+
     def test_get_random_sublattice_index_for_swaps(self):
-        """Tests the do trial step."""
+        """Tests get_random_sublattice_index_for_swaps."""
 
         for _ in range(1000):
             sl_index = self.ensemble.get_random_sublattice_index_for_swaps()
