@@ -447,8 +447,7 @@ class BaseEnsemble(ABC):
 
         if len(probability_distribution) != len(self.sublattices):
             raise ValueError("probability_distribution should have the same size as sublattices")
-        pick = np.random.choice(range(0, len(self.sublattices)),
-                                p=probability_distribution)
+        pick = np.random.choice(range(0, len(self.sublattices)), p=probability_distribution)
         return pick
 
     def _restart_ensemble(self):
