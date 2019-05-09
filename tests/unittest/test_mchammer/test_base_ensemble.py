@@ -223,6 +223,17 @@ class TestEnsemble(unittest.TestCase):
                 number_of_observations,
                 total_iters // self.ensemble.observers['Apple2'].interval + 1)
 
+    def test_get_random_sublattice_index(self):
+        """Tests the random sublattice index method."""
+
+        for _ in range(100):
+            self.ensemble.get_random_sublattice_index()
+
+        with self.assertRaises(ValueError) as context:
+            self.ensemble.get_random_sublattice_index([1, 0])
+        self.assertIn("probability_distribution should have the same size as sublattices",
+                      str(context.exception))
+
     def test_run_with_dict_observer(self):
         """Tests the run method with a dict observer."""
         observer = DictObserver(interval=28)

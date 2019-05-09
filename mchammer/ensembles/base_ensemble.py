@@ -432,9 +432,6 @@ class BaseEnsemble(ABC):
         ----------
         probability_distribution
             probability distributions for the sublattices
-        Todo
-        ----
-        * add unit test
         """
 
         if probability_distribution is None:
