@@ -234,6 +234,23 @@ class TestEnsemble(unittest.TestCase):
         self.assertIn("probability_distribution should have the same size as sublattices",
                       str(context.exception))
 
+        # Test running with inactive sublattice
+        chemical_symbols = [['C', 'Be'], ['W']]
+        prim = bulk('W', 'bcc', cubic=True, )
+        cs = ClusterSpace(atoms=prim, chemical_symbols=chemical_symbols, cutoffs=[5])
+        parameters = [1] * len(cs)
+        ce = ClusterExpansion(cs, parameters)
+
+        size = 4
+        atoms = ce.cluster_space.primitive_structure.repeat(size)
+        calculator = ClusterExpansionCalculator(atoms, ce)
+        mc = ConcreteEnsemble(atoms=atoms, calculator=calculator)
+
+        # We should always get the active sublattice(i.e. the zeroth sublattice)
+        for _ in range(1000):
+            index = mc.get_random_sublattice_index()
+            self.assertEqual(index, 0)
+
     def test_run_with_dict_observer(self):
         """Tests the run method with a dict observer."""
         observer = DictObserver(interval=28)
