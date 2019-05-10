@@ -73,11 +73,6 @@ class TestEnsemble(unittest.TestCase):
             self.ensemble.do_canonical_swap(sublattice_index=sl_index)
         self.assertEqual(self.ensemble._total_trials, 20)
 
-        for _ in range(10):
-            sl_index = self.ensemble.get_random_sublattice_index_for_swaps()
-            self.ensemble.do_canonical_swap(sublattice_index=sl_index)
-        self.assertEqual(self.ensemble._total_trials, 30)
-
     def test_do_vcsgc_flip(self):
         """Test the vcsgc flip."""
         kappa = 200
@@ -86,13 +81,6 @@ class TestEnsemble(unittest.TestCase):
         for _ in range(10):
             self.ensemble.do_vcsgc_flip(phis=phis, kappa=kappa)
         self.assertEqual(self.ensemble._total_trials, 10)
-
-    def test_get_random_sublattice_index_for_swaps(self):
-        """Tests get_random_sublattice_index_for_swaps."""
-
-        for _ in range(1000):
-            sl_index = self.ensemble.get_random_sublattice_index_for_swaps()
-            self.assertTrue(self.ensemble.configuration.is_swap_possible(sl_index))
 
 
 if __name__ == '__main__':

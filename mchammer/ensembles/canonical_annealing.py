@@ -130,7 +130,6 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
             self._cooling_function = cooling_function
         else:
             raise TypeError('cooling_function must be either str or a function')
-        self._sublattice_probabilities = self._get_swap_sublattice_probabilities()
 
     @property
     def temperature(self) -> float:
@@ -162,8 +161,7 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
         """ Carries out one Monte Carlo trial step. """
         self._temperature = self._cooling_function(
             self.total_trials, self.T_start, self.T_stop, self.n_steps)
-        sublattice_index = self.get_random_sublattice_index(self._sublattice_probabilities)
-        self.do_canonical_swap(sublattice_index=sublattice_index)
+        self.do_canonical_swap()
 
     def _get_ensemble_data(self) -> Dict:
         """Returns the data associated with the ensemble. For the

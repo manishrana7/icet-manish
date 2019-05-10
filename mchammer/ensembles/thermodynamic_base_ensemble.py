@@ -71,6 +71,9 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             ensemble_data_write_interval=ensemble_data_write_interval,
             trajectory_write_interval=trajectory_write_interval)
 
+        self._flip_sublattice_probabilities = self._get_flip_sublattice_probabilities()
+        self._swap_sublattice_probabilities = self._get_swap_sublattice_probabilities()
+
     @abstractproperty
     @property
     def temperature(self) -> float:
@@ -109,7 +112,8 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
          """
         self._total_trials += 1
         if sublattice_index is None:
-            sublattice_index = self.get_random_sublattice_index_for_swaps()
+            sublattice_index = self.get_random_sublattice_index(
+                self._swap_sublattice_probabilities)
         sites, species = self.configuration.get_swapped_state(sublattice_index)
         potential_diff = self._get_property_change(sites, species)
 
@@ -129,7 +133,8 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         """
         self._total_trials += 1
         if sublattice_index is None:
-            sublattice_index = self.get_random_sublattice_index()
+            sublattice_index = self.get_random_sublattice_index(
+                self._flip_sublattice_probabilities)
 
         index, species = self.configuration.get_flip_state(sublattice_index)
         potential_diff = self._get_property_change([index], [species])
@@ -158,7 +163,8 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         """
         self._total_trials += 1
         if sublattice_index is None:
-            sublattice_index = self.get_random_sublattice_index()
+            sublattice_index = self.get_random_sublattice_index(
+                self._flip_sublattice_probabilities)
 
         index, new_species = self.configuration.get_flip_state(sublattice_index)
         old_species = self.configuration.occupations[index]
@@ -182,12 +188,6 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             self._accepted_trials += 1
             self.update_occupations([index], [new_species])
 
-    def get_random_sublattice_index_for_swaps(self) -> int:
-        """ Returns a random sublattice index suitable for swaps."""
-        sublattice_probabilities = self._get_swap_sublattice_probabilities()
-        pick = np.random.choice(range(0, len(self.sublattices)), p=sublattice_probabilities)
-        return pick
-
     def _get_swap_sublattice_probabilities(self) -> List[float]:
         """ Returns sublattice probabilities suitable for swaps."""
         sublattice_probabilities = []
@@ -201,3 +201,18 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             raise ValueError('No canonical swaps are possible on any of the active sublattices.')
         sublattice_probabilities = [p / norm for p in sublattice_probabilities]
         return sublattice_probabilities
+
+    def _get_flip_sublattice_probabilities(self) -> List[float]:
+        """Returns the default sublattice probability which is based on
+        the sizes of a sublattice.
+        """
+        probability_distribution = []
+        for i, sl in enumerate(self.sublattices):
+            if len(sl.chemical_symbols) > 1:
+                probability_distribution.append(len(sl.indices))
+            else:
+                probability_distribution.append(0)
+
+        norm = sum(probability_distribution)
+        probability_distribution = [p / norm for p in probability_distribution]
+        return probability_distribution
