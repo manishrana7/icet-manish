@@ -384,6 +384,10 @@ class TestDataContainer(unittest.TestCase):
         for atoms, occupation in zip(atoms_list, occupations):
             self.assertEqual(atoms.numbers.tolist(), occupation)
 
+        atoms_list, potential = self.dc._get_trajectory('potential')
+        for atoms, occupation in zip(atoms_list, occupations):
+            self.assertEqual(atoms.numbers.tolist(), occupation)
+
         # trajectory and properties
         mctrial, atoms_list, energies = \
             self.dc.get_data('mctrial', 'trajectory', 'potential')

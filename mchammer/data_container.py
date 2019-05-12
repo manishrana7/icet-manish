@@ -202,7 +202,9 @@ class DataContainer:
             if fill_method != 'skip_none':
                 raise ValueError('Only skip_none fill method is avaliable'
                                  ' when trajectory is requested')
-            return self._get_trajectory(*tags, start=start, stop=stop,
+            new_tags = tuple(['occupations' if tag == 'trajectory' else
+                             tag for tag in tags])
+            return self._get_trajectory(*new_tags, start=start, stop=stop,
                                         interval=interval)
 
         for tag in tags:
@@ -432,12 +434,15 @@ class DataContainer:
             increment for mctrial; by default the smallest available
             interval will be used.
         """
-        new_tags = tuple(['occupations' if tag == 'trajectory' else
-                          tag for tag in tags])
+        if 'occupations' in tags:
+            new_tags = tags
+        else:
+            new_tags = ('occupations', ) + tags
+
         data = \
             self.get_data(*new_tags, start=start, stop=stop, interval=interval)
 
-        if len(tags) > 1:
+        if len(new_tags) > 1:
             data_list = list(data)
         else:
             data_list = [data]
