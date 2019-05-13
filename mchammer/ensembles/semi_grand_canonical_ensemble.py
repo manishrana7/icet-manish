@@ -112,6 +112,10 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
     trajectory_write_interval : int
         interval at which the current occupation vector of the atomic
         configuration is written to the data container.
+    sublattice_probability : List[float]
+        probability for picking a sublattice when doing a random flip.
+        This should be as long as the number of sublattices and should
+        sum up to 1.
 
     Example
     -------
@@ -155,7 +159,8 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None,
-                 boltzmann_constant: float = kB) -> None:
+                 boltzmann_constant: float = kB,
+                 sublattice_probability=None) -> None:
 
         self._ensemble_parameters = dict(temperature=temperature)
 
@@ -176,6 +181,11 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
             trajectory_write_interval=trajectory_write_interval,
             boltzmann_constant=boltzmann_constant)
 
+        if sublattice_probability is None:
+            self._flip_sublattice_probabilities = self._get_flip_sublattice_probabilities()
+        else:
+            self._flip_sublattice_probabilities = sublattice_probability
+
     @property
     def temperature(self) -> float:
         """ temperature :math:`T` (see parameters section above) """
@@ -183,7 +193,9 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
 
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
-        self.do_sgc_flip(self.chemical_potentials)
+        sublattice_index = self.get_random_sublattice_index(
+            probability_distribution=self._flip_sublattice_probabilities)
+        self.do_sgc_flip(self.chemical_potentials, sublattice_index=sublattice_index)
 
     @property
     def chemical_potentials(self) -> Dict[int, float]:

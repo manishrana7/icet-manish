@@ -84,6 +84,11 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
     trajectory_write_interval : int
         interval at which the current occupation vector of the atomic
         configuration is written to the data container.
+    sublattice_probability : List[float]
+        probability for picking a sublattice when doing a random swap.
+        This should be as long as the number of sublattices and should
+        sum up to 1.
+
     """
 
     def __init__(self, atoms: Atoms, calculator: BaseCalculator,
@@ -94,7 +99,8 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
                  data_container: DataContainer = None, random_seed: int = None,
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
-                 trajectory_write_interval: int = None) -> None:
+                 trajectory_write_interval: int = None,
+                 sublattice_probability=None) -> None:
 
         self._ensemble_parameters = dict(n_steps=n_steps)
 
@@ -131,6 +137,11 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
         else:
             raise TypeError('cooling_function must be either str or a function')
 
+        if sublattice_probability is None:
+            self._swap_sublattice_probabilities = self._get_swap_sublattice_probabilities()
+        else:
+            self._swap_sublattice_probabilities = sublattice_probability
+
     @property
     def temperature(self) -> float:
         """ Current temperature """
@@ -161,7 +172,8 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
         """ Carries out one Monte Carlo trial step. """
         self._temperature = self._cooling_function(
             self.total_trials, self.T_start, self.T_stop, self.n_steps)
-        self.do_canonical_swap()
+        sublattice_index = self.get_random_sublattice_index(self._swap_sublattice_probabilities)
+        self.do_canonical_swap(sublattice_index=sublattice_index)
 
     def _get_ensemble_data(self) -> Dict:
         """Returns the data associated with the ensemble. For the

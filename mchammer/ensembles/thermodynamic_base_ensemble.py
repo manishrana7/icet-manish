@@ -71,9 +71,6 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             ensemble_data_write_interval=ensemble_data_write_interval,
             trajectory_write_interval=trajectory_write_interval)
 
-        self._flip_sublattice_probabilities = self._get_flip_sublattice_probabilities()
-        self._swap_sublattice_probabilities = self._get_swap_sublattice_probabilities()
-
     @abstractproperty
     @property
     def temperature(self) -> float:
@@ -102,7 +99,7 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             p = np.exp(-potential_diff / (self.boltzmann_constant * self.temperature))
             return p > self._next_random_number()
 
-    def do_canonical_swap(self, sublattice_index: int = None) -> None:
+    def do_canonical_swap(self, sublattice_index: int) -> None:
         """ Carries out one Monte Carlo trial step.
 
         Parameters
@@ -111,9 +108,6 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             the sublattice the swap will act on
          """
         self._total_trials += 1
-        if sublattice_index is None:
-            sublattice_index = self.get_random_sublattice_index(
-                self._swap_sublattice_probabilities)
         sites, species = self.configuration.get_swapped_state(sublattice_index)
         potential_diff = self._get_property_change(sites, species)
 
@@ -122,7 +116,7 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             self.update_occupations(sites, species)
 
     def do_sgc_flip(self, chemical_potentials: Dict[int, float],
-                    sublattice_index: int = None) -> None:
+                    sublattice_index: int) -> None:
         """ Carries out one Monte Carlo trial step.
 
         chemical_potentials
@@ -132,9 +126,6 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             the sublattice the flip will act on
         """
         self._total_trials += 1
-        if sublattice_index is None:
-            sublattice_index = self.get_random_sublattice_index(
-                self._flip_sublattice_probabilities)
 
         index, species = self.configuration.get_flip_state(sublattice_index)
         potential_diff = self._get_property_change([index], [species])

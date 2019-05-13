@@ -52,26 +52,20 @@ class TestEnsemble(unittest.TestCase):
     def test_do_sgc_trial_step(self):
         """Tests the do trial step."""
         chemical_potentials = self.ensemble._chemical_potentials
-        for _ in range(10):
-            self.ensemble.do_sgc_flip(chemical_potentials=chemical_potentials)
-        self.assertEqual(self.ensemble._total_trials, 10)
 
         for _ in range(10):
             sl_index = self.ensemble.get_random_sublattice_index()
             self.ensemble.do_sgc_flip(sublattice_index=sl_index,
                                       chemical_potentials=chemical_potentials)
-        self.assertEqual(self.ensemble._total_trials, 20)
+        self.assertEqual(self.ensemble._total_trials, 10)
 
     def test_do_canonical_trial_step(self):
         """Tests the do trial step."""
-        for _ in range(10):
-            self.ensemble.do_canonical_swap()
-        self.assertEqual(self.ensemble._total_trials, 10)
 
         for _ in range(10):
             sl_index = self.ensemble.get_random_sublattice_index()
             self.ensemble.do_canonical_swap(sublattice_index=sl_index)
-        self.assertEqual(self.ensemble._total_trials, 20)
+        self.assertEqual(self.ensemble._total_trials, 10)
 
     def test_do_vcsgc_flip(self):
         """Test the vcsgc flip."""
@@ -79,7 +73,8 @@ class TestEnsemble(unittest.TestCase):
         phis = {'Al': -1, 'Ga': -1}
         phis = get_phis(phis)
         for _ in range(10):
-            self.ensemble.do_vcsgc_flip(phis=phis, kappa=kappa)
+            sl_index = self.ensemble.get_random_sublattice_index()
+            self.ensemble.do_vcsgc_flip(phis=phis, kappa=kappa, sublattice_index=sl_index)
         self.assertEqual(self.ensemble._total_trials, 10)
 
 

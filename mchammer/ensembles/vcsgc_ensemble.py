@@ -124,6 +124,11 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
     trajectory_write_interval : int
         interval at which the current occupation vector of the atomic
         configuration is written to the data container.
+    sublattice_probability : List[float]
+        probability for picking a sublattice when doing a random flip.
+        This should be as long as the number of sublattices and should
+        sum up to 1.
+
 
     Example
     -------
@@ -165,7 +170,8 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
                  random_seed: int = None,
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
-                 trajectory_write_interval: int = None) -> None:
+                 trajectory_write_interval: int = None,
+                 sublattice_probability=None) -> None:
 
         self._ensemble_parameters = dict(temperature=temperature,
                                          kappa=kappa)
@@ -198,9 +204,16 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
                 if number not in self.phis.keys():
                     raise ValueError('phis were not set for {}'.format(chemical_symbols[number]))
 
+        if sublattice_probability is None:
+            self._flip_sublattice_probabilities = self._get_flip_sublattice_probabilities()
+        else:
+            self._flip_sublattice_probabilities = sublattice_probability
+
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
-        self.do_vcsgc_flip(phis=self.phis, kappa=self.kappa)
+        sublattice_index = self.get_random_sublattice_index(
+            probability_distribution=self._flip_sublattice_probabilities)
+        self.do_vcsgc_flip(phis=self.phis, kappa=self.kappa, sublattice_index=sublattice_index)
 
     @property
     def temperature(self) -> float:
