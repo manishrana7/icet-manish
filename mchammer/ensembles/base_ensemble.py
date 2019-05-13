@@ -478,7 +478,7 @@ class BaseEnsemble(ABC):
             accepted_trials=self._accepted_trials,
             random_state=random.getstate())
 
-        self.data_container._write(outfile)
+        self.data_container.write(outfile)
 
     @property
     def ensemble_parameters(self) -> dict:

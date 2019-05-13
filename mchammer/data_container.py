@@ -121,7 +121,7 @@ class DataContainer:
         self._last_state['accepted_trials'] = accepted_trials
         self._last_state['random_state'] = random_state
 
-    def update_from_observer(self, observer: BaseObserver):
+    def apply_observer(self, observer: BaseObserver):
         """ Adds observer data from observer to data container.
 
         The observer will only be run for the mctrials for which the
@@ -138,7 +138,12 @@ class DataContainer:
             if 'occupations' in row_data:
                 atoms = self.atoms.copy()
                 atoms.numbers = row_data['occupations']
-                record = {observer.tag: observer.get_observable(atoms)}
+                record = dict()
+                if observer.return_type is dict:
+                    for key, value in observer.get_observable(atoms).items():
+                        record[key] = value
+                else:
+                    record[observer.tag] = observer.get_observable(atoms)
                 row_data.update(record)
                 self._observables.add(observer.tag)
 
@@ -557,7 +562,7 @@ class DataContainer:
 
         return dc
 
-    def _write(self, outfile: Union[str, BinaryIO, TextIO]):
+    def write(self, outfile: Union[str, BinaryIO, TextIO]):
         """
         Writes DataContainer object to file.
 
