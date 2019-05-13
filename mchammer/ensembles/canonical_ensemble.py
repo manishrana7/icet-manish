@@ -161,6 +161,7 @@ class CanonicalEnsemble(ThermodynamicBaseEnsemble):
 
     @property
     def temperature(self) -> float:
+        """ Current temperature """
         return self._ensemble_parameters['temperature']
 
     def _do_trial_step(self):
