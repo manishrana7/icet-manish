@@ -83,12 +83,12 @@ pages:
     - for tag in `git tag | tail -3` ; do
         echo "tag= ${tag}" ;
         git checkout $tag ;
-	if [ -d examples ] ; then ;
+        if [ -d examples ] ; then ;
           cd examples ;
           find tutorial/ -print | zip ../public/tutorial_${tag}.zip -@ ;
           find advanced_topics/ -print | zip ../public/advanced_topics_${tag}.zip -@ ;
           cd .. ;
-	fi ;
+        fi ;
         find tests/ -print | zip public/tests_${tag}.zip tests/structure_databases/*.db -@ ;
       done
     # clean up
