@@ -123,7 +123,7 @@ class DataContainer:
         self._last_state['accepted_trials'] = accepted_trials
         self._last_state['random_state'] = random_state
 
-    def update_from_observer(self, observer: BaseObserver):
+    def apply_observer(self, observer: BaseObserver):
         """ Adds observer data from observer to data container.
 
         The observer will only be run for the mctrials for which the
@@ -560,7 +560,7 @@ class DataContainer:
 
         return dc
 
-    def _write(self, outfile: Union[str, BinaryIO, TextIO]):
+    def write(self, outfile: Union[str, BinaryIO, TextIO]):
         """
         Writes DataContainer object to file.
 
