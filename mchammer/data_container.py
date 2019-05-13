@@ -151,7 +151,9 @@ class DataContainer:
                  fill_method: str = 'skip_none',
                  apply_to: List[str] = None) \
             -> Union[np.ndarray, List[Atoms], Tuple[np.ndarray, List[Atoms]]]:
-        """Returns the accumulated data for the requested observables.
+        """Returns the accumulated data for the requested observables,
+        including configurations stored in the data container. The latter
+        can be achieved by including 'trajectory' as a tag.
 
         Parameters
         ----------
@@ -189,6 +191,25 @@ class DataContainer:
             if fill method is unknown
         ValueError
             if trajectory is requested and fill method is not skip_none
+
+        Examples
+        --------
+        The following lines illustrate how to use the `get_data` method
+        for extracting data from the trajectory.
+
+        ```
+        # obtain a list of all values of the potential represented by
+        # the cluster expansion along the trajectory
+        p = get_data('potential')
+
+        # as above but this time the MC trial step and the temperature
+        # are included as well
+        s, p, t = get_data('mctrial', 'potential', 'temperature')
+
+        # obtain configurations along the trajectory along with
+        # their potential
+        p, confs = get_data('potential', 'trajectory')
+        ```
         """
         fill_methods = ['skip_none',
                         'fill_backward',
