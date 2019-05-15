@@ -4,7 +4,7 @@ import numpy as np
 
 from ase import Atoms
 from ase.units import kB
-from typing import Dict
+from typing import Dict, List
 
 from .. import DataContainer
 from ..calculators.base_calculator import BaseCalculator
@@ -84,7 +84,7 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
     trajectory_write_interval : int
         interval at which the current occupation vector of the atomic
         configuration is written to the data container.
-    sublattice_probability : List[float]
+    sublattice_probabilities : List[float]
         probability for picking a sublattice when doing a random swap.
         This should be as long as the number of sublattices and should
         sum up to 1.
@@ -100,7 +100,7 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None,
-                 sublattice_probability=None) -> None:
+                 sublattice_probabilities: List[float]=None) -> None:
 
         self._ensemble_parameters = dict(n_steps=n_steps)
 
@@ -137,10 +137,10 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
         else:
             raise TypeError('cooling_function must be either str or a function')
 
-        if sublattice_probability is None:
+        if sublattice_probabilities is None:
             self._swap_sublattice_probabilities = self._get_swap_sublattice_probabilities()
         else:
-            self._swap_sublattice_probabilities = sublattice_probability
+            self._swap_sublattice_probabilities = sublattice_probabilities
 
     @property
     def temperature(self) -> float:

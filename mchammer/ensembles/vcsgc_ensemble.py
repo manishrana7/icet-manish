@@ -7,7 +7,7 @@ import numpy as np
 from ase import Atoms
 from ase.data import atomic_numbers, chemical_symbols
 from ase.units import kB
-from typing import Dict, Union
+from typing import Dict, Union, List
 
 from .. import DataContainer
 from ..calculators.base_calculator import BaseCalculator
@@ -124,9 +124,9 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
     trajectory_write_interval : int
         interval at which the current occupation vector of the atomic
         configuration is written to the data container.
-    sublattice_probability : List[float]
+    sublattice_probabilities : List[float]
         probability for picking a sublattice when doing a random flip.
-        This should be as long as the number of sublattices and should
+        The list should be as long as the number of sublattices and should
         sum up to 1.
 
 
@@ -171,11 +171,11 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None,
-                 sublattice_probability=None) -> None:
+                 sublattice_probabilities: List[float]=None) -> None:
 
         self._ensemble_parameters = dict(temperature=temperature,
                                          kappa=kappa)
-        self._set_phis(phis)
+        self._phis = get_phis(phis)
         for atnum, phi in self.phis.items():
             phi_sym = 'phi_{}'.format(chemical_symbols[atnum])
             self._ensemble_parameters[phi_sym] = phi
@@ -204,10 +204,10 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
                 if number not in self.phis.keys():
                     raise ValueError('phis were not set for {}'.format(chemical_symbols[number]))
 
-        if sublattice_probability is None:
+        if sublattice_probabilities is None:
             self._flip_sublattice_probabilities = self._get_flip_sublattice_probabilities()
         else:
-            self._flip_sublattice_probabilities = sublattice_probability
+            self._flip_sublattice_probabilities = sublattice_probabilities
 
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
@@ -235,10 +235,6 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
         (see parameters section above)
         """
         return self.ensemble_parameters['kappa']
-
-    def _set_phis(self, phis: Dict[Union[int, str], float]):
-        """ Sets values of phis."""
-        self._phis = get_phis(phis)
 
     def _get_ensemble_data(self) -> Dict:
         """

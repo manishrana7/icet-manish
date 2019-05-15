@@ -226,9 +226,6 @@ class TestEnsemble(unittest.TestCase):
     def test_get_random_sublattice_index(self):
         """Tests the random sublattice index method."""
 
-        for _ in range(100):
-            self.ensemble.get_random_sublattice_index()
-
         with self.assertRaises(ValueError) as context:
             self.ensemble.get_random_sublattice_index([1, 0])
         self.assertIn("probability_distribution should have the same size as sublattices",
@@ -245,11 +242,6 @@ class TestEnsemble(unittest.TestCase):
         atoms = ce.cluster_space.primitive_structure.repeat(size)
         calculator = ClusterExpansionCalculator(atoms, ce)
         mc = ConcreteEnsemble(atoms=atoms, calculator=calculator)
-
-        # We should always get the active sublattice(i.e. the zeroth sublattice)
-        for _ in range(1000):
-            index = mc.get_random_sublattice_index()
-            self.assertEqual(index, 0)
 
     def test_run_with_dict_observer(self):
         """Tests the run method with a dict observer."""

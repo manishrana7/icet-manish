@@ -8,7 +8,7 @@ from ase import Atoms
 from ase.data import atomic_numbers, chemical_symbols
 from ase.units import kB
 from collections import OrderedDict
-from typing import Dict, Union
+from typing import Dict, Union, List
 
 from .. import DataContainer
 from ..calculators.base_calculator import BaseCalculator
@@ -112,7 +112,7 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
     trajectory_write_interval : int
         interval at which the current occupation vector of the atomic
         configuration is written to the data container.
-    sublattice_probability : List[float]
+    sublattice_probabilities : List[float]
         probability for picking a sublattice when doing a random flip.
         This should be as long as the number of sublattices and should
         sum up to 1.
@@ -160,12 +160,11 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None,
                  boltzmann_constant: float = kB,
-                 sublattice_probability=None) -> None:
+                 sublattice_probabilities: List[float]=None) -> None:
 
         self._ensemble_parameters = dict(temperature=temperature)
 
-        self._chemical_potentials = None
-        self._set_chemical_potentials(chemical_potentials)
+        self._chemical_potentials = get_chemical_potentials(chemical_potentials)
         for atnum, chempot in self.chemical_potentials.items():
             mu_sym = 'mu_{}'.format(chemical_symbols[atnum])
             self._ensemble_parameters[mu_sym] = chempot
@@ -181,10 +180,10 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
             trajectory_write_interval=trajectory_write_interval,
             boltzmann_constant=boltzmann_constant)
 
-        if sublattice_probability is None:
+        if sublattice_probabilities is None:
             self._flip_sublattice_probabilities = self._get_flip_sublattice_probabilities()
         else:
-            self._flip_sublattice_probabilities = sublattice_probability
+            self._flip_sublattice_probabilities = sublattice_probabilities
 
     @property
     def temperature(self) -> float:
@@ -203,14 +202,6 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
         chemical potentials :math:`\\mu_i` (see parameters section above)
         """
         return self._chemical_potentials
-
-    def _set_chemical_potentials(self, chemical_potentials: Dict[Union[int, str], float]):
-        """ Sets values of chemical potentials. """
-        if not isinstance(chemical_potentials, dict):
-            raise TypeError('chemical_potentials has the wrong type: {}'
-                            .format(type(chemical_potentials)))
-
-        self._chemical_potentials = get_chemical_potentials(chemical_potentials)
 
     def _get_ensemble_data(self) -> Dict:
         """Returns the data associated with the ensemble. For the SGC

@@ -4,6 +4,7 @@ from ase.build import bulk
 from icet import ClusterExpansion, ClusterSpace
 from mchammer.calculators import ClusterExpansionCalculator
 from mchammer.ensembles import SemiGrandCanonicalEnsemble
+from mchammer.ensembles.semi_grand_canonical_ensemble import get_chemical_potentials
 
 
 class TestEnsemble(unittest.TestCase):
@@ -74,7 +75,7 @@ class TestEnsemble(unittest.TestCase):
 
         # test exceptions
         with self.assertRaises(TypeError) as context:
-            self.ensemble._set_chemical_potentials('xyz')
+            get_chemical_potentials('xyz')
         self.assertTrue('chemical_potentials has the wrong type'
                         in str(context.exception))
 
