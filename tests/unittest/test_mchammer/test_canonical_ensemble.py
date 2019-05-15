@@ -5,9 +5,7 @@ from ase.build import bulk
 
 from icet import ClusterExpansion, ClusterSpace
 from mchammer.calculators import ClusterExpansionCalculator
-from mchammer.configuration_manager import ConfigurationManager
-from mchammer.ensembles.canonical_ensemble import CanonicalEnsemble, \
-    get_swap_sublattice_probabilities
+from mchammer.ensembles.canonical_ensemble import CanonicalEnsemble
 
 
 class TestEnsemble(unittest.TestCase):
@@ -146,25 +144,25 @@ class TestEnsemble(unittest.TestCase):
         prim = bulk('Al').repeat([2, 1, 1])
         chemical_symbols = [['Al'], ['Ag', 'Al']]
         cs = ClusterSpace(prim, cutoffs=[0], chemical_symbols=chemical_symbols)
+        ce = ClusterExpansion(cs, [1]*len(cs))
 
         supercell = prim.repeat(2)
         supercell[1].symbol = 'Ag'
-        sublattices = cs.get_sublattices(supercell)
-        cm = ConfigurationManager(supercell, sublattices)
+        ce_calc = ClusterExpansionCalculator(supercell, ce)
+        ensemble = CanonicalEnsemble(supercell, ce_calc, temperature=100)
 
         # test get_swap_sublattice_probabilities
-        probs = get_swap_sublattice_probabilities(cm)
+        probs = ensemble._get_swap_sublattice_probabilities()
         self.assertEqual(len(probs), 2)
         self.assertEqual(probs[0], 1)
         self.assertEqual(probs[1], 0)
 
         # test raise when swap not possible on either lattice
         supercell[1].symbol = 'Al'
-        sublattices = cs.get_sublattices(supercell)
-        cm = ConfigurationManager(supercell, sublattices)
+        ce_calc = ClusterExpansionCalculator(supercell, ce)
 
         with self.assertRaises(ValueError) as context:
-            get_swap_sublattice_probabilities(cm)
+            ensemble = CanonicalEnsemble(supercell, ce_calc, temperature=100)
         self.assertIn('No canonical swaps are possible on any of the', str(context.exception))
 
 

@@ -6,7 +6,6 @@ import numpy as np
 from typing import List
 import random
 from icet.io.logging import logger
-
 logger = logger.getChild('target_cluster_vector_annealing')
 
 
@@ -121,7 +120,8 @@ class TargetClusterVectorAnnealing():
         ensemble = random.choice(self._sub_ensembles)
 
         # Choose two sites and swap
-        sublattice_index = ensemble.get_random_sublattice_index()
+        sublattice_index = ensemble.get_random_sublattice_index(
+            ensemble._swap_sublattice_probabilities)
         sites, species = ensemble.configuration.get_swapped_state(
             sublattice_index)
 
