@@ -125,6 +125,10 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
         self._T_stop = T_stop
         self._n_steps = n_steps
 
+        self._ground_state_candidate = self.configuration.atoms
+        self._ground_state_candidate_potential = self.calculator.calculate_total(
+                occupations=self.configuration.occupations)
+
         # setup cooling function
         if isinstance(cooling_function, str):
             available = sorted(available_cooling_functions.keys())
@@ -162,6 +166,16 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
         """ Number of steps to carry out """
         return self._n_steps
 
+    @property
+    def estimated_ground_state(self):
+        """ Structure with lowest observed potential during run """
+        return self._ground_state_candidate.copy()
+
+    @property
+    def estimated_ground_state_potential(self):
+        """ Lowest observed potential during run """
+        return self._ground_state_candidate_potential
+
     def run(self):
         """ Runs the annealing. """
         if self.total_trials >= self.n_steps:
@@ -181,6 +195,9 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
         """
         data = super()._get_ensemble_data()
         data['temperature'] = self.temperature
+        if data['potential'] < self._ground_state_candidate_potential:
+            self._ground_state_candidate_potential = data['potential']
+            self._ground_state_candidate = self.configuration.atoms
         return data
 
 
