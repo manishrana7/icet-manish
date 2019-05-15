@@ -6,7 +6,6 @@ import numpy as np
 from typing import List
 import random
 from icet.io.logging import logger
-from .thermodynamic_base_ensemble import ThermodynamicBaseEnsemble
 logger = logger.getChild('target_cluster_vector_annealing')
 
 
