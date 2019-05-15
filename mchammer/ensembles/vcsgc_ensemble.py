@@ -171,7 +171,7 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None,
-                 sublattice_probabilities: List[float]=None) -> None:
+                 sublattice_probabilities: List[float] = None) -> None:
 
         self._ensemble_parameters = dict(temperature=temperature,
                                          kappa=kappa)

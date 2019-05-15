@@ -80,7 +80,6 @@ class TargetClusterVectorAnnealing():
         self._total_trials = 0
         self._accepted_trials = 0
         self._n_steps = 42
-        
 
     def generate_structure(self, number_of_trial_steps: int = None) -> Atoms:
         """
@@ -122,7 +121,8 @@ class TargetClusterVectorAnnealing():
         ensemble = random.choice(self._sub_ensembles)
 
         # Choose two sites and swap
-        sublattice_index = ensemble.get_random_sublattice_index(ensemble._swap_sublattice_probabilities)
+        sublattice_index = ensemble.get_random_sublattice_index(
+            ensemble._swap_sublattice_probabilities)
         sites, species = ensemble.configuration.get_swapped_state(
             sublattice_index)
 

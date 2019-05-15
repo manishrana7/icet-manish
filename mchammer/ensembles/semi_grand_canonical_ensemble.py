@@ -160,7 +160,7 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None,
                  boltzmann_constant: float = kB,
-                 sublattice_probabilities: List[float]=None) -> None:
+                 sublattice_probabilities: List[float] = None) -> None:
 
         self._ensemble_parameters = dict(temperature=temperature)
 
