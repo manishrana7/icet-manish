@@ -33,5 +33,5 @@ for temperature in [900, 300]:
             phis={'Ag': -2.0 - phi, 'Pd': phi},
             kappa=200)
 
-        mc.run(number_of_trial_steps=len(atoms) * 100)
+        mc.run(number_of_trial_steps=len(atoms) * 30)
         atoms = mc.atoms
