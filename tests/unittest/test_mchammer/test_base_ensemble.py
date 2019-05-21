@@ -112,6 +112,16 @@ class TestEnsemble(unittest.TestCase):
         self.assertTrue('Path to data container file does not exist:'
                         ' path/to/nowhere' in str(context.exception))
 
+        # wrong occupations on atoms
+        wrong_atoms = self.atoms.copy()
+        wrong_atoms.numbers = [1]*len(self.atoms)
+        with self.assertRaises(ValueError) as context:
+            ConcreteEnsemble(atoms=wrong_atoms,
+                             calculator=self.calculator)
+
+        self.assertTrue('Occupations of structure not compatible with '
+                        'the sublattice' in str(context.exception))
+
     def test_init_fails_for_faulty_chemical_symbols(self):
         """Tests that initialization fails if species exists  on
         mutliple sublattices"""
@@ -213,6 +223,14 @@ class TestEnsemble(unittest.TestCase):
                 number_of_observations,
                 total_iters // self.ensemble.observers['Apple2'].interval + 1)
 
+    def test_get_random_sublattice_index(self):
+        """Tests the random sublattice index method."""
+
+        with self.assertRaises(ValueError) as context:
+            self.ensemble.get_random_sublattice_index([1, 0])
+        self.assertIn("probability_distribution should have the same size as sublattices",
+                      str(context.exception))
+
     def test_run_with_dict_observer(self):
         """Tests the run method with a dict observer."""
         observer = DictObserver(interval=28)
@@ -263,7 +281,7 @@ class TestEnsemble(unittest.TestCase):
 
         # write data container to tempfile
         temp_container_file = tempfile.NamedTemporaryFile()
-        dc_read._write(temp_container_file.name)
+        dc_read.write(temp_container_file.name)
 
         # initialise a new ensemble with dc file
         ensemble_reloaded = \
@@ -386,6 +404,10 @@ class TestEnsemble(unittest.TestCase):
 
         input = [20, 15, 10]
         target = 5
+        self.assertEqual(self.ensemble._get_gcd(input), target)
+
+        input = [1]
+        target = 1
         self.assertEqual(self.ensemble._get_gcd(input), target)
 
     def test_get_property_change(self):

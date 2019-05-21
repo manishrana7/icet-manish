@@ -19,8 +19,7 @@ from ase.io import write as ase_write
 from icet.core.orbit_list import OrbitList
 from icet.core.structure import Structure
 from icet.core.sublattices import Sublattices
-from icet.tools.geometry import (add_vacuum_in_non_pbc,
-                                 get_decorated_primitive_structure)
+from icet.tools.geometry import get_decorated_primitive_structure
 
 
 class ClusterSpace(_ClusterSpace):
@@ -41,6 +40,14 @@ class ClusterSpace(_ClusterSpace):
         atomic configuration
     cutoffs : list(float)
         cutoff radii per order that define the cluster space
+
+        Cutoffs are specified in units of Angstrom and refer to the
+        longest distance between two atoms in the cluster. The first
+        element refers to pairs, the second to triplets, the third
+        to quadruplets, and so on. ``cutoffs=[7.0, 4.5]`` thus implies
+        that all pairs distanced 7 A or less will be included,
+        as well as all triplets among which the longest distance is no
+        longer than 4.5 A.
     chemical_symbols : list(str) or list(list(str))
         list of chemical symbols, each of which must map to an element
         of the periodic table
@@ -134,15 +141,18 @@ class ClusterSpace(_ClusterSpace):
             raise TypeError("chemical_symbols must be List[str] or List[List[str]], not {}".format(
                 type(self._input_chemical_symbols)))
         elif len(self._input_chemical_symbols) != len(self._input_atoms):
-            raise ValueError('chemical_symbols must have same length as atoms')
+            msg = 'chemical_symbols must have same length as atoms. '
+            msg += 'len(chemical_symbols = {}, len(atoms)= {}'.format(
+                len(self._input_chemical_symbols), len(self._input_atoms))
+            raise ValueError(msg)
         else:
             chemical_symbols = copy.deepcopy(self._input_chemical_symbols)
 
-        for symbols in chemical_symbols:
+        for i, symbols in enumerate(chemical_symbols):
             if len(symbols) != len(set(symbols)):
-                duplicates = [s for s in symbols if symbols.count(s) > 1]
                 raise ValueError(
-                    'Found duplicate symbols {}  on sublattice'.format(duplicates))
+                    'Found duplicates of allowed chemical symbols on site {}.'
+                    ' allowed species on  site {}= {}'.format(i, i, symbols))
 
         if len([tuple(sorted(s)) for s in chemical_symbols if len(s) > 1]) == 0:
             raise ValueError('No active sites found')
@@ -441,19 +451,39 @@ class ClusterSpace(_ClusterSpace):
         vol1 = prim.get_volume() / len(prim)
         vol2 = structure.get_volume() / len(structure)
         if abs(vol1 - vol2) > vol_tol:
-            raise ValueError('Volume per atom of structure does not match the volume of'
+            raise ValueError('Volume per atom of structure does not match the volume of '
                              'ClusterSpace.primitive_structure')
 
         # check occupations
-        symbols = structure.get_chemical_symbols()
         sublattices = self.get_sublattices(structure)
-        for sl in sublattices:
-            for i in sl.indices:
-                if not symbols[i] in sl.chemical_symbols:
-                    msg = 'Occupations of structure not compatible with ClusterSpace. '
-                    msg += 'Site {} with occupation {} not allowed on sublattice {}'.format(
-                        i, symbols[i], sl.chemical_symbols)
-                    raise ValueError(msg)
+        sublattices.assert_occupation_is_allowed(structure.get_chemical_symbols())
+
+    def is_supercell_self_correlated(self, atoms: Atoms) -> bool:
+        """
+        Check whether an atoms object self-interacts via periodic
+        boundary conditions.
+
+        Parameters
+        ----------
+        atoms
+            An atoms object to check self-interaction for
+
+        Returns
+        -------
+        bool
+            If True, the atoms object self-interacts via periodic
+            boundary conditions, otherwise False.
+        """
+        ol = self.orbit_list.get_supercell_orbit_list(atoms)
+        orbit_indices = set()
+        for orbit in ol.orbits:
+            for sites in orbit.get_equivalent_sites():
+                indices = tuple(sorted([site.index for site in sites]))
+                if indices in orbit_indices:
+                    return True
+                else:
+                    orbit_indices.add(indices)
+        return False
 
     def write(self, filename: str) -> None:
         """
@@ -604,18 +634,15 @@ def get_singlet_configuration(atoms: Atoms,
                                                    return_cluster_space=True)
 
     if to_primitive:
-        singlet_configuration = cluster_space.primitive_structure
+        atoms_singlet = cluster_space.primitive_structure
         for singlet in cluster_data:
             for site in singlet['sites']:
                 symbol = chemical_symbols[singlet['orbit_index'] + 1]
                 atom_index = site[0].index
-                singlet_configuration[atom_index].symbol = symbol
+                atoms_singlet[atom_index].symbol = symbol
     else:
-        singlet_configuration = atoms.copy()
-        singlet_configuration = add_vacuum_in_non_pbc(singlet_configuration)
-        orbit_list_supercell\
-            = cluster_space._orbit_list.get_supercell_orbit_list(
-                singlet_configuration)
+        atoms_singlet = atoms.copy()
+        orbit_list_supercell = cluster_space._orbit_list.get_supercell_orbit_list(atoms_singlet)
         for singlet in cluster_data:
             for site in singlet['sites']:
                 symbol = chemical_symbols[singlet['orbit_index'] + 1]
@@ -623,9 +650,9 @@ def get_singlet_configuration(atoms: Atoms,
                     singlet['orbit_index']).get_equivalent_sites()
                 for lattice_site in sites:
                     k = lattice_site[0].index
-                    singlet_configuration[k].symbol = symbol
+                    atoms_singlet[k].symbol = symbol
 
-    return singlet_configuration
+    return atoms_singlet
 
 
 def view_singlets(atoms: Atoms, to_primitive: bool = False):
@@ -643,6 +670,5 @@ def view_singlets(atoms: Atoms, to_primitive: bool = False):
     from ase.visualize import view
     assert isinstance(atoms, Atoms), \
         'input configuration must be an ASE Atoms object'
-    singlet_configuration = get_singlet_configuration(
-        atoms, to_primitive=to_primitive)
-    view(singlet_configuration)
+    atoms_singlet = get_singlet_configuration(atoms, to_primitive=to_primitive)
+    view(atoms_singlet)

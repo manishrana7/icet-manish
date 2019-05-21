@@ -186,6 +186,16 @@ in the RFE algorithm.
 | ``final_estimator_kwargs`` | ``dict``  | keyword arguments for fit method defined by ``final_estimator``        | ``{}``              |
 +----------------------------+-----------+------------------------------------------------------------------------+---------------------+
 
+.. note::
+
+   When running on multi-core systems please be mindful of memory
+   consumption. By default all CPUs will be used (`n_jobs=-1`), which
+   will duplicate data and can require a lot of memory, potentially
+   giving rise to errors. To prevent this behavior you can set the
+   [`n_jobs`
+   parameter](https://scikit-learn.org/stable/glossary.html#term-n-jobs)
+   explicitly, which is handed over directly to scikit-learn.
+
 
 Other methods
 ^^^^^^^^^^^^^
@@ -209,8 +219,6 @@ Optimizer
    :members:
    :undoc-members:
    :inherited-members:
-   :noindex:
-
 
 .. index::
    single: Class reference; EnsembleOptimizer
@@ -222,7 +230,6 @@ EnsembleOptimizer
    :members:
    :undoc-members:
    :inherited-members:
-   :noindex:
 
 
 .. index::
@@ -235,4 +242,3 @@ CrossValidationEstimator
    :members:
    :undoc-members:
    :inherited-members:
-   :noindex:
