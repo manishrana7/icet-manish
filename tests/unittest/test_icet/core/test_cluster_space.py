@@ -508,11 +508,8 @@ class TestClusterSpaceTernary(unittest.TestCase):
                                [[0, 1, 2], [0, 2, 1], [2, 0, 1]],
                                [[0, 1, 2], [1, 0, 2], [1, 2, 0]],
                                [[0, 1, 2]]]
-        print("\n\nTesting cluster space on branch 271 (Python)")
         permutation_retval = self.cs.get_multi_component_vector_permutations(
             mc_vector_target, orbit_index)
-        # for l in permutation_retval:
-        #     print(l)
         self.assertEqual(permutations_target, permutation_retval)
 
         # Test orbit 3
