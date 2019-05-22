@@ -286,7 +286,7 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeSite>
                               std::back_inserter(p_allowed_permutations));
 
         // Step six: Get the indice version of p_allowed_permutations
-        std::unordered_set<std::vector<int>, VectorHash> allowedPermutations;
+        std::set<std::vector<int>> allowedPermutations;
         for (const auto &p_lattNbr : p_allowed_permutations)
         {
             size_t failedLoops = 0;
