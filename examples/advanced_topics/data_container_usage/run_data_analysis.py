@@ -1,5 +1,4 @@
 import numpy as np
-from ase.units import kB
 from mchammer import DataContainer
 from mchammer.data_analysis import get_autocorrelation_function
 import matplotlib.pyplot as plt
