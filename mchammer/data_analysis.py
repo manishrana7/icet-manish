@@ -108,7 +108,8 @@ def _estimate_correlation_length_from_acf(acf: np.ndarray) -> int:
         return lengths[0]
 
 
-def _estimate_error(data: np.ndarray, correlation_length: int, confidence: float) -> float:
+def _estimate_error(data: np.ndarray, correlation_length: int,
+                    confidence: float) -> float:
     """ Estimate error using correlation length"""
     t_factor = scipy.stats.t.ppf((1 + confidence) / 2, len(data)-1)
     error = t_factor * np.std(data) / np.sqrt(len(data) / correlation_length)

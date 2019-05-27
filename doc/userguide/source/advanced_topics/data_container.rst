@@ -6,33 +6,53 @@
 Data container
 ==============
 
+The results of a :term:`MC` simulation are stored in the form of a
+:class:`DataContainer <mchammer.DataContainer>` object, which can be accessed
+via the :func:`data_container
+<mchammer.ensembles.CanonicalEnsemble.data_container>` property of the MC
+ensemble. If a file name is provided during ensemble initialization via the
+`data_container` parameter the data container is also written to file. The
+latter can then be easily read at a later time via the :func:`read
+<mchammer.DataContainer.read>` function of the :class:`DataContainer
+<mchammer.DataContainer>`.
 
-Getting data
-------------
-The raw observable data as a function of mctrial steps can be obtained via the ``get_data``
-function. This function allows for selecting a start and stop mctrial step. This is particular
-useful when e.g. wanting to discard the equilibration part of the simulations. 
+The :class:`DataContainer <mchammer.DataContainer>` class provides ample
+functionality for processing data and extracting various observables that are
+briefly introduced in this section.
 
-.. code-block:: python
+
+Extracting data
+---------------
+
+The raw data as a function of MC trial step can be obtained via the
+:func:`get_data <mchammer.DataContainer.get_data>` function, which also allows
+slicing data by specifying an initial and final MC step. This is useful e.g.,
+for discarding the equilibration part of a simulation::
 
     energy = dc.get_data('potential', start=5000)
 
-The ``get_data`` also allows for pairing multiple observerables for the mctrial steps they all exist.
+The :func:`get_data <mchammer.DataContainer.get_data>` function also allows
+extracting several observables in parallel::
 
-.. code-block:: python
+    mctrial, energy, sro = dc.get_data('mctrial', potential', 'sro_Ag_1')
 
-    mctrial, energy, sro = dc.get_data('potential', start=5000)
+The available observables can be checked using the :attr:`observables
+<mchammer.DataContainer.observables>` attribute.
 
 
-Trajectory
-----------
-The trajectory from the MC simulation can be obtained via
+Extracting trajectory
+---------------------
+
+The atomic configuration can be extracted using the :func:`get_trajectory
+<mchammer.DataContainer.get_trajectory>`
 
 .. code-block:: python
 
     traj = dc.get_trajectory()
 
-The trajectory can also be obtained from the ``get_data`` function, which also allows for pairing the snapshots in the trajectory with observables in the data container.
+Alternatively, the trajectory can be obtained via the :func:`get_data
+<mchammer.DataContainer.get_data>` function, which also allows for pairing the
+snapshots in the trajectory with observables in the data container.
 
 .. code-block:: python
 
@@ -41,9 +61,13 @@ The trajectory can also be obtained from the ``get_data`` function, which also a
 
 Updating data container
 -----------------------
-If you forgot to add an observer when running the MC simulation it can be applied after the fact,
-given that the trajectory is stored in the datacontainer. This is done via the ``apply_observer``
-function. The datacontainer can then be rewritten to file using the ``write`` function.
+
+Normally :ref:`observers <observers>` are attached to an ensemble at the
+beginning of an MC simulation via the :func:`attach_observer
+<mchammer.ensembles.CanonicalEnsemble.attach_observer>` function. They can,
+however, also be applied after the fact via the :func:`apply_observer
+<mchammer.DataContainer.apply_observer>` function, provided the trajectory is
+available via a :class:`DataContainer <mchammer.DataContainer>` object.
 
 .. code-block:: python
 
@@ -51,32 +75,43 @@ function. The datacontainer can then be rewritten to file using the ``write`` fu
     dc = DataContainer.read('my_dc.dc')
     dc.apply_observer(obs)
     new_obs_data = dc.get_data('')
-    dc.write('my_dc.dc')
+
+Afterwards the data container, including the new data, can be written back to
+file using the :func:`write <mchammer.DataContainer.write>` function.
 
 
 Data analysis
 -------------
-The datacontainer also allows for more detailed analysis. The ``analyze_data`` function computes
-the average, std, correlation-length and 95% error estimate of the average for a given observable.
+
+Data containers also allow more detailed analysis. The :func:`analyze_data
+<mchammer.DataContainer.analyze_data>` function computes average, standard
+deviation, correlation length, and 95% error estimate of the average for a
+given observable.
 
 .. code-block:: python
 
     summary = dc.analyze_data('potential')
     print(summary)
 
-The correlation length, :math:`s`, is estimated from the autocorrelation function (ACF).
-When the ACF have decayed below :math:`\mathrm{e^{-2}}` the configurations are said to be
-uncorrelated and this thus provides an estimate of the correlation length.
+Here, the correlation length, :math:`s`, is estimated from the autocorrelation
+function (ACF). When the ACF has decayed below :math:`\mathrm{e^{-2}}`
+observations are said to be uncorrelated, providing an estimate of the
+correlation length.
 
 .. figure::
     autocorrelation.svg
 
-The error estimate (https://en.wikipedia.org/wiki/Standard_error) of the average can be calculated via
+An `error estimate <https://en.wikipedia.org/wiki/Standard_error>`_ of the
+average can be calculated via
 
 .. math::
-    \mathrm{error} = \frac{t \sigma }{\sqrt{Ns}}
+    \mathrm{error} = \frac{t \sigma }{\sqrt{Ns}},
 
-where :math:`\sigma` is the standard deviation, :math:`N` the number of samples, :math:`s` the correlation length and :math:`t` is the t-factor (https://en.wikipedia.org/wiki/Student%27s_t-distribution>) which should be adjusted depending on the confidence interval desired. 
+where :math:`\sigma` is the standard deviation, :math:`N` the number of
+samples, :math:`s` the correlation length and :math:`t` is the `t-factor
+<https://en.wikipedia.org/wiki/Student%27s_t-distribution>`_, which can be
+adjusted depending on the desired confidence interval.
 
-
-Obtaining the autocorrelation function directly or carrying out error estimates can be done via functionality provided in ``mchammer/data_analysis.py``.
+Obtaining the autocorrelation function directly or carrying out error estimates
+can be done via functionality provided in the :ref:`data_analysis
+<data_container_supporting_functions>` module.

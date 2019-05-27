@@ -3,6 +3,8 @@
 
 .. module:: mchammer.observers
 
+.. _observers:
+
 Observers
 =========
 
