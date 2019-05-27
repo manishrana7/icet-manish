@@ -29,8 +29,7 @@ def analyze_data(data: np.ndarray, max_lag: int = None) -> dict:
     return summary
 
 
-def get_autocorrelation_function(data: np.ndarray,
-                                 max_lag: int = None) -> np.ndarray:
+def get_autocorrelation_function(data: np.ndarray, max_lag: int = None) -> np.ndarray:
     """ Returns autocorrelation function.
 
     The autocorrelation function is computed using Pandas.Series.autocorr
