@@ -7,14 +7,14 @@ import numpy as np
 from ase import Atoms
 from ase.data import atomic_numbers, chemical_symbols
 from ase.units import kB
-from typing import Dict
+from typing import Dict, Union, List
 
 from .. import DataContainer
-from .base_ensemble import BaseEnsemble
 from ..calculators.base_calculator import BaseCalculator
+from .thermodynamic_base_ensemble import ThermodynamicBaseEnsemble
 
 
-class VCSGCEnsemble(BaseEnsemble):
+class VCSGCEnsemble(ThermodynamicBaseEnsemble):
     """Instances of this class allow one to simulate systems in the
     variance-constrained semi-grand canonical (VCSGC) ensemble
     (:math:`N\\phi\\kappa VT`), i.e. at constant temperature (:math:`T`), total
@@ -81,125 +81,144 @@ class VCSGCEnsemble(BaseEnsemble):
 
     Parameters
     ----------
-    temperature : float temperature :math:`T` in appropriate units [commonly
-        Kelvin] boltzmann_constant : float Boltzmann constant :math:`k_B` in
-        appropriate units, i.e. units that are consistent with the underlying
-        cluster expansion and the temperature units [default: eV/K] phis :
-        Dict[str, float] average constraint parameters :math:`\\phi_i`; the key
-        denotes the species; there must be one entry for each species but their
-        sum must be :math:`-2.0` (referred to as :math:`\\bar{\\phi}` in
-        [SadErh12]_) kappa : float parameter that constrains the variance of
-        the concentration (referred to as :math:`\\bar{\\kappa}` in
-        [SadErh12]_) calculator : :class:`BaseCalculator` calculator to be used
-        for calculating the potential changes that enter the evaluation of the
-        Metropolis criterion atoms : :class:`ase:Atoms` atomic configuration to
-        be used in the Monte Carlo simulation; also defines the initial
-        occupation vector name : str human-readable ensemble name [default:
-        `BaseEnsemble`] data_container : str name of file the data container
-        associated with the ensemble will be written to; if the file exists it
-        will be read, the data container will be appended, and the file will be
-        updated/overwritten ensemble_data_write_interval : int interval at
-        which data is written to the data container; this includes for example
-        the current value of the calculator (i.e. usually the energy) as well
-        as ensembles specific fields such as temperature or the number of atoms
-        of different species data_container_write_period : float period in
-        units of seconds at which the data container is written to file;
-        writing periodically to file provides both a way to examine the
-        progress of the simulation and to back up the data [default: np.inf]
-        trajectory_write_interval : int interval at which the current
-        occupation vector of the atomic configuration is written to the data
-        container. random_seed : int seed for the random number generator used
-        in the Monte Carlo simulation
+    atoms : :class:`Atoms <ase.Atoms>`
+        atomic configuration to be used in the Monte Carlo simulation;
+        also defines the initial occupation vector
+    calculator : :class:`BaseCalculator <mchammer.calculators.ClusterExpansionCalculator>`
+        calculator to be used for calculating the potential changes
+        that enter the evaluation of the Metropolis criterion
+    temperature : float
+        temperature :math:`T` in appropriate units [commonly Kelvin]
+    phis : Dict[str, float]
+        average constraint parameters :math:`\\phi_i`; the key denotes the
+        species; there must be one entry for each species but their sum must be
+        :math:`-2.0` (referred to as :math:`\\bar{\\phi}` in [SadErh12]_)
+    kappa : float
+        parameter that constrains the variance of the concentration
+        (referred to as :math:`\\bar{\\kappa}` in [SadErh12]_)
+    boltzmann_constant : float
+        Boltzmann constant :math:`k_B` in appropriate
+        units, i.e. units that are consistent
+        with the underlying cluster expansion
+        and the temperature units [default: eV/K]
+    user_tag : str
+        human-readable tag for ensemble [default: None]
+    data_container : str
+        name of file the data container associated with the ensemble
+        will be written to; if the file exists it will be read, the
+        data container will be appended, and the file will be
+        updated/overwritten
+    random_seed : int
+        seed for the random number generator used in the Monte Carlo
+        simulation
+    ensemble_data_write_interval : int
+        interval at which data is written to the data container; this
+        includes for example the current value of the calculator
+        (i.e. usually the energy) as well as ensembles specific fields
+        such as temperature or the number of atoms of different species
+    data_container_write_period : float
+        period in units of seconds at which the data container is
+        written to file; writing periodically to file provides both
+        a way to examine the progress of the simulation and to back up
+        the data [default: np.inf]
+    trajectory_write_interval : int
+        interval at which the current occupation vector of the atomic
+        configuration is written to the data container.
+    sublattice_probabilities : List[float]
+        probability for picking a sublattice when doing a random flip.
+        The list should be as long as the number of sublattices and should
+        sum up to 1.
 
-    Attributes
-    ----------
-    temperature : float temperature :math:`T` (see parameters section above)
-        boltzmann_constant : float Boltzmann constant :math:`k_B` (see
-        parameters section above) kappa : float variance constraint parameter
-        (see parameters section above) accepted_trials : int number of accepted
-        trial steps total_trials : int number of total trial steps
-        data_container_write_period : int period in units of seconds at which
-        the data container is written to file
+
+    Example
+    -------
+    The following snippet illustrate how to carry out a simple Monte Carlo
+    simulation in the variance-constrained semi-canonical ensemble. Here, the
+    parameters of the cluster expansion are set to emulate a simple Ising model
+    in order to obtain an example that can be run without modification. In
+    practice, one should of course use a proper cluster expansion::
+
+        from ase.build import bulk
+        from icet import ClusterExpansion, ClusterSpace
+        from mchammer.calculators import ClusterExpansionCalculator
+        from mchammer.ensembles import VCSGCEnsemble
+
+        # prepare cluster expansion
+        # the setup emulates a second nearest-neighbor (NN) Ising model
+        # (zerolet and singlet ECIs are zero; only first and second neighbor
+        # pairs are included)
+        prim = bulk('Au')
+        cs = ClusterSpace(prim, cutoffs=[4.3], chemical_symbols=['Ag', 'Au'])
+        ce = ClusterExpansion(cs, [0, 0, 0.1, -0.02])
+
+        # set up and run MC simulation
+        atoms = prim.repeat(3)
+        calc = ClusterExpansionCalculator(atoms, ce)
+        phi = 0.6
+        mc = VCSGCEnsemble(atoms=atoms, calculator=calc, temperature=600,
+                           data_container='myrun_vcsgc.dc',
+                           phis={'Ag': -2.0 - phi, 'Au': phi},
+                           kappa=200)
+        mc.run(100)  # carry out 100 trial swaps
     """
 
-    def __init__(self, atoms: Atoms = None,
-                 calculator: BaseCalculator = None,
-                 name: str = 'Variance-constrained '
-                 'semi-grand canonical ensemble',
+    def __init__(self, atoms: Atoms, calculator: BaseCalculator,
+                 temperature: float, phis: Dict[str, float],
+                 kappa: float, boltzmann_constant: float = kB,
+                 user_tag: str = None,
                  data_container: DataContainer = None,
                  random_seed: int = None,
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None,
-                 boltzmann_constant: float = kB, *, temperature: float,
-                 phis: Dict[str, float],
-                 kappa: float) -> None:
+                 sublattice_probabilities: List[float] = None) -> None:
+
+        self._ensemble_parameters = dict(temperature=temperature,
+                                         kappa=kappa)
+        self._phis = get_phis(phis)
+        for atnum, phi in self.phis.items():
+            phi_sym = 'phi_{}'.format(chemical_symbols[atnum])
+            self._ensemble_parameters[phi_sym] = phi
+
+        self._boltzmann_constant = boltzmann_constant
 
         super().__init__(
-            atoms=atoms, calculator=calculator, name=name,
+            atoms=atoms, calculator=calculator, user_tag=user_tag,
             data_container=data_container,
             random_seed=random_seed,
             data_container_write_period=data_container_write_period,
             ensemble_data_write_interval=ensemble_data_write_interval,
-            trajectory_write_interval=trajectory_write_interval)
+            trajectory_write_interval=trajectory_write_interval,
+            boltzmann_constant=boltzmann_constant
+        )
 
-        self.temperature = temperature
-        self.boltzmann_constant = boltzmann_constant
+        if any([len(sl.chemical_symbols) > 2 for sl in self.sublattices]):
+            raise NotImplementedError('VCSGCEnsemble does not yet support cluster'
+                                      ' spaces with more than two species.')
 
-        self._phis = None
-        self.phis = phis
-        self.kappa = kappa
+        if len(self.sublattices.active_sublattices) > 1:
+            raise NotImplementedError('VCSGCEnsemble does not yet support cluster'
+                                      ' spaces with more than one active sublattice.')
+        for sl in self.sublattices.active_sublattices:
+            for number in sl.atomic_numbers:
+                if number not in self.phis.keys():
+                    raise ValueError('phis were not set for {}'.format(chemical_symbols[number]))
 
-        if len(self.configuration._allowed_species) > 2:
-            raise NotImplementedError('VCSGCEnsemble does not yet support '
-                                      'cluster spaces with more than two '
-                                      'species.')
+        if sublattice_probabilities is None:
+            self._flip_sublattice_probabilities = self._get_flip_sublattice_probabilities()
+        else:
+            self._flip_sublattice_probabilities = sublattice_probabilities
 
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
-        self.total_trials += 1
+        sublattice_index = self.get_random_sublattice_index(
+            probability_distribution=self._flip_sublattice_probabilities)
+        self.do_vcsgc_flip(phis=self.phis, kappa=self.kappa, sublattice_index=sublattice_index)
 
-        # choose flip
-        sublattice_index = self.get_random_sublattice_index()
-        index, new_species = \
-            self.configuration.get_flip_state(sublattice_index)
-        old_species = self.configuration.occupations[index]
-
-        # Calculate difference in VCSGC thermodynamic potential.
-        # Note that this assumes that only one atom was flipped.
-        N = len(self.atoms)
-        occupations = self.configuration._occupations.tolist()
-        potential_diff = 1.0  # dN
-        potential_diff -= occupations.count(old_species)
-        potential_diff -= 0.5 * N * self.phis[old_species]
-        potential_diff += occupations.count(new_species)
-        potential_diff += 0.5 * N * self._phis[new_species]
-        potential_diff *= self.kappa
-        potential_diff *= self.boltzmann_constant * self.temperature
-        potential_diff /= N
-
-        potential_diff += self._get_property_change([index], [new_species])
-
-        if self._acceptance_condition(potential_diff):
-            self.accepted_trials += 1
-            self.update_occupations([index], [new_species])
-
-    def _acceptance_condition(self, potential_diff: float) -> bool:
-        """
-        Evaluates Metropolis acceptance criterion.
-
-        Parameters
-        ----------
-        potential_diff
-            the change in the thermodynamic potential associated
-            with the trial step
-        """
-        if potential_diff < 0:
-            return True
-        else:
-            return np.exp(-potential_diff / (
-                self.boltzmann_constant * self.temperature)) > \
-                self._next_random_number()
+    @property
+    def temperature(self) -> float:
+        """ temperature :math:`T` (see parameters section above) """
+        return self.ensemble_parameters['temperature']
 
     @property
     def phis(self) -> Dict[int, float]:
@@ -209,38 +228,20 @@ class VCSGCEnsemble(BaseEnsemble):
         """
         return self._phis
 
-    @phis.setter
-    def phis(self, phis):
-        if not isinstance(phis, dict):
-            raise TypeError('phis must be dict, not {}'.format(type(phis)))
-        if abs(sum(phis.values()) + 2) > 1e-6:
-            raise ValueError('The sum of all phis must equal -2')
-
-        self._phis = {}
-
-        for key, phi in phis.items():
-            if isinstance(key, str):
-                atomic_number = atomic_numbers[key]
-                self._phis[atomic_number] = phi
-            elif isinstance(key, int):
-                self._phis[key] = phi
-        if set(self.configuration._allowed_species) != set(self._phis.keys()):
-            raise ValueError('phis were not set for all species')
+    @property
+    def kappa(self) -> float:
+        """
+        kappa :math:`\\bar{\\kappa}` constrain parameter
+        (see parameters section above)
+        """
+        return self.ensemble_parameters['kappa']
 
     def _get_ensemble_data(self) -> Dict:
         """
         Returns a dict with the default data of the ensemble. This includes
-        temperature, :math:`kappa`, :math:`phi` for every species, atom counts
-        and free energy derivative.
+        atom counts and free energy derivative.
         """
         data = super()._get_ensemble_data()
-
-        # concentration parameters (phis)
-        for atnum, phi in self.phis.items():
-            data['phi_{}'.format(chemical_symbols[atnum])] = phi
-
-        # variance parameter (kappa)
-        data['kappa'] = self.kappa
 
         # free energy derivative
         atnum_1 = min(self.phis.keys())
@@ -250,16 +251,38 @@ class VCSGCEnsemble(BaseEnsemble):
             self.boltzmann_constant * self.temperature * \
             (- 2 * concentration - self.phis[atnum_1])
 
-        # temperature
-        data['temperature'] = self.temperature
-
         # species counts
         atoms = self.configuration.atoms
         unique, counts = np.unique(atoms.numbers, return_counts=True)
-        # TODO: avoid accessing a protected member of a client class
-        for atnum in self.configuration._allowed_species:
-            data['{}_count'.format(chemical_symbols[atnum])] = 0
+
+        for sl in self.sublattices:
+            for symbol in sl.chemical_symbols:
+                data['{}_count'.format(symbol)] = 0
         for atnum, count in zip(unique, counts):
             data['{}_count'.format(chemical_symbols[atnum])] = count
 
         return data
+
+
+def get_phis(phis: Dict[Union[int, str], float]) -> Dict[int, float]:
+    """Get phis as used in the vcsgc ensemble.
+
+    Parameters
+    ----------
+    phis
+        the phis that will be transformed to the format
+        the ensemble use.
+    """
+    if not isinstance(phis, dict):
+        raise TypeError('phis has the wrong type: {}'.format(type(phis)))
+    if abs(sum(phis.values()) + 2) > 1e-6:
+        raise ValueError('The sum of all phis must equal to -2')
+
+    phis_ret = {}
+    for key, phi in phis.items():
+        if isinstance(key, str):
+            atomic_number = atomic_numbers[key]
+            phis_ret[atomic_number] = phi
+        elif isinstance(key, int):
+            phis_ret[key] = phi
+    return phis_ret

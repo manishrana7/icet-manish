@@ -7,6 +7,7 @@ from icet import ClusterExpansion, ClusterSpace
 from mchammer.calculators import ClusterExpansionCalculator
 
 from mchammer.ensembles import VCSGCEnsemble
+from mchammer.ensembles.vcsgc_ensemble import get_phis
 
 
 class TestEnsemble(unittest.TestCase):
@@ -37,61 +38,93 @@ class TestEnsemble(unittest.TestCase):
         self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
 
         self.ensemble = VCSGCEnsemble(
-            calculator=self.calculator, atoms=self.atoms,
-            name='test-ensemble', random_seed=42,
-            data_container_write_period=499.0,
-            ensemble_data_write_interval=25,
-            trajectory_write_interval=40,
+            atoms=self.atoms,
+            calculator=self.calculator,
             temperature=self.temperature,
             phis=self.phis,
             kappa=self.kappa,
-            boltzmann_constant=1e-5)
+            boltzmann_constant=1e-5,
+            user_tag='test-ensemble', random_seed=42,
+            data_container_write_period=499.0,
+            ensemble_data_write_interval=25,
+            trajectory_write_interval=40)
+
+    def test_init(self):
+        """ Tests exceptions are raised during initialization. """
+        with self.assertRaises(TypeError) as context:
+            VCSGCEnsemble(atoms=self.atoms, calculator=self.calculator)
+        self.assertTrue("required positional arguments: 'temperature'" in
+                        str(context.exception))
+
+        with self.assertRaises(TypeError) as context:
+            VCSGCEnsemble(atoms=self.atoms,
+                          calculator=self.calculator,
+                          temperature=self.temperature)
+        self.assertTrue("required positional arguments: 'phis'"
+                        in str(context.exception))
+
+        with self.assertRaises(TypeError) as context:
+            VCSGCEnsemble(atoms=self.atoms,
+                          calculator=self.calculator,
+                          temperature=self.temperature,
+                          phis=self.phis)
+        self.assertTrue("required positional argument: 'kappa'"
+                        in str(context.exception))
+
+        with self.assertRaises(ValueError) as context:
+            VCSGCEnsemble(atoms=self.atoms,
+                          calculator=self.calculator,
+                          temperature=self.temperature,
+                          phis={13: -2.0},
+                          kappa=self.kappa)
+        self.assertTrue('phis were not set' in str(context.exception))
 
     def test_property_phis(self):
-        """Test property phis."""
+        """Tests phis property."""
         retval = self.ensemble.phis
         target = {13: -1.3, 31: -0.7}
         self.assertEqual(retval, target)
 
-        self.ensemble.phis = {'Al': -1.2, 'Ga': -0.8}
+        self.ensemble._phis = get_phis({'Al': -1.2, 'Ga': -0.8})
         retval = self.ensemble.phis
         target = {13: -1.2, 31: -0.8}
         self.assertEqual(retval, target)
 
-        self.ensemble.phis = {13: -2.2, 31: 0.2}
+        self.ensemble._phis = get_phis({13: -2.2, 31: 0.2})
         retval = self.ensemble.phis
         target = {13: -2.2, 31: 0.2}
         self.assertEqual(retval, target)
 
-        # test exceptions
-        with self.assertRaises(ValueError) as context:
-            self.ensemble.phis = {13: -2.0}
-        self.assertTrue('phis were not set' in str(context.exception))
-
         with self.assertRaises(TypeError) as context:
-            self.ensemble.phis = 'xyz'
-        self.assertTrue('phis must be dict' in str(context.exception))
+            get_phis('xyz')
+        self.assertTrue('phis has the wrong type' in str(context.exception))
 
         with self.assertRaises(ValueError) as context:
-            self.ensemble.phis = {13: -1.2, 31: -0.7}
+            get_phis({13: -1.2, 31: -0.7})
         self.assertTrue('The sum of all phis must' in str(context.exception))
 
-    def test_temperature_attribute(self):
-        """Test temperature attribute."""
+    def test_property_boltzmann(self):
+        """Tests explicit Boltzmann constant."""
+        self.assertAlmostEqual(1e-5, self.ensemble.boltzmann_constant)
+
+    def test_property_temperature(self):
+        """Tests temperature property."""
         self.assertEqual(self.ensemble.temperature, self.temperature)
-        self.ensemble.temperature = 300
-        self.assertEqual(self.ensemble.temperature, 300)
+
+    def test_property_kappa(self):
+        """Tests kappa property."""
+        self.assertEqual(self.ensemble.kappa, self.kappa)
 
     def test_do_trial_step(self):
-        """Test the do trial step."""
+        """Tests the do trial step."""
         # Do it many times and hopefully get both a reject and an accept
         for _ in range(10):
             self.ensemble._do_trial_step()
 
-        self.assertEqual(self.ensemble.total_trials, 10)
+        self.assertEqual(self.ensemble._total_trials, 10)
 
     def test_acceptance_condition(self):
-        """ Test the acceptance condition method."""
+        """Tests the acceptance condition method."""
 
         self.assertTrue(self.ensemble._acceptance_condition(-10.0))
 
@@ -99,12 +132,13 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble._acceptance_condition(10.0)
 
     def test_init_with_integer_phis(self):
-        """ Test init with integer chemical potentials."""
+        """Tests init with integer chemical potentials."""
 
         phis = {13: -1, 31: -1}
         ensemble = VCSGCEnsemble(
-            calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
-            random_seed=42, temperature=self.temperature,
+            atoms=self.atoms, calculator=self.calculator,
+            user_tag='test-ensemble', random_seed=42,
+            temperature=self.temperature,
             phis=phis,
             kappa=self.kappa)
         ensemble._do_trial_step()
@@ -112,34 +146,50 @@ class TestEnsemble(unittest.TestCase):
         # Test both int and str
         phis = {'Al': -1, 31: -1}
         ensemble = VCSGCEnsemble(
-            calculator=self.calculator, atoms=self.atoms, name='test-ensemble',
-            random_seed=42, temperature=self.temperature,
+            atoms=self.atoms, calculator=self.calculator,
+            user_tag='test-ensemble', random_seed=42,
+            temperature=self.temperature,
             phis=phis,
             kappa=self.kappa)
         ensemble._do_trial_step()
 
     def test_get_ensemble_data(self):
-        """Test the get ensemble data method."""
+        """Tests the get ensemble data method."""
         data = self.ensemble._get_ensemble_data()
 
         self.assertIn('potential', data.keys())
         self.assertIn('Al_count', data.keys())
         self.assertIn('Ga_count', data.keys())
-        self.assertIn('phi_Al', data.keys())
-        self.assertIn('phi_Ga', data.keys())
-        self.assertIn('kappa', data.keys())
-        self.assertIn('temperature', data.keys())
 
         self.assertEqual(data['Al_count'], 13)
         self.assertEqual(data['Ga_count'], 14)
-        self.assertEqual(data['temperature'], 100.0)
-        self.assertAlmostEqual(data['phi_Al'], -1.3)
-        self.assertAlmostEqual(data['phi_Ga'], -0.7)
-        self.assertEqual(data['kappa'], 10)
+
+    def test_ensemble_parameters(self):
+        """Tests the get ensemble parameters method."""
+        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'],
+                         len(self.atoms))
+        self.assertEqual(self.ensemble.ensemble_parameters['temperature'],
+                         self.temperature)
+        self.assertEqual(self.ensemble.ensemble_parameters['phi_Al'], -1.3)
+        self.assertEqual(self.ensemble.ensemble_parameters['phi_Ga'], -0.7)
+        self.assertEqual(self.ensemble.ensemble_parameters['kappa'], 10)
+
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['n_atoms'],
+            len(self.atoms))
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['temperature'],
+            self.temperature)
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['phi_Al'], -1.3)
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['phi_Ga'], -0.7)
+        self.assertEqual(
+            self.ensemble.data_container.ensemble_parameters['kappa'], 10)
 
     def test_write_interval_and_period(self):
         """
-        Test interval and period for writing data from ensemble.
+        Tests interval and period for writing data from ensemble.
         """
         self.assertEqual(self.ensemble.data_container_write_period, 499.0)
         self.assertEqual(self.ensemble._ensemble_data_write_interval, 25)

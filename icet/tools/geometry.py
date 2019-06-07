@@ -1,14 +1,12 @@
 import numpy as np
 import spglib
-from ase import Atoms
 from typing import Tuple, List, Sequence, TypeVar
-
+from ase import Atoms
+from ase.data import chemical_symbols
 from ase.neighborlist import NeighborList as ase_NeighborList
+from icet.core.lattice_site import LatticeSite
 from icet.core.neighbor_list import NeighborList
 from icet.core.structure import Structure
-from icet.core.lattice_site import LatticeSite
-from icet.core_py.lattice_site import LatticeSite as LatticeSite_py
-from ase.data import chemical_symbols
 
 Vector = List[float]
 T = TypeVar('T')
@@ -76,8 +74,10 @@ def add_vacuum_in_non_pbc(configuration: Atoms) -> Atoms:
     return configuration_cpy
 
 
-def get_primitive_structure(atoms: Atoms, no_idealize: bool = True,
-                            to_primitive=True, symprec=1e-5) -> Atoms:
+def get_primitive_structure(atoms: Atoms,
+                            no_idealize: bool = True,
+                            to_primitive: bool = True,
+                            symprec: float = 1e-5) -> Atoms:
     """
     Determines primitive structure using spglib.
 
@@ -86,7 +86,11 @@ def get_primitive_structure(atoms: Atoms, no_idealize: bool = True,
     atoms
         input atomic structure
     no_idealize
-        If True lengths and angles are not idealized
+        if True lengths and angles are not idealized
+    to_primitive
+        convert to primitive structure
+    symprec
+        tolerance imposed when analyzing the symmetry using spglib
 
     Returns
     -------
@@ -94,9 +98,7 @@ def get_primitive_structure(atoms: Atoms, no_idealize: bool = True,
         primitive structure
     """
     atoms_cpy = atoms.copy()
-    atoms_with_vacuum = add_vacuum_in_non_pbc(atoms_cpy)
-
-    atoms_as_tuple = ase_atoms_to_spglib_cell(atoms_with_vacuum)
+    atoms_as_tuple = ase_atoms_to_spglib_cell(atoms_cpy)
 
     lattice, scaled_positions, numbers = spglib.standardize_cell(
         atoms_as_tuple, to_primitive=to_primitive,
@@ -160,12 +162,12 @@ def get_fractional_positions_from_ase_neighbor_list(
     fractional_positions = []
 
     for i in range(len(atoms)):
-        lattice_site = LatticeSite_py(i, [0., 0., 0.])
+        lattice_site = LatticeSite(i, [0., 0., 0.])
         position = get_position_from_lattice_site(atoms, lattice_site)
         neighbor_positions.append(position)
         indices, offsets = neighbor_list.get_neighbors(i)
         for index, offset in zip(indices, offsets):
-            lattice_site = LatticeSite_py(index, offset)
+            lattice_site = LatticeSite(index, offset)
             position = get_position_from_lattice_site(atoms, lattice_site)
             neighbor_positions.append(position)
     if len(neighbor_positions) > 0:
@@ -192,7 +194,7 @@ def get_position_from_lattice_site(atoms: Atoms, lattice_site: LatticeSite):
 
 
 def find_lattice_site_by_position(atoms: Atoms, position: List[float],
-                                  tol: float = 1e-4) -> LatticeSite_py:
+                                  tol: float = 1e-4) -> LatticeSite:
     """
     Tries to construct a lattice site equivalent from
     position in reference to the atoms object.
@@ -207,17 +209,17 @@ def find_lattice_site_by_position(atoms: Atoms, position: List[float],
         pos = position - atom.position
         # Direct match
         if np.linalg.norm(pos) < tol:
-            return LatticeSite_py(i, np.array((0., 0., 0.)))
+            return LatticeSite(i, np.array((0., 0., 0.)))
 
         fractional = np.linalg.solve(atoms.cell.T, np.array(pos).T).T
         unit_cell_offset = [np.floor(round(x)) for x in fractional]
         residual = np.dot(fractional - unit_cell_offset, atoms.cell)
         if np.linalg.norm(residual) < tol:
-            latNbr = LatticeSite_py(i, unit_cell_offset)
+            latNbr = LatticeSite(i, unit_cell_offset)
             return latNbr
 
     # found nothing, raise error
-    raise RuntimeError("Did not find site in find_lattice_site_by_position")
+    raise RuntimeError('Did not find site in find_lattice_site_by_position')
 
 
 def fractional_to_cartesian(atoms: Atoms,
@@ -241,8 +243,8 @@ def get_permutation(container: Sequence[T],
     Returns the permuted version of container.
     """
     if len(permutation) != len(container):
-        raise RuntimeError("Container and permutation"
-                           " not of same size {} != {}".format(
+        raise RuntimeError('Container and permutation'
+                           ' not of same size {} != {}'.format(
                                len(container), len(permutation)))
     if len(set(permutation)) != len(permutation):
         raise Exception
@@ -282,21 +284,29 @@ def ase_atoms_to_spglib_cell(atoms: Atoms) \
 
 
 def get_decorated_primitive_structure(
-        atoms: Atoms, allowed_species: List[List[str]])-> Tuple[
-        Atoms, List[List[str]]]:
-    """Returns a decorated primitive structure
+        atoms: Atoms,
+        allowed_species: List[List[str]],
+        symprec: float = 1e-5) -> Tuple[Atoms, List[List[str]]]:
+    """Returns a decorated primitive structure.
+    Will put hydrogen on sublattice 1, Helium on sublattice 2 and
+    so on
 
-    Example
-    --------
-        Will put hydrogen on sublattice 1, Helium on sublattice 2 and
-        so on
+    Parameters
+    ----------
+    atoms
+        input structure
+    allowed_species
+        chemical symbols that are allowed on each site
+    symprec
+        tolerance imposed when analyzing the symmetry using spglib
 
-    todo : simplify the revert back to unsorted symbols
+    Todo
+    ----
+    simplify the revert back to unsorted symbols
     """
     if len(atoms) != len(allowed_species):
         raise ValueError(
-            "Atoms object and chemical symbols need to be the same size.")
-    symbols = set()
+            'Atoms object and chemical symbols need to be the same size.')
     symbols = sorted({tuple(sorted(s)) for s in allowed_species})
 
     decorated_primitive = atoms.copy()
@@ -304,7 +314,8 @@ def get_decorated_primitive_structure(
         sublattice = symbols.index(tuple(sorted(sym))) + 1
         decorated_primitive[i].symbol = chemical_symbols[sublattice]
 
-    decorated_primitive = get_primitive_structure(decorated_primitive)
+    decorated_primitive = get_primitive_structure(decorated_primitive,
+                                                  symprec=symprec)
     decorated_primitive.wrap()
     primitive_chemical_symbols = []
     for atom in decorated_primitive:
@@ -316,3 +327,31 @@ def get_decorated_primitive_structure(
             index = primitive_chemical_symbols.index(tuple(sorted(symbols)))
             primitive_chemical_symbols[index] = symbols
     return decorated_primitive, primitive_chemical_symbols
+
+
+def atomic_number_to_chemical_symbol(numbers: List[int]) -> List[str]:
+    """Returns the chemical symbols equivalent to the input atomic
+    numbers.
+
+    Parameters
+    ----------
+    numbers
+        atomic numbers
+    """
+
+    symbols = [chemical_symbols[number] for number in numbers]
+    return symbols
+
+
+def chemical_symbols_to_numbers(symbols: List[str]) -> List[int]:
+    """Returns the atomic numbers equivalent to the input chemical
+    symbols.
+
+    Parameters
+    ----------
+    symbols
+        chemical symbols
+    """
+
+    numbers = [chemical_symbols.index(symbols) for symbols in symbols]
+    return numbers

@@ -37,7 +37,7 @@ void ClusterCounts::count(const Structure &structure,
     std::vector<int> elements(clusterSize);
     for (size_t i = 0; i < latticeNeighbors.size(); i++)
     {
-        elements[i] = structure.getAtomicNumber(latticeNeighbors[i].index());
+        elements[i] = structure._atomicNumbers[latticeNeighbors[i].index()];
     }
 
     // Don't do intact order since there is no reason for it
@@ -55,13 +55,12 @@ void ClusterCounts::count(const Structure &structure,
 void ClusterCounts::count(const Structure &structure, const std::vector<std::vector<LatticeSite>> &latticeSites,
                           const Cluster &cluster, bool orderIntact)
 {
-
+    std::vector<int> elements(latticeSites[0].size());
     for (const auto &sites : latticeSites)
     {
-        std::vector<int> elements(sites.size());
         for (size_t i = 0; i < sites.size(); i++)
         {
-            elements[i] = structure.getAtomicNumber(sites[i].index());
+            elements[i] = structure._atomicNumbers[sites[i].index()];
         }
         countCluster(cluster, elements, orderIntact);
     }
@@ -91,9 +90,9 @@ void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> 
 */
 void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &orbitList, bool orderIntact, bool permuteSites)
 {
-    for (int i = 0; i < orbitList.size(); i++)
+    for (size_t i = 0; i < orbitList.size(); i++)
     {
-        Cluster repr_cluster = orbitList._orbitList[i].getRepresentativeCluster();
+        Cluster repr_cluster = orbitList._orbits[i].getRepresentativeCluster();
         repr_cluster.setTag(i);
         if (permuteSites && orderIntact && repr_cluster.order() != 1)
         {
@@ -101,48 +100,13 @@ void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &
         }
         else if (!permuteSites && orderIntact && repr_cluster.order() != 1)
         {
-            count(structure, orbitList._orbitList[i]._equivalentSites, repr_cluster, orderIntact);
+            count(structure, orbitList._orbits[i]._equivalentSites, repr_cluster, orderIntact);
         }
         else
         {
-            count(structure, orbitList._orbitList[i]._equivalentSites, repr_cluster, orderIntact);
+            count(structure, orbitList._orbits[i]._equivalentSites, repr_cluster, orderIntact);
         }
     }
 }
 
-// Return clusters count information (elements and count) per cluster
-void ClusterCounts::setupClusterCountsInfo()
-{
-    _clusterCountsInfo.clear();
-    for (const auto &map_pair : _clusterCounts)
-    {
-        for (const auto &element_count_pair : map_pair.second)
-        {
-            std::vector<std::string> elementVec;
-            for (auto el : element_count_pair.first)
-            {
-                auto getElementSymbol = PeriodicTable::intStr[el];
-                elementVec.push_back(getElementSymbol);
-            }
-            auto getCountPair = map_pair.second.at(element_count_pair.first);
-            _clusterCountsInfo.push_back(std::make_pair(elementVec, getCountPair));
-        }
-    }
-    //std::sort(
-    //    _clusterCountsInfo.begin(),
-    //    _clusterCountsInfo.end(),
-    //    [](const std::pair<std::vector<std::string>, int> &a, const std::pair<std::vector<std::string>, int> &b){
-    //        return a.first.size() < b.first.size();
-    //    });
-}
 
-// Retrieve cluster count information
-std::pair<std::vector<std::string>, int> ClusterCounts::getClusterCountsInfo(const unsigned int index)
-{
-    if (index >= _clusterCountsInfo.size())
-    {
-        std::string errMSG = "Out of range in ClusterCounts::getClusterCountsInfo " + std::to_string(index) + " >= " + std::to_string(_clusterCountsInfo.size());
-        throw std::out_of_range(errMSG);
-    }
-    return _clusterCountsInfo[index];
-}

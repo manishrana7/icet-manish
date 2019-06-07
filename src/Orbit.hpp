@@ -184,13 +184,13 @@ class Orbit
     }
 
     /// Assigns the allowed sites permutations.
-    void setAllowedSitesPermutations(std::unordered_set<std::vector<int>, VectorHash> &permutations)
+    void setAllowedSitesPermutations(std::set<std::vector<int>> &permutations)
     {
         _allowedSitesPermutations = permutations;
     }
 
     /// Gets the allowed sites permutations.
-    std::unordered_set<std::vector<int>, VectorHash> getAllowedSitesPermutations() const
+    std::set<std::vector<int>> getAllowedSitesPermutations() const
     {
         return _allowedSitesPermutations;
     }
@@ -272,10 +272,10 @@ class Orbit
     bool contains(const std::vector<LatticeSite> sites, bool sorted) const;
 
     /// Removes all elements i in equivalent sites if any sites in _equivalentSites[i] have the input index.
-    void removeSitesWithIndex(const int indexRemove, bool);
+    void removeSitesWithIndex(const size_t indexRemove, bool);
 
     /// Removes all elements i in equivalent sites if no sites in _equivalentSites[i] have the input index.
-    void removeSitesNotWithIndex(const int index, bool);
+    void removeSitesNotWithIndex(const size_t index, bool);
 
     /// Remove a specific set of sites with corresponding equivalent site permutation.
     void removeSites(std::vector<LatticeSite>);
@@ -291,5 +291,5 @@ class Orbit
     std::vector<std::vector<int>> _equivalentSitesPermutations;
 
     /// Contains the allowed sites permutations. i.e. if 0,2,1 is in this set then 0,1,0 is the same MC vector as 0,0,1
-    std::unordered_set<std::vector<int>, VectorHash> _allowedSitesPermutations;
+    std::set<std::vector<int>> _allowedSitesPermutations;
 };

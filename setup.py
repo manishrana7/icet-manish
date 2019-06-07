@@ -3,38 +3,22 @@
 
 import re
 import sys
-from multiprocessing import Process
+from glob import glob
 
 import setuptools
 from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext
 
 
-ext_modules = [
-    Extension(
-        '_icet',
-        ['src/ClusterCounts.cpp',
-         'src/Cluster.cpp',
-         'src/ClusterExpansionCalculator.cpp',
-         'src/ClusterSpace.cpp',
-         'src/Geometry.cpp',
-         'src/LocalOrbitListGenerator.cpp',
-         'src/ManyBodyNeighborList.cpp',
-         'src/NeighborList.cpp',
-         'src/Orbit.cpp',
-         'src/OrbitList.cpp',
-         'src/PermutationMatrix.cpp',
-         'src/PyBinding.cpp',
-         'src/Structure.cpp',
-         'src/Symmetry.cpp'],
-        include_dirs=[
-            'src/3rdparty/pybind11/include/',
-            'src/3rdparty/boost_1_68_0/',
-            'src/3rdparty/eigen3/'
-        ],
-        language='c++'
-    ),
-]
+icet_cpp_module = Extension(
+    '_icet',
+    glob('src/*.cpp'),
+    include_dirs=[
+        'src/3rdparty/pybind11/include/',
+        'src/3rdparty/boost_1_68_0/',
+        'src/3rdparty/eigen3/'
+    ],
+    language='c++')
 
 
 # As of Python 3.6, CCompiler has a `has_flag` method.
@@ -94,6 +78,7 @@ class BuildExt(build_ext):
                         .format(self.distribution.get_version()))
         for ext in self.extensions:
             ext.extra_compile_args = opts
+            ext.extra_link_args = opts
         build_ext.build_extensions(self)
 
 
@@ -101,7 +86,7 @@ if sys.version_info < (3, 5, 0, 'final', 0):
     raise SystemExit('Python 3.5 or later is required!')
 
 
-with open('README.md', encoding='utf-8') as fd:
+with open('README.rst', encoding='utf-8') as fd:
     long_description = fd.read()
 
 with open('icet/__init__.py', encoding='utf-8') as fd:
@@ -122,7 +107,7 @@ author_list = ['Mattias Ångqvist',
                'Piotr Rozyczko',
                'Thomas Holm Rod',
                'Paul Erhart']
-authors = ', '.join(author_list[:-1]) + 'and ' + author_list[-1]
+authors = ', '.join(author_list[:-1]) + ', and ' + author_list[-1]
 
 version = re.search("__version__ = '(.*)'", lines).group(1)
 maintainer = re.search("__maintainer__ = '(.*)'", lines).group(1)
@@ -141,39 +126,11 @@ classifiers = [
     'Programming Language :: Python :: 3.7',
     'Intended Audience :: Science/Research',
     'License :: OSI Approved :: {}'.format(license),
-    'Operating System :: MacOS :: MacOS X',
-    'Operating System :: Microsoft :: Windows',
-    'Operating System :: UNIX',
-    'Operating System :: LINUX',
     'Topic :: Scientific/Engineering :: Physics']
 
 
-def setup_cpp():
-    setup(
-        name='icet_cpp',
-        version=version,
-        author=authors,
-        author_email=email,
-        description=description,
-        long_description=long_description,
-        ext_modules=ext_modules,
-        install_requires=['pybind11>=2.2',
-                          'ase',
-                          'numpy',
-                          'scipy',
-                          'sklearn',
-                          'pandas>=0.23',
-                          'spglib>1.11.0.19'],
-        packages=find_packages(),
-        cmdclass={'build_ext': BuildExt},
-        zip_safe=False,
-        classifiers=classifiers,
-        license=license,
-        url=url,
-    )
+if __name__ == '__main__':
 
-
-def setup_python_icet():
     setup(
         name='icet',
         version=version,
@@ -181,53 +138,18 @@ def setup_python_icet():
         author_email=email,
         description=description,
         long_description=long_description,
-        install_requires=['ase',
+        ext_modules=[icet_cpp_module],
+        install_requires=['pybind11>=2.2',
+                          'ase',
                           'numpy',
                           'scipy',
                           'sklearn',
                           'pandas>=0.23',
-                          'spglib>1.11.0.19'],
+                          'spglib>1.12.0'],
         packages=find_packages(),
+        cmdclass={'build_ext': BuildExt},
+        zip_safe=False,
         classifiers=classifiers,
         license=license,
         url=url,
     )
-
-
-def setup_python_mchammer():
-    setup(
-        name='mchammer',
-        version=version,
-        author=authors,
-        author_email=email,
-        description=description,
-        long_description=long_description,
-        install_requires=['ase',
-                          'numpy',
-                          'scipy',
-                          'sklearn',
-                          'pandas>=0.23',
-                          'spglib>1.11.0.19'],
-        packages=find_packages(),
-        classifiers=classifiers,
-        license=license,
-        url=url,
-    )
-
-
-if __name__ == '__main__':
-
-    # Install cpp
-    install_process = Process(target=setup_cpp)
-    install_process.start()
-    install_process.join()
-
-    # Install python icet
-    install_process = Process(target=setup_python_icet)
-    install_process.start()
-    install_process.join()
-
-    # setup_python mchammer
-    install_process = Process(target=setup_python_mchammer)
-    install_process.start()
-    install_process.join()
