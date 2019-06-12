@@ -66,6 +66,18 @@ class ConfigurationManager(object):
         atoms.set_atomic_numbers(self.occupations)
         return atoms
 
+    def get_occupations_on_sublattice(self, sublattice_index: int) -> List[int]:
+        """
+        Returns the occupations on one sublattice.
+
+        Parameters
+        ---------
+        sublattice_index
+            the sublattice for which the occupations should be returned
+        """
+        sl = self.sublattices[sublattice_index]
+        return list(self.occupations[sl.indices])
+
     def is_swap_possible(self, sublattice_index: int) -> bool:
         """ Checks if swap is possible on specific sublattice.
 

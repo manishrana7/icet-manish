@@ -142,7 +142,7 @@ class ClusterSpace(_ClusterSpace):
                 type(self._input_chemical_symbols)))
         elif len(self._input_chemical_symbols) != len(self._input_atoms):
             msg = 'chemical_symbols must have same length as atoms. '
-            msg += 'len(chemical_symbols = {}, len(atoms)= {}'.format(
+            msg += 'len(chemical_symbols) = {}, len(atoms)= {}'.format(
                 len(self._input_chemical_symbols), len(self._input_atoms))
             raise ValueError(msg)
         else:
