@@ -5,6 +5,7 @@ import numpy as np
 
 from ase import Atoms
 from ase.units import kB
+from ase.data import chemical_symbols
 
 from .. import DataContainer
 from ..calculators.base_calculator import BaseCalculator
@@ -162,17 +163,18 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
 
         # Calculate difference in VCSGC thermodynamic potential.
         # Note that this assumes that only one atom was flipped.
-        N = len(self.atoms)
-        occupations = self.configuration._occupations.tolist()
+        sl_occupations = self.configuration.get_occupations_on_sublattice(sublattice_index)
+        N = len(sl_occupations)
         potential_diff = 1.0  # dN
-        potential_diff -= occupations.count(old_species)
-        potential_diff -= 0.5 * N * phis[old_species]
-        potential_diff += occupations.count(new_species)
-        potential_diff += 0.5 * N * phis[new_species]
-        potential_diff *= kappa
-        potential_diff *= self.boltzmann_constant * self.temperature
-        potential_diff /= N
-
+        for species in phis:
+            if species == old_species:
+                factor = -1
+            elif species == new_species:
+                factor = 1
+            else:
+                continue
+            potential_diff += factor * (N * phis[species] + 2 * sl_occupations.count(species))
+        potential_diff *= kappa * self.boltzmann_constant * self.temperature / N
         potential_diff += self._get_property_change([index], [new_species])
 
         if self._acceptance_condition(potential_diff):
@@ -207,3 +209,48 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         norm = sum(probability_distribution)
         probability_distribution = [p / norm for p in probability_distribution]
         return probability_distribution
+
+    def _get_vcsgc_free_energy_derivatives(self, phis: Dict[int, str], kappa: float,
+                                           sublattice_index: int = None) -> Dict:
+        """
+        Returns a dict with the free energy derivatives.
+
+        Parameters
+        ----------
+        phis
+            average constraint parameters
+        kappa
+            parameter that constrains the variance of the concentration
+        sublattice_index
+            sublattice index
+        """
+        data = {}
+
+        for atnum in phis:
+            for i, sublattice in enumerate(self.sublattices):
+                if sublattice_index is not None and i != sublattice_index:
+                    continue
+                if len(sublattice.chemical_symbols) > 0 and atnum in sublattice.atomic_numbers:
+                    N = len(sublattice.indices)
+                    sl_occupations = self.configuration.get_occupations_on_sublattice(i)
+                    concentration = sl_occupations.count(atnum) / N
+                    data['free_energy_derivative_{}'.format(chemical_symbols[atnum])] \
+                        = kappa * self.boltzmann_constant * self.temperature * \
+                        (- 2 * concentration - phis[atnum])
+
+        return data
+
+    def _get_species_counts(self) -> Dict:
+        """
+        Returns a dict with the species counts.
+        """
+        data = {}
+        atoms = self.configuration.atoms
+        unique, counts = np.unique(atoms.numbers, return_counts=True)
+        for sl in self.sublattices:
+            for symbol in sl.chemical_symbols:
+                data['{}_count'.format(symbol)] = 0
+        for atnum, count in zip(unique, counts):
+            data['{}_count'.format(chemical_symbols[atnum])] = count
+
+        return data
