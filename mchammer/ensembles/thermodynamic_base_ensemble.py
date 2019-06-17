@@ -100,24 +100,26 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             p = np.exp(-potential_diff / (self.boltzmann_constant * self.temperature))
             return p > self._next_random_number()
 
-    def do_canonical_swap(self, sublattice_index: int) -> None:
+    def do_canonical_swap(self, sublattice_index: int, allowed_species: List[int] = None) -> None:
         """ Carries out one Monte Carlo trial step.
 
         Parameters
         ---------
         sublattice_index
             the sublattice the swap will act on
+        allowed_species
+            list of atomic numbers for allowed species
          """
         self._total_trials += 1
-        sites, species = self.configuration.get_swapped_state(sublattice_index)
+        sites, species = self.configuration.get_swapped_state(sublattice_index, allowed_species)
         potential_diff = self._get_property_change(sites, species)
 
         if self._acceptance_condition(potential_diff):
             self._accepted_trials += 1
             self.update_occupations(sites, species)
 
-    def do_sgc_flip(self, chemical_potentials: Dict[int, float],
-                    sublattice_index: int) -> None:
+    def do_sgc_flip(self, chemical_potentials: Dict[int, float], sublattice_index: int,
+                    allowed_species: List[int] = None) -> None:
         """ Carries out one Monte Carlo trial step.
 
         chemical_potentials
@@ -125,10 +127,11 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
              difference
         sublattice_index
             the sublattice the flip will act on
+        allowed_species
+            list of atomic numbers for allowed species
         """
         self._total_trials += 1
-
-        index, species = self.configuration.get_flip_state(sublattice_index)
+        index, species = self.configuration.get_flip_state(sublattice_index, allowed_species)
         potential_diff = self._get_property_change([index], [species])
 
         # change in chemical potential
@@ -140,8 +143,8 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             self._accepted_trials += 1
             self.update_occupations([index], [species])
 
-    def do_vcsgc_flip(self, phis: Dict[int, float],
-                      kappa: float, sublattice_index: int = None) -> None:
+    def do_vcsgc_flip(self, phis: Dict[int, float], kappa: float, sublattice_index: int,
+                      allowed_species: List[int] = None) -> None:
         """Carries out one Monte Carlo trial step.
 
         Parameters
@@ -152,13 +155,12 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             parameter that constrains the variance of the concentration
         sublattice_index
             the sublattice the flip will act on
+        allowed_species
+            list of atomic numbers for allowed species
         """
         self._total_trials += 1
-        if sublattice_index is None:
-            sublattice_index = self.get_random_sublattice_index(
-                self._flip_sublattice_probabilities)
-
-        index, new_species = self.configuration.get_flip_state(sublattice_index)
+        index, new_species = self.configuration.get_flip_state(
+            sublattice_index, allowed_species)
         old_species = self.configuration.occupations[index]
 
         # Calculate difference in VCSGC thermodynamic potential.
