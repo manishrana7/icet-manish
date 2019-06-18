@@ -64,7 +64,7 @@ pages:
     - tests
   script:
     # prepare homepage
-    - mkdir public
+    - mkdir -p public/dev
     # code coverage report (actually for the master master (=development version)
     # but that is the sensible one to show anyways)
     - mv htmlcov/ public/
