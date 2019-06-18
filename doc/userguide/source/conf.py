@@ -59,10 +59,10 @@ html_theme_options = {'display_version': True}
 html_context = {
     'current_version': version,
     'versions':
-        [('latest stable release'.format(version),
+        [('{} (latest release)'.format(version),
           '{}'.format(site_url)),
-         ('development version',
-          '{}/dev'.format(site_url))]}
+         ('{} (development)'.format(version),
+          '{}/dev'.format(site_url).replace('//', ''))]}
 htmlhelp_basename = 'icetdoc'
 intersphinx_mapping = \
     {'ase': ('https://wiki.fysik.dtu.dk/ase', None),
