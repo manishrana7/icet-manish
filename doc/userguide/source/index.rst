@@ -30,6 +30,15 @@ The following snippet provides a minimal example for its usage:
    opt.train()
    ce = ClusterExpansion(cs, opt.parameters)
 
+:program:`icet` has been developed at the `Department of Physics
+<https://www.chalmers.se/en/departments/physics/Pages/default.aspx>`_
+of `Chalmers University of Technology <https://www.chalmers.se/>`_ in
+Gothenburg, Sweden, and the `Data and Software Management Center
+<https://europeanspallationsource.se/data-management-software#data-analysis-modelling>`_
+at the European Spallation Source in Copenhagen, Denmark. Please
+consult the :ref:`credits page <credits>` for information on how to
+cite :program:`icet`.
+
 :program:`icet` and its development are hosted on `gitlab
 <https://gitlab.com/materials-modeling/icet>`_. Bugs and feature
 requests are ideally submitted via the `gitlab issue tracker

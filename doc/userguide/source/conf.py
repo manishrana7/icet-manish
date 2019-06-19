@@ -62,7 +62,7 @@ html_context = {
         [('latest stable release',
           '{}'.format(site_url)),
          ('development version',
-          '{}/dev'.format(site_url))]}
+          '{}/dev'.format(site_url).replace('//', ''))]}
 htmlhelp_basename = 'icetdoc'
 intersphinx_mapping = \
     {'ase': ('https://wiki.fysik.dtu.dk/ase', None),
