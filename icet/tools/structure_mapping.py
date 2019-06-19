@@ -126,10 +126,6 @@ def map_structure_to_reference(input_structure: Atoms,
     logger.debug('Cell metric of rescaled input structure:\n'
                  '{}\n'.format(scaled_structure.cell))
 
-    # map atoms in input structure to closest site in ideal supercell
-    dr_max = 0.0
-    dr_sum = 0.0
-    dr_sumsq = 0.0
     # per-atom-list for keeping track of mapped atoms
     mapped = [-1] * len(ideal_supercell)
     # positions in scaled input structure
@@ -184,7 +180,7 @@ def map_structure_to_reference(input_structure: Atoms,
     dr_avg = np.average([d for d in drs if d is not None])
     dr_sdv = np.std([d for d in drs if d is not None])
     dr_max = np.max([d for d in drs if d is not None])
-    
+
     # check that not more than one atom was assigned to the same site
     for k in set(mapped):
         assert k < 0 or mapped.count(k) <= 1, \
