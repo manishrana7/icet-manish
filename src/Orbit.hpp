@@ -195,6 +195,15 @@ class Orbit
         return _allowedSitesPermutations;
     }
 
+    /// Gets the allowed sites permutations.
+    std::vector<std::vector<int>> getAllowedSitesPermutationsVec() const
+    {
+        // convert set to vector for python to understand
+        std::vector<std::vector<int>> vecset;
+        std::copy(_allowedSitesPermutations.begin(), _allowedSitesPermutations.end(), std::back_inserter(vecset));
+        return vecset;
+    }
+
     /// Returns the representative sites of this orbit (if any equivalentSites permutations exists it is to these sites they refer to).
     std::vector<LatticeSite> getRepresentativeSites() const
     {

@@ -7,7 +7,7 @@ from _icet import ClusterCounts as _ClusterCounts
 from _icet import Cluster
 from ase import Atoms
 from icet.core.orbit_list import OrbitList
-from icet import Structure
+from icet.core.structure import Structure
 from .local_orbit_list_generator import LocalOrbitListGenerator
 
 

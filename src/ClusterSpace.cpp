@@ -151,7 +151,12 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure) c
                     auto permutedRepresentativeIndices = icet::getPermutedVector(representativeSitesIndices, perm);
                     auto permutedNumberOfAllowedSpeciesBySite = icet::getPermutedVector(numberOfAllowedSpeciesBySite, perm);
 
-                    clusterVectorElement += evaluateClusterProduct(permutedMultiComponentVector, permutedNumberOfAllowedSpeciesBySite, speciesCountPair.first, permutedRepresentativeIndices) * speciesCountPair.second;
+                    clusterVectorElement += evaluateClusterProduct(
+                        permutedMultiComponentVector,
+                        permutedNumberOfAllowedSpeciesBySite,
+                        speciesCountPair.first,
+                        permutedRepresentativeIndices) * speciesCountPair.second;
+
                     multiplicity += speciesCountPair.second;
                 }
             }

@@ -248,6 +248,8 @@ PYBIND11_MODULE(_icet, m)
              -------
              list of ints
          )pbdoc")
+		.def("get_number_of_allowed_species_by_site", &Structure::getNumberOfAllowedSpeciesBySite)
+
         .def("set_number_of_allowed_species", (void (Structure::*)(const std::vector<int> &)) & Structure::setNumberOfAllowedSpecies,
              py::arg("numbersOfAllowedSpecies"),
              R"pbdoc(
@@ -614,6 +616,7 @@ PYBIND11_MODULE(_icet, m)
              py::arg("sort") = false)
         .def("get_equivalent_sites", &Orbit::getEquivalentSites)
         .def("get_allowed_sites_permutations", &Orbit::getAllowedSitesPermutations)
+        .def("get_allowed_sites_permutations_vec", &Orbit::getAllowedSitesPermutationsVec)
         .def("get_representative_sites", &Orbit::getRepresentativeSites)
         .def("get_equivalent_sites_permutations", &Orbit::getPermutationsOfEquivalentSites)
 

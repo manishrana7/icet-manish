@@ -5,8 +5,8 @@ Main module of the icet package.
 
 from __future__ import print_function, division
 
-from .core.cluster_space import ClusterSpace, get_singlet_info, view_singlets
-from .core.cluster_expansion import ClusterExpansion
+from .core_py.ClusterSpace import ClusterSpace, get_singlet_info, view_singlets
+from .core_py.ClusterExpansion import ClusterExpansion
 from .core.orbit_list import OrbitList
 from .core.structure import Structure
 from .core.structure_container import StructureContainer
