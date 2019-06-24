@@ -1,3 +1,4 @@
+.. _credits:
 .. index:: Credits
 
 Credits
