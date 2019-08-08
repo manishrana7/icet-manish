@@ -59,16 +59,17 @@ class BinaryShortRangeOrderObserver(BaseObserver):
 
         # prepare initial configuration
         nAg = 10
-        atoms = prim.repeat(3)
-        atoms.set_chemical_symbols(nAg * ['Ag'] + (len(atoms) - nAg) * ['Au'])
+        structure = prim.repeat(3)
+        structure.set_chemical_symbols(nAg * ['Ag'] + (len(structure) - nAg) * ['Au'])
 
         # set up MC simulation
-        calc = ClusterExpansionCalculator(atoms, ce)
-        mc = CanonicalEnsemble(atoms=atoms, calculator=calc, temperature=600,
+        calc = ClusterExpansionCalculator(structure, ce)
+        mc = CanonicalEnsemble(structure=structure, calculator=calc, temperature=600,
                                data_container='myrun_sro.dc')
 
         # set up observer and attach it to the MC simulation
-        sro = BinaryShortRangeOrderObserver(cs, atoms, interval=len(atoms), radius=4.3)
+        sro = BinaryShortRangeOrderObserver(cs, structure, interval=len(structure),
+                                            radius=4.3)
         mc.attach_observer(sro)
 
         # run 1000 trial steps
@@ -88,11 +89,11 @@ class BinaryShortRangeOrderObserver(BaseObserver):
         self._structure = structure
 
         self._cluster_space = ClusterSpace(
-            atoms=cluster_space.primitive_structure,
+            structure=cluster_space.primitive_structure,
             cutoffs=[radius],
             chemical_symbols=cluster_space.chemical_symbols)
         self._cluster_count_observer = ClusterCountObserver(
-            cluster_space=self._cluster_space, atoms=structure,
+            cluster_space=self._cluster_space, structure=structure,
             interval=interval)
 
         self._sublattices = self._cluster_space.get_sublattices(structure)
@@ -109,21 +110,21 @@ class BinaryShortRangeOrderObserver(BaseObserver):
             raise ValueError('Number of binary sublattices must equal one,'
                              ' not {}'.format(binary_sublattice_counts))
 
-    def get_observable(self, atoms: Atoms) -> Dict[str, float]:
+    def get_observable(self, structure: Atoms) -> Dict[str, float]:
         """Returns the value of the property from a cluster expansion
         model for a given atomic configurations.
 
         Parameters
         ----------
-        atoms
+        structure
             input atomic structure
         """
 
-        self._cluster_count_observer._generate_counts(atoms)
+        self._cluster_count_observer._generate_counts(structure)
         df = self._cluster_count_observer.count_frame
 
-        symbol_counts = self._get_atom_count(atoms)
-        conc_B = self._get_concentrations(atoms)[self._symbols[0]]
+        symbol_counts = self._get_atom_count(structure)
+        conc_B = self._get_concentrations(structure)[self._symbols[0]]
 
         pair_orbit_indices = set(
             df.loc[df['order'] == 2]['orbit_index'].tolist())
@@ -136,10 +137,10 @@ class BinaryShortRangeOrderObserver(BaseObserver):
             total_A_count = 0
             for i, row in orbit_df.iterrows():
                 total_count += row.cluster_count
-                if self._symbols[0] in row.decoration:
+                if self._symbols[0] in row.occupation:
                     total_A_count += row.cluster_count
-                if self._symbols[0] in row.decoration and \
-                        self._symbols[1] in row.decoration:
+                if self._symbols[0] in row.occupation and \
+                        self._symbols[1] in row.occupation:
                     A_B_pair_count += row.cluster_count
 
             key = 'sro_{}_{}'.format(self._symbols[0], k+1)
@@ -161,13 +162,13 @@ class BinaryShortRangeOrderObserver(BaseObserver):
         structure
             the configuration that will be analyzed
         """
-        decoration = np.array(structure.get_chemical_symbols())
+        occupation = np.array(structure.get_chemical_symbols())
         concentrations = {}
         for sublattice in self._sublattices:
             if len(sublattice.chemical_symbols) == 1:
                 continue
             for symbol in sublattice.chemical_symbols:
-                symbol_count = decoration[sublattice.indices].tolist().count(
+                symbol_count = occupation[sublattice.indices].tolist().count(
                     symbol)
                 concentration = symbol_count / len(sublattice.indices)
                 concentrations[symbol] = concentration
@@ -182,13 +183,13 @@ class BinaryShortRangeOrderObserver(BaseObserver):
         structure
             the configuration that will be analyzed
         """
-        decoration = np.array(structure.get_chemical_symbols())
+        occupation = np.array(structure.get_chemical_symbols())
         counts = {}
         for sublattice in self._sublattices:
             if len(sublattice.chemical_symbols) == 1:
                 continue
             for symbol in sublattice.chemical_symbols:
-                symbol_count = decoration[sublattice.indices].tolist().count(
+                symbol_count = occupation[sublattice.indices].tolist().count(
                     symbol)
                 counts[symbol] = symbol_count
         return counts

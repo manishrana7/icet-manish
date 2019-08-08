@@ -74,11 +74,11 @@ def map_structure_to_reference(input_structure: Atoms,
 
         from ase.build import bulk
         reference = bulk('Au', a=4.09)
-        atoms = bulk('Au', cubic=True, a=4.09).repeat(4)
-        atoms.set_chemical_symbols(10 * ['Ag'] + (len(atoms) - 10) * ['Au'])
-        atoms.set_cell(atoms.cell * 1.02, scale_atoms=True)
-        atoms.rattle(0.1)
-        mapped_atoms = map_structure_to_reference(atoms, reference, 1.0)
+        structure = bulk('Au', cubic=True, a=4.09).repeat(4)
+        structure.set_chemical_symbols(10 * ['Ag'] + (len(structure) - 10) * ['Au'])
+        structure.set_cell(structure.cell * 1.02, scale_atoms=True)
+        structure.rattle(0.1)
+        mapped_structure = map_structure_to_reference(structure, reference, 1.0)
 
     """
     assert np.all(input_structure.pbc == reference_structure.pbc), \

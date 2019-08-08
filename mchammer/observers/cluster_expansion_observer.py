@@ -37,14 +37,14 @@ class ClusterExpansionObserver(BaseObserver):
         super().__init__(interval=interval, return_type=float, tag=tag)
         self._cluster_expansion = cluster_expansion
 
-    def get_observable(self, atoms: Atoms) -> float:
+    def get_observable(self, structure: Atoms) -> float:
         """
         Returns the value of the property from a cluster expansion model
         for a given atomic configuration.
 
         Parameters
         ----------
-        atoms
+        structure
             input atomic structure.
         """
-        return self._cluster_expansion.predict(atoms)
+        return self._cluster_expansion.predict(structure)

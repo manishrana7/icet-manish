@@ -82,7 +82,7 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
 
     Parameters
     ----------
-    atoms : :class:`Atoms <ase.Atoms>`
+    structure : :class:`Atoms <ase.Atoms>`
         atomic configuration to be used in the Monte Carlo simulation;
         also defines the initial occupation vector
     calculator : :class:`BaseCalculator <mchammer.calculators.ClusterExpansionCalculator>`
@@ -154,17 +154,18 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
         ce = ClusterExpansion(cs, [0, 0, 0.1, -0.02])
 
         # set up and run MC simulation
-        atoms = prim.repeat(3)
-        calc = ClusterExpansionCalculator(atoms, ce)
+        structure = prim.repeat(3)
+        calc = ClusterExpansionCalculator(structure, ce)
         phi = 0.6
-        mc = VCSGCEnsemble(atoms=atoms, calculator=calc, temperature=600,
+        mc = VCSGCEnsemble(structure=structure, calculator=calc,
+                           temperature=600,
                            data_container='myrun_vcsgc.dc',
                            phis={'Au': phi},
                            kappa=200)
         mc.run(100)  # carry out 100 trial swaps
     """
 
-    def __init__(self, atoms: Atoms, calculator: BaseCalculator,
+    def __init__(self, structure: Atoms, calculator: BaseCalculator,
                  temperature: float, phis: Dict[str, float],
                  kappa: float, boltzmann_constant: float = kB,
                  user_tag: str = None,
@@ -189,7 +190,7 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
             self._ensemble_parameters[phi_sym] = phi
 
         super().__init__(
-            atoms=atoms, calculator=calculator, user_tag=user_tag,
+            structure=structure, calculator=calculator, user_tag=user_tag,
             data_container=data_container,
             random_seed=random_seed,
             data_container_write_period=data_container_write_period,

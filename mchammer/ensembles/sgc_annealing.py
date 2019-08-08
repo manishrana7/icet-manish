@@ -41,7 +41,7 @@ class SGCAnnealing(ThermodynamicBaseEnsemble):
 
     Parameters
     ----------
-    atoms : :class:`Atoms <ase.Atoms>`
+    structure : :class:`Atoms <ase.Atoms>`
         atomic configuration to be used in the Monte Carlo simulation;
         also defines the initial occupation vector
     chemical_potentials : Dict[str, float]
@@ -95,7 +95,7 @@ class SGCAnnealing(ThermodynamicBaseEnsemble):
 
     """
 
-    def __init__(self, atoms: Atoms, calculator: BaseCalculator,
+    def __init__(self, structure: Atoms, calculator: BaseCalculator,
                  T_start: float, T_stop: float, n_steps: int,
                  chemical_potentials: Dict[str, float],
                  cooling_function: str = 'exponential',
@@ -118,7 +118,7 @@ class SGCAnnealing(ThermodynamicBaseEnsemble):
             self._ensemble_parameters[mu_sym] = chempot
 
         super().__init__(
-            atoms=atoms, calculator=calculator, user_tag=user_tag,
+            structure=structure, calculator=calculator, user_tag=user_tag,
             data_container=data_container,
             random_seed=random_seed,
             data_container_write_period=data_container_write_period,
@@ -131,7 +131,7 @@ class SGCAnnealing(ThermodynamicBaseEnsemble):
         self._T_stop = T_stop
         self._n_steps = n_steps
 
-        self._ground_state_candidate = self.configuration.atoms
+        self._ground_state_candidate = self.configuration.structure
         self._ground_state_candidate_potential = self.calculator.calculate_total(
             occupations=self.configuration.occupations)
 
@@ -200,5 +200,5 @@ class SGCAnnealing(ThermodynamicBaseEnsemble):
         data['temperature'] = self.temperature
         if data['potential'] < self._ground_state_candidate_potential:
             self._ground_state_candidate_potential = data['potential']
-            self._ground_state_candidate = self.configuration.atoms
+            self._ground_state_candidate = self.configuration.structure
         return data

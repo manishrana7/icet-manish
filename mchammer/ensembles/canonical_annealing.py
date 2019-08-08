@@ -41,7 +41,7 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
 
     Parameters
     ----------
-    atoms : :class:`Atoms <ase.Atoms>`
+    structure : :class:`Atoms <ase.Atoms>`
         atomic configuration to be used in the Monte Carlo simulation;
         also defines the initial occupation vector
     calculator : :class:`BaseCalculator <mchammer.calculators.ClusterExpansionCalculator>`
@@ -91,7 +91,7 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
 
     """
 
-    def __init__(self, atoms: Atoms, calculator: BaseCalculator,
+    def __init__(self, structure: Atoms, calculator: BaseCalculator,
                  T_start: float, T_stop: float, n_steps: int,
                  cooling_function: str = 'exponential',
                  user_tag: str = None,
@@ -108,11 +108,11 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
         for sl in calculator.sublattices:
             for symbol in sl.chemical_symbols:
                 key = 'n_atoms_{}'.format(symbol)
-                count = atoms.get_chemical_symbols().count(symbol)
+                count = structure.get_chemical_symbols().count(symbol)
                 self._ensemble_parameters[key] = count
 
         super().__init__(
-            atoms=atoms, calculator=calculator, user_tag=user_tag,
+            structure=structure, calculator=calculator, user_tag=user_tag,
             data_container=data_container,
             random_seed=random_seed,
             data_container_write_period=data_container_write_period,
@@ -125,7 +125,7 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
         self._T_stop = T_stop
         self._n_steps = n_steps
 
-        self._ground_state_candidate = self.configuration.atoms
+        self._ground_state_candidate = self.configuration.structure
         self._ground_state_candidate_potential = self.calculator.calculate_total(
             occupations=self.configuration.occupations)
 
@@ -197,7 +197,7 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
         data['temperature'] = self.temperature
         if data['potential'] < self._ground_state_candidate_potential:
             self._ground_state_candidate_potential = data['potential']
-            self._ground_state_candidate = self.configuration.atoms
+            self._ground_state_candidate = self.configuration.structure
         return data
 
 

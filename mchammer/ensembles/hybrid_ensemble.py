@@ -52,7 +52,7 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
     Parameters
     ----------
 
-    atoms : :class:`Atoms <ase.Atoms>`
+    structure : :class:`Atoms <ase.Atoms>`
         atomic configuration to be used in the Monte Carlo simulation;
         also defines the initial occupation vector
     calculator : :class:`BaseCalculator <mchammer.calculators.ClusterExpansionCalculator>`
@@ -148,9 +148,9 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
         ce = ClusterExpansion(
             cs, [0, 0, 0, 0.1, 0.1, 0.1, -0.02, -0.02, -0.02])
 
-        # define atoms object
-        atoms = prim.repeat(3)
-        for i, atom in enumerate(atoms):
+        # define structure object
+        structure = prim.repeat(3)
+        for i, atom in enumerate(structure):
             if i % 2 == 0:
                 atom.symbol = 'Ag'
             elif i % 3 == 0:
@@ -160,26 +160,26 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
         # since the VCSGC ensemble only performs flips on a subset of all
         # sites on the sublattice, namely those originally occupied by Ag
         # and Pd atoms, specific values will be provided
-        weights = [len(atoms),
-                   len([s for s in atoms.get_chemical_symbols() if s != 'Au'])]
+        weights = [len(structure),
+                   len([s for s in structure.get_chemical_symbols() if s != 'Au'])]
         norm = sum(weights)
         probabilities = [w / norm for w in weights]
 
         # set up and run MC simulation
-        calc = ClusterExpansionCalculator(atoms, ce)
+        calc = ClusterExpansionCalculator(structure, ce)
         ensemble_specs = [
             {'ensemble': 'canonical', 'sublattice_index': 0},
             {'ensemble': 'vcsgc', 'sublattice_index': 0,
              'phis': {'Ag': -0.2}, 'kappa': 200,
              'allowed_symbols':['Ag', 'Pd']}]
-        mc = HybridEnsemble(atoms=atoms, calculator=calc,
+        mc = HybridEnsemble(structure=structure, calculator=calc,
                             ensemble_specs=ensemble_specs,
                             temperature=600, probabilities=probabilities,
                             data_container='myrun_hybrid.dc')
         mc.run(100)  # carry out 100 trial steps
     """
 
-    def __init__(self, atoms: Atoms, calculator: BaseCalculator,
+    def __init__(self, structure: Atoms, calculator: BaseCalculator,
                  temperature: float,
                  ensemble_specs: List[Dict],
                  probabilities: List[float] = None,
@@ -206,7 +206,7 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
         self._process_ensemble_specs(ensemble_specs)
 
         super().__init__(
-            atoms=atoms, calculator=calculator, user_tag=user_tag,
+            structure=structure, calculator=calculator, user_tag=user_tag,
             data_container=data_container,
             random_seed=random_seed,
             data_container_write_period=data_container_write_period,

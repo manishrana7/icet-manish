@@ -18,8 +18,8 @@ class TestEnsemble(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEnsemble, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk('Al').repeat(3)
-        for i, atom in enumerate(self.atoms):
+        self.structure = bulk('Al').repeat(3)
+        for i, atom in enumerate(self.structure):
             if i % 2 == 0:
                 atom.symbol = 'Ga'
         cutoffs = [5, 5, 4]
@@ -32,7 +32,7 @@ class TestEnsemble(unittest.TestCase):
                                'chemical_potentials': self.chemical_potentials},
                                {'ensemble': 'vcsgc', 'sublattice_index': 0,
                                'phis': self.phis, 'kappa': self.kappa}]
-        self.cs = ClusterSpace(self.atoms, cutoffs, elements)
+        self.cs = ClusterSpace(self.structure, cutoffs, elements)
         parameters = parameters = np.array([1.2] * len(self.cs))
         self.ce = ClusterExpansion(self.cs, parameters)
         self.temperature = 100.0
@@ -43,10 +43,10 @@ class TestEnsemble(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
+        self.calculator = ClusterExpansionCalculator(self.structure, self.ce)
 
         self.ensemble = HybridEnsemble(
-            atoms=self.atoms,
+            structure=self.structure,
             calculator=self.calculator,
             ensemble_specs=self.ensemble_specs,
             temperature=self.temperature,
@@ -59,18 +59,18 @@ class TestEnsemble(unittest.TestCase):
     def test_init(self):
         """ Tests exceptions are raised during initialization. """
         with self.assertRaises(TypeError) as context:
-            HybridEnsemble(atoms=self.atoms, calculator=self.calculator)
+            HybridEnsemble(structure=self.structure, calculator=self.calculator)
         self.assertIn("required positional arguments: 'temperature'", str(context.exception))
 
         with self.assertRaises(TypeError) as context:
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature)
         self.assertIn("required positional argument: 'ensemble_specs'", str(context.exception))
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -79,7 +79,7 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'canonical'}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -89,7 +89,7 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 0, 'temperature': 100}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -99,7 +99,7 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'grand', 'sublattice_index': 0}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -108,7 +108,7 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'semi-grand', 'sublattice_index': 0}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -118,7 +118,7 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'vcsgc', 'sublattice_index': 0}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -128,7 +128,7 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'vcsgc', 'sublattice_index': 0, 'phis': self.phis}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -138,7 +138,7 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 0, 'phis': self.phis}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -148,7 +148,7 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 0, 'kappa': self.kappa}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -159,7 +159,7 @@ class TestEnsemble(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 0,
                                'chemical_potentials': self.chemical_potentials}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -170,7 +170,7 @@ class TestEnsemble(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'semi-grand', 'sublattice_index': 0,
                                'chemical_potentials': self.chemical_potentials, 'phis': self.phis}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -182,7 +182,7 @@ class TestEnsemble(unittest.TestCase):
             ensemble_specs = [{'ensemble': 'semi-grand', 'sublattice_index': 0,
                                'chemical_potentials': self.chemical_potentials,
                                'kappa': self.kappa}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -194,7 +194,7 @@ class TestEnsemble(unittest.TestCase):
             ensemble_specs = [{'ensemble': 'vcsgc', 'sublattice_index': 0,
                                'phis': self.phis, 'kappa': self.kappa,
                                'chemical_potentials': self.chemical_potentials}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -204,7 +204,7 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(TypeError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 'A'}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -213,7 +213,7 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 1}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -222,7 +222,7 @@ class TestEnsemble(unittest.TestCase):
         with self.assertRaises(TypeError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 0,
                                'allowed_symbols': 'Al'}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -232,7 +232,7 @@ class TestEnsemble(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 0,
                                'allowed_symbols': ['Ge']}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -242,7 +242,7 @@ class TestEnsemble(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'vcsgc', 'sublattice_index': 0,
                                'phis': {'Al': -2.0, 'Ga': 0.0}, 'kappa': self.kappa}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -250,7 +250,7 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 0}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs,
@@ -260,7 +260,7 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 0}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs,
@@ -323,7 +323,7 @@ class TestEnsemble(unittest.TestCase):
         ensemble_specs = [{'ensemble': 'semi-grand', 'sublattice_index': 0,
                            'chemical_potentials': {13: 5, 31: 0}}]
         ensemble = HybridEnsemble(
-                       atoms=self.atoms,
+                       structure=self.structure,
                        calculator=self.calculator,
                        temperature=self.temperature,
                        ensemble_specs=ensemble_specs,
@@ -335,7 +335,7 @@ class TestEnsemble(unittest.TestCase):
         ensemble_specs = [{'ensemble': 'semi-grand', 'sublattice_index': 0,
                            'chemical_potentials': {'Al': 5, 31: 0}}]
         ensemble = HybridEnsemble(
-                       atoms=self.atoms,
+                       structure=self.structure,
                        calculator=self.calculator,
                        temperature=self.temperature,
                        ensemble_specs=ensemble_specs,
@@ -348,7 +348,7 @@ class TestEnsemble(unittest.TestCase):
         ensemble_specs = [{'ensemble': 'vcsgc', 'sublattice_index': 0,
                            'phis': {13: -1}, 'kappa': self.kappa}]
         ensemble = HybridEnsemble(
-                       atoms=self.atoms,
+                       structure=self.structure,
                        calculator=self.calculator,
                        temperature=self.temperature,
                        ensemble_specs=ensemble_specs,
@@ -360,7 +360,7 @@ class TestEnsemble(unittest.TestCase):
         """Tests init with probabilities."""
         probabilities = [1.0/3.0, 0.5, 1/6]
         ensemble = HybridEnsemble(
-                       atoms=self.atoms,
+                       structure=self.structure,
                        calculator=self.calculator,
                        temperature=self.temperature,
                        ensemble_specs=self.ensemble_specs,
@@ -386,7 +386,7 @@ class TestEnsemble(unittest.TestCase):
 
     def test_ensemble_parameters(self):
         """Tests the get ensemble parameters method."""
-        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.atoms))
+        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.structure))
         self.assertEqual(self.ensemble.ensemble_parameters['temperature'], self.temperature)
         for i, ensemble_spec in enumerate(self.ensemble_specs):
             tag = 'ensemble_{}'.format(i)
@@ -403,7 +403,7 @@ class TestEnsemble(unittest.TestCase):
                                  self.kappa)
 
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['n_atoms'],
-                         len(self.atoms))
+                         len(self.structure))
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['temperature'],
                          self.temperature)
         for i, ensemble_spec in enumerate(self.ensemble_specs):
@@ -438,8 +438,8 @@ class TestEnsembleTernaryFCC(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEnsembleTernaryFCC, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk('Al').repeat(3)
-        for i, atom in enumerate(self.atoms):
+        self.structure = bulk('Al').repeat(3)
+        for i, atom in enumerate(self.structure):
             if i % 2 == 0:
                 atom.symbol = 'Ga'
             elif i % 3 == 0:
@@ -455,7 +455,7 @@ class TestEnsembleTernaryFCC(unittest.TestCase):
                                 'chemical_potentials': self.chemical_potentials},
                                {'ensemble': 'vcsgc', 'sublattice_index': 0,
                                 'phis': self.phis, 'kappa': self.kappa}]
-        self.cs = ClusterSpace(self.atoms, cutoffs, elements)
+        self.cs = ClusterSpace(self.structure, cutoffs, elements)
         parameters = parameters = np.array([1.2] * len(self.cs))
         self.ce = ClusterExpansion(self.cs, parameters)
         self.temperature = 100.0
@@ -466,10 +466,10 @@ class TestEnsembleTernaryFCC(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
+        self.calculator = ClusterExpansionCalculator(self.structure, self.ce)
 
         self.ensemble = HybridEnsemble(
-            atoms=self.atoms,
+            structure=self.structure,
             calculator=self.calculator,
             ensemble_specs=self.ensemble_specs,
             temperature=self.temperature,
@@ -484,7 +484,7 @@ class TestEnsembleTernaryFCC(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'vcsgc', 'sublattice_index': 0,
                                'phis': {'Al': -0.5}, 'kappa': self.kappa}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -493,7 +493,7 @@ class TestEnsembleTernaryFCC(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'vcsgc', 'sublattice_index': 0,
                                'phis': {'Al': -0.5, 'Ga': -0.3, 'In': -0.7}, 'kappa': self.kappa}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -549,7 +549,7 @@ class TestEnsembleTernaryFCC(unittest.TestCase):
 
     def test_ensemble_parameters(self):
         """Tests the get ensemble parameters method."""
-        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.atoms))
+        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.structure))
         self.assertEqual(self.ensemble.ensemble_parameters['temperature'], self.temperature)
         for i, ensemble_spec in enumerate(self.ensemble_specs):
             tag = 'ensemble_{}'.format(i)
@@ -566,7 +566,7 @@ class TestEnsembleTernaryFCC(unittest.TestCase):
                                  self.kappa)
 
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['n_atoms'],
-                         len(self.atoms))
+                         len(self.structure))
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['temperature'],
                          self.temperature)
         for i, ensemble_spec in enumerate(self.ensemble_specs):
@@ -599,8 +599,8 @@ class TestEnsembleSublattices(unittest.TestCase):
         lattice_parameter = 4.0
         prim = bulk('Pd', a=lattice_parameter, crystalstructure='fcc')
         prim.append(Atom('H', position=(lattice_parameter / 2,)*3))
-        self.atoms = prim.repeat(3)
-        for i, atom in enumerate(self.atoms):
+        self.structure = prim.repeat(3)
+        for i, atom in enumerate(self.structure):
             if i % 3 == 0:
                 if atom.symbol == 'Pd':
                     atom.symbol = 'Au'
@@ -627,10 +627,10 @@ class TestEnsembleSublattices(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
+        self.calculator = ClusterExpansionCalculator(self.structure, self.ce)
 
         self.ensemble = HybridEnsemble(
-            atoms=self.atoms,
+            structure=self.structure,
             calculator=self.calculator,
             ensemble_specs=self.ensemble_specs,
             temperature=self.temperature,
@@ -645,7 +645,7 @@ class TestEnsembleSublattices(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'vcsgc', 'sublattice_index': 0,
                                'phis': {'Pd': -2.0, 'Au': 0.0}, 'kappa': self.kappa}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -654,7 +654,7 @@ class TestEnsembleSublattices(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'vcsgc', 'sublattice_index': 0,
                                'phis': {}, 'kappa': self.kappa}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -663,7 +663,7 @@ class TestEnsembleSublattices(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'vcsgc', 'sublattice_index': 1,
                                'phis': {'H': -2.0, 'V': 0.0}, 'kappa': self.kappa}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -672,7 +672,7 @@ class TestEnsembleSublattices(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'vcsgc', 'sublattice_index': 1,
                                'phis': {}, 'kappa': self.kappa}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -680,7 +680,7 @@ class TestEnsembleSublattices(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 2}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -689,7 +689,7 @@ class TestEnsembleSublattices(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 0,
                               'allowed_symbols': ['H']}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -699,7 +699,7 @@ class TestEnsembleSublattices(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 1,
                               'allowed_symbols': ['Au']}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -735,7 +735,7 @@ class TestEnsembleSublattices(unittest.TestCase):
         """Tests init with probabilities."""
         probabilities = [1.0/3.0, 0.5, 1/6]
         ensemble = HybridEnsemble(
-                       atoms=self.atoms,
+                       structure=self.structure,
                        calculator=self.calculator,
                        temperature=self.temperature,
                        ensemble_specs=self.ensemble_specs,
@@ -767,7 +767,7 @@ class TestEnsembleSublattices(unittest.TestCase):
 
     def test_ensemble_parameters(self):
         """Tests the get ensemble parameters method."""
-        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.atoms))
+        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.structure))
         self.assertEqual(self.ensemble.ensemble_parameters['temperature'], self.temperature)
         for i, ensemble_spec in enumerate(self.ensemble_specs):
             tag = 'ensemble_{}'.format(i)
@@ -784,7 +784,7 @@ class TestEnsembleSublattices(unittest.TestCase):
                                  self.kappa)
 
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['n_atoms'],
-                         len(self.atoms))
+                         len(self.structure))
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['temperature'],
                          self.temperature)
         for i, ensemble_spec in enumerate(self.ensemble_specs):
@@ -825,8 +825,8 @@ class TestEnsembleSpectatorSublattice(unittest.TestCase):
         lattice_parameter = 4.0
         prim = bulk('Pd', a=lattice_parameter, crystalstructure='fcc')
         prim.append(Atom('H', position=(lattice_parameter / 2,)*3))
-        self.atoms = prim.repeat(3)
-        for i, atom in enumerate(self.atoms):
+        self.structure = prim.repeat(3)
+        for i, atom in enumerate(self.structure):
             if i % 3 == 0:
                 if atom.symbol == 'Pd':
                     continue
@@ -853,10 +853,10 @@ class TestEnsembleSpectatorSublattice(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
+        self.calculator = ClusterExpansionCalculator(self.structure, self.ce)
 
         self.ensemble = HybridEnsemble(
-            atoms=self.atoms,
+            structure=self.structure,
             calculator=self.calculator,
             ensemble_specs=self.ensemble_specs,
             temperature=self.temperature,
@@ -871,7 +871,7 @@ class TestEnsembleSpectatorSublattice(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'vcsgc', 'sublattice_index': 0,
                                'phis': {'Pd': -2.0}, 'kappa': self.kappa}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -879,7 +879,7 @@ class TestEnsembleSpectatorSublattice(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 1}]
-            HybridEnsemble(atoms=self.atoms,
+            HybridEnsemble(structure=self.structure,
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
@@ -927,7 +927,7 @@ class TestEnsembleSpectatorSublattice(unittest.TestCase):
 
     def test_ensemble_parameters(self):
         """Tests the get ensemble parameters method."""
-        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.atoms))
+        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.structure))
         self.assertEqual(self.ensemble.ensemble_parameters['temperature'], self.temperature)
         for i, ensemble_spec in enumerate(self.ensemble_specs):
             tag = 'ensemble_{}'.format(i)
@@ -944,7 +944,7 @@ class TestEnsembleSpectatorSublattice(unittest.TestCase):
                                  self.kappa)
 
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['n_atoms'],
-                         len(self.atoms))
+                         len(self.structure))
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['temperature'],
                          self.temperature)
         for i, ensemble_spec in enumerate(self.ensemble_specs):

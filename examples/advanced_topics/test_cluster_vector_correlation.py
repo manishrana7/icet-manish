@@ -12,28 +12,28 @@ from icet import ClusterSpace
 
 
 # Function for generating random structures
-def generate_random_structure(atoms_prim, chemical_species, repeat=8):
+def generate_random_structure(primitive_structure, chemical_species, repeat=8):
     """
     Generate a random structure with atoms_prim as a base
     and fill it randomly with symbols from chemical_species
     """
 
-    atoms = atoms_prim.copy().repeat(repeat)
+    structure = primitive_structure.copy().repeat(repeat)
 
-    for at in atoms:
-        at.symbol = random.choice(chemical_species)
+    for atom in structure:
+        atom.symbol = random.choice(chemical_species)
 
-    return atoms
+    return structure
 
 
 # Function for generating cluster vectors
-def generate_cv_set(n, atoms_prim, chemical_species, clusterspace, repeat=8):
+def generate_cv_set(n, primitive_structure, chemical_species, clusterspace, repeat=8):
     """
     Generate a set of cluster vectors from a cluster space
     """
     clustervectors = []
     for i in range(n):
-        conf = generate_random_structure(atoms_prim, chemical_species, repeat)
+        conf = generate_random_structure(primitive_structure, chemical_species, repeat)
         cv = clusterspace.get_cluster_vector(conf)
         clustervectors.append(cv)
 
@@ -84,17 +84,15 @@ repeat = 8
 # previously generated database.
 db = connect('PdHVac-fcc.db')
 for row in db.select('id<=10'):
-    atoms_row = row.toatoms()
-    atoms_id = row.id
-    atoms_form = row.formula
-    print('Testing structure: {} (id={}) with cutoffs {}'.format(atoms_form,
-                                                                 atoms_id,
+    structure = row.toatoms()
+    print('Testing structure: {} (id={}) with cutoffs {}'.format(row.formula,
+                                                                 row.id,
                                                                  cutoffs))
-    atoms_row.wrap()  # Wrap all atoms into the unit cell
-    cluster_space = ClusterSpace(atoms_row, cutoffs, chemical_species)
+    structure.wrap()  # Wrap all atoms into the unit cell
+    cluster_space = ClusterSpace(structure, cutoffs, chemical_species)
 
-    cvs = generate_cv_set(20, atoms_row, chemical_species,
+    cvs = generate_cv_set(20, structure, chemical_species,
                           cluster_space, repeat)
     assert_no_correlation(cvs)
     print('Number of atoms: {}    Length of cluster vector: {}'.format(
-        len(atoms_row.repeat(repeat)), len(cvs[0])))
+        len(structure.repeat(repeat)), len(cvs[0])))

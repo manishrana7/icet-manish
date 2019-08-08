@@ -18,7 +18,7 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
 
     Parameters
     ----------
-    atoms : :class:`Atoms <ase.Atoms>`
+    structure : :class:`Atoms <ase.Atoms>`
         atomic configuration to be used in the Monte Carlo simulation;
         also defines the initial occupation vector
     calculator : :class:`BaseCalculator <mchammer.calculators.ClusterExpansionCalculator>`
@@ -43,7 +43,7 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         interval at which data is written to the data container; this
         includes for example the current value of the calculator
         (i.e. usually the energy) as well as ensembles specific fields
-        such as temperature or the number of atoms of different species
+        such as temperature or the number of structure of different species
     data_container_write_period : float
         period in units of seconds at which the data container is
         written to file; writing periodically to file provides both
@@ -54,7 +54,7 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         configuration is written to the data container.
     """
 
-    def __init__(self, atoms: Atoms, calculator: BaseCalculator,
+    def __init__(self, structure: Atoms, calculator: BaseCalculator,
                  user_tag: str = None,
                  boltzmann_constant: float = kB,
                  data_container: DataContainer = None, random_seed: int = None,
@@ -65,7 +65,7 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         self._boltzmann_constant = boltzmann_constant
 
         super().__init__(
-            atoms=atoms, calculator=calculator, user_tag=user_tag,
+            structure=structure, calculator=calculator, user_tag=user_tag,
             data_container=data_container,
             random_seed=random_seed,
             data_container_write_period=data_container_write_period,
@@ -247,8 +247,8 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         Returns a dict with the species counts.
         """
         data = {}
-        atoms = self.configuration.atoms
-        unique, counts = np.unique(atoms.numbers, return_counts=True)
+        structure = self.configuration.structure
+        unique, counts = np.unique(structure.numbers, return_counts=True)
         for sl in self.sublattices:
             for symbol in sl.chemical_symbols:
                 data['{}_count'.format(symbol)] = 0

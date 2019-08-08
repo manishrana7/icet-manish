@@ -10,26 +10,26 @@ class TestConfigurationManager(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestConfigurationManager, self).__init__(*args, **kwargs)
-        self.atoms = bulk('Al').repeat([2, 1, 1])
-        self.atoms[1].symbol = 'Ag'
-        self.atoms = self.atoms.repeat(3)
-        cs = ClusterSpace(self.atoms, cutoffs=[0], chemical_symbols=['Ag', 'Al'])
-        self.sublattices = cs.get_sublattices(self.atoms)
+        self.structure = bulk('Al').repeat([2, 1, 1])
+        self.structure[1].symbol = 'Ag'
+        self.structure = self.structure.repeat(3)
+        cs = ClusterSpace(self.structure, cutoffs=[0], chemical_symbols=['Ag', 'Al'])
+        self.sublattices = cs.get_sublattices(self.structure)
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):
-        self.cm = ConfigurationManager(self.atoms, self.sublattices)
+        self.cm = ConfigurationManager(self.structure, self.sublattices)
 
     def test_type(self):
         """Tests cm type."""
         self.assertIsInstance(self.cm, ConfigurationManager)
 
-    def test_property_atoms(self):
-        """Tests atoms property."""
-        self.assertEqual(self.atoms, self.cm.atoms)
+    def test_property_structure(self):
+        """Tests structure property."""
+        self.assertEqual(self.structure, self.cm.structure)
 
     def test_property_occupations(self):
         """
@@ -38,7 +38,7 @@ class TestConfigurationManager(unittest.TestCase):
         """
 
         self.assertListEqual(list(self.cm.occupations),
-                             list(self.atoms.numbers))
+                             list(self.structure.numbers))
 
         # Tests that the property can not be set.
         with self.assertRaises(AttributeError) as context:
@@ -117,8 +117,8 @@ class TestConfigurationManager(unittest.TestCase):
             self.assertEqual(self.cm.occupations[index2], elements[0])
 
         # set everything to Al and see that swap is not possible
-        indices = [i for i in range(len(self.atoms))]
-        elements = [13] * len(self.atoms)
+        indices = [i for i in range(len(self.structure))]
+        elements = [13] * len(self.structure)
         self.cm.update_occupations(indices, elements)
 
         with self.assertRaises(SwapNotPossibleError) as context:
@@ -187,7 +187,7 @@ class TestConfigurationManager(unittest.TestCase):
 
     def test_update_occupations(self):
         """Tests the update occupation method."""
-        atoms_cpy = self.atoms.copy()
+        structure_cpy = self.structure.copy()
         indices = [0, 2, 3, 5, 7, 8]
         elements = [13, 13, 47, 47, 13, 47]
 
@@ -197,8 +197,8 @@ class TestConfigurationManager(unittest.TestCase):
         self.assertEqual(list(self.cm.occupations[indices]), elements)
         self.assertTrue(self._is_sites_by_species_dict_correct(self.cm))
 
-        # test input atoms remains unchanged
-        self.assertEqual(self.atoms, atoms_cpy)
+        # test input structure remains unchanged
+        self.assertEqual(self.structure, structure_cpy)
 
         # test that correct exceptions are raised
         with self.assertRaises(ValueError) as context:
@@ -224,20 +224,20 @@ class TestConfigurationManager(unittest.TestCase):
         self.assertTrue(self._is_sites_by_species_dict_correct(self.cm))
 
         # Set everything to Al
-        indices = [i for i in range(len(self.atoms))]
-        elements = [13] * len(self.atoms)
+        indices = [i for i in range(len(self.structure))]
+        elements = [13] * len(self.structure)
         self.cm.update_occupations(indices, elements)
         self.assertTrue(self._is_sites_by_species_dict_correct(self.cm))
 
         # Set everything to Ag
-        indices = [i for i in range(len(self.atoms))]
-        elements = [47] * len(self.atoms)
+        indices = [i for i in range(len(self.structure))]
+        elements = [47] * len(self.structure)
         self.cm.update_occupations(indices, elements)
         self.assertTrue(self._is_sites_by_species_dict_correct(self.cm))
 
         # Set everything to Al-Ag-Al-Ag ...
-        indices = [i for i in range(len(self.atoms))]
-        elements = [13, 47] * (len(self.atoms) // 2)
+        indices = [i for i in range(len(self.structure))]
+        elements = [13, 47] * (len(self.structure) // 2)
         self.cm.update_occupations(indices, elements)
         self.assertTrue(self._is_sites_by_species_dict_correct(self.cm))
 

@@ -22,12 +22,12 @@ class BaseEnsemble(ABC):
 
     Parameters
     ----------
-    calculator : :class:`BaseCalculator`
-        calculator to be used for calculating the potential changes
-        that enter the evaluation of the Metropolis criterion
-    atoms : :class:`ase:Atoms`
+    structure : :class:`Atoms <ase.Atoms>`
         atomic configuration to be used in the Monte Carlo simulation;
         also defines the initial occupation vector
+    calculator : :class:`BaseCalculator <mchammer.calculators.ClusterExpansionCalculator>`
+        calculator to be used for calculating the potential changes
+        that enter the evaluation of the Metropolis criterion
     user_tag : str
         human-readable tag for ensemble [default: None]
     data_container : str
@@ -53,7 +53,7 @@ class BaseEnsemble(ABC):
         simulation
     """
 
-    def __init__(self, atoms: Atoms, calculator: BaseCalculator,
+    def __init__(self, structure: Atoms, calculator: BaseCalculator,
                  user_tag: str = None, data_container: DataContainer = None,
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
@@ -71,7 +71,7 @@ class BaseEnsemble(ABC):
         self._user_tag = user_tag
         sublattices = self.calculator.sublattices
 
-        sublattices.assert_occupation_is_allowed(atoms.get_chemical_symbols())
+        sublattices.assert_occupation_is_allowed(structure.get_chemical_symbols())
 
         # item for sublist in l for item in sublist
         symbols_flat = [s for sl in sublattices.active_sublattices for s in sl.chemical_symbols]
@@ -79,7 +79,7 @@ class BaseEnsemble(ABC):
             bad_symbols = set([s for s in symbols_flat if symbols_flat.count(s) > 1])
             raise ValueError('Symbols {} found on multiple active sublattices'.format(bad_symbols))
 
-        self.configuration = ConfigurationManager(atoms, sublattices)
+        self.configuration = ConfigurationManager(structure, sublattices)
 
         # random number generator
         if random_seed is None:
@@ -89,7 +89,7 @@ class BaseEnsemble(ABC):
         random.seed(a=self._random_seed)
 
         # add ensemble parameters and metadata
-        self._ensemble_parameters['n_atoms'] = len(self.atoms)
+        self._ensemble_parameters['n_atoms'] = len(self.structure)
         metadata = OrderedDict(ensemble_name=self.__class__.__name__,
                                user_tag=user_tag, seed=self.random_seed)
 
@@ -116,12 +116,12 @@ class BaseEnsemble(ABC):
                 if filedir and not os.path.isdir(filedir):
                     raise FileNotFoundError('Path to data container file does'
                                             ' not exist: {}'.format(filedir))
-            self._data_container = DataContainer(atoms=atoms,
+            self._data_container = DataContainer(structure=structure,
                                                  ensemble_parameters=self.ensemble_parameters,
                                                  metadata=metadata)
 
         # interval for writing data and further preparation of data container
-        self._default_interval = len(atoms)
+        self._default_interval = len(structure)
 
         if ensemble_data_write_interval is None:
             self._ensemble_data_write_interval = self._default_interval
@@ -137,9 +137,9 @@ class BaseEnsemble(ABC):
         self._find_observer_interval()
 
     @property
-    def atoms(self) -> Atoms:
+    def structure(self) -> Atoms:
         """ current configuration (copy) """
-        return self.configuration.atoms.copy()
+        return self.configuration.structure.copy()
 
     @property
     def total_trials(self) -> int:
@@ -273,10 +273,10 @@ class BaseEnsemble(ABC):
         for observer in self.observers.values():
             if step % observer.interval == 0:
                 if observer.return_type is dict:
-                    for key, value in observer.get_observable(self.calculator.atoms).items():
+                    for key, value in observer.get_observable(self.calculator.structure).items():
                         row_dict[key] = value
                 else:
-                    row_dict[observer.tag] = observer.get_observable(self.calculator.atoms)
+                    row_dict[observer.tag] = observer.get_observable(self.calculator.structure)
 
         if len(row_dict) > 0:
             self._data_container.append(mctrial=step, record=row_dict)

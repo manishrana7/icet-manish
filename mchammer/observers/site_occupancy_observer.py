@@ -22,9 +22,8 @@ class SiteOccupancyObserver(BaseObserver):
         dictionary containing lists of sites that are to be considered,
         which keys will be taken as the names of the sites
 
-    super_cell : ase.Atoms
-        an atoms object that represents a typical super cell, which is used to
-        determine the allowed species
+    supercell : ase.Atoms
+        a typical supercell, which is used to determine the allowed species
 
     interval : int
         observation interval during the Monte Carlo simulation
@@ -68,19 +67,19 @@ class SiteOccupancyObserver(BaseObserver):
         print(ce)
 
         # prepare initial configuration based on a 2x2 supercell
-        atoms = prim.repeat((2, 2, 1))
+        structure = prim.repeat((2, 2, 1))
         for k in range(20):
-            atoms[k].symbol = 'Ag'
+            structure[k].symbol = 'Ag'
 
         # set up MC simulation
-        calc = ClusterExpansionCalculator(atoms, ce)
-        mc = CanonicalEnsemble(atoms=atoms, calculator=calc, temperature=600,
+        calc = ClusterExpansionCalculator(structure, ce)
+        mc = CanonicalEnsemble(structure=structure, calculator=calc, temperature=600,
                                data_container='myrun_sof.dc')
 
         # set up observer and attach it to the MC simulation
         sites = {'surface': [0, 9], 'subsurface': [1, 8],
                  'bulk': list(range(2, 8))}
-        sof = SiteOccupancyObserver(cs, sites, atoms, interval=len(atoms))
+        sof = SiteOccupancyObserver(cs, sites, structure, interval=len(structure))
         mc.attach_observer(sof)
 
         # run 1000 trial steps
@@ -94,7 +93,7 @@ class SiteOccupancyObserver(BaseObserver):
 
     def __init__(self, cluster_space: ClusterSpace,
                  sites: Dict[str, List[int]],
-                 super_cell: Atoms,
+                 supercell: Atoms,
                  interval: int = None) -> None:
         super().__init__(interval=interval, return_type=dict,
                          tag='SiteOccupancyObserver')
@@ -102,18 +101,21 @@ class SiteOccupancyObserver(BaseObserver):
         self._sites = {site: sorted(indices)
                        for site, indices in sites.items()}
 
-        self._set_allowed_species(cluster_space, super_cell)
+        self._set_allowed_species(cluster_space, supercell)
 
     def _set_allowed_species(self,
                              cluster_space: ClusterSpace,
-                             super_cell: Atoms):
+                             supercell: Atoms):
         """
-        Set the allowed species for the selected sites in the atoms object
+        Set the allowed species for the selected sites in the Atoms object
 
         Parameters
         ----------
-        atoms
-            input atomic structure.
+        cluster_space
+            Cluster space implicitly defining allowed species
+        supercell
+            Specific supercell (consistent with cluster_space) whose
+            allowed species are to be determined
         """
 
         primitive_structure = Structure.from_atoms(
@@ -130,7 +132,7 @@ class SiteOccupancyObserver(BaseObserver):
             allowed_species = {}
             for site, indices in self._sites.items():
                 allowed_species[site] = None
-                positions = super_cell.get_positions()[np.array(indices)]
+                positions = supercell.get_positions()[np.array(indices)]
                 lattice_sites =\
                     primitive_structure.find_lattice_sites_by_positions(
                         positions)
@@ -149,17 +151,17 @@ class SiteOccupancyObserver(BaseObserver):
 
         self._allowed_species = allowed_species
 
-    def get_observable(self, atoms: Atoms) -> Dict[str, List[float]]:
+    def get_observable(self, structure: Atoms) -> Dict[str, List[float]]:
         """
         Returns the site occupation factors for a given atomic configuration.
 
         Parameters
         ----------
-        atoms
+        structure
             input atomic structure.
         """
 
-        chemical_symbols = np.array(atoms.get_chemical_symbols())
+        chemical_symbols = np.array(structure.get_chemical_symbols())
         sofs = {}
         for site, indices in self._sites.items():
             counts = {species: 0 for species in self._allowed_species[site]}

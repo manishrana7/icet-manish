@@ -15,7 +15,7 @@ cs = ce_mix_energies.cluster_space
 db = connect('reference_data.db')
 sc = StructureContainer(cluster_space=cs)
 for row in db.select('natoms<=8'):
-    sc.add_structure(atoms=row.toatoms(),
+    sc.add_structure(structure=row.toatoms(),
                      user_tag=row.tag,
                      properties={'lattice_parameter': row.lattice_parameter})
 
@@ -27,10 +27,10 @@ opt.train()
 ce_latt_param = ClusterExpansion(cluster_space=cs, parameters=opt.parameters)
 
 # step 4: Set up the calculator and a canonical ensemble
-atoms = cs.primitive_structure.repeat(3)
-atoms.set_chemical_symbols([chemical_symbols[0]] * len(atoms))
-calculator = CECalculator(atoms=atoms, cluster_expansion=ce_mix_energies)
-ensemble = SGCEnsemble(calculator=calculator, atoms=atoms,
+structure = cs.primitive_structure.repeat(3)
+structure.set_chemical_symbols([chemical_symbols[0]] * len(structure))
+calculator = CECalculator(structure=structure, cluster_expansion=ce_mix_energies)
+ensemble = SGCEnsemble(calculator=calculator, structure=structure,
                        random_seed=42, temperature=900.0,
                        chemical_potentials={'Ag': 0, 'Pd': 0},
                        ensemble_data_write_interval=10)

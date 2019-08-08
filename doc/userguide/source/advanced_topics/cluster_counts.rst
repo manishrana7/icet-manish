@@ -30,7 +30,7 @@ Generate prototype cell
 -----------------------
 
 The next step is to build a prototype supercell. Here, we create a toy
-structure based on Ti and W decorating a simple cubic :math:`2\times1\times1`
+structure based on Ti and W occupying a simple cubic :math:`2\times1\times1`
 cell. Moreover, we define a cutoff for pairs at 5 Å. We also keep the
 primitive cell, i.e., the :math:`1\times1\times1` simple cubic cell.
 

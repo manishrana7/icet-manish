@@ -47,9 +47,8 @@ class BaseObserver(ABC):
         When implementing this method use the following names for the
         following types of data:
 
-        ASE atoms object : `atoms`.
+        ASE Atoms object : `structure`.
         list of chemical species : `species`.
-        icet structure object : `structure`.
         icet cluster expansion : `cluster_expansion`.
         mchammer calculator : `calculator`.
         """

@@ -30,10 +30,10 @@ class TestClusterExpansion(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestClusterExpansion, self).__init__(*args, **kwargs)
-        self.atoms = bulk('Au')
+        self.structure = bulk('Au')
         self.cutoffs = [3.0] * 3
         chemical_symbols = ['Au', 'Pd']
-        self.cs = ClusterSpace(self.atoms, self.cutoffs, chemical_symbols)
+        self.cs = ClusterSpace(self.structure, self.cutoffs, chemical_symbols)
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
@@ -57,7 +57,7 @@ class TestClusterExpansion(unittest.TestCase):
 
     def test_predict(self):
         """Tests predict function."""
-        predicted_val = self.ce.predict(self.atoms)
+        predicted_val = self.ce.predict(self.structure)
         self.assertEqual(predicted_val, 10.0)
 
     def test_property_orders(self):
@@ -95,8 +95,8 @@ class TestClusterExpansion(unittest.TestCase):
         ce_read = ClusterExpansion.read(temp_file.name)
 
         # check cluster space
-        self.assertEqual(self.cs._input_atoms,
-                         ce_read.cluster_space._input_atoms)
+        self.assertEqual(self.cs._input_structure,
+                         ce_read.cluster_space._input_structure)
         self.assertEqual(self.cs._cutoffs, ce_read.cluster_space._cutoffs)
         self.assertEqual(
             self.cs._input_chemical_symbols, ce_read.cluster_space._input_chemical_symbols)
@@ -236,10 +236,10 @@ class TestClusterExpansionTernary(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestClusterExpansionTernary, self).__init__(*args, **kwargs)
-        self.atoms = bulk('Au')
+        self.structure = bulk('Au')
         self.cutoffs = [3.0] * 3
         chemical_symbols = ['Au', 'Pd', 'Ag']
-        self.cs = ClusterSpace(self.atoms, self.cutoffs, chemical_symbols)
+        self.cs = ClusterSpace(self.structure, self.cutoffs, chemical_symbols)
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""

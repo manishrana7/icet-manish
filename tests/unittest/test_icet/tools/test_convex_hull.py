@@ -39,9 +39,9 @@ class TestConvexHull(unittest.TestCase):
         hull.
         """
         from ase.build import bulk
-        atoms_1 = bulk('Au')
-        atoms_2 = bulk('Pd')
-        structures = [atoms_1, atoms_2]
+        structure_1 = bulk('Au')
+        structure_2 = bulk('Pd')
+        structures = [structure_1, structure_2]
         concentrations = [0.3, 0.7]
         energies = [-7.0, 0.1]
         energy_tolerance = 0.3

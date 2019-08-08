@@ -17,9 +17,9 @@ class ConfigurationManager(object):
 
     Parameters
     ----------
-    atoms : ASE Atoms
+    structure : ase.Atoms
         configuration to be handled
-    sublattices : Sublattices
+    sublattices : :class:`Sublattices <icet.core.sublattices.Sublattices>`
         sublattices class used to define allowed occupations and so on
 
     Todo
@@ -27,10 +27,10 @@ class ConfigurationManager(object):
     * revise docstrings
     """
 
-    def __init__(self, atoms: Atoms, sublattices: Sublattices) -> None:
+    def __init__(self, structure: Atoms, sublattices: Sublattices) -> None:
 
-        self._atoms = atoms.copy()
-        self._occupations = self._atoms.numbers
+        self._structure = structure.copy()
+        self._occupations = self._structure.numbers
         self._sublattices = sublattices
 
         self._sites_by_species = self._get_sites_by_species()
@@ -60,11 +60,11 @@ class ConfigurationManager(object):
         return self._sublattices
 
     @property
-    def atoms(self) -> Atoms:
+    def structure(self) -> Atoms:
         """ atomic structure associated with configuration (copy) """
-        atoms = self._atoms.copy()
-        atoms.set_atomic_numbers(self.occupations)
-        return atoms
+        structure = self._structure.copy()
+        structure.set_atomic_numbers(self.occupations)
+        return structure
 
     def get_occupations_on_sublattice(self, sublattice_index: int) -> List[int]:
         """

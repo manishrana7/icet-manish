@@ -7,11 +7,11 @@ import numpy as np
 
 # step 1: Set up structure to simulate as well as calculator
 ce = ClusterExpansion.read('mixing_energy.ce')
-atoms = make_supercell(ce.cluster_space.primitive_structure,
-                       3 * np.array([[-1, 1, 1],
-                                     [1, -1, 1],
-                                     [1, 1, -1]]))
-calculator = ClusterExpansionCalculator(atoms, ce)
+structure = make_supercell(ce.cluster_space.primitive_structure,
+                           3 * np.array([[-1, 1, 1],
+                                         [1, -1, 1],
+                                         [1, 1, -1]]))
+calculator = ClusterExpansionCalculator(structure, ce)
 
 
 # step 2: Define a function that handles MC run of one set of parameters
@@ -19,12 +19,12 @@ def run_mc(args):
     temperature = args['temperature']
     dmu = args['dmu']
     mc = SemiGrandCanonicalEnsemble(
-        atoms=atoms,
+        structure=structure,
         calculator=calculator,
         temperature=temperature,
         data_container='sgc-T{}-dmu{:+.3f}.dc'.format(temperature, dmu),
         chemical_potentials={'Ag': 0, 'Pd': dmu})
-    mc.run(number_of_trial_steps=len(atoms) * 30)
+    mc.run(number_of_trial_steps=len(structure) * 30)
 
 
 # step 3: Define all sets of parameters to be run

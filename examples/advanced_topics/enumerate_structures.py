@@ -12,14 +12,18 @@ from icet.tools import enumerate_structures
 
 # Generate all binary fcc structures with up to 6 atoms/cell
 # and save them in a database
-atoms = bulk('Au')
+primitive_structure = bulk('Au')
 db = connect('AuPd-fcc.db')
-for structure in enumerate_structures(atoms, range(1, 7), ['Pd', 'Au']):
+for structure in enumerate_structures(primitive_structure,
+                                      range(1, 7),
+                                      ['Pd', 'Au']):
     db.write(structure)
 
 # Generate fcc structures in the dilute limit
 conc_rest = {'Au': (0, 0.1)}
-for structure in enumerate_structures(atoms, range(10, 14), ['Pd', 'Au'],
+for structure in enumerate_structures(primitive_structure,
+                                      range(10, 14),
+                                      ['Pd', 'Au'],
                                       concentration_restrictions=conc_rest):
     db.write(structure)
 
@@ -28,25 +32,25 @@ for structure in enumerate_structures(atoms, range(10, 14), ['Pd', 'Au'],
 # specify that one site should always be Pd while the other can be
 # either a hydrogen or a vacancy (vanadium will serve as our "vacancy")
 a = 4.0
-atoms = bulk('Au', a=a)
-atoms.append(Atom('H', (a / 2, a / 2, a / 2)))
+primitive_structure = bulk('Au', a=a)
+primitive_structure.append(Atom('H', (a / 2, a / 2, a / 2)))
 species = [['Pd'], ['H', 'V']]
 db = connect('PdHVac-fcc.db')
-for structure in enumerate_structures(atoms, range(1, 5), species):
+for structure in enumerate_structures(primitive_structure, range(1, 5), species):
     db.write(structure)
 
 # Enumerate a copper surface with oxygen adsorbates (or vacancies) in
 # fcc and hcp hollow sites.
-atoms = fcc111('Cu', (1, 1, 5), vacuum=10.0)
-atoms.pbc = [True, True, False]
-add_adsorbate(atoms, 'O', 1.2, 'fcc')
-add_adsorbate(atoms, 'O', 1.2, 'hcp')
+primitive_structure = fcc111('Cu', (1, 1, 5), vacuum=10.0)
+primitive_structure.pbc = [True, True, False]
+add_adsorbate(primitive_structure, 'O', 1.2, 'fcc')
+add_adsorbate(primitive_structure, 'O', 1.2, 'hcp')
 species = []
-for atom in atoms:
+for atom in primitive_structure:
     if atom.symbol == 'Cu':
         species.append(['Cu'])
     else:
         species.append(['O', 'H'])
 db = connect('Cu-O-adsorbates.db')
-for structure in enumerate_structures(atoms, range(1, 5), species):
+for structure in enumerate_structures(primitive_structure, range(1, 5), species):
     db.write(structure)
