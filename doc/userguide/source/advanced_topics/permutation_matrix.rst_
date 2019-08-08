@@ -14,7 +14,7 @@ Import modules
 
 To extract permutation matrices, only a single :program:`icet`
 function is required, namely
-:func:`~icet.core.permutation_matrix.permutation_matrix_from_atoms`. Additionally,
+:func:`~icet.core.permutation_matrix.permutation_matrix_from_structure`. Additionally,
 the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function
 :func:`~ase.build.bulk` will be used to generate a structure.
 
@@ -36,7 +36,7 @@ Obtain permutation matrix
 -------------------------
 
 Next, the
-:func:`~icet.core.permutation_matrix.permutation_matrix_from_atoms`
+:func:`~icet.core.permutation_matrix.permutation_matrix_from_structure`
 function is called with the ASE :class:`~ase.Atoms` object that was
 defined above and a neighbor cutoff of 2.0 Å as arguments. The
 resulting output is a list that contains three elements, namely a
@@ -49,9 +49,9 @@ resulting output is a list that contains three elements, namely a
 
 Since the verbosity was set to :math:`\geq 3`, the following extra
 information should be printed by
-:func:`~icet.core.permutation_matrix.permutation_matrix_from_atoms`::
+:func:`~icet.core.permutation_matrix.permutation_matrix_from_structure`::
 
-  size of atoms_prim 1
+  size of structure_prim 1
   number of positions: 19
 
 Extract permuted positions

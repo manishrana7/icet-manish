@@ -53,7 +53,6 @@ class Sublattices:
     This class stores and provides information about the sublattices
     of a structure.
 
-
     Parameters
     ----------
     allowed_species
@@ -104,11 +103,11 @@ class Sublattices:
                 self._index_to_sublattice[index] = k
 
     def __getitem__(self, key: int) -> Sublattice:
-        """Returns a sublattice according to key."""
+        """ Returns a sublattice according to key. """
         return self._sublattices[key]
 
     def __len__(self):
-        """Returns number of sublattices."""
+        """ Returns number of sublattices. """
         return len(self._sublattices)
 
     def get_sublattice_index(self, index: int) -> int:
@@ -161,12 +160,12 @@ class Sublattices:
 
     @property
     def active_sublattices(self) -> List[Sublattice]:
-        """Lists of the active sublattices."""
+        """ List of the active sublattices. """
         return [sl for sl in self if len(sl.chemical_symbols) > 1]
 
     @property
     def inactive_sublattices(self) -> List[Sublattice]:
-        """Lists of the active sublattices."""
+        """ List of the active sublattices. """
         return [sl for sl in self if len(sl.chemical_symbols) == 1]
 
     def assert_occupation_is_allowed(self, chemical_symbols: List[str]):

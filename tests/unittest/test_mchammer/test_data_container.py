@@ -14,9 +14,9 @@ class ConcreteObserver(BaseObserver):
     def __init__(self, interval, tag='ConcreteObserver'):
         super().__init__(interval=interval, return_type=int, tag=tag)
 
-    def get_observable(self, atoms):
+    def get_observable(self, structure):
         """Returns number of Al atoms."""
-        return atoms.get_chemical_symbols().count('Al')
+        return structure.get_chemical_symbols().count('Al')
 
 
 class TestDataContainer(unittest.TestCase):
@@ -24,8 +24,8 @@ class TestDataContainer(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestDataContainer, self).__init__(*args, **kwargs)
-        self.atoms = bulk('Al').repeat(2)
-        self.ensemble_parameters = {'number_of_atoms': len(self.atoms),
+        self.structure = bulk('Al').repeat(2)
+        self.ensemble_parameters = {'number_of_atoms': len(self.structure),
                                     'temperature': 375.15}
 
     def shortDescription(self):
@@ -35,7 +35,7 @@ class TestDataContainer(unittest.TestCase):
     def setUp(self):
         """Setup before each test case."""
         self.dc = \
-            DataContainer(atoms=self.atoms,
+            DataContainer(structure=self.structure,
                           ensemble_parameters=self.ensemble_parameters,
                           metadata=OrderedDict(ensemble_name='test-ensemble',
                                                seed=144))
@@ -46,17 +46,17 @@ class TestDataContainer(unittest.TestCase):
 
         # test fails with a non ASE Atoms type
         with self.assertRaises(TypeError) as context:
-            DataContainer(atoms='atoms',
+            DataContainer(structure='structure',
                           ensemble_parameters=self.ensemble_parameters,
                           metadata=OrderedDict(ensemble_name='test-ensemble',
                                                seed=144))
 
-        self.assertTrue('atoms is not an ASE Atoms object'
+        self.assertTrue('structure is not an ASE Atoms object'
                         in str(context.exception))
 
-    def test_atoms(self):
-        """Tests reference atoms property."""
-        self.assertEqual(self.dc.atoms, self.atoms)
+    def test_structure(self):
+        """Tests reference structure property."""
+        self.assertEqual(self.dc.structure, self.structure)
 
     def test_append_data(self):
         """Tests append data functionality."""
@@ -73,7 +73,7 @@ class TestDataContainer(unittest.TestCase):
             if mctrial % observal_interval == 0:
                 for obs in observers:
                     if mctrial % obs.interval == 0:
-                        observable = obs.get_observable(self.atoms)
+                        observable = obs.get_observable(self.structure)
                         row_data[obs.tag] = observable
             if mctrial % trajectory_write_interval == 0:
                 row_data['occupations'] = [13, 13, 13]
@@ -104,7 +104,7 @@ class TestDataContainer(unittest.TestCase):
     def test_update_last_state(self):
         """Tests update_last_state functionality."""
         self.dc._update_last_state(last_step=10001,
-                                   occupations=[13] * len(self.atoms),
+                                   occupations=[13] * len(self.structure),
                                    accepted_trials=12,
                                    random_state=random.getstate())
 
@@ -134,8 +134,8 @@ class TestDataContainer(unittest.TestCase):
 
         # run new observer on
         class MyObserver(BaseObserver):
-            def get_observable(self, atoms):
-                Al_count = atoms.numbers.tolist().count(13)
+            def get_observable(self, structure):
+                Al_count = structure.numbers.tolist().count(13)
                 return Al_count**2
 
         new_observer = MyObserver(interval=1, return_type=float, tag='myobs')
@@ -178,12 +178,12 @@ class TestDataContainer(unittest.TestCase):
     def test_property_last_state(self):
         """Tests last_state property."""
         self.dc._update_last_state(last_step=10001,
-                                   occupations=[13] * len(self.atoms),
+                                   occupations=[13] * len(self.structure),
                                    accepted_trials=12,
                                    random_state=random.getstate())
         self.assertEqual(self.dc.last_state,
                          dict([('last_step', 10001),
-                               ('occupations', [13] * len(self.atoms)),
+                               ('occupations', [13] * len(self.structure)),
                                ('accepted_trials', 12),
                                ('random_state', random.getstate())]))
 
@@ -375,17 +375,17 @@ class TestDataContainer(unittest.TestCase):
         # only trajectory
         occupations = \
             pd.DataFrame(data_rows).T.occupations.dropna().tolist()
-        atoms_list = self.dc.get_data('trajectory')
-        for atoms, occupation in zip(atoms_list, occupations):
-            self.assertEqual(atoms.numbers.tolist(), occupation)
+        structure_list = self.dc.get_data('trajectory')
+        for structure, occupation in zip(structure_list, occupations):
+            self.assertEqual(structure.numbers.tolist(), occupation)
 
         # trajectory and properties
-        mctrial, atoms_list, energies = \
+        mctrial, structure_list, energies = \
             self.dc.get_data('mctrial', 'trajectory', 'potential')
 
         self.assertEqual(mctrial.tolist(), [0, 20, 40, 60])
         self.assertEqual(energies.tolist(), [-1.32, -1.33, -1.02, -1.3])
-        self.assertIsInstance(atoms_list, list)
+        self.assertIsInstance(structure_list, list)
 
         # test fails for non skip_none fill method
         with self.assertRaises(ValueError) as context:
@@ -441,7 +441,7 @@ class TestDataContainer(unittest.TestCase):
         dc_read = self.dc.read(temp_file)
 
         # check properties and metadata
-        self.assertEqual(self.atoms, dc_read.atoms)
+        self.assertEqual(self.structure, dc_read.structure)
         self.assertEqual(self.dc.metadata, dc_read.metadata)
         self.assertEqual(self.dc.ensemble_parameters,
                          dc_read.ensemble_parameters)

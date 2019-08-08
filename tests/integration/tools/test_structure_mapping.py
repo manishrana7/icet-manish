@@ -10,9 +10,9 @@ from icet.tools.structure_mapping import (_get_scaled_cell,
 
 
 class TestStructureMapping(unittest.TestCase):
-    '''
+    """
     Container for tests of the class functionality
-    '''
+    """
 
     def __init__(self, *args, **kwargs):
         from ase import Atom
@@ -22,12 +22,12 @@ class TestStructureMapping(unittest.TestCase):
         reference.append(Atom('H', (2, 2, 2)))
         self.reference = reference
 
-        atoms = reference.repeat(2)
+        structure = reference.repeat(2)
         for i in [0, 4, 6, 2, 7, 3]:
-            if atoms[i].symbol == 'Au':
-                atoms[i].symbol = 'Pd'
-            elif atoms[i].symbol == 'H':
-                del atoms[i]
+            if structure[i].symbol == 'Au':
+                structure[i].symbol = 'Pd'
+            elif structure[i].symbol == 'H':
+                del structure[i]
 
         # Displace the atoms somewhat
         rattle = [[0.147, -0.037, -0.01],
@@ -45,17 +45,17 @@ class TestStructureMapping(unittest.TestCase):
                   [-0.062, -0.066, 0.023],
                   [0.081, 0.078, -0.014]]
 
-        atoms.positions = atoms.positions + rattle
-        atoms.set_cell(atoms.cell * 1.01, scale_atoms=True)
-        self.atoms = atoms
+        structure.positions = structure.positions + rattle
+        structure.set_cell(structure.cell * 1.01, scale_atoms=True)
+        self.structure = structure
 
         super(TestStructureMapping, self).__init__(*args, **kwargs)
 
     def test_get_scaled_cell(self):
-        '''
+        """
         Testing that the cell scaling retrieval works.
-        '''
-        modcell = _get_scaled_cell(self.atoms, self.reference,
+        """
+        modcell = _get_scaled_cell(self.structure, self.reference,
                                    vacancy_type='V',
                                    inert_species=['Au', 'Pd'])
         target = np.array([[0., 4., 4.],
@@ -63,50 +63,50 @@ class TestStructureMapping(unittest.TestCase):
                            [4., 4., 0.]])
         self.assertTrue(np.allclose(modcell, target))
 
-        modcell = _get_scaled_cell(self.atoms, self.reference,
+        modcell = _get_scaled_cell(self.structure, self.reference,
                                    vacancy_type='V')
         target = np.array([[0., 4.04, 4.04],
                            [4.04, 0., 4.04],
                            [4.04, 4.04, 0.]])
         self.assertTrue(np.allclose(modcell, target))
 
-        modcell = _get_scaled_cell(self.atoms, self.reference)
+        modcell = _get_scaled_cell(self.structure, self.reference)
         target = np.array([[0., 3.82586237, 3.82586237],
                            [3.82586237, 0., 3.82586237],
                            [3.82586237, 3.82586237, 0.]])
         self.assertTrue(np.allclose(modcell, target))
 
     def test_get_transformation_matrix(self):
-        '''
+        """
         Testing that transformation matrix calculation works.
-        '''
-        P = _get_transformation_matrix(self.atoms.cell, self.reference.cell)
+        """
+        P = _get_transformation_matrix(self.structure.cell, self.reference.cell)
         target = np.array([[2., 0., 0.],
                            [0., 2., 0.],
                            [0., 0., 2.]])
         self.assertTrue(np.allclose(P, target))
 
     def test_rescale_structures(self):
-        '''
+        """
         Testing that the structure rescaling works.
-        '''
+        """
         P = np.array([[2., 0., 0.],
                       [0., 2., 0.],
                       [0., 0., 2.]])
         scaled_structure, ideal_supercell = \
-            _rescale_structures(self.atoms, self.reference, P)
+            _rescale_structures(self.structure, self.reference, P)
         self.assertEqual(len(scaled_structure), 14)
         self.assertEqual(len(ideal_supercell), 16)
         self.assertTrue(np.allclose(scaled_structure.cell,
                                     ideal_supercell.cell))
 
     def test_map_structure_to_reference(self):
-        '''
+        """
         Testing that the mapping works. This function will also invoke the
         other ones.
-        '''
+        """
         mapped, r_max, r_av = \
-            map_structure_to_reference(self.atoms, self.reference,
+            map_structure_to_reference(self.structure, self.reference,
                                        0.7,
                                        vacancy_type='V',
                                        inert_species=['Au', 'Pd'])

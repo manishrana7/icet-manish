@@ -52,7 +52,7 @@ class CanonicalEnsemble(ThermodynamicBaseEnsemble):
 
     Parameters
     ----------
-    atoms : :class:`Atoms <ase.Atoms>`
+    structure : :class:`Atoms <ase.Atoms>`
         atomic configuration to be used in the Monte Carlo simulation;
         also defines the initial occupation vector
     calculator : :class:`BaseCalculator <mchammer.calculators.ClusterExpansionCalculator>`
@@ -116,18 +116,19 @@ class CanonicalEnsemble(ThermodynamicBaseEnsemble):
         ce = ClusterExpansion(cs, [0, 0, 0.1, -0.02])
 
         # prepare initial configuration
-        atoms = prim.repeat(3)
+        structure = prim.repeat(3)
         for k in range(5):
-            atoms[k].symbol = 'Ag'
+            structure[k].symbol = 'Ag'
 
         # set up and run MC simulation
-        calc = ClusterExpansionCalculator(atoms, ce)
-        mc = CanonicalEnsemble(atoms=atoms, calculator=calc, temperature=600,
+        calc = ClusterExpansionCalculator(structure, ce)
+        mc = CanonicalEnsemble(structure=structure, calculator=calc,
+                               temperature=600,
                                data_container='myrun_canonical.dc')
         mc.run(100)  # carry out 100 trial swaps
     """
 
-    def __init__(self, atoms: Atoms, calculator: BaseCalculator,
+    def __init__(self, structure: Atoms, calculator: BaseCalculator,
                  temperature: float, user_tag: str = None,
                  boltzmann_constant: float = kB,
                  data_container: DataContainer = None, random_seed: int = None,
@@ -143,11 +144,11 @@ class CanonicalEnsemble(ThermodynamicBaseEnsemble):
                        for symbol in sub.chemical_symbols])
         for symbol in symbols:
             key = 'n_atoms_{}'.format(symbol)
-            count = atoms.get_chemical_symbols().count(symbol)
+            count = structure.get_chemical_symbols().count(symbol)
             self._ensemble_parameters[key] = count
 
         super().__init__(
-            atoms=atoms, calculator=calculator, user_tag=user_tag,
+            structure=structure, calculator=calculator, user_tag=user_tag,
             data_container=data_container,
             random_seed=random_seed,
             data_container_write_period=data_container_write_period,

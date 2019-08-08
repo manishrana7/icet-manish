@@ -17,8 +17,8 @@ class TestTVCalculatorBinary(unittest.TestCase):
 
         self.prim = bulk('Al', a=4.0)
 
-        atoms = self.prim.repeat((2, 1, 1))
-        self.atoms = atoms.repeat(3)
+        structure = self.prim.repeat((2, 1, 1))
+        self.structure = structure.repeat(3)
         self.cutoffs = [5, 5]
         self.elements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.prim, self.cutoffs, self.elements)
@@ -30,17 +30,17 @@ class TestTVCalculatorBinary(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.atoms = self.prim.repeat(4)
+        self.structure = self.prim.repeat(4)
 
         self.calculator = TargetVectorCalculator(
-            atoms=self.atoms, cluster_space=self.cs,
+            structure=self.structure, cluster_space=self.cs,
             target_vector=self.target_vector,
             name='Tests target vector calc')
 
     def test_init_with_weights(self):
         """Test init with weights."""
         calculator = TargetVectorCalculator(
-            atoms=self.atoms, cluster_space=self.cs,
+            structure=self.structure, cluster_space=self.cs,
             target_vector=self.target_vector,
             weights=np.linspace(3, 1, len(self.cs)),
             optimality_weight=3.0,
@@ -52,7 +52,7 @@ class TestTVCalculatorBinary(unittest.TestCase):
     def test_init_without_optimality_weight(self):
         """Test init without optimality weight."""
         calculator = TargetVectorCalculator(
-            atoms=self.atoms, cluster_space=self.cs,
+            structure=self.structure, cluster_space=self.cs,
             target_vector=self.target_vector,
             optimality_weight=None,
             name='Tests target vector calc')
@@ -63,7 +63,7 @@ class TestTVCalculatorBinary(unittest.TestCase):
         """Test init without weights of wrong length."""
         with self.assertRaises(ValueError) as cm:
             TargetVectorCalculator(
-                atoms=self.atoms, cluster_space=self.cs,
+                structure=self.structure, cluster_space=self.cs,
                 target_vector=self.target_vector,
                 weights=[1.0],
                 optimality_weight=None,
@@ -79,7 +79,7 @@ class TestTVCalculatorBinary(unittest.TestCase):
     def test_calculate_total(self):
         """Test calculate_total function."""
         occupations = []
-        for i in range(len(self.atoms)):
+        for i in range(len(self.structure)):
             if i % 2 == 0:
                 occupations.append(13)
             else:
@@ -98,8 +98,8 @@ class TestTVCalculatorBinaryHCP(unittest.TestCase):
 
         self.prim = bulk('Al', a=4.0, crystalstructure='hcp')
 
-        atoms = self.prim.repeat((2, 1, 1))
-        self.atoms = atoms.repeat(3)
+        structure = self.prim.repeat((2, 1, 1))
+        self.structure = structure.repeat(3)
         self.cutoffs = [5, 5]
         self.elements = [['Al', 'Ge'], ['Al', 'Ge']]
         self.cs = ClusterSpace(self.prim, self.cutoffs, self.elements)
@@ -111,10 +111,10 @@ class TestTVCalculatorBinaryHCP(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.atoms = self.prim.repeat(3)
+        self.structure = self.prim.repeat(3)
 
         self.calculator = TargetVectorCalculator(
-            atoms=self.atoms, cluster_space=self.cs,
+            structure=self.structure, cluster_space=self.cs,
             target_vector=self.target_vector,
             optimality_weight=0,
             name='Tests target vector calc')
@@ -122,7 +122,7 @@ class TestTVCalculatorBinaryHCP(unittest.TestCase):
     def test_calculate_total(self):
         """Test calculate_total function."""
         occupations = []
-        for i in range(len(self.atoms)):
+        for i in range(len(self.structure)):
             if i % 2 == 0:
                 occupations.append(32)
             else:
@@ -168,8 +168,8 @@ class TestTVCalculatorTernary(unittest.TestCase):
 
         self.prim = bulk('Al', a=4.0)
 
-        atoms = self.prim.repeat((2, 1, 1))
-        self.atoms = atoms.repeat(3)
+        structure = self.prim.repeat((2, 1, 1))
+        self.structure = structure.repeat(3)
         self.cutoffs = [5, 5]
         self.elements = ['Al', 'Ge', 'Ga']
         self.cs = ClusterSpace(self.prim, self.cutoffs, self.elements)
@@ -181,10 +181,10 @@ class TestTVCalculatorTernary(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.atoms = self.prim.repeat(4)
+        self.structure = self.prim.repeat(4)
 
         self.calculator = TargetVectorCalculator(
-            atoms=self.atoms, cluster_space=self.cs,
+            structure=self.structure, cluster_space=self.cs,
             target_vector=self.target_vector,
             weights=np.linspace(3.1, 1.2, len(self.cs)),
             name='Tests target vector calc')
@@ -197,7 +197,7 @@ class TestTVCalculatorTernary(unittest.TestCase):
     def test_calculate_total(self):
         """Test calculate_total function."""
         occupations = []
-        for i in range(len(self.atoms)):
+        for i in range(len(self.structure)):
             if i % 2 == 0:
                 occupations.append(13)
             else:

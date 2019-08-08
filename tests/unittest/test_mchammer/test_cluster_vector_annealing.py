@@ -17,17 +17,17 @@ class TestEnsemble(unittest.TestCase):
 
         # setup supercells
         self.prim = bulk('Al')
-        self.atoms = []
-        atoms = self.prim.repeat(4)
-        for i, atom in enumerate(atoms):
+        self.structure = []
+        structure = self.prim.repeat(4)
+        for i, atom in enumerate(structure):
             if i % 2 == 0:
                 atom.symbol = 'Ga'
-        self.atoms.append(atoms)
-        atoms = self.prim.repeat(2)
-        for i, atom in enumerate(atoms):
+        self.structure.append(structure)
+        structure = self.prim.repeat(2)
+        for i, atom in enumerate(structure):
             if i % 2 == 0:
                 atom.symbol = 'Ga'
-        self.atoms.append(atoms)
+        self.structure.append(structure)
 
         # setup cluster expansion
         cutoffs = [5, 5, 4]
@@ -37,8 +37,8 @@ class TestEnsemble(unittest.TestCase):
         target_vector = np.linspace(-1, 1, len(cs))
 
         self.calculators = []
-        for atoms in self.atoms:
-            self.calculators.append(TargetVectorCalculator(atoms,
+        for structure in self.structure:
+            self.calculators.append(TargetVectorCalculator(structure,
                                                            cs,
                                                            target_vector))
 
@@ -52,7 +52,7 @@ class TestEnsemble(unittest.TestCase):
     def setUp(self):
         """Setup before each test."""
         self.ensemble = TargetClusterVectorAnnealing(
-            atoms=self.atoms,
+            structure=self.structure,
             calculators=self.calculators,
             T_start=self.T_start,
             T_stop=self.T_stop,
@@ -62,7 +62,7 @@ class TestEnsemble(unittest.TestCase):
         """Test that ensemble cannot be initialized with ASE Atoms."""
         with self.assertRaises(ValueError) as cm:
             TargetClusterVectorAnnealing(
-                atoms=bulk('Al'),
+                structure=bulk('Al'),
                 calculators=self.calculators,
                 T_start=self.T_start,
                 T_stop=self.T_stop)
@@ -73,7 +73,7 @@ class TestEnsemble(unittest.TestCase):
         """Test that ensemble cannot be init with unequal length lists."""
         with self.assertRaises(ValueError) as cm:
             TargetClusterVectorAnnealing(
-                self.atoms,
+                self.structure,
                 calculators=self.calculators[:-1],
                 T_start=self.T_start,
                 T_stop=self.T_stop)
@@ -83,7 +83,7 @@ class TestEnsemble(unittest.TestCase):
     def test_init_without_random_seed(self):
         """Test that init without random seed specification works."""
         ensemble = TargetClusterVectorAnnealing(
-            atoms=self.atoms,
+            structure=self.structure,
             calculators=self.calculators,
             T_start=self.T_start,
             T_stop=self.T_stop)

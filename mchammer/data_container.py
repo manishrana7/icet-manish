@@ -33,7 +33,7 @@ class DataContainer:
 
     Parameters
     ----------
-    atoms : ASE Atoms object
+    structure : ASE Atoms object
         reference atomic structure associated with the data container
 
     ensemble_parameters : dict
@@ -43,15 +43,15 @@ class DataContainer:
         metadata associated with the data container
     """
 
-    def __init__(self, atoms: Atoms, ensemble_parameters: dict,
+    def __init__(self, structure: Atoms, ensemble_parameters: dict,
                  metadata: dict = OrderedDict()):
         """
         Initializes a DataContainer object.
         """
-        if not isinstance(atoms, Atoms):
-            raise TypeError('atoms is not an ASE Atoms object')
+        if not isinstance(structure, Atoms):
+            raise TypeError('structure is not an ASE Atoms object')
 
-        self.atoms = atoms.copy()
+        self.structure = structure.copy()
         self._ensemble_parameters = ensemble_parameters
         self._metadata = metadata
         self._add_default_metadata()
@@ -137,14 +137,14 @@ class DataContainer:
         """
         for row_data in self._data_list:
             if 'occupations' in row_data:
-                atoms = self.atoms.copy()
-                atoms.numbers = row_data['occupations']
+                structure = self.structure.copy()
+                structure.numbers = row_data['occupations']
                 record = dict()
                 if observer.return_type is dict:
-                    for key, value in observer.get_observable(atoms).items():
+                    for key, value in observer.get_observable(structure).items():
                         record[key] = value
                 else:
-                    record[observer.tag] = observer.get_observable(atoms)
+                    record[observer.tag] = observer.get_observable(structure)
                 row_data.update(record)
                 self._observables.add(observer.tag)
 
@@ -474,15 +474,15 @@ class DataContainer:
             data_list = [data]
 
         tag_list = list(new_tags)
-        atoms_list = []
+        structure_list = []
         for tag, data_row in zip(tag_list, data_list):
             if tag == 'occupations':
                 ind = tag_list.index('occupations')
                 for occupation_vector in data_row:
-                    atoms = self.atoms.copy()
-                    atoms.numbers = occupation_vector
-                    atoms_list.append(atoms)
-                data_list[ind] = atoms_list
+                    structure = self.structure.copy()
+                    structure.numbers = occupation_vector
+                    structure_list.append(structure)
+                data_list[ind] = structure_list
 
         if len(data_list) > 1:
             return tuple(data_list)
@@ -503,10 +503,10 @@ class DataContainer:
         outfile
             output file name or file object
         """
-        atoms_list, energies = self._get_trajectory('occupations', 'potential')
+        structure_list, energies = self._get_trajectory('occupations', 'potential')
         traj = Trajectory(outfile, mode='a')
-        for atoms, energy in zip(atoms_list, energies):
-            traj.write(atoms=atoms, energy=energy)
+        for structure, energy in zip(structure_list, energies):
+            traj.write(atoms=structure, energy=energy)
         traj.close()
 
     @staticmethod
@@ -536,16 +536,16 @@ class DataContainer:
         if not tarfile.is_tarfile(filename):
             raise TypeError('{} is not a tar file'.format(filename))
 
-        reference_atoms_file = tempfile.NamedTemporaryFile()
+        reference_structure_file = tempfile.NamedTemporaryFile()
         reference_data_file = tempfile.NamedTemporaryFile()
         runtime_data_file = tempfile.NamedTemporaryFile()
 
         with tarfile.open(mode='r', name=filename) as tar_file:
-            # file with atoms
-            reference_atoms_file.write(tar_file.extractfile('atoms').read())
+            # file with structures
+            reference_structure_file.write(tar_file.extractfile('atoms').read())
 
-            reference_atoms_file.seek(0)
-            atoms = ase_read(reference_atoms_file.name, format='json')
+            reference_structure_file.seek(0)
+            structure = ase_read(reference_structure_file.name, format='json')
 
             # file with reference data
             reference_data_file.write(tar_file.extractfile('reference_data').read())
@@ -554,7 +554,8 @@ class DataContainer:
                 reference_data = json.load(fd)
 
             # init DataContainer
-            dc = DataContainer(atoms=atoms, ensemble_parameters=reference_data['parameters'])
+            dc = DataContainer(structure=structure,
+                               ensemble_parameters=reference_data['parameters'])
 
             # overwrite metadata
             dc._metadata = reference_data['metadata']
@@ -591,8 +592,8 @@ class DataContainer:
         self._metadata['date_last_backup'] = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 
         # Save reference atomic structure
-        reference_atoms_file = tempfile.NamedTemporaryFile()
-        ase_write(reference_atoms_file.name, self.atoms, format='json')
+        reference_structure_file = tempfile.NamedTemporaryFile()
+        ase_write(reference_structure_file.name, self.structure, format='json')
 
         # Save reference data
         reference_data = {'parameters': self._ensemble_parameters,
@@ -608,7 +609,7 @@ class DataContainer:
         np.savez_compressed(runtime_data_file, self._data_list)
 
         with tarfile.open(outfile, mode='w') as handle:
-            handle.add(reference_atoms_file.name, arcname='atoms')
+            handle.add(reference_structure_file.name, arcname='atoms')
             handle.add(reference_data_file.name, arcname='reference_data')
             handle.add(runtime_data_file.name, arcname='runtime_data')
         runtime_data_file.close()

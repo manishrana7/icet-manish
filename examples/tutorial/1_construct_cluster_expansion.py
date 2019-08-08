@@ -6,10 +6,10 @@ from icet import (ClusterSpace, StructureContainer,
 
 # step 1: Basic setup
 db = connect('reference_data.db')
-prim = db.get(id=1).toatoms()  # primitive structure
+primitive_structure = db.get(id=1).toatoms()  # primitive structure
 
 # step 2: Set up the basic structure and a cluster space
-cs = ClusterSpace(atoms=prim,
+cs = ClusterSpace(structure=primitive_structure,
                   cutoffs=[13.5, 6.0, 5.5],
                   chemical_symbols=['Ag', 'Pd'])
 print(cs)
@@ -17,7 +17,7 @@ print(cs)
 # step 3: Parse the input structures and set up a structure container
 sc = StructureContainer(cluster_space=cs)
 for row in db.select('natoms<=8'):
-    sc.add_structure(atoms=row.toatoms(),
+    sc.add_structure(structure=row.toatoms(),
                      user_tag=row.tag,
                      properties={'mixing_energy': row.mixing_energy})
 print(sc)

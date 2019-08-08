@@ -1,19 +1,19 @@
-'''
+"""
 This example generate a permutation matrix for a structure
-'''
+"""
 
 # Import modules
 import numpy as np
 from ase.build import bulk
-from icet.core.permutation_matrix import permutation_matrix_from_atoms
+from icet.core.permutation_matrix import permutation_matrix_from_structure
 
 # Create a prototype Al structure
-atoms = bulk('Al', 'fcc', a=2.0)
+structure = bulk('Al', 'fcc', a=2.0)
 
 # Generate a permutation matrix for all neighbors inside the cutoff
 neighbor_cutoff = 2.0
 permutation_matrix, prim_structure, neighbor_list = \
-    permutation_matrix_from_atoms(atoms, neighbor_cutoff)
+    permutation_matrix_from_structure(structure, neighbor_cutoff)
 
 # Extract the permuted, indexed and unique positions.
 perm_pos = permutation_matrix.get_permuted_positions()

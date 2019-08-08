@@ -172,12 +172,12 @@ class TestSublattices(unittest.TestCase):
         """Tests that the number of sublattices are correct
         in the case of the allowed species have duplicates in them.
         """
-        atoms = bulk("Al").repeat(2)
+        structure = bulk("Al").repeat(2)
 
-        chemical_symbols = [['H']] + [['Al', 'Ge']]*(len(atoms)-1)
+        chemical_symbols = [['H']] + [['Al', 'Ge']]*(len(structure)-1)
         cs = ClusterSpace(
-            atoms=atoms, chemical_symbols=chemical_symbols, cutoffs=[5])
-        sublattices = cs.get_sublattices(atoms)
+            structure=structure, chemical_symbols=chemical_symbols, cutoffs=[5])
+        sublattices = cs.get_sublattices(structure)
 
         self.assertEqual(len(sublattices), 2)
         self.assertEqual(sublattices.allowed_species, [('Al', 'Ge'), ('H',)])

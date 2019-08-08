@@ -17,15 +17,15 @@ class TestEnsemble(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEnsemble, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk('Al').repeat(3)
-        for i, atom in enumerate(self.atoms):
+        self.structure = bulk('Al').repeat(3)
+        for i, atom in enumerate(self.structure):
             if i % 2 == 0:
                 atom.symbol = 'Ga'
         cutoffs = [5, 5, 4]
         elements = ['Al', 'Ga']
         self.phis = {'Al': -1.3}
         self.kappa = 10.0
-        self.cs = ClusterSpace(self.atoms, cutoffs, elements)
+        self.cs = ClusterSpace(self.structure, cutoffs, elements)
         parameters = parameters = np.array([1.2] * len(self.cs))
         self.ce = ClusterExpansion(self.cs, parameters)
         self.temperature = 100.0
@@ -36,10 +36,10 @@ class TestEnsemble(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
+        self.calculator = ClusterExpansionCalculator(self.structure, self.ce)
 
         self.ensemble = VCSGCEnsemble(
-            atoms=self.atoms,
+            structure=self.structure,
             calculator=self.calculator,
             temperature=self.temperature,
             phis=self.phis,
@@ -53,24 +53,24 @@ class TestEnsemble(unittest.TestCase):
     def test_init(self):
         """ Tests exceptions are raised during initialization. """
         with self.assertRaises(TypeError) as context:
-            VCSGCEnsemble(atoms=self.atoms, calculator=self.calculator)
+            VCSGCEnsemble(structure=self.structure, calculator=self.calculator)
         self.assertIn("required positional arguments: 'temperature'", str(context.exception))
 
         with self.assertRaises(TypeError) as context:
-            VCSGCEnsemble(atoms=self.atoms,
+            VCSGCEnsemble(structure=self.structure,
                           calculator=self.calculator,
                           temperature=self.temperature)
         self.assertIn("required positional arguments: 'phis'", str(context.exception))
 
         with self.assertRaises(TypeError) as context:
-            VCSGCEnsemble(atoms=self.atoms,
+            VCSGCEnsemble(structure=self.structure,
                           calculator=self.calculator,
                           temperature=self.temperature,
                           phis=self.phis)
         self.assertIn("required positional argument: 'kappa'", str(context.exception))
 
         with self.assertRaises(ValueError) as context:
-            VCSGCEnsemble(atoms=self.atoms,
+            VCSGCEnsemble(structure=self.structure,
                           calculator=self.calculator,
                           temperature=self.temperature,
                           phis={'Al': -2.0, 'Ga': 0.0},
@@ -130,7 +130,7 @@ class TestEnsemble(unittest.TestCase):
 
         phis = {13: -1}
         ensemble = VCSGCEnsemble(
-            atoms=self.atoms, calculator=self.calculator,
+            structure=self.structure, calculator=self.calculator,
             user_tag='test-ensemble', random_seed=42,
             temperature=self.temperature,
             phis=phis,
@@ -150,13 +150,13 @@ class TestEnsemble(unittest.TestCase):
 
     def test_ensemble_parameters(self):
         """Tests the get ensemble parameters method."""
-        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.atoms))
+        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.structure))
         self.assertEqual(self.ensemble.ensemble_parameters['temperature'], self.temperature)
         self.assertEqual(self.ensemble.ensemble_parameters['phi_Al'], -1.3)
         self.assertEqual(self.ensemble.ensemble_parameters['kappa'], 10)
 
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['n_atoms'],
-                         len(self.atoms))
+                         len(self.structure))
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['temperature'],
                          self.temperature)
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['phi_Al'], -1.3)
@@ -177,8 +177,8 @@ class TestEnsembleTernaryFCC(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEnsembleTernaryFCC, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk('Al').repeat(3)
-        for i, atom in enumerate(self.atoms):
+        self.structure = bulk('Al').repeat(3)
+        for i, atom in enumerate(self.structure):
             if i % 2 == 0:
                 atom.symbol = 'Ga'
             elif i % 3 == 0:
@@ -187,7 +187,7 @@ class TestEnsembleTernaryFCC(unittest.TestCase):
         elements = ['Al', 'Ga', 'In']
         self.phis = {'Al': -1.3, 'Ga': -0.4}
         self.kappa = 10.0
-        self.cs = ClusterSpace(self.atoms, cutoffs, elements)
+        self.cs = ClusterSpace(self.structure, cutoffs, elements)
         parameters = parameters = np.array([1.2] * len(self.cs))
         self.ce = ClusterExpansion(self.cs, parameters)
         self.temperature = 100.0
@@ -198,10 +198,10 @@ class TestEnsembleTernaryFCC(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
+        self.calculator = ClusterExpansionCalculator(self.structure, self.ce)
 
         self.ensemble = VCSGCEnsemble(
-            atoms=self.atoms,
+            structure=self.structure,
             calculator=self.calculator,
             temperature=self.temperature,
             phis=self.phis,
@@ -215,7 +215,7 @@ class TestEnsembleTernaryFCC(unittest.TestCase):
     def test_init(self):
         """ Tests exceptions are raised during initialization. """
         with self.assertRaises(ValueError) as context:
-            VCSGCEnsemble(atoms=self.atoms,
+            VCSGCEnsemble(structure=self.structure,
                           calculator=self.calculator,
                           temperature=self.temperature,
                           phis={'Al': -0.5},
@@ -223,7 +223,7 @@ class TestEnsembleTernaryFCC(unittest.TestCase):
         self.assertIn('phis must be set for N - 1 elements', str(context.exception))
 
         with self.assertRaises(ValueError) as context:
-            VCSGCEnsemble(atoms=self.atoms,
+            VCSGCEnsemble(structure=self.structure,
                           calculator=self.calculator,
                           temperature=self.temperature,
                           phis={'Al': -0.5, 'Ga': -0.3, 'In': -0.7},
@@ -267,14 +267,14 @@ class TestEnsembleTernaryFCC(unittest.TestCase):
 
     def test_ensemble_parameters(self):
         """Tests the get ensemble parameters method."""
-        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.atoms))
+        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.structure))
         self.assertEqual(self.ensemble.ensemble_parameters['temperature'], self.temperature)
         self.assertEqual(self.ensemble.ensemble_parameters['phi_Al'], -1.3)
         self.assertEqual(self.ensemble.ensemble_parameters['phi_Ga'], -0.4)
         self.assertEqual(self.ensemble.ensemble_parameters['kappa'], 10)
 
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['n_atoms'],
-                         len(self.atoms))
+                         len(self.structure))
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['temperature'],
                          self.temperature)
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['phi_Al'], -1.3)
@@ -294,8 +294,8 @@ class TestEnsembleSublattices(unittest.TestCase):
         lattice_parameter = 4.0
         prim = bulk('Pd', a=lattice_parameter, crystalstructure='fcc')
         prim.append(Atom('H', position=(lattice_parameter / 2,)*3))
-        self.atoms = prim.repeat(3)
-        for i, atom in enumerate(self.atoms):
+        self.structure = prim.repeat(3)
+        for i, atom in enumerate(self.structure):
             if i % 3 == 0:
                 if atom.symbol == 'Pd':
                     atom.symbol = 'Au'
@@ -316,10 +316,10 @@ class TestEnsembleSublattices(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
+        self.calculator = ClusterExpansionCalculator(self.structure, self.ce)
 
         self.ensemble = VCSGCEnsemble(
-            atoms=self.atoms,
+            structure=self.structure,
             calculator=self.calculator,
             temperature=self.temperature,
             phis=self.phis,
@@ -333,7 +333,7 @@ class TestEnsembleSublattices(unittest.TestCase):
     def test_init(self):
         """ Tests exceptions are raised during initialization. """
         with self.assertRaises(ValueError) as context:
-            VCSGCEnsemble(atoms=self.atoms,
+            VCSGCEnsemble(structure=self.structure,
                           calculator=self.calculator,
                           temperature=self.temperature,
                           phis={'Pd': -2.0, 'Au': 0.0},
@@ -341,7 +341,7 @@ class TestEnsembleSublattices(unittest.TestCase):
         self.assertIn('phis must be set for N - 1 elements', str(context.exception))
 
         with self.assertRaises(ValueError) as context:
-            VCSGCEnsemble(atoms=self.atoms,
+            VCSGCEnsemble(structure=self.structure,
                           calculator=self.calculator,
                           temperature=self.temperature,
                           phis={'Au': -2.0},
@@ -349,7 +349,7 @@ class TestEnsembleSublattices(unittest.TestCase):
         self.assertIn('phis must be set for N - 1 elements', str(context.exception))
 
         with self.assertRaises(ValueError) as context:
-            VCSGCEnsemble(atoms=self.atoms,
+            VCSGCEnsemble(structure=self.structure,
                           calculator=self.calculator,
                           temperature=self.temperature,
                           phis={'Au': -2.0, 'H': -1.2, 'V': -1.0},
@@ -357,7 +357,7 @@ class TestEnsembleSublattices(unittest.TestCase):
         self.assertIn('phis must be set for N - 1 elements', str(context.exception))
 
         with self.assertRaises(ValueError) as context:
-            VCSGCEnsemble(atoms=self.atoms,
+            VCSGCEnsemble(structure=self.structure,
                           calculator=self.calculator,
                           temperature=self.temperature,
                           phis={},
@@ -399,14 +399,14 @@ class TestEnsembleSublattices(unittest.TestCase):
 
     def test_ensemble_parameters(self):
         """Tests the get ensemble parameters method."""
-        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.atoms))
+        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.structure))
         self.assertEqual(self.ensemble.ensemble_parameters['temperature'], self.temperature)
         self.assertAlmostEqual(self.ensemble.ensemble_parameters['phi_Au'], -1.3)
         self.assertAlmostEqual(self.ensemble.ensemble_parameters['phi_H'], -1.0)
         self.assertAlmostEqual(self.ensemble.ensemble_parameters['kappa'], 200.0)
 
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['n_atoms'],
-                         len(self.atoms))
+                         len(self.structure))
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['temperature'],
                          self.temperature)
         self.assertAlmostEqual(self.ensemble.data_container.ensemble_parameters['phi_Au'], -1.3)
@@ -434,8 +434,8 @@ class TestEnsembleSpectatorSublattice(unittest.TestCase):
         lattice_parameter = 4.0
         prim = bulk('Pd', a=lattice_parameter, crystalstructure='fcc')
         prim.append(Atom('H', position=(lattice_parameter / 2,)*3))
-        self.atoms = prim.repeat(3)
-        for i, atom in enumerate(self.atoms):
+        self.structure = prim.repeat(3)
+        for i, atom in enumerate(self.structure):
             if i % 3 == 0:
                 if atom.symbol == 'Pd':
                     continue
@@ -456,10 +456,10 @@ class TestEnsembleSpectatorSublattice(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
+        self.calculator = ClusterExpansionCalculator(self.structure, self.ce)
 
         self.ensemble = VCSGCEnsemble(
-            atoms=self.atoms,
+            structure=self.structure,
             calculator=self.calculator,
             temperature=self.temperature,
             phis=self.phis,
@@ -473,7 +473,7 @@ class TestEnsembleSpectatorSublattice(unittest.TestCase):
     def test_init(self):
         """ Tests exceptions are raised during initialization. """
         with self.assertRaises(ValueError) as context:
-            VCSGCEnsemble(atoms=self.atoms,
+            VCSGCEnsemble(structure=self.structure,
                           calculator=self.calculator,
                           temperature=self.temperature,
                           phis={'Pd': -2.0},
@@ -513,13 +513,13 @@ class TestEnsembleSpectatorSublattice(unittest.TestCase):
 
     def test_ensemble_parameters(self):
         """Tests the get ensemble parameters method."""
-        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.atoms))
+        self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], len(self.structure))
         self.assertEqual(self.ensemble.ensemble_parameters['temperature'], self.temperature)
         self.assertAlmostEqual(self.ensemble.ensemble_parameters['phi_H'], -1.0)
         self.assertAlmostEqual(self.ensemble.ensemble_parameters['kappa'], 200.0)
 
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['n_atoms'],
-                         len(self.atoms))
+                         len(self.structure))
         self.assertEqual(self.ensemble.data_container.ensemble_parameters['temperature'],
                          self.temperature)
         self.assertAlmostEqual(self.ensemble.data_container.ensemble_parameters['phi_H'], -1.0)

@@ -13,14 +13,14 @@ class TestEnsemble(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEnsemble, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk('Al').repeat(3)
-        for i, atom in enumerate(self.atoms):
+        self.structure = bulk('Al').repeat(3)
+        for i, atom in enumerate(self.structure):
             if i % 2 == 0:
                 atom.symbol = 'Ga'
         cutoffs = [5, 5, 4]
         elements = ['Al', 'Ga']
         self.chemical_potentials = {'Al': 5, 'Ga': 0}
-        self.cs = ClusterSpace(self.atoms, cutoffs, elements)
+        self.cs = ClusterSpace(self.structure, cutoffs, elements)
         parameters = parameters = np.array([1.2] * len(self.cs))
         self.ce = ClusterExpansion(self.cs, parameters)
         self.temperature = 100.0
@@ -31,10 +31,10 @@ class TestEnsemble(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
+        self.calculator = ClusterExpansionCalculator(self.structure, self.ce)
 
         self.ensemble = SemiGrandCanonicalEnsemble(
-            atoms=self.atoms,
+            structure=self.structure,
             calculator=self.calculator,
             user_tag='test-ensemble', random_seed=42,
             data_container_write_period=499.0,
@@ -47,13 +47,13 @@ class TestEnsemble(unittest.TestCase):
     def test_init(self):
         """ Tests exceptions are raised during initialization. """
         with self.assertRaises(TypeError) as context:
-            SemiGrandCanonicalEnsemble(atoms=self.atoms,
+            SemiGrandCanonicalEnsemble(structure=self.structure,
                                        calculator=self.calculator)
         self.assertTrue("required positional arguments: 'temperature'" in
                         str(context.exception))
 
         with self.assertRaises(TypeError) as context:
-            SemiGrandCanonicalEnsemble(atoms=self.atoms,
+            SemiGrandCanonicalEnsemble(structure=self.structure,
                                        calculator=self.calculator,
                                        temperature=self.temperature)
         self.assertTrue("required positional argument:"
@@ -99,7 +99,7 @@ class TestEnsemble(unittest.TestCase):
 
         chemical_potentials = {13: 5, 31: 0}
         ensemble = SemiGrandCanonicalEnsemble(
-            atoms=self.atoms, calculator=self.calculator,
+            structure=self.structure, calculator=self.calculator,
             user_tag='test-ensemble',
             random_seed=42, temperature=self.temperature,
             chemical_potentials=chemical_potentials)
@@ -108,7 +108,7 @@ class TestEnsemble(unittest.TestCase):
         # Test both int and str
         chemical_potentials = {'Al': 5, 31: 0}
         ensemble = SemiGrandCanonicalEnsemble(
-            atoms=self.atoms, calculator=self.calculator,
+            structure=self.structure, calculator=self.calculator,
             user_tag='test-ensemble',
             random_seed=42, temperature=self.temperature,
             chemical_potentials=chemical_potentials)
@@ -128,7 +128,7 @@ class TestEnsemble(unittest.TestCase):
     def test_get_ensemble_parameters(self):
         """Tests the get ensemble parameters method."""
         self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'],
-                         len(self.atoms))
+                         len(self.structure))
         self.assertEqual(self.ensemble.ensemble_parameters['temperature'],
                          self.temperature)
         self.assertEqual(self.ensemble.ensemble_parameters['mu_Al'], 5)
@@ -136,7 +136,7 @@ class TestEnsemble(unittest.TestCase):
 
         self.assertEqual(
             self.ensemble.data_container.ensemble_parameters['n_atoms'],
-            len(self.atoms))
+            len(self.structure))
         self.assertEqual(
             self.ensemble.data_container.ensemble_parameters['temperature'],
             self.temperature)

@@ -59,28 +59,28 @@ class TestStructureContainer(unittest.TestCase):
         super(TestStructureContainer, self).__init__(*args, **kwargs)
         prim = bulk('Ag', a=4.09)
         chemical_symbols = ['Ag', 'Au']
-        self.cs = ClusterSpace(atoms=prim,
+        self.cs = ClusterSpace(structure=prim,
                                cutoffs=[4.0, 4.0, 4.0],
                                chemical_symbols=chemical_symbols)
         self.structure_list = []
         self.user_tags = []
         for k in range(4):
-            atoms = prim.repeat(2)
-            symbols = [chemical_symbols[0]] * len(atoms)
+            structure = prim.repeat(2)
+            symbols = [chemical_symbols[0]] * len(structure)
             symbols[:k] = [chemical_symbols[1]] * k
-            atoms.set_chemical_symbols(symbols)
-            self.structure_list.append(atoms)
+            structure.set_chemical_symbols(symbols)
+            self.structure_list.append(structure)
             self.user_tags.append('Structure {}'.format(k))
 
         self.properties_list = []
         self.add_properties_list = []
-        for k, atoms in enumerate(self.structure_list):
-            atoms.set_calculator(EMT())
-            properties = {'energy': atoms.get_potential_energy(),
-                          'volume': atoms.get_volume(),
-                          'Au atoms': atoms.get_chemical_symbols().count('Au')}
+        for k, structure in enumerate(self.structure_list):
+            structure.set_calculator(EMT())
+            properties = {'energy': structure.get_potential_energy(),
+                          'volume': structure.get_volume(),
+                          'Au atoms': structure.get_chemical_symbols().count('Au')}
             self.properties_list.append(properties)
-            add_properties = {'total_energy': atoms.get_total_energy()}
+            add_properties = {'total_energy': structure.get_total_energy()}
             self.add_properties_list.append(add_properties)
 
     def shortDescription(self):
@@ -90,8 +90,10 @@ class TestStructureContainer(unittest.TestCase):
     def setUp(self):
         """Instantiates class before each test."""
         self.sc = StructureContainer(self.cs)
-        for atoms, tag, props in zip(self.structure_list, self.user_tags, self.properties_list):
-            self.sc.add_structure(atoms, tag, props)
+        for structure, tag, props in zip(self.structure_list,
+                                         self.user_tags,
+                                         self.properties_list):
+            self.sc.add_structure(structure, tag, props)
 
     def test_init(self):
         """Tests that initialization of tested class works."""
@@ -120,37 +122,38 @@ class TestStructureContainer(unittest.TestCase):
 
     def test_add_structure(self):
         """Tests add_structure functionality."""
-        # add atoms with tag and property
-        atoms = self.structure_list[0]
+        # add structure with tag and property
+        structure = self.structure_list[0]
         properties = self.properties_list[0]
         tag = 'Structure 4'
-        self.sc.add_structure(atoms, tag, properties)
+        self.sc.add_structure(structure, tag, properties)
         self.assertEqual(len(self.sc), len(self.structure_list) + 1)
 
         # add atom and read property from calculator
-        self.sc.add_structure(atoms)
+        self.sc.add_structure(structure)
         self.assertEqual(len(self.sc), len(self.structure_list) + 2)
         self.assertEqual(self.sc[5].properties['energy'],
-                         self.properties_list[0]['energy'] / len(atoms))
+                         self.properties_list[0]['energy'] / len(structure))
 
         # add atom and don't read property from calculator
-        atoms_cpy = atoms.copy()
-        atoms_cpy.set_calculator(EMT())
-        self.sc.add_structure(atoms_cpy)
+        structure_cpy = structure.copy()
+        structure_cpy.set_calculator(EMT())
+        self.sc.add_structure(structure_cpy)
         self.assertEqual(len(self.sc), len(self.structure_list) + 3)
         self.assertNotIn('energy', self.sc[6].properties)
 
         # check that duplicate structure is not added.
         with self.assertRaises(ValueError) as cm:
-            self.sc.add_structure(atoms, allow_duplicate=False)
-        msg = 'Input atoms have identical cluster vector with' \
-              ' Structure 0 at index 0'
+            self.sc.add_structure(structure, allow_duplicate=False)
+        msg = 'Input structure and Structure 0 have identical ' \
+              'cluster vectors at index 0'
+
         self.assertEqual(msg, str(cm.exception))
         self.assertEqual(len(self.sc), len(self.structure_list) + 3)
 
-        symbols = ['Au' for i in range(len(atoms))]
-        atoms.set_chemical_symbols(symbols)
-        self.sc.add_structure(atoms, 'Structure 5', allow_duplicate=False)
+        symbols = ['Au' for i in range(len(structure))]
+        structure.set_chemical_symbols(symbols)
+        self.sc.add_structure(structure, 'Structure 5', allow_duplicate=False)
         self.assertEqual(len(self.sc), len(self.structure_list) + 4)
 
     def test_get_condition_number(self):
@@ -168,17 +171,17 @@ class TestStructureContainer(unittest.TestCase):
         self.assertIsInstance(cluster_vectors, np.ndarray)
         self.assertIsInstance(properties, np.ndarray)
         # testing values of cluster_vectors and properties
-        for atoms, cv in zip(self.structure_list, cluster_vectors):
+        for structure, cv in zip(self.structure_list, cluster_vectors):
             retval = list(cv)
-            target = list(self.cs.get_cluster_vector(atoms))
+            target = list(self.cs.get_cluster_vector(structure))
             self.assertAlmostEqual(retval, target, places=9)
         for target, retval in zip(self.properties_list, properties):
             self.assertEqual(retval, target['energy'])
         # passing a list of indexes
         cluster_vectors, properties = self.sc.get_fit_data([0])
         retval = list(cluster_vectors[0])
-        atoms = self.structure_list[0]
-        target = list(self.cs.get_cluster_vector(atoms))
+        structure = self.structure_list[0]
+        target = list(self.cs.get_cluster_vector(structure))
         self.assertAlmostEqual(retval, target, places=9)
         retval2 = properties[0]
         target2 = self.properties_list[0]
@@ -198,7 +201,7 @@ index |       user_tag        | natoms | chemical formula | Au atoms |  energy  
    2  | Structure 2           |     8  | Ag6Au2           |        2 |   -0.026 |  136.836
    3  | Structure 3           |     8  | Ag5Au3           |        3 |   -0.038 |  136.836
 ==========================================================================================
-""" # noqa
+"""  # noqa
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
 
@@ -220,7 +223,7 @@ index |       user_tag        | natoms | chemical formula | Au atoms |  energy  
  ...
    3  | Structure 3           |     8  | Ag5Au3           |        3 |   -0.038 |  136.836
 ==========================================================================================
-""" # noqa
+"""  # noqa
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
 
@@ -273,7 +276,7 @@ index |       user_tag        | natoms | chemical formula | Au atoms |  energy  
         for fs, fs_read in zip(self.sc._structure_list, sc_read._structure_list):
             self.assertEqual(list(fs.cluster_vector),
                              list(fs_read.cluster_vector))
-            self.assertEqual(fs.atoms, fs_read.atoms)
+            self.assertEqual(fs.structure, fs_read.structure)
             self.assertEqual(fs.user_tag, fs_read.user_tag)
             self.assertEqual(fs.properties, fs_read.properties)
         temp_file.close()
@@ -285,12 +288,12 @@ class TestFitStructure(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestFitStructure, self).__init__(*args, **kwargs)
         self.prim = bulk('Ag', a=4.09)
-        self.cs = ClusterSpace(atoms=self.prim, cutoffs=[4.0, 4.0, 4.0],
+        self.cs = ClusterSpace(structure=self.prim, cutoffs=[4.0, 4.0, 4.0],
                                chemical_symbols=['Ag', 'Au'])
 
-        self.atoms = self.prim.repeat(2)
+        self.structure = self.prim.repeat(2)
         self.prop = {'energy': 0.0126746}
-        self.cv = self.cs.get_cluster_vector(self.atoms)
+        self.cv = self.cs.get_cluster_vector(self.structure)
         self.tag = 'struct1'
 
     def shortDescription(self):
@@ -299,25 +302,25 @@ class TestFitStructure(unittest.TestCase):
 
     def setUp(self):
         """Instantiates class before each test."""
-        self.fit_structure = FitStructure(self.atoms, self.tag, self.cv, self.prop)
+        self.fit_structure = FitStructure(self.structure, self.tag, self.cv, self.prop)
 
     def test_init(self):
         """Tests that initialization of tested class works."""
-        atoms = self.prim.repeat(2)
+        structure = self.prim.repeat(2)
         tag = 'struct1'
-        self.fit_structure = FitStructure(atoms, tag, [1, 2, 3, 4])
+        self.fit_structure = FitStructure(structure, tag, [1, 2, 3, 4])
 
     def test_cluster_vector(self):
         """Tests cluster vector attribute."""
-        atoms = self.prim.repeat(2)
-        cv_from_cluster_space = list(self.cs.get_cluster_vector(atoms))
+        structure = self.prim.repeat(2)
+        cv_from_cluster_space = list(self.cs.get_cluster_vector(structure))
         cv = list(self.fit_structure.cluster_vector)
         self.assertEqual(cv, cv_from_cluster_space)
 
-    def test_atoms(self):
-        """Tests atoms attribute."""
-        atoms = self.fit_structure.atoms
-        self.assertTrue(isinstance(atoms, Atoms))
+    def test_structure(self):
+        """Tests structure attribute."""
+        structure = self.fit_structure.structure
+        self.assertTrue(isinstance(structure, Atoms))
 
     def test_user_tag(self):
         """Tests user_tag attribute."""
@@ -332,7 +335,7 @@ class TestFitStructure(unittest.TestCase):
     def test_getattr(self):
         """Tests custom getattr function."""
         properties = dict(energy=2.123, nvac=48, c=[0.5, 0.5], fname='asd.xml')
-        fs = FitStructure(self.atoms, self.tag, self.cv, properties)
+        fs = FitStructure(self.structure, self.tag, self.cv, properties)
 
         # test the function call
         for key, val in properties.items():
@@ -346,7 +349,7 @@ class TestFitStructure(unittest.TestCase):
 
         # test regular attribute call
         fs.properties
-        fs.atoms
+        fs.structure
         with self.assertRaises(AttributeError):
             fs.hello_world
 

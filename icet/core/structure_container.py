@@ -113,7 +113,7 @@ class StructureContainer:
                 ('index', '{:4}'.format(index)),
                 ('user_tag', '{:21}'.format(structure.user_tag)),
                 ('natoms', '{:5}'.format(len(structure))),
-                ('chemical formula', structure._atoms.get_chemical_formula())])
+                ('chemical formula', structure._structure.get_chemical_formula())])
             fields.update(sorted(structure.properties.items()))
             for key, value in fields.items():
                 if isinstance(value, float):
@@ -183,19 +183,20 @@ class StructureContainer:
         print(self._get_string_representation(print_threshold=print_threshold,
                                               print_minimum=print_minimum))
 
-    def add_structure(self, atoms: Atoms, user_tag: str = None, properties: dict = None,
-                      allow_duplicate: bool = True, sanity_check: bool = True):
+    def add_structure(self, structure: Atoms, user_tag: str = None,
+                      properties: dict = None, allow_duplicate: bool = True,
+                      sanity_check: bool = True):
         """
         Adds a structure to the structure container.
 
         Parameters
         ----------
-        atoms
+        structure
             the atomic structure to be added
         user_tag
             custom user tag to label structure
         properties
-            scalar properties. If properties are not specified the atoms
+            scalar properties. If properties are not specified the structure
             object will be checked for an attached ASE calculator object
             with a calculated potential energy
         allow_duplicate
@@ -206,38 +207,40 @@ class StructureContainer:
             structure. This includes checking occupations and volume.
         """
 
-        # atoms must have a proper format and label
-        if not isinstance(atoms, Atoms):
-            raise TypeError('atoms must be an ASE Atoms object. Not {}'.format(type(atoms)))
+        # structure must have a proper format and label
+        if not isinstance(structure, Atoms):
+            raise TypeError('structure must be an ASE Atoms object '
+                            'not {}'.format(type(structure)))
 
         if user_tag is not None:
             if not isinstance(user_tag, str):
-                raise TypeError('user_tag must be a string. Not {}.'.format(type(user_tag)))
+                raise TypeError('user_tag must be a string'
+                                ' not {}.'.format(type(user_tag)))
 
         if sanity_check:
-            self._cluster_space.assert_structure_compatability(atoms)
+            self._cluster_space.assert_structure_compatability(structure)
 
         # check for properties in attached calculator
-        if properties is None and atoms.calc:
+        if properties is None and structure.calc:
             properties = {}
-            if not atoms.calc.calculation_required(atoms, ['energy']):
-                energy = atoms.get_potential_energy()
-                properties['energy'] = energy / len(atoms)
+            if not structure.calc.calculation_required(structure, ['energy']):
+                energy = structure.get_potential_energy()
+                properties['energy'] = energy / len(structure)
 
-        # check if there exists structures with identical cluster vector
-        atoms_copy = atoms.copy()
-        cv = self._cluster_space.get_cluster_vector(atoms_copy)
+        # check if there exist structures with identical cluster vectors
+        structure_copy = structure.copy()
+        cv = self._cluster_space.get_cluster_vector(structure_copy)
         if not allow_duplicate:
             for i, fs in enumerate(self):
                 if np.allclose(cv, fs.cluster_vector):
-                    msg = "{} have identical cluster vector with {}".format(
-                        user_tag if user_tag is not None else 'Input atoms',
+                    msg = '{} and {} have identical cluster vectors'.format(
+                        user_tag if user_tag is not None else 'Input structure',
                         fs.user_tag if fs.user_tag != 'None' else 'structure')
-                    msg += " at index {}".format(i)
+                    msg += ' at index {}'.format(i)
                     raise ValueError(msg)
 
         # add structure
-        structure = FitStructure(atoms_copy, user_tag, cv, properties)
+        structure = FitStructure(structure_copy, user_tag, cv, properties)
         self._structure_list.append(structure)
 
     def get_condition_number(self, structure_indices: List[int] = None,
@@ -250,14 +253,14 @@ class StructureContainer:
         Parameters
         ----------
         structure_indices
-            list of structure indices. By default (``None``) the
+            list of structure indices; by default (``None``) the
             method will return all fit data available.
         key
             key of properties dictionary
 
         Returns
         -------
-        condition number for the sensing matrix
+        condition number of the sensing matrix
         """
         return np.linalg.cond(self.get_fit_data(structure_indices, key)[0])
 
@@ -265,12 +268,12 @@ class StructureContainer:
                      key: str = 'energy') -> Tuple[np.ndarray, np.ndarray]:
         """
         Returns fit data for all structures. The cluster vectors and
-        target properties for all structures are stacked into NumPy arrays.
+        target properties for all structures are stacked into numpy arrays.
 
         Parameters
         ----------
         structure_indices
-            list of structure indices. By default (``None``) the
+            list of structure indices; by default (``None``) the
             method will return all fit data available.
         key
             key of properties dictionary
@@ -326,7 +329,7 @@ class StructureContainer:
             data_dict = {'user_tag': fit_structure.user_tag,
                          'properties': fit_structure.properties,
                          'cluster_vector': fit_structure.cluster_vector}
-            db.write(fit_structure.atoms, data=data_dict)
+            db.write(fit_structure.structure, data=data_dict)
 
         with tarfile.open(outfile, mode='w') as handle:
             handle.add(temp_db_file.name, arcname='database')
@@ -380,19 +383,19 @@ class FitStructure:
 
     Attributes
     ----------
-    atoms : ASE Atoms
+    structure : Atoms
         supercell structure
     user_tag : str
         custom user tag
-    cvs : NumPy array
+    cvs : np.ndarray
         calculated cluster vector for actual structure
     properties : dict
-        the properties dictionary
+        dictionary of properties
     """
 
-    def __init__(self, atoms: Atoms, user_tag: str,
+    def __init__(self, structure: Atoms, user_tag: str,
                  cv: np.ndarray, properties: dict = {}):
-        self._atoms = atoms
+        self._structure = structure
         self._user_tag = user_tag
         self._cluster_vector = cv
         self.properties = properties
@@ -403,9 +406,9 @@ class FitStructure:
         return self._cluster_vector
 
     @property
-    def atoms(self) -> Atoms:
-        """supercell structure"""
-        return self._atoms
+    def structure(self) -> Atoms:
+        """atomic structure"""
+        return self._structure
 
     @property
     def user_tag(self) -> str:
@@ -413,11 +416,11 @@ class FitStructure:
         return str(self._user_tag)
 
     def __getattr__(self, key):
-        """Accesses properties if possible and returns value"""
+        """ Accesses properties if possible and returns value. """
         if key not in self.properties.keys():
             return super().__getattribute__(key)
         return self.properties[key]
 
     def __len__(self) -> int:
         """ Number of sites in the structure. """
-        return len(self._atoms)
+        return len(self._structure)

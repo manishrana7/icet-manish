@@ -7,11 +7,11 @@ from os import mkdir
 
 # step 1: Set up structure to simulate as well as calculator
 ce = ClusterExpansion.read('mixing_energy.ce')
-atoms = make_supercell(ce.cluster_space.primitive_structure,
-                       3 * np.array([[-1, 1, 1],
-                                     [1, -1, 1],
-                                     [1, 1, -1]]))
-calculator = ClusterExpansionCalculator(atoms, ce)
+structure = make_supercell(ce.cluster_space.primitive_structure,
+                           3 * np.array([[-1, 1, 1],
+                                         [1, -1, 1],
+                                         [1, 1, -1]]))
+calculator = ClusterExpansionCalculator(structure, ce)
 
 # step 2: Carry out Monte Carlo simulations
 # Make sure output directory exists
@@ -25,7 +25,7 @@ for temperature in [900, 300]:
     for phi in np.arange(-2.1, 0.11, 0.08):
         # Initialize MC ensemble
         mc = VCSGCEnsemble(
-            atoms=atoms,
+            structure=structure,
             calculator=calculator,
             temperature=temperature,
             data_container='{}/vcsgc-T{}-phi{:+.3f}.dc'
@@ -33,5 +33,5 @@ for temperature in [900, 300]:
             phis={'Pd': phi},
             kappa=200)
 
-        mc.run(number_of_trial_steps=len(atoms) * 30)
-        atoms = mc.atoms
+        mc.run(number_of_trial_steps=len(structure) * 30)
+        structure = mc.structure

@@ -32,14 +32,14 @@ class TestEnsemble(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEnsemble, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk('Al').repeat(3)
-        for i, atom in enumerate(self.atoms):
+        self.structure = bulk('Al').repeat(3)
+        for i, atom in enumerate(self.structure):
             if i % 2 == 0:
                 atom.symbol = 'Ga'
         cutoffs = [5, 5, 4]
         self.elements = ['Al', 'Ga']
         self.chemical_potentials = {'Al': 5, 'Ga': 0}
-        self.cs = ClusterSpace(self.atoms, cutoffs, self.elements)
+        self.cs = ClusterSpace(self.structure, cutoffs, self.elements)
         parameters = parameters = np.array([1.2] * len(self.cs))
         self.ce = ClusterExpansion(self.cs, parameters)
         self.temperature = 100.0
@@ -50,15 +50,15 @@ class TestEnsemble(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
+        self.calculator = ClusterExpansionCalculator(self.structure, self.ce)
 
-        self.atoms = bulk('Al').repeat(3)
-        for i, atom in enumerate(self.atoms):
+        self.structure = bulk('Al').repeat(3)
+        for i, atom in enumerate(self.structure):
             if i % 2 == 0:
                 atom.symbol = 'Ga'
 
         self.ensemble = SemiGrandCanonicalEnsemble(
-            atoms=self.atoms,
+            structure=self.structure,
             calculator=self.calculator,
             user_tag='test-ensemble', random_seed=42,
             data_container_write_period=499.0,
@@ -133,7 +133,7 @@ class TestEnsemble(unittest.TestCase):
         phis = {'Al': -1}
         phis = get_phis(phis)
         concentration = len(
-            [n for n in self.atoms.numbers if n == 13]) / len(self.atoms)
+            [n for n in self.structure.numbers if n == 13]) / len(self.structure)
         target = {'free_energy_derivative_Al': kappa * self.ensemble.boltzmann_constant *
                   self.temperature * (- 2 * concentration - phis[13])}
         data = self.ensemble._get_vcsgc_free_energy_derivatives(phis=phis, kappa=kappa)
@@ -148,7 +148,7 @@ class TestEnsemble(unittest.TestCase):
     def test_get_species_counts(self):
         """Test the functionality for determining the species counts."""
         target = {'{}_count'.format(symbol): counts for symbol, counts in
-                  zip(*np.unique(self.atoms.get_chemical_symbols(), return_counts=True))}
+                  zip(*np.unique(self.structure.get_chemical_symbols(), return_counts=True))}
         data = self.ensemble._get_species_counts()
         self.assertDictEqual(data, target)
 

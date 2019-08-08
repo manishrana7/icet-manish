@@ -14,18 +14,17 @@ cs = ClusterSpace(reference, [5.0, 3], ['Y', 'Al', 'O', 'V'])
 
 # Construct test structure
 P = [[4, 1, -3], [1, 3, 1], [-1, 1, 3]]
-atoms = make_supercell(reference, P)
+structure = make_supercell(reference, P)
 
 # Change some elements
 to_delete = []
-for atom in atoms:
+for atom in structure:
     if atom.position[2] < 10.0:
         if atom.symbol == 'Y':
             atom.symbol = 'Al'
         elif atom.symbol == 'O':
             to_delete.append(atom.index)
-del atoms[to_delete]
-
+del structure[to_delete]
 # Rattle the structure
 rattle = [[-0.2056, 0.177, -0.586],
           [-0.1087, -0.0637, 0.0402],
@@ -64,11 +63,11 @@ rattle = [[-0.2056, 0.177, -0.586],
           [-0.2432, 0.1574, -0.1606],
           [-0.116, -0.0166, 0.0354]]
 
-atoms.positions = atoms.positions + rattle
+structure.positions = structure.positions + rattle
 
 # Do the mapping
 mapped_structure, r_max, r_av = \
-    map_structure_to_reference(atoms, reference,
+    map_structure_to_reference(structure, reference,
                                tolerance_mapping=0.9,
                                vacancy_type='V',
                                inert_species=['Y', 'Al'])

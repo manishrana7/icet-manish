@@ -11,15 +11,14 @@ species = ['Ag', 'Pd']
 data = {'concentration': [], 'mixing_energy': []}
 structures = []
 chemical_symbols = ce.cluster_space.chemical_symbols
-prim = ce.cluster_space.primitive_structure
-for atoms in enumerate_structures(
-        atoms=prim,
-        sizes=range(1, 13),
-        chemical_symbols=chemical_symbols):
-    conc = atoms.get_chemical_symbols().count('Pd') / len(atoms)
+primitive_structure = ce.cluster_space.primitive_structure
+for structure in enumerate_structures(structure=primitive_structure,
+                                      sizes=range(1, 13),
+                                      chemical_symbols=chemical_symbols):
+    conc = structure.get_chemical_symbols().count('Pd') / len(structure)
     data['concentration'].append(conc)
-    data['mixing_energy'].append(ce.predict(atoms))
-    structures.append(atoms)
+    data['mixing_energy'].append(ce.predict(structure))
+    structures.append(structure)
 print('Predicted energies for {} structures'.format(len(structures)))
 
 # step 2: Construct convex hull

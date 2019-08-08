@@ -17,9 +17,9 @@ class ClusterCounts(_ClusterCounts):
 
     Parameters
     ----------
-    orbit_list : OrbitList object
+    orbit_list : icet.OrbitList
         orbit list for a primitive structure
-    atoms : ASE Atoms object
+    structure : ase.Atoms
         supercell of the structure that `orbit_list` is based on
 
     Attributes
@@ -32,22 +32,22 @@ class ClusterCounts(_ClusterCounts):
         {('Au', 'Ag'): 3, ('Au', 'Au'): 5}.
     """
 
-    def __init__(self, orbit_list: OrbitList, atoms: Atoms):
+    def __init__(self, orbit_list: OrbitList, structure: Atoms):
         self._orbit_list = orbit_list
-        self._structure = Structure.from_atoms(atoms)
+        self._structure = Structure.from_atoms(structure)
         # call (base) C++ constructor
         _ClusterCounts.__init__(self)
         self.cluster_counts = self._count_clusters()
 
     def _count_clusters(self, keep_order_intact=False, permute_sites=True):
         """
-        Count all clusters in a structure by finding their local orbit list.
+        Counts all clusters in a structure by finding their local orbit list.
 
         Parameters
         ----------
-        keep_order_intact: boolean
+        keep_order_intact : bool
             if true the order in the cluster will be sorted
-        permute_sites : boolean
+        permute_sites : bool
             if true will permute the sites so they are in the
             symmetrically equivalent order as the representative sites
         """

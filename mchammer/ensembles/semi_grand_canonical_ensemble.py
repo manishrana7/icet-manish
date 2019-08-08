@@ -72,7 +72,7 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
 
     Parameters
     ----------
-    atoms : :class:`Atoms <ase.Atoms>`
+    structure : :class:`Atoms <ase.Atoms>`
         atomic configuration to be used in the Monte Carlo simulation;
         also defines the initial occupation vector
     calculator : :class:`BaseCalculator <mchammer.calculators.ClusterExpansionCalculator>`
@@ -139,9 +139,9 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
         ce = ClusterExpansion(cs, [0, 0, 0.1, -0.02])
 
         # set up and run MC simulation (T=600 K, delta_mu=0.8 eV/atom)
-        atoms = prim.repeat(3)
-        calc = ClusterExpansionCalculator(atoms, ce)
-        mc = SemiGrandCanonicalEnsemble(atoms=atoms, calculator=calc,
+        structure = prim.repeat(3)
+        calc = ClusterExpansionCalculator(structure, ce)
+        mc = SemiGrandCanonicalEnsemble(structure=structure, calculator=calc,
                                         temperature=600,
                                         data_container='myrun_sgc.dc',
                                         chemical_potentials={'Ag': 0, 'Au': 0.8})
@@ -152,7 +152,7 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
     * add check that chemical symbols in chemical potentials are allowed
     """
 
-    def __init__(self, atoms: Atoms, calculator: BaseCalculator,
+    def __init__(self, structure: Atoms, calculator: BaseCalculator,
                  temperature: float, chemical_potentials: Dict[str, float],
                  user_tag: str = None,
                  data_container: DataContainer = None, random_seed: int = None,
@@ -173,7 +173,7 @@ class SemiGrandCanonicalEnsemble(ThermodynamicBaseEnsemble):
         self._boltzmann_constant = boltzmann_constant
 
         super().__init__(
-            atoms=atoms, calculator=calculator, user_tag=user_tag,
+            structure=structure, calculator=calculator, user_tag=user_tag,
             data_container=data_container,
             random_seed=random_seed,
             data_container_write_period=data_container_write_period,

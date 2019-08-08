@@ -20,7 +20,7 @@ class AppleObserver(BaseObserver):
     def __init__(self, interval, tag='Apple'):
         super().__init__(interval=interval, return_type=float, tag=tag)
 
-    def get_observable(self, atoms):  # noqa
+    def get_observable(self, structure):  # noqa
         """Say 2.63323e+20."""
         return 2.63323e+20
 
@@ -30,7 +30,7 @@ class DictObserver(BaseObserver):
     def __init__(self, interval, tag='Ayaymama'):
         super().__init__(interval=interval, return_type=dict, tag=tag)
 
-    def get_observable(self, atoms):
+    def get_observable(self, structure):
         return {'value_1': 1.0, 'value_2': 2.0}
 
     def get_keys(self):
@@ -42,14 +42,14 @@ class DictObserver(BaseObserver):
 
 class ConcreteEnsemble(BaseEnsemble):
 
-    def __init__(self, atoms, calculator, temperature=None,
+    def __init__(self, structure, calculator, temperature=None,
                  user_tag=None, data_container=None,
                  data_container_write_period=np.inf, random_seed=None,
                  ensemble_data_write_interval=None,
                  trajectory_write_interval=None):
         self._ensemble_parameters = dict(temperature=temperature)
         super().__init__(
-            atoms=atoms, calculator=calculator, user_tag=user_tag,
+            structure=structure, calculator=calculator, user_tag=user_tag,
             data_container=data_container,
             data_container_write_period=data_container_write_period,
             random_seed=random_seed,
@@ -66,10 +66,10 @@ class TestEnsemble(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEnsemble, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk('Al').repeat(3)
+        self.structure = bulk('Al').repeat(3)
         cutoffs = [5, 5, 4]
         elements = ['Al', 'Ga']
-        self.cs = ClusterSpace(self.atoms, cutoffs, elements)
+        self.cs = ClusterSpace(self.structure, cutoffs, elements)
         parameters = np.array([1.2 for _ in range(len(self.cs))])
         self.ce = ClusterExpansion(self.cs, parameters)
 
@@ -79,9 +79,9 @@ class TestEnsemble(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
+        self.calculator = ClusterExpansionCalculator(self.structure, self.ce)
         self.ensemble = ConcreteEnsemble(
-            atoms=self.atoms, calculator=self.calculator, temperature=1000,
+            structure=self.structure, calculator=self.calculator, temperature=1000,
             user_tag='test-ensemble', random_seed=42)
 
         # Create an observer for testing.
@@ -95,28 +95,28 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(TypeError) as context:
             ConcreteEnsemble(calculator=self.calculator)
-        self.assertIn("required positional argument: 'atoms'",
+        self.assertIn("required positional argument: 'structure'",
                       str(context.exception))
 
         with self.assertRaises(TypeError) as context:
-            ConcreteEnsemble(atoms=self.atoms)
+            ConcreteEnsemble(structure=self.structure)
         self.assertIn("required positional argument: 'calculator'",
                       str(context.exception))
 
         # wrong path to data container file
         with self.assertRaises(FileNotFoundError) as context:
-            ConcreteEnsemble(atoms=self.atoms,
+            ConcreteEnsemble(structure=self.structure,
                              calculator=self.calculator,
                              data_container='path/to/nowhere/mydc')
 
         self.assertTrue('Path to data container file does not exist:'
                         ' path/to/nowhere' in str(context.exception))
 
-        # wrong occupations on atoms
-        wrong_atoms = self.atoms.copy()
-        wrong_atoms.numbers = [1]*len(self.atoms)
+        # wrong occupations on structure
+        wrong_structure = self.structure.copy()
+        wrong_structure.numbers = [1]*len(self.structure)
         with self.assertRaises(ValueError) as context:
-            ConcreteEnsemble(atoms=wrong_atoms,
+            ConcreteEnsemble(structure=wrong_structure,
                              calculator=self.calculator)
 
         self.assertTrue('Occupations of structure not compatible with '
@@ -125,23 +125,23 @@ class TestEnsemble(unittest.TestCase):
     def test_init_fails_for_faulty_chemical_symbols(self):
         """Tests that initialization fails if species exists  on
         mutliple sublattices"""
-        atoms = bulk('Al').repeat(2)
+        structure = bulk('Al').repeat(2)
         cutoffs = [4.0]
         elements = [['Al', 'Ga']] * 4 + [['Al', 'Ge']] * 4
-        cs = ClusterSpace(atoms, cutoffs, elements)
+        cs = ClusterSpace(structure, cutoffs, elements)
         ce = ClusterExpansion(cs, np.arange(0, len(cs)))
-        calc = ClusterExpansionCalculator(atoms, ce)
+        calc = ClusterExpansionCalculator(structure, ce)
         with self.assertRaises(ValueError) as context:
-            ConcreteEnsemble(atoms, calc)
+            ConcreteEnsemble(structure, calc)
         self.assertIn('found on multiple active sublattices', str(context.exception))
 
     def test_property_user_tag(self):
         """Tests name property."""
         self.assertEqual('test-ensemble', self.ensemble.user_tag)
 
-    def test_property_atoms(self):
-        """Tests atoms property."""
-        self.assertEqual(self.atoms, self.ensemble.atoms)
+    def test_property_structure(self):
+        """Tests structure property."""
+        self.assertEqual(self.structure, self.ensemble.structure)
 
     def test_property_random_seed(self):
         """Tests random seed property."""
@@ -253,7 +253,7 @@ class TestEnsemble(unittest.TestCase):
     def test_backup_file(self):
         """Tests data is being saved and can be read by the ensemble."""
         # set-up ensemble with a non-inf write period
-        ensemble = ConcreteEnsemble(atoms=self.atoms,
+        ensemble = ConcreteEnsemble(structure=self.structure,
                                     calculator=self.calculator,
                                     user_tag='this-ensemble',
                                     data_container='my-datacontainer.dc',
@@ -285,7 +285,7 @@ class TestEnsemble(unittest.TestCase):
 
         # initialise a new ensemble with dc file
         ensemble_reloaded = \
-            ConcreteEnsemble(atoms=self.atoms,
+            ConcreteEnsemble(structure=self.structure,
                              calculator=self.calculator,
                              data_container=temp_container_file.name,
                              ensemble_data_write_interval=14,
@@ -324,7 +324,7 @@ class TestEnsemble(unittest.TestCase):
         self.ensemble.write_data_container(ensemble_T1000.name)
 
         with self.assertRaises(ValueError) as context:
-            ConcreteEnsemble(atoms=self.atoms,
+            ConcreteEnsemble(structure=self.structure,
                              calculator=self.calculator,
                              temperature=3000,
                              data_container=ensemble_T1000.name)
@@ -337,22 +337,23 @@ class TestEnsemble(unittest.TestCase):
 
         chemical_symbols = [['C', 'Be'], ['W']]
         prim = bulk('W', 'bcc', cubic=True, )
-        cs = ClusterSpace(atoms=prim, chemical_symbols=chemical_symbols, cutoffs=[5])
+        cs = ClusterSpace(structure=prim, chemical_symbols=chemical_symbols, cutoffs=[5])
         parameters = [1] * len(cs)
         ce = ClusterExpansion(cs, parameters)
 
         size = 4
-        atoms = ce.cluster_space.primitive_structure.repeat(size)
-        calculator = ClusterExpansionCalculator(atoms, ce)
+        structure = ce.cluster_space.primitive_structure.repeat(size)
+        calculator = ClusterExpansionCalculator(structure, ce)
 
         # Carry out Monte Carlo simulations
         dc_file = tempfile.NamedTemporaryFile()
-        mc = ConcreteEnsemble(atoms=atoms, calculator=calculator)
+        mc = ConcreteEnsemble(structure=structure, calculator=calculator)
         mc.write_data_container(dc_file.name)
         mc.run(10)
 
         # and now restart
-        mc = ConcreteEnsemble(atoms=atoms, calculator=calculator, data_container=dc_file.name)
+        mc = ConcreteEnsemble(structure=structure, calculator=calculator,
+                              data_container=dc_file.name)
         mc.run(10)
 
     def test_internal_run(self):
