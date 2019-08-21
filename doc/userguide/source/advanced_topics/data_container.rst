@@ -56,7 +56,7 @@ snapshots in the trajectory with observables in the data container.
 
 .. code-block:: python
 
-    E_mix, traj = dc.get_trajectory('potential', 'trajectory')
+    E_mix, traj = dc.get_data('potential', 'trajectory')
 
 
 Updating data container

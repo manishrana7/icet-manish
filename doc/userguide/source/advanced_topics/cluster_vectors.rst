@@ -22,7 +22,7 @@ structures.
 
 .. literalinclude:: ../../../../examples/advanced_topics/get_cluster_vectors.py
    :start-after: # Import modules
-   :end-before: # Create a prototype
+   :end-before: # Create a primitive structure
 
 Generate prototype structure
 ----------------------------
