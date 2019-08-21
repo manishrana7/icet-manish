@@ -34,7 +34,7 @@ for discarding the equilibration part of a simulation::
 The :func:`get_data <mchammer.DataContainer.get_data>` function also allows
 extracting several observables in parallel::
 
-    mctrial, energy, sro = dc.get_data('mctrial', potential', 'sro_Ag_1')
+    mctrial, energy, sro = dc.get_data('mctrial', 'potential', 'sro_Ag_1')
 
 The available observables can be checked using the :attr:`observables
 <mchammer.DataContainer.observables>` attribute.
