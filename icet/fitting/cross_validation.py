@@ -46,8 +46,9 @@ class CrossValidationEstimator(BaseOptimizer):
         "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr",
         "rfe", "split-bregman"
     standardize : bool
-        if True the fit matrix is standardized before fitting, meaning columns
-        are normalized to have a standard deviation of 1.0
+        if True the fit matrix and target values are standardized before fitting,
+        meaning columns in the fit matrix and th target values are rescaled to
+        have a standard deviation of 1.0.
     validation_method : str
         method to use for cross-validation; possible choices are
         "shuffle-split", "k-fold"
@@ -216,12 +217,12 @@ class CrossValidationEstimator(BaseOptimizer):
         return self._parameters_splits
 
     @property
-    def n_nonzero_parameters_splits(self) -> list:
+    def n_nonzero_parameters_splits(self) -> np.ndarray:
         """ number of non-zero parameters for each split """
         if self.parameters_splits is None:
             return None
         else:
-            return [np.count_nonzero(p) for p in self.parameters_splits]
+            return np.array([np.count_nonzero(p) for p in self.parameters_splits])
 
     @property
     def rmse_train_final(self) -> float:

@@ -16,7 +16,7 @@ class TestFitMethods(unittest.TestCase):
         N, M = 200, 50
         self.n_rows, self.n_cols = N, M
         self.A = np.random.normal(0, 1.0, (N, M))
-        self.x = np.random.normal(0.0, 10.0, M)
+        self.x = np.random.normal(0.0, 1.0, M)
         noise = np.random.normal(0.0, 0.2, N)
         self.y = np.dot(self.A, self.x) + noise
 
@@ -27,14 +27,14 @@ class TestFitMethods(unittest.TestCase):
     def test_all_available_fit_methods(self):
         """Tests all available fit_methods."""
 
-        # with standardize
-        for fit_method in available_fit_methods:
-            res = fit(self.A, self.y, fit_method=fit_method, standardize=True)
-            self.assertLess(np.linalg.norm(self.x - res['parameters']), 0.2)
-
         # without standardize
         for fit_method in available_fit_methods:
             res = fit(self.A, self.y, fit_method=fit_method, standardize=False)
+            self.assertLess(np.linalg.norm(self.x - res['parameters']), 0.2)
+
+        # with standardize
+        for fit_method in available_fit_methods:
+            res = fit(self.A, self.y, fit_method=fit_method, standardize=True)
             self.assertLess(np.linalg.norm(self.x - res['parameters']), 0.2)
 
     def test_with_large_condition_number(self):
@@ -76,6 +76,24 @@ class TestFitMethods(unittest.TestCase):
         for fit_method in bad_fit_methods:
             with self.assertRaises(ValueError):
                 fit(self.A, self.y, fit_method=fit_method)
+
+    def test_ardr_line_scan(self):
+        """Tests all available fit_methods."""
+
+        res = fit(self.A, self.y, fit_method='ardr', line_scan=True)
+        self.assertLess(np.linalg.norm(self.x - res['parameters']), 0.2)
+
+        res = fit(self.A, self.y, fit_method='ardr', line_scan=True, threshold_lambdas=[1e4, 1e6])
+        self.assertLess(np.linalg.norm(self.x - res['parameters']), 0.2)
+
+        res = fit(self.A, self.y, fit_method='ardr', line_scan=True, cv_splits=5)
+        self.assertLess(np.linalg.norm(self.x - res['parameters']), 0.2)
+
+    def test_standardize(self):
+        """ Tests that standardize kwarg works """
+        res1 = fit(self.A, self.y, fit_method='least-squares', standardize=True)
+        res2 = fit(self.A, self.y, fit_method='least-squares', standardize=False)
+        np.testing.assert_almost_equal(res1['parameters'], res2['parameters'])
 
 
 if __name__ == '__main__':

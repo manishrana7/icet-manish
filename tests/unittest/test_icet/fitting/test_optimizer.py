@@ -192,6 +192,21 @@ class TestOptimizer(unittest.TestCase):
         self.assertEqual(opt.test_size, len(test_set))
         self.assertAlmostEqual(opt.test_fraction, len(test_set) / self.n_rows)
 
+    def test_zero_error_with_least_square_fit(self):
+        """ Test that the error is zero if training without noise and with
+        least-squares. """
+
+        # set up dummy linear problem data
+        for standardize in [True, False]:
+            y = np.dot(self.A, self.x)
+            opt = Optimizer((self.A, y), fit_method='least-squares', standardize=standardize)
+            opt.train()
+
+            self.assertAlmostEqual(opt.rmse_train, 0.0)
+            self.assertAlmostEqual(opt.rmse_test, 0.0)
+
+            self.assertAlmostEqual(np.abs(self.x - opt.parameters).max(), 0)
+
 
 if __name__ == '__main__':
     unittest.main()

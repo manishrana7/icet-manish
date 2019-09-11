@@ -28,8 +28,9 @@ class BaseOptimizer(ABC):
         "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr",
         "rfe", "split-bregman"
     standardize : bool
-        if True the fit matrix is standardized before fitting, meaning columns
-        are normalized to have a standard deviation of 1.0
+        if True the fit matrix and target values are standardized before fitting,
+        meaning columns in the fit matrix and th target values are rescaled to
+        have a standard deviation of 1.0.
     check_condition : bool
         if True the condition number will be checked
         (this can be sligthly more time consuming for larger
