@@ -12,8 +12,8 @@ from typing import List, Union
 
 import numpy as np
 
-from _icet import ClusterSpace as _ClusterSpace
-#from .core_py.ClusterSpace import ClusterSpace as _ClusterSpace
+from icet.core_py.ClusterSpaceBase import ClusterSpaceBase
+#from _icet import ClusterSpace as ClusterSpaceBase
 from ase import Atoms
 from ase.io import read as ase_read
 from ase.io import write as ase_write
@@ -23,7 +23,7 @@ from icet.core.sublattices import Sublattices
 from icet.tools.geometry import get_decorated_primitive_structure
 
 
-class ClusterSpace(_ClusterSpace):
+class ClusterSpace(ClusterSpaceBase):
     """
     This class provides functionality for generating and maintaining
     cluster spaces.
@@ -119,6 +119,7 @@ class ClusterSpace(_ClusterSpace):
         # set up primitive
         decorated_primitive, primitive_chemical_symbols = get_decorated_primitive_structure(
             self._input_atoms, chemical_symbols)
+
         self._primitive_chemical_symbols = primitive_chemical_symbols
         assert len(decorated_primitive) == len(primitive_chemical_symbols)
 
@@ -126,8 +127,8 @@ class ClusterSpace(_ClusterSpace):
         self._orbit_list = OrbitList(decorated_primitive, self._cutoffs)
         self._orbit_list.remove_inactive_orbits(primitive_chemical_symbols)
 
-        # call (base) C++ constructor
-        _ClusterSpace.__init__(
+        # call base constructor
+        ClusterSpaceBase.__init__(
             self, primitive_chemical_symbols, self._orbit_list)
 
     def _get_chemical_symbols(self):
@@ -287,25 +288,24 @@ class ClusterSpace(_ClusterSpace):
         sublattices = self.get_sublattices(self.primitive_structure)
         data.append(zerolet)
         index = 1
-        while index < len(self):
-            cluster_space_info = self.get_cluster_space_info(index)
+        while index < len(self)+1:
+            cluster_space_info = self.getClusterSpaceInfo(index)[0]
             orbit_index = cluster_space_info[0]
             mc_vector = cluster_space_info[1]
-            orbit = self.get_orbit(orbit_index)
+            orbit = self.getOrbit(orbit_index)
             rep_sites = orbit.get_representative_sites()
             orbit_sublattices = '-'.join(
                 [sublattices[sublattices.get_sublattice_index(ls.index)].symbol
                  for ls in rep_sites])
-            local_Mi = self.get_number_of_allowed_species_by_site(
-                self._get_primitive_structure(), orbit.representative_sites)
+            local_Mi = self.getNumberOfAllowedSpeciesBySite(
+                self.getPrimitiveStructure(), orbit.representative_sites)
             mc_vectors = orbit.get_mc_vectors(local_Mi)
-            mc_permutations = self.get_multi_component_vector_permutations(
+            mc_permutations = self.getMultiComponentVectorPermutations(
                 mc_vectors, orbit_index)
             mc_index = mc_vectors.index(mc_vector)
             mc_permutations_multiplicity = len(mc_permutations[mc_index])
-            cluster = self.get_orbit(orbit_index).get_representative_cluster()
-
-            multiplicity = len(self.get_orbit(
+            cluster = self.getOrbit(orbit_index).get_representative_cluster()
+            multiplicity = len(self.getOrbit(
                 orbit_index).get_equivalent_sites())
             record = OrderedDict([('index', index),
                                   ('order', cluster.order),
@@ -351,7 +351,7 @@ class ClusterSpace(_ClusterSpace):
             raise TypeError('input structure must be an ASE Atoms object')
 
         try:
-            cv = _ClusterSpace.get_cluster_vector(self, Structure.from_atoms(atoms))
+            cv = self.getClusterVector(Structure.from_atoms(atoms))
         except Exception as e:
             self.assert_structure_compatability(atoms)
             raise(e)
@@ -368,10 +368,10 @@ class ClusterSpace(_ClusterSpace):
         """
         size_before = len(self._orbit_list)
 
-        self._prune_orbit_list_cpp(indices)
+        self.pruneOrbitList(indices)
         for index in sorted(indices, reverse=True):
             self._orbit_list.remove_orbit(index)
-        self._precompute_multi_component_vectors()
+        self.precomputeMultiComponentVectors()
 
         size_after = len(self._orbit_list)
         assert size_before - len(indices) == size_after
@@ -382,7 +382,7 @@ class ClusterSpace(_ClusterSpace):
         """
         Primitive structure on which the cluster space is based
         """
-        atoms = self._get_primitive_structure().to_atoms()
+        atoms = self.getPrimitiveStructure().to_atoms()
         # Decorate with the "real" symbols (instead of H, He, Li etc)
         for atom, symbols in zip(atoms, self._primitive_chemical_symbols):
             atom.symbol = min(symbols)
@@ -543,7 +543,7 @@ class ClusterSpace(_ClusterSpace):
         cs = ClusterSpace(
             atoms=atoms, cutoffs=items['cutoffs'], chemical_symbols=items['chemical_symbols'])
         for indices in items['pruning_history']:
-            cs._prune_orbit_list(indices)
+            cs.pruneOrbitList(indices)
         return cs
 
     def copy(self):
@@ -553,7 +553,7 @@ class ClusterSpace(_ClusterSpace):
         chemical_symbols = self._input_chemical_symbols
         cs_copy = ClusterSpace(atoms, cutoffs, chemical_symbols)
         for indices in self._pruning_history:
-            cs_copy._prune_orbit_list(indices)
+            cs_copy.pruneOrbitList(indices)
         return cs_copy
 
 
@@ -588,7 +588,7 @@ def get_singlet_info(atoms: Atoms,
     singlet_data = []
 
     for i in range(1, len(cs)):
-        cluster_space_info = cs.get_cluster_space_info(i)
+        cluster_space_info = cs.getClusterSpaceInfo(i)
         orbit_index = cluster_space_info[0]
         cluster = cs.get_orbit(orbit_index).get_representative_cluster()
         multiplicity = len(cs.get_orbit(orbit_index).get_equivalent_sites())
@@ -673,3 +673,4 @@ def view_singlets(atoms: Atoms, to_primitive: bool = False):
         'input configuration must be an ASE Atoms object'
     atoms_singlet = get_singlet_configuration(atoms, to_primitive=to_primitive)
     view(atoms_singlet)
+

@@ -11,7 +11,9 @@ import numpy as np
 import ase.db
 from ase import Atoms
 
-from icet import ClusterSpace
+from icet.core_py.ClusterSpace import ClusterSpace
+#from icet import ClusterSpace
+
 from icet.io.logging import logger
 logger = logger.getChild('structure_container')
 

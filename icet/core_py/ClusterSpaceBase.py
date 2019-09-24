@@ -324,14 +324,20 @@ class ClusterSpaceBase(object):
 
         return self._clusterSpaceInfo[index];
 
+    def getClusterSpaceSize(self):
+        """
+        @details
+        """
+        return len(self)-1
+
     def pruneOrbitList(self, indices: list):
         """
         @details This function removes orbits from the underlying orbit list.
         @param indices list of orbit indices 
         """
         indices.sort()
-        for i in range(len(indices), -1, -1):
-            self._orbitList.removeOrbit(indices[i])
+        for i in range(len(indices)-1, 0, -1):
+            self._orbitList.remove_orbit(indices[i])
 
         self.precomputeMultiComponentVectors()
 

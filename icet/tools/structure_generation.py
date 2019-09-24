@@ -7,7 +7,8 @@ from mchammer.calculators import (TargetVectorCalculator,
                                   compare_cluster_vectors)
 from icet.tools import (enumerate_structures,
                         enumerate_supercells)
-from icet import ClusterSpace
+#from icet import ClusterSpace
+from icet.core_py.ClusterSpace import ClusterSpace
 from ase import Atoms
 from ase.data import chemical_symbols as periodic_table
 
@@ -495,7 +496,8 @@ def _get_sqs_cluster_vector(cluster_space: ClusterSpace,
             for i, symbol in enumerate(symbols):
                 mc_vector_component = orbit['multi_component_vector'][i]
                 species_i = symbol_to_integer_map[symbol]
-                prod = cluster_space.evaluate_cluster_function(nbr_of_allowed_species[i],
+                prod = cluster_space.evaluateClusterFunction(nbr_of_allowed_species[i],
+                #prod = cluster_space.evaluate_cluster_function(nbr_of_allowed_species[i],
                                                                mc_vector_component,
                                                                species_i)
                 cluster_product *= probabilities[symbol] * prod

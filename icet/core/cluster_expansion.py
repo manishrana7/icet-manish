@@ -9,7 +9,9 @@ import tempfile
 import tarfile
 import re
 
-from icet import ClusterSpace
+#from icet import ClusterSpace
+from .core_py.ClusterSpace import ClusterSpace
+
 from icet.core.structure import Structure
 from typing import List, Union
 from ase import Atoms

@@ -1,18 +1,24 @@
-import time
+import timeit
+import pyperf
 from ase.build import bulk
 from icet.core.cluster_space import ClusterSpace as ClusterSpace_cpp
 
-
-if __name__ == '__main__':
-
+def test():
     atoms = bulk('Al')
 
     cutoffs = [10, 7, 6]
     chemical_symbols = ['Al', 'Ti']
 
-    start = time.process_time()
     cs = ClusterSpace_cpp(atoms, cutoffs, chemical_symbols)  # noqa
-    elapsed_time = time.process_time() - start
 
-    print('Time to initialize ClusterSpace in with cutoffs: {}, {:.6} sec'
-          .format(cutoffs, elapsed_time))
+
+if __name__ == '__main__':
+
+#    runner = pyperf.Runner()
+#    runner.bench_func('Cluster Space', test)
+
+    print(timeit.timeit("test()",
+          setup="from __main__ import test",
+          number=100))
+
+
