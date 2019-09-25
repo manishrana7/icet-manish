@@ -6,7 +6,6 @@ import numpy as np
 from typing import List
 import random
 from icet.io.logging import logger
-
 logger = logger.getChild('target_cluster_vector_annealing')
 
 
@@ -20,7 +19,7 @@ class TargetClusterVectorAnnealing():
 
     Parameters
     ----------
-    atoms
+    structure
         atomic configurations to be used in the Monte Carlo simulation;
         also defines the initial occupation vectors
     calculators
@@ -35,21 +34,21 @@ class TargetClusterVectorAnnealing():
         simulation
     """
 
-    def __init__(self, atoms: List[Atoms],
+    def __init__(self, structure: List[Atoms],
                  calculators: List[TargetVectorCalculator],
                  T_start: float = 5.0, T_stop: float = 0.001,
                  random_seed: int = None) -> None:
 
-        if type(atoms) == Atoms:
+        if isinstance(structure, Atoms):
             raise ValueError(
                 'A list of ASE Atoms (supercells) must be provided')
-        if len(atoms) != len(calculators):
+        if len(structure) != len(calculators):
             raise ValueError('There must be as many supercells as there '
-                             'are calculators ({} != {})'.format(len(atoms),
+                             'are calculators ({} != {})'.format(len(structure),
                                                                  len(calculators)))
 
         logger.info('Initializing target cluster vector annealing '
-                    'with {} supercells'.format(len(atoms)))
+                    'with {} supercells'.format(len(structure)))
 
         # random number generator
         if random_seed is None:
@@ -60,8 +59,8 @@ class TargetClusterVectorAnnealing():
 
         # Initialize an ensemble for each supercell
         sub_ensembles = []
-        for ens_id, (supercell, calculator) in enumerate(zip(atoms, calculators)):
-            sub_ensembles.append(CanonicalEnsemble(atoms=supercell,
+        for ens_id, (supercell, calculator) in enumerate(zip(structure, calculators)):
+            sub_ensembles.append(CanonicalEnsemble(structure=supercell,
                                                    calculator=calculator,
                                                    random_seed=random.randint(
                                                        0, 1e16),
@@ -73,7 +72,7 @@ class TargetClusterVectorAnnealing():
         self._current_score = self._sub_ensembles[0].calculator.calculate_total(
             self._sub_ensembles[0].configuration.occupations)
         self._best_score = self._current_score
-        self._best_atoms = atoms[0]
+        self._best_structure = structure[0]
         self._temperature = T_start
         self._T_start = T_start
         self._T_stop = T_stop
@@ -109,7 +108,7 @@ class TargetClusterVectorAnnealing():
                                                         self.temperature,
                                                         self.best_score))
             self._do_trial_step()
-        return self.best_atoms
+        return self.best_structure
 
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
@@ -121,7 +120,8 @@ class TargetClusterVectorAnnealing():
         ensemble = random.choice(self._sub_ensembles)
 
         # Choose two sites and swap
-        sublattice_index = ensemble.get_random_sublattice_index()
+        sublattice_index = ensemble.get_random_sublattice_index(
+            ensemble._swap_sublattice_probabilities)
         sites, species = ensemble.configuration.get_swapped_state(
             sublattice_index)
 
@@ -139,7 +139,7 @@ class TargetClusterVectorAnnealing():
             # keep track of the best one we have found as yet (the
             # current one may have a worse score)
             if self._current_score < self._best_score:
-                self._best_atoms = ensemble.atoms
+                self._best_structure = ensemble.structure
                 self._best_score = self._current_score
         else:
             ensemble.configuration.update_occupations(
@@ -204,6 +204,6 @@ class TargetClusterVectorAnnealing():
         return self._best_score
 
     @property
-    def best_atoms(self) -> float:
+    def best_structure(self) -> float:
         """ Structure most closely matching target vector so far """
-        return self._best_atoms
+        return self._best_structure

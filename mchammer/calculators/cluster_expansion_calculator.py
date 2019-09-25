@@ -26,7 +26,7 @@ class ClusterExpansionCalculator(BaseCalculator):
 
     Parameters
     ----------
-    atoms : ase.Atoms
+    structure : ase.Atoms
         structure for which to set up the calculator
     cluster_expansion : ClusterExpansion
         cluster expansion from which to build calculator
@@ -42,16 +42,16 @@ class ClusterExpansionCalculator(BaseCalculator):
     """
 
     def __init__(self,
-                 atoms: Atoms, cluster_expansion: ClusterExpansion,
+                 structure: Atoms, cluster_expansion: ClusterExpansion,
                  name: str = 'Cluster Expansion Calculator',
                  scaling: Union[float, int] = None,
                  use_local_energy_calculator: bool = True) -> None:
-        super().__init__(atoms=atoms, name=name)
+        super().__init__(structure=structure, name=name)
 
-        atoms_cpy = atoms.copy()
+        structure_cpy = structure.copy()
         cluster_expansion.prune()
 
-        if cluster_expansion._cluster_space.is_supercell_self_correlated(atoms):
+        if cluster_expansion._cluster_space.is_supercell_self_correlated(structure):
             logger.warning('The ClusterExpansionCalculator self-interacts, '
                            'which may lead to erroneous results. To avoid '
                            'self-interaction, use a larger supercell or a '
@@ -61,11 +61,11 @@ class ClusterExpansionCalculator(BaseCalculator):
         if self.use_local_energy_calculator:
             self.cpp_calc = _ClusterExpansionCalculator(
                 cluster_expansion.cluster_space,
-                Structure.from_atoms(atoms_cpy))
+                Structure.from_atoms(structure_cpy))
 
         self._cluster_expansion = cluster_expansion
         if scaling is None:
-            self._property_scaling = len(atoms)
+            self._property_scaling = len(structure)
         else:
             self._property_scaling = scaling
 
@@ -84,8 +84,8 @@ class ClusterExpansionCalculator(BaseCalculator):
         occupations
             the entire occupation vector (i.e. list of atomic species)
         """
-        self.atoms.set_atomic_numbers(occupations)
-        return self.cluster_expansion.predict(self.atoms) * \
+        self.structure.set_atomic_numbers(occupations)
+        return self.cluster_expansion.predict(self.structure) * \
             self._property_scaling
 
     def calculate_local_contribution(self, *, local_indices: List[int],
@@ -104,7 +104,7 @@ class ClusterExpansionCalculator(BaseCalculator):
         if not self.use_local_energy_calculator:
             return self.calculate_total(occupations=occupations)
 
-        self.atoms.set_atomic_numbers(occupations)
+        self.structure.set_atomic_numbers(occupations)
 
         local_contribution = 0
         exclude_indices = []  # type: List[int]
@@ -137,11 +137,11 @@ class ClusterExpansionCalculator(BaseCalculator):
 
         """
         local_cv = self.cpp_calc.get_local_cluster_vector(
-            self.atoms.get_atomic_numbers(), index, exclude_indices)
+            self.structure.get_atomic_numbers(), index, exclude_indices)
         return np.dot(local_cv, self.cluster_expansion.parameters)
 
     @property
     def sublattices(self) -> Sublattices:
         """Sublattices of the calculators structure."""
-        sl = self.cluster_expansion._cluster_space.get_sublattices(self.atoms)
+        sl = self.cluster_expansion._cluster_space.get_sublattices(self.structure)
         return sl

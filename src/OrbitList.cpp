@@ -39,7 +39,7 @@ OrbitList::OrbitList(const Structure &structure,
                 lat_nbrs.push_back(latticeSite);
                 auto lat_nbrs_copy = lat_nbrs;
                 std::sort(lat_nbrs_copy.begin(), lat_nbrs_copy.end());
-                if (lat_nbrs_copy != lat_nbrs and !bothways)
+                if (lat_nbrs_copy != lat_nbrs && !bothways)
                 {
                     throw std::runtime_error("Original sites is not sorted");
                 }
@@ -286,7 +286,7 @@ void OrbitList::addPermutationInformationToOrbits(const std::vector<LatticeSite>
                               std::back_inserter(p_allowed_permutations));
 
         // Step six: Get the indice version of p_allowed_permutations
-        std::unordered_set<std::vector<int>, VectorHash> allowedPermutations;
+        std::set<std::vector<int>> allowedPermutations;
         for (const auto &p_lattNbr : p_allowed_permutations)
         {
             size_t failedLoops = 0;

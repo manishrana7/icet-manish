@@ -52,8 +52,8 @@ class ClusterExpansion:
         print(ce.predict(sc))
     """
 
-    def __init__(self, cluster_space: ClusterSpace,
-                 parameters: np.array) -> None:
+    def __init__(self, cluster_space: ClusterSpace, parameters: np.array,
+                 metadata: dict = None) -> None:
         """
         Initializes a ClusterExpansion object.
 
@@ -63,6 +63,10 @@ class ClusterExpansion:
             cluster space to be used for constructing the cluster expansion
         parameters
             effective cluster interactions (ECIs)
+        metadata : dict
+            metadata dictionary, user-defined metadata to be stored together
+            with cluster expansion. Will be pickled when CE is written to file.
+            By default contains icet version, username, hostname and date.
 
         Raises
         ------
@@ -71,13 +75,18 @@ class ClusterExpansion:
         """
         if len(cluster_space) != len(parameters):
             raise ValueError('cluster_space ({}) and parameters ({}) must have'
-                             ' the same length'.format(len(cluster_space),
-                                                       len(parameters)))
+                             ' the same length'.format(len(cluster_space), len(parameters)))
         self._cluster_space = cluster_space.copy()
         if isinstance(parameters, list):
             parameters = np.array(parameters)
         self._parameters = parameters
         self._original_parameters = parameters.copy()
+
+        # add metadata
+        if metadata is None:
+            metadata = dict()
+        self._metadata = metadata
+        self._add_default_metadata()
 
     def predict(self, structure: Union[Atoms, Structure]) -> float:
         """
@@ -121,6 +130,11 @@ class ClusterExpansion:
         """ effective cluster interactions (ECIs) """
         return self._parameters
 
+    @property
+    def metadata(self):
+        """ dict : metadata associated with cluster expansion """
+        return self._metadata
+
     def plot_parameters(self, orders=None):
         """ Plot ECIs for given orders, default plots for all orders """
 
@@ -150,13 +164,23 @@ class ClusterExpansion:
         cluster_space_repr = self._cluster_space._get_string_representation(
             print_threshold, print_minimum).split('\n')
         # rescale width
-        eci_col_width = max(
-            len('{:9.3g}'.format(max(self._parameters, key=abs))), len('ECI'))
+        eci_col_width = max(len('{:9.3g}'.format(max(self._parameters, key=abs))), len('ECI'))
         width = len(cluster_space_repr[0]) + len(' | ') + eci_col_width
 
         s = []  # type: List
         s += ['{s:=^{n}}'.format(s=' Cluster Expansion ', n=width)]
         s += [t for t in cluster_space_repr if re.search(':', t)]
+
+        # additional information about number of nonzero the ECIs
+        df = self.parameters_as_dataframe
+        orders = self.orders
+        nzp_by_order = [np.count_nonzero(df[df.order == order].eci) for order in orders]
+        assert sum(nzp_by_order) == np.count_nonzero(self.parameters)
+        s += [' total number of nonzero parameters: {}'.format(sum(nzp_by_order))]
+        line = ' number of nonzero parameters by order: '
+        for order, nzp in zip(orders, nzp_by_order):
+            line += '{}= {}  '.format(order, nzp)
+        s += [line]
 
         # table header
         s += [''.center(width, '-')]
@@ -234,8 +258,7 @@ class ClusterExpansion:
 
         if 0 in indices:
             raise ValueError('Orbit index cannot be 0 since the zerolet may not be pruned.')
-        orbit_candidates_for_removal = \
-            df.orbit_index[np.array(indices)].tolist()
+        orbit_candidates_for_removal = df.orbit_index[np.array(indices)].tolist()
         safe_to_remove_orbits, safe_to_remove_params = [], []
         for oi in set(orbit_candidates_for_removal):
             if oi == -1:
@@ -265,6 +288,10 @@ class ClusterExpansion:
 
         items = dict()
         items['parameters'] = self.parameters
+
+        # TODO: remove if condition once metadata is firmly established
+        if hasattr(self, '_metadata'):
+            items['metadata'] = self._metadata
 
         with tarfile.open(name=filename, mode='w') as tar_file:
             cs_file = tempfile.NamedTemporaryFile()
@@ -299,5 +326,23 @@ class ClusterExpansion:
         parameters = items['parameters']
         ce = ClusterExpansion(cs, parameters)
 
+        # TODO: remove if condition once metadata is firmly established
+        if 'metadata' in items:
+            ce._metadata = items['metadata']
+        else:
+            del ce._metadata
+
         assert list(parameters) == list(ce.parameters)
         return ce
+
+    def _add_default_metadata(self):
+        """Adds default metadata to metadata dict."""
+        import getpass
+        import socket
+        from datetime import datetime
+        from icet import __version__ as icet_version
+
+        self._metadata['date_created'] = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        self._metadata['username'] = getpass.getuser()
+        self._metadata['hostname'] = socket.gethostname()
+        self._metadata['icet_version'] = icet_version

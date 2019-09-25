@@ -4,15 +4,14 @@ import numpy as np
 
 from ase import Atoms
 from ase.units import kB
-from typing import Dict
+from typing import Dict, List
 
 from .. import DataContainer
-from .base_ensemble import BaseEnsemble
-from .canonical_ensemble import get_swap_sublattice_probabilities
 from ..calculators.base_calculator import BaseCalculator
+from .thermodynamic_base_ensemble import ThermodynamicBaseEnsemble
 
 
-class CanonicalAnnealing(BaseEnsemble):
+class CanonicalAnnealing(ThermodynamicBaseEnsemble):
     """Instances of this class allow one to carry out simulated annealing
     in the canonical ensemble, i.e. the temperature is varied in
     pre-defined fashion while the composition is kept fixed.  See
@@ -42,7 +41,7 @@ class CanonicalAnnealing(BaseEnsemble):
 
     Parameters
     ----------
-    atoms : :class:`Atoms <ase.Atoms>`
+    structure : :class:`Atoms <ase.Atoms>`
         atomic configuration to be used in the Monte Carlo simulation;
         also defines the initial occupation vector
     calculator : :class:`BaseCalculator <mchammer.calculators.ClusterExpansionCalculator>`
@@ -85,9 +84,14 @@ class CanonicalAnnealing(BaseEnsemble):
     trajectory_write_interval : int
         interval at which the current occupation vector of the atomic
         configuration is written to the data container.
+    sublattice_probabilities : List[float]
+        probability for picking a sublattice when doing a random swap.
+        This should be as long as the number of sublattices and should
+        sum up to 1.
+
     """
 
-    def __init__(self, atoms: Atoms, calculator: BaseCalculator,
+    def __init__(self, structure: Atoms, calculator: BaseCalculator,
                  T_start: float, T_stop: float, n_steps: int,
                  cooling_function: str = 'exponential',
                  user_tag: str = None,
@@ -95,7 +99,8 @@ class CanonicalAnnealing(BaseEnsemble):
                  data_container: DataContainer = None, random_seed: int = None,
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
-                 trajectory_write_interval: int = None) -> None:
+                 trajectory_write_interval: int = None,
+                 sublattice_probabilities: List[float] = None) -> None:
 
         self._ensemble_parameters = dict(n_steps=n_steps)
 
@@ -103,22 +108,26 @@ class CanonicalAnnealing(BaseEnsemble):
         for sl in calculator.sublattices:
             for symbol in sl.chemical_symbols:
                 key = 'n_atoms_{}'.format(symbol)
-                count = atoms.get_chemical_symbols().count(symbol)
+                count = structure.get_chemical_symbols().count(symbol)
                 self._ensemble_parameters[key] = count
 
         super().__init__(
-            atoms=atoms, calculator=calculator, user_tag=user_tag,
+            structure=structure, calculator=calculator, user_tag=user_tag,
             data_container=data_container,
             random_seed=random_seed,
             data_container_write_period=data_container_write_period,
             ensemble_data_write_interval=ensemble_data_write_interval,
-            trajectory_write_interval=trajectory_write_interval)
+            trajectory_write_interval=trajectory_write_interval,
+            boltzmann_constant=boltzmann_constant)
 
-        self._boltzmann_constant = boltzmann_constant
         self._temperature = T_start
         self._T_start = T_start
         self._T_stop = T_stop
         self._n_steps = n_steps
+
+        self._ground_state_candidate = self.configuration.structure
+        self._ground_state_candidate_potential = self.calculator.calculate_total(
+            occupations=self.configuration.occupations)
 
         # setup cooling function
         if isinstance(cooling_function, str):
@@ -130,11 +139,12 @@ class CanonicalAnnealing(BaseEnsemble):
         elif callable(cooling_function):
             self._cooling_function = cooling_function
         else:
-            raise TypeError(
-                'cooling_function must be either str or a function')
+            raise TypeError('cooling_function must be either str or a function')
 
-        # setup sublattice probabilities
-        self.sublattice_probabilities = get_swap_sublattice_probabilities(self.configuration)
+        if sublattice_probabilities is None:
+            self._swap_sublattice_probabilities = self._get_swap_sublattice_probabilities()
+        else:
+            self._swap_sublattice_probabilities = sublattice_probabilities
 
     @property
     def temperature(self) -> float:
@@ -157,47 +167,27 @@ class CanonicalAnnealing(BaseEnsemble):
         return self._n_steps
 
     @property
-    def boltzmann_constant(self) -> float:
-        """ Boltzmann constant :math:`k_B` (see parameters section above) """
-        return self._boltzmann_constant
+    def estimated_ground_state(self):
+        """ Structure with lowest observed potential during run """
+        return self._ground_state_candidate.copy()
+
+    @property
+    def estimated_ground_state_potential(self):
+        """ Lowest observed potential during run """
+        return self._ground_state_candidate_potential
 
     def run(self):
         """ Runs the annealing. """
-        if self.total_trials >= self.n_steps:
+        if self.step >= self.n_steps:
             raise Exception('Annealing has already finished')
-        super().run(self.n_steps - self.total_trials)
+        super().run(self.n_steps - self.step)
 
-    def _do_trial_step(self):
+    def _do_trial_step(self) -> int:
         """ Carries out one Monte Carlo trial step. """
         self._temperature = self._cooling_function(
-            self.total_trials, self.T_start, self.T_stop, self.n_steps)
-        self._total_trials += 1
-
-        sublattice_index = self.get_random_sublattice_index()
-        sites, species = self.configuration.get_swapped_state(sublattice_index)
-        potential_diff = self._get_property_change(sites, species)
-
-        if self._acceptance_condition(potential_diff):
-            self._accepted_trials += 1
-            self.update_occupations(sites, species)
-
-    def _acceptance_condition(self, potential_diff: float) -> bool:
-        """
-        Evaluates Metropolis acceptance criterion.
-
-        Parameters
-        ----------
-        potential_diff
-            change in the thermodynamic potential associated
-            with the trial step
-        """
-        if potential_diff < 0:
-            return True
-        elif abs(self.temperature) < 1e-6:  # temperature is numerically zero
-            return False
-        else:
-            p = np.exp(-potential_diff / (self.boltzmann_constant * self.temperature))
-            return p > self._next_random_number()
+            self.step, self.T_start, self.T_stop, self.n_steps)
+        sublattice_index = self.get_random_sublattice_index(self._swap_sublattice_probabilities)
+        return self.do_canonical_swap(sublattice_index=sublattice_index)
 
     def _get_ensemble_data(self) -> Dict:
         """Returns the data associated with the ensemble. For the
@@ -205,18 +195,10 @@ class CanonicalAnnealing(BaseEnsemble):
         """
         data = super()._get_ensemble_data()
         data['temperature'] = self.temperature
+        if data['potential'] < self._ground_state_candidate_potential:
+            self._ground_state_candidate_potential = data['potential']
+            self._ground_state_candidate = self.configuration.structure
         return data
-
-    def get_random_sublattice_index(self) -> int:
-        """Returns a random sublattice index based on the weights of the
-        sublattice.
-
-        Todo
-        ----
-        * add unit test
-        """
-        pick = np.random.choice(range(0, len(self.sublattices)), p=self.sublattice_probabilities)
-        return pick
 
 
 def _cooling_linear(step, T_start, T_stop, n_steps):

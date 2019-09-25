@@ -12,7 +12,7 @@ from icet.io.logging import set_log_config, logger, formatter
 
 # Test logger
 # --------------
-atoms = bulk('Al')
+structure = bulk('Al')
 cutoffs = [4.0]
 symbols = ['Al', 'Ti']
 
@@ -28,7 +28,7 @@ for log_level in [logging.DEBUG, logging.INFO, logging.WARNING]:
     logger.addHandler(stream_handler)
     stream_handler.setLevel(logging.INFO)
 
-    cs = ClusterSpace(atoms, cutoffs, symbols)
+    cs = ClusterSpace(structure, cutoffs, symbols)
     stream_handler.flush()
     lines1 = stream.getvalue().split('\n')[:-1]  # remove last blank line
 
@@ -39,7 +39,7 @@ for log_level in [logging.DEBUG, logging.INFO, logging.WARNING]:
     logfile = tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8')
     set_log_config(filename=logfile.name, level=logging.INFO)
 
-    cs = ClusterSpace(atoms, cutoffs, symbols)
+    cs = ClusterSpace(structure, cutoffs, symbols)
     logfile.seek(0)
     lines2 = [l.replace('\n', '') for l in logfile.readlines()]
 

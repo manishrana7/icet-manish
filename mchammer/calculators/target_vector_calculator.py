@@ -32,7 +32,7 @@ class TargetVectorCalculator(BaseCalculator):
 
     Parameters
     ----------
-    atoms
+    structure
         structure for which to set up calculator
     cluster_space
         cluster space from which to build calculator
@@ -52,13 +52,13 @@ class TargetVectorCalculator(BaseCalculator):
         human-readable identifier for this calculator
     """
 
-    def __init__(self, atoms: Atoms, cluster_space: ClusterSpace,
+    def __init__(self, structure: Atoms, cluster_space: ClusterSpace,
                  target_vector: List[float],
                  weights: List[float] = None,
                  optimality_weight: float = 1.0,
                  optimality_tol: float = 1e-5,
                  name: str = 'Target vector calculator') -> None:
-        super().__init__(atoms=atoms, name=name)
+        super().__init__(structure=structure, name=name)
 
         if len(target_vector) != len(cluster_space):
             raise ValueError('Cluster space and target vector '
@@ -95,25 +95,25 @@ class TargetVectorCalculator(BaseCalculator):
         occupations
             the entire occupation vector (i.e. list of atomic species)
         """
-        self.atoms.set_atomic_numbers(occupations)
-        cv = self.cluster_space.get_cluster_vector(self.atoms)
+        self.structure.set_atomic_numbers(occupations)
+        cv = self.cluster_space.get_cluster_vector(self.structure)
         return compare_cluster_vectors(cv, self.target_vector,
                                        self.orbit_data,
                                        weights=self.weights,
                                        optimality_weight=self.optimality_weight,
                                        tol=self.optimality_tol)
 
-    def calculate_local_contribution(self, occupations: List[int]) -> float:
+    def calculate_local_contribution(self, local_indices, occupations: List[int]) -> float:
         """
         Not yet implemented, forwards calculation to
         calculate_total.
         """
-        return self.calulate_total(occupations)
+        return self.calculate_total(occupations)
 
     @property
     def sublattices(self) -> Sublattices:
         """Sublattices of the calculators structure."""
-        sl = self.cluster_space.get_sublattices(self.atoms)
+        sl = self.cluster_space.get_sublattices(self.structure)
         return sl
 
 

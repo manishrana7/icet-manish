@@ -11,12 +11,12 @@ class TestClusterCountObserver(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestClusterCountObserver, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk('Al').repeat([2, 1, 1])
-        self.atoms[1].symbol = 'Ge'
+        self.structure = bulk('Al').repeat([2, 1, 1])
+        self.structure[1].symbol = 'Ge'
 
         cutoffs = [3]
         subelements = ['Al', 'Ge', 'Si']
-        self.cs = ClusterSpace(self.atoms, cutoffs, subelements)
+        self.cs = ClusterSpace(self.structure, cutoffs, subelements)
         self.interval = 10
 
     def shortDescription(self):
@@ -26,7 +26,7 @@ class TestClusterCountObserver(unittest.TestCase):
     def setUp(self):
         """Set up observer before each test."""
         self.observer = ClusterCountObserver(
-            cluster_space=self.cs, atoms=self.atoms, interval=self.interval)
+            cluster_space=self.cs, structure=self.structure, interval=self.interval)
 
     def test_property_tag(self):
         """Tests property tag."""
@@ -45,7 +45,7 @@ class TestClusterCountObserver(unittest.TestCase):
         subelements = ['Au', 'Pd']
         cs = ClusterSpace(prim, cutoffs, subelements)
         observer = ClusterCountObserver(
-            cluster_space=cs, atoms=structure, interval=self.interval)
+            cluster_space=cs, structure=structure, interval=self.interval)
 
         structure.set_chemical_symbols(['Au'] * len(structure))
         # 1 Pd in pure Au sro

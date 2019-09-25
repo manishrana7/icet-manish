@@ -9,7 +9,7 @@ class TestBaseCalculator(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestBaseCalculator, self).__init__(*args, **kwargs)
-        self.atoms = bulk("Al").repeat(3)
+        self.structure = bulk("Al").repeat(3)
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
@@ -18,8 +18,8 @@ class TestBaseCalculator(unittest.TestCase):
     def setUp(self):
         """Setup before each test."""
         class ConcreteCalculator(BaseCalculator):
-            def __init__(self, atoms, name='ConcreteCalc'):
-                super().__init__(atoms, name=name)
+            def __init__(self, structure, name='ConcreteCalc'):
+                super().__init__(structure, name=name)
 
             def calculate_total(self):
                 super().calculate_total()
@@ -27,12 +27,12 @@ class TestBaseCalculator(unittest.TestCase):
             def calculate_local_contribution(self):
                 super().calculate_local_contribution()
 
-        self.calculator = ConcreteCalculator(self.atoms)
+        self.calculator = ConcreteCalculator(self.structure)
 
-    def test_property_atoms(self):
-        """Tests property atoms."""
-        self.assertIsInstance(self.calculator.atoms, Atoms)
-        self.assertEqual(self.atoms, self.calculator.atoms)
+    def test_property_structure(self):
+        """Tests property structure."""
+        self.assertIsInstance(self.calculator.structure, Atoms)
+        self.assertEqual(self.structure, self.calculator.structure)
 
     def test_calculate_total(self):
         """Tests calculate total."""
@@ -44,23 +44,23 @@ class TestBaseCalculator(unittest.TestCase):
 
     def test_update_occupations(self):
         """Tests set elements method."""
-        atoms_cpy = self.atoms.copy()
+        structure_cpy = self.structure.copy()
 
         indices = [0, 1, 3]
         elements = [6, 1, 2]
 
         # Test first that everything is Al
-        self.assertEqual(self.calculator.atoms[0].symbol, 'Al')
-        self.assertEqual(self.calculator.atoms[1].symbol, 'Al')
-        self.assertEqual(self.calculator.atoms[3].symbol, 'Al')
+        self.assertEqual(self.calculator.structure[0].symbol, 'Al')
+        self.assertEqual(self.calculator.structure[1].symbol, 'Al')
+        self.assertEqual(self.calculator.structure[3].symbol, 'Al')
 
         self.calculator.update_occupations(indices, elements)
-        self.assertEqual(self.calculator.atoms[0].symbol, 'C')
-        self.assertEqual(self.calculator.atoms[1].symbol, 'H')
-        self.assertEqual(self.calculator.atoms[3].symbol, 'He')
+        self.assertEqual(self.calculator.structure[0].symbol, 'C')
+        self.assertEqual(self.calculator.structure[1].symbol, 'H')
+        self.assertEqual(self.calculator.structure[3].symbol, 'He')
 
-        # test input atoms remains unchanged
-        self.assertEqual(self.atoms, atoms_cpy)
+        # test input structure remains unchanged
+        self.assertEqual(self.structure, structure_cpy)
 
         # test that correct exceptions are raised
         with self.assertRaises(TypeError) as context:

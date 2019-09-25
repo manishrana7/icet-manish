@@ -55,7 +55,7 @@ def fit(X: np.ndarray,
     fit_method
         method to be used for training; possible choice are
         "least-squares", "lasso", "elasticnet", "bayesian-ridge", "ardr",
-        "rfe-l2", "split-bregman"
+        "rfe", "split-bregman"
     standardize : bool
         if True the fit matrix is standardized before fitting
     check_condition : bool
@@ -77,11 +77,24 @@ def fit(X: np.ndarray,
             logger.warning('Condition number is large, {}'.format(cond))
 
     if standardize:
+
+        # standardize fit matrix, column wise std -> 1.0
         ss = StandardScaler(copy=False, with_mean=False, with_std=True)
         ss.fit_transform(X)  # change in place
-        results = fit_methods[fit_method](X, y, **kwargs)
+
+        # standardize target values, std(y) -> 1.0
+        y_scale = 1.0/np.std(y)
+        y_rescaled = y * y_scale
+
+        # train
+        results = fit_methods[fit_method](X, y_rescaled, **kwargs)
+
+        # inverse standardization
+        parameters = results['parameters'] / y_scale
         ss.inverse_transform(X)  # change in place
-        ss.transform(results['parameters'].reshape(1, -1)).reshape(-1,)
+        ss.transform(parameters.reshape(1, -1)).reshape(-1,)
+        results['parameters'] = parameters
+
     else:
         results = fit_methods[fit_method](X, y, **kwargs)
     return results
@@ -180,24 +193,25 @@ def _fit_lassoCV(X: np.ndarray,
     if alphas is None:
         alphas = np.logspace(-8, -0.3, 100)
 
-    lassoCV = LassoCV(alphas=alphas, fit_intercept=fit_intercept, cv=cv,
-                      n_jobs=n_jobs, **kwargs)
+    lassoCV = LassoCV(alphas=alphas, fit_intercept=fit_intercept, cv=cv, n_jobs=n_jobs, **kwargs)
     lassoCV.fit(X, y)
     results = dict()
     results['parameters'] = lassoCV.coef_
     results['alpha_optimal'] = lassoCV.alpha_
-    results['alpha_path'] = lassoCV.alphas_
-    results['mse_path'] = lassoCV.mse_path_.mean(axis=1)
     return results
 
 
 def _fit_ridge(X, y, alpha=None, fit_intercept=False, **kwargs):
+    results = dict()
     if alpha is None:
+        if 'alphas' not in kwargs:
+            kwargs['alphas'] = np.logspace(-6, 3, 100)
         ridge = RidgeCV(fit_intercept=fit_intercept, **kwargs)
+        ridge.fit(X, y)
+        results['alpha_optimal'] = ridge.alpha_
     else:
         ridge = Ridge(alpha=alpha, fit_intercept=fit_intercept, **kwargs)
-    ridge.fit(X, y)
-    results = dict()
+        ridge.fit(X, y)
     results['parameters'] = ridge.coef_
     return results
 
@@ -251,8 +265,7 @@ def _fit_elasticnet(X: np.ndarray, y: np.ndarray,
     if alpha is None:
         return _fit_elasticnetCV(X, y, fit_intercept=fit_intercept, **kwargs)
     else:
-        elasticnet = ElasticNet(alpha=alpha, fit_intercept=fit_intercept,
-                                **kwargs)
+        elasticnet = ElasticNet(alpha=alpha, fit_intercept=fit_intercept, **kwargs)
         elasticnet.fit(X, y)
         results = dict()
         results['parameters'] = elasticnet.coef_
@@ -307,22 +320,19 @@ def _fit_elasticnetCV(X: np.ndarray,
                     0.8, 0.75, 0.65, 0.5, 0.4, 0.25, 0.1]
 
     elasticnetCV = ElasticNetCV(alphas=alphas, l1_ratio=l1_ratio, cv=cv,
-                                fit_intercept=fit_intercept, n_jobs=n_jobs,
-                                **kwargs)
+                                fit_intercept=fit_intercept, n_jobs=n_jobs, **kwargs)
     elasticnetCV.fit(X, y)
     results = dict()
     results['parameters'] = elasticnetCV.coef_
     results['alpha_optimal'] = elasticnetCV.alpha_
-    results['alpha_path'] = elasticnetCV.alphas_
-    results['l1_ratio_path'] = elasticnetCV.l1_ratio
     results['l1_ratio_optimal'] = elasticnetCV.l1_ratio_
-    results['mse_path'] = elasticnetCV.mse_path_.mean(axis=2)
     return results
 
 
 def _fit_ardr(X: np.ndarray,
               y: np.ndarray,
-              threshold_lambda: float = 1e6,
+              threshold_lambda: float = None,
+              line_scan: bool = False,
               fit_intercept: bool = False,
               **kwargs) -> Dict[str, Any]:
     """
@@ -339,18 +349,79 @@ def _fit_ardr(X: np.ndarray,
         target array
     threshold_lambda
         threshold lambda parameter forwarded to sklearn
+    line_scan
+        whether or not to perform line-scan in order to find optimal
+        threshold-lambda
     fit_intercept
         center data or not, forwarded to sklearn
     """
-    ardr = ARDRegression(threshold_lambda=threshold_lambda,
-                         fit_intercept=fit_intercept, **kwargs)
-    ardr.fit(X, y)
-    results = dict()
-    results['parameters'] = ardr.coef_
+
+    if threshold_lambda is not None and line_scan:
+        raise ValueError('Specify threshold_lambda or set line_scan=True, not both')
+
+    if threshold_lambda is None:
+        threshold_lambda = 1e4
+
+    if line_scan:
+        return _fit_ardr_line_scan(X, y, fit_intercept=fit_intercept, **kwargs)
+    else:
+        ardr = ARDRegression(threshold_lambda=threshold_lambda, fit_intercept=fit_intercept,
+                             **kwargs)
+        ardr.fit(X, y)
+        results = dict()
+        results['parameters'] = ardr.coef_
+        return results
+
+
+def _fit_ardr_line_scan(X: np.ndarray,
+                        y: np.ndarray,
+                        cv_splits: int = 1,
+                        threshold_lambdas: List[float] = None,
+                        **kwargs) -> Dict[str, Any]:
+    """ ARDR with line-scan for optimal threshold-lambda.
+
+    Parameters
+    -----------
+    X
+        fit matrix
+    y
+        target array
+    threshold_lambdas
+        list of threshold-lambda values to be evaluated. The optimal
+        lambda-value found will be used in the final fit.
+    cv_splits
+        how many CV splits to carry out when evaluating each lambda value.
+    """
+
+    from .cross_validation import CrossValidationEstimator
+
+    # default lambda values to scan
+    if threshold_lambdas is None:
+        threshold_lambdas = np.logspace(3, 6, 15)
+
+    # run lin-scan of lambda values
+    cv_data = []
+    for lam in threshold_lambdas:
+        cve = CrossValidationEstimator((X, y), fit_method='ardr', validation_method='shuffle-split',
+                                       threshold_lambda=lam, test_size=0.1, train_size=0.9,
+                                       n_splits=cv_splits, **kwargs)
+        cve.validate()
+        cv_data.append([lam, cve.rmse_validation])
+
+    # select best lambda
+    cv_data = np.array(cv_data)
+    optimal_ind = cv_data[:, 1].argmin()
+    lambda_optimal = cv_data[optimal_ind, 0]
+
+    # final fit with optimal lambda
+    results = _fit_ardr(X, y, threshold_lambda=lambda_optimal, **kwargs)
+    results['threshold_lambda_optimal'] = lambda_optimal
     return results
 
 
 class _Estimator:
+    """ Estimator class making it possible to use all fit methods
+    as estimators in RFE """
 
     def __init__(self, fit_method, **kwargs):
         if fit_method == 'rfe':
@@ -424,11 +495,9 @@ def fit_rfe(X: np.ndarray,
         if 'scoring' not in rfe_kwargs:
             rfe_kwargs['scoring'] = 'neg_mean_squared_error'
         cv = ShuffleSplit(train_size=0.9, test_size=0.1, n_splits=cv_splits)
-        rfe = RFECV(estimator_obj, step=step, cv=cv, n_jobs=n_jobs,
-                    **rfe_kwargs)
+        rfe = RFECV(estimator_obj, step=step, cv=cv, n_jobs=n_jobs, **rfe_kwargs)
     else:
-        rfe = RFE(estimator_obj, n_features_to_select=n_features, step=step,
-                  **rfe_kwargs)
+        rfe = RFE(estimator_obj, n_features_to_select=n_features, step=step, **rfe_kwargs)
 
     # Carry out RFE
     rfe.fit(X, y)
@@ -437,8 +506,7 @@ def fit_rfe(X: np.ndarray,
 
     # carry out final fit
     n_params = X.shape[1]
-    results = fit(X[:, features], y, fit_method=final_estimator,
-                  **final_estimator_kwargs)
+    results = fit(X[:, features], y, fit_method=final_estimator, **final_estimator_kwargs)
     params = np.zeros(n_params)
     params[features] = results['parameters']
     results['parameters'] = params
@@ -459,4 +527,4 @@ fit_methods = OrderedDict([
     ('ardr', _fit_ardr),
     ('rfe', fit_rfe),
     ])
-available_fit_methods = list(fit_methods.keys())
+available_fit_methods = sorted(fit_methods.keys())

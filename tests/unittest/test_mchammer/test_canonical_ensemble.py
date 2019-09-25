@@ -5,9 +5,7 @@ from ase.build import bulk
 
 from icet import ClusterExpansion, ClusterSpace
 from mchammer.calculators import ClusterExpansionCalculator
-from mchammer.configuration_manager import ConfigurationManager
-from mchammer.ensembles.canonical_ensemble import CanonicalEnsemble, \
-    get_swap_sublattice_probabilities
+from mchammer.ensembles.canonical_ensemble import CanonicalEnsemble
 
 
 class TestEnsemble(unittest.TestCase):
@@ -16,13 +14,13 @@ class TestEnsemble(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEnsemble, self).__init__(*args, **kwargs)
 
-        self.atoms = bulk('Al').repeat(3)
-        for i, atom in enumerate(self.atoms):
+        self.structure = bulk('Al').repeat(3)
+        for i, atom in enumerate(self.structure):
             if i % 2 == 0:
                 atom.symbol = 'Ga'
         cutoffs = [5, 5, 4]
         elements = ['Al', 'Ga']
-        self.cs = ClusterSpace(self.atoms, cutoffs, elements)
+        self.cs = ClusterSpace(self.structure, cutoffs, elements)
         parameters = parameters = np.array([1.2] * len(self.cs))
         self.ce = ClusterExpansion(self.cs, parameters)
         self.temperature = 100.0
@@ -33,9 +31,9 @@ class TestEnsemble(unittest.TestCase):
 
     def setUp(self):
         """Setup before each test."""
-        self.calculator = ClusterExpansionCalculator(self.atoms, self.ce)
+        self.calculator = ClusterExpansionCalculator(self.structure, self.ce)
         self.ensemble = CanonicalEnsemble(
-            atoms=self.atoms,
+            structure=self.structure,
             calculator=self.calculator,
             user_tag='test-ensemble', random_seed=42,
             data_container_write_period=499.0,
@@ -46,7 +44,7 @@ class TestEnsemble(unittest.TestCase):
     def test_init(self):
         """ Tests exceptions are raised during initialization. """
         with self.assertRaises(TypeError) as context:
-            CanonicalEnsemble(atoms=self.atoms, calculator=self.calculator)
+            CanonicalEnsemble(structure=self.structure, calculator=self.calculator)
         self.assertTrue("required positional argument: 'temperature'" in
                         str(context.exception))
 
@@ -57,7 +55,11 @@ class TestEnsemble(unittest.TestCase):
         for _ in range(10):
             self.ensemble._do_trial_step()
 
-        self.assertEqual(self.ensemble._total_trials, 10)
+    def test_run(self):
+        """Test that run function runs. """
+        n = 50
+        self.ensemble.run(n)
+        self.assertEqual(self.ensemble.step, n)
 
     def test_acceptance_condition(self):
         """Tests the acceptance condition method."""
@@ -71,14 +73,14 @@ class TestEnsemble(unittest.TestCase):
         """Tests init with explicit Boltzmann constant."""
         from ase.units import kB
         ens = CanonicalEnsemble(
-            atoms=self.atoms,
+            structure=self.structure,
             calculator=self.calculator,
             user_tag='test-ensemble',
             random_seed=42, temperature=100.0)
         self.assertAlmostEqual(kB, ens.boltzmann_constant)
 
         ens = CanonicalEnsemble(
-            atoms=self.atoms,
+            structure=self.structure,
             calculator=self.calculator,
             user_tag='test-ensemble',
             random_seed=42, temperature=100.0, boltzmann_constant=1.0)
@@ -96,9 +98,9 @@ class TestEnsemble(unittest.TestCase):
     def test_ensemble_parameters(self):
         """Tests the get ensemble parameters method."""
 
-        n_atoms = len(self.atoms)
-        n_atoms_Al = self.atoms.get_chemical_symbols().count('Al')
-        n_atoms_Ga = self.atoms.get_chemical_symbols().count('Ga')
+        n_atoms = len(self.structure)
+        n_atoms_Al = self.structure.get_chemical_symbols().count('Al')
+        n_atoms_Ga = self.structure.get_chemical_symbols().count('Ga')
 
         self.assertEqual(self.ensemble.ensemble_parameters['n_atoms'], n_atoms)
         self.assertEqual(self.ensemble.ensemble_parameters['n_atoms_Al'], n_atoms_Al)
@@ -146,25 +148,25 @@ class TestEnsemble(unittest.TestCase):
         prim = bulk('Al').repeat([2, 1, 1])
         chemical_symbols = [['Al'], ['Ag', 'Al']]
         cs = ClusterSpace(prim, cutoffs=[0], chemical_symbols=chemical_symbols)
+        ce = ClusterExpansion(cs, [1] * len(cs))
 
         supercell = prim.repeat(2)
         supercell[1].symbol = 'Ag'
-        sublattices = cs.get_sublattices(supercell)
-        cm = ConfigurationManager(supercell, sublattices)
+        ce_calc = ClusterExpansionCalculator(supercell, ce)
+        ensemble = CanonicalEnsemble(supercell, ce_calc, temperature=100)
 
         # test get_swap_sublattice_probabilities
-        probs = get_swap_sublattice_probabilities(cm)
+        probs = ensemble._get_swap_sublattice_probabilities()
         self.assertEqual(len(probs), 2)
         self.assertEqual(probs[0], 1)
         self.assertEqual(probs[1], 0)
 
         # test raise when swap not possible on either lattice
         supercell[1].symbol = 'Al'
-        sublattices = cs.get_sublattices(supercell)
-        cm = ConfigurationManager(supercell, sublattices)
+        ce_calc = ClusterExpansionCalculator(supercell, ce)
 
         with self.assertRaises(ValueError) as context:
-            get_swap_sublattice_probabilities(cm)
+            ensemble = CanonicalEnsemble(supercell, ce_calc, temperature=100)
         self.assertIn('No canonical swaps are possible on any of the', str(context.exception))
 
 

@@ -131,10 +131,10 @@ PYBIND11_MODULE(_icet, m)
         .def(py::init<>())
         .def(
             py::init<const Eigen::Matrix<double, Dynamic, 3, Eigen::RowMajor> &,
-                    const std::vector<std::string> &,
-                    const Eigen::Matrix3d &,
-                    const std::vector<bool> &,
-                    double>(),
+                     const std::vector<std::string> &,
+                     const Eigen::Matrix3d &,
+                     const std::vector<bool> &,
+                     double>(),
             "Initializes an icet Structure instance.",
             py::arg("positions"),
             py::arg("chemical_symbols"),
@@ -707,17 +707,19 @@ PYBIND11_MODULE(_icet, m)
         returns all_mc_vectors : list of tuples of int
         )pbdoc")
         .def_property("allowed_permutations", [](const Orbit &orbit) {
-             auto permutationSet = orbit.getAllowedSitesPermutations();
-             std::vector<std::vector<int>> vectorPermutations;
-            for(auto vector : permutationSet)
-            {
-                vectorPermutations.push_back(vector);
-            }
-             return vectorPermutations; }, [](Orbit &orbit, const std::vector<std::vector<int>> &permutations) {
+            std::set<std::vector<int>> allowedPermutations = orbit.getAllowedSitesPermutations();
+            // std::vector<std::vector<int>> retPermutations;
+            std::vector<std::vector<int>> retPermutations(allowedPermutations.begin(), allowedPermutations.end());
+            return retPermutations; },
+                      [](Orbit &orbit, const std::vector<std::vector<int>> &newPermutations) {
+                          std::set<std::vector<int>> allowedPermutations;
+                          for (const auto &perm : newPermutations)
+                          {
+                              allowedPermutations.insert(perm);
+                          }
+                          orbit.setAllowedSitesPermutations(allowedPermutations);
+                      },
 
-                std::unordered_set<std::vector<int>, VectorHash> setPermutations;
-                setPermutations.insert(permutations.begin(),permutations.end());
-                 orbit.setAllowedSitesPermutations(setPermutations); },
                       R"pbdoc(Get the list of equivalent permutations
         for this orbit.
 
@@ -731,10 +733,8 @@ PYBIND11_MODULE(_icet, m)
         functions (0,1,0) will not
         be considered since it is
         equivalent to (0,0,1).)pbdoc")
-        .def_property(
-            "permutations_to_representative",
-            &Orbit::getPermutationsOfEquivalentSites, &Orbit::setEquivalentSitesPermutations,
-            R"pbdoc(
+        .def_property("permutations_to_representative", &Orbit::getPermutationsOfEquivalentSites, &Orbit::setEquivalentSitesPermutations,
+                      R"pbdoc(
         list of permutations;
         permutations_to_representative[i] takes self.equivalent_sites[i] to
         the same order as self.representative_sites.
@@ -797,18 +797,18 @@ PYBIND11_MODULE(_icet, m)
             index : int
                 index of the orbit to be removed
             )pbdoc")
-//        .def("_find_orbit", (int (OrbitList::*)(const Cluster &) const) & OrbitList::findOrbit,
-//             R"pbdoc(
-//                 Returns the index of the orbit with the given representative cluster.
-//
-//             Parameters
-//             ---------
-//             cluster: icet Cluster object
-//                representative cluster of an orbit
-//             )pbdoc",
-//             py::arg("cluster"))
+        //        .def("_find_orbit", (int (OrbitList::*)(const Cluster &) const) & OrbitList::findOrbit,
+        //             R"pbdoc(
+        //                 Returns the index of the orbit with the given representative cluster.
+        //
+        //             Parameters
+        //             ---------
+        //             cluster: icet Cluster object
+        //                representative cluster of an orbit
+        //             )pbdoc",
+        //             py::arg("cluster"))
         .def("_is_row_taken", &OrbitList::isRowsTaken,
-            R"pbdoc(
+             R"pbdoc(
             Returns true if rows exist in taken_rows.
 
             Parameters
@@ -934,7 +934,6 @@ PYBIND11_MODULE(_icet, m)
         .def("_prune_orbit_list_cpp", &ClusterSpace::pruneOrbitList)
         .def("evaluate_cluster_function", &ClusterSpace::evaluateClusterFunction, "Evaluates value of a cluster function.")
         .def("__len__", &ClusterSpace::getClusterSpaceSize);
-
 
     py::class_<ClusterExpansionCalculator>(m, "_ClusterExpansionCalculator")
         .def(py::init<const ClusterSpace &, const Structure &>(),

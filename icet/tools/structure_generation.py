@@ -36,7 +36,7 @@ def generate_target_structure(cluster_space: ClusterSpace, max_size: int,
     Parameters
     ----------
     cluster_space
-        a cluster space defining the lattice to be decorated.
+        a cluster space defining the lattice to be occupied
     max_size
         maximum supercell size
     target_concentrations
@@ -95,15 +95,15 @@ def generate_target_structure(cluster_space: ClusterSpace, max_size: int,
         # fulfill the target concentrations
         for supercell in enumerate_supercells(cluster_space.primitive_structure,
                                               [size]):
-            _decorate_atoms_randomly(supercell, cluster_space,
-                                     target_concentrations)
+            _occupy_structure_randomly(supercell, cluster_space,
+                                       target_concentrations)
             supercells.append(supercell)
             calculators.append(TargetVectorCalculator(supercell, cluster_space,
                                                       target_cluster_vector,
                                                       optimality_weight=optimality_weight,
                                                       optimality_tol=tol))
 
-    ens = TargetClusterVectorAnnealing(atoms=supercells, calculators=calculators,
+    ens = TargetClusterVectorAnnealing(structure=supercells, calculators=calculators,
                                        T_start=T_start, T_stop=T_stop,
                                        random_seed=random_seed)
     return ens.generate_structure(number_of_trial_steps=n_steps)
@@ -124,7 +124,7 @@ def generate_sqs(cluster_space: ClusterSpace, max_size: int,
 
     In the present case, this means that the generated structure will
     have a cluster vector that as closely as possible matches the
-    cluster vector of an infintely large randomly decorated supercell.
+    cluster vector of an infintely large randomly occupated supercell.
     Internally the function uses a simulated annealing algorithm and the
     difference between two cluster vectors is calculated with the
     measure suggested by A. van de Walle et al. in Calphad **42**, 13-18
@@ -134,7 +134,7 @@ def generate_sqs(cluster_space: ClusterSpace, max_size: int,
     Parameters
     ----------
     cluster_space
-        a cluster space defining the lattice to be decorated.
+        a cluster space defining the lattice to be occupated
     max_size
         maximum supercell size
     target_concentrations
@@ -192,7 +192,7 @@ def generate_sqs_by_enumeration(cluster_space: ClusterSpace, max_size: int,
 
     In the present case, this means that the generated structure will
     have a cluster vector that as closely as possible matches the
-    cluster vector of an infintely large randomly decorated supercell.
+    cluster vector of an infintely large randomly occupied supercell.
     Internally the function uses a simulated annealing algorithm and the
     difference between two cluster vectors is calculated with the
     measure suggested by A. van de Walle et al. in Calphad **42**, 13-18
@@ -206,7 +206,7 @@ def generate_sqs_by_enumeration(cluster_space: ClusterSpace, max_size: int,
     Parameters
     ----------
     cluster_space
-        a cluster space defining the lattice to be decorated.
+        a cluster space defining the lattice to be occupied
     max_size
         maximum supercell size
     target_concentrations
@@ -260,16 +260,16 @@ def generate_sqs_by_enumeration(cluster_space: ClusterSpace, max_size: int,
     return best_structure
 
 
-def _decorate_atoms_randomly(atoms: Atoms, cluster_space: ClusterSpace,
-                             target_concentrations: dict):
+def _occupy_structure_randomly(structure: Atoms, cluster_space: ClusterSpace,
+                               target_concentrations: dict):
     """
-    Decorate an ``atoms`` object with "random" order but fulfilling
+    Occupy a structure with "random" order but fulfilling
     ``target_concentrations``.
 
     Parameters
     ----------
-    atoms
-        Atoms object that will be decorated randomly
+    structure
+        ASE Atoms object that will be occupied randomly
     cluster_space
         cluster space (becuse it carries information about sublattices
         etc)
@@ -277,24 +277,24 @@ def _decorate_atoms_randomly(atoms: Atoms, cluster_space: ClusterSpace,
         concentration of each species in the target structure (for
         example `{'Ag': 0.5, 'Pd': 0.5}`
 
-        Concentrations are always expressed with respect to all atoms in
+        Concentrations are always expressed with respect to all structure in
         the supercell, which implies that the sum of all concentrations
         should always be 1. In the case of multiple sublattices, a valid
         specification would thus be `{'Au': 0.25, 'Pd': 0.25, 'H': 0.1,
         'V': 0.4}`.
     """
-    if not _concentrations_fit_atoms(atoms, cluster_space, target_concentrations):
-        raise ValueError('Atoms object with {} atoms cannot accomodate '
-                         'target concentrations {}'.format(len(atoms),
+    if not _concentrations_fit_structure(structure, cluster_space, target_concentrations):
+        raise ValueError('Structure with {} atoms cannot accomodate '
+                         'target concentrations {}'.format(len(structure),
                                                            target_concentrations))
 
     # symbols_all will hold chemical_symbols of all sublattices
-    symbols_all = [0] * len(atoms)
-    for sublattice in cluster_space.get_sublattices(atoms):
+    symbols_all = [0] * len(structure)
+    for sublattice in cluster_space.get_sublattices(structure):
         symbols = []  # chemical_symbols in one sublattice
         for chemical_symbol in sublattice.chemical_symbols:
             n_symbol = int(
-                round(len(atoms) * target_concentrations[chemical_symbol]))
+                round(len(structure) * target_concentrations[chemical_symbol]))
             symbols += [chemical_symbol] * n_symbol
 
         # Should not happen but you never know
@@ -308,7 +308,7 @@ def _decorate_atoms_randomly(atoms: Atoms, cluster_space: ClusterSpace,
             symbols_all[lattice_site] = symbol
 
     assert symbols_all.count(0) == 0
-    atoms.set_chemical_symbols(symbols_all)
+    structure.set_chemical_symbols(symbols_all)
 
 
 def _validate_concentrations(concentrations: dict,
@@ -335,13 +335,12 @@ def _validate_concentrations(concentrations: dict,
 
     # Symbols need to match
     # Flatten chemical symbols from cluster space
-    chemical_symbols = [
-        sym for syms in cluster_space.chemical_symbols for sym in syms]
-    if tuple(sorted(chemical_symbols)) != tuple(sorted(concentrations.keys())):
+    chemical_symbols = set(sym for syms in cluster_space.chemical_symbols for sym in syms)
+    if chemical_symbols != set(concentrations.keys()):
         raise ValueError('Chemical symbols in cluster space ({}) are '
                          'not the same as those in the specified '
-                         'concentrations ({})'.format(cluster_space.chemical_symbols,
-                                                      list(concentrations.keys())))
+                         'concentrations ({})'.format(set(chemical_symbols),
+                                                      set(concentrations.keys())))
 
     # Concentrations for each sublattice need to sum up to
     # its proportion of the total structure
@@ -383,18 +382,18 @@ def _concentrations_fit_atom_count(atom_count: int,
     return True
 
 
-def _concentrations_fit_atoms(atoms: Atoms,
-                              cluster_space: ClusterSpace,
-                              concentrations: dict,
-                              tol: float = 1e-5) -> bool:
+def _concentrations_fit_structure(structure: Atoms,
+                                  cluster_space: ClusterSpace,
+                                  concentrations: dict,
+                                  tol: float = 1e-5) -> bool:
     """
     Check if specified concentrations are commensurate with a
     certain supercell (including sublattices)
 
     Parameters
     ----------
-    atoms
-        atoms object to be checked
+    structure
+        ASE Atoms object to be checked
     cluster_space
         corresponding cluster space
     concentrations
@@ -403,10 +402,10 @@ def _concentrations_fit_atoms(atoms: Atoms,
         Numerical tolerance
     """
     # Check that concentrations are OK in each sublattice
-    for sublattice in cluster_space.get_sublattices(atoms):
+    for sublattice in cluster_space.get_sublattices(structure):
         # Since concentrations are specified relative to all atoms,
         # we must rescale when we check against the size of a sublattice
-        scaling = len(atoms) / len(sublattice.indices)
+        scaling = len(structure) / len(sublattice.indices)
         concentrations_sub = {elem: scaling * concentrations[elem]
                               for elem in sublattice.chemical_symbols}
         if not _concentrations_fit_atom_count(len(sublattice.indices),
@@ -421,12 +420,12 @@ def _get_sqs_cluster_vector(cluster_space: ClusterSpace,
     """
     Get the SQS vector for a certain cluster space and certain
     concentration. Here SQS vector refers to the cluster vector of an
-    infintely large supercell with random decoration.
+    infintely large supercell with random occupation.
 
     Parameters
     ----------
     cluster_space
-        The kind of lattice to be decorated
+        The kind of lattice to be occupied
     target_concentrations
         concentration of each species in the target structure (for
         example `{'Ag': 0.5, 'Pd': 0.5}`

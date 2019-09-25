@@ -2,7 +2,7 @@
 
   <p>
   <a href="https://gitlab.com/materials-modeling/icet/commits/master"><img alt="pipeline status" src="https://gitlab.com/materials-modeling/icet/badges/master/pipeline.svg" /></a>
-  <a href="https://icet.materialsmodeling.org/coverage"><img alt="coverage report" src="https://gitlab.com/materials-modeling/icet/badges/master/coverage.svg" /></a>
+  <a href="https://icet.materialsmodeling.org/htmlcov"><img alt="coverage report" src="https://gitlab.com/materials-modeling/icet/badges/master/coverage.svg" /></a>
   <a href="https://badge.fury.io/py/icet"><img src="https://badge.fury.io/py/icet.svg" alt="PyPI version" height="18"></a>
   </p>
 
@@ -30,6 +30,15 @@ The following snippet provides a minimal example for its usage:
    opt.train()
    ce = ClusterExpansion(cs, opt.parameters)
 
+:program:`icet` has been developed at the `Department of Physics
+<https://www.chalmers.se/en/departments/physics/Pages/default.aspx>`_
+of `Chalmers University of Technology <https://www.chalmers.se/>`_ in
+Gothenburg, Sweden, and the `Data and Software Management Center
+<https://europeanspallationsource.se/data-management-software#data-analysis-modelling>`_
+at the European Spallation Source in Copenhagen, Denmark. Please
+consult the :ref:`credits page <credits>` for information on how to
+cite :program:`icet`.
+
 :program:`icet` and its development are hosted on `gitlab
 <https://gitlab.com/materials-modeling/icet>`_. Bugs and feature
 requests are ideally submitted via the `gitlab issue tracker
@@ -40,12 +49,11 @@ team can also be reached by email via icet@materialsmodeling.org.
    :maxdepth: 2
    :caption: Main
 
-   overview
-   background
-   workflow
+   background/index
    installation
-   basic/index
-   advanced/index
+   tutorial/index
+   advanced_topics/index
+   credits
 
 .. toctree::
    :maxdepth: 2
@@ -60,5 +68,6 @@ team can also be reached by email via icet@materialsmodeling.org.
    :caption: Backmatter
 
    bibliography
+   publications
    glossary
    genindex

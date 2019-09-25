@@ -19,25 +19,23 @@ from ase.io import write as ase_write
 from icet.core.orbit_list import OrbitList
 from icet.core.structure import Structure
 from icet.core.sublattices import Sublattices
-from icet.tools.geometry import get_decorated_primitive_structure
+from icet.tools.geometry import get_occupied_primitive_structure
 
 
 class ClusterSpace(_ClusterSpace):
-    """
-    This class provides functionality for generating and maintaining
+    """This class provides functionality for generating and maintaining
     cluster spaces.
 
-    **Note:**
-    In icet all :class:`ase.Atoms` objects must have periodic boundary
-    conditions. When carrying out cluster-expansions for surfaces and
-    nano-particles it is therefore recommended to embed the atoms
-    object in a vacuum and use periodic boundary conditions. This can
-    be done using e.g., :func:`ase.Atoms.center`.
+    **Note:** In icet all :class:`ase.Atoms` objects must have
+    periodic boundary conditions. When carrying out cluster expansions
+    for surfaces and nanoparticles it is therefore recommended to
+    surround the structure with vacuum and use periodic boundary
+    conditions. This can be done using e.g., :func:`ase.Atoms.center`.
 
     Parameters
     ----------
-    atoms : ase.Atoms
-        atomic configuration
+    structure : ase.Atoms
+        atomic structure
     cutoffs : list(float)
         cutoff radii per order that define the cluster space
 
@@ -57,7 +55,7 @@ class ClusterSpace(_ClusterSpace):
         list.
 
         If a list of list of chemical symbols is provided then the
-        outer list must be the same length as the atoms object and
+        outer list must be the same length as the `structure` object and
         ``chemical_symbols[i]`` will correspond to the allowed species
         on lattice site ``i``.
 
@@ -71,58 +69,56 @@ class ClusterSpace(_ClusterSpace):
 
         # AgPd alloy with pairs up to 7.0 A and triplets up to 4.5 A
         prim = bulk('Ag')
-        cs = ClusterSpace(atoms=prim, cutoffs=[7.0, 4.5],
+        cs = ClusterSpace(structure=prim, cutoffs=[7.0, 4.5],
                           chemical_symbols=[['Ag', 'Pd']])
         print(cs)
 
         # (Mg,Zn)O alloy on rocksalt lattice with pairs up to 8.0 A
         prim = bulk('MgO', crystalstructure='rocksalt', a=6.0)
-        cs = ClusterSpace(atoms=prim, cutoffs=[8.0],
+        cs = ClusterSpace(structure=prim, cutoffs=[8.0],
                           chemical_symbols=[['Mg', 'Zn'], ['O']])
         print(cs)
 
         # (Ga,Al)(As,Sb) alloy with pairs, triplets, and quadruplets
         prim = bulk('GaAs', crystalstructure='zincblende', a=6.5)
-        cs = ClusterSpace(atoms=prim, cutoffs=[7.0, 6.0, 5.0],
+        cs = ClusterSpace(structure=prim, cutoffs=[7.0, 6.0, 5.0],
                           chemical_symbols=[['Ga', 'Al'], ['As', 'Sb']])
         print(cs)
 
         # PdCuAu alloy with pairs and triplets
         prim = bulk('Pd')
-        cs = ClusterSpace(atoms=prim, cutoffs=[7.0, 5.0],
+        cs = ClusterSpace(structure=prim, cutoffs=[7.0, 5.0],
                           chemical_symbols=[['Au', 'Cu', 'Pd']])
         print(cs)
-
 
     """
 
     def __init__(self,
-                 atoms: Atoms,
+                 structure: Atoms,
                  cutoffs: List[float],
                  chemical_symbols: Union[List[str], List[List[str]]]) -> None:
 
-        if not isinstance(atoms, Atoms):
+        if not isinstance(structure, Atoms):
             raise TypeError('Input configuration must be an ASE Atoms object'
-                            ', not type {}'.format(type(atoms)))
-        if not all(atoms.pbc):
-            raise ValueError('Input structure must have periodic boundary '
-                             'condition')
+                            ', not type {}'.format(type(structure)))
+        if not all(structure.pbc):
+            raise ValueError('Input structure must have periodic boundary conditions')
 
         self._cutoffs = cutoffs.copy()
-        self._input_atoms = atoms.copy()
+        self._input_structure = structure.copy()
         self._input_chemical_symbols = copy.deepcopy(chemical_symbols)
         chemical_symbols = self._get_chemical_symbols()
 
         self._pruning_history = []
 
         # set up primitive
-        decorated_primitive, primitive_chemical_symbols = get_decorated_primitive_structure(
-            self._input_atoms, chemical_symbols)
+        occupied_primitive, primitive_chemical_symbols = get_occupied_primitive_structure(
+            self._input_structure, chemical_symbols)
         self._primitive_chemical_symbols = primitive_chemical_symbols
-        assert len(decorated_primitive) == len(primitive_chemical_symbols)
+        assert len(occupied_primitive) == len(primitive_chemical_symbols)
 
         # set up orbit list
-        self._orbit_list = OrbitList(decorated_primitive, self._cutoffs)
+        self._orbit_list = OrbitList(occupied_primitive, self._cutoffs)
         self._orbit_list.remove_inactive_orbits(primitive_chemical_symbols)
 
         # call (base) C++ constructor
@@ -130,20 +126,20 @@ class ClusterSpace(_ClusterSpace):
             self, primitive_chemical_symbols, self._orbit_list)
 
     def _get_chemical_symbols(self):
-        """ Returns chemical symbols using input atoms and input
+        """ Returns chemical symbols using input structure and
         chemical symbols. Carries out multiple sanity checks. """
 
         # setup chemical symbols as List[List[str]]
         if all(isinstance(i, str) for i in self._input_chemical_symbols):
             chemical_symbols = [
-                self._input_chemical_symbols] * len(self._input_atoms)
+                self._input_chemical_symbols] * len(self._input_structure)
         elif not all(isinstance(i, list) for i in self._input_chemical_symbols):
             raise TypeError("chemical_symbols must be List[str] or List[List[str]], not {}".format(
                 type(self._input_chemical_symbols)))
-        elif len(self._input_chemical_symbols) != len(self._input_atoms):
-            msg = 'chemical_symbols must have same length as atoms. '
-            msg += 'len(chemical_symbols = {}, len(atoms)= {}'.format(
-                len(self._input_chemical_symbols), len(self._input_atoms))
+        elif len(self._input_chemical_symbols) != len(self._input_structure):
+            msg = 'chemical_symbols must have same length as structure. '
+            msg += 'len(chemical_symbols) = {}, len(structure)= {}'.format(
+                len(self._input_chemical_symbols), len(self._input_structure))
             raise ValueError(msg)
         else:
             chemical_symbols = copy.deepcopy(self._input_chemical_symbols)
@@ -221,10 +217,10 @@ class ClusterSpace(_ClusterSpace):
               .format(self._get_chemical_symbol_representation())]
         s += [' cutoffs: {}'.format(' '.join(['{:.4f}'.format(co)
                                               for co in self._cutoffs]))]
-        s += [' total number of orbits: {}'.format(len(self))]
+        s += [' total number of parameters: {}'.format(len(self))]
         t = ['{}= {}'.format(k, c)
              for k, c in self.get_number_of_orbits_by_order().items()]
-        s += [' number of orbits by order: {}'.format('  '.join(t))]
+        s += [' number of parameters by order: {}'.format('  '.join(t))]
 
         # table header
         s += [''.center(width, '-')]
@@ -333,26 +329,26 @@ class ClusterSpace(_ClusterSpace):
             count_orbits[k] = count_orbits.get(k, 0) + 1
         return OrderedDict(sorted(count_orbits.items()))
 
-    def get_cluster_vector(self, atoms: Atoms) -> np.ndarray:
+    def get_cluster_vector(self, structure: Atoms) -> np.ndarray:
         """
         Returns the cluster vector for a structure.
 
         Parameters
         ----------
-        atoms
+        structure
             atomic configuration
 
         Returns
         -------
         the cluster vector
         """
-        if not isinstance(atoms, Atoms):
-            raise TypeError('input structure must be an ASE Atoms object')
+        if not isinstance(structure, Atoms):
+            raise TypeError('Input structure must be an ASE Atoms object')
 
         try:
-            cv = _ClusterSpace.get_cluster_vector(self, Structure.from_atoms(atoms))
+            cv = _ClusterSpace.get_cluster_vector(self, Structure.from_atoms(structure))
         except Exception as e:
-            self.assert_structure_compatability(atoms)
+            self.assert_structure_compatibility(structure)
             raise(e)
         return cv
 
@@ -378,28 +374,24 @@ class ClusterSpace(_ClusterSpace):
 
     @property
     def primitive_structure(self) -> Atoms:
-        """
-        Primitive structure on which the cluster space is based
-        """
-        atoms = self._get_primitive_structure().to_atoms()
+        """ Primitive structure on which cluster space is based """
+        structure = self._get_primitive_structure().to_atoms()
         # Decorate with the "real" symbols (instead of H, He, Li etc)
-        for atom, symbols in zip(atoms, self._primitive_chemical_symbols):
+        for atom, symbols in zip(structure, self._primitive_chemical_symbols):
             atom.symbol = min(symbols)
-        return atoms
+        return structure
 
     @property
     def chemical_symbols(self) -> List[List[str]]:
-        """
-        Chemical species considered
-        """
+        """ Species identified by their chemical symbols """
         return self._primitive_chemical_symbols.copy()
 
     @property
     def cutoffs(self) -> List[float]:
         """
-        Cutoffs for the different n-body clusters. Each cutoff radii
-        (in Angstroms) defines the largest inter-atomic distance in each
-        cluster
+        Cutoffs for different n-body clusters. The cutoff radius (in
+        Angstroms) defines the largest interatomic distance in a
+        cluster.
         """
         return self._cutoffs
 
@@ -408,9 +400,9 @@ class ClusterSpace(_ClusterSpace):
         """Orbit list that defines the cluster in the cluster space"""
         return self._orbit_list
 
-    def get_possible_orbit_decorations(self, orbit_index: int) \
+    def get_possible_orbit_occupations(self, orbit_index: int) \
             -> List[List[str]]:
-        """Returns possible decorations on the orbit
+        """Returns possible occupation of the orbit.
 
         Parameters
         ----------
@@ -426,7 +418,8 @@ class ClusterSpace(_ClusterSpace):
         return list(itertools.product(*allowed_species))
 
     def get_sublattices(self, structure: Atoms) -> Sublattices:
-        """ Returns the sublattices of the input structure
+        """
+        Returns the sublattices of the input structure.
 
         Parameters
         ----------
@@ -436,10 +429,12 @@ class ClusterSpace(_ClusterSpace):
         sl = Sublattices(self.chemical_symbols, self.primitive_structure, structure)
         return sl
 
-    def assert_structure_compatability(self, structure: Atoms, vol_tol: float = 1e-5) -> None:
-        """ Raises if structure is not compatible with ClusterSpace.
+    def assert_structure_compatibility(self, structure: Atoms, vol_tol: float = 1e-5) -> None:
+        """ Raises error if structure is not compatible with ClusterSpace.
 
-        TODO: Add check for if structure is relaxed
+        Todo
+        ----
+        Add check for if structure is relaxed.
 
         Parameters
         ----------
@@ -451,30 +446,34 @@ class ClusterSpace(_ClusterSpace):
         vol1 = prim.get_volume() / len(prim)
         vol2 = structure.get_volume() / len(structure)
         if abs(vol1 - vol2) > vol_tol:
-            raise ValueError('Volume per atom of structure does not match the volume of'
+            raise ValueError('Volume per atom of structure does not match the volume of '
                              'ClusterSpace.primitive_structure')
 
         # check occupations
         sublattices = self.get_sublattices(structure)
         sublattices.assert_occupation_is_allowed(structure.get_chemical_symbols())
 
-    def is_supercell_self_correlated(self, atoms: Atoms) -> bool:
+        # check pbc
+        if not all(structure.pbc):
+            raise ValueError('Input structure must have periodic boundary conditions')
+
+    def is_supercell_self_correlated(self, structure: Atoms) -> bool:
         """
-        Check whether an atoms object self-interacts via periodic
+        Checks whether an structure has self-interactions via periodic
         boundary conditions.
 
         Parameters
         ----------
-        atoms
-            An atoms object to check self-interaction for
+        structure
+            structure to be tested
 
         Returns
         -------
         bool
-            If True, the atoms object self-interacts via periodic
+            If True, the structure contains self-interactions via periodic
             boundary conditions, otherwise False.
         """
-        ol = self.orbit_list.get_supercell_orbit_list(atoms)
+        ol = self.orbit_list.get_supercell_orbit_list(structure)
         orbit_indices = set()
         for orbit in ol.orbits:
             for sites in orbit.get_equivalent_sites():
@@ -507,9 +506,9 @@ class ClusterSpace(_ClusterSpace):
             tar_file.addfile(tar_info, temp_file)
             temp_file.close()
 
-            # write atoms
+            # write structure
             temp_file = tempfile.NamedTemporaryFile()
-            ase_write(temp_file.name, self._input_atoms, format='json')
+            ase_write(temp_file.name, self._input_structure, format='json')
             temp_file.seek(0)
             tar_info = tar_file.gettarinfo(arcname='atoms', fileobj=temp_file)
             tar_file.addfile(tar_info, temp_file)
@@ -532,38 +531,38 @@ class ClusterSpace(_ClusterSpace):
         # read items
         items = pickle.load(tar_file.extractfile('items'))
 
-        # read atoms
+        # read structure
         temp_file = tempfile.NamedTemporaryFile()
         temp_file.write(tar_file.extractfile('atoms').read())
         temp_file.seek(0)
-        atoms = ase_read(temp_file.name, format='json')
+        structure = ase_read(temp_file.name, format='json')
 
         tar_file.close()
-        cs = ClusterSpace(
-            atoms=atoms, cutoffs=items['cutoffs'], chemical_symbols=items['chemical_symbols'])
+        cs = ClusterSpace(structure=structure, cutoffs=items['cutoffs'],
+                          chemical_symbols=items['chemical_symbols'])
         for indices in items['pruning_history']:
             cs._prune_orbit_list(indices)
         return cs
 
     def copy(self):
         """ Returns copy of ClusterSpace instance. """
-        atoms = self._input_atoms
+        structure = self._input_structure
         cutoffs = self._cutoffs
         chemical_symbols = self._input_chemical_symbols
-        cs_copy = ClusterSpace(atoms, cutoffs, chemical_symbols)
+        cs_copy = ClusterSpace(structure, cutoffs, chemical_symbols)
         for indices in self._pruning_history:
             cs_copy._prune_orbit_list(indices)
         return cs_copy
 
 
-def get_singlet_info(atoms: Atoms,
+def get_singlet_info(structure: Atoms,
                      return_cluster_space: bool = False):
     """
     Retrieves information concerning the singlets in the input structure.
 
     Parameters
     ----------
-    atoms
+    structure
         atomic configuration
     return_cluster_space
         if True return the cluster space created during the process
@@ -575,14 +574,15 @@ def get_singlet_info(atoms: Atoms,
     ClusterSpace object (optional)
         cluster space created during the process
     """
-    assert isinstance(atoms, Atoms), \
-        'input configuration must be an ASE Atoms object'
+    if not isinstance(structure, Atoms):
+        raise TypeError('Input configuration must be an ASE Atoms object'
+                        ', not type {}'.format(type(structure)))
 
     # create dummy species and cutoffs
     chemical_symbols = ['H', 'He']
     cutoffs = [0.0]
 
-    cs = ClusterSpace(atoms, cutoffs, chemical_symbols)
+    cs = ClusterSpace(structure, cutoffs, chemical_symbols)
 
     singlet_data = []
 
@@ -608,15 +608,15 @@ def get_singlet_info(atoms: Atoms,
         return singlet_data
 
 
-def get_singlet_configuration(atoms: Atoms,
+def get_singlet_configuration(structure: Atoms,
                               to_primitive: bool = False) -> Atoms:
     """
-    Returns the atomic configuration decorated with a different species for
+    Returns the atomic configuration occupied with a different species for
     each Wyckoff site. This is useful for visualization and analysis.
 
     Parameters
     ----------
-    atoms
+    structure
         atomic configuration
     to_primitive
         if True the input structure will be reduced to its primitive unit cell
@@ -624,25 +624,25 @@ def get_singlet_configuration(atoms: Atoms,
 
     Returns
     -------
-    ASE Atoms object
-        structure with singlets highlighted by different chemical species
+    structure with singlets highlighted by different chemical species
     """
     from ase.data import chemical_symbols
-    assert isinstance(atoms, Atoms), \
+    assert isinstance(structure, Atoms), \
         'input configuration must be an ASE Atoms object'
-    cluster_data, cluster_space = get_singlet_info(atoms,
+    cluster_data, cluster_space = get_singlet_info(structure,
                                                    return_cluster_space=True)
 
     if to_primitive:
-        atoms_singlet = cluster_space.primitive_structure
+        structure_singlet = cluster_space.primitive_structure
         for singlet in cluster_data:
             for site in singlet['sites']:
                 symbol = chemical_symbols[singlet['orbit_index'] + 1]
                 atom_index = site[0].index
-                atoms_singlet[atom_index].symbol = symbol
+                structure_singlet[atom_index].symbol = symbol
     else:
-        atoms_singlet = atoms.copy()
-        orbit_list_supercell = cluster_space._orbit_list.get_supercell_orbit_list(atoms_singlet)
+        structure_singlet = structure.copy()
+        orbit_list_supercell = \
+            cluster_space._orbit_list.get_supercell_orbit_list(structure_singlet)
         for singlet in cluster_data:
             for site in singlet['sites']:
                 symbol = chemical_symbols[singlet['orbit_index'] + 1]
@@ -650,25 +650,25 @@ def get_singlet_configuration(atoms: Atoms,
                     singlet['orbit_index']).get_equivalent_sites()
                 for lattice_site in sites:
                     k = lattice_site[0].index
-                    atoms_singlet[k].symbol = symbol
+                    structure_singlet[k].symbol = symbol
 
-    return atoms_singlet
+    return structure_singlet
 
 
-def view_singlets(atoms: Atoms, to_primitive: bool = False):
+def view_singlets(structure: Atoms, to_primitive: bool = False):
     """
-    Visualize singlets in a structure using the ASE graphical user interface.
+    Visualizes singlets in a structure using the ASE graphical user interface.
 
     Parameters
     ----------
-    atoms
+    structure
         atomic configuration
     to_primitive
         if True the input structure will be reduced to its primitive unit cell
         before processing
     """
     from ase.visualize import view
-    assert isinstance(atoms, Atoms), \
+    assert isinstance(structure, Atoms), \
         'input configuration must be an ASE Atoms object'
-    atoms_singlet = get_singlet_configuration(atoms, to_primitive=to_primitive)
-    view(atoms_singlet)
+    structure_singlet = get_singlet_configuration(structure, to_primitive=to_primitive)
+    view(structure_singlet)

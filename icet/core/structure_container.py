@@ -26,12 +26,31 @@ class StructureContainer:
     cluster_space : icet.ClusterSpace
         cluster space used for evaluating the cluster vectors
 
-    list_of_atoms : list or tuple or list(tuple)
-        list of atoms; if the list contains tuples, the second element of the
-        tuple will be used as a tag of the structure
+    Example
+    -------
+    The following snippet illustrates the initialization
+    and usage of a StructureContainer object. The construction
+    of a structure container is convenient for compiling the
+    data needed to train a cluster expansion, i.e., a sensing
+    matrix and target energies::
 
-    list_of_properties : list(dict)
-        list of properties, which are provided in dicts
+        from ase.build import bulk
+        from icet import ClusterSpace, StructureContainer
+        from icet.tools import enumerate_structures
+        import numpy as np
+
+        # create cluster space
+        prim = bulk('Au')
+        cs = ClusterSpace(prim, cutoffs=[7.0, 5.0],
+                          chemical_symbols=[['Au', 'Pd']])
+
+        sc = StructureContainer(cs)
+        for structure in enumerate_structures(prim, range(5), ['Au', 'Pd']):
+            sc.add_structure(structure,
+                             properties={'my_random_energy': np.random.rand()})
+        print(sc)
+
+        sensing_matrix, target_energies = sc.get_fit_data(key='my_random_energy')
     """
 
     def __init__(self, cluster_space: ClusterSpace):
@@ -64,8 +83,7 @@ class StructureContainer:
         """
         return [i for i, s in enumerate(self) if user_tag is None or s.user_tag == user_tag]
 
-    def _get_string_representation(self, print_threshold: int = None,
-                                   print_minimum: int = 10) -> str:
+    def _get_string_representation(self, print_threshold: int = None) -> str:
         """
         String representation of the structure container that provides an
         overview of the structures in the container.
@@ -74,9 +92,6 @@ class StructureContainer:
         ----------
         print_threshold
             if the number of structures exceeds this number print dots
-        print_minimum
-            number of lines printed from the top and the bottom of the
-            structure list if `print_threshold` is exceeded
 
         Returns
         -------
@@ -84,72 +99,67 @@ class StructureContainer:
             string representation of the structure container
         """
 
-        def repr_structure(structure, index=-1, header=False):
-            """
-            Helper function used to generate a representation string for a
-            single structure.
-            """
-            from collections import OrderedDict
-            fields = OrderedDict([
-                ('index', '{:4}'.format(index)),
-                ('user_tag', '{:21}'.format(structure.user_tag)),
-                ('natoms', '{:5}'.format(len(structure))),
-                ('chemical formula', structure._atoms.get_chemical_formula())])
-            fields.update(sorted(structure.properties.items()))
-            for key, value in fields.items():
-                if isinstance(value, float):
-                    fields[key] = '{:8.3f}'.format(value)
-                if isinstance(value, int):
-                    fields[key] = '{:8}'.format(value)
-            s = []
-            for name, value in fields.items():
-                n = max(len(name), len(value))
-                if header:
-                    s += ['{s:^{n}}'.format(s=name, n=n)]
-                else:
-                    if name == 'user_tag' or name == 'chemical formula':
-                        # We want them aligned to the left
-                        value = '{:{padding}}'.format(value, padding=n - 1)
-                    s += ['{s:^{n}}'.format(s=value, n=n)]
-            return ' | '.join(s)
-
         if len(self) == 0:
             return 'Empty StructureContainer'
 
-        # basic information
-        # (use last structure in list to obtain maximum line length)
-        dummy = self._structure_list[-1]
-        width = len(repr_structure(dummy))
+        # Number of structures to print before cutting and printing dots
+        if print_threshold is None or print_threshold >= len(self):
+            print_threshold = len(self) + 2
 
-        # table header
-        s = []  # type: List
-        s += ['{s:=^{n}}'.format(s=' Structure Container ', n=width)]
+        # format specifiers for fields in table
+        def get_format(val):
+            if isinstance(val, float):
+                return '{:9.4f}'
+            else:
+                return '{}'
+
+        # table headers
+        default_headers = ['index', 'user_tag', 'n_atoms', 'chemical formula']
+        property_headers = sorted(set(key for fs in self for key in fs.properties))
+        headers = default_headers + property_headers
+
+        # collect the table data
+        str_table = []
+        for i, fs in enumerate(self):
+            default_data = [i, fs.user_tag, len(fs), fs.structure.get_chemical_formula()]
+            property_data = [fs.properties.get(key, '') for key in property_headers]
+            str_row = [get_format(d).format(d) for d in default_data+property_data]
+            str_table.append(str_row)
+        str_table = np.array(str_table)
+
+        # find maximum widths for each column
+        widths = []
+        for i in range(str_table.shape[1]):
+            data_width = max(len(val) for val in str_table[:, i])
+            header_width = len(headers[i])
+            widths.append(max([data_width, header_width]))
+
+        total_width = sum(widths) + 3 * len(headers)
+        row_format = ' | '.join('{:'+str(width)+'}' for width in widths)
+
+        # Make string representation of table
+        s = []
+        s += ['{s:=^{n}}'.format(s=' Structure Container ', n=total_width)]
         s += ['Total number of structures: {}'.format(len(self))]
-        s += [''.center(width, '-')]
-        s += [repr_structure(dummy, header=True).rstrip()]
-        s += [''.center(width, '-')]
-
-        # table body
-        index = 0
-        while index < len(self):
-            if (print_threshold is not None and
-                    len(self) > print_threshold and
-                    index >= print_minimum and
-                    index <= len(self) - print_minimum):
-                index = len(self) - print_minimum
+        s += [''.center(total_width, '-')]
+        s += [row_format.format(*headers)]
+        s += [''.center(total_width, '-')]
+        for i, fs_data in enumerate(str_table, start=1):
+            s += [row_format.format(*fs_data)]
+            if i+1 >= print_threshold:
                 s += [' ...']
-            s += [repr_structure(self._structure_list[index], index=index)]
-            index += 1
-        s += [''.center(width, '=')]
+                s += [row_format.format(*str_table[-1])]
+                break
+        s += [''.center(total_width, '=')]
+        s = '\n'.join(s)
 
-        return '\n'.join(s)
+        return s
 
     def __repr__(self) -> str:
         """ String representation. """
         return self._get_string_representation(print_threshold=50)
 
-    def print_overview(self, print_threshold: int = None,
-                       print_minimum: int = 10):
+    def print_overview(self, print_threshold: int = None):
         """
         Prints a list of structures in the structure container.
 
@@ -157,68 +167,66 @@ class StructureContainer:
         ----------
         print_threshold
             if the number of orbits exceeds this number print dots
-        print_minimum
-            number of lines printed from the top and the bottom of the orbit
-            list if `print_threshold` is exceeded
         """
-        print(self._get_string_representation(print_threshold=print_threshold,
-                                              print_minimum=print_minimum))
+        print(self._get_string_representation(print_threshold=print_threshold))
 
-    def add_structure(self, atoms: Atoms, user_tag: str = None, properties: dict = None,
-                      allow_duplicate: bool = True, sanity_check: bool = True):
+    def add_structure(self, structure: Atoms, user_tag: str = None,
+                      properties: dict = None, allow_duplicate: bool = True,
+                      sanity_check: bool = True):
         """
         Adds a structure to the structure container.
 
         Parameters
         ----------
-        atoms
+        structure
             the atomic structure to be added
         user_tag
             custom user tag to label structure
         properties
-            scalar properties. If properties are not specified the atoms
+            scalar properties. If properties are not specified the structure
             object will be checked for an attached ASE calculator object
             with a calculated potential energy
         allow_duplicate
              whether or not to add the structure if there already exists a
              structure with identical cluster-vector
-         sanity_check
+        sanity_check
             whether or not to carry out a sanity check before adding the
             structure. This includes checking occupations and volume.
         """
 
-        # atoms must have a proper format and label
-        if not isinstance(atoms, Atoms):
-            raise TypeError('atoms must be an ASE Atoms object. Not {}'.format(type(atoms)))
+        # structure must have a proper format and label
+        if not isinstance(structure, Atoms):
+            raise TypeError('structure must be an ASE Atoms object not {}'.format(type(structure)))
 
         if user_tag is not None:
             if not isinstance(user_tag, str):
-                raise TypeError('user_tag must be a string. Not {}.'.format(type(user_tag)))
+                raise TypeError('user_tag must be a string not {}.'.format(type(user_tag)))
 
         if sanity_check:
-            self._cluster_space.assert_structure_compatability(atoms)
+            self._cluster_space.assert_structure_compatibility(structure)
 
         # check for properties in attached calculator
-        if properties is None and atoms.calc:
+        if properties is None:
             properties = {}
-            if not atoms.calc.calculation_required(atoms, ['energy']):
-                energy = atoms.get_potential_energy()
-                properties['energy'] = energy / len(atoms)
+            if structure.calc is not None:
+                if not structure.calc.calculation_required(structure, ['energy']):
+                    energy = structure.get_potential_energy()
+                    properties['energy'] = energy / len(structure)
 
-        # check if there exists structures with identical cluster vector
-        atoms_copy = atoms.copy()
-        cv = self._cluster_space.get_cluster_vector(atoms_copy)
+        # check if there exist structures with identical cluster vectors
+        structure_copy = structure.copy()
+        cv = self._cluster_space.get_cluster_vector(structure_copy)
         if not allow_duplicate:
             for i, fs in enumerate(self):
                 if np.allclose(cv, fs.cluster_vector):
-                    msg = "{} have identical cluster vector with {}".format(
-                        user_tag if user_tag is not None else 'Input atoms',
+                    msg = '{} and {} have identical cluster vectors'.format(
+                        user_tag if user_tag is not None else 'Input structure',
                         fs.user_tag if fs.user_tag != 'None' else 'structure')
-                    msg += " at index {}".format(i)
+                    msg += ' at index {}'.format(i)
                     raise ValueError(msg)
 
         # add structure
-        structure = FitStructure(atoms_copy, user_tag, cv, properties)
+        structure = FitStructure(structure_copy, user_tag, cv, properties)
         self._structure_list.append(structure)
 
     def get_condition_number(self, structure_indices: List[int] = None,
@@ -231,14 +239,14 @@ class StructureContainer:
         Parameters
         ----------
         structure_indices
-            list of structure indices. By default (``None``) the
+            list of structure indices; by default (``None``) the
             method will return all fit data available.
         key
             key of properties dictionary
 
         Returns
         -------
-        condition number for the sensing matrix
+        condition number of the sensing matrix
         """
         return np.linalg.cond(self.get_fit_data(structure_indices, key)[0])
 
@@ -246,12 +254,12 @@ class StructureContainer:
                      key: str = 'energy') -> Tuple[np.ndarray, np.ndarray]:
         """
         Returns fit data for all structures. The cluster vectors and
-        target properties for all structures are stacked into NumPy arrays.
+        target properties for all structures are stacked into numpy arrays.
 
         Parameters
         ----------
         structure_indices
-            list of structure indices. By default (``None``) the
+            list of structure indices; by default (``None``) the
             method will return all fit data available.
         key
             key of properties dictionary
@@ -307,7 +315,7 @@ class StructureContainer:
             data_dict = {'user_tag': fit_structure.user_tag,
                          'properties': fit_structure.properties,
                          'cluster_vector': fit_structure.cluster_vector}
-            db.write(fit_structure.atoms, data=data_dict)
+            db.write(fit_structure.structure, data=data_dict)
 
         with tarfile.open(outfile, mode='w') as handle:
             handle.add(temp_db_file.name, arcname='database')
@@ -361,19 +369,19 @@ class FitStructure:
 
     Attributes
     ----------
-    atoms : ASE Atoms
+    structure : Atoms
         supercell structure
     user_tag : str
         custom user tag
-    cvs : NumPy array
+    cvs : np.ndarray
         calculated cluster vector for actual structure
     properties : dict
-        the properties dictionary
+        dictionary of properties
     """
 
-    def __init__(self, atoms: Atoms, user_tag: str,
+    def __init__(self, structure: Atoms, user_tag: str,
                  cv: np.ndarray, properties: dict = {}):
-        self._atoms = atoms
+        self._structure = structure
         self._user_tag = user_tag
         self._cluster_vector = cv
         self.properties = properties
@@ -384,9 +392,9 @@ class FitStructure:
         return self._cluster_vector
 
     @property
-    def atoms(self) -> Atoms:
-        """supercell structure"""
-        return self._atoms
+    def structure(self) -> Atoms:
+        """atomic structure"""
+        return self._structure
 
     @property
     def user_tag(self) -> str:
@@ -394,11 +402,11 @@ class FitStructure:
         return str(self._user_tag)
 
     def __getattr__(self, key):
-        """Accesses properties if possible and returns value"""
+        """ Accesses properties if possible and returns value. """
         if key not in self.properties.keys():
             return super().__getattribute__(key)
         return self.properties[key]
 
     def __len__(self) -> int:
         """ Number of sites in the structure. """
-        return len(self._atoms)
+        return len(self._structure)
