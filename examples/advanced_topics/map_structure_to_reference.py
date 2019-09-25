@@ -23,13 +23,9 @@ for i in [0, 1, 5, 8, 10]:
     supercell[i].symbol = 'Pd'
 
 # Map the "relaxed" structure onto an ideal supercell
-tolerance = 0.8  # Tolerance in Angstrom for how far
-# the atoms are allowed to have been displaceed
-ideal_structure, r_max, r_av = map_structure_to_reference(supercell,
-                                                          reference,
-                                                          tolerance)
-print('Maximum displacement: {:.3f} Angstrom'.format(r_max))
-print('Average displacement: {:.3f} Angstrom'.format(r_av))
+ideal_structure, info = map_structure_to_reference(supercell, reference)
+print('Maximum displacement: {:.3f} Angstrom'.format(info['drmax']))
+print('Average displacement: {:.3f} Angstrom'.format(info['dravg']))
 
 # Map a structure that contains vacancies, in this case Pd-Au-H-Vac, in which
 # Pd and Au share one sublattice and Pd and H another.
@@ -47,9 +43,7 @@ for i in [0, 4, 6, 2, 7, 3, 17]:
     elif supercell[i].symbol == 'H':
         del supercell[i]
 
-tolerance = 0.8
-ideal_structure, r_max, r_av = \
-    map_structure_to_reference(supercell, reference, tolerance,
-                               vacancy_type='V', inert_species=['Au', 'Pd'])
-print('Maximum displacement: {:.3f} Angstrom'.format(r_max))
-print('Average displacement: {:.3f} Angstrom'.format(r_av))
+ideal_structure, info = map_structure_to_reference(supercell, reference,
+                                                   inert_species=['Au', 'Pd'])
+print('Maximum displacement: {:.3f} Angstrom'.format(info['drmax']))
+print('Average displacement: {:.3f} Angstrom'.format(info['dravg']))
