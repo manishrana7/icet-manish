@@ -53,8 +53,11 @@ class BaseEnsemble(ABC):
         simulation
     """
 
-    def __init__(self, structure: Atoms, calculator: BaseCalculator,
-                 user_tag: str = None, data_container: DataContainer = None,
+    def __init__(self,
+                 structure: Atoms,
+                 calculator: BaseCalculator,
+                 user_tag: str = None,
+                 data_container: DataContainer = None,
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None,
@@ -94,7 +97,6 @@ class BaseEnsemble(ABC):
 
         # data container
         self._data_container_write_period = data_container_write_period
-
         self._data_container_filename = data_container
 
         if data_container is not None and os.path.isfile(data_container):

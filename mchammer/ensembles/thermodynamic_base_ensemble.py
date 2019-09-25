@@ -54,10 +54,13 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         configuration is written to the data container.
     """
 
-    def __init__(self, structure: Atoms, calculator: BaseCalculator,
+    def __init__(self,
+                 structure: Atoms,
+                 calculator: BaseCalculator,
                  user_tag: str = None,
                  boltzmann_constant: float = kB,
-                 data_container: DataContainer = None, random_seed: int = None,
+                 data_container: DataContainer = None,
+                 random_seed: int = None,
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None) -> None:

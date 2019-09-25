@@ -60,22 +60,29 @@ the maximum and average displacement.
 Structures with vacancies
 -------------------------
 
-If the structure to be mapped contains vacancies additional keywords
-should e provided, (1) ``vacancy_type``, the chemical symbol that
-signifies vacancies in the reference structure, and (2)
-``inert_species``, a list of elements that are never substituted for a
-vacancy. The latter allows the code to rescale the volume of the cell
-and can be omitted, but the mapping is then more likely to fail.
+For cluster expansions with vacancies, one typically wants to map the relaxed
+structure onto an ideal lattice that explicitly contains vacant sites. In that
+case, if the volume of the cell has changed during relaxation, it can be
+tricky to determine the size of the ideal supercell. To help the function with
+this task, an additional keyword, ``inert_species``, can be specified, which
+is a list of species that reside on sublattices without vacancies.
 
-In the example below, a Au-Pd-H-vacancy system is created. In this
-example, vanadium (``'V'``) represents vacancies. The system of choice
-consists of two sublattices, one occupied by Au and Pd and another
-occupied by H and vacancies. Since Au and Pd belong to a sublattice
-in which we do not allow vacancies, we may set ``inert_species =
-['Au', 'Pd']``.
+In the example below, a Au-Pd-H-vacancy system is created. The system
+of choice consists of two sublattices, one occupied by Au and Pd
+and another occupied by H and vacancies. Since Au and Pd belong to a
+sublattice in which we do not allow vacancies, we may set
+``inert_species = ['Au', 'Pd']``.
 
 .. literalinclude:: ../../../../examples/advanced_topics/map_structure_to_reference.py
    :start-after: # Pd and Au share
+
+The mapped structure will contain atoms of type ``X``, which represent
+vacancies.
+
+If there is no sublattice without vacancies, one typically has
+to set the keyword argument ``assume_no_cell_relaxation`` to
+``True``. The algorithm will then use the cell metric of the relaxed
+structure as the ideal one.
 
 Source code
 -----------

@@ -1,66 +1,60 @@
-import logging
 from typing import List, Tuple
 
 import numpy as np
+
 from ase import Atoms
-from ase.build import cut
-
+from ase.build import make_supercell
+from ase.geometry import get_distances
+from scipy.optimize import linear_sum_assignment
 from icet.io.logging import logger
-logger = logger.getChild('structure_mapping')
 
 
-def map_structure_to_reference(input_structure: Atoms,
-                               reference_structure: Atoms,
-                               tolerance_mapping: float,
-                               vacancy_type: str = None,
+def map_structure_to_reference(relaxed: Atoms,
+                               reference: Atoms,
                                inert_species: List[str] = None,
-                               tolerance_cell: float = 0.05,
-                               tolerance_positions: float = 0.01) \
-                               -> Tuple[Atoms, float, float]:
+                               tol_positions: float = 1e-4,
+                               suppress_warnings: bool = False,
+                               assume_no_cell_relaxation: bool = False) \
+        -> Tuple[Atoms, dict]:
     """Maps a relaxed structure onto a reference structure.
-    The function returns a tuple comprising
+    The function returns a tuple comprising the ideal supercell most
+    closely matching the relaxed structure and a dictionary with
+    supplementary information concerning the mapping. The latter
+    includes for example the largest deviation of any position in the
+    relaxed structure from its reference position (`drmax`), the average
+    deviation of the positions in the relaxed structure from the
+    reference positions (`dravg`), and the strain tensor for the relaxed
+    structure relative to the reference structure (`strain_tensor`).
 
-    * the ideal supercell most closely matching the input structure,
-    * the largest deviation of any input coordinate from its ideal
-      coordinate, and
-    * the average deviation of the input coordinates from the ideal
-      coordinates.
+    The Atoms object that provide further supplemental information via
+    custom per-atom arrays including the atomic displacements
+    (`Displacement`, 'Displacement_Magnitude`) as well as the
+    distances to the three next best sites (`Minimum_Distances`).
 
     Parameters
     ----------
-    input_structure
+    relaxed
         relaxed input structure
-    reference_structure
-        reference structure, which can but need not represent the primitive
-        cell
-    tolerance_mapping
-        maximum allowed displacement for mapping an atom in the relaxed (but
-        rescaled) structure to the reference supercell
-
-        *Note*: A reasonable choice is up to 20-30% of the first
-        nearest neighbor distance (`r1`).  A value above 50% of `r1`
-        will most likely lead to atoms being multiply assigned,
-        whereby the mapping fails.
-    vacancy_type
-        If this parameter is set to a non-zero string unassigned sites in the
-        reference structure will be assigned to this type.
-
-        *Note 1*: By default (``None``) the method will fail if there
-        are *any* unassigned sites in the reference structure.
-
-        *Note 2*: ``vacancy_type`` must be a valid species as
-        enforced by the :class:`ase.Atoms` class.
+    reference
+        reference structure, which can but need not be the primitive structure
     inert_species
-        List of chemical symbols (e.g., ``['Au', 'Pd']``) that are never
-        substituted for a vacancy. Used to make an initial rescale of the cell
-        and thus increases the probability for a successful mapping. Need not
-        be specified if ``vacancy_type`` is ``None``.
-    tolerance_cell
-        tolerance factor applied when computing permutation matrix to generate
-        supercell
-    tolerance_positions
+        list of chemical symbols (e.g., ``['Au', 'Pd']``) that are never
+        substituted for a vacancy; the number of inert sites is used to rescale
+        the volume of the relaxed structure to match the reference structure.
+    tol_positions
         tolerance factor applied when scanning for overlapping positions in
-        Angstrom (forwarded to :func:`ase.build.cut`)
+        Angstrom (forwarded to :func:`ase.build.make_supercell`)
+    suppress_warnings
+        if True, print no warnings of large strain or relaxation distances
+    assume_no_cell_relaxation
+        if False volume and cell metric of the relaxed structure are rescaled
+        to match the reference structure; this can be unnecessary (and
+        counterproductive) for some structures, e.g., with many vacancies
+
+        **Note**: When setting this parameter to False the reference cell metric
+        must be obtainable via an *integer* transformation matrix from the
+        reference cell metric. In other words the relaxed structure should not
+        involve relaxations of the volume or the cell metric.
 
     Example
     -------
@@ -72,306 +66,233 @@ def map_structure_to_reference(input_structure: Atoms,
     cell vectors, and random displacements to the atoms. Finally, the present
     function is used to map the structure back the ideal lattice::
 
+        from icet.tools import map_structure_to_reference
         from ase.build import bulk
         reference = bulk('Au', a=4.09)
         structure = bulk('Au', cubic=True, a=4.09).repeat(4)
         structure.set_chemical_symbols(10 * ['Ag'] + (len(structure) - 10) * ['Au'])
         structure.set_cell(structure.cell * 1.02, scale_atoms=True)
         structure.rattle(0.1)
-        mapped_structure = map_structure_to_reference(structure, reference, 1.0)
+        mapped_structure, info = map_structure_to_reference(structure, reference)
 
     """
-    assert np.all(input_structure.pbc == reference_structure.pbc), \
-        ('The periodic boundary conditions differ'
-         ' between input and reference structure')
 
-    if logger.isEnabledFor(logging.DEBUG):
-        np.set_printoptions(suppress=True, precision=6)
+    # Obtain supercell of reference structure that is compatible
+    # with relaxed structure
+    reference_supercell = _get_reference_supercell(
+        relaxed, reference, inert_species=inert_species,
+        tol_positions=tol_positions, assume_no_cell_relaxation=assume_no_cell_relaxation)
 
-    # Scale input cell and construct supercell of the reference structure
-    scaled_cell = _get_scaled_cell(input_structure, reference_structure,
-                                   vacancy_type=vacancy_type,
-                                   inert_species=inert_species)
-    P = _get_transformation_matrix(scaled_cell,
-                                   reference_structure.cell,
-                                   tolerance_cell=tolerance_cell)
-    logger.debug('P:\n {}'.format(P))
-    scaled_structure, ideal_supercell = \
-        _rescale_structures(input_structure,
-                            reference_structure,
-                            P,
-                            tolerance_positions=tolerance_positions)
+    # Compute strain
+    epsilon = np.dot(relaxed.cell.T - reference_supercell.cell.T,
+                     np.linalg.inv(reference_supercell.cell.T))
+    strain_tensor = 0.5 * (epsilon + epsilon.T)
+    eigenvalues = np.linalg.eig(strain_tensor)[0]
+    volumetric_strain = sum(eigenvalues)
 
-    assert len(ideal_supercell) == len(scaled_structure) or \
-        vacancy_type is not None, \
-        ('Number of atoms in ideal supercell does not match '
-         'input structure.\n'
-         'ideal: {}\ninput: {}'.format(len(ideal_supercell),
-                                       len(scaled_structure)))
+    # Rescale the relaxed atoms object
+    relaxed_scaled = relaxed.copy()
+    relaxed_scaled.set_cell(reference_supercell.cell, scale_atoms=True)
 
-    logger.debug('Number of atoms in reference structure:'
-                 ' {}'.format(len(reference_structure)))
-    logger.debug('Number of atoms in input structure:'
-                 ' {}\n'.format(len(input_structure)))
-    logger.debug('Reference cell metric:\n'
-                 '{}'.format(reference_structure.cell))
-    logger.debug('Input cell metric:\n'
-                 '{}\n'.format(input_structure.cell))
-    logger.debug('Transformation matrix connecting reference structure'
-                 ' and idealized input structure:\n {}'.format(P))
-    logger.debug('Determinant of transformation matrix:'
-                 ' {:.3f}\n'.format(np.linalg.det(P)))
-    logger.debug('Cell metric of ideal supercell:\n'
-                 '{}'.format(ideal_supercell.cell))
-    logger.debug('Cell metric of rescaled input structure:\n'
-                 '{}\n'.format(scaled_structure.cell))
+    # Match positions
+    mapped_structure, drmax, dravg = _match_positions(relaxed_scaled, reference_supercell)
 
-    # per-atom-list for keeping track of mapped atoms
-    mapped = [-1] * len(ideal_supercell)
-    # positions in scaled input structure
-    original_positions = [(None, None, None)] * len(ideal_supercell)
-    # displacement vectors
-    displacements = [(None, None, None)] * len(ideal_supercell)
-    # distances between ideal and input sites
-    drs = [None] * len(ideal_supercell)
-    for ideal_site in ideal_supercell:
-        for atom in scaled_structure:
-            # in order to compute the distance the current atom from
-            # the input structure is temporarily added to the
-            # ideal supercell. This allows one to simply use the ASE
-            # Atoms method for computing the interatomic distance
-            ideal_supercell.append(atom)
-            dvec = ideal_supercell.get_distance(ideal_site.index,
-                                                ideal_supercell[-1].index,
-                                                mic=True, vector=True)
-            dr = np.linalg.norm(dvec)
-            del ideal_supercell[-1]
-            if dr < tolerance_mapping:
-                if mapped[ideal_site.index] >= 0:
-                    raise Exception('More than one atom from the relaxed'
-                                    ' (and rescaled) structure have been'
-                                    ' mapped onto the same ideal site.\n'
-                                    ' Try reducing `tolerance_mapping`.')
-                mapped[ideal_site.index] = atom.index
-                drs[ideal_site.index] = dr
-                original_positions[ideal_site.index] = atom.position
-                displacements[ideal_site.index] = dvec
-                ideal_site.symbol = atom.symbol
-                break
+    if not suppress_warnings:
+        s = 'Consider excluding this structure when training a cluster expansion.'
+        if assume_no_cell_relaxation:
+            trigger_levels = {'volumetric_strain': 1e-3,
+                              'eigenvalue_diff': 1e-3}
         else:
-            assert vacancy_type is not None, \
-                ('Failed to assign an atom from the relaxed (and'
-                 ' rescaled) structure to the ideal lattice.'
-                 ' Try increasing `tolerance_mapping`.\n'
-                 ' {}'.format(ideal_site))
-            ideal_site.symbol = vacancy_type
+            trigger_levels = {'volumetric_strain': 0.25,
+                              'eigenvalue_diff': 0.1}
+        if abs(volumetric_strain) > trigger_levels['volumetric_strain']:
+            logger.warning('High volumetric strain ({:.2f} %). {}'.format(
+                100 * volumetric_strain, s))
+        if max(eigenvalues) - min(eigenvalues) > trigger_levels['eigenvalue_diff']:
+            logger.warning('High anisotropic strain (the difference between '
+                           'largest and smallest eigenvalues of strain tensor is '
+                           '{:.5f}). {}'.format(max(eigenvalues) - min(eigenvalues), s))
+        if drmax > 1.0:
+            logger.warning('Large maximum relaxation distance '
+                           '({:.5f} Angstrom). {}'.format(drmax, s))
+        if dravg > 0.5:
+            logger.warning('Large average relaxation distance '
+                           '({:.5f} Angstrom). {}'.format(dravg, s))
 
-    # store information concerning mapping in output structure
-    ideal_supercell.new_array('displacements', displacements,
-                              float, (3,))
-    ideal_supercell.new_array('original_positions', original_positions,
-                              float, (3,))
-    for name, ar in reference_structure.arrays.items():
-        if name in ideal_supercell.arrays:
-            continue
-        ideal_supercell.new_array(name, ar)
+    # Populate dictionary with supplementary information
+    info = {'drmax': drmax,
+            'dravg': dravg,
+            'strain_tensor': strain_tensor,
+            'volumetric_strain': volumetric_strain,
+            'strain_tensor_eigenvalues': eigenvalues}
 
-    # maximum, average, and standard deviation of displacements
-    dr_avg = np.average([d for d in drs if d is not None])
-    dr_sdv = np.std([d for d in drs if d is not None])
-    dr_max = np.max([d for d in drs if d is not None])
-
-    # check that not more than one atom was assigned to the same site
-    for k in set(mapped):
-        assert k < 0 or mapped.count(k) <= 1, \
-            ('Site {} has been assigned more than once.'.format(k))
-
-    # check that the chemical composition of input and ideal supercell matches
-    for symbol in set(input_structure.get_chemical_symbols()):
-        n1 = input_structure.get_chemical_symbols().count(symbol)
-        n2 = ideal_supercell.get_chemical_symbols().count(symbol)
-        assert n1 == n2, ('Number of atoms of type {} differs between'
-                          ' input structure ({}) and ideal'
-                          ' supercell ({}).'.format(symbol, n1, n2))
-
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug('Maximum, average and standard deviation of atomic'
-                     ' displacements: {} {} {}'.format(dr_max, dr_avg, dr_sdv))
-
-        logger.debug('{:52} {:}'.format('Input structure:',
-                                        'Scaled structure:'))
-        for k, (input_atom, scaled_atom) in enumerate(zip(input_structure,
-                                                          scaled_structure)):
-            msg = '{:4}  {:2}'.format(k, input_atom.symbol)
-            msg += (3 * ' {:12.6f}').format(*input_atom.position)
-            msg += '    -->'
-            msg += (3 * ' {:12.6f}').format(*scaled_atom.position)
-            logger.debug(msg)
-
-        logger.debug('\n')
-
-        logger.debug('{:52} {}'.format('Ideal supercell:',
-                                       'Scaled structure:'))
-        for ideal_atom, k, dr in zip(ideal_supercell, mapped, drs):
-            msg = ' {:2}'.format(ideal_atom.symbol)
-            msg += (3 * '  {:12.6f}').format(*ideal_atom.position)
-            msg += '    -->'
-            msg += ' {:4}'.format(k)
-
-            if k >= 0:
-                scaled_pos = scaled_structure[k].position
-                msg += (3 * ' {:12.6f}').format(*scaled_pos)
-                msg += '    --> {:.4f}'.format(dr)
-            logger.debug(msg)
-
-    return ideal_supercell, dr_max, dr_avg
+    return mapped_structure, info
 
 
-def _get_scaled_cell(input_structure: Atoms,
-                     reference_structure: Atoms,
-                     vacancy_type: str = None,
-                     inert_species: List[str] = None) -> np.ndarray:
+def _get_reference_supercell(relaxed: Atoms,
+                             reference: Atoms,
+                             inert_species: List[str] = None,
+                             tol_positions: float = 1e-5,
+                             assume_no_cell_relaxation: bool = False) -> Atoms:
     """
-    The input structure needs to be scaled in order to match the lattice
-    structure of the reference structure. The reference structure can be a
-    primitive cell, in which case the input structure would usually be a
-    supercell thereof. Also, we need an ideal supercell that matches the input
-    structure.
+    Returns a supercell of the reference structure that is compatible with the
+    cell metric of the relaxed structure.
 
     Parameters
     ----------
-    input_structure
+    relaxed
         relaxed input structure
-    reference_structure: ASE Atoms object
-        reference structure, which can but need not represent the primitive
-        cell
-    vacancy_type
-        if not None, the cell is scaled if and only if `inert_species` is not
-        None
+    reference
+        reference structure, which can but need not be the primitive structure
     inert_species
-        list of chemical symbols(e.g., `['Au', 'Pd']`) that are never
-        substituted for a vacancy. Needless if `vacancy_type` is `None`
-    """
-    modcell = input_structure.get_cell()
-    if vacancy_type is None:
-        # Without scale factor we can just rescale with number of atoms
-        atvol_in = input_structure.get_volume() / len(input_structure)
-        atvol_ref = reference_structure.get_volume() / len(reference_structure)
-        scale = atvol_in / atvol_ref
+        list of chemical symbols (e.g., ``['Au', 'Pd']``) that are never
+        substituted for a vacancy; the number of inert sites is used to rescale
+        of the relaxed structure to match the reference structure.
+    tol_positions
+        tolerance factor applied when scanning for overlapping positions in
+        Angstrom (forwarded to :func:`ase.build.make_supercell`)
+    assume_no_cell_relaxation
+        if False volume and cell metric of the relaxed structure are rescaled
+        to match the reference structure; this can be unnecessary (and
+        counterproductive) for some structures, e.g., with many vacancies
 
-    if vacancy_type is not None:
+        **Note**: When setting this parameter to False relaxed structure
+        must be obtainable via an *integer* transformation matrix from the
+        reference cell metric. In other words the relaxed structure should not
+        involve relaxations of the volume or the cell metric.
+
+    Raises
+    ------
+    ValueError
+        if the boundary conditions of the reference and the relaxed structure
+        do not match
+    ValueError
+        if the transformation matrix deviates too strongly from the nearest
+        integer matrix
+    ValueError
+        if assume_no_cell_relaxation is True but the relaxed structure is
+        not obtainable via an integer transformation from the reference
+        cell metric
+    """
+
+    if not np.all(reference.pbc == relaxed.pbc):
+        msg = 'The boundary conditions of reference and relaxed structures do not match.'
+        msg += '\n  reference: ' + str(reference.pbc)
+        msg += '\n  relaxed: ' + str(relaxed.pbc)
+        raise ValueError(msg)
+
+    # Step 1:
+    # rescale cell metric of relaxed cell to match volume per atom of reference cell
+    if not assume_no_cell_relaxation:
         if inert_species is None:
-            scale = 1.0
+            n_ref = len(reference)
+            n_rlx = len(relaxed)
         else:
-            # We cannot use the number of atoms since there may be vacancies
-            # in the input_structure. Instead we count the species that we
-            # know should always be present.
-            n_in = 0
-            n_ref = 0
-            symbols_in = input_structure.get_chemical_symbols()
-            symbols_ref = reference_structure.get_chemical_symbols()
-            for species in inert_species:
-                n_in += symbols_in.count(species)
-                n_ref += symbols_ref.count(species)
-            atvol_in = input_structure.get_volume() / n_in
-            atvol_ref = reference_structure.get_volume() / n_ref
-            scale = atvol_in / atvol_ref
-    modcell *= (1.0 / scale) ** (1.0 / 3.0)
-    return modcell
+            n_ref = sum([reference.get_chemical_symbols().count(s) for s in inert_species])
+            n_rlx = sum([relaxed.get_chemical_symbols().count(s) for s in inert_species])
+        vol_scale = reference.get_volume() / n_ref
+        vol_scale /= relaxed.get_volume() / n_rlx
+        scaled_relaxed_cell = relaxed.cell * vol_scale ** (1 / 3)
+    else:
+        scaled_relaxed_cell = relaxed.cell
 
-
-def _get_transformation_matrix(input_cell: np.ndarray,
-                               reference_cell: np.ndarray,
-                               tolerance_cell: float = 0.05) -> np.ndarray:
-    """
-    Obtains the (in general non-integer) transformation matrix connecting the
-    input structure to the reference structure L=L_p.P - -> P=L_p ^ -1.L
-
-    Parameters
-    ----------
-    input_cell
-        cell metric of input structure(possibly scaled)
-    reference_cell
-        cell metric of reference structure
-    tolerance_cell
-        tolerance for how much the elements of P are allowed to deviate from
-        the nearest integer before they are rounded
-
-    Returns
-    -------
-    transformation matrix P of integers
-    """
-    logger.debug('reference_cell:\n {}'.format(reference_cell))
-    logger.debug('input_cell:\n {}'.format(input_cell))
-    logger.debug('inv(reference_cell):\n {}'
-                 .format(np.linalg.inv(reference_cell)))
-    P = np.dot(input_cell, np.linalg.inv(reference_cell))
-    logger.debug('P:\n {}'.format(P))
-
-    # ensure that the transformation matrix does not deviate too
-    # strongly from the nearest integer matrix
-    if np.linalg.norm(P - np.around(P)) / 9 > tolerance_cell:
-        print('reference:\n {}\n'.format(reference_cell))
-        print('input:\n {}\n'.format(input_cell))
-        print('P:\n {}\n'.format(P))
-        print('det P = {}\n'.format(np.linalg.det(P)))
-        print('P_round:\n {}\n'.format(np.around(P)))
-        print('Deviation: {}\n'.format(np.linalg.norm(P - np.around(P)) / 9))
-        raise Exception('Failed to map structure to reference structure'
-                        ' (tolerance_cell exceeded). If there are vacancies,'
-                        ' one can try specifying `inert_species`. Otherwise,'
-                        ' one can try raising `tolerance_cell`.')
+    # Step 2:
+    # get transformation matrix
+    P = np.dot(scaled_relaxed_cell, np.linalg.inv(reference.cell))
 
     # reduce the (real) transformation matrix to the nearest integer one
     P = np.around(P)
-    logger.debug('P:\n {}'.format(P))
-    return P
+
+    # Step 3:
+    # generate supercell of reference structure
+    reference_supercell = make_supercell(reference, P, tol=tol_positions)
+
+    return reference_supercell
 
 
-def _rescale_structures(input_structure: Atoms,
-                        reference_structure: Atoms,
-                        P: np.ndarray,
-                        tolerance_positions: float = 0.01) \
-                        -> Tuple[Atoms, Atoms]:
-    """
-    Rescales `input_structure` with `P` so that it matches
-    `reference_structure`, and creates a supercell of `reference_structure`
-    using `P`
+def _match_positions(relaxed: Atoms, reference: Atoms) -> Tuple[Atoms, float, float]:
+    """Matches the atoms in the `relaxed` structure to the sites in the
+    `reference` structure. The function returns tuple the first element of which
+    is a copy of the `reference` structure, in which the chemical species are
+    assigned to comply with the `relaxed` structure. The second and third element
+    of the tuple represent the maximum and average distance between relaxed and
+    reference sites.
 
     Parameters
     ----------
-    input_structure
-        relaxed input structure
-    reference_structure
-        reference structure, which can but need not represent the primitive
-        cell
-    P
-        transformation matrix of integers
-    tolerance_positions
-        tolerance factor applied when scanning for overlapping positions in
-        Angstrom(forwarded to `ase.build.cut`)
+    relaxed
+        structure with relaxed positions
+    reference
+        structure with idealized positions
 
-    Returns
-    -------
-    a tuple with the scaled version of `input_structure` and the supercell of
-    `reference_structure` matching cell metric of `scaled_structure`
+    Raises
+    ------
+    ValueError
+        if the cell metrics of the two input structures do not match
+    ValueError
+        if the periodic boundary conditions of the two input structures do not match
+    ValueError
+        if the relaxed structure contains more atoms than the reference structure
     """
-    scaled_structure = input_structure.copy()
-    scaled_structure.set_cell(np.dot(P, reference_structure.cell),
-                              scale_atoms=True)
 
-    # generate supercell of (presumably primitive) reference structure
-    ideal_supercell = cut(reference_structure, *P,
-                          tolerance=tolerance_positions)
-    n_mapped = int(np.round(len(reference_structure) * np.linalg.det(P)))
-    if len(ideal_supercell) != n_mapped:
-        print('len(reference_structure)', len(reference_structure))
-        print('det(P)', np.linalg.det(P))
-        print('len(ideal_supercell)', len(ideal_supercell))
-        print('n_mapped', n_mapped)
-        raise Exception('Supercell construction of reference structure failed'
-                        ' (number of atoms do not match).\n'
-                        'Permutation matrix used:\n{}'.format(P) +
-                        '\nYou can try to change tolerance_positions.')
+    if not np.all(reference.pbc == relaxed.pbc):
+        msg = 'The boundary conditions of reference and relaxed structures do not match.'
+        msg += '\n  reference: ' + str(reference.pbc)
+        msg += '\n  relaxed: ' + str(relaxed.pbc)
+        raise ValueError(msg)
 
-    return scaled_structure, ideal_supercell
+    if len(relaxed) > len(reference):
+        msg = 'The relaxed structure contains more atoms than the reference structure.'
+        msg += '\n  reference: ' + str(len(reference))
+        msg += '\n  relaxed: ' + str(len(relaxed))
+        raise ValueError(msg)
+
+    if not np.all(np.isclose(reference.cell, relaxed.cell)):
+        msg = 'The cell metrics of reference and relaxed structures do not match.'
+        msg += '\n  reference: ' + str(reference.cell)
+        msg += '\n  relaxed: ' + str(relaxed.cell)
+        raise ValueError(msg)
+
+    # compute distances between reference and relaxed positions
+    _, dists = get_distances(reference.positions, relaxed.positions,
+                             cell=reference.cell, pbc=reference.pbc)
+    # pad matrix with zeros to obtain square matrix
+    n, m = dists.shape
+    cost_matrix = np.pad(dists, ((0, 0), (0, abs(n - m))),
+                         mode='constant', constant_values=0)
+    # find optimal mapping using Kuhn-Munkres (Hungarian) algorithm
+    row_ind, col_ind = linear_sum_assignment(cost_matrix)
+
+    # compile new configuration with supplementary information
+    mapped = reference.copy()
+    displacement_magnitudes = []
+    displacements = []
+    minimum_distances = []
+    for i, j in zip(row_ind, col_ind):
+        atom = mapped[i]
+        if j >= len(relaxed):
+            # vacant site in reference structure
+            atom.symbol = 'X'
+            displacement_magnitudes.append(None)
+            displacements.append(3 * [None])
+            minimum_distances.append(3 * [None])
+        else:
+            atom.symbol = relaxed[j].symbol
+            dvecs, drs = get_distances([relaxed[j].position],
+                                       [reference[i].position],
+                                       cell=reference.cell, pbc=reference.pbc)
+            displacement_magnitudes.append(drs[0][0])
+            displacements.append(dvecs[0][0])
+            # distances to the next three available sites
+            minimum_distances.append(sorted(dists[:, j])[:3])
+
+    displacement_magnitudes = np.array(displacement_magnitudes, dtype=np.float64)
+    mapped.new_array('Displacement', displacements, float, (3, ))
+    mapped.new_array('Displacement_Magnitude', displacement_magnitudes, float)
+    mapped.new_array('Minimum_Distances', minimum_distances,
+                     float, (3, ))
+
+    drmax = np.nanmax(displacement_magnitudes)
+    dravg = np.nanmean(displacement_magnitudes)
+
+    return mapped, drmax, dravg

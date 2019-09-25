@@ -128,10 +128,14 @@ class CanonicalEnsemble(ThermodynamicBaseEnsemble):
         mc.run(100)  # carry out 100 trial swaps
     """
 
-    def __init__(self, structure: Atoms, calculator: BaseCalculator,
-                 temperature: float, user_tag: str = None,
+    def __init__(self,
+                 structure: Atoms,
+                 calculator: BaseCalculator,
+                 temperature: float,
+                 user_tag: str = None,
                  boltzmann_constant: float = kB,
-                 data_container: DataContainer = None, random_seed: int = None,
+                 data_container: DataContainer = None,
+                 random_seed: int = None,
                  data_container_write_period: float = np.inf,
                  ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None,
