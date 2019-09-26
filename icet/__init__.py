@@ -26,7 +26,7 @@ __authors__ = ['Mattias Ångqvist',
                'Paul Erhart']
 __copyright__ = '2019'
 __license__ = 'Mozilla Public License 2.0 (MPL 2.0)'
-__version__ = '0.5'
+__version__ = '1.0'
 __all__ = ['ClusterSpace',
            'ClusterExpansion',
            'Structure',
@@ -39,5 +39,5 @@ __all__ = ['ClusterSpace',
            'view_singlets']
 __maintainer__ = 'The icet developers team'
 __email__ = 'icet@materialsmodeling.org'
-__status__ = 'Beta'
+__status__ = 'Stable'
 __url__ = 'http://icet.materialsmodeling.org/'
