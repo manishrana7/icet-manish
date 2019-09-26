@@ -228,8 +228,7 @@ class DataContainer:
                                  ' when trajectory is requested')
 
             new_tags = tuple(['occupations' if tag == 'trajectory' else tag for tag in tags])
-
-            return self._get_trajectory(*tags, start=start, stop=stop, interval=interval)
+            return self._get_trajectory(*new_tags, start=start, stop=stop, interval=interval)
 
         for tag in tags:
             if tag == 'mctrial':
