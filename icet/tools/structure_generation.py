@@ -274,13 +274,13 @@ def occupy_structure_randomly(structure: Atoms, cluster_space: ClusterSpace,
         cluster space (needed as it carries information about sublattices)
     target_concentrations
         concentration of each species in the target structure (for
-        example `{'Ag': 0.5, 'Pd': 0.5}`
+        example ``{'Ag': 0.5, 'Pd': 0.5}``
 
         Concentrations are always expressed with respect to all atoms in
         the supercell, which implies that the sum of all concentrations
         should always be 1. In the case of multiple sublattices, a valid
-        specification would thus be `{'Au': 0.25, 'Pd': 0.25, 'H': 0.1,
-        'V': 0.4}`.
+        specification would thus be ``{'Au': 0.25, 'Pd': 0.25, 'H': 0.1,
+        'V': 0.4}``.
     """
     if not _concentrations_fit_structure(structure, cluster_space, target_concentrations):
         raise ValueError('Structure with {} atoms cannot accomodate '
