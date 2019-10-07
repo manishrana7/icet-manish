@@ -225,7 +225,7 @@ class TestStructureGenerationTernaryFCC(unittest.TestCase):
         structure = self.prim.repeat(2)
         target_concentrations = {'Cu': 0.25, 'Au': 0.25, 'Pd': 0.5}
         occupy_structure_randomly(structure, self.cs,
-                                   target_concentrations)
+                                  target_concentrations)
         syms = structure.get_chemical_symbols()
         self.assertEqual(syms.count('Cu'), len(structure) // 4)
         self.assertEqual(syms.count('Au'), len(structure) // 4)
@@ -289,7 +289,7 @@ class TestStructureGenerationHCP(unittest.TestCase):
         structure = self.prim.repeat(3)
         target_concentrations = {'Pd': 1 / 3, 'Au': 2 / 3}
         occupy_structure_randomly(structure, self.cs,
-                                   target_concentrations)
+                                  target_concentrations)
         syms = structure.get_chemical_symbols()
         self.assertEqual(syms.count('Au'), 2 * len(structure) // 3)
         self.assertEqual(syms.count('Pd'), len(structure) // 3)
@@ -379,7 +379,7 @@ class TestStructureGenerationSublatticesFCC(unittest.TestCase):
         target_concentrations = {'Cu': 1 / 8, 'Au': 2 / 8, 'Pd': 1 / 8,
                                  'H': 3 / 8, 'V': 1 / 8}
         occupy_structure_randomly(structure, self.cs,
-                                   target_concentrations)
+                                  target_concentrations)
         syms = structure.get_chemical_symbols()
         self.assertEqual(syms.count('Cu'), len(structure) // 8)
         self.assertEqual(syms.count('Au'), len(structure) // 4)
