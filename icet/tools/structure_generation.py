@@ -95,8 +95,8 @@ def generate_target_structure(cluster_space: ClusterSpace, max_size: int,
         # fulfill the target concentrations
         for supercell in enumerate_supercells(cluster_space.primitive_structure,
                                               [size]):
-            _occupy_structure_randomly(supercell, cluster_space,
-                                       target_concentrations)
+            occupy_structure_randomly(supercell, cluster_space,
+                                      target_concentrations)
             supercells.append(supercell)
             calculators.append(TargetVectorCalculator(supercell, cluster_space,
                                                       target_cluster_vector,
