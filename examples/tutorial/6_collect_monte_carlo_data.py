@@ -1,12 +1,12 @@
 import pandas as pd
 from glob import glob
-from mchammer import DataContainer
+from mchammer import read_data_container
 
 # step 1: Collect data from SGC and VCSGC simulations
 for ensemble in ['sgc', 'vcsgc']:
     data = []
     for filename in glob('monte_carlo_data/{}-*.dc'.format(ensemble)):
-        dc = DataContainer.read(filename)
+        dc = read_data_container(filename)
         data_row = dc.ensemble_parameters
         data_row['filename'] = filename
         n_atoms = data_row['n_atoms']
