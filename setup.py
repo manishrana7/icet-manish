@@ -120,7 +120,7 @@ url = re.search("__url__ = '(.*)'", lines).group(1)
 license = re.search("__license__ = '(.*)'", lines).group(1)
 
 classifiers = [
-    'Development Status :: 5 - Stable',
+    'Development Status :: 5 - Production/Stable',
     'Operating System :: OS Independent',
     'Programming Language :: Python :: 3 :: Only',
     'Programming Language :: Python :: 3',

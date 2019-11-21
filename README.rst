@@ -4,7 +4,7 @@ icet
 **icet** is a tool for the construction and sampling of alloy cluster
 expansions. A detailed description of the functionality provided as well as an
 extensive tutorial can be found in the `user guide
-<https://icet.materialsmodeling.org/>`_
+<https://icet.materialsmodeling.org/>`_.
 
 **icet** is written in Python, which allows easy integration with countless
 first-principles codes and analysis tools accessible from Python, and allows
@@ -28,7 +28,7 @@ structures, or sampled via Monte Carlo simulations.
 Installation
 ------------
 
-In the most simple case, **icet** can be installed using pip as follows::
+In many cases, **icet** can be installed using pip as follows::
 
     pip3 install icet --user
 
