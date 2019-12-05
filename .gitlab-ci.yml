@@ -109,7 +109,6 @@ pages:
     - find tests/ -print | zip public/dev/tests.zip tests/structure_databases/*.db -@
     # --------------------------
     # clean up
-    - ls -l public/.well-known/acme-challenge/
     - ls -l public/
     - chmod go-rwX -R public/
   artifacts:
