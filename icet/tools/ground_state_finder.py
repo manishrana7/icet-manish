@@ -13,6 +13,11 @@ from ..input_output.logging_tools import logger
 try:
     import mip
     from mip.constants import BINARY
+    from distutils.version import LooseVersion
+
+    if LooseVersion(mip.constants.VERSION) < '1.6.3':
+        raise ImportError('Python-MIP version 1.6.3 or later is required in '
+                          'order to use the ground state finder.')
 except ImportError:
     raise ImportError('Python-MIP '
                       '(https://python-mip.readthedocs.io/en/latest/) is '
@@ -152,7 +157,7 @@ class GroundStateFinder:
         self._optimization_status = None
 
     def _build_model(self, structure: Atoms, solver_name: str,
-                     verbose: bool, xcount: int = -1) -> mip.Model:
+                     verbose: bool) -> mip.Model:
         """
         Build a Python-MIP model based on the provided structure
 
@@ -165,8 +170,6 @@ class GroundStateFinder:
             available solvers if not informed
         verbose
             whether to display solver messages on the screen
-        xcount
-            constraint for the species count
         """
 
         # Create cluster maps
@@ -221,7 +224,7 @@ class GroundStateFinder:
                 constraint_count += 1
 
         # Set species constraint
-        model.add_constr(mip.xsum(xs) == xcount, 'Species count')
+        model.add_constr(mip.xsum(xs) == -1, 'Species count')
 
         # Update the model so that variables and constraints can be queried
         if model.solver_name.upper() in ['GRB', 'GUROBI']:
@@ -401,18 +404,7 @@ class GroundStateFinder:
         model.threads = threads
 
         # Update the species count
-        # temporary hack until python-mip supports setting RHS directly:
-        if model.solver_name.upper() in ['GUROBI', 'GRB']:
-            # remove the old constraint and add a new one
-            idx = model.solver.constr_get_index('Species count')
-            model.solver.remove_constrs([idx])
-            model.add_constr(mip.xsum(self.xs) == xcount, 'Species count')
-        else:
-            # rebuild the whole model
-            self._model = model = self._build_model(self.structure,
-                                                    model.solver_name,
-                                                    bool(model.verbose),
-                                                    xcount=xcount)
+        model.constr_by_name('Species count').rhs = xcount
 
         # Optimize the model
         self._optimization_status = model.optimize(max_seconds=max_seconds)
@@ -431,11 +423,8 @@ class GroundStateFinder:
 
         # Assert that the solution agrees with the prediction
         prediction = self._cluster_expansion.predict(gs)
-        if model.solver_name.upper() in ['GUROBI', 'GRB']:
-            assert abs(model.objective_value - prediction) < 1e-6
-        elif model.solver_name.upper() == 'CBC':
-            assert abs(model.objective_const +
-                       model.objective_value - prediction) < 1e-6
+        assert abs(model.objective_value - prediction) < 1e-6
+
         return gs
 
     @property
