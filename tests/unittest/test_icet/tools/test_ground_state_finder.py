@@ -378,7 +378,7 @@ class TestGroundStateFinderInactiveSublattice(unittest.TestCase):
     def test_get_active_orbit_indices(self):
         """Tests _get_active_orbit_indices functionality """
         retval = self.gsf._get_active_orbit_indices(self.structure_prim)
-        target = [0, 3, 6]
+        target = [0, 1, 2]
         self.assertEqual(target, retval)
 
 

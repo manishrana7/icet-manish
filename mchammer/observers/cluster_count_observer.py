@@ -46,8 +46,10 @@ class ClusterCountObserver(BaseObserver):
         super().__init__(interval=interval, return_type=dict, tag='ClusterCountObserver')
 
         self._cluster_space = cluster_space
-        local_orbit_list_generator = LocalOrbitListGenerator(cluster_space.orbit_list,
-                                                             Structure.from_atoms(structure))
+        local_orbit_list_generator = LocalOrbitListGenerator(
+            cluster_space.orbit_list,
+            Structure.from_atoms(structure),
+            cluster_space.fractional_position_tolerance)
 
         self._full_orbit_list = local_orbit_list_generator.generate_full_orbit_list()
         self._cluster_counts_cpp = _ClusterCounts()

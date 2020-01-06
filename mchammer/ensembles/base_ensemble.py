@@ -511,7 +511,6 @@ class BaseEnsemble(ABC):
 
 
 def dicts_equal(dict1: Dict, dict2: Dict, atol: float = 1e-12) -> bool:
-
     """Returns True (False) if two dicts are equal (not equal), if
     float or integers are in the dicts then atol is used for comparing them."""
     if len(dict1) != len(dict2):
@@ -521,7 +520,7 @@ def dicts_equal(dict1: Dict, dict2: Dict, atol: float = 1e-12) -> bool:
             return False
         if isinstance(dict1[key], (int, float)) and isinstance(dict2[key], (int, float)):
             if not np.isclose(dict1[key], dict2[key], rtol=0.0, atol=atol) and \
-                   not np.isnan(dict1[key]) and not np.isnan(dict2[key]):
+                    not np.isnan(dict1[key]) and not np.isnan(dict2[key]):
                 return False
         else:
             if dict1[key] != dict2[key]:

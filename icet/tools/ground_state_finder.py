@@ -4,7 +4,6 @@ from typing import List, Dict
 from ase import Atoms
 from ase.data import chemical_symbols as periodic_table
 from .. import ClusterExpansion
-from ..core.orbit_list import OrbitList
 from ..core.local_orbit_list_generator import LocalOrbitListGenerator
 from ..core.structure import Structure
 from .variable_transformation import transform_ECIs
@@ -96,6 +95,7 @@ class GroundStateFinder:
         ground_state = gsf.get_ground_state({'Ag': 5})
         print('Ground state energy:', ce.predict(ground_state))
     """
+
     def __init__(self,
                  cluster_expansion: ClusterExpansion,
                  structure: Atoms,
@@ -103,6 +103,7 @@ class GroundStateFinder:
                  verbose: bool = True) -> None:
         # Check that there is only one active sublattice
         self._cluster_expansion = cluster_expansion
+        self._fractional_position_tolerance = cluster_expansion.fractional_position_tolerance
         self.structure = structure
         cluster_space = self._cluster_expansion.get_cluster_space_copy()
         primitive_structure = cluster_space.primitive_structure
@@ -130,12 +131,12 @@ class GroundStateFinder:
         # Generate orbit list
         primitive_structure.set_chemical_symbols(
             [els[0] for els in cluster_space.chemical_symbols])
-        cutoffs = cluster_space.cutoffs
-        self._orbit_list = OrbitList(primitive_structure, cutoffs)
-
+        self._orbit_list = cluster_space.orbit_list
         # Generate full orbit list
-        lolg = LocalOrbitListGenerator(self._orbit_list,
-                                       Structure.from_atoms(primitive_structure))
+        lolg = LocalOrbitListGenerator(
+            self._orbit_list,
+            Structure.from_atoms(primitive_structure),
+            self._fractional_position_tolerance)
         full_orbit_list = lolg.generate_full_orbit_list()
 
         # Determine the number of active orbits
@@ -219,7 +220,7 @@ class GroundStateFinder:
             if len(cluster) < 2 or ECI > 0:  # no "upwards" pressure
                 model.add_constr(ys[i] >= 1 - len(cluster) +
                                  mip.xsum(xs[site_to_active_index_map[atom]]
-                                 for atom in cluster),
+                                          for atom in cluster),
                                  'Decoration -> cluster {}'.format(constraint_count))
                 constraint_count += 1
 
@@ -243,8 +244,9 @@ class GroundStateFinder:
             atomic configuration
         """
         # Generate full orbit list
-        lolg = LocalOrbitListGenerator(self._orbit_list,
-                                       Structure.from_atoms(structure))
+        lolg = LocalOrbitListGenerator(
+            self._orbit_list, Structure.from_atoms(structure),
+            self._fractional_position_tolerance)
         full_orbit_list = lolg.generate_full_orbit_list()
 
         # Create maps of site indices and orbits for all clusters
@@ -308,15 +310,11 @@ class GroundStateFinder:
         structure
             atomic configuration
         """
-        # Generate full orbit list
-        lolg = LocalOrbitListGenerator(self._orbit_list,
-                                       Structure.from_atoms(structure))
-        full_orbit_list = lolg.generate_full_orbit_list()
 
         # Determine the active orbits
         active_orbit_indices = []
-        for i in range(len(full_orbit_list)):
-            equivalent_clusters = full_orbit_list.get_orbit(
+        for i in range(len(self._orbit_list)):
+            equivalent_clusters = self._orbit_list.get_orbit(
                 i).get_equivalent_sites()
             if all(structure[site.index].symbol in self._species
                    for cluster in equivalent_clusters for site in cluster):
