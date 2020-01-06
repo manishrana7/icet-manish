@@ -10,7 +10,6 @@ if __name__ == '__main__':
 
     structure = bulk('Al')
     cutoff = 15
-
     start = time.process_time()
     pm, prim_structure, _ = permutation_matrix_from_structure(structure, cutoff)
 

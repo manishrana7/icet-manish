@@ -11,7 +11,7 @@ import re
 
 from icet import ClusterSpace
 from icet.core.structure import Structure
-from typing import List, Union, Dict
+from typing import List, Union
 from ase import Atoms
 
 
@@ -130,9 +130,27 @@ class ClusterExpansion:
         return self._parameters
 
     @property
-    def metadata(self) -> Dict:
-        """ dict : metadata associated with cluster expansion """
+    def metadata(self) -> dict:
+        """ metadata associated with cluster expansion """
         return self._metadata
+
+    @property
+    def symprec(self) -> float:
+        """ tolerance imposed when analyzing the symmetry using spglib
+        (inherited from the underlying cluster space) """
+        return self._cluster_space.symprec
+
+    @property
+    def position_tolerance(self) -> float:
+        """ tolerance applied when comparing positions in Cartesian coordinates
+        (inherited from the underlying cluster space) """
+        return self._cluster_space.position_tolerance
+
+    @property
+    def fractional_position_tolerance(self) -> float:
+        """ tolerance applied when comparing positions in fractional coordinates
+        (inherited from the underlying cluster space) """
+        return self._cluster_space.fractional_position_tolerance
 
     @property
     def primitive_structure(self) -> Atoms:
@@ -180,10 +198,10 @@ class ClusterExpansion:
         orders = self.orders
         nzp_by_order = [np.count_nonzero(df[df.order == order].eci) for order in orders]
         assert sum(nzp_by_order) == np.count_nonzero(self.parameters)
-        s += [' total number of nonzero parameters: {}'.format(sum(nzp_by_order))]
-        line = ' number of nonzero parameters by order: '
+        s += [' {:38} : {}'.format('total number of nonzero parameters', sum(nzp_by_order))]
+        line = ' {:38} :'.format('number of nonzero parameters by order')
         for order, nzp in zip(orders, nzp_by_order):
-            line += '{}= {}  '.format(order, nzp)
+            line += ' {}= {} '.format(order, nzp)
         s += [line]
 
         # table header

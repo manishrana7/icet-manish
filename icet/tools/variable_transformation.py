@@ -77,7 +77,7 @@ def get_transformation_matrix(structure: Atoms,
     # determine its contribution to each orbit
     transformation = np.zeros((len(active_orbit_indices) + 1,
                                len(active_orbit_indices) + 1))
-    transformation[0, 0] = 1.0
+
     for i, orb_index in enumerate(active_orbit_indices, 1):
         orbit = full_orbit_list.get_orbit(orb_index)
         rep_sites = orbit.get_representative_sites()

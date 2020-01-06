@@ -182,16 +182,20 @@ class TestClusterExpansion(unittest.TestCase):
         """Tests repr functionality."""
 
         retval = self.ce.__repr__()
+
         target = """
 ========================================== Cluster Expansion ===========================================
- chemical species: ['Au', 'Pd'] (sublattice A)
- cutoffs: 3.0000 3.0000 3.0000
- total number of parameters: 5
- number of parameters by order: 0= 1  1= 1  2= 1  3= 1  4= 1
- total number of nonzero parameters: 4
- number of nonzero parameters by order: 0= 0  1= 1  2= 1  3= 1  4= 1  
+ chemical species                       : ['Au', 'Pd'] (sublattice A)
+ cutoffs                                : 3.0000 3.0000 3.0000
+ total number of parameters             : 5
+ number of parameters by order          : 0= 1  1= 1  2= 1  3= 1  4= 1
+ fractional_position_tolerance          : 4e-06
+ position_tolerance                     : 1e-05
+ symprec                                : 1e-05
+ total number of nonzero parameters     : 4
+ number of nonzero parameters by order  : 0= 0  1= 1  2= 1  3= 1  4= 1
 --------------------------------------------------------------------------------------------------------
-index | order |  radius  | multiplicity | orbit_index | multi_component_vector | sublattices |    ECI   
+index | order |  radius  | multiplicity | orbit_index | multi_component_vector | sublattices |    ECI
 --------------------------------------------------------------------------------------------------------
    0  |   0   |   0.0000 |        1     |      -1     |           .            |      .      |         0
    1  |   1   |   0.0000 |        1     |       0     |          [0]           |      A      |         1
@@ -211,14 +215,17 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
 
         target = """
 ========================================== Cluster Expansion ===========================================
- chemical species: ['Au', 'Pd'] (sublattice A)
- cutoffs: 3.0000 3.0000 3.0000
- total number of parameters: 5
- number of parameters by order: 0= 1  1= 1  2= 1  3= 1  4= 1
- total number of nonzero parameters: 4
- number of nonzero parameters by order: 0= 0  1= 1  2= 1  3= 1  4= 1  
+ chemical species                       : ['Au', 'Pd'] (sublattice A)
+ cutoffs                                : 3.0000 3.0000 3.0000
+ total number of parameters             : 5
+ number of parameters by order          : 0= 1  1= 1  2= 1  3= 1  4= 1
+ fractional_position_tolerance          : 4e-06
+ position_tolerance                     : 1e-05
+ symprec                                : 1e-05
+ total number of nonzero parameters     : 4
+ number of nonzero parameters by order  : 0= 0  1= 1  2= 1  3= 1  4= 1
 --------------------------------------------------------------------------------------------------------
-index | order |  radius  | multiplicity | orbit_index | multi_component_vector | sublattices |    ECI   
+index | order |  radius  | multiplicity | orbit_index | multi_component_vector | sublattices |    ECI
 --------------------------------------------------------------------------------------------------------
    0  |   0   |   0.0000 |        1     |      -1     |           .            |      .      |         0
  ...

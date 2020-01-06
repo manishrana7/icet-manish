@@ -120,8 +120,7 @@ class SiteOccupancyObserver(BaseObserver):
             allowed species are to be determined
         """
 
-        primitive_structure = Structure.from_atoms(
-            cluster_space.primitive_structure)
+        primitive_structure = Structure.from_atoms(cluster_space.primitive_structure)
         chemical_symbols = cluster_space.get_chemical_symbols()
 
         if len(chemical_symbols) == 1:
@@ -137,7 +136,7 @@ class SiteOccupancyObserver(BaseObserver):
                 positions = supercell.get_positions()[np.array(indices)]
                 lattice_sites =\
                     primitive_structure.find_lattice_sites_by_positions(
-                        positions)
+                        positions, cluster_space.fractional_position_tolerance)
                 for l, lattice_site in enumerate(lattice_sites):
                     species = chemical_symbols[lattice_site.index]
                     # check that the allowed species are equal for all sites
