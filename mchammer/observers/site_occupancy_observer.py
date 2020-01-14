@@ -76,7 +76,7 @@ class SiteOccupancyObserver(BaseObserver):
         # set up MC simulation
         calc = ClusterExpansionCalculator(structure, ce)
         mc = CanonicalEnsemble(structure=structure, calculator=calc, temperature=600,
-                               data_container='myrun_sof.dc')
+                               dc_filename='myrun_sof.dc')
 
         # set up observer and attach it to the MC simulation
         sites = {'surface': [0, 9], 'subsurface': [1, 8],
