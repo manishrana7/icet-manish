@@ -54,8 +54,7 @@ style_check:
   tags:
     - linux
   script:
-    - python3 tests/check_flake8__.py
-  allow_failure: true
+    - flake8 icet/ mchammer/ tests/ benchmark/ doc/ examples/
 
 
 test_documentation:
@@ -71,7 +70,6 @@ test_documentation:
     - mv doc/apidoc/html/ public/apidoc/
     # user guide (sphinx)
     - sphinx-build -W doc/userguide/source/ public/
-  allow_failure: true
   except:
    - master
   artifacts:
