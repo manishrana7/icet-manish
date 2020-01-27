@@ -147,10 +147,11 @@ class BaseDataContainer:
                 if observer.return_type is dict:
                     for key, value in observer.get_observable(structure).items():
                         record[key] = value
+                        self._observables.add(key)
                 else:
                     record[observer.tag] = observer.get_observable(structure)
+                    self._observables.add(observer.tag)
                 row_data.update(record)
-                self._observables.add(observer.tag)
 
     def get(self, *input_tags, start: int = 0) \
             -> Union[np.ndarray, List[Atoms], Tuple[np.ndarray, List[Atoms]]]:
