@@ -168,8 +168,8 @@ class TestGeometry(unittest.TestCase):
         prim[3].position += [0, 0, -0.01]
         prim.cell[0][0] += 0.002
         with self.assertRaises(ValueError) as cm:
-            self.assertIn('spglib failed to find the primitive cell', str(cm.exception))
             get_primitive_structure(prim, symprec=symprec)
+        self.assertIn('spglib failed to find the primitive cell', str(cm.exception))
 
     def test_fractional_to_cartesian(self):
         """Tests the geometry function fractional_to_cartesian."""
