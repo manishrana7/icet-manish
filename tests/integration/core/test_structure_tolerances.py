@@ -21,6 +21,7 @@ def test_structures(cluster_space, structures):
 
     return results
 
+
 # primitive structure
 prim = bulk('Au', a=1, crystalstructure='bcc', cubic=True)
 
