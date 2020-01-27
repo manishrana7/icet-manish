@@ -112,7 +112,6 @@ class ClusterSpace(_ClusterSpace):
                             ', not type {}'.format(type(structure)))
         if not all(structure.pbc):
             raise ValueError('Input structure must have periodic boundary conditions')
-
         if symprec <= 0:
             raise ValueError('symprec must be a positive number')
 
@@ -139,22 +138,24 @@ class ClusterSpace(_ClusterSpace):
             self._config['position_tolerance'] = position_tolerance
         effective_box_size = abs(np.linalg.det(occupied_primitive.cell)) ** (1 / 3)
         tol = self.position_tolerance / effective_box_size
+        tol = min(tol, self._config['position_tolerance'] / 5)
         self._config['fractional_position_tolerance'] = round(tol, -int(floor(log10(abs(tol)))))
 
         # set up orbit list
-        self._orbit_list = OrbitList(occupied_primitive,
-                                     self._cutoffs,
-                                     self.symprec,
-                                     self.position_tolerance,
-                                     self.fractional_position_tolerance)
+        self._orbit_list = OrbitList(
+            structure=occupied_primitive,
+            cutoffs=self._cutoffs,
+            symprec=self.symprec,
+            position_tolerance=self.position_tolerance,
+            fractional_position_tolerance=self.fractional_position_tolerance)
         self._orbit_list.remove_inactive_orbits(primitive_chemical_symbols)
 
         # call (base) C++ constructor
         _ClusterSpace.__init__(self,
-                               primitive_chemical_symbols,
-                               self._orbit_list,
-                               self.position_tolerance,
-                               self.fractional_position_tolerance)
+                               chemical_symbols=primitive_chemical_symbols,
+                               orbit_list=self._orbit_list,
+                               position_tolerance=self.position_tolerance,
+                               fractional_position_tolerance=self.fractional_position_tolerance)
 
     def _get_chemical_symbols(self):
         """ Returns chemical symbols using input structure and
@@ -401,9 +402,10 @@ class ClusterSpace(_ClusterSpace):
             raise TypeError('Input structure must be an ASE Atoms object')
 
         try:
-            cv = _ClusterSpace.get_cluster_vector(self,
-                                                  Structure.from_atoms(structure),
-                                                  self.fractional_position_tolerance)
+            cv = _ClusterSpace.get_cluster_vector(
+                self,
+                structure=Structure.from_atoms(structure),
+                fractional_position_tolerance=self.fractional_position_tolerance)
         except Exception as e:
             self.assert_structure_compatibility(structure)
             raise(e)
@@ -486,7 +488,7 @@ class ClusterSpace(_ClusterSpace):
         sl = Sublattices(self.chemical_symbols,
                          self.primitive_structure,
                          structure,
-                         self.fractional_position_tolerance)
+                         fractional_position_tolerance=self.fractional_position_tolerance)
         return sl
 
     def assert_structure_compatibility(self, structure: Atoms, vol_tol: float = 1e-5) -> None:
@@ -517,7 +519,7 @@ class ClusterSpace(_ClusterSpace):
         if not all(structure.pbc):
             raise ValueError('Input structure must have periodic boundary conditions')
 
-    def is_supercell_self_correlated(self, structure: Atoms) -> bool:
+    def is_supercell_self_interacting(self, structure: Atoms) -> bool:
         """
         Checks whether an structure has self-interactions via periodic
         boundary conditions.
@@ -533,7 +535,9 @@ class ClusterSpace(_ClusterSpace):
             If True, the structure contains self-interactions via periodic
             boundary conditions, otherwise False.
         """
-        ol = self.orbit_list.get_supercell_orbit_list(structure, self.position_tolerance)
+        ol = self.orbit_list.get_supercell_orbit_list(
+            structure=structure,
+            fractional_position_tolerance=self.fractional_position_tolerance)
         orbit_indices = set()
         for orbit in ol.orbits:
             for sites in orbit.get_equivalent_sites():
