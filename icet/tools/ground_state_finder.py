@@ -136,9 +136,10 @@ class GroundStateFinder:
 
         # Generate full orbit list
         self._orbit_list = cluster_space.orbit_list
-        lolg = LocalOrbitListGenerator(self._orbit_list,
-                                       Structure.from_atoms(primitive_structure),
-                                       self._fractional_position_tolerance)
+        lolg = LocalOrbitListGenerator(
+            orbit_list=self._orbit_list,
+            structure=Structure.from_atoms(primitive_structure),
+            fractional_position_tolerance=self._fractional_position_tolerance)
         self._full_orbit_list = lolg.generate_full_orbit_list()
 
         # Transform the ECIs
@@ -251,9 +252,10 @@ class GroundStateFinder:
             atomic configuration
         """
         # Generate full orbit list
-        lolg = LocalOrbitListGenerator(self._orbit_list,
-                                       Structure.from_atoms(structure),
-                                       self._fractional_position_tolerance)
+        lolg = LocalOrbitListGenerator(
+            orbit_list=self._orbit_list,
+            structure=Structure.from_atoms(structure),
+            fractional_position_tolerance=self._fractional_position_tolerance)
         full_orbit_list = lolg.generate_full_orbit_list()
 
         # Create maps of site indices and orbits for all clusters

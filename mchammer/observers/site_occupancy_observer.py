@@ -134,13 +134,13 @@ class SiteOccupancyObserver(BaseObserver):
             for site, indices in self._sites.items():
                 allowed_species[site] = None
                 positions = supercell.positions[np.array(indices)]
-                lattice_sites =\
-                    primitive_structure.find_lattice_sites_by_positions(
-                        positions, cluster_space.fractional_position_tolerance)
+                lattice_sites = primitive_structure.find_lattice_sites_by_positions(
+                    positions=positions,
+                    fractional_position_tolerance=cluster_space.fractional_position_tolerance)
                 for l, lattice_site in enumerate(lattice_sites):
                     species = chemical_symbols[lattice_site.index]
                     # check that the allowed species are equal for all sites
-                    if allowed_species[site] is not None and\
+                    if allowed_species[site] is not None and \
                             species != allowed_species[site]:
                         raise Exception("The allowed species {} for the site"
                                         " with index {} differs from the"
