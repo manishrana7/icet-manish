@@ -248,7 +248,7 @@ def get_wyckoff_sites(structure: Atoms,
     :class:`SiteOccupancyObserver
     <mchammer.observers.SiteOccupancyObserver>`.
     The Wyckoff labels can be conveniently attached as an array to the
-    structure object as demonstrated in the Examples section below.
+    structure object as demonstrated in the examples section below.
 
     By default the occupation of the sites is part of the symmetry
     analysis. If a chemically disordered structure is provided this
@@ -278,33 +278,26 @@ def get_wyckoff_sites(structure: Atoms,
     --------
     Wyckoff sites of a hexagonal-close packed structure::
 
-        >> from ase.build import bulk
-        >> from icet.tools import get_wyckoff_sites
-
-        >> structure = bulk('Ti')
-        >> wyckoff_sites = get_wyckoff_sites(structure)
-        >> print(wyckoff_sites)
-
-    Running the snippet above will produce the following output::
-
+        >>> from ase.build import bulk
+        >>> structure = bulk('Ti')
+        >>> wyckoff_sites = get_wyckoff_sites(structure)
+        >>> print(wyckoff_sites)
         ['2d', '2d']
+
 
     The Wyckoff labels can also be attached as an array to the
     structure, in which case the information is also included when
     storing the Atoms object::
 
-        >> from ase.io import write
-        >> structure.new_array('wyckoff_sites', wyckoff_sites, str)
-        >> write('structure.xyz', structure)
+        >>> from ase.io import write
+        >>> structure.new_array('wyckoff_sites', wyckoff_sites, str)
+        >>> write('structure.xyz', structure)
 
     The function can also be applied to supercells::
 
-        >> structure = bulk('GaAs', crystalstructure='zincblende', a=3.0).repeat(2)
-        >> wyckoff_sites = get_wyckoff_sites(structure)
-        >> print(wyckoff_sites)
-
-    This snippet will produce the following output::
-
+        >>> structure = bulk('GaAs', crystalstructure='zincblende', a=3.0).repeat(2)
+        >>> wyckoff_sites = get_wyckoff_sites(structure)
+        >>> print(wyckoff_sites)
         ['4a', '4c', '4a', '4c', '4a', '4c', '4a', '4c',
          '4a', '4c', '4a', '4c', '4a', '4c', '4a', '4c']
 
@@ -312,11 +305,10 @@ def get_wyckoff_sites(structure: Atoms,
     alloy. Applying the function directly yields much lower symmetry
     since the symmetry of the original structure is broken::
 
-        >> structure.set_chemical_symbols(
-               ['Ga', 'As', 'Al', 'As', 'Ga', 'As', 'Al', 'As',
-                'Ga', 'As', 'Ga', 'As', 'Al', 'As', 'Ga', 'As'])
-        >> print(get_wyckoff_sites(structure))
-
+        >>> structure.set_chemical_symbols(
+        ...        ['Ga', 'As', 'Al', 'As', 'Ga', 'As', 'Al', 'As',
+        ...         'Ga', 'As', 'Ga', 'As', 'Al', 'As', 'Ga', 'As'])
+        >>> print(get_wyckoff_sites(structure))
         ['8g', '8i', '4e', '8i', '8g', '8i', '2c', '8i',
          '2d', '8i', '8g', '8i', '4e', '8i', '8g', '8i']
 
@@ -325,8 +317,7 @@ def get_wyckoff_sites(structure: Atoms,
     analysis, which can be achieved via the ``map_occupations``
     keyword::
 
-        >> print(get_wyckoff_sites(structure, map_occupations=[['Ga', 'Al'], ['As']]))
-
+        >>> print(get_wyckoff_sites(structure, map_occupations=[['Ga', 'Al'], ['As']]))
         ['4a', '4c', '4a', '4c', '4a', '4c', '4a', '4c',
          '4a', '4c', '4a', '4c', '4a', '4c', '4a', '4c']
 
@@ -335,8 +326,7 @@ def get_wyckoff_sites(structure: Atoms,
     into a diamond lattice, on which case there is only one Wyckoff
     site::
 
-        >> print(get_wyckoff_sites(structure, map_occupations=[]))
-
+        >>> print(get_wyckoff_sites(structure, map_occupations=[]))
         ['8a', '8a', '8a', '8a', '8a', '8a', '8a', '8a',
          '8a', '8a', '8a', '8a', '8a', '8a', '8a', '8a']
     """

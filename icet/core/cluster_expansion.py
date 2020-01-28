@@ -35,21 +35,21 @@ class ClusterExpansion:
     of ones. Usually, they would be obtained by training with
     respect to a set of reference data::
 
-        from ase.build import bulk
-        from icet import ClusterSpace, ClusterExpansion
+       >>> from ase.build import bulk
+       >>> from icet import ClusterSpace, ClusterExpansion
 
-        # create cluster expansion
-        prim = bulk('Au')
-        cs = ClusterSpace(prim, cutoffs=[7.0, 5.0],
-                          chemical_symbols=[['Au', 'Pd']])
-        ecis = 14 * [1.0]
-        ce = ClusterExpansion(cs, ecis)
+       >>> # create cluster expansion with fake ECIs
+       >>> prim = bulk('Au')
+       >>> cs = ClusterSpace(prim, cutoffs=[7.0, 5.0],
+       ...                   chemical_symbols=[['Au', 'Pd']])
+       >>> ecis = len(cs) * [1.0]
+       >>> ce = ClusterExpansion(cs, ecis)
 
-        # make prediction for supercell
-        sc = prim.repeat(3)
-        for k in [1, 4, 7]:
-            sc[k].symbol = 'Pd'
-        print(ce.predict(sc))
+       >>> # make prediction for supercell
+       >>> sc = prim.repeat(3)
+       >>> for k in [1, 4, 7]:
+       >>>     sc[k].symbol = 'Pd'
+       >>> print(ce.predict(sc))
     """
 
     def __init__(self, cluster_space: ClusterSpace, parameters: np.array,

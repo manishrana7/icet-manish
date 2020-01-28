@@ -97,15 +97,13 @@ def map_structure_to_reference(relaxed: Atoms,
     cell vectors, and random displacements to the atoms. Finally, the present
     function is used to map the structure back the ideal lattice::
 
-        from icet.tools import map_structure_to_reference
-        from ase.build import bulk
-        reference = bulk('Au', a=4.09)
-        structure = bulk('Au', cubic=True, a=4.09).repeat(4)
-        structure.set_chemical_symbols(10 * ['Ag'] + (len(structure) - 10) * ['Au'])
-        structure.set_cell(structure.cell * 1.02, scale_atoms=True)
-        structure.rattle(0.1)
-        mapped_structure, info = map_structure_to_reference(structure, reference)
-
+        >>> from ase.build import bulk
+        >>> reference = bulk('Au', a=4.09)
+        >>> structure = bulk('Au', cubic=True, a=4.09).repeat(4)
+        >>> structure.set_chemical_symbols(10 * ['Ag'] + (len(structure) - 10) * ['Au'])
+        >>> structure.set_cell(structure.cell * 1.02, scale_atoms=True)
+        >>> structure.rattle(0.1)
+        >>> mapped_structure, info = map_structure_to_reference(structure, reference)
     """
 
     # Obtain supercell of reference structure that is compatible

@@ -11,26 +11,31 @@ RUN \
     zip
 
 # Packages for testing
-RUN pip3 install --upgrade \
-  coverage \
-  flake8
-
 # Packages needed for icet
-RUN pip3 install --upgrade \
-  ase \
-  mip \
-  numpy \
-  pandas \
-  scikit-learn \
-  scipy \
-  spglib
-
 # Packages for building documentation
-RUN pip3 install --upgrade \
-  breathe \
-  cloud_sptheme \
-  sphinx \
-  sphinx-rtd-theme \
-  sphinx_autodoc_typehints \
-  sphinx_sitemap \
-  sphinxcontrib-bibtex
+RUN \
+  pip3 install --upgrade \
+    pip \
+  && \
+  pip3 install --upgrade \
+    coverage \
+    flake8 \
+  && \
+  pip3 install --upgrade \
+    ase \
+    mip \
+    numpy \
+    pandas \
+    scikit-learn \
+    scipy \
+    spglib \
+    xdoctest \
+  && \
+  pip3 install --upgrade \
+    breathe \
+    cloud_sptheme \
+    sphinx \
+    sphinx-rtd-theme \
+    sphinx_autodoc_typehints \
+    sphinx_sitemap \
+    sphinxcontrib-bibtex

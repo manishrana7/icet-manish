@@ -129,7 +129,6 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
         The list should be as long as the number of sublattices and should
         sum up to 1.
 
-
     Example
     -------
     The following snippet illustrate how to carry out a simple Monte Carlo
@@ -138,29 +137,28 @@ class VCSGCEnsemble(ThermodynamicBaseEnsemble):
     in order to obtain an example that can be run without modification. In
     practice, one should of course use a proper cluster expansion::
 
-        from ase.build import bulk
-        from icet import ClusterExpansion, ClusterSpace
-        from mchammer.calculators import ClusterExpansionCalculator
-        from mchammer.ensembles import VCSGCEnsemble
+        >>> from ase.build import bulk
+        >>> from icet import ClusterExpansion, ClusterSpace
+        >>> from mchammer.calculators import ClusterExpansionCalculator
 
-        # prepare cluster expansion
-        # the setup emulates a second nearest-neighbor (NN) Ising model
-        # (zerolet and singlet ECIs are zero; only first and second neighbor
-        # pairs are included)
-        prim = bulk('Au')
-        cs = ClusterSpace(prim, cutoffs=[4.3], chemical_symbols=['Ag', 'Au'])
-        ce = ClusterExpansion(cs, [0, 0, 0.1, -0.02])
+        >>> # prepare cluster expansion
+        >>> # the setup emulates a second nearest-neighbor (NN) Ising model
+        >>> # (zerolet and singlet ECIs are zero; only first and second neighbor
+        >>> # pairs are included)
+        >>> prim = bulk('Au')
+        >>> cs = ClusterSpace(prim, cutoffs=[4.3], chemical_symbols=['Ag', 'Au'])
+        >>> ce = ClusterExpansion(cs, [0, 0, 0.1, -0.02])
 
-        # set up and run MC simulation
-        structure = prim.repeat(3)
-        calc = ClusterExpansionCalculator(structure, ce)
-        phi = 0.6
-        mc = VCSGCEnsemble(structure=structure, calculator=calc,
-                           temperature=600,
-                           dc_filename='myrun_vcsgc.dc',
-                           phis={'Au': phi},
-                           kappa=200)
-        mc.run(100)  # carry out 100 trial swaps
+        >>> # set up and run MC simulation
+        >>> structure = prim.repeat(3)
+        >>> calc = ClusterExpansionCalculator(structure, ce)
+        >>> phi = 0.6
+        >>> mc = VCSGCEnsemble(structure=structure, calculator=calc,
+        ...                   temperature=600,
+        ...                   dc_filename='myrun_vcsgc.dc',
+        ...                   phis={'Au': phi},
+        ...                   kappa=200)
+        >>> mc.run(100)  # carry out 100 trial swaps
     """
 
     def __init__(self, structure: Atoms,

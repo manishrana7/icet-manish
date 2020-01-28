@@ -26,6 +26,8 @@ tests:
   dependencies:
     - build_linux
   script:
+    - xdoctest icet
+    - xdoctest mchammer
     - coverage run tests/main.py
     - coverage report -m
     - coverage html
@@ -68,6 +70,8 @@ test_documentation:
     - doxygen Doxyfile
     - cd ../..
     - mv doc/apidoc/html/ public/apidoc/
+    # check examples in documentation via doctest
+    - sphinx-build -b doctest -W doc/userguide/source/ public/
     # user guide (sphinx)
     - sphinx-build -W doc/userguide/source/ public/
   except:
