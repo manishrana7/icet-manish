@@ -70,33 +70,33 @@ class ClusterSpace(_ClusterSpace):
     --------
     The following snippets illustrate several common situations::
 
-        from ase.build import bulk
-        from ase.io import read
-        from icet import ClusterSpace
+        >>> from ase.build import bulk
+        >>> from ase.io import read
+        >>> from icet import ClusterSpace
 
-        # AgPd alloy with pairs up to 7.0 A and triplets up to 4.5 A
-        prim = bulk('Ag')
-        cs = ClusterSpace(structure=prim, cutoffs=[7.0, 4.5],
-                          chemical_symbols=[['Ag', 'Pd']])
-        print(cs)
+        >>> # AgPd alloy with pairs up to 7.0 A and triplets up to 4.5 A
+        >>> prim = bulk('Ag')
+        >>> cs = ClusterSpace(structure=prim, cutoffs=[7.0, 4.5],
+        ...                   chemical_symbols=[['Ag', 'Pd']])
+        >>> print(cs)
 
-        # (Mg,Zn)O alloy on rocksalt lattice with pairs up to 8.0 A
-        prim = bulk('MgO', crystalstructure='rocksalt', a=6.0)
-        cs = ClusterSpace(structure=prim, cutoffs=[8.0],
-                          chemical_symbols=[['Mg', 'Zn'], ['O']])
-        print(cs)
+        >>> # (Mg,Zn)O alloy on rocksalt lattice with pairs up to 8.0 A
+        >>> prim = bulk('MgO', crystalstructure='rocksalt', a=6.0)
+        >>> cs = ClusterSpace(structure=prim, cutoffs=[8.0],
+        ...                   chemical_symbols=[['Mg', 'Zn'], ['O']])
+        >>> print(cs)
 
-        # (Ga,Al)(As,Sb) alloy with pairs, triplets, and quadruplets
-        prim = bulk('GaAs', crystalstructure='zincblende', a=6.5)
-        cs = ClusterSpace(structure=prim, cutoffs=[7.0, 6.0, 5.0],
-                          chemical_symbols=[['Ga', 'Al'], ['As', 'Sb']])
-        print(cs)
+        >>> # (Ga,Al)(As,Sb) alloy with pairs, triplets, and quadruplets
+        >>> prim = bulk('GaAs', crystalstructure='zincblende', a=6.5)
+        >>> cs = ClusterSpace(structure=prim, cutoffs=[7.0, 6.0, 5.0],
+        ...                   chemical_symbols=[['Ga', 'Al'], ['As', 'Sb']])
+        >>> print(cs)
 
-        # PdCuAu alloy with pairs and triplets
-        prim = bulk('Pd')
-        cs = ClusterSpace(structure=prim, cutoffs=[7.0, 5.0],
-                          chemical_symbols=[['Au', 'Cu', 'Pd']])
-        print(cs)
+        >>> # PdCuAu alloy with pairs and triplets
+        >>> prim = bulk('Pd')
+        >>> cs = ClusterSpace(structure=prim, cutoffs=[7.0, 5.0],
+        ...                   chemical_symbols=[['Au', 'Cu', 'Pd']])
+        >>> print(cs)
 
     """
 
