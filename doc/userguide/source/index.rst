@@ -86,7 +86,6 @@ team can also be reached by email via icet@materialsmodeling.org.
 
    moduleref_icet/index
    moduleref_mchammer/index
-   coreref/index
 
 .. toctree::
    :maxdepth: 2
