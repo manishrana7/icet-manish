@@ -80,7 +80,6 @@ class ClusterExpansion:
         if isinstance(parameters, list):
             parameters = np.array(parameters)
         self._parameters = parameters
-        self._original_parameters = parameters.copy()
 
         # add metadata
         if metadata is None:
@@ -345,8 +344,9 @@ class ClusterExpansion:
             cs = ClusterSpace.read(cs_file.name)
             items = pickle.load(tar_file.extractfile('items'))
 
-        parameters = items['parameters']
-        ce = ClusterExpansion(cs, parameters)
+        ce = ClusterExpansion.__new__(ClusterExpansion)
+        ce._cluster_space = cs
+        ce._parameters = items['parameters']
 
         # TODO: remove if condition once metadata is firmly established
         if 'metadata' in items:
@@ -354,7 +354,7 @@ class ClusterExpansion:
         else:
             del ce._metadata
 
-        assert list(parameters) == list(ce.parameters)
+        assert list(items['parameters']) == list(ce.parameters)
         return ce
 
     def _add_default_metadata(self):
