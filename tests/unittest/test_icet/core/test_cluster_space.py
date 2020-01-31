@@ -413,8 +413,8 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
     def test_read_write(self):
         """Tests read/write functionality."""
         f = tempfile.NamedTemporaryFile()
+        f.close()
         self.cs.write(f.name)
-        f.seek(0)
         cs_read = ClusterSpace.read(f.name)
         self.assertEqual(self.cs._input_structure, cs_read._input_structure)
         self.assertEqual(list(self.cs._cutoffs), list(cs_read._cutoffs))

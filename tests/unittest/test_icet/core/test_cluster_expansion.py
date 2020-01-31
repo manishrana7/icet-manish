@@ -87,11 +87,11 @@ class TestClusterExpansion(unittest.TestCase):
     def test_read_write(self):
         """Tests read and write functionalities."""
         # save to file
-        temp_file = tempfile.NamedTemporaryFile()
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        temp_file.close()
         self.ce.write(temp_file.name)
 
         # read from file
-        temp_file.seek(0)
         ce_read = ClusterExpansion.read(temp_file.name)
 
         # check cluster space
@@ -113,15 +113,15 @@ class TestClusterExpansion(unittest.TestCase):
     def test_read_write_pruned(self):
         """Tests read and write functionalities."""
         # save to file
-        temp_file = tempfile.NamedTemporaryFile()
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
         self.ce.prune(indices=[2, 3])
         self.ce.prune(tol=3)
         pruned_params = self.ce.parameters
         pruned_cs_len = len(self.ce._cluster_space)
+        temp_file.close()
         self.ce.write(temp_file.name)
 
         # read from file
-        temp_file.seek(0)
         ce_read = ClusterExpansion.read(temp_file.name)
         params_read = ce_read.parameters
         cs_len_read = len(ce_read._cluster_space)

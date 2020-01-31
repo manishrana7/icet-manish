@@ -316,7 +316,8 @@ class ClusterExpansion:
             items['metadata'] = self._metadata
 
         with tarfile.open(name=filename, mode='w') as tar_file:
-            cs_file = tempfile.NamedTemporaryFile()
+            cs_file = tempfile.NamedTemporaryFile(delete=False)
+            cs_file.close()
             self._cluster_space.write(cs_file.name)
             tar_file.add(cs_file.name, arcname='cluster_space')
 
@@ -339,9 +340,9 @@ class ClusterExpansion:
             file from which to read
         """
         with tarfile.open(name=filename, mode='r') as tar_file:
-            cs_file = tempfile.NamedTemporaryFile()
+            cs_file = tempfile.NamedTemporaryFile(delete=False)
             cs_file.write(tar_file.extractfile('cluster_space').read())
-            cs_file.seek(0)
+            cs_file.close()
             cs = ClusterSpace.read(cs_file.name)
             items = pickle.load(tar_file.extractfile('items'))
 

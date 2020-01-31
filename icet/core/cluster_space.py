@@ -574,12 +574,12 @@ class ClusterSpace(_ClusterSpace):
             temp_file.close()
 
             # write structure
-            temp_file = tempfile.NamedTemporaryFile()
-            ase_write(temp_file.name, self._input_structure, format='json')
-            temp_file.seek(0)
-            tar_info = tar_file.gettarinfo(arcname='atoms', fileobj=temp_file)
-            tar_file.addfile(tar_info, temp_file)
+            temp_file = tempfile.NamedTemporaryFile(delete=False)
             temp_file.close()
+            ase_write(temp_file.name, self._input_structure, format='json')
+            with open(temp_file.name, 'rb') as tt:
+                tar_info = tar_file.gettarinfo(arcname='atoms', fileobj=tt)
+                tar_file.addfile(tar_info, tt)
 
     @staticmethod
     def read(filename: str):
@@ -600,9 +600,9 @@ class ClusterSpace(_ClusterSpace):
         items = pickle.load(tar_file.extractfile('items'))
 
         # read structure
-        temp_file = tempfile.NamedTemporaryFile()
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
         temp_file.write(tar_file.extractfile('atoms').read())
-        temp_file.seek(0)
+        temp_file.close()
         structure = ase_read(temp_file.name, format='json')
 
         tar_file.close()
