@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.linalg import null_space
 from .structure_enumeration import enumerate_structures
+import itertools
 
 
 class Constraints:
@@ -14,7 +15,7 @@ class Constraints:
     Example
     -------
     The following example demonstrates fitting of a cluster expansion under the
-    constraint that ECI 2 and ECI 4 should be equal.
+    constraint that ECI 2 and ECI 4 should be equal::
 
         >>> from icet.tools import Constraints
         >>> from icet.fitting import Optimizer
@@ -81,20 +82,66 @@ class Constraints:
 def get_mixing_energy_constraints(cluster_space) -> Constraints:
     """
     A cluster expansion of *mixing energy* should ideally predict zero energy
-    for concentration 0 and 1. This function constructs a `Constraint` object
-    that enforces that condition during fitting.
+    for concentration 0 and 1. This function constructs a :class:`Constraints`
+    object that enforces that condition during fitting.
 
     Parameters
     ----------
     cluster_space : ClusterSpace
         Cluster space corresponding to cluster expansion for which constraints
         should be imposed
+
+    Example
+    -------
+    This example demonstrates how to constrain the mixing energy to zero
+    at the pure phases in a toy example with random cluster vectors and
+    random target energies::
+
+        >>> from icet.tools import get_mixing_energy_constraints
+        >>> from icet.fitting import Optimizer
+        >>> from icet import ClusterSpace
+        >>> from ase.build import bulk
+        >>> import numpy as np
+
+        >>> # Set up cluster space along with random sensing matrix and target "energies"
+        >>> prim = bulk('Au')
+        >>> cs = ClusterSpace(prim, cutoffs=[6.0, 5.0], chemical_symbols=['Au', 'Ag'])
+        >>> n_params = len(cs)
+        >>> A = np.random.random((10, len(cs)))
+        >>> y = np.random.random(10)
+
+        >>> # Define constraints
+        >>> c = get_mixing_energy_constraints(cs)
+
+        >>> # Do the actual fit and finally extract parameters
+        >>> A_constrained = c.transform(A)
+        >>> opt = Optimizer((A_constrained, y), fit_method='ridge')
+        >>> opt.train()
+        >>> parameters = c.inverse_transform(opt.parameters)
+
+    Warning
+    -------
+    Constraining the energy of one structure is always done at the expense of the
+    fit quality of the others. Always expect that your :term:`CV` scores will increase
+    somewhat when using this function.
     """
     M = []
-    for structure in enumerate_structures(structure=cluster_space.primitive_structure,
-                                          sizes=[1],
-                                          chemical_symbols=cluster_space.chemical_symbols):
+
+    prim = cluster_space.primitive_structure.copy()
+    sublattices = cluster_space.get_sublattices(prim)
+    chemical_symbols = [subl.chemical_symbols for subl in sublattices]
+
+    # Loop over all combinations of pure phases
+    for symbols in itertools.product(*chemical_symbols):
+        structure = prim.copy()
+        for subl, symbol in zip(sublattices, symbols):
+            for atom_index in subl.indices:
+                structure[atom_index].symbol = symbol
+
+        # Add constraint for this pure phase
+        cv = cluster_space.get_cluster_vector(structure)
         M.append(cluster_space.get_cluster_vector(structure))
+
     c = Constraints(n_params=len(cluster_space))
     c.add_constraint(M)
     return c
