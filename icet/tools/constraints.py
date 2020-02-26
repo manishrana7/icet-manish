@@ -2,6 +2,7 @@ import numpy as np
 from scipy.linalg import null_space
 from typing import List
 
+
 class Constraints:
     """ Class for handling linear constraints with right hand side equal to zero.
 
@@ -17,11 +18,11 @@ class Constraints:
 
         >>> from icet.tools import Constraints
         >>> import numpy as np
-        
+
         >>> # Set up random sensing matrix and target "energies"
         >>> n_params = 10
-        >>> A = np.random((10, n_params))
-        >>> y = np.random(10)
+        >>> A = np.random.random((10, n_params))
+        >>> y = np.random.random(10)
 
         >>> # Define constraints
         >>> c = Constraints(n_params=n_params)
@@ -72,3 +73,32 @@ class Constraints:
         M[0, parameter_indices] = 1
         self.M = np.vstack((self.M, M))
         self.constraint_vectors = null_space(self.M)
+
+
+def get_binary_mixing_energy_constraints(cluster_space) -> Constraints:
+    """
+    A cluster expansion of the *mixing energy* of a binary system should
+    ideally predict zero energy for concentration 0 and 1. This function
+    constructs a `Constraint` object that enforces that condition
+    during fitting.
+
+    Parameters
+    ----------
+    cluster_space : ClusterSpace
+        Cluster space corresponding to cluster expansion for which constraints
+        should be imposed
+    """
+    # Create two list, one with indices of odd orbits, one with indices of even
+    even = []
+    odd = []
+    for orbit in cluster_space.orbit_data:
+        if orbit['order'] % 2 == 0:
+            even.append(orbit['index'])
+        else:
+            odd.append(orbit['index'])
+
+    # Create Constraints object with those constraints
+    c = Constraints(n_params=len(cluster_space))
+    c.add_constraint(parameter_indices=even)
+    c.add_constraint(parameter_indices=odd)
+    return c
