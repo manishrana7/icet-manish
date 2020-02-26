@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.linalg import null_space
 from typing import List
-
+from .structure_enumeration import enumerate_structures
 
 class Constraints:
     """ Class for handling linear constraints with right hand side equal to zero.
@@ -61,26 +61,26 @@ class Constraints:
         """
         return self.constraint_vectors.dot(A)
 
-    def add_constraint(self, parameter_indices: List[int]) -> None:
-        """ Add a constraint and resolve for the constraint space
+
+    def add_constraint(self, M: np.ndarray) -> None:
+        """ Add a constraint matrix and resolve for the constraint space
 
         Parameters
         ----------
-        parameter_indices
-            Indices of parameters the sum of which should be zero
+        M
+            Constraint matrix with each constraint as a row. Can (but need not be)
+            cluster vectors.
         """
-        M = np.zeros((1, self.M.shape[1]))
-        M[0, parameter_indices] = 1
+        M = np.array(M)
         self.M = np.vstack((self.M, M))
         self.constraint_vectors = null_space(self.M)
 
 
-def get_binary_mixing_energy_constraints(cluster_space) -> Constraints:
+def get_mixing_energy_constraints(cluster_space) -> Constraints:
     """
-    A cluster expansion of the *mixing energy* of a binary system should
-    ideally predict zero energy for concentration 0 and 1. This function
-    constructs a `Constraint` object that enforces that condition
-    during fitting.
+    A cluster expansion of *mixing energy* should ideally predict zero energy
+    for concentration 0 and 1. This function constructs a `Constraint` object
+    that enforces that condition during fitting.
 
     Parameters
     ----------
@@ -88,17 +88,11 @@ def get_binary_mixing_energy_constraints(cluster_space) -> Constraints:
         Cluster space corresponding to cluster expansion for which constraints
         should be imposed
     """
-    # Create two list, one with indices of odd orbits, one with indices of even
-    even = []
-    odd = []
-    for orbit in cluster_space.orbit_data:
-        if orbit['order'] % 2 == 0:
-            even.append(orbit['index'])
-        else:
-            odd.append(orbit['index'])
-
-    # Create Constraints object with those constraints
+    M = []
+    for structure in enumerate_structures(structure=cluster_space.primitive_structure,
+                                          sizes=[1],
+                                          chemical_symbols=cluster_space.chemical_symbols):
+        M.append(cluster_space.get_cluster_vector(structure))
     c = Constraints(n_params=len(cluster_space))
-    c.add_constraint(parameter_indices=even)
-    c.add_constraint(parameter_indices=odd)
+    c.add_constraint(M)
     return c
