@@ -12,12 +12,10 @@ y = np.random.random(n)
 # constraint sum eci[inds] = 0
 inds1 = [1, 3, 4, 5]
 inds2 = [2, 6, 7, 8]
-M = np.zeros((2, m))
-M[0, inds1] = 1
-M[1, inds2] = 1
 
 c = Constraints(m)
-c.add_constraint(M)
+for inds in [inds1, inds2]:
+    c.add_constraint(inds)
 
 Ac = c.transform(A)
 opt = Optimizer((Ac, y), fit_method='ridge')
