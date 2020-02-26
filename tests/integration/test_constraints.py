@@ -1,6 +1,10 @@
 import numpy as np
 from icet.fitting import Optimizer
-from icet.tools import Constraints
+from icet.tools import Constraints, get_mixing_energy_constraints
+from icet import ClusterSpace
+from ase import Atom
+from ase.build import bulk
+import itertools
 
 
 np.random.seed(42)
@@ -31,3 +35,24 @@ print('constraints 2, ', sum_2)
 
 assert abs(sum_1) < 1e-12
 assert abs(sum_2) < 1e-12
+
+# Test get_mixing_energy_constraints function
+a = 4.0
+prim = bulk('Au', a=a)
+prim.append(Atom('H', position=(a / 2, a / 2, a / 2)))
+cs = ClusterSpace(prim, cutoffs=[7.0, 5.0, 4.0],
+                  chemical_symbols=[['Au', 'Pd', 'Cu'], ['H', 'V']])
+
+A = np.random.random((n, len(cs)))
+y = np.random.random(n)
+
+c = get_mixing_energy_constraints(cs)
+Ac = c.transform(A)
+opt = Optimizer((Ac, y), fit_method='ridge')
+opt.train()
+
+parameters = c.inverse_transform(opt.parameters)
+
+for syms in itertools.product(['Au', 'Pd', 'Cu'], ['H', 'V']):
+    prim.set_chemical_symbols(syms)
+    assert abs(np.dot(parameters, cs.get_cluster_vector(prim))) < 1e-12
