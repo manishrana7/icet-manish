@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.linalg import null_space
-from .structure_enumeration import enumerate_structures
 import itertools
 
 
@@ -139,7 +138,6 @@ def get_mixing_energy_constraints(cluster_space) -> Constraints:
                 structure[atom_index].symbol = symbol
 
         # Add constraint for this pure phase
-        cv = cluster_space.get_cluster_vector(structure)
         M.append(cluster_space.get_cluster_vector(structure))
 
     c = Constraints(n_params=len(cluster_space))

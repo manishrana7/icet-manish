@@ -44,7 +44,7 @@ cs = ClusterSpace(prim, cutoffs=[7.0, 5.0, 4.0],
                   chemical_symbols=[['Au', 'Pd', 'Cu'], ['H', 'V']])
 
 A = np.random.random((n, len(cs)))
-y = np.random.random(n) # Add 10 so we are sure nothing gets zero by accident
+y = np.random.random(n)  # Add 10 so we are sure nothing gets zero by accident
 
 c = get_mixing_energy_constraints(cs)
 Ac = c.transform(A)
@@ -64,7 +64,7 @@ cs = ClusterSpace(prim, cutoffs=[7.0, 5.0, 4.0],
                   chemical_symbols=chemical_symbols)
 
 A = np.random.random((n, len(cs)))
-y = np.random.random(n) + 10.0 # Add 10 so we are sure nothing gets zero by accident
+y = np.random.random(n) + 10.0  # Add 10 so we are sure nothing gets zero by accident
 
 c = get_mixing_energy_constraints(cs)
 Ac = c.transform(A)
