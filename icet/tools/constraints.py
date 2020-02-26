@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.linalg import null_space
-from typing import List
 from .structure_enumeration import enumerate_structures
+
 
 class Constraints:
     """ Class for handling linear constraints with right hand side equal to zero.
@@ -63,7 +63,6 @@ class Constraints:
             array to be inversed transformed
         """
         return self.constraint_vectors.dot(A)
-
 
     def add_constraint(self, M: np.ndarray) -> None:
         """ Add a constraint matrix and resolve for the constraint space
