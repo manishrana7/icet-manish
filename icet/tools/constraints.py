@@ -17,6 +17,7 @@ class Constraints:
     constraint that ECI 2 and ECI 4 should be equal.
 
         >>> from icet.tools import Constraints
+        >>> from icet.fitting import Optimizer
         >>> import numpy as np
 
         >>> # Set up random sensing matrix and target "energies"
@@ -26,7 +27,9 @@ class Constraints:
 
         >>> # Define constraints
         >>> c = Constraints(n_params=n_params)
-        >>> c.add_constraint([2, 4])
+        >>> M = np.zeros((1, n_params))
+        >>> M[0, [2, 4]] = 1
+        >>> c.add_constraint(M)
 
         >>> # Do the actual fit and finally extract parameters
         >>> A_constrained = c.transform(A)
