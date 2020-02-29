@@ -3,7 +3,7 @@
 import random
 
 from collections import OrderedDict
-from typing import BinaryIO, Dict, List, TextIO, Union, Any, Optional
+from typing import BinaryIO, Dict, Tuple, List, TextIO, Union, Any, Optional
 
 import numpy as np
 
@@ -585,3 +585,72 @@ class WangLandauEnsemble(BaseEnsemble):
         norm = sum(sublattice_probabilities)
         sublattice_probabilities = [p / norm for p in sublattice_probabilities]
         return sublattice_probabilities
+
+
+def get_bins_for_parallel_simulations(n_bins: int,
+                                      energy_spacing: float,
+                                      minimum_energy: float,
+                                      maximum_energy: float,
+                                      overlap: int = 4,
+                                      bin_size_exponent: float = 1.0) -> List[Tuple[float, float]]:
+    """Generates a list of energy bins (lower and upper bound) suitable for
+    parallel Wang-Landau simulations. For the latter, the energy range is
+    split up into a several bins (``n_bins``). Each bin is then sampled in a
+    separate Wang-Landau simulation. Once the density of states in the
+    individual bins has been converged the total density of states can be
+    constructed by patching the segments back together. To this end, one
+    requires some over overlap between the segments (``overlap``).
+
+    The function returns a list of tuples. Each tuple provides the lower
+    (``energy_limit_left``) and upper (``energy_limit_right``) bound of one
+    bin, which are then to be used to set ``energy_limit_left`` and
+    ``energy_limit_right`` when initializing a :class:`WangLandauEnsemble`
+    instance.
+
+    N.B.: The left-most/right-most bin has no lower/upper bound (set to
+    ``None``).
+
+    Parameters
+    ----------
+    n_bins
+        number of bins
+    energy_spacing
+        defines the bin size of the energy grid used by the Wang-Landau
+        simulation, see :class:`WangLandauEnsemble` for details
+    minimum_energy
+        an estimate for the lowest energy to be encountered in this system
+    maximum_energy
+        an estimate for the highest energy to be encountered in this system
+    overlap
+        amount of overlap between bins in units of ``energy_spacing``
+    bin_size_exponent
+        *Expert option*: This parameter allows one to generate a non-uniform
+        distribution of bin sizes. If ``bin_size_exponent`` is smaller than
+        one bins at the lower and upper end of the energy range (specified via
+        ``minimum_energy`` and ``maximum_energy``) will be shrunk relative to
+        the bins in the middle of the energy range. In principle this can be
+        used one to achieve a more even distribution of computational load
+        between the individual Wang-Landau simulations.
+    """
+
+    limits = np.linspace(-1, 1, n_bins + 1)
+    limits = np.sign(limits) * np.abs(limits) ** bin_size_exponent
+    limits *= 0.5 * (maximum_energy - minimum_energy)
+    limits += 0.5 * (maximum_energy + minimum_energy)
+    limits[0], limits[-1] = None, None
+
+    bounds = []
+    for k, (energy_limit_left, energy_limit_right) in enumerate(zip(limits[:-1], limits[1:])):
+        if energy_limit_left is not None and energy_limit_right is not None and \
+              (energy_limit_right - energy_limit_left) / energy_spacing < 2 * overlap:
+            raise ValueError('Energy window too small. min/max: {}/{}'
+                             .format(energy_limit_right, energy_limit_left) +
+                             ' Try decreasing n_bins ({}) and/or overlap ({}).'
+                             .format(n_bins, overlap))
+        if energy_limit_left is not None:
+            energy_limit_left -= overlap * energy_spacing
+        if energy_limit_right is not None:
+            energy_limit_right += overlap * energy_spacing
+        bounds.append((energy_limit_left, energy_limit_right))
+
+    return bounds
