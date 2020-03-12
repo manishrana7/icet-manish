@@ -13,6 +13,9 @@ from pandas import DataFrame
 from .. import WangLandauDataContainer
 from ..calculators.base_calculator import BaseCalculator
 from .thermodynamic_base_ensemble import BaseEnsemble
+from icet.input_output.logging_tools import logger
+
+logger = logger.getChild('wang_landau_ensemble')
 
 
 class WangLandauEnsemble(BaseEnsemble):
@@ -218,7 +221,6 @@ class WangLandauEnsemble(BaseEnsemble):
                              ' smaller than right boundary ({}, {})'
                              .format(energy_limit_left, self._bin_left,
                                      energy_limit_right, self._bin_right))
-        self._reached_energy_window = self._bin_left is None and self._bin_right is None
 
         # ensemble parameters
         self._ensemble_parameters = {}
@@ -243,6 +245,9 @@ class WangLandauEnsemble(BaseEnsemble):
             count = structure.get_chemical_symbols().count(symbol)
             self._ensemble_parameters[key] = count
 
+        # set the convergence, which may be updated in case of a restart
+        self._converged = None  # type: Optional[bool]
+
         # the constructor of the parent classes must be called *after*
         # the ensemble_parameters dict has been populated
         super().__init__(
@@ -266,9 +271,10 @@ class WangLandauEnsemble(BaseEnsemble):
         # initialize Wang-Landau algorithm; in the case of a restart
         # these quantities are read from the data container file; the
         # if-conditions prevent these values from being overwritten
-        self._converged = None  # type: Optional[bool]
         self._potential = self.calculator.calculate_total(
             occupations=self.configuration.occupations)
+        self._reached_energy_window = self._inside_energy_window(
+            self._get_bin_index(self._potential))
         if not hasattr(self, '_fill_factor'):
             self._fill_factor = 1.0
         if not hasattr(self, '_fill_factor_history'):
@@ -332,6 +338,28 @@ class WangLandauEnsemble(BaseEnsemble):
     def flatness_check_interval(self, new_value: int) -> None:
         self._flatness_check_interval = new_value
 
+    def run(self, number_of_trial_steps: int):
+        """
+        Samples the ensemble for the given number of trial steps.
+
+        Parameters
+        ----------
+        number_of_trial_steps
+            number of MC trial steps to run in total
+        reset_step
+            if True the MC trial step counter and the data container will
+            be reset to zero and empty, respectively.
+
+        Raises
+        ------
+        TypeError
+            if `number_of_trial_steps` is not an int
+        """
+        if self.converged:
+            logger.warning('Convergence has already been reached.')
+        else:
+            super().run(number_of_trial_steps)
+
     def get_entropy(self) -> DataFrame:
         """ entropy accumulated during Wang-Landau simulation """
         df = DataFrame(data={'energy': self._energy_spacing * np.array(list(self._entropy.keys())),
@@ -366,6 +394,7 @@ class WangLandauEnsemble(BaseEnsemble):
         self._fill_factor_history = self.data_container._last_state['fill_factor_history']
         self._histogram = self.data_container._last_state['histogram']
         self._entropy = self.data_container._last_state['entropy']
+        self._converged = (self._fill_factor <= self._fill_factor_limit)
 
     def write_data_container(self, outfile: Union[str, BinaryIO, TextIO]):
         """Updates last state of the Wang-Landau simulation and
