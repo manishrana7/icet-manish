@@ -131,7 +131,7 @@ class WangLandauEnsemble(BaseEnsemble):
         period in units of seconds at which the data container is
         written to file; writing periodically to file provides both
         a way to examine the progress of the simulation and to back up
-        the data [default: np.inf]
+        the data
     trajectory_write_interval : int
         interval at which the current occupation vector of the atomic
         configuration is written to the data container.
@@ -345,7 +345,8 @@ class WangLandauEnsemble(BaseEnsemble):
         Parameters
         ----------
         number_of_trial_steps
-            number of MC trial steps to run in total
+            maximum number of MC trial steps to run in total (the
+            run will terminate earlier if `fill_factor_limit` is reached)
         reset_step
             if True the MC trial step counter and the data container will
             be reset to zero and empty, respectively.
