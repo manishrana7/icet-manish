@@ -458,8 +458,10 @@ class WangLandauEnsemble(BaseEnsemble):
                 self._histogram = {k: self._histogram[k]
                                    for k in self._histogram if self._inside_energy_window(k)}
             else:
-                if (self._bin_left is not None and bin_cur < self._bin_left and bin_new < bin_old) or \
-                   (self._bin_right is not None and bin_cur > self._bin_right and bin_new > bin_old):
+                if (self._bin_left is not None and \
+                    bin_cur < self._bin_left and bin_new < bin_old) or \
+                   (self._bin_right is not None and \
+                    bin_cur > self._bin_right and bin_new > bin_old):
                     if accept:
                         self._potential -= potential_diff
                     bin_cur = bin_old
