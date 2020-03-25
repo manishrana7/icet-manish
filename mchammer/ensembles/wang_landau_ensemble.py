@@ -428,8 +428,9 @@ class WangLandauEnsemble(BaseEnsemble):
         """
 
         # acceptance/rejection step
-        bin_cur = self._get_bin_index(self._potential)
+        bin_old = self._get_bin_index(self._potential)
         bin_new = self._get_bin_index(self._potential + potential_diff)
+        bin_cur = bin_old
         if self._allow_move(bin_cur, bin_new):
             S_cur = self._entropy.get(bin_cur, 0)
             S_new = self._entropy.get(bin_new, 0)
@@ -456,6 +457,26 @@ class WangLandauEnsemble(BaseEnsemble):
                                  for k in self._entropy if self._inside_energy_window(k)}
                 self._histogram = {k: self._histogram[k]
                                    for k in self._histogram if self._inside_energy_window(k)}
+            else:
+                # then reconsider accept/reject based on whether we
+                # approached the window or not
+                if (self._bin_left is not None and
+                   bin_cur < self._bin_left and bin_new < bin_old) or \
+                   (self._bin_right is not None and
+                   bin_cur > self._bin_right and bin_new > bin_old):
+                    # should be rejected
+                    if accept:
+                        # reset potential
+                        self._potential -= potential_diff
+                    bin_cur = bin_old
+                    accept = False
+                else:
+                    # should be accepted
+                    if not accept:
+                        # reset potential
+                        self._potential += potential_diff
+                    bin_cur = bin_new
+                    accept = True
 
         # update histograms and entropy counters
         self._update_entropy(bin_cur)
