@@ -175,7 +175,7 @@ class TestEnsemble(unittest.TestCase):
                                  energy_limit_left=-70,
                                  ensemble_data_write_interval=1,
                                  random_seed=42)
-        ens.run(10) # Run to get something in the data container
+        ens.run(10)  # Run to get something in the data container
 
         # Stepping away from window should not be allowed
         self.assertFalse(ens._acceptance_condition(10))
