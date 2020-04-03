@@ -13,7 +13,6 @@
 #include "LatticeSite.hpp"
 #include "LocalOrbitListGenerator.hpp"
 #include "ManyBodyNeighborList.hpp"
-#include "NeighborList.hpp"
 #include "Orbit.hpp"
 #include "OrbitList.hpp"
 #include "PeriodicTable.hpp"
@@ -69,11 +68,6 @@ PYBIND11_MODULE(_icet, m)
         MatrixOfEquivalentPositions
         ---------------------------
         .. autoclass:: MatrixOfEquivalentPositions
-           :members:
-
-        NeighborList
-        ------------
-        .. autoclass:: NeighborList
            :members:
 
         Orbit
@@ -327,50 +321,6 @@ PYBIND11_MODULE(_icet, m)
              py::arg("positions"),
              py::arg("fractional_position_tolerance"))
         .def("__len__", &Structure::size);
-
-    py::class_<NeighborList>(m, "NeighborList",
-        R"pbdoc(
-        This class handles a neighbor list.
-
-        Parameters
-        ----------
-        cutoff : float
-            cutoff to be used for constructing the neighbor list
-        )pbdoc")
-        .def(py::init<const double>(),
-             "Initializes a neighbor list instance.",
-	     py::arg("cutoff"))
-        .def("build",
-             &NeighborList::build,
-             py::arg("structure"),
-             py::arg("position_tolerance"),
-             R"pbdoc(
-             Builds a neighbor list for the given atomic configuration.
-
-             Parameters
-             ----------
-             structure : icet.Structure
-                 atomic configuration
-             position_tolerance : float
-                 tolerance applied when evaluating positions in Cartesian coordinates
-             )pbdoc")
-        .def("get_neighbors",
-             &NeighborList::getNeighbors,
-             py::arg("index"),
-             R"pbdoc(
-             Returns a list of lattice sites that identify the neighbors of site in question.
-
-             Parameters
-             ----------
-             index : int
-                 index of site in structure for which neighbor list was build
-
-             Returns
-             -------
-             list(_icet.LatticeSite)
-                list of lattice sites
-             )pbdoc")
-        .def("__len__", &NeighborList::size);
 
     // @todo document ManyBodyNeighborList in pybindings
     py::class_<ManyBodyNeighborList>(m, "ManyBodyNeighborList",
@@ -783,7 +733,7 @@ PYBIND11_MODULE(_icet, m)
             (supercell) structure for which to generate orbit list
         matrix_of_equivalent_sites : list(list(_icet.LatticeSite))
             matrix of symmetry equivalent sites
-        neighbor_lists : list(icet.NeighborList)
+        neighbor_lists : list(list(list(_icet.LatticeSite)))
             neighbor lists for each (cluster) order
         position_tolerance
             tolerance applied when comparing positions in Cartesian coordinates
@@ -791,7 +741,7 @@ PYBIND11_MODULE(_icet, m)
         .def(py::init<>())
         .def(py::init<const Structure &,
                       const std::vector<std::vector<LatticeSite>> &,
-                      const std::vector<NeighborList> &,
+                      const std::vector<std::vector<std::vector<LatticeSite>>> &,
                       const double>(),
              "Constructs an OrbitList object from a matrix of equivalent sites.",
              py::arg("structure"),

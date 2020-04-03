@@ -6,7 +6,6 @@
 #include "Geometry.hpp"
 #include "LatticeSite.hpp"
 #include "ManyBodyNeighborList.hpp"
-#include "NeighborList.hpp"
 #include "Orbit.hpp"
 #include "Structure.hpp"
 #include "Symmetry.hpp"
@@ -29,7 +28,7 @@ class OrbitList
     /// Constructs orbit list from a set of neighbor lists, a permutation matrix, and a structure.
     OrbitList(const Structure &,
               const std::vector<std::vector<LatticeSite>> &,
-              const std::vector<NeighborList> &,
+              const std::vector<std::vector<std::vector<LatticeSite>>> &,
               const double);
 
     /// Sort orbit list.
