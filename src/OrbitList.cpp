@@ -9,7 +9,7 @@
 **/
 OrbitList::OrbitList(const Structure &structure,
                      const std::vector<std::vector<LatticeSite>> &matrixOfEquivalentSites,
-                     const std::vector<NeighborList> &neighborLists,
+                     const std::vector<std::vector<std::vector<LatticeSite>>> &neighborLists,
                      const double positionTolerance)
 {
     bool bothways = false;
