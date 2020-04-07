@@ -443,6 +443,7 @@ PYBIND11_MODULE(_icet, m)
 	     "Initializes a LatticeSite object.",
 	     py::arg("site_index"),
 	     py::arg("unitcell_offset"))
+          //py::arg("add_unitcell_offset"))
         .def_property(
              "index",
              &LatticeSite::index,
@@ -452,6 +453,8 @@ PYBIND11_MODULE(_icet, m)
              "unitcell_offset",
              &LatticeSite::unitcellOffset,
              &LatticeSite::setUnitcellOffset,
+             "list(int) : unit cell offset (in units of the cell vectors)")
+        .def("add_unitcell_offset", &LatticeSite::addUnitcellOffset,
              "list(int) : unit cell offset (in units of the cell vectors)")
         .def(py::self < py::self)
         .def(py::self == py::self)
