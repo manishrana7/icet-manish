@@ -102,3 +102,8 @@ texinfo_documents = [
      author, 'icet', 'A Pythonic approach to cluster expansions',
      'Miscellaneous'),
 ]
+
+
+html_css_files = [
+    'custom.css',
+]
