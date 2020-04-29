@@ -448,23 +448,30 @@ class WangLandauEnsemble(BaseEnsemble):
             else:
                 # then reconsider accept/reject based on whether we
                 # approached the window or not
-                if (self._bin_left is not None and
-                   bin_cur < self._bin_left and bin_new < bin_old) or \
-                   (self._bin_right is not None and
-                   bin_cur > self._bin_right and bin_new > bin_old):
-                    # should be rejected
-                    if accept:
-                        # reset potential
-                        self._potential -= potential_diff
-                    bin_cur = bin_old
-                    accept = False
-                else:
+                dist_new = np.inf
+                dist_old = np.inf
+                if self._bin_left is not None:
+                    dist_new = min(dist_new, abs(bin_new - self._bin_left))
+                    dist_old = min(dist_old, abs(bin_old - self._bin_left))
+                if self._bin_right is not None:
+                    dist_new = min(dist_new, abs(bin_new - self._bin_right))
+                    dist_old = min(dist_old, abs(bin_old - self._bin_right))
+                assert dist_new < np.inf and dist_old < np.inf
+                exp_dist = np.exp(dist_old - dist_new)
+                if exp_dist >= 1 or exp_dist >= self._next_random_number():
                     # should be accepted
                     if not accept:
                         # reset potential
                         self._potential += potential_diff
                     bin_cur = bin_new
                     accept = True
+                else:
+                    # should be rejected
+                    if accept:
+                        # reset potential
+                        self._potential -= potential_diff
+                    bin_cur = bin_old
+                    accept = False
 
         # update histograms and entropy counters
         self._update_entropy(bin_cur)
