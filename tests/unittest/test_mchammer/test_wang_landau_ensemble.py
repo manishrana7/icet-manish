@@ -176,11 +176,11 @@ class TestEnsemble(unittest.TestCase):
                                  random_seed=42)
         ens.run(10)  # Run to get something in the data container
 
-        # Stepping far away from window should not be allowed
-        self.assertFalse(ens._acceptance_condition(10000.0))
-
         # Approaching the window should always be allowed
         self.assertTrue(ens._acceptance_condition(-10))
+
+        # Stepping far away from window should not be allowed
+        self.assertFalse(ens._acceptance_condition(10000.0))
 
         # Do the same thing from below
         ens._potential = -100
@@ -202,6 +202,17 @@ class TestEnsemble(unittest.TestCase):
         ens._histogram[-10000] = 1
         ens._entropy[-10000] = 1
         self.assertFalse(ens._acceptance_condition(-9920))
+
+        # Stepping away should not be allowed if the penalty is high
+        ens._potential = -80
+        ens._histogram[-81] = 1
+        ens._entropy[-81] = 1
+        ens._window_search_penalty = 100
+        self.assertFalse(ens._acceptance_condition(-1))
+
+        # Stepping away should be allowed if the penalty is low
+        ens._window_search_penalty = 0.0001
+        self.assertTrue(ens._acceptance_condition(-1))
 
         # Finally step inside the window
         ens._potential = -59

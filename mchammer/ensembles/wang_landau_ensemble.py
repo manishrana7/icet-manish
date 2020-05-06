@@ -111,6 +111,18 @@ class WangLandauEnsemble(BaseEnsemble):
         The histogram :math:`H(E)` is deemed sufficiently flat if
         :math:`H(E) > \\chi \\left<H(E)\\right>\\,\\forall
         E`. ``flatness_limit`` sets the parameter :math:`\\chi`.
+    window_search_penalty : float
+        If `energy_limit_left` and/or `energy_limit_right` have been
+        provided, a modified acceptance probability,
+        :math:`P=\\min\\{1,\\,\\exp[C_\\mathrm{WSP}(d_\\mathrm{new}-
+        d_\\mathrm{cur})]\\}`, will be used until a configuration is
+        found within the interval of interest. This parameter,
+        specifically, corresponds to :math:`C_\\mathrm{WSP}`, which
+        controls how strongly moves that lead to an increase in the
+        distance, i.e. difference in energy divided by the energy
+        spacing, to the energy window (:math:`d_\\mathrm{new}>
+        d_\\mathrm{cur}`) should be penalized. A higher value leads
+        to a lower acceptance probability for such moves.
     user_tag : str
         human-readable tag for ensemble [default: None]
     dc_filename : str
@@ -182,6 +194,7 @@ class WangLandauEnsemble(BaseEnsemble):
                  fill_factor_limit: float = 1e-6,
                  flatness_check_interval: int = None,
                  flatness_limit: float = 0.8,
+                 window_search_penalty: float = 2.0,
                  user_tag: str = None,
                  dc_filename: str = None,
                  data_container: str = None,
@@ -213,6 +226,7 @@ class WangLandauEnsemble(BaseEnsemble):
         self._flatness_limit = flatness_limit
 
         # energy window
+        self._window_search_penalty = window_search_penalty
         self._bin_left = self._get_bin_index(energy_limit_left)
         self._bin_right = self._get_bin_index(energy_limit_right)
         if self._bin_left is not None and \
@@ -237,6 +251,7 @@ class WangLandauEnsemble(BaseEnsemble):
         #  * flatness_check_interval
         #  * flatness_limit
         #  * entropy_write_frequency
+        #  * window_search_penalty
 
         # add species count to ensemble parameters
         symbols = set([symbol for sub in calculator.sublattices
@@ -457,7 +472,7 @@ class WangLandauEnsemble(BaseEnsemble):
                     dist_new = min(dist_new, abs(bin_new - self._bin_right))
                     dist_old = min(dist_old, abs(bin_old - self._bin_right))
                 assert dist_new < np.inf and dist_old < np.inf
-                exp_dist = np.exp(dist_old - dist_new)
+                exp_dist = np.exp((dist_old - dist_new) * self._window_search_penalty)
                 if exp_dist >= 1 or exp_dist >= self._next_random_number():
                     # should be accepted
                     if not accept:
