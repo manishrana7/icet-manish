@@ -8,11 +8,10 @@ from mchammer.calculators import ClusterExpansionCalculator
 
 def time_local_energy(calculator, occupations, iters):
     """ Returns timing for local energy calculations. """
-    indices = [2]
     t0 = time.time()
     for _ in range(iters):
-        calculator.calculate_local_contribution(local_indices=indices,
-                                                occupations=occupations)
+        calculator._calculate_local_contribution(occupations=occupations,
+                                                 index=2)
     t1 = time.time() - t0
     return t1
 
