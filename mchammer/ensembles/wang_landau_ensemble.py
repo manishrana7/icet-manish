@@ -142,7 +142,7 @@ class WangLandauEnsemble(BaseEnsemble):
         period in units of seconds at which the data container is
         written to file; writing periodically to file provides both
         a way to examine the progress of the simulation and to back up
-        the data
+        the data [default: 600 s]
     trajectory_write_interval : int
         interval at which the current occupation vector of the atomic
         configuration is written to the data container.
