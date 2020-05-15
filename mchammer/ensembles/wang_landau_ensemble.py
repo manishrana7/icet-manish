@@ -3,7 +3,7 @@
 import random
 
 from collections import OrderedDict
-from typing import BinaryIO, Dict, Tuple, List, TextIO, Union, Any, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -33,7 +33,6 @@ class WangLandauEnsemble(BaseEnsemble):
      #. Initialize counters for the microcanonical entropy
         :math:`S(E)` and the histogram :math:`H(E)` to zero.
      #. Set the fill factor :math:`f=1`.
-
 
     It then proceeds as follows.
 
@@ -318,7 +317,7 @@ class WangLandauEnsemble(BaseEnsemble):
         return self._fill_factor_history
 
     @property
-    def converged(self) -> bool:
+    def converged(self) -> Optional[bool]:
         """ True if convergence has been achieved """
         return self._converged
 
@@ -399,7 +398,7 @@ class WangLandauEnsemble(BaseEnsemble):
         self._entropy = self.data_container._last_state['entropy']
         self._converged = (self._fill_factor <= self._fill_factor_limit)
 
-    def write_data_container(self, outfile: Union[str, BinaryIO, TextIO]):
+    def write_data_container(self, outfile: Union[str, bytes]):
         """Updates last state of the Wang-Landau simulation and
         writes DataContainer to file.
 
@@ -527,13 +526,13 @@ class WangLandauEnsemble(BaseEnsemble):
                     # reset histogram
                     self._histogram = dict.fromkeys(self._histogram, 0)
 
-    def _get_bin_index(self, energy: float) -> int:
+    def _get_bin_index(self, energy: float) -> Optional[int]:
         """ Returns bin index for histogram and entropy dictionaries. """
         if energy is None or np.isnan(energy):
             return None
         return int(np.around(energy / self._energy_spacing))
 
-    def _allow_move(self, bin_cur: int, bin_new: int) -> bool:
+    def _allow_move(self, bin_cur: Optional[int], bin_new: int) -> bool:
         """Returns True if the current move is to be included in the
         accumulation of histogram and entropy. This logic has been
         moved into a separate function in order to enhance
