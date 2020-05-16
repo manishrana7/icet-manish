@@ -412,7 +412,7 @@ def get_density_of_states_wl(dcs: Union[WangLandauDataContainer,
                                  .format(tag1, tag2))
             df1_ = df1[(df1.energy >= left_lim) & (df1.energy <= right_lim)]
             df2_ = df2[(df2.energy >= left_lim) & (df2.energy <= right_lim)]
-            offset = np.average(df2_.entropy - df1_.entropy)
+            offset = (df2_.entropy - df1_.entropy).mean()
             errors['{}-{}'.format(tag1, tag2)] = np.std(df2_.entropy - df1_.entropy)
             entropies[tag2].entropy = entropies[tag2].entropy - offset
 
