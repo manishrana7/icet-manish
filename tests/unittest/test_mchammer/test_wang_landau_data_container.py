@@ -499,10 +499,13 @@ class TestDataContainer(unittest.TestCase):
 
         self.assertEqual(len(ret_binned), len(ret_single))
 
-        # test data containers with uneven overlap
+        # test data containers with uneven overlap, 1 subset of 2
         dcs = {1: self.prepareDataContainer(energy_limit_left=-12, energy_limit_right=-5),
                2: self.prepareDataContainer(energy_limit_left=-15, energy_limit_right=0)}
-        ret = get_density_of_states_wl(dcs, fill_factor_limit)
+        with self.assertWarns(Warning) as context:
+            ret = get_density_of_states_wl(dcs, fill_factor_limit)
+        self.assertIn('Window 1 is a subset of 2',
+                      str(context.warning))
         self.assertTrue(len(ret), 2)
         self.assertIsInstance(ret[0], DataFrame)
         self.assertIsInstance(ret[1], dict)
@@ -517,6 +520,7 @@ class TestDataContainer(unittest.TestCase):
         target_entropy -= np.min(target_entropy)
         target_entropy = target_entropy.tolist()
         self.assertAlmostEqualList(ret_entropy, target_entropy)
+
 
     def test_get_average_observables_wl(self):
         """Tests get_average_observables_wl function."""
