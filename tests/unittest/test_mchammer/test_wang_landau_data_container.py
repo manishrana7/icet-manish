@@ -521,7 +521,6 @@ class TestDataContainer(unittest.TestCase):
         target_entropy = target_entropy.tolist()
         self.assertAlmostEqualList(ret_entropy, target_entropy)
 
-
     def test_get_average_observables_wl(self):
         """Tests get_average_observables_wl function."""
 
