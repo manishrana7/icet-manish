@@ -63,7 +63,7 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
     ensemble_specs: List[Dict]
         A list of dictionaries, which should contain the following items:
 
-            * 'ensemble', which could be either "vcsgc"; "semigrand"
+            * 'ensemble', which could be either "vcsgc"; "semi-grand"
               or "canonical", lowercase and uppercase letters or any
               combination thereof are accepted (required)
             * 'sublattice_index', index for the sublattice of
@@ -249,8 +249,8 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
         ----------
          ensemble_specs: List[Dict]
             A list of dictionaries, which should contain the following items:
-            * 'ensemble', which could be either "vcsgc"; "semigrand" or "canonical", lowercase and
-            upercase letters or any combination thereof are accepted
+            * 'ensemble', which could be either "vcsgc"; "semi-grand" or "canonical", lowercase
+            and upercase letters or any combination thereof are accepted
             * 'sublattice_index', index for the sublattice of interest
             * 'allowed_symbols', list of allowed chemical symbols
             * 'chemical_potentials', a dictionary of chemical potentials for each species
