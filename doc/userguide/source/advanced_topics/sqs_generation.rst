@@ -6,6 +6,12 @@
 Special quasirandom structures
 ==============================
 
+.. note::
+    Looking for a simple way to generate special quasirandom structures?
+    Feel free to try this `SHARC web application
+    <https://sharc.materialsmodeling.org/sqs/>`_, which uses :program:`icet`
+    under the hood.
+
 Random alloys are often of special interest. This is true in particular for
 systems that form random solid solutions below the melting point. It is,
 however, not always easy to model such structures, because the system sizes
