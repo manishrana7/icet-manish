@@ -16,9 +16,14 @@ try:
     from mip.constants import BINARY, INTEGER
     from distutils.version import LooseVersion
 
-    if LooseVersion(mip.constants.VERSION) < '1.6.3':
-        raise VersionConflict('Python-MIP version 1.6.3 or later is required in order to use the '
-                              'ground state finder.')
+    try:
+        if LooseVersion(mip.constants.VERSION) < '1.6.3':
+            raise VersionConflict('Python-MIP version 1.6.3 or later is required in order '
+                                  'to use the ground state finder.')
+    except AttributeError:
+        # This will happen with recent versions of MIP since mip.constants.VERSION
+        # has moved to mip.VERSION, but that is fine.
+        pass
 except ImportError:
     raise ImportError('Python-MIP (https://python-mip.readthedocs.io/en/latest/) is required in '
                       'order to use the ground state finder.')
