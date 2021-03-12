@@ -182,7 +182,7 @@ class ClusterExpansion:
         ax.legend(loc='best')
         ax.set_xlabel('Radius')
         ax.set_ylabel('ECI')
-        plt.show()
+        plt.show(block=False)
 
     def __len__(self) -> int:
         return len(self._parameters)

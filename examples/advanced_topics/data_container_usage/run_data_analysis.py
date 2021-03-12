@@ -34,4 +34,4 @@ plt.legend()
 
 plt.tight_layout()
 plt.savefig('autocorrelation.svg')
-plt.show()
+plt.show(block=False)

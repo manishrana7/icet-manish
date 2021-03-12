@@ -63,7 +63,7 @@ generated/scipy.spatial.ConvexHull.html>`_.
         >>> import matplotlib.pyplot as plt
         >>> plt.scatter(data['concentration'], data['mixing_energy'], color='darkred')
         >>> plt.plot(hull.concentrations, hull.energies)
-        >>> plt.show()
+        >>> plt.show(block=False)
 
     It is also possible to extract structures at or close to the convex hull::
 

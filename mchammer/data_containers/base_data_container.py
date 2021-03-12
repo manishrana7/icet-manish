@@ -221,7 +221,7 @@ class BaseDataContainer:
             >>> # as above but this time the MC trial step is included as well
             >>> s, p = dc.get('mctrial', 'potential')
             >>> _ = plt.plot(s, p)
-            >>> plt.show()
+            >>> plt.show(block=False)
 
             >>> # obtain configurations along the trajectory along with
             >>> # their potential
