@@ -117,7 +117,7 @@ demonstrated by the following snippet:
     >>> import matplotlib.pyplot as plt
     >>> s, p = dc.get('mctrial', 'potential')
     >>> _ = plt.plot(s, p)
-    >>> plt.show()
+    >>> plt.show(block=False)
 
 The atomic configurations along the trajectory can be retrieved as a list of
 :class:`Atoms <ase.Atoms>` objects using the `trajectory` observable.
@@ -151,7 +151,7 @@ available via a :class:`DataContainer <mchammer.DataContainer>` object.
     >>> dc.apply_observer(obs)
     >>> s, sro = dc.get('mctrial', 'sro_Ag_1')
     >>> _ = plt.plot(s, sro)
-    >>> plt.show()
+    >>> plt.show(block=False)
 
 Afterwards the data container, including the new data, can be written back to
 file using the :func:`write <mchammer.DataContainer.write>` function.

@@ -162,7 +162,7 @@ class WangLandauDataContainer(BaseDataContainer):
             >>> # the point when the fill factor reached below 0.6
             >>> s, p = dc.get('mctrial', 'potential', fill_factor_limit=0.6)
             >>> _ = plt.plot(s, p)
-            >>> plt.show()
+            >>> plt.show(block=False)
 
             >>> # obtain configurations along the trajectory along with
             >>> # their potential
