@@ -1,0 +1,43 @@
+---
+- name: "Verifying if GitLab runner exists"
+  stat: path=/usr/local/bin/gitlab-runner
+  register: runner_exists
+
+- name: "Creating temp directory"
+  ansible.builtin.file:
+    path: ./tmp
+    state: directory
+    mode: '0755'
+  when: runner_exists.stat.exists == False
+
+- name: "Downloading gitlab-runner"
+  get_url:
+    url: "https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-darwin-amd64"
+    dest: "./tmp/gitlab-runner"
+    use_proxy: yes
+  when: runner_exists.stat.exists == False
+
+- name: "Installing gitlab-runner"
+  copy:
+    remote_src: True
+    src: ./tmp/gitlab-runner
+    dest: /usr/local/bin/gitlab-runner
+    mode: +x
+  when: runner_exists.stat.exists == False
+
+- name: "Install"
+  command: /usr/local/bin/gitlab-runner install
+  when: runner_exists.stat.exists == False
+
+- name: "Adding proxy to the gitlab-runner.plist"
+  script: ./modify-plist.py 192.168.1.1 8123
+  args:
+    executable: python3
+
+- name: "Start"
+  command: /usr/local/bin/gitlab-runner start
+  when: runner_exists.stat.exists == False
+
+- name: "Clean up"
+  command: rm -R ./tmp/
+  when: runner_exists.stat.exists == False
