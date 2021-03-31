@@ -1,0 +1,38 @@
+- name: Install dependencies for testing
+  pip:
+    executable: /usr/local/bin/pip3.9
+    name:
+      - coverage>=5.1,<5.2
+      - flake8>=3.7.9,<3.8.0
+  become: True
+
+- name: Install dependencies for icet
+  pip:
+    executable: /usr/local/bin/pip3.9
+    name:
+      - ase>=3.19.1,<4.0
+      - mip>=1.9.4,<1.10.0
+      - numpy>=1.18.4,<1.19.0
+      - pandas>=1.2.0,<1.3.0
+      - scikit-learn>=0.24.1,<0.25.0
+      - scipy>=1.6.1,<1.7.0
+      - spglib>=1.15.1,<1.16.0
+      - xdoctest>=0.12.0,<1.13.0
+  become: True
+
+- name: Install dependencies for building documentation
+  pip:
+    executable: /usr/local/bin/pip3.9
+    name:
+      - breathe>=4.18.0,<4.19.0
+      - sphinx>=3.0.3,<3.1.0
+      - sphinx-rtd-theme>=0.4.3,<0.5.0
+      - sphinxcontrib-bibtex>=1.0.0,<1.1.0
+  become: True
+
+- name: Install dependencies for PyPi
+  pip:
+    executable: /usr/local/bin/pip3.9
+    name:
+      - twine
+  become: True
