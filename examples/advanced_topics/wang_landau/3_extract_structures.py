@@ -27,7 +27,7 @@ ax.set_ylabel('Pair term of cluster vector')
 ax.plot(df.temperature, np.array(list(df.cv_std)).T[2], label='stddev')
 ax.plot(df.temperature, np.array(list(df.cv_mean)).T[2], label='mean')
 ax.legend()
-plt.savefig(f'wang_landau_cluster_vector_vs_temperature.svg', bbox_inches='tight')
+plt.savefig('wang_landau_cluster_vector_vs_temperature.svg', bbox_inches='tight')
 
 # Get low(est) energy structure
 temperature = 0.1
