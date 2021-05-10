@@ -139,7 +139,7 @@ class SiteOccupancyObserver(BaseObserver):
                 lattice_sites = primitive_structure.find_lattice_sites_by_positions(
                     positions=positions,
                     fractional_position_tolerance=cluster_space.fractional_position_tolerance)
-                for l, lattice_site in enumerate(lattice_sites):
+                for k, lattice_site in enumerate(lattice_sites):
                     species = chemical_symbols[lattice_site.index]
                     # check that the allowed species are equal for all sites
                     if allowed_species[site] is not None and \
@@ -147,9 +147,9 @@ class SiteOccupancyObserver(BaseObserver):
                         raise Exception("The allowed species {} for the site"
                                         " with index {} differs from the"
                                         " result {} for the previous index"
-                                        " ({})!".format(species, indices[l],
+                                        " ({})!".format(species, indices[k],
                                                         allowed_species[site],
-                                                        indices[l-1]))
+                                                        indices[k-1]))
                     allowed_species[site] = species
 
         self._allowed_species = allowed_species

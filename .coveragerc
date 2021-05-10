@@ -1,17 +1,17 @@
 # .coveragerc to control coverage.py
 [run]
+
 branch = True
 
-
 omit = 
-    *ase/*
-    *numpy/*
-    *spglib/*
-    tests/*
+    *ase*
+    *numpy*
+    *spglib*
+    *tests*
 
-include = 
-    icet/*
-    mchammer/*
+source = 
+    icet
+    mchammer
 
 [report]
 # Regexes for lines to exclude from consideration

@@ -28,7 +28,6 @@ import os
 import sys
 import numpy as np
 import importlib
-from pkg_resources import VersionConflict
 
 from ase import Atom
 from ase.build import bulk, fcc111
@@ -42,7 +41,7 @@ try:
 except ImportError as ex:
     module = ex.args[0].split()[0]
     if module == 'Python-MIP':
-        raise unittest.SkipTest('no mip module'.format(module))
+        raise unittest.SkipTest('no mip module')
     else:
         raise
 
@@ -167,13 +166,6 @@ class TestGroundStateFinder(unittest.TestCase):
                 importlib.reload(icet.tools.ground_state_finder)
         self.assertTrue('Python-MIP (https://python-mip.readthedocs.io/en/latest/) is required in '
                         'order to use the ground state finder.' in str(cm.exception))
-
-        # Test that an error is raised if the Python-MIP version is not sufficiently recent
-        with self.assertRaises(VersionConflict) as cm:
-            with mock.patch('mip.constants.VERSION', '1.6.2'):
-                importlib.reload(icet.tools.ground_state_finder)
-        self.assertTrue('Python-MIP version 1.6.3 or later is required in order to use the ground '
-                        'state finder.' in str(cm.exception))
 
     def test_init(self):
         """Tests that initialization of tested class work."""

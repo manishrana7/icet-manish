@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.6
+FROM python:3.7
 
 # 1. Base packages
 # 2. Packages for testing
@@ -23,6 +23,7 @@ RUN \
     coverage \
     flake8 \
     mypy \
+    twine \
   && \
   pip3 install --upgrade \
     ase \

@@ -41,7 +41,7 @@ for log_level in [logging.DEBUG, logging.INFO, logging.WARNING]:
 
     cs = ClusterSpace(structure, cutoffs, symbols)
     logfile.seek(0)
-    lines2 = [l.replace('\n', '') for l in logfile.readlines()]
+    lines2 = [m.replace('\n', '') for m in logfile.readlines()]
 
     # assert lines1 (from stringIO stream) and lines (from file stream) are equal
     assert len(lines1) == len(lines2)
