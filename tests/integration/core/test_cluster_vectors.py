@@ -4,8 +4,6 @@ its cluster vector computed
 """
 
 import random
-import numpy as np
-from ase.db import connect
 from icet import ClusterSpace
 
 
@@ -36,41 +34,9 @@ def generate_cluster_vector_set(n, structure_prim, chemical_symbols,
     return cluster_vectors
 
 
-def assert_decorrelation(matrix, tolerance=0.99):
-    """
-    Confirm that the correlation between any two columns of the input matrix
-    does not exceed the tolerance specified.
-
-    Parameters
-    ----------
-    matrix : list of lists/NumPy array
-        input matrix
-    tolerance : float
-        the correlation of any two columns must be lower than this value
-    """
-    A = np.array(matrix)
-    for i in range(len(matrix[0])):
-        if i == 0:  # skip zerolets (always one)
-            continue
-        col_i = matrix[:, i]
-        for j in range(len(matrix[0])):
-            if j <= i:
-                continue
-            col_j = A[:, j]
-            corr = np.dot(col_i, col_j)
-            corr /= np.linalg.norm(col_i) * np.linalg.norm(col_j)
-            msg = 'columns {} and {} correlated <i|j>= {}'.format(i, j, corr)
-            assert corr < tolerance, msg
-
-
-db = connect('structures_for_testing.db')
-chemical_symbols = ['H', 'He', 'Pb']
-for row in db.select():
-    structure_row = row.toatoms()
-    structure_tag = row.tag
-    cutoffs = [1.4] * 3
-    if len(structure_row) == 0:
-        continue
-    structure_row.wrap()
-    cluster_space = ClusterSpace(structure_row, cutoffs, chemical_symbols)
-    cvs = generate_cluster_vector_set(5, structure_row, chemical_symbols, cluster_space)
+def test_cluster_vectors(structures_for_testing):
+    chemical_symbols = ['H', 'He', 'Pb']
+    for structure in structures_for_testing.values():
+        cutoffs = [1.4] * 3
+        cluster_space = ClusterSpace(structure, cutoffs, chemical_symbols)
+        _ = generate_cluster_vector_set(3, structure, chemical_symbols, cluster_space)

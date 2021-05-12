@@ -1,5 +1,11 @@
 image: $CI_REGISTRY/$CI_PROJECT_PATH/cicd
 
+stages:
+  - build
+  - test
+  - distribution
+  - deploy
+
 variables:
   INSTDIR: "local_installation"
 
@@ -37,14 +43,10 @@ build:macos:
   script:
     - xdoctest icet
     - xdoctest mchammer
-    - coverage run --source $INSTDIR/icet,$INSTDIR/mchammer tests/main.py
+    - pytest -v -m coverage_hangup tests/
+    - coverage run -m pytest --verbose -m 'not coverage_hangup' --junitxml=report.xml tests/
     - coverage report -m
     - coverage html
-    - coverage xml
-  artifacts:
-    when: always
-    reports:
-      junit: coverage.xml
 
 basic_tests:linux:
   extends: .basic_tests
@@ -56,6 +58,8 @@ basic_tests:linux:
     expire_in: 2 days
     paths:
       - htmlcov/
+    reports:
+      junit: report.xml
 
 benchmarks_examples:
   stage: test
@@ -111,6 +115,21 @@ test_documentation:
     - sphinx-build -W doc/userguide/source/ public/
 
 
+#------------------- distribution stage -------------------
+
+pypi:
+  stage: distribution
+  tags:
+    - linux
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TAG != ""
+      when: manual
+  script:
+    - python3 setup.py sdist
+    - ls -l dist/
+    - python3 -m twine upload dist/*
+
+
 #------------------- deploy stage -------------------
 
 pages:
@@ -160,16 +179,3 @@ pages:
     - find tests/ -print | zip public/dev/tests.zip tests/structure_databases/*.db -@
     # --------------------------
     - ls -l public/
-
-pypi:
-  stage: deploy
-  tags:
-    - linux
-  rules:
-    - if: $CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TAG != ""
-      when: manual
-  script:
-    - export
-    - python3 setup.py sdist
-    - ls -l dist/
-    - python3 -m twine upload dist/*

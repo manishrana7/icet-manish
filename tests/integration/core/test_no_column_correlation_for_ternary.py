@@ -72,10 +72,12 @@ def checkNoCorrelation(cvs, tol=0.99):
     assert no_correlated_columns
 
 
-subelements = ['H', 'He', 'Pb']
-structure_row = bulk('H', 'fcc', a=1.01)
-cutoffs = [2.8] * 1
+def test_no_column_correlation_for_ternary():
 
-clusterspace = ClusterSpace(structure_row, cutoffs, subelements)
-cvs = generateCVSet(40, structure_row, subelements, clusterspace)
-checkNoCorrelation(cvs)
+    subelements = ['H', 'He', 'Pb']
+    structure_row = bulk('H', 'fcc', a=1.01)
+    cutoffs = [2.8] * 1
+
+    clusterspace = ClusterSpace(structure_row, cutoffs, subelements)
+    cvs = generateCVSet(40, structure_row, subelements, clusterspace)
+    checkNoCorrelation(cvs)
