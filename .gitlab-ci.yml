@@ -181,7 +181,7 @@ pypi:
   environment:
       name: pypi-upload
   script:
-    # check out the latest tag (redundant if job is limited to tags)
+    # check out the latest tag (redundant if job is limited to tags; still a sensible precaution)
     - tag=$(git tag | tail -1)
     - echo "tag= $tag"
     - git checkout $tag
