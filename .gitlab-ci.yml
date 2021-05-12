@@ -55,6 +55,17 @@ basic_tests:linux:
     reports:
       junit: report.xml
 
+basic_tests:macos:
+  extends: .basic_tests
+  needs:
+    - build:macos
+  tags:
+    - macos
+  artifacts:
+    expire_in: 2 days
+    reports:
+      junit: report.xml
+
 benchmarks_examples:
   stage: test
   tags:
