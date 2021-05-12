@@ -1,7 +1,7 @@
 import unittest
 from itertools import permutations
+from ase import Atoms
 from ase.build import bulk
-from ase.db import connect as ase_connect
 
 from icet.core.lattice_site import LatticeSite
 from icet.core.cluster import Cluster
@@ -337,16 +337,40 @@ class TestOrbitList(unittest.TestCase):
                         match_repr_site = True
             self.assertTrue(match_repr_site)
 
-    def test_orbit_permutations_for_structure_in_database(self):
+    def test_orbit_permutations_for_example_structures(self):
         """
         Tests allowed_permutation and equivalent_sites of orbits in orbit_list
-        for structure in database (only structures with pbc=True).
+        for series of structures.
         """
-        db = ase_connect('structures_for_testing.db')
-        for row in db.select('pbc=TTT'):
-            structure = row.toatoms()
-            with self.subTest(structure_tag=row.tag):
+        structures = {}
+
+        structures['Al-fcc-primitive_cell'] = bulk('Al', 'fcc', a=1.0)
+        structures['Al-fcc-supercell'] = structure = bulk('Al', 'fcc', a=1.0).repeat(2)
+
+        structure = bulk('Al', 'fcc', a=1.0).repeat(2)
+        structure.rattle(stdev=0.001, seed=42)
+        structures['Al-fcc-distorted'] = structure
+
+        structure = bulk('Ti', 'bcc', a=1.0).repeat(2)
+        structure.symbols[[a.index for a in structure if a.index % 2 == 0]] = 'W'
+        structures['WTi-bcc-supercell'] = structure
+
+        structures['NaCl-rocksalt-cubic-cell'] = bulk('NaCl', 'rocksalt', a=1.0)
+
+        structures['Ni-hcp-hexagonal-cell'] = bulk('Ni', 'hcp', a=0.625, c=1.0)
+
+        a = 1.0
+        b = 0.5 * a
+        structure = Atoms('BaZrO3',
+                          positions=[(0, 0, 0), (b, b, b),
+                                     (b, b, 0), (b, 0, b), (0, b, b)],
+                          cell=[a, a, a], pbc=True)
+        structures['BaZrO3-perovskite'] = structure
+
+        for name, structure in structures.items():
+            with self.subTest(structure_tag=name):
                 self._test_allowed_permutations(structure)
+            with self.subTest(structure_tag=name):
                 self._test_equivalent_sites(structure)
 
     def test_orbit_list_fcc(self):

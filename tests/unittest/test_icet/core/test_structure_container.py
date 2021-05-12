@@ -75,7 +75,7 @@ class TestStructureContainer(unittest.TestCase):
         self.properties_list = []
         self.add_properties_list = []
         for k, structure in enumerate(self.structure_list):
-            structure.set_calculator(EMT())
+            structure.calc = EMT()
             properties = {'energy': structure.get_potential_energy(),
                           'volume': structure.get_volume(),
                           'Au atoms': structure.get_chemical_symbols().count('Au')}
@@ -137,7 +137,7 @@ class TestStructureContainer(unittest.TestCase):
 
         # add atom and don't read property from calculator
         structure_cpy = structure.copy()
-        structure_cpy.set_calculator(EMT())
+        structure_cpy.calc = EMT()
         self.sc.add_structure(structure_cpy)
         self.assertEqual(len(self.sc), len(self.structure_list) + 3)
         self.assertNotIn('energy', self.sc[6].properties)
@@ -194,7 +194,7 @@ class TestStructureContainer(unittest.TestCase):
 ================================ Structure Container =================================
 Total number of structures: 4
 --------------------------------------------------------------------------------------
-index | user_tag    | n_atoms | chemical formula | Au atoms | energy    | volume   
+index | user_tag    | n_atoms | chemical formula | Au atoms | energy    | volume
 --------------------------------------------------------------------------------------
 0     | Structure 0 | 8       | Ag8              | 0        |    0.0127 |  136.8359
 1     | Structure 1 | 8       | Ag7Au            | 1        |   -0.0073 |  136.8359
@@ -216,7 +216,7 @@ index | user_tag    | n_atoms | chemical formula | Au atoms | energy    | volume
 ================================ Structure Container =================================
 Total number of structures: 4
 --------------------------------------------------------------------------------------
-index | user_tag    | n_atoms | chemical formula | Au atoms | energy    | volume   
+index | user_tag    | n_atoms | chemical formula | Au atoms | energy    | volume
 --------------------------------------------------------------------------------------
 0     | Structure 0 | 8       | Ag8              | 0        |    0.0127 |  136.8359
  ...

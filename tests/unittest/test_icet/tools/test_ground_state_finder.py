@@ -20,6 +20,7 @@ the cluster_space.py file
 
 """
 
+import pytest
 import unittest
 from unittest import mock
 from io import StringIO
@@ -209,6 +210,7 @@ class TestGroundStateFinder(unittest.TestCase):
         """Tests the model property."""
         self.assertEqual(self.gsf.model.name, 'CE')
 
+    @pytest.mark.coverage_hangup
     def test_get_ground_state(self):
         """Tests get_ground_state functionality."""
         target_val = min([self.ce.predict(structure) for structure in self.all_possible_structures])
@@ -336,6 +338,7 @@ class TestGroundStateFinderInactiveSublattice(unittest.TestCase):
                                                                verbose=False)
         self.assertIsInstance(gsf, icet.tools.ground_state_finder.GroundStateFinder)
 
+    @pytest.mark.coverage_hangup
     def test_get_ground_state(self):
         """Tests get_ground_state functionality."""
         target_val = min([self.ce.predict(structure)
@@ -449,6 +452,7 @@ class TestGroundStateFinderInactiveSublatticeSameSpecies(unittest.TestCase):
                                                                verbose=False)
         self.assertIsInstance(gsf, icet.tools.ground_state_finder.GroundStateFinder)
 
+    @pytest.mark.coverage_hangup
     def test_get_ground_state(self):
         """Tests get_ground_state functionality."""
         target_val = min([self.ce.predict(structure)
@@ -563,6 +567,7 @@ class TestGroundStateFinderZeroParameter(unittest.TestCase):
                                                                verbose=False)
         self.assertIsInstance(gsf, icet.tools.ground_state_finder.GroundStateFinder)
 
+    @pytest.mark.coverage_hangup
     def test_get_ground_state(self):
         """Tests get_ground_state functionality."""
         target_val = min([self.ce.predict(structure) for structure in self.all_possible_structures])
@@ -618,6 +623,7 @@ class TestGroundStateFinderTriplets(unittest.TestCase):
                                                                verbose=False)
         self.assertIsInstance(gsf, icet.tools.ground_state_finder.GroundStateFinder)
 
+    @pytest.mark.coverage_hangup
     def test_get_ground_state(self):
         """Tests get_ground_state functionality."""
         target_val = min([self.ce.predict(structure) for structure in self.all_possible_structures])
@@ -728,9 +734,8 @@ class TestGroundStateFinderTwoActiveSublattices(unittest.TestCase):
         db = db_connect(os.path.join(path, db_name))
 
         # Select the structure set with the lowest pairwise correlations
-        selections = ['id={}'.format(i) for i in [7, 13, 15, 62, 76]]
-        for selection in selections:
-            row = db.get(selection)
+        for index in [7, 13, 15, 62, 76]:
+            row = db.get(f'id={index}')
             structure = row.toatoms()
             target_cluster_vector = self.cs.get_cluster_vector(structure)
             species_count = {
@@ -740,7 +745,7 @@ class TestGroundStateFinderTwoActiveSublattices(unittest.TestCase):
                 structure.get_chemical_symbols().count(self.chemical_symbols[1][0])}
             ground_state = self.gsf.get_ground_state(species_count=species_count)
             gs_cluster_vector = self.cs.get_cluster_vector(ground_state)
-            mean_diff = np.mean(abs(target_cluster_vector - gs_cluster_vector))
+            mean_diff = np.mean(np.abs(target_cluster_vector - gs_cluster_vector))
             self.assertLess(mean_diff, 1e-8)
 
     def test_ground_state_cluster_vectors(self):

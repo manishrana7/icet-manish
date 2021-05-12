@@ -23,6 +23,7 @@ RUN \
     coverage \
     flake8 \
     mypy \
+    pytest \
     twine \
   && \
   pip3 install --upgrade \

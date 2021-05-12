@@ -164,26 +164,6 @@ class ClusterExpansion:
         """ primitive structure on which cluster expansion is based """
         return self._cluster_space.primitive_structure.copy()
 
-    def plot_ecis(self, orders=None):
-        """ Plot ECIs for given orders, default plots for all orders """
-
-        if orders is None:
-            orders = self.orders
-        df = self.to_dataframe()
-
-        # plotting
-        import matplotlib.pyplot as plt
-        fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1)
-        ax.axhline(y=0.0, c='k', lw=1)
-        for order in orders:
-            df_order = df.loc[df['order'] == order]
-            ax.plot(df_order.radius, df_order.eci, 'o', ms=8, label='order {}'.format(order))
-        ax.legend(loc='best')
-        ax.set_xlabel('Radius')
-        ax.set_ylabel('ECI')
-        plt.show(block=False)
-
     def __len__(self) -> int:
         return len(self._parameters)
 

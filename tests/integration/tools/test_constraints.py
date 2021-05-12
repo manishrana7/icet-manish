@@ -7,75 +7,77 @@ from ase.build import bulk
 import itertools
 
 
-np.random.seed(42)
-n, m = 20, 10
+def test_constraints():
 
-A = np.random.random((n, m))
-y = np.random.random(n)
+    np.random.seed(42)
+    n, m = 20, 10
 
-# constraint sum eci[inds] = 0
-inds1 = [1, 3, 4, 5]
-inds2 = [2, 6, 7, 8]
-M = np.zeros((2, m))
-M[0, inds1] = 1
-M[1, inds2] = 1
+    A = np.random.random((n, m))
+    y = np.random.random(n)
 
-c = Constraints(m)
-c.add_constraint(M)
+    # constraint sum eci[inds] = 0
+    inds1 = [1, 3, 4, 5]
+    inds2 = [2, 6, 7, 8]
+    M = np.zeros((2, m))
+    M[0, inds1] = 1
+    M[1, inds2] = 1
 
-Ac = c.transform(A)
-opt = Optimizer((Ac, y), fit_method='ridge')
-opt.train()
+    c = Constraints(m)
+    c.add_constraint(M)
 
-parameters = c.inverse_transform(opt.parameters)
-sum_1 = parameters[inds1].sum()
-sum_2 = parameters[inds2].sum()
-print('constraints 1, ', sum_1)
-print('constraints 2, ', sum_2)
+    Ac = c.transform(A)
+    opt = Optimizer((Ac, y), fit_method='ridge')
+    opt.train()
 
-assert abs(sum_1) < 1e-12
-assert abs(sum_2) < 1e-12
+    parameters = c.inverse_transform(opt.parameters)
+    sum_1 = parameters[inds1].sum()
+    sum_2 = parameters[inds2].sum()
+    print('constraints 1, ', sum_1)
+    print('constraints 2, ', sum_2)
 
-# Test get_mixing_energy_constraints function
-a = 4.0
-prim = bulk('Au', a=a)
-prim.append(Atom('H', position=(a / 2, a / 2, a / 2)))
-cs = ClusterSpace(prim, cutoffs=[7.0, 5.0, 4.0],
-                  chemical_symbols=[['Au', 'Pd', 'Cu'], ['H', 'V']])
+    assert abs(sum_1) < 1e-12
+    assert abs(sum_2) < 1e-12
 
-A = np.random.random((n, len(cs)))
-y = np.random.random(n)  # Add 10 so we are sure nothing gets zero by accident
+    # Test get_mixing_energy_constraints function
+    a = 4.0
+    prim = bulk('Au', a=a)
+    prim.append(Atom('H', position=(a / 2, a / 2, a / 2)))
+    cs = ClusterSpace(prim, cutoffs=[7.0, 5.0, 4.0],
+                      chemical_symbols=[['Au', 'Pd', 'Cu'], ['H', 'V']])
 
-c = get_mixing_energy_constraints(cs)
-Ac = c.transform(A)
-opt = Optimizer((Ac, y), fit_method='ridge')
-opt.train()
+    A = np.random.random((n, len(cs)))
+    y = np.random.random(n)  # Add 10 so we are sure nothing gets zero by accident
 
-parameters = c.inverse_transform(opt.parameters)
+    c = get_mixing_energy_constraints(cs)
+    Ac = c.transform(A)
+    opt = Optimizer((Ac, y), fit_method='ridge')
+    opt.train()
 
-for syms in itertools.product(['Au', 'Pd', 'Cu'], ['H', 'V']):
-    prim.set_chemical_symbols(syms)
-    assert abs(np.dot(parameters, cs.get_cluster_vector(prim))) < 1e-12
+    parameters = c.inverse_transform(opt.parameters)
 
-# Test get_mixing_energy_constraints for structure with multiple atoms in sublattice
-prim = bulk('Ti', crystalstructure='hcp')
-chemical_symbols = ['Ti', 'W', 'V']
-cs = ClusterSpace(prim, cutoffs=[7.0, 5.0, 4.0],
-                  chemical_symbols=chemical_symbols)
+    for syms in itertools.product(['Au', 'Pd', 'Cu'], ['H', 'V']):
+        prim.set_chemical_symbols(syms)
+        assert abs(np.dot(parameters, cs.get_cluster_vector(prim))) < 1e-12
 
-A = np.random.random((n, len(cs)))
-y = np.random.random(n) + 10.0  # Add 10 so we are sure nothing gets zero by accident
+    # Test get_mixing_energy_constraints for structure with multiple atoms in sublattice
+    prim = bulk('Ti', crystalstructure='hcp')
+    chemical_symbols = ['Ti', 'W', 'V']
+    cs = ClusterSpace(prim, cutoffs=[7.0, 5.0, 4.0],
+                      chemical_symbols=chemical_symbols)
 
-c = get_mixing_energy_constraints(cs)
-Ac = c.transform(A)
-opt = Optimizer((Ac, y), fit_method='ridge')
-opt.train()
+    A = np.random.random((n, len(cs)))
+    y = np.random.random(n) + 10.0  # Add 10 so we are sure nothing gets zero by accident
 
-parameters = c.inverse_transform(opt.parameters)
+    c = get_mixing_energy_constraints(cs)
+    Ac = c.transform(A)
+    opt = Optimizer((Ac, y), fit_method='ridge')
+    opt.train()
 
-for sym in chemical_symbols:
-    prim.set_chemical_symbols([sym, sym])
-    assert abs(np.dot(parameters, cs.get_cluster_vector(prim))) < 1e-12
+    parameters = c.inverse_transform(opt.parameters)
 
-prim.set_chemical_symbols(['Ti', 'W'])
-assert abs(np.dot(parameters, cs.get_cluster_vector(prim))) > 1e-12
+    for sym in chemical_symbols:
+        prim.set_chemical_symbols([sym, sym])
+        assert abs(np.dot(parameters, cs.get_cluster_vector(prim))) < 1e-12
+
+    prim.set_chemical_symbols(['Ti', 'W'])
+    assert abs(np.dot(parameters, cs.get_cluster_vector(prim))) > 1e-12

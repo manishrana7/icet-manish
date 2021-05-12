@@ -178,10 +178,6 @@ class TestClusterExpansion(unittest.TestCase):
             self.ce.prune(indices=[0])
         self.assertTrue('zerolet may not be pruned' in str(context.exception))
 
-    def test_plot_ecis(self):
-        """Tests plot_ecis."""
-        self.ce.plot_ecis()
-
     def test_repr(self):
         """Tests repr functionality."""
         retval = self.ce.__repr__()
