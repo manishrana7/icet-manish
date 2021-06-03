@@ -119,6 +119,14 @@ test_documentation:
     - sphinx-build -b doctest -W doc/userguide/source/ public/
     - sphinx-build -W doc/userguide/source/ public/
 
+include:
+  - template: Code-Quality.gitlab-ci.yml
+
+code_quality:
+  tags:
+    - linux
+  artifacts:
+    paths: [gl-code-quality-report.json]
 
 #------------------- deploy stage -------------------
 
