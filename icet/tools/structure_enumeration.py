@@ -200,7 +200,8 @@ def _yield_unique_labelings(labelings: List[int], snf: SmithNormalForm,
             yield labeling
 
 
-def _labeling_to_ase_atoms(labeling: tuple, hnf: np.ndarray, cell: np.ndarray,
+def _labeling_to_ase_atoms(labeling: tuple, hnf: HermiteNormalForm,
+                           cell: np.ndarray,
                            new_cell: np.ndarray,
                            basis: np.ndarray, chemical_symbols: List[str],
                            pbc: List[bool]) -> Atoms:
@@ -225,25 +226,33 @@ def _labeling_to_ase_atoms(labeling: tuple, hnf: np.ndarray, cell: np.ndarray,
     pbc
         periodic boundary conditions of the primitive structure
     """
+    a = hnf.H[0, 0]
+    b = hnf.H[1, 0]
+    c = hnf.H[1, 1]
+    d = hnf.H[2, 0]
+    e = hnf.H[2, 1]
+    f = hnf.H[2, 2]
     symbols = []
     positions = []
-    count = 0
-    for i in range(hnf.H[0, 0]):
-        coord = i * hnf.H[1, 0]
-        offset10 = coord // hnf.H[0, 0] + coord % hnf.H[0, 0]
-        coord = i * hnf.H[2, 0]
-        offset20 = coord // hnf.H[0, 0] + coord % hnf.H[0, 0]
-        for j in range(hnf.H[1, 1]):
-            coord = j * hnf.H[2, 1]
-            offset21 = coord // hnf.H[1, 1] + coord % hnf.H[1, 1]
-            for k in range(hnf.H[2, 2]):
-                for basis_vector in basis:
-                    positions.append(i * cell[0] +
-                                     (j + offset10) * cell[1] +
-                                     (k + offset20 + offset21) * cell[2] +
-                                     np.dot(cell.T, basis_vector))
-                    symbols.append(chemical_symbols[labeling[count]])
-                    count += 1
+    for z1 in range(a):
+        offset_1 = (b * z1) / a
+        for z2 in range(int(offset_1), int(offset_1 + c)):
+            offset_2 = z1 * (d - (e * b) / c) / a + (e * z2) / c
+            for z3 in range(int(offset_2), int(f + offset_2)):
+                for basis_vector_i, basis_vector in enumerate(basis):
+
+                    # Determine position in Cartesian coordinates
+                    pos = np.dot(cell.T, np.array([z1, z2, z3]) + basis_vector)
+                    positions.append(pos)
+
+                    # Now determine which species this is
+                    g = np.dot(hnf.snf.L, [z1, z2, z3])
+                    assert np.allclose(g, np.round(g))
+                    g = np.round(g).astype('int64')
+                    g = [g[i] % hnf.snf.S[i] for i in range(3)]
+                    ind = len(basis) * (g[0] * hnf.snf.S[1] * hnf.snf.S[2] +
+                                        g[1] * hnf.snf.S[2] + g[2]) + basis_vector_i
+                    symbols.append(chemical_symbols[labeling[ind]])
     structure = Atoms(symbols, positions, cell=new_cell, pbc=(True, True, True))
     structure.wrap()
     structure.pbc = pbc
@@ -486,8 +495,9 @@ def enumerate_structures(structure: Atoms,
                     new_cell = np.dot(hnf.H.T, structure.cell)
                 for labeling in _yield_unique_labelings(labelings, snf, hnf,
                                                         nsites):
-                    yield _labeling_to_ase_atoms(labeling, hnf, structure.cell,
-                                                 new_cell, basis, elements,
+                    yield _labeling_to_ase_atoms(labeling, hnf,
+                                                 structure.cell, new_cell,
+                                                 basis, elements,
                                                  structure.pbc)
 
 
