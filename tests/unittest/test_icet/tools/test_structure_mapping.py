@@ -55,25 +55,29 @@ class TestStructureMapping(unittest.TestCase):
         """
         Tests that retrieval of a reference supercell works.
         """
-        supercell = _get_reference_supercell(self.structure, self.reference)
+        supercell, P = _get_reference_supercell(self.structure, self.reference)
         target_cell = np.array([[0., 4., 4.],
                                 [4., 0., 4.],
                                 [4., 4., 0.]])
+        target_P = np.array([[2., 0., 0.],
+                             [0., 2., 0.],
+                             [0., 0., 2.]])
         target_formula = 'H8Au8'
         self.assertTrue(np.allclose(supercell.cell, target_cell))
         self.assertEqual(supercell.get_chemical_formula(), target_formula)
+        self.assertTrue(np.allclose(P, target_P))
 
         # Should work with default tol_cell when inert_species are specified
-        supercell = _get_reference_supercell(self.structure, self.reference,
-                                             inert_species=['Au', 'Pd'])
+        supercell, P = _get_reference_supercell(self.structure, self.reference,
+                                                inert_species=['Au', 'Pd'])
         self.assertTrue(np.allclose(supercell.cell, target_cell))
         self.assertEqual(supercell.get_chemical_formula(), target_formula)
 
         # Assuming no cell relaxation, proper match
         structure_scaled = self.structure.copy()
         structure_scaled.set_cell(structure_scaled.cell / 1.01, scale_atoms=True)
-        supercell = _get_reference_supercell(structure_scaled, self.reference,
-                                             assume_no_cell_relaxation=True)
+        supercell, P = _get_reference_supercell(structure_scaled, self.reference,
+                                                assume_no_cell_relaxation=True)
         self.assertTrue(np.allclose(supercell.cell, target_cell))
         self.assertEqual(supercell.get_chemical_formula(), target_formula)
 
@@ -204,7 +208,7 @@ class TestStructureMapping(unittest.TestCase):
             mapped, info = map_structure_to_reference(structure,
                                                       reference,
                                                       **kwargs)
-            self.assertEqual(len(info), 6)
+            self.assertEqual(len(info), 7)
             self.assertAlmostEqual(info['drmax'], expected_drmax)
             self.assertAlmostEqual(info['dravg'], expected_dravg)
             self.assertEqual(mapped.get_chemical_formula(), expected_chemical_formula)
