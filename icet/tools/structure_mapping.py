@@ -112,7 +112,7 @@ def map_structure_to_reference(structure: Atoms,
 
     # Obtain supercell of reference structure that is compatible
     # with relaxed structure
-    reference_supercell = _get_reference_supercell(
+    reference_supercell, P = _get_reference_supercell(
         structure, reference, inert_species=inert_species,
         tol_positions=tol_positions, assume_no_cell_relaxation=assume_no_cell_relaxation)
 
@@ -168,7 +168,8 @@ def map_structure_to_reference(structure: Atoms,
             'strain_tensor': strain_tensor,
             'volumetric_strain': volumetric_strain,
             'strain_tensor_eigenvalues': eigenvalues,
-            'warnings': warnings}
+            'warnings': warnings,
+            'transformation_matrix': P}
 
     return mapped_structure, info
 
@@ -177,10 +178,11 @@ def _get_reference_supercell(structure: Atoms,
                              reference: Atoms,
                              inert_species: List[str] = None,
                              tol_positions: float = 1e-5,
-                             assume_no_cell_relaxation: bool = False) -> Atoms:
+                             assume_no_cell_relaxation: bool = False) -> Tuple[Atoms, np.ndarray]:
     """
-    Returns a supercell of the reference structure that is compatible with the
-    cell metric of the input structure.
+    Returns a tuple comprising a supercell of the reference structure that is compatible with the
+    cell metric of the input structure as well as the transformation matrix that maps from the
+    primitive to the supercell structure.
 
     Parameters
     ----------
@@ -251,7 +253,7 @@ def _get_reference_supercell(structure: Atoms,
     # generate supercell of reference structure
     reference_supercell = make_supercell(reference, P, tol=tol_positions)
 
-    return reference_supercell
+    return reference_supercell, P
 
 
 def _match_positions(structure: Atoms, reference: Atoms) -> Tuple[Atoms, float, float]:
