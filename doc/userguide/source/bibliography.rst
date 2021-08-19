@@ -108,4 +108,4 @@ Bibliography
    | `doi: 10.1103/PhysRevLett.65.353 <https://doi.org/10.1103/PhysRevLett.65.353>`_
 
 
-Also see [I]_, [II]_, [III]_, and [IV]_.
+Also see this :ref:`list of publications <publications>` using icet.
