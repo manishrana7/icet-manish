@@ -106,3 +106,5 @@ texinfo_documents = [
 html_css_files = [
     'custom.css',
 ]
+
+suppress_warnings = ['ref.citation']
