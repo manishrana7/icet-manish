@@ -1,4 +1,4 @@
-image: $CI_REGISTRY/$CI_PROJECT_PATH/cicd
+image: $CI_REGISTRY/materials-modeling/$CI_PROJECT_NAME/cicd
 
 variables:
   INSTDIR: "local_installation"
