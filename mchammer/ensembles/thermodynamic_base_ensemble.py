@@ -109,7 +109,9 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             p = np.exp(-potential_diff / (self.boltzmann_constant * self.temperature))
             return p > self._next_random_number()
 
-    def do_canonical_swap(self, sublattice_index: int, allowed_species: List[int] = None) -> int:
+    def do_canonical_swap(self,
+                          sublattice_index: int,
+                          allowed_species: List[int] = None) -> int:
         """ Carries out one Monte Carlo trial step.
 
         Parameters
@@ -131,7 +133,8 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             return 1
         return 0
 
-    def do_sgc_flip(self, chemical_potentials: Dict[int, float], sublattice_index: int,
+    def do_sgc_flip(self, chemical_potentials: Dict[int, float],
+                    sublattice_index: int,
                     allowed_species: List[int] = None) -> int:
         """ Carries out one Monte Carlo trial step.
 
@@ -139,7 +142,7 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         ---------
         chemical_potentials
             chemical potentials used to calculate the potential
-             difference
+            difference
         sublattice_index
             the sublattice the flip will act on
         allowed_species
@@ -162,7 +165,10 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             return 1
         return 0
 
-    def do_vcsgc_flip(self, phis: Dict[int, float], kappa: float, sublattice_index: int,
+    def do_vcsgc_flip(self,
+                      phis: Dict[int, float],
+                      kappa: float,
+                      sublattice_index: int,
                       allowed_species: List[int] = None) -> int:
         """Carries out one Monte Carlo trial step.
 
@@ -235,7 +241,9 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         probability_distribution = [p / norm for p in probability_distribution]
         return probability_distribution
 
-    def _get_vcsgc_free_energy_derivatives(self, phis: Dict[int, float], kappa: float,
+    def _get_vcsgc_free_energy_derivatives(self,
+                                           phis: Dict[int, float],
+                                           kappa: float,
                                            sublattice_index: int = None) -> Dict:
         """
         Returns a dict with the free energy derivatives.
