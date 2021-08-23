@@ -12,7 +12,8 @@
 
 /**
 @brief This class handles the cluster space.
-@details It provides functionality for setting up a cluster space, calculating cluster vectors as well as retrieving various types of associated information.
+@details It provides functionality for setting up a cluster space, calculating
+cluster vectors as well as retrieving various types of associated information.
 */
 
 class ClusterSpace
@@ -83,8 +84,8 @@ class ClusterSpace
     /// Computes permutations and multicomponent vectors of each orbit.
     void computeMultiComponentVectors();
 
-    /// Prunes the orbit list.
-    void pruneOrbitList(std::vector<size_t> &);
+    /// Removes orbits.
+    void removeOrbits(std::vector<size_t> &);
 
     /// Primitive (prototype) structure.
     Structure _primitiveStructure;
