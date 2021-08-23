@@ -383,7 +383,7 @@ PYBIND11_MODULE(_icet, m)
              {
                  std::ostringstream msg;
                  msg << "radius: " << cluster.radius();
-                 msg << " vertex distances:";
+                 msg << " vertices:";
                  for (const auto dist : cluster.distances())
                  {
                      msg << " " << std::to_string(dist);
@@ -551,11 +551,11 @@ PYBIND11_MODULE(_icet, m)
              "list of sites that comprise the representative cluster")
         .def_property_readonly(
              "order",
-             [](const Orbit &orbit) { return orbit.getRepresentativeCluster().order(); },
+             [](const Orbit &orbit) { return orbit.order(); },
              "number of sites in the representative cluster")
         .def_property_readonly(
              "radius",
-             [](const Orbit &orbit) { return orbit.getRepresentativeCluster().radius(); },
+             [](const Orbit &orbit) { return orbit.radius(); },
              "radius of the representative cluster")
         .def_property(
              "permutations_to_representative",
@@ -649,20 +649,30 @@ PYBIND11_MODULE(_icet, m)
              [](const Orbit &orbit)
              {
                  std::ostringstream msg;
-                 msg << "radius: " << orbit.radius();
-                 msg << "  equivalent_clusters:";
+                 msg << "order: " << orbit.order() << std::endl;
+                 msg << "multiplicity: " << orbit.size() << std::endl;
+                 msg << "radius: " << orbit.radius() << std::endl;
+                 msg << "representative_cluster:" << std::endl;
+                 for (const auto site : orbit.getSitesOfRepresentativeCluster())
+                 {
+                     msg << "    site: " << site << std::endl;
+                 }
+                 msg << "equivalent_clusters:" << std::endl;
+                 int k = -1;
                  for (const auto sites : orbit._equivalentClusters)
                  {
-                     msg << "  ";
+                     k += 1;
+                     msg << "  cluster: " << k << std::endl;
                      for (const auto site : sites)
                      {
-                         msg << " " << site;
+                         msg << "    site: " << site << std::endl;
                      }
                  }
                  return msg.str();
              })
         .def(py::self < py::self)
-        .def(py::self + Eigen::Vector3d());
+        .def(py::self + Eigen::Vector3d())
+        .def(py::self += py::self);
 
     py::class_<OrbitList>(m, "_OrbitList",
 	R"pbdoc(
@@ -699,9 +709,6 @@ PYBIND11_MODULE(_icet, m)
         .def("add_orbit",
              &OrbitList::addOrbit,
              "Adds an orbit.")
-        .def("get_number_of_nbody_clusters",
-             &OrbitList::getNumberOfNBodyClusters,
-             "Returns the number of orbits.")
         .def("get_orbit",
              &OrbitList::getOrbit,
              "Returns a copy of the orbit at position i in the orbit list.")
@@ -737,9 +744,9 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             taken_rows: set(tuple(int))
+             taken_rows : set(tuple(int))
                  unique collection of row index
-             rows: list(int)
+             rows : list(int)
                  row indices
              )pbdoc",
              py::arg("taken_rows"),
@@ -751,13 +758,13 @@ PYBIND11_MODULE(_icet, m)
 
              Parameters
              ----------
-             lattice_neighbors: list(_icet.LatticeSite)
+             lattice_neighbors : list(_icet.LatticeSite)
                 set of lattice sites that might be representative for a cluster
-             sort_it: bool
+             sort : bool
                 If true sort translasted sites.
              )pbdoc",
              py::arg("lattice_neighbors"),
-             py::arg("sort_it"))
+             py::arg("sort"))
         .def("_get_all_columns_from_sites",
              &OrbitList::getAllColumnsFromCluster,
              R"pbdoc(
@@ -881,6 +888,29 @@ PYBIND11_MODULE(_icet, m)
              )pbdoc",
              py::arg("structure"),
              py::arg("fractional_position_tolerance"))
+          .def("_merge_orbit",
+               [](ClusterSpace &clusterSpace,
+                  int index1,
+                  int index2)
+                  {
+                    clusterSpace._orbitList._orbits[index1] += clusterSpace._orbitList._orbits[index2];
+                  },
+             R"pbdoc(
+             Merges the two orbits. This implies that the equivalent clusters
+             from the second orbit are added to to the list of equivalent
+             clusters of the first orbit, after which the second orbit is
+             removed.
+
+             Parameters
+             ----------
+             index1 : int
+                 index of the first orbit in the list of orbits of the cluster space
+             index3 : int
+                 index of the first orbit in the list of orbits of the cluster space
+             )pbdoc",
+             py::arg("index1"),
+             py::arg("index2"))
+
         .def("_get_orbit_list", &ClusterSpace::getOrbitList)
         .def("get_orbit", &ClusterSpace::getOrbit)
         .def_property_readonly("species_maps", &ClusterSpace::getSpeciesMaps)
@@ -895,7 +925,7 @@ PYBIND11_MODULE(_icet, m)
         .def("_compute_multi_component_vectors",
              &ClusterSpace::computeMultiComponentVectors,
              "Compute the multi-component vectors (internal).")
-        .def("_prune_orbit_list_cpp", &ClusterSpace::pruneOrbitList)
+        .def("_remove_orbits_cpp", &ClusterSpace::removeOrbits)
         .def("evaluate_cluster_function",
              &ClusterSpace::evaluateClusterFunction,
              "Evaluates value of a cluster function.")
@@ -930,7 +960,7 @@ PYBIND11_MODULE(_icet, m)
               ignored_indices : list(int)
                   list of indices that have already had their local energy calculated;
                   this is required to prevent double counting
-              )pbdoc",              
+              )pbdoc",
               py::arg("occupations"),
               py::arg("index"),
               py::arg("ignored_indices"))
@@ -947,8 +977,8 @@ PYBIND11_MODULE(_icet, m)
               Parameters
               ----------
               occupations : list(int)
-                  the occupation vector for the supercell              
-              )pbdoc",              
+                  the occupation vector for the supercell
+              )pbdoc",
               py::arg("occupations"))
               ;
 }

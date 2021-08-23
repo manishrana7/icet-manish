@@ -156,22 +156,6 @@ void OrbitList::addOrbit(const Orbit &orbit) {
 }
 
 /**
-@param nbody number of bodies for which to return the number of clusters
-**/
-unsigned int OrbitList::getNumberOfNBodyClusters(unsigned int nbody) const
-{
-    unsigned int count = 0;
-    for (const auto &orbit : _orbits)
-    {
-        if (orbit.getRepresentativeCluster().order() == nbody)
-        {
-            count++;
-        }
-    }
-    return count;
-}
-
-/**
 @details Returns the index of the orbit for which the given cluster is representative.
 @param cluster cluster to search for
 @param clusterIndexMap map of cluster indices for fast lookup
@@ -346,7 +330,7 @@ void OrbitList::addPermutationInformationToOrbits()
         if (sitePermutations.size() != _orbits[i].getEquivalentClusters().size() || sitePermutations.size() == 0)
         {
             std::ostringstream msg;
-            msg << "Not each set of site got a permutation (OrbitList::addPermutationInformationToOrbits) " << std::endl;
+            msg << "Not each set of site has a permutation (OrbitList::addPermutationInformationToOrbits) " << std::endl;
             msg << sitePermutations.size() << " != " << _orbits[i].getEquivalentClusters().size();
             throw std::runtime_error(msg.str());
         }
@@ -443,7 +427,7 @@ std::vector<std::vector<LatticeSite>> OrbitList::getSitesTranslatedToUnitcell(co
     Vector3d zeroVector = {0.0, 0.0, 0.0};
     for (size_t i = 0; i < latticeSites.size(); i++)
     {
-        if ((latticeSites[i].unitcellOffset() - zeroVector).norm() > 0.5) // only translate those outside unitcell
+        if ((latticeSites[i].unitcellOffset() - zeroVector).norm() > 0.5)  // only translate those outside unitcell
         {
             auto translatedSites = translateSites(latticeSites, i);
             if (sort)
@@ -461,7 +445,7 @@ std::vector<std::vector<LatticeSite>> OrbitList::getSitesTranslatedToUnitcell(co
 }
 
 /**
-@detail Takes all lattice sites in vector latticeSites and subtracts the unitcell offset of site latticeSites[index].
+@details Takes all lattice sites in vector latticeSites and subtracts the unitcell offset of site latticeSites[index].
 @param latticeSites list of lattice sites, typically a cluster
 @param index index of site relative to which to shift
 */
@@ -650,7 +634,7 @@ Orbit OrbitList::getSuperCellOrbit(const Structure &supercell,
     if (orbitIndex >= _orbits.size())
     {
         std::ostringstream msg;
-        msg << "Orbit index out of range (OrbitList::getSuperCellOrbit).";
+        msg << "Orbit index out of range (OrbitList::getSuperCellOrbit): ";
         msg << orbitIndex << " >= " << _orbits.size();
         throw std::out_of_range(msg.str());
     }

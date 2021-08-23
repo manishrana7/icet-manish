@@ -94,6 +94,22 @@ def _assertAlmostEqualList(self, retval, target, places=6):
 unittest.TestCase.assertAlmostEqualList = _assertAlmostEqualList
 
 
+def _assertEqualAtoms(self, retval, target, places=6):
+    """
+    Helper function that conducts a basic comparison of two Atoms objects.
+    """
+    self.assertIsInstance(retval, type(target))
+    self.assertEqual(len(retval), len(target))
+    self.assertTrue(all(retval.pbc == target.pbc))
+    self.assertAlmostEqualList(retval.cell.flatten(), target.cell.flatten(), places=places)
+    for atom1, atom2 in zip(retval, target):
+        self.assertEqual(atom1.symbol, atom2.symbol)
+        self.assertAlmostEqualList(atom1.position, atom2.position, places=places)
+
+
+unittest.TestCase.assertEqualAtoms = _assertEqualAtoms
+
+
 class TestClusterSpace(unittest.TestCase):
     """Container for test of the class functionality."""
 
@@ -440,7 +456,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
         self.cs.write(f.name)
         f.seek(0)
         cs_read = ClusterSpace.read(f.name)
-        self.assertEqual(self.cs._input_structure, cs_read._input_structure)
+        self.assertEqualAtoms(self.cs._input_structure, cs_read._input_structure)
         self.assertEqual(list(self.cs._cutoffs), list(cs_read._cutoffs))
         self.assertEqual(self.cs._input_chemical_symbols,
                          cs_read._input_chemical_symbols)
@@ -699,6 +715,268 @@ class TestClusterSpaceMultiSublattice(unittest.TestCase):
         # Twice as many pairs in 100 direction since they can be both
         # sublattice-1 -> sublatice 1 and sublattice 2  -> sublattice 2
         self.assertEqual(pair_counts_binary[2.045] * 2, pair_counts[2.045])
+
+
+class TestClusterSpaceMergedOrbits(unittest.TestCase):
+    """
+    Container for tests of the class functionality for merged orbits
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(TestClusterSpaceMergedOrbits, self).__init__(*args, **kwargs)
+        self.chemical_symbols = ['Au', 'Pd']
+        self.cutoffs = [5.0, 5.0]
+        self.primitive_structure = bulk('Au', a=4.0)
+        self.structure = self.primitive_structure.repeat((3, 3, 3))
+        for i in [3, 7, 9, 14, 18, 21]:
+            self.structure[i].symbol = 'Pd'
+
+    def setUp(self):
+        """Instantiates class before each test."""
+        self.cs = ClusterSpace(self.primitive_structure, self.cutoffs, self.chemical_symbols)
+
+    def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
+        return None
+
+    def test_merge_orbits(self):
+        """ Tests merge orbits function"""
+
+        # Merge orbits
+        self.cs.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]})
+
+        order_target = [0, 1, 2, 3]
+        radii_target = [0, 0.0, 1.4142135623730951, 1.632993161855452]
+        multiplicity_target = [1, 1, 21, 124]
+
+        self.assertEqual([orb['order'] for orb in self.cs.orbit_data], order_target)
+        self.assertAlmostEqualList([orb['radius'] for orb in self.cs.orbit_data], radii_target)
+        self.assertEqual([orb['multiplicity'] for orb in self.cs.orbit_data], multiplicity_target)
+
+    def test_merge_orbits_fails_for_self_merge(self):
+        """ Tests that merging orbit with itself fails. """
+        with self.assertRaises(ValueError) as cm:
+            self.cs.merge_orbits({2: [2, 3]})
+        self.assertTrue('Cannot merge' in str(cm.exception) and 'with itself' in str(cm.exception))
+
+    def test_merge_orbits_fails_when_merging_multiple_times(self):
+        """ Tests that merging orbit multiple times fails. """
+        with self.assertRaises(ValueError) as cm:
+            self.cs.merge_orbits({1: [3], 2: [3]})
+        self.assertTrue('was already merged with another orbit' in str(cm.exception))
+
+    def test_merge_orbits_fails_when_merging_different_orders(self):
+        """ Tests that merging orbits with different orders fails. """
+        with self.assertRaises(ValueError) as cm:
+            self.cs.merge_orbits({0: [5]})
+        self.assertTrue('does not match the order' in str(cm.exception))
+
+    def test_cluster_vectors(self):
+        """ Tests that the same cluster vector is produced regardless of which orbit is
+        used as key when merging """
+
+        cv_target = [1., 0.55555556, 0.28747795, 0.13261649]
+
+        cs_1 = self.cs.copy()
+        cs_1.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]})
+        cv_1 = cs_1.get_cluster_vector(self.structure)
+
+        cs_2 = self.cs.copy()
+        cs_2.merge_orbits({2: [1, 3], 9: [4, 5, 6, 7, 8, 10]})
+        cv_2 = cs_2.get_cluster_vector(self.structure)
+
+        self.assertAlmostEqualList(list(cv_1), cv_target)
+        self.assertAlmostEqualList(list(cv_1), list(cv_2))
+
+    def test_read_write(self):
+        """Tests read/write functionality."""
+        self.cs.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]})
+        f = tempfile.NamedTemporaryFile()
+        self.cs.write(f.name)
+        f.seek(0)
+        cs_read = ClusterSpace.read(f.name)
+        self.assertEqualAtoms(self.cs._input_structure, cs_read._input_structure)
+        self.assertAlmostEqualList(list(self.cs._cutoffs), list(cs_read._cutoffs))
+        self.assertEqual(self.cs._input_chemical_symbols,
+                         cs_read._input_chemical_symbols)
+        self.assertEqual(len(self.cs), len(cs_read))
+
+
+class TestClusterSpaceMergedOrbitsTernary(unittest.TestCase):
+    """
+    Container for tests of the class functionality for merged orbits
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(TestClusterSpaceMergedOrbitsTernary, self).__init__(*args, **kwargs)
+        self.chemical_symbols = ['Au', 'Cu', 'Pd']
+        self.cutoffs = [5.0, 5.0]
+        self.primitive_structure = bulk('Au', a=4.0)
+        self.structure = self.primitive_structure.repeat((3, 3, 3))
+        for i in [3, 7, 9, 14, 18, 21]:
+            self.structure[i].symbol = 'Pd'
+
+    def setUp(self):
+        """Instantiates class before each test."""
+        self.cs = ClusterSpace(self.primitive_structure, self.cutoffs, self.chemical_symbols)
+
+    def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
+        return None
+
+    def test_merge_orbits(self):
+        """ Tests merge orbits function"""
+
+        # Merge orbits
+        self.cs.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]})
+
+        order_target = [0, 1, 1, 2, 2, 2, 3, 3, 3, 3]
+        radii_target = [0] * 3 + [1.4142135623730951] * 3 + [1.632993161855452] * 4
+        multiplicity_target = [1, 1, 1, 21, 42, 21, 124, 372, 372, 124]
+
+        self.assertEqual([orb['order'] for orb in self.cs.orbit_data], order_target)
+        self.assertAlmostEqualList([orb['radius'] for orb in self.cs.orbit_data], radii_target)
+        self.assertEqual([orb['multiplicity'] for orb in self.cs.orbit_data], multiplicity_target)
+
+    def test_merge_orbits_fails_for_self_merge(self):
+        """ Tests that merging orbit with itself fails. """
+        with self.assertRaises(ValueError) as cm:
+            self.cs.merge_orbits({2: [2, 3]})
+        self.assertTrue('Cannot merge' in str(cm.exception) and 'with itself' in str(cm.exception))
+
+    def test_merge_orbits_fails_when_merging_multiple_times(self):
+        """ Tests that merging orbit multiple times fails. """
+        with self.assertRaises(ValueError) as cm:
+            self.cs.merge_orbits({1: [3], 2: [3]})
+        self.assertTrue('was already merged with another orbit' in str(cm.exception))
+
+    def test_merge_orbits_fails_when_merging_different_orders(self):
+        """ Tests that merging orbits with different orders fails. """
+        with self.assertRaises(ValueError) as cm:
+            self.cs.merge_orbits({0: [5]})
+        self.assertTrue('does not match the order' in str(cm.exception))
+
+    def test_cluster_vectors(self):
+        """ Tests that the same cluster vector is produced regardless of which orbit is
+        used as key when merging """
+
+        cv_target = [1, 0.5, 0.48112522, 0.25, 0.24056261, 0.21560847, 0.125, 0.12028131,
+                     0.10648148, 0.08613694]
+        cs = self.cs.copy()
+        cs.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]})
+        cv = cs.get_cluster_vector(self.structure)
+        self.assertAlmostEqualList(list(cv), cv_target)
+
+        cs = self.cs.copy()
+        cs.merge_orbits({2: [1, 3], 4: [5, 6, 7, 8, 9, 10]})
+        cv = cs.get_cluster_vector(self.structure)
+        self.assertAlmostEqualList(list(cv), cv_target)
+
+        cv_target = [1, 0.5, 0.48112522, 0.25, 0.24056261, 0.21560847, 0.125, 0.12028131,
+                     0.12028131, 0.10349462, 0.1124552, 0.08613694]
+
+        cs = self.cs.copy()
+        cs.merge_orbits({1: [2, 3], 5: [4, 6, 7, 8, 9, 10]})
+        cv = cs.get_cluster_vector(self.structure)
+        self.assertAlmostEqualList(list(cv), cv_target)
+
+    def test_read_write(self):
+        """Tests read/write functionality."""
+        self.cs.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]})
+        f = tempfile.NamedTemporaryFile()
+        self.cs.write(f.name)
+        f.seek(0)
+        cs_read = ClusterSpace.read(f.name)
+        self.assertEqualAtoms(self.cs._input_structure, cs_read._input_structure)
+        self.assertAlmostEqualList(list(self.cs._cutoffs), list(cs_read._cutoffs))
+        self.assertEqual(self.cs._input_chemical_symbols,
+                         cs_read._input_chemical_symbols)
+        self.assertEqual(len(self.cs), len(cs_read))
+
+
+class TestClusterSpaceMergedOrbitsSublattices(unittest.TestCase):
+    """
+    Container for tests of the class functionality for merged orbits
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(TestClusterSpaceMergedOrbitsSublattices, self).__init__(*args, **kwargs)
+        self.chemical_symbols = [['H', 'X'], ['Pd', 'Au']]
+        self.cutoffs = [5]
+        self.primitive_structure = bulk('HPd', crystalstructure='rocksalt', a=4.0)
+        self.structure = self.primitive_structure.repeat((3, 3, 3))
+        for i in [8, 12, 40, 42]:
+            self.structure[i].symbol = 'X'
+        for i in [3, 7, 9, 15, 21]:
+            self.structure[i].symbol = 'Au'
+
+    def setUp(self):
+        """Instantiates class before each test."""
+        self.cs = ClusterSpace(self.primitive_structure, self.cutoffs, self.chemical_symbols)
+
+    def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
+        return None
+
+    def test_merge_orbits(self):
+        """ Tests merge orbits function"""
+
+        # Merge orbits
+        self.cs.merge_orbits({2: [5, 8], 3: [6, 9], 4: [7, 10]})
+
+        order_target = [0, 1, 1, 2, 2, 2]
+        radii_target = [0] * 3 + [1.0] + [1.4142135623730951] * 2
+        multiplicity_target = [1, 1, 1, 38, 21, 21]
+
+        self.assertEqual([orb['order'] for orb in self.cs.orbit_data], order_target)
+        self.assertAlmostEqualList([orb['radius'] for orb in self.cs.orbit_data], radii_target)
+        self.assertEqual([orb['multiplicity'] for orb in self.cs.orbit_data], multiplicity_target)
+
+    def test_merge_orbits_fails_for_self_merge(self):
+        """ Tests that merging orbit with itself fails. """
+        with self.assertRaises(ValueError) as cm:
+            self.cs.merge_orbits({2: [2, 3]})
+        self.assertTrue('Cannot merge' in str(cm.exception) and 'with itself' in str(cm.exception))
+
+    def test_merge_orbits_fails_when_merging_multiple_times(self):
+        """ Tests that merging orbit multiple times fails. """
+        with self.assertRaises(ValueError) as cm:
+            self.cs.merge_orbits({2: [8], 5: [8]})
+        self.assertTrue('was already merged with another orbit' in str(cm.exception))
+
+    def test_merge_orbits_fails_when_merging_different_orders(self):
+        """ Tests that merging orbits with different orders fails. """
+        with self.assertRaises(ValueError) as cm:
+            self.cs.merge_orbits({0: [5]})
+        self.assertTrue('does not match the order' in str(cm.exception))
+
+    def test_cluster_vectors(self):
+        """ Tests that that the correct cluster vectors are being produced """
+
+        cv_target = [1, 0.7037037, -0.62962963, -0.4502924, 0.49206349, 0.35802469]
+
+        cs = self.cs.copy()
+        cs.merge_orbits({2: [5, 8], 3: [6, 9], 4: [7, 10]})
+        cv = cs.get_cluster_vector(self.structure)
+        self.assertAlmostEqualList(list(cv), cv_target)
+
+        cs = self.cs.copy()
+        cs.merge_orbits({5: [2, 8], 6: [3, 9], 7: [4, 10]})
+        cv = cs.get_cluster_vector(self.structure)
+        self.assertAlmostEqualList(list(cv), cv_target)
+
+    def test_read_write(self):
+        """Tests read/write functionality."""
+        self.cs.merge_orbits({2: [5, 8], 3: [6, 9], 4: [7, 10]})
+        f = tempfile.NamedTemporaryFile()
+        self.cs.write(f.name)
+        f.seek(0)
+        cs_read = ClusterSpace.read(f.name)
+        self.assertEqualAtoms(self.cs._input_structure, cs_read._input_structure)
+        self.assertAlmostEqualList(list(self.cs._cutoffs), list(cs_read._cutoffs))
+        self.assertEqual(self.cs._input_chemical_symbols,
+                         cs_read._input_chemical_symbols)
+        self.assertEqual(len(self.cs), len(cs_read))
 
 
 if __name__ == '__main__':

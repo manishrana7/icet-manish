@@ -346,7 +346,7 @@ std::pair<int, std::vector<int>> ClusterSpace::getMultiComponentVectorsByOrbit(c
 @details This function removes orbits from the underlying orbit list.
 @param indices list of orbit indices
 **/
-void ClusterSpace::pruneOrbitList(std::vector<size_t> &indices)
+void ClusterSpace::removeOrbits(std::vector<size_t> &indices)
 {
     std::sort(indices.begin(), indices.end());
 

@@ -9,7 +9,7 @@ import tarfile
 import tempfile
 from collections import OrderedDict
 from math import log10, floor
-from typing import List, Union, Tuple
+from typing import Dict, List, Union, Tuple
 
 import numpy as np
 import spglib
@@ -40,7 +40,7 @@ class ClusterSpace(_ClusterSpace):
     ----------
     structure : ase.Atoms
         atomic structure
-    cutoffs : list(float)
+    cutoffs : List[float]
         cutoff radii per order that define the cluster space
 
         Cutoffs are specified in units of Angstrom and refer to the
@@ -50,7 +50,7 @@ class ClusterSpace(_ClusterSpace):
         that all pairs distanced 7 A or less will be included,
         as well as all triplets among which the longest distance is no
         longer than 4.5 A.
-    chemical_symbols : list(str) or list(list(str))
+    chemical_symbols : Union[List[str], List[List[str]]]
         list of chemical symbols, each of which must map to an element
         of the periodic table
 
@@ -110,11 +110,11 @@ class ClusterSpace(_ClusterSpace):
 
         if not isinstance(structure, Atoms):
             raise TypeError('Input configuration must be an ASE Atoms object'
-                            ', not type {}'.format(type(structure)))
+                            f', not type {type(structure)}.')
         if not all(structure.pbc):
-            raise ValueError('Input structure must have periodic boundary conditions')
+            raise ValueError('Input structure must have periodic boundary conditions.')
         if symprec <= 0:
-            raise ValueError('symprec must be a positive number')
+            raise ValueError('symprec must be a positive number.')
 
         self._config = {'symprec': symprec}
         self._cutoffs = cutoffs.copy()
@@ -122,7 +122,7 @@ class ClusterSpace(_ClusterSpace):
         self._input_chemical_symbols = copy.deepcopy(chemical_symbols)
         chemical_symbols = self._get_chemical_symbols()
 
-        self._pruning_history = []
+        self._pruning_history = []  # type: List[tuple]
 
         # set up primitive
         occupied_primitive, primitive_chemical_symbols = get_occupied_primitive_structure(
@@ -351,19 +351,16 @@ class ClusterSpace(_ClusterSpace):
             local_Mi = self.get_number_of_allowed_species_by_site(
                 self._get_primitive_structure(), orbit.sites_of_representative_cluster)
             mc_vectors = orbit.get_mc_vectors(local_Mi)
-            mc_permutations = self.get_multi_component_vector_permutations(
-                mc_vectors, orbit_index)
+            mc_permutations = self.get_multi_component_vector_permutations(mc_vectors, orbit_index)
             mc_index = mc_vectors.index(mc_vector)
             mc_permutations_multiplicity = len(mc_permutations[mc_index])
             cluster = self.get_orbit(orbit_index).representative_cluster
+            multiplicity = len(self.get_orbit(orbit_index).equivalent_clusters)
 
-            multiplicity = len(self.get_orbit(
-                orbit_index).equivalent_clusters)
             record = OrderedDict([('index', index),
                                   ('order', cluster.order),
                                   ('radius', cluster.radius),
-                                  ('multiplicity', multiplicity *
-                                   mc_permutations_multiplicity),
+                                  ('multiplicity', multiplicity * mc_permutations_multiplicity),
                                   ('orbit_index', orbit_index)])
             record['multi_component_vector'] = mc_vector
             record['sublattices'] = orbit_sublattices
@@ -414,20 +411,15 @@ class ClusterSpace(_ClusterSpace):
 
     def get_coordinates_of_representative_cluster(self, orbit_index: int) -> List[Tuple[float]]:
         """
-        Returns the positions of atoms in the selected orbit
+        Returns the positions of the sites in the representative cluster of the selected orbit.
 
         Parameters
         ----------
         orbit_index
-            index of the orbit from which to calculate the positions of the atoms
-
-        Returns
-        -------
-        list of positions of atoms in the selected orbit
-
+            index of the orbit for which to return the positions of the sites
         """
         # Raise exception if chosen orbit index not in current list of orbit indices
-        if not (orbit_index in range(len(self._orbit_list))):
+        if orbit_index not in range(len(self._orbit_list)):
             raise ValueError('The input orbit index is not in the list of possible values.')
 
         lattice_sites = self._orbit_list.get_orbit(orbit_index).sites_of_representative_cluster
@@ -440,9 +432,18 @@ class ClusterSpace(_ClusterSpace):
 
         return positions
 
-    def _prune_orbit_list(self, indices: List[int]) -> None:
+    def _rebuild_orbit_list(self) -> None:
+        """Rebuild the Python-side orbit list using the orbits from the
+        C++-side orbit list. This is necessary in order to ensure the
+        consistency of Python and C++ orbit lists in particular after merging
+        orbits."""
+        self._orbit_list.clear()
+        for i in range(max([(d['orbit_index']) for d in self.orbit_data])+1):
+            self._orbit_list.add_orbit(self.get_orbit(i))
+
+    def _remove_orbits(self, indices: List[int]) -> None:
         """
-        Prunes the internal orbit list
+        Removes orbits.
 
         Parameters
         ----------
@@ -450,15 +451,23 @@ class ClusterSpace(_ClusterSpace):
             indices to all orbits to be removed
         """
         size_before = len(self._orbit_list)
-
-        self._prune_orbit_list_cpp(indices)
-        for index in sorted(indices, reverse=True):
-            self._orbit_list.remove_orbit(index)
+        self._remove_orbits_cpp(indices)
         self._compute_multi_component_vectors()
-
+        self._rebuild_orbit_list()
         size_after = len(self._orbit_list)
         assert size_before - len(indices) == size_after
-        self._pruning_history.append(indices)
+
+    def _prune_orbit_list(self, indices: List[int]) -> None:
+        """
+        Prunes the internal orbit list and maintains the history.
+
+        Parameters
+        ----------
+        indices
+            indices to all orbits to be removed
+        """
+        self._remove_orbits(indices)
+        self._pruning_history.append(('prune', indices))
 
     @property
     def primitive_structure(self) -> Atoms:
@@ -488,8 +497,7 @@ class ClusterSpace(_ClusterSpace):
         """Orbit list that defines the cluster in the cluster space"""
         return self._orbit_list
 
-    def get_possible_orbit_occupations(self, orbit_index: int) \
-            -> List[List[str]]:
+    def get_possible_orbit_occupations(self, orbit_index: int) -> List[List[str]]:
         """Returns possible occupation of the orbit.
 
         Parameters
@@ -506,8 +514,7 @@ class ClusterSpace(_ClusterSpace):
         return list(itertools.product(*allowed_species))
 
     def get_sublattices(self, structure: Atoms) -> Sublattices:
-        """
-        Returns the sublattices of the input structure.
+        """ Returns the sublattices of the input structure.
 
         Parameters
         ----------
@@ -523,22 +530,17 @@ class ClusterSpace(_ClusterSpace):
     def assert_structure_compatibility(self, structure: Atoms, vol_tol: float = 1e-5) -> None:
         """ Raises error if structure is not compatible with ClusterSpace.
 
-        Todo
-        ----
-        Add check for if structure is relaxed.
-
         Parameters
         ----------
         structure
-            structure to check if compatible with ClusterSpace
+            structure to check for compatibility with ClusterSpace
         """
         # check volume
-        prim = self.primitive_structure
-        vol1 = prim.get_volume() / len(prim)
+        vol1 = self.primitive_structure.get_volume() / len(self.primitive_structure)
         vol2 = structure.get_volume() / len(structure)
         if abs(vol1 - vol2) > vol_tol:
-            raise ValueError('Volume per atom of structure does not match the volume of '
-                             'ClusterSpace.primitive_structure')
+            raise ValueError('Volume per atom of structure does not match the volume of'
+                             ' ClusterSpace.primitive_structure.')
 
         # check occupations
         sublattices = self.get_sublattices(structure)
@@ -546,7 +548,84 @@ class ClusterSpace(_ClusterSpace):
 
         # check pbc
         if not all(structure.pbc):
-            raise ValueError('Input structure must have periodic boundary conditions')
+            raise ValueError('Input structure must have periodic boundary conditions.')
+
+    def merge_orbits(self, equivalent_orbits: Dict[int, List[int]]) -> None:
+        """ Combines several orbits into one. This allows one to make custom
+        cluster spaces by manually declaring the clusters in two or more
+        orbits to be equivalent. This is a powerful approach for simplifying
+        the cluster spaces of low-dimensional structures such as, e.g.,
+        surfaces or nanoparticles.
+
+        The procedure works in principle for any number of components. Note,
+        however, that in the case of more than two components the outcome of
+        the merging procedure inherits the treatment of the multicomponent
+        vectors of the orbit chosen as the representative one.
+
+        Parameters
+        ----------
+        equivalent_orbits
+            the keys of this dictionary denote the indices of the orbit into
+            which to merge, the values are the indices of the orbits that are
+            supposed to be merged into the orbit denoted by the key
+
+        Note
+        ----
+        The `orbit_index` should not be confused with the `index` shown when
+        printing the cluster space.
+
+        Examples
+        --------
+        The following snippet illustrates the use of this method to create a
+        cluster space for a (111) FCC surface, in which only the singlets for
+        the first and second layer are distinct as well as the in-plane pair
+        interaction in the topmost layer. All other singlets and pairs are
+        respectively merged into one orbit. After merging there will be only 3
+        singlets and 2 pairs left with correspondingly higher multiplicities.
+
+            >>> from icet import ClusterSpace
+            >>> from ase.build import fcc111
+            >>>
+            >>> # Create primitive surface unit cell
+            >>> structure = fcc111('Au', size=(1, 1, 8), a=4.1, vacuum=10, periodic=True)
+            >>>
+            >>> # Set up initial cluster space
+            >>> cs = ClusterSpace(structure=structure, cutoffs=[3.8], chemical_symbols=['Au', 'Ag'])
+            >>>
+            >>> # At this point, one can inspect the orbits in the cluster space by printing the
+            >>> #  `cs` object and by using its `get_coordinates_of_representative_cluster()`
+            >>> # method. There will be 4 singlets and 8 pairs.
+            >>>
+            >>> # Merge singlets for third and fourth layers as well as all pairs except for
+            >>> # the one corresponding to the in-plane interaction in the outmost surface
+            >>> # layer
+            >>> cs.merge_orbits({2: [3], 4: [6, 7, 8, 9, 10, 11]})
+        """
+
+        self._pruning_history.append(('merge', equivalent_orbits))
+        orbits_to_delete = []
+        for k1, orbit_indices in equivalent_orbits.items():
+            order1 = self.get_orbit(k1).order
+
+            for k2 in orbit_indices:
+
+                # sanity checks
+                if k1 == k2:
+                    raise ValueError(f'Cannot merge orbit {k1} with itself.')
+                if k2 in orbits_to_delete:
+                    raise ValueError(f'Orbit {k2} cannot be merged into orbit {k1}'
+                                     ' since it was already merged with another orbit.')
+                order2 = self.get_orbit(k2).order
+                if order1 != order2:
+                    raise ValueError(f'The order of orbit {k1} ({order1}) does not'
+                                     f' match the order of orbit {k2} ({order2}).')
+
+                # merge
+                self._merge_orbit(k1, k2)
+                orbits_to_delete.append(k2)
+
+        # update merge/prune history
+        self._remove_orbits(orbits_to_delete)
 
     def is_supercell_self_interacting(self, structure: Atoms) -> bool:
         """
@@ -647,8 +726,18 @@ class ClusterSpace(_ClusterSpace):
                           chemical_symbols=items['chemical_symbols'],
                           symprec=items['symprec'],
                           position_tolerance=items['position_tolerance'])
-        for indices in items['pruning_history']:
-            cs._prune_orbit_list(indices)
+        if len(items['pruning_history']) > 0:
+            if isinstance(items['pruning_history'][0], tuple):
+                for key, value in items['pruning_history']:
+                    if key == 'prune':
+                        cs._prune_orbit_list(value)
+                    elif key == 'merge':
+                        cs.merge_orbits(value)
+            else:  # for backwards compatibility
+                for value in items['pruning_history']:
+                    cs._pruning_history(value)
+
+        cs._rebuild_orbit_list()
         return cs
 
     def copy(self):
@@ -658,6 +747,11 @@ class ClusterSpace(_ClusterSpace):
                                chemical_symbols=self._input_chemical_symbols,
                                symprec=self.symprec,
                                position_tolerance=self.position_tolerance)
-        for indices in self._pruning_history:
-            cs_copy._prune_orbit_list(indices)
+
+        for key, value in self._pruning_history:
+            if key == 'prune':
+                cs_copy._prune_orbit_list(value)
+            elif key == 'merge':
+                cs_copy.merge_orbits(value)
+        cs_copy._rebuild_orbit_list()
         return cs_copy
