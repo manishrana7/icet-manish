@@ -28,7 +28,10 @@ class BaseObserver(ABC):
         the observation interval
     """
 
-    def __init__(self, return_type: type, interval: int = None, tag: str = 'BaseObserver') -> None:
+    def __init__(self,
+                 return_type: type,
+                 interval: int = None,
+                 tag: str = 'BaseObserver') -> None:
         self.tag = tag
         self.interval = interval
         self._return_type = return_type
@@ -56,3 +59,15 @@ class BaseObserver(ABC):
         mchammer calculator : `calculator`.
         """
         raise NotImplementedError
+
+    def __str__(self) -> str:
+        """ string representation of BaseObserver. """
+        width = 60
+        name = self.__class__.__name__
+        s = [' {} '.format(name).center(width, '=')]
+
+        fmt = '{:15} : {}'
+        s += [fmt.format('return_type', self.return_type)]
+        s += [fmt.format('interval', self.interval)]
+        s += [fmt.format('tag', self.tag)]
+        return '\n'.join(s)
