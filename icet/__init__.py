@@ -6,9 +6,6 @@ Main module of the icet package.
 from .core.cluster_space import ClusterSpace
 from .core.cluster_expansion import ClusterExpansion
 from .core.structure_container import StructureContainer
-from .fitting import (Optimizer,
-                      EnsembleOptimizer,
-                      CrossValidationEstimator)
 
 __project__ = 'icet'
 __description__ = 'A Pythonic approach to cluster expansions'
@@ -22,7 +19,4 @@ __url__ = 'http://icet.materialsmodeling.org/'
 
 __all__ = ['ClusterSpace',
            'ClusterExpansion',
-           'StructureContainer',
-           'Optimizer',
-           'EnsembleOptimizer',
-           'CrossValidationEstimator']
+           'StructureContainer']

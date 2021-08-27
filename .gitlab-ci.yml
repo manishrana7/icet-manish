@@ -116,8 +116,8 @@ test_documentation:
     - doxygen Doxyfile
     - cd ../..
     - mv doc/apidoc/html/ public/apidoc/
-    - sphinx-build -b doctest -W doc/userguide/source/ public/
-    - sphinx-build -W doc/userguide/source/ public/
+    - sphinx-build -b doctest -W doc/userguide/ public/
+    - sphinx-build -W doc/userguide/ public/
 
 include:
   - template: Code-Quality.gitlab-ci.yml
@@ -153,7 +153,7 @@ pages:
     - doxygen Doxyfile
     - cd ../..
     - mv doc/apidoc/html/ public/apidoc/
-    - sphinx-build -W doc/userguide/source/ public/
+    - sphinx-build -W doc/userguide/ public/
     - cd examples
     - find tutorial/ -print | zip ../public/tutorial.zip -@
     - find advanced_topics/ -print | zip ../public/advanced_topics.zip -@
@@ -168,9 +168,9 @@ pages:
     - doxygen Doxyfile
     - cd ../..
     - mv doc/apidoc/html/ public/dev/apidoc/
-    - sed -i "s/version = ''/version = '$tag'/" doc/userguide/source/conf.py
-    - grep version doc/userguide/source/conf.py
-    - sphinx-build -W doc/userguide/source/ public/dev/
+    - sed -i "s/version = ''/version = '$tag'/" doc/userguide/conf.py
+    - grep version doc/userguide/conf.py
+    - sphinx-build -W doc/userguide/ public/dev/
     - cd examples
     - find tutorial/ -print | zip ../public/dev/tutorial.zip -@
     - find advanced_topics/ -print | zip ../public/dev/advanced_topics.zip -@

@@ -48,8 +48,8 @@ libraries including
 `pandas <https://pandas.pydata.org/>`_,
 `numpy <http://www.numpy.org/>`_,
 `scipy <https://www.scipy.org/>`_,
-`scitkit-learn <http://scikit-learn.org/>`_, and
-`spglib <https://atztogo.github.io/spglib/>`_.
+`spglib <https://atztogo.github.io/spglib/>`_, and
+`trainstation <https://trainstation.materialsmodeling.org/>`_.
 
 
 Credits

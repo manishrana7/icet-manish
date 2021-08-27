@@ -2,7 +2,7 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
-import scipy
+from scipy import stats
 
 
 def analyze_data(data: np.ndarray, max_lag: int = None) -> dict:
@@ -134,6 +134,6 @@ def _estimate_error(data: np.ndarray,
                     correlation_length: int,
                     confidence: float) -> float:
     """ Estimates error using correlation length. """
-    t_factor = scipy.stats.t.ppf((1 + confidence) / 2, len(data)-1)  # type: float
+    t_factor = stats.t.ppf((1 + confidence) / 2, len(data)-1)  # type: float
     error = t_factor * np.std(data) / np.sqrt(len(data) / correlation_length)  # type: float
     return error

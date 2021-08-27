@@ -1,10 +1,12 @@
+import itertools
+
 import numpy as np
-from icet.fitting import Optimizer
-from icet.tools import Constraints, get_mixing_energy_constraints
-from icet import ClusterSpace
 from ase import Atom
 from ase.build import bulk
-import itertools
+from trainstation import Optimizer
+
+from icet.tools import Constraints, get_mixing_energy_constraints
+from icet import ClusterSpace
 
 
 def test_constraints():

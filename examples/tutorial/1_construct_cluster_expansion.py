@@ -1,8 +1,8 @@
 # This scripts runs in about 16 seconds on an i7-6700K CPU.
 
 from ase.db import connect
-from icet import (ClusterSpace, StructureContainer,
-                  CrossValidationEstimator, ClusterExpansion)
+from icet import ClusterSpace, StructureContainer, ClusterExpansion
+from trainstation import CrossValidationEstimator
 
 # step 1: Basic setup
 db = connect('reference_data.db')
