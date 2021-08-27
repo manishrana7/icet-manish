@@ -123,8 +123,8 @@ def get_mixing_energy_constraints(cluster_space) -> Constraints:
     Warning
     -------
     Constraining the energy of one structure is always done at the expense of the
-    fit quality of the others. Always expect that your :term:`CV` scores will increase
-    somewhat when using this function.
+    fit quality of the others. Always expect that your cross-validation scores will
+    increase somewhat when using this function.
     """
     M = []
 

@@ -153,7 +153,7 @@ pages:
     - doxygen Doxyfile
     - cd ../..
     - mv doc/apidoc/html/ public/apidoc/
-    - sphinx-build -W doc/userguide/ public/
+    - sphinx-build -W doc/userguide/source/ public/
     - cd examples
     - find tutorial/ -print | zip ../public/tutorial.zip -@
     - find advanced_topics/ -print | zip ../public/advanced_topics.zip -@
