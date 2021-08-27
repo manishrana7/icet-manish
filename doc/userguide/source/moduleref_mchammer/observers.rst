@@ -59,3 +59,16 @@ ClusterExpansionObserver
    :members:
    :undoc-members:
    :inherited-members:
+
+
+.. index::
+   single: Class reference; ConstituentStrainObserver
+   single: Monte Carlo; Constituent strain observer
+
+ConstituentStrainObserver
+-------------------------
+
+.. autoclass:: ConstituentStrainObserver
+   :members:
+   :undoc-members:
+   :inherited-members:

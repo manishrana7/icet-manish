@@ -392,6 +392,7 @@ class BaseEnsemble(ABC):
         if len(sites) != len(species):
             raise ValueError('sites and species must have the same length.')
         self.configuration.update_occupations(sites, species)
+        self.calculator.accept_change()
 
     def _get_property_change(self, sites: List[int], species: List[int]) -> float:
         """Computes and returns the property change due to a change of

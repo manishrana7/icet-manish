@@ -63,8 +63,8 @@ Ground state finder
 Convex hull construction
 ------------------------
 
-.. automodule:: icet.tools
-   :members: ConvexHull
+.. autoclass:: icet.tools.ConvexHull
+   :members:
 
 
 .. index::
@@ -75,6 +75,17 @@ Fitting with constraints
 ------------------------
 
 .. automodule:: icet.tools.constraints
+   :members:
+
+
+.. index::
+   single: Function reference; Constituent strain
+   single: Class reference; Constituent strain
+
+Constituent strain
+------------------
+
+.. autoclass:: icet.tools.ConstituentStrain
    :members:
 
 
