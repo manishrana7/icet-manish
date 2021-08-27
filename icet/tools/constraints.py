@@ -16,14 +16,15 @@ class Constraints:
     The following example demonstrates fitting of a cluster expansion under the
     constraint that parameter 2 and parameter 4 should be equal::
 
-        >>> from icet.tools import Constraints
-        >>> from icet.fitting import Optimizer
         >>> import numpy as np
+        >>> from icet.tools import Constraints
+        >>> from trainstation import Optimizer
 
         >>> # Set up random sensing matrix and target "energies"
         >>> n_params = 10
-        >>> A = np.random.random((10, n_params))
-        >>> y = np.random.random(10)
+        >>> n_energies = 20
+        >>> A = np.random.random((n_energies, n_params))
+        >>> y = np.random.random(n_energies)
 
         >>> # Define constraints
         >>> c = Constraints(n_params=n_params)
@@ -96,18 +97,19 @@ def get_mixing_energy_constraints(cluster_space) -> Constraints:
     at the pure phases in a toy example with random cluster vectors and
     random target energies::
 
-        >>> from icet.tools import get_mixing_energy_constraints
-        >>> from icet.fitting import Optimizer
-        >>> from icet import ClusterSpace
-        >>> from ase.build import bulk
         >>> import numpy as np
+        >>> from ase.build import bulk
+        >>> from icet import ClusterSpace
+        >>> from icet.tools import get_mixing_energy_constraints
+        >>> from trainstation import Optimizer
 
         >>> # Set up cluster space along with random sensing matrix and target "energies"
         >>> prim = bulk('Au')
         >>> cs = ClusterSpace(prim, cutoffs=[6.0, 5.0], chemical_symbols=['Au', 'Ag'])
         >>> n_params = len(cs)
-        >>> A = np.random.random((10, len(cs)))
-        >>> y = np.random.random(10)
+        >>> n_energies = 20
+        >>> A = np.random.random((n_energies, n_params))
+        >>> y = np.random.random(n_energies)
 
         >>> # Define constraints
         >>> c = get_mixing_energy_constraints(cs)
