@@ -184,10 +184,11 @@ with a list of target properties produced by the :func:`get_fit_data()
    :start-after: # step 4
    :end-before: # step 5
 
-The :class:`CrossValidationEstimator <trainstation.CrossValidationEstimator>` optimizer used here is intended to provide a reliable estimate for the cross validation (:term:`CV`) score.
+The :class:`CrossValidationEstimator <trainstation.CrossValidationEstimator>` optimizer used here is intended to provide a reliable estimate for the cross validation score.
 This is achieved by calling the :func:`validate <trainstation.CrossValidationEstimator.validate>` method.
 With the default settings used here the :class:`CrossValidationEstimator <trainstation.CrossValidationEstimator>` then randomly splits the available data into a training and a validation set.
-Here, the effective cluster interactions (:term:`ECIs`) are obtained using the :term:`LASSO` method (``fit_method``).
+Here, the effective cluster interactions (:term:`ECIs`) are obtained using the
+`LASSO <https://en.wikipedia.org/wiki/Lasso_(statistics)>`_ method (``fit_method``).
 This procedure is repeated 10 times (the default value for ``number_of_splits``).
 
 .. note::
@@ -230,7 +231,7 @@ We have thus constructed a CE with an average root mean square error (RMSE,
 ``rmse_validation``) for the validation set of only 2.4 meV/atom. The original
 cluster space included 173 parameters (``number_of_parameters``), 54 of which
 are non-zero (``number_of_nonzero_parameters``) in the final CE. The efficiency
-of the :term:`LASSO` method for finding sparse solutions is evident from the
+of the LASSO method for finding sparse solutions is evident from the
 number of non-zero parameters (54) being much smaller than the total number of
 parameters (173).
 
