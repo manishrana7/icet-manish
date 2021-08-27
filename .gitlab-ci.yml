@@ -39,8 +39,8 @@ build:macos:
     - xdoctest mchammer
     - pytest -v -m coverage_hangup tests/
     - coverage run -m pytest --verbose -m 'not coverage_hangup' --junitxml=report.xml tests/
-    - coverage report -m
-    - coverage html
+    - coverage report -m --omit=icet/tools/constituent_strain_helper_functions.py
+    - coverage html --omit=icet/tools/constituent_strain_helper_functions.py
 
 basic_tests:linux:
   extends: .basic_tests
@@ -78,7 +78,7 @@ benchmarks_examples:
     - for f in benchmark/*.py; do python3 -u "$f"; done
     - pwd=`pwd`
     - |
-      for dir in `find examples -name '*.py' | xargs gdirname | sort -uk1` ; do
+      for dir in `find examples -name '*.py' | grep -v constituent_strain | xargs gdirname | sort -uk1` ; do
         cd $pwd
         cd $dir
         for file in `ls *.py | sort -gk1 | grep -v __ | grep -v parallel_monte_carlo` ; do

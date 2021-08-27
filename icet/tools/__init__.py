@@ -10,6 +10,8 @@ from .structure_enumeration import (enumerate_structures,
 from .geometry import (get_wyckoff_sites,
                        get_primitive_structure)
 from .structure_mapping import map_structure_to_reference
+from .constituent_strain import ConstituentStrain
+from .constituent_strain_helper_functions import redlich_kister
 
 __all__ = ['Constraints',
            'get_mixing_energy_constraints',
@@ -18,4 +20,6 @@ __all__ = ['Constraints',
            'enumerate_supercells',
            'get_primitive_structure',
            'get_wyckoff_sites',
-           'map_structure_to_reference']
+           'map_structure_to_reference',
+           'ConstituentStrain',
+           'redlich_kister']

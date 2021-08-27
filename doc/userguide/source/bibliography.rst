@@ -41,6 +41,12 @@ Bibliography
    | Physical Review B **80**, 014120 (2009)
    | `doi: 10.1103/PhysRevB.80.014120 <http://dx.doi.org/10.1103/PhysRevB.80.014120>`_
 
+.. [LakFerFro92]
+   | D. B. Laks, L. G. Ferreira, S. Froyen, and A. Zunger
+   | *Efficient cluster expansion for substitutional systems*
+   | Phys. Rev. B **46**, 12587 (1992)
+   | `doi: 10.1103/PhysRevB.46.12587 <https://doi.org/10.1103/PhysRevB.46.12587>`_
+
 .. [LanTsaExl04]
    | D. P. Landau, S.-H. Tsai, and M. Exler
    | *A new approach to Monte Carlo simulations in statistical physics: Wang-Landau sampling*
@@ -58,6 +64,12 @@ Bibliography
    | *Cluster expansion made easy with Bayesian compressive sensing*
    | Phys. Rev. B **88**, 155105 (2013)
    | `doi: 10.1103/PhysRevB.88.155105 <http://dx.doi.org/10.1103/PhysRevB.88.155105>`_
+
+.. [OzoWolZun98]
+   | V. Ozoliņš, C. Wolverton, and Alex Zunger
+   | *Effects of anharmonic strain on the phase stability of epitaxial films and superlattices: Applications to noble metals*
+   | Phys. Rev. B **57**, 4816 (1998)
+   | `doi: 10.1103/PhysRevB.57.4816 <http://dx.doi.org/10.1103/PhysRevB.57.4816>`_
 
 .. [SadErh12]
    | B. Sadigh, and P. Erhart
