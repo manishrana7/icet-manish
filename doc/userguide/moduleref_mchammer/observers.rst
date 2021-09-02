@@ -36,8 +36,16 @@ BinaryShortRangeOrderObserver
 
 
 .. index::
-   single: Class reference; ClusterCountObserver
-   single: Monte Carlo; Cluster count observer
+   single: Class reference; StructureFactorObserver
+   single: Monte Carlo; Structure factor observer
+
+StructureFactorObserver
+-----------------------
+
+.. autoclass:: StructureFactorObserver
+   :members:
+   :undoc-members:
+   :inherited-members:
 
 ClusterCountObserver
 --------------------

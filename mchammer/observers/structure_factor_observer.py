@@ -9,21 +9,20 @@ logger = logger.getChild('structure_factor_observer')
 
 
 class StructureFactorObserver(BaseObserver):
-    r"""
-    This class represents a structure factor observer.
+    r"""This class represents a structure factor observer.
 
     This observer allows one to compute structure factors along the
     trajectory sampled by a Monte Carlo (MC) simulation. Structure
-    factors are convenient for monitoring long-range order.
-    The [structure factor](https://en.wikipedia.org/wiki/Structure_factor)
-    is defined as::
+    factors are convenient for monitoring long-range order. The
+    `structure factor <https://en.wikipedia.org/wiki/Structure_factor>`_
+    is defined as:
 
-    ```math
-    S(\vec{q}) = \frac{1}{\sum_{j=1}^N f_j^2}
+    .. math::
+
+        S(\vec{q}) = \frac{1}{\sum_{j=1}^N f_j^2}
                  \sum_{j,k}^N e^{-i \vec{q} \cdot (\vec{R}_k - \vec{R}_j)}
-    ```
 
-    In addition to this ``total'' structure factor, this observer
+    In addition to this "total" structure factor, this observer
     calculates pair-specific structure factors, which correspond to parts
     of the summation defined above, with the summation restricted to pairs
     of specific types, e.g., Au-Au, Au-Cu and Cu-Cu in the example below.
@@ -50,8 +49,9 @@ class StructureFactorObserver(BaseObserver):
         form factors for each atom type; this can be used to (very
         coarsely) simulate X-ray or neutron spectra; note that in general
         the form factors are q-dependent, see, e.g.,
-        [here](https://wiki.fysik.dtu.dk/ase/ase/xrdebye.html) and
-        [here](https://wiki.fysik.dtu.dk/ase/ase/xrdebye.html#ase.utils.xrdebye.XrDebye.get_waasmaier);
+        `here <https://wiki.fysik.dtu.dk/ase/ase/xrdebye.html>`__ and
+        `here <https://wiki.fysik.dtu.dk/ase/ase/
+        xrdebye.html#ase.utils.xrdebye.XrDebye.get_waasmaier>`__;
         by default (`None`) all form factors are set to 1
 
     interval : int
