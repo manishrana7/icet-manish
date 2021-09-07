@@ -306,9 +306,9 @@ class TestStructure(unittest.TestCase):
         chem_symbols = ase_structure.get_chemical_symbols()
         self.assertListEqual(chem_symbols, ['Ag', 'Ag'])
 
-    def test_repr_function(self):
-        """Tests string representation."""
-        retval = self.icet_structure.__repr__()
+    def test_str(self):
+        """Tests __str__ method."""
+        retval = self.icet_structure.__str__()
         target = """
 Cell:
 [[ 2.          0.          0.        ]

@@ -49,7 +49,7 @@ def _structure_to_atoms(self) -> Atoms:
 Structure.to_atoms = _structure_to_atoms
 
 
-def _repr_function(self) -> str:
+def _str_function(self) -> str:
     s = ['Cell:']
     s += ['{}\n'.format(self.cell)]
     s += ['Element and positions:']
@@ -58,4 +58,4 @@ def _repr_function(self) -> str:
     return '\n'.join(s)
 
 
-Structure.__repr__ = _repr_function
+Structure.__str__ = _str_function
