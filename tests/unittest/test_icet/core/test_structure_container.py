@@ -187,9 +187,9 @@ class TestStructureContainer(unittest.TestCase):
         target2 = self.properties_list[0]
         self.assertEqual(retval2, target2['energy'])
 
-    def test_repr(self):
-        """Tests repr functionality."""
-        retval = self.sc.__repr__()
+    def test_str(self):
+        """Tests __str__ method."""
+        retval = self.sc.__str__()
         target = """
 ================================ Structure Container =================================
 Total number of structures: 4
@@ -207,7 +207,7 @@ index | user_tag    | n_atoms | chemical formula | Au atoms | energy    | volume
 
         # test representation of an empty structure container
         sc = StructureContainer(self.cs)
-        self.assertEqual(sc.__repr__(), 'Empty StructureContainer')
+        self.assertEqual(sc.__str__(), 'Empty StructureContainer')
 
     def test_get_string_representation(self):
         """Tests _get_string_representation functionality."""

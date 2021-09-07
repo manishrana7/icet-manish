@@ -157,7 +157,7 @@ class StructureContainer:
 
         return s
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         """ String representation. """
         return self._get_string_representation(print_threshold=50)
 

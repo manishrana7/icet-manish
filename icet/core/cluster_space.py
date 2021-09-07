@@ -280,6 +280,16 @@ class ClusterSpace(_ClusterSpace):
         return '\n'.join(s)
 
     def __repr__(self) -> str:
+        """ Representation. """
+        s = type(self).__name__ + '('
+        s += f'structure={self.primitive_structure.__repr__()}'
+        s += f', cutoffs={self._cutoffs.__repr__()}'
+        s += f', chemical_symbols={self._input_chemical_symbols.__repr__()}'
+        s += f', position_tolerance={self._config["position_tolerance"]}'
+        s += ')'
+        return s
+
+    def __str__(self) -> str:
         """ String representation. """
         return self._get_string_representation(print_threshold=50)
 
@@ -539,8 +549,8 @@ class ClusterSpace(_ClusterSpace):
         vol1 = self.primitive_structure.get_volume() / len(self.primitive_structure)
         vol2 = structure.get_volume() / len(structure)
         if abs(vol1 - vol2) > vol_tol:
-            raise ValueError('Volume per atom of structure does not match the volume of'
-                             ' ClusterSpace.primitive_structure.')
+            raise ValueError(f'Volume per atom of structure ({vol1}) does not match the volume of'
+                             f' ClusterSpace.primitive_structure ({vol2}). vol_tol= {vol_tol}')
 
         # check occupations
         sublattices = self.get_sublattices(structure)

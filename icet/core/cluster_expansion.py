@@ -221,6 +221,14 @@ class ClusterExpansion:
         return '\n'.join(s)
 
     def __repr__(self) -> str:
+        """ Representation. """
+        s = type(self).__name__ + '('
+        s += f'cluster_space={self._cluster_space.__repr__()}'
+        s += f', parameters={list(self._parameters).__repr__()}'
+        s += ')'
+        return s
+
+    def __str__(self) -> str:
         """ string representation """
         return self._get_string_representation(print_threshold=50)
 

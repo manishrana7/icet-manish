@@ -1,10 +1,12 @@
-import unittest
+import sys
 import tempfile
+import unittest
+from io import StringIO
+
 from icet import ClusterSpace, ClusterExpansion
 from ase.build import bulk
-from io import StringIO
+from ase import Atoms  # NOQA (needed for eval(retval))
 import numpy as np
-import sys
 
 
 def strip_surrounding_spaces(input_string):
@@ -179,8 +181,16 @@ class TestClusterExpansion(unittest.TestCase):
         self.assertTrue('zerolet may not be pruned' in str(context.exception))
 
     def test_repr(self):
-        """Tests repr functionality."""
+        """Tests __repr__ method."""
         retval = self.ce.__repr__()
+        self.assertIn('ClusterExpansion', retval)
+        self.assertIn('ClusterSpace', retval)
+        ret = eval(retval)
+        self.assertIsInstance(ret, ClusterExpansion)
+
+    def test_str(self):
+        """Tests __str__ method."""
+        retval = self.ce.__str__()
         target = """
 ================================================ Cluster Expansion =================================================
  space group                            : Fm-3m (225)

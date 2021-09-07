@@ -31,6 +31,7 @@ import unittest
 import numpy as np
 from ase.build import bulk
 from ase.db import connect as db_connect
+from ase import Atoms  # NOQA (needed for eval(retval))
 from icet import ClusterSpace
 
 
@@ -269,8 +270,18 @@ class TestClusterSpace(unittest.TestCase):
         self.assertEqualComplexList(self.cs.orbit_data, target)
 
     def test_repr(self):
-        """Tests string representation functionality."""
+        """Tests __repr__ method."""
         retval = self.cs.__repr__()
+        self.assertIn('ClusterSpace', retval)
+        self.assertIn('Atoms', retval)
+        self.assertIn('cutoffs=', retval)
+        self.assertIn('chemical_symbols=', retval)
+        ret = eval(retval)
+        self.assertIsInstance(ret, ClusterSpace)
+
+    def test_str(self):
+        """Tests __str__ method."""
+        retval = self.cs.__str__()
         target = """
 ====================================== Cluster Space =======================================
  space group                            : Fm-3m (225)
@@ -490,7 +501,8 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
         supercell_tmp.set_cell(1.01 * supercell_tmp.cell, scale_atoms=True)
         with self.assertRaises(ValueError) as cm:
             self.cs.assert_structure_compatibility(supercell_tmp)
-        self.assertIn('Volume per atom of structure does not match the', str(cm.exception))
+        self.assertIn('Volume per atom of structure', str(cm.exception))
+        self.assertIn('does not match', str(cm.exception))
 
         # faulty occupations
         supercell_tmp = supercell.copy()
