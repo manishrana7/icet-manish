@@ -4,15 +4,13 @@ from ase import Atoms
 from typing import List, Tuple, Callable
 from ase.symbols import chemical_symbols as ase_chemical_symbols
 from functools import partial
-from dataclasses import dataclass, field
 from .constituent_strain_helper_functions import (_get_structure_factor,
                                                   _get_partial_structure_factor)
 
 
-@dataclass(init=True)
 class KPoint:
     """
-    Dataclass for handling each k point in a supercell separately.
+    Class for handling each k point in a supercell separately.
 
     Parameters
     ----------
@@ -28,17 +26,16 @@ class KPoint:
         function that takes a concentration and a list of parameters
         and returns strain energy
     """
-    kpt: np.ndarray
-    multiplicity: int
-    structure_factor: float
-    structure_factor_after: float = field(init=False)
-    strain_energy_function: Callable[[float, List[float]], float]
-    damping: float
-    damping_factor: float = field(init=False)
+    def __init__(self, kpt: np.ndarray, multiplicity: float, structure_factor: float,
+                 strain_energy_function: Callable[[float, List[float]], float],
+                 damping: float):
 
-    def __post_init__(self):
+        self.kpt = kpt
+        self.multiplicity = multiplicity
+        self.structure_factor = structure_factor
         self.structure_factor_after = self.structure_factor
-        self.damping_factor = np.exp(-(self.damping * np.linalg.norm(self.kpt)) ** 2)
+        self.strain_energy_function = strain_energy_function
+        self.damping_factor = np.exp(-(damping * np.linalg.norm(self.kpt)) ** 2)
 
 
 class ConstituentStrain:
