@@ -536,7 +536,7 @@ class WangLandauEnsemble(BaseEnsemble):
         """ Returns bin index for histogram and entropy dictionaries. """
         if energy is None or np.isnan(energy):
             return None
-        return int(np.around(energy / self._energy_spacing))
+        return int(round(energy / self._energy_spacing))
 
     def _allow_move(self, bin_cur: Optional[int], bin_new: int) -> bool:
         """Returns True if the current move is to be included in the
