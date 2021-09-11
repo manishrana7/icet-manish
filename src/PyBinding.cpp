@@ -942,10 +942,10 @@ PYBIND11_MODULE(_icet, m)
         .def("get_cluster_vector_change",
             [](ClusterExpansionCalculator &calc,
                const std::vector<int> &occupations,
-               const int changedIndex,
-               const int newAtomicNumber)
+               const int flipIndex,
+               const int newOccupation)
               {
-                auto cvChange = calc.getClusterVectorChange(occupations, changedIndex, newAtomicNumber);
+                auto cvChange = calc.getClusterVectorChange(occupations, flipIndex, newOccupation);
                 return py::array(cvChange.size(), cvChange.data());
               },
               R"pbdoc(
