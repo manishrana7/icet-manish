@@ -27,8 +27,10 @@ public:
     /// Constructor.
     ClusterCounts() {  }
     void count(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool);
-    void countCluster(const Cluster &, const std::vector<int> &, bool);
+    void countCluster(const Cluster &, const std::vector<int> &, bool, int unit = 1);
     void countOrbitList(const Structure &, const OrbitList &, bool keepOrder, bool permuteSites = false, int maxOrbit = -1);
+    void countOrbitListChange(const Structure &, const int, const int, const OrbitList &, bool keepOrder, bool permuteSites = false, int maxOrbit = -1);
+    void countChange(const Structure &, const int, const int, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool);
 
     /**
     @details Returns a map representing the cluster counts. The key of the map

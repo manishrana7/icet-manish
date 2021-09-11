@@ -31,8 +31,8 @@ public:
     /// Constructor.
     ClusterExpansionCalculator(const ClusterSpace &, const Structure &, const double);
 
-    /// Returns the local cluster vector.
-    std::vector<double> getLocalClusterVector(const std::vector<int>&, const int, const std::vector<size_t>);
+    /// Returns change in cluster vector upon flipping occupation of one site
+    std::vector<double> getClusterVectorChange(const std::vector<int>&, const int, const int);
 
     /// Returns the full cluster vector.
     std::vector<double> getClusterVector(const std::vector<int> &occupations);

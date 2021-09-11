@@ -6,6 +6,7 @@ from icet.core.structure import Structure
 from mchammer.calculators.cluster_expansion_calculator import \
     ClusterExpansionCalculator
 from _icet import _ClusterExpansionCalculator
+import numpy as np
 
 
 class TestCECalculatorBinary(unittest.TestCase):
@@ -134,10 +135,9 @@ class TestCECalculatorBinary(unittest.TestCase):
             occupations=self.structure.get_atomic_numbers().copy())
 
         # Calculate change in energy
-        change = self.calculator.calculate_change(
-            sites=indices,
-            current_occupations=original_occupations,
-            new_site_occupations=new_site_occupations)
+        change = self.calculator.calculate_change(sites=indices,
+                                                  current_occupations=original_occupations,
+                                                  new_site_occupations=new_site_occupations)
 
         # difference in energy according to total energy
         total_diff = new_value_total - initial_value_total
@@ -193,20 +193,22 @@ class TestCECalculatorBinary(unittest.TestCase):
         self.calculator.use_local_energy_calculator = True
         self.assertAlmostEqual(change_total, change)
 
-    def test_get_local_cluster_vector(self):
-        """Tests the get local clustervector method."""
+    def test_get_cluster_vector_change(self):
+        """Tests the cluster vector change calculation."""
 
         cpp_calc = _ClusterExpansionCalculator(
             self.cs, Structure.from_atoms(self.structure), self.cs.fractional_position_tolerance)
 
         index = 4
-        cpp_calc.get_local_cluster_vector(
-            self.structure.get_atomic_numbers(), index, [])
+        new_occupation = 32
+        cv_change = cpp_calc.get_cluster_vector_change(
+            self.structure.get_atomic_numbers(), index, new_occupation)
 
+        cv_full_before = self.cs.get_cluster_vector(self.structure)
         self.structure[index].symbol = 'Ge'
+        cv_full_after = self.cs.get_cluster_vector(self.structure)
 
-        cpp_calc.get_local_cluster_vector(
-            self.structure.get_atomic_numbers(), index, [])
+        self.assertTrue(np.allclose(cv_change, cv_full_after - cv_full_before))
 
 
 class TestMergedOrbitCECalculatorBinary(TestCECalculatorBinary):
@@ -214,6 +216,7 @@ class TestMergedOrbitCECalculatorBinary(TestCECalculatorBinary):
     Container for tests of CE calculator based on a cluster space with merged
     orbits
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -222,6 +225,23 @@ class TestMergedOrbitCECalculatorBinary(TestCECalculatorBinary):
         params_len = len(self.cs)
         params = [1.1] * params_len
         self.ce = ClusterExpansion(self.cs, params)
+
+    def test_get_cluster_vector_change(self):
+        """Tests the cluster vector change calculation."""
+
+        cpp_calc = _ClusterExpansionCalculator(
+            self.cs, Structure.from_atoms(self.structure), self.cs.fractional_position_tolerance)
+
+        index = 4
+        new_occupation = 32
+        cv_change = cpp_calc.get_cluster_vector_change(
+            self.structure.get_atomic_numbers(), index, new_occupation)
+
+        cv_full_before = self.cs.get_cluster_vector(self.structure)
+        self.structure[index].symbol = 'Ge'
+        cv_full_after = self.cs.get_cluster_vector(self.structure)
+
+        self.assertTrue(np.allclose(cv_change, cv_full_after - cv_full_before))
 
 
 class TestCECalculatorBinaryHCP(unittest.TestCase):
@@ -356,12 +376,30 @@ class TestCECalculatorBinaryHCP(unittest.TestCase):
 
         return change, total_diff
 
+    def test_get_cluster_vector_change(self):
+        """Tests the cluster vector change calculation."""
+
+        cpp_calc = _ClusterExpansionCalculator(
+            self.cs, Structure.from_atoms(self.structure), self.cs.fractional_position_tolerance)
+
+        index = 4
+        new_occupation = 32
+        cv_change = cpp_calc.get_cluster_vector_change(
+            self.structure.get_atomic_numbers(), index, new_occupation)
+
+        cv_full_before = self.cs.get_cluster_vector(self.structure)
+        self.structure[index].symbol = 'Ge'
+        cv_full_after = self.cs.get_cluster_vector(self.structure)
+
+        self.assertTrue(np.allclose(cv_change, cv_full_after - cv_full_before))
+
 
 class TestMergedOrbitCECalculatorBinaryHCP(TestCECalculatorBinaryHCP):
     """
     Container for tests of CE calculator based on a cluster space with merged
     orbits
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         merge_orbits_data = {2: [3], 7: [8, 9], 48: [49]}
@@ -641,6 +679,25 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
         self.structure.set_atomic_numbers(original_occupations.copy())
 
         return change, total_diff
+
+    def test_get_cluster_vector_change(self):
+        """Tests the cluster vector change calculation."""
+
+        cpp_calc = _ClusterExpansionCalculator(
+            self.cs, Structure.from_atoms(self.structure), self.cs.fractional_position_tolerance)
+
+        index = 4
+        new_occupation = 32
+        cv_change = cpp_calc.get_cluster_vector_change(
+            self.structure.get_atomic_numbers(), index, new_occupation)
+
+        cv_full_before = self.cs.get_cluster_vector(self.structure)
+        self.structure[index].symbol = 'Ge'
+        cv_full_after = self.cs.get_cluster_vector(self.structure)
+
+        self.assertTrue(np.allclose(cv_change, cv_full_after - cv_full_before))
+
+
 
 
 class TestCECalculatorTernaryHCP(unittest.TestCase):

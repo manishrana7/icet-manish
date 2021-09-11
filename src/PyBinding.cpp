@@ -939,14 +939,14 @@ PYBIND11_MODULE(_icet, m)
 	     py::arg("cluster_space"),
 	     py::arg("structure"),
 	     py::arg("fractional_position_tolerance"))
-        .def("get_local_cluster_vector",
-             [](ClusterExpansionCalculator &calc,
-                const std::vector<int> &occupations,
-                const int index,
-                const std::vector<size_t> indices)
-             {
-                auto cv = calc.getLocalClusterVector(occupations, index, indices);
-                return py::array(cv.size(), cv.data());
+        .def("get_cluster_vector_change",
+            [](ClusterExpansionCalculator &calc,
+               const std::vector<int> &occupations,
+               const int changedIndex,
+               const int newAtomicNumber)
+              {
+                auto cvChange = calc.getClusterVectorChange(occupations, changedIndex, newAtomicNumber);
+                return py::array(cvChange.size(), cvChange.data());
               },
               R"pbdoc(
               Returns a cluster vector that only considers clusters that contain the input index.
@@ -954,17 +954,16 @@ PYBIND11_MODULE(_icet, m)
               Parameters
               ----------
               occupations : list(int)
-                  the occupation vector for the supercell
-              index : int
-                  local index of the supercell
-              ignored_indices : list(int)
-                  list of indices that have already had their local energy calculated;
-                  this is required to prevent double counting
+                  the occupation vector for the supercell before flip
+              flipIndex : int
+                  local index of the supercell where flip has occured
+              newOccupation : int
+                  new atomic number of the flipped site
               )pbdoc",
               py::arg("occupations"),
-              py::arg("index"),
-              py::arg("ignored_indices"))
-        .def("get_full_cluster_vector",
+              py::arg("flip_index"),
+              py::arg("new_occupation"))
+        .def("get_cluster_vector",
              [](ClusterExpansionCalculator &calc,
                 const std::vector<int> &occupations)
              {

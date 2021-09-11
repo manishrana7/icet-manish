@@ -110,10 +110,6 @@ class OrbitList
     /// Finds and returns sites in first column of matrix of equivalent sites along with their unit cell translated indistinguishable sites.
     std::vector<std::vector<LatticeSite>> getAllColumnsFromCluster(const std::vector<LatticeSite> &) const;
 
-    /// Removes from each orbit all clusters in equivalent sites that involve the given site.
-    void removeClustersContainingIndex(const int,
-                                    bool);
-
     /// Removes from each orbit all clusters in equivalent sites that _do not_ involve the given site.
     void removeClustersWithoutIndex(const int, bool);
 

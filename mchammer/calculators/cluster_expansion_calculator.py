@@ -45,7 +45,7 @@ class ClusterExpansionCalculator(BaseCalculator):
     def __init__(self,
                  structure: Atoms, cluster_expansion: ClusterExpansion,
                  name: str = 'Cluster Expansion Calculator',
-                 scaling: Union[float, int] = None,
+                 scaling: Union[float, int]=None,
                  use_local_energy_calculator: bool = True) -> None:
         super().__init__(name=name)
 
@@ -89,7 +89,7 @@ class ClusterExpansionCalculator(BaseCalculator):
             the entire occupation vector (i.e. list of atomic species)
         """
 
-        cv = self.cpp_calc.get_full_cluster_vector(occupations)
+        cv = self.cpp_calc.get_cluster_vector(occupations)
         return np.dot(cv, self.cluster_expansion.parameters) * self._property_scaling
 
     def calculate_change(self, *, sites: List[int],
@@ -109,7 +109,8 @@ class ClusterExpansionCalculator(BaseCalculator):
             atomic numbers after change at the sites defined by `sites`
         """
         occupations = np.array(current_occupations)
-        new_site_occupations = np.array(new_site_occupations)
+        current_occupations = occupations.copy()
+        #new_site_occupations = np.array(new_site_occupations)
 
         if not self.use_local_energy_calculator:
             e_before = self.calculate_total(occupations=occupations)
@@ -117,31 +118,24 @@ class ClusterExpansionCalculator(BaseCalculator):
             e_after = self.calculate_total(occupations=occupations)
             return e_after - e_before
 
-        local_contribution = 0
+        change = 0
         try:
             exclude_indices = []  # type: List[int]
-            for index in sites:
-                local_contribution -= self._calculate_local_contribution(
-                    occupations=occupations, index=index,
-                    exclude_indices=exclude_indices)
+            for index, new_occupation in zip(sites, new_site_occupations):
+                change += self._calculate_partial_change(occupations=occupations,
+                                                         flip_index=index,
+                                                         new_occupation=new_occupation)
                 exclude_indices.append(index)
+                occupations[index] = new_occupation
 
-            occupations[sites] = np.array(new_site_occupations)
-            exclude_indices = []  # type: List[int]
-            for index in sites:
-                local_contribution += self._calculate_local_contribution(
-                    occupations=occupations, index=index,
-                    exclude_indices=exclude_indices)
-                exclude_indices.append(index)
         except Exception as e:
             msg = 'Caught exception {}. Try setting parameter '.format(e)
             msg += 'use_local_energy_calculator to False in init'
             raise RuntimeError(msg)
+        return change * self._property_scaling
 
-        return local_contribution * self._property_scaling
-
-    def _calculate_local_contribution(self, occupations: List[int], index: int,
-                                      exclude_indices: List[int] = []):
+    def _calculate_partial_change(self, occupations: List[int], flip_index: int,
+                                  new_occupation: int):
         """
         Internal method to calculate the local contribution for one
         index.
@@ -150,16 +144,15 @@ class ClusterExpansionCalculator(BaseCalculator):
         ----------
         occupations
             entire occupation vector
-        index : int
-            lattice index
-        exclude_indices
-            previously calculated indices, these indices will
-            be ignored in order to avoid double counting bonds
-
+        flip_index : int
+            lattice index for site where a flipped has occurred
+        new_occupation
+            atomic number of new occupation at site `flip_index`
         """
-        local_cv = self.cpp_calc.get_local_cluster_vector(
-            occupations, index, exclude_indices)
-        return np.dot(local_cv, self.cluster_expansion.parameters)
+        cv_change = self.cpp_calc.get_cluster_vector_change(occupations=occupations,
+                                                            flip_index=flip_index,
+                                                            new_occupation=new_occupation)
+        return np.dot(cv_change, self.cluster_expansion.parameters)
 
     @property
     def sublattices(self) -> Sublattices:

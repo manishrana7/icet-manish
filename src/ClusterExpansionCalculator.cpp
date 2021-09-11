@@ -125,29 +125,22 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     }
 }
 
+
 /**
-@details This constructs a cluster vector that only includes clusters that contain the input index.
-@param occupations the occupation vector for the supercell
-@param index the local index of the supercell
-@param ignoredIndices a vector of indices which have already had their local energy calculated. This is required to input so that no double counting occurs.
+@details Calculate change in cluster vector upon change in occupation on one site
+@param occupationsBefore the occupation vector for the supercell before the flip
+@param flipIndex the index in the supercell where occupation has changed
+@param newOccupation new atomic number on site index
 */
-std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std::vector<int> &occupations,
-                                                                      int index,
-                                                                      std::vector<size_t> ignoredIndices)
+std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const std::vector<int> &occupationsBefore,
+                                                                       int flipIndex,
+                                                                       int newOccupation)
 {
-    _supercell.setAtomicNumbers(occupations);
+    _supercell.setAtomicNumbers(occupationsBefore);
     _clusterCounts.reset();
-    if (occupations.size() != _supercell.size())
+    if (occupationsBefore.size() != _supercell.size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getLocalClusterVector)");
-    }
-
-    for (auto ignoreIndex : ignoredIndices)
-    {
-        if (ignoreIndex >= _supercell.size())
-        {
-            throw std::runtime_error("Index larger than input structure size (ClusterExpansionCalculator::getLocalClusterVector)");
-        }
     }
 
     // do not sort the clusters
@@ -157,31 +150,22 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
     // since these clusters are already in the permuted order
     bool permuteSites = false;
     
-
     // Get one of the translated orbitlists
-    _translatedOrbitList = _localOrbitlists[_indexToOffset[index]];
+    _translatedOrbitList = _localOrbitlists[_indexToOffset[flipIndex]];
 
     // Remove sites not containing the local index
     if (_clusterSpace._primitiveStructure.size() > 1)
     {
         // true meaning we only look at zero offset sites
-        _translatedOrbitList.removeClustersWithoutIndex(index, true);
-    }
-
-    // Purge the orbit list of all clusters that contain any of the ignored indices
-    for (auto ignoredIndex : ignoredIndices)
-    {   
-        // False meaning we consider all offsets 
-        _translatedOrbitList.removeClustersContainingIndex(ignoredIndex, false);
+        _translatedOrbitList.removeClustersWithoutIndex(flipIndex, true);
     }
 
     // Count clusters and get cluster count map
-    _clusterCounts.countOrbitList(_supercell, _translatedOrbitList, keepOrder, permuteSites);
-    
+    _clusterCounts.countOrbitListChange(_supercell, flipIndex, newOccupation, _translatedOrbitList, keepOrder, permuteSites);
 
     // Finally begin occupying the cluster vector
     std::vector<double> clusterVector;
-    clusterVector.push_back(1.0 / _supercell.size());
+    clusterVector.push_back(0.0);
     for (size_t i = 0; i < _fullPrimitiveOrbitList.size(); i++)
     {
         Cluster representativeCluster = _fullPrimitiveOrbitList._orbits[i]._representativeCluster;
@@ -245,7 +229,6 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
                     permutedMCVector = icet::getPermutedVector(mcVectors[currentMCVectorIndex], perm);
                     permutedAllowedOccupations = icet::getPermutedVector(allowedOccupations, perm);
                     permutedRepresentativeIndices = icet::getPermutedVector(indicesOfRepresentativeSites, perm);
-
                     clusterVectorElement += _clusterSpace.evaluateClusterProduct(permutedMCVector, permutedAllowedOccupations, elementsCountPair.first, permutedRepresentativeIndices) * elementsCountPair.second;
                 }
             }
@@ -258,8 +241,6 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
     }
     return clusterVector;
 }
-
-
 
 std::vector<double> ClusterExpansionCalculator::getClusterVector(const std::vector<int> &occupations)
 {
