@@ -108,8 +108,9 @@ class ClusterExpansionCalculator(BaseCalculator):
         new_site_occupations
             atomic numbers after change at the sites defined by `sites`
         """
+        occupations = np.array(current_occupations)
+
         if not self.use_local_energy_calculator:
-            occupations = np.array(current_occupations)
             e_before = self.calculate_total(occupations=occupations)
             occupations[sites] = np.array(new_site_occupations)
             e_after = self.calculate_total(occupations=occupations)
@@ -119,11 +120,11 @@ class ClusterExpansionCalculator(BaseCalculator):
         try:
             exclude_indices = []  # type: List[int]
             for index, new_occupation in zip(sites, new_site_occupations):
-                change += self._calculate_partial_change(occupations=current_occupations,
+                change += self._calculate_partial_change(occupations=occupations,
                                                          flip_index=index,
                                                          new_occupation=new_occupation)
                 exclude_indices.append(index)
-                current_occupations[index] = new_occupation  # Safe because we work with a copy
+                occupations[index] = new_occupation  # Safe because we work with a copy
 
         except Exception as e:
             msg = 'Caught exception {}. Try setting parameter '.format(e)
