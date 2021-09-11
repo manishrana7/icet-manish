@@ -698,8 +698,6 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
         self.assertTrue(np.allclose(cv_change, cv_full_after - cv_full_before))
 
 
-
-
 class TestCECalculatorTernaryHCP(unittest.TestCase):
     """
     Container for tests of the class functionality.
