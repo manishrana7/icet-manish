@@ -140,7 +140,11 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const std
     _clusterCounts.reset();
     if (occupationsBefore.size() != _supercell.size())
     {
-        throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getLocalClusterVector)");
+        throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getClusterVectorChange)");
+    }
+    if (flipIndex >= _supercell.size())
+    {
+        throw std::runtime_error("flipIndex larger than the length of the structure (ClusterExpansionCalculator::getClusterVectorChange)");
     }
 
     // do not sort the clusters
