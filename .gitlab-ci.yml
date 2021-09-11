@@ -4,7 +4,7 @@ variables:
   INSTDIR: "local_installation"
 
 before_script:
-  - export PYTHONPATH=$INSTDIR:${PYTHONPATH}
+  - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
 
 
 #------------------- build stage -------------------
@@ -78,7 +78,7 @@ benchmarks_examples:
     - for f in benchmark/*.py; do python3 -u "$f"; done
     - pwd=`pwd`
     - |
-      for dir in `find examples -name '*.py' | grep -v constituent_strain | xargs gdirname | sort -uk1` ; do
+      for dir in $(find examples -name '*.py' | grep -v constituent_strain | xargs dirname | sort -uk1) ; do
         cd $pwd
         cd $dir
         for file in `ls *.py | sort -gk1 | grep -v __ | grep -v parallel_monte_carlo` ; do
