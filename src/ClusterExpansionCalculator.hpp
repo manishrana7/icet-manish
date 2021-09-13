@@ -27,18 +27,16 @@ using namespace Eigen;
 class ClusterExpansionCalculator
 {
 public:
-
     /// Constructor.
     ClusterExpansionCalculator(const ClusterSpace &, const Structure &, const double);
 
     /// Returns change in cluster vector upon flipping occupation of one site
-    std::vector<double> getClusterVectorChange(const std::vector<int>&, const int, const int);
+    std::vector<double> getClusterVectorChange(const py::array_t<int> &, const int, const int);
 
     /// Returns the full cluster vector.
-    std::vector<double> getClusterVector(const std::vector<int> &occupations);
+    std::vector<double> getClusterVector(const py::array_t<int> &);
 
 private:
-
     /// Maps offsets to local orbit lists.
     std::unordered_map<Vector3d, OrbitList, Vector3dHash> _localOrbitlists;
 

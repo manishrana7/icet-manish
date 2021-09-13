@@ -1,4 +1,5 @@
 #include "ClusterExpansionCalculator.hpp"
+#include <pybind11/stl.h>
 
 ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clusterSpace,
                                                        const Structure &structure,
@@ -14,7 +15,6 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     for (const auto orbit : clusterSpace._orbitList._orbits)
     {
         orbitVector.push_back(Orbit(orbit.getRepresentativeCluster()));
-        
     }
 
     // Permutations for the clusters in the orbits
@@ -70,7 +70,8 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
                 for (auto translatedCluster : translatedClusters)
                 {
-                    if (std::any_of(translatedCluster.begin(), translatedCluster.end(), [=](LatticeSite ls) { return (ls.unitcellOffset()).norm() < fractionalPositionTolerance; }))
+                    if (std::any_of(translatedCluster.begin(), translatedCluster.end(), [=](LatticeSite ls)
+                                    { return (ls.unitcellOffset()).norm() < fractionalPositionTolerance; }))
                     {
                         // false or true here does not seem to matter
                         if (!orbitVector[orbitIndex].contains(translatedCluster, true))
@@ -125,14 +126,13 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     }
 }
 
-
 /**
 @details Calculate change in cluster vector upon change in occupation on one site
 @param occupationsBefore the occupation vector for the supercell before the flip
 @param flipIndex the index in the supercell where occupation has changed
 @param newOccupation new atomic number on site index
 */
-std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const std::vector<int> &occupationsBefore,
+std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py::array_t<int> &occupationsBefore,
                                                                        int flipIndex,
                                                                        int newOccupation)
 {
@@ -153,7 +153,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const std
     // Count the clusters in the order as in the equivalent clusters
     // since these clusters are already in the permuted order
     bool permuteSites = false;
-    
+
     // Get one of the translated orbitlists
     _translatedOrbitList = _localOrbitlists[_indexToOffset[flipIndex]];
 
@@ -192,11 +192,12 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const std
         }
 
         // Skip the rest if any of the sites are inactive (i.e. allowed occupation < 2)
-        if (std::any_of(allowedOccupations.begin(), allowedOccupations.end(), [](int allowedOccupation) { return allowedOccupation < 2; }))
+        if (std::any_of(allowedOccupations.begin(), allowedOccupations.end(), [](int allowedOccupation)
+                        { return allowedOccupation < 2; }))
         {
             continue;
         }
-        
+
         std::vector<int> indicesOfRepresentativeSites;
         for (const auto site : representativeSites)
         {
@@ -246,7 +247,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const std
     return clusterVector;
 }
 
-std::vector<double> ClusterExpansionCalculator::getClusterVector(const std::vector<int> &occupations)
+std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array_t<int> &occupations)
 {
     _supercell.setAtomicNumbers(occupations);
     _clusterCounts.reset();
@@ -254,7 +255,6 @@ std::vector<double> ClusterExpansionCalculator::getClusterVector(const std::vect
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getLocalClusterVector)");
     }
-
 
     // do not sort the clusters
     bool keepOrder = true;
@@ -264,7 +264,6 @@ std::vector<double> ClusterExpansionCalculator::getClusterVector(const std::vect
 
     // Count clusters and get cluster count map
     _clusterCounts.countOrbitList(_supercell, _fullOrbitList, keepOrder, permuteSites);
-
 
     // Finally begin occupying the cluster vector
     std::vector<double> clusterVector;
@@ -291,11 +290,12 @@ std::vector<double> ClusterExpansionCalculator::getClusterVector(const std::vect
         }
 
         // Skip the rest if any of the sites are inactive (i.e. allowed occupation < 2)
-        if (std::any_of(allowedOccupations.begin(), allowedOccupations.end(), [](int allowedOccupation) { return allowedOccupation < 2; }))
+        if (std::any_of(allowedOccupations.begin(), allowedOccupations.end(), [](int allowedOccupation)
+                        { return allowedOccupation < 2; }))
         {
             continue;
         }
-        
+
         std::vector<int> representativeSitesIndices;
         for (const auto site : representativeSites)
         {
@@ -336,7 +336,6 @@ std::vector<double> ClusterExpansionCalculator::getClusterVector(const std::vect
 
                     clusterVectorElement += _clusterSpace.evaluateClusterProduct(permutedMCVector, permutedAllowedOccupations, elementsCountPair.first, permutedRepresentativeIndices) * elementsCountPair.second;
                     multiplicity += elementsCountPair.second;
-
                 }
             }
             clusterVectorElement /= (double)multiplicity;

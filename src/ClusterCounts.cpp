@@ -15,7 +15,7 @@ void ClusterCounts::count(const Structure &structure, const std::vector<std::vec
     {
         for (size_t i = 0; i < sites.size(); i++)
         {
-            elements[i] = structure._atomicNumbers[sites[i].index()];
+            elements[i] = structure._atomicNumbers.at(sites[i].index());
         }
         countCluster(cluster, elements, keepOrder);
     }
@@ -46,7 +46,8 @@ void ClusterCounts::countCluster(const Cluster &cluster, const std::vector<int> 
 */
 void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &orbitList, bool keepOrder, bool permuteSites, int maxOrbit)
 {
-    if (maxOrbit == -1) {
+    if (maxOrbit == -1)
+    {
         maxOrbit = orbitList.size();
     }
     for (size_t i = 0; i < maxOrbit; i++)
@@ -92,7 +93,7 @@ void ClusterCounts::countChange(const Structure &structure,
         for (size_t i = 0; i < sites.size(); i++)
         {
             siteIndex = sites[i].index();
-            occupation = structure._atomicNumbers[siteIndex];
+            occupation = structure._atomicNumbers.at(siteIndex);
             elementsOld[i] = occupation;
 
             // If the present site index is the one that was changed,
@@ -130,7 +131,8 @@ void ClusterCounts::countOrbitListChange(const Structure &structure,
                                          const OrbitList &orbitList,
                                          bool keepOrder, bool permuteSites, int maxOrbit)
 {
-    if (maxOrbit == -1) {
+    if (maxOrbit == -1)
+    {
         maxOrbit = orbitList.size();
     }
     for (size_t i = 0; i < maxOrbit; i++)
