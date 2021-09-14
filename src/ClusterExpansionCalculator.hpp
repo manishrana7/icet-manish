@@ -35,9 +35,14 @@ public:
     std::vector<double> getClusterVectorChange(const std::vector<int>&, const int, const int);
 
     /// Returns the full cluster vector.
-    std::vector<double> getClusterVector(const std::vector<int> &occupations);
+    std::vector<double> getClusterVector(const std::vector<int> &);
+
+    /// Returns a local cluster vector; the contribution to the cluster vector from one site.
+    std::vector<double> getLocalClusterVector(const std::vector<int> &, int);
 
 private:
+    /// Occupy a cluster vector based on an orbit list and already counted clusters
+    std::vector<double> _occupyClusterVector(const double);
 
     /// Maps offsets to local orbit lists.
     std::unordered_map<Vector3d, OrbitList, Vector3dHash> _localOrbitlists;

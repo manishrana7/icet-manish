@@ -949,20 +949,40 @@ PYBIND11_MODULE(_icet, m)
                 return py::array(cvChange.size(), cvChange.data());
               },
               R"pbdoc(
-              Returns a cluster vector that only considers clusters that contain the input index.
+              Returns the change in cluster vector upon flipping of one site.
 
               Parameters
               ----------
               occupations : list(int)
                   the occupation vector for the supercell before flip
-              flipIndex : int
+              flip_index : int
                   local index of the supercell where flip has occured
-              newOccupation : int
+              new_occupation : int
                   new atomic number of the flipped site
               )pbdoc",
               py::arg("occupations"),
               py::arg("flip_index"),
               py::arg("new_occupation"))
+        .def("get_local_cluster_vector",
+            [](ClusterExpansionCalculator &calc,
+               const std::vector<int> &occupations,
+               const int index)
+              {
+                auto localCv = calc.getLocalClusterVector(occupations, index);
+                return py::array(localCv.size(), localCv.data());
+              },
+              R"pbdoc(
+              Returns a cluster vector that only considers clusters that contain the input index.
+
+              Parameters
+              ----------
+              occupations : list(int)
+                  the full occupation vector for the supercell
+              index : int
+                  index of site whose local cluster vector should be calculated
+              )pbdoc",
+              py::arg("occupations"),
+              py::arg("index"))
         .def("get_cluster_vector",
              [](ClusterExpansionCalculator &calc,
                 const std::vector<int> &occupations)

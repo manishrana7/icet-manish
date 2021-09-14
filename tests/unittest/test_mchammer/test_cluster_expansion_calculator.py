@@ -210,6 +210,23 @@ class TestCECalculatorBinary(unittest.TestCase):
 
         self.assertTrue(np.allclose(cv_change, cv_full_after - cv_full_before))
 
+    def test_get_local_cluster_vector(self):
+        """Tests the local cluster vector calculation."""
+        expected_cv = [0.125, -0.125, 0.25, 0.25, 0.25, -0.375,
+                       -0.375, -0.375, -0.375, -0.375, -0.375, -0.375]
+        # Since the structure is monoelemental, all local cluster vectors
+        # should be identical
+        structure = self.cs.primitive_structure.repeat(2)
+        total_cv = np.zeros(len(self.cs))
+        for i in range(len(structure)):
+            local_cv = self.calculator.cpp_calc.get_local_cluster_vector(
+                self.structure.get_atomic_numbers(), 0)
+            total_cv += local_cv
+            self.assertTrue(np.allclose(local_cv, expected_cv))
+        print(total_cv, self.cs.get_cluster_vector(structure))
+        self.assertTrue(np.allclose(total_cv, self.cs.get_cluster_vector(structure)))
+
+
 
 class TestMergedOrbitCECalculatorBinary(TestCECalculatorBinary):
     """
