@@ -59,11 +59,10 @@ class ClusterExpansionCalculator(BaseCalculator):
                            'cluster space with shorter cutoffs.')
 
         self.use_local_energy_calculator = use_local_energy_calculator
-        if self.use_local_energy_calculator:
-            self.cpp_calc = _ClusterExpansionCalculator(
-                cluster_space=cluster_expansion.get_cluster_space_copy(),
-                structure=Structure.from_atoms(structure_cpy),
-                fractional_position_tolerance=cluster_expansion.fractional_position_tolerance)
+        self.cpp_calc = _ClusterExpansionCalculator(
+            cluster_space=cluster_expansion.get_cluster_space_copy(),
+            structure=Structure.from_atoms(structure_cpy),
+            fractional_position_tolerance=cluster_expansion.fractional_position_tolerance)
 
         self._cluster_expansion = cluster_expansion
         if scaling is None:
