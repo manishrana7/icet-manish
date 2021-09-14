@@ -28,7 +28,7 @@ class TestCECalculatorBinary(unittest.TestCase):
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.structure, self.cutoffs, self.subelements)
         params_len = len(self.cs)
-        params = [1.1] * params_len
+        params = [(-1)**i * ((i + 1) / 10)**(1.02) for i in range(params_len)]
 
         self.ce = ClusterExpansion(self.cs, params)
 
@@ -223,7 +223,7 @@ class TestMergedOrbitCECalculatorBinary(TestCECalculatorBinary):
         merge_orbits_data = {2: [3], 8: [6, 9, 10]}
         self.cs.merge_orbits(merge_orbits_data)
         params_len = len(self.cs)
-        params = [1.1] * params_len
+        params = [(-1)**i * ((i + 1) / 10)**(1.02) for i in range(params_len)]
         self.ce = ClusterExpansion(self.cs, params)
 
     def test_get_cluster_vector_change(self):
@@ -257,7 +257,7 @@ class TestCECalculatorBinaryHCP(unittest.TestCase):
         self.cs = ClusterSpace(
             self.structure.copy(), self.cutoffs, self.subelements)
         params_len = len(self.cs)
-        params = [1.0] * params_len
+        params = [(-1)**i * ((i + 1) / 10)**(1.02) for i in range(params_len)]
 
         self.ce = ClusterExpansion(self.cs, params)
 
@@ -405,7 +405,7 @@ class TestMergedOrbitCECalculatorBinaryHCP(TestCECalculatorBinaryHCP):
         merge_orbits_data = {2: [3], 7: [8, 9], 48: [49]}
         self.cs.merge_orbits(merge_orbits_data)
         params_len = len(self.cs)
-        params = [1.1] * params_len
+        params = [(-1)**i * ((i + 1) / 10)**(1.02) for i in range(params_len)]
         self.ce = ClusterExpansion(self.cs, params)
 
 
@@ -429,7 +429,7 @@ class TestCECalculatorBinaryBCC(unittest.TestCase):
         self.subelements = ['Al', 'Ge']
         self.cs = ClusterSpace(self.structure, self.cutoffs, self.subelements)
         params_len = len(self.cs)
-        params = [1.1] * params_len
+        params = [(-1)**i * ((i + 1) / 10)**(1.02) for i in range(params_len)]
 
         self.ce = ClusterExpansion(self.cs, params)
 
@@ -565,7 +565,7 @@ class TestCECalculatorTernaryBCC(unittest.TestCase):
         self.subelements = ['Al', 'Ge', 'H']
         self.cs = ClusterSpace(self.structure, self.cutoffs, self.subelements)
         params_len = len(self.cs)
-        params = [1.0] * params_len
+        params = [(-1)**i * ((i + 1) / 10)**(1.02) for i in range(params_len)]
         self.ce = ClusterExpansion(self.cs, params)
 
     def shortDescription(self):
@@ -718,7 +718,7 @@ class TestCECalculatorTernaryHCP(unittest.TestCase):
         self.subelements = ['Al', 'Ge', 'H']
         self.cs = ClusterSpace(self.structure, self.cutoffs, self.subelements)
         params_len = len(self.cs)
-        params = [1.0] * params_len
+        params = [(-1)**i * ((i + 1) / 10)**(1.02) for i in range(params_len)]
         self.ce = ClusterExpansion(self.cs, params)
 
     def shortDescription(self):
