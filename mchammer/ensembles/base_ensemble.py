@@ -426,10 +426,13 @@ class BaseEnsemble(ABC):
         probability_distribution
             probability distributions for the sublattices
         """
-
-        if len(probability_distribution) != len(self.sublattices):
+        n_sublattices = len(self.sublattices)
+        if len(probability_distribution) != n_sublattices:
             raise ValueError('probability_distribution should have the same size as sublattices')
-        pick = np.random.choice(len(self.sublattices), p=probability_distribution)
+        if n_sublattices == 1:  # Special but very common case, we save some time
+            return 0
+        pick = random.choices(list(range(n_sublattices)),
+                              weights=probability_distribution)[0]
         return pick
 
     def _restart_ensemble(self):
