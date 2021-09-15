@@ -1,6 +1,6 @@
+import random
 from typing import Dict, List, Any
 
-import numpy as np
 from math import isclose
 
 from ase import Atoms
@@ -442,9 +442,8 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
 
     def _do_trial_step(self):
         """ Carries out one Monte Carlo trial step. """
-
         # randomly pick an ensemble
-        ensemble_arg = np.random.choice(self._ensemble_args, p=self._probabilities)
+        ensemble_arg = random.choices(self._ensemble_args, weights=self._probabilities)[0]
 
         # count number of trial steps for each ensemble
         self._trial_steps_per_ensemble[ensemble_arg['tag']] += 1
