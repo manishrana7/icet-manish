@@ -36,7 +36,7 @@ public:
               latter the key represents the chemical species, while the value
               is the cluster count.
     **/
-  std::unordered_map<Cluster, std::map<std::vector<int>, int>> getClusterCounts() const { return _clusterCounts; }
+  std::unordered_map<Cluster, std::map<std::vector<int>, double>> getClusterCounts() const { return _clusterCounts; }
 
   /// Returns the cluster counts size i.e. the total number of clusters
   size_t size() const
@@ -55,5 +55,5 @@ public:
               the chemical species, while the value is the cluster count.
     @todo make private
     **/
-  std::unordered_map<Cluster, std::map<std::vector<int>, int>> _clusterCounts;
+  std::unordered_map<Cluster, std::map<std::vector<int>, double>> _clusterCounts;
 };

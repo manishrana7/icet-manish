@@ -56,7 +56,7 @@ void ClusterCounts::countChange(const Structure &structure,
                                 const Cluster &cluster, bool keepOrder,
                                 int doNotDoubleCountThisSiteIndex)
 {
-    std::map<std::vector<int>, int> tmpCounts;
+    std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elementsOld(latticeSites[0].size());
     std::vector<int> elementsNew(latticeSites[0].size());
     int siteIndex;

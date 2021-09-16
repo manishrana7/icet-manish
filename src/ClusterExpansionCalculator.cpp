@@ -260,8 +260,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const std
 @param occupations the occupation vector for the supercell
 @param index the local index of the supercell
 */
-std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std::vector<int> &occupations,
-                                                                      int index)
+std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std::vector<int> &occupations, int index)
 {
     _supercell.setAtomicNumbers(occupations);
     _clusterCounts.reset();

@@ -117,14 +117,11 @@ class ClusterExpansionCalculator(BaseCalculator):
 
         change = 0.0
         try:
-            exclude_indices = []  # type: List[int]
             for index, new_occupation in zip(sites, new_site_occupations):
                 change += self._calculate_partial_change(occupations=occupations,
                                                          flip_index=index,
                                                          new_occupation=new_occupation)
-                exclude_indices.append(index)
                 occupations[index] = new_occupation  # Safe because we work with a copy
-
         except Exception as e:
             msg = 'Caught exception {}. Try setting parameter '.format(e)
             msg += 'use_local_energy_calculator to False in init'
@@ -149,6 +146,7 @@ class ClusterExpansionCalculator(BaseCalculator):
         cv_change = self.cpp_calc.get_cluster_vector_change(occupations=occupations,
                                                             flip_index=flip_index,
                                                             new_occupation=new_occupation)
+
         return np.dot(cv_change, self.cluster_expansion.parameters)
 
     @property
