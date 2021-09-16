@@ -14,7 +14,6 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     for (const auto orbit : clusterSpace._orbitList._orbits)
     {
         orbitVector.push_back(Orbit(orbit.getRepresentativeCluster()));
-        
     }
 
     // Permutations for the clusters in the orbits
@@ -70,7 +69,8 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
                 for (auto translatedCluster : translatedClusters)
                 {
-                    if (std::any_of(translatedCluster.begin(), translatedCluster.end(), [=](LatticeSite ls) { return (ls.unitcellOffset()).norm() < fractionalPositionTolerance; }))
+                    if (std::any_of(translatedCluster.begin(), translatedCluster.end(), [=](LatticeSite ls)
+                                    { return (ls.unitcellOffset()).norm() < fractionalPositionTolerance; }))
                     {
                         // false or true here does not seem to matter
                         if (!orbitVector[orbitIndex].contains(translatedCluster, true))
@@ -155,11 +155,12 @@ std::vector<double> ClusterExpansionCalculator::_occupyClusterVector(const doubl
         }
 
         // Skip the rest if any of the sites are inactive (i.e. allowed occupation < 2)
-        if (std::any_of(allowedOccupations.begin(), allowedOccupations.end(), [](int allowedOccupation) { return allowedOccupation < 2; }))
+        if (std::any_of(allowedOccupations.begin(), allowedOccupations.end(), [](int allowedOccupation)
+                        { return allowedOccupation < 2; }))
         {
             continue;
         }
-        
+
         std::vector<int> indicesOfRepresentativeSites;
         for (const auto site : representativeSites)
         {
@@ -237,7 +238,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const std
     // Count the clusters in the order as in the equivalent clusters
     // since these clusters are already in the permuted order
     bool permuteSites = false;
-    
+
     // Get one of the translated orbitlists
     _translatedOrbitList = _localOrbitlists[_indexToOffset[flipIndex]];
 
@@ -249,7 +250,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const std
     }
 
     // Count clusters and get cluster count map
-    _clusterCounts.countOrbitListChange(_supercell, flipIndex, newOccupation, _translatedOrbitList, keepOrder, permuteSites);
+    _clusterCounts.countOrbitListChange(_supercell, flipIndex, newOccupation, _translatedOrbitList, keepOrder, permuteSites, -1, flipIndex);
 
     return _occupyClusterVector(0.0);
 }
@@ -287,12 +288,10 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
     }
 
     // Count clusters and get cluster count map
-    _clusterCounts.countOrbitList(_supercell, _translatedOrbitList, keepOrder, permuteSites);
+    _clusterCounts.countOrbitList(_supercell, _translatedOrbitList, keepOrder, permuteSites, -1, index);
 
     return _occupyClusterVector(1.0 / _supercell.size());
-
 }
-
 
 std::vector<double> ClusterExpansionCalculator::getClusterVector(const std::vector<int> &occupations)
 {
