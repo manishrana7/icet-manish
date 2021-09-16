@@ -19,7 +19,9 @@ def get_complementary_symbol(symbol, chemical_symbols):
 
 @pytest.fixture
 def system(request):
-    model, supercell = request.param
+    model, repeat, supercell = request.param
+
+    # Create primitive structure and cluster space
     if model == 'binary_fcc':
         alat = 4.0
         chemical_symbols = [['Al', 'Ge']]
@@ -123,6 +125,7 @@ def system(request):
     else:
         raise Exception(f'Unknown supercell ({supercell})')
 
+    # Define ECIs that are not all the same
     params = [(-1)**i * ((i + 1) / 10)**1.02 for i in range(len(cs))]
     ce = ClusterExpansion(cluster_space=cs, parameters=params)
     return ce, structure, anti_structure
@@ -130,13 +133,18 @@ def system(request):
 # Make a list of parameters; possible combinations of systems and supercells
 systems = []
 systems_with_calculator_choice = []
-for model in ['binary_fcc', 'ternary_fcc', 'binary_bcc', 'ternary_bcc', 'binary_hcp', 'ternary_hcp',
+for model in ['binary_fcc', 'ternary_fcc', 'binary_bcc', 'ternary_hcp',
               'sublattices_fcc', 'ternarysublattices_fcc', 'inactivesublattice_fcc']:
-    for supercell in ['homogeneous', 'pseudorandom', 'ordered', 'segregated']:
-        systems.append(((model, supercell)))
-        systems_with_calculator_choice.append(((model, supercell), True))
-        if model == 'binary_bcc':
-            systems_with_calculator_choice.append(((model, supercell), False))
+    for repeat in [(1, 1, 1), (2, 1, 1), (2, 2, 3)]:
+        for supercell in ['homogeneous', 'pseudorandom', 'ordered', 'segregated']:
+            if repeat in [(1, 1, 1), (2, 1, 1)] and supercell != 'ordered':
+                continue
+            elif 'ternary' in model and supercell == 'segregated':
+                continue
+            systems.append(((model, repeat, supercell)))
+            systems_with_calculator_choice.append(((model, repeat, supercell), True))
+            if model == 'binary_bcc':
+                systems_with_calculator_choice.append(((model, repeat, supercell), False))
 
 
 @pytest.mark.parametrize('system', systems, indirect=['system'])
@@ -165,14 +173,14 @@ def test_get_cluster_vector(system):
     ce, structure, anti_structure = system
     calc = ClusterExpansionCalculator(structure, ce, name='Test CE calc')
     print(structure)
-    cv_calc = calc.cpp_calc.get_cluster_vector(structure.get_atomic_numbers())
+    cv_calc = calc.cpp_calc.get_full_cluster_vector(structure.get_atomic_numbers())
     cv_cs = ce.get_cluster_space_copy().get_cluster_vector(structure)
     assert np.allclose(cv_calc, cv_cs)
 
     # Make sure it works after modifying the structure
     for i in range(2):
         structure[i].symbol = anti_structure[i].symbol
-    cv_calc = calc.cpp_calc.get_cluster_vector(structure.get_atomic_numbers())
+    cv_calc = calc.cpp_calc.get_full_cluster_vector(structure.get_atomic_numbers())
     cv_cs = ce.get_cluster_space_copy().get_cluster_vector(structure)
     assert np.allclose(cv_calc, cv_cs)
 
