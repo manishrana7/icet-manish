@@ -6,7 +6,7 @@
 @param latticeSites A group of sites, represented by 'cluster', that will be counted
 @param cluster A cluster used as identification on what sites the clusters belong to
 @param keepOrder if true the order of the sites will stay the same otherwise the vector of species being counted will be sorted
-@param doNotDoubleCountThisSiteIndex Count clusters with this site index with a factor 1/n, where n is the number of occurences of this site in the cluster.
+@param doNotDoubleCountThisSiteIndex Count clusters with this site index with a factor 1/n, where n is the number of occurences of this site in the cluster (to avoid double counting).
 */
 void ClusterCounts::count(const Structure &structure,
                           const std::vector<std::vector<LatticeSite>> &latticeSites,
@@ -26,6 +26,10 @@ void ClusterCounts::count(const Structure &structure,
             std::sort(elements.begin(), elements.end());
         }
         double unit = 1;
+        // If the present atom (doNotDoubleCountThisSiteIndex) occurs more than once,
+        // we risk double counting it if we calculate a change in cluster vector or
+        // a local cluster vector. To avoid this, we count the clusters in units of
+        // 1 / n, where n is the number of occurences of the present atom in the cluster.
         if (doNotDoubleCountThisSiteIndex > -1)
         {
             unit /= (double)std::count_if(sites.begin(), sites.end(), [=](LatticeSite ls)
@@ -48,6 +52,7 @@ void ClusterCounts::count(const Structure &structure,
 @param latticeSites A group of sites, represented by 'cluster', that will be counted
 @param cluster A cluster used as identification on what sites the clusters belong to
 @param keepOrder if true the order of the sites will stay the same otherwise the vector of species being counted will be sorted
+@param doNotDoubleCountThisSiteIndex Count clusters with this site index with a factor 1/n, where n is the number of occurences of this site in the cluster (to avoid double counting).
 */
 void ClusterCounts::countChange(const Structure &structure,
                                 const int flipIndex,
@@ -85,7 +90,12 @@ void ClusterCounts::countChange(const Structure &structure,
             std::sort(elementsOld.begin(), elementsOld.end());
             std::sort(elementsNew.begin(), elementsNew.end());
         }
+
         double unit = 1;
+        // If the present atom (doNotDoubleCountThisSiteIndex) occurs more than once,
+        // we risk double counting it if we calculate a change in cluster vector or
+        // a local cluster vector. To avoid this, we count the clusters in units of
+        // 1 / n, where n is the number of occurences of the present atom in the cluster.
         if (doNotDoubleCountThisSiteIndex > -1)
         {
             unit /= (double)std::count_if(sites.begin(), sites.end(), [=](LatticeSite ls)

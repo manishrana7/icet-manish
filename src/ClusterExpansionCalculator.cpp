@@ -202,7 +202,11 @@ std::vector<double> ClusterExpansionCalculator::_occupyClusterVector(const doubl
                 }
             }
 
-            /// This is the multiplicity one would have gotten during a full cluster vector calculation and is needed as normalizing factor
+            // Usually we could have counted multiplicity by simply adding the number of
+            // clusters in the orbit (elementsCountPair.second), but in the case of 
+            // local cluster vectors or change in cluster vectors, we have only counted
+            // a subset of the clusters. We thus need to compute the multiplicity by
+            // analyzing the orbit in detail.
             double realMultiplicity = (double)_clusterSpace._sitePermutations[i][currentMCVectorIndex].size() * (double)_clusterSpace._orbitList._orbits[i].size() / (double)_clusterSpace._primitiveStructure.size();
             clusterVectorElement /= ((double)realMultiplicity * (double)_supercell.size());
             clusterVector.push_back(clusterVectorElement);
@@ -292,6 +296,10 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
     return _occupyClusterVector(1.0 / _supercell.size());
 }
 
+/**
+@details Calculate the cluster vector for a supercell.
+@param occupations the occupation vector of the supercell
+*/
 std::vector<double> ClusterExpansionCalculator::getClusterVector(const std::vector<int> &occupations)
 {
     _supercell.setAtomicNumbers(occupations);
