@@ -23,6 +23,7 @@ htmlcov
 *~
 *.pyc
 *.swp
+*.DS_Store
 
 *.dc
 *.ce
