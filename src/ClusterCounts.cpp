@@ -8,7 +8,7 @@
  @param keepOrder if true the order of the sites will stay the same otherwise the vector of species being counted will be sorted
  @param doNotDoubleCountThisSiteIndex In small supercells, clusters may include both a site and its periodic image.
                                       This argument can be used to avoid double counting in such cases; clusters
-                                      where a site with this index occurs more than once will only be counted
+                                      in which a site with this index occurs more than once will only be counted
                                       with a factor 1 / n, where n is the number of occurences of this index.
                                       By default (doNotDoubleCountThisSiteIndex = -1) no such correction is done.
 */
@@ -59,7 +59,7 @@ void ClusterCounts::count(const Structure &structure,
  @param keepOrder if true the order of the sites will stay the same otherwise the vector of species being counted will be sorted
  @param doNotDoubleCountThisSiteIndex In small supercells, clusters may include both a site and its periodic image.
                                       This argument can be used to avoid double counting in such cases; clusters
-                                      where a site with this index occurs more than once will only be counted
+                                      in which a site with this index occurs more than once will only be counted
                                       with a factor 1 / n, where n is the number of occurences of this index.
                                       By default (doNotDoubleCountThisSiteIndex = -1) no such correction is done.
 */
@@ -131,7 +131,7 @@ void ClusterCounts::countChange(const Structure &structure,
  @param maxOrbit include only orbits with indices smaller than this (by default all orbits are included)
  @param doNotDoubleCountThisSiteIndex In small supercells, clusters may include both a site and its periodic image.
                                       This argument can be used to avoid double counting in such cases; clusters
-                                      where a site with this index occurs more than once will only be counted
+                                      in which a site with this index occurs more than once will only be counted
                                       with a factor 1 / n, where n is the number of occurences of this index.
                                       By default (doNotDoubleCountThisSiteIndex = -1) no such correction is done.
 */
@@ -169,7 +169,7 @@ void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &
  @param maxOrbit include only orbits with indices smaller than this (by default all orbits are included)
  @param doNotDoubleCountThisSiteIndex In small supercells, clusters may include both a site and its periodic image.
                                       This argument can be used to avoid double counting in such cases; clusters
-                                      where a site with this index occurs more than once will only be counted
+                                      in which a site with this index occurs more than once will only be counted
                                       with a factor 1 / n, where n is the number of occurences of this index.
                                       By default (doNotDoubleCountThisSiteIndex = -1) no such correction is done.
 */
