@@ -10,7 +10,8 @@
 */
 void ClusterCounts::count(const Structure &structure,
                           const std::vector<std::vector<LatticeSite>> &latticeSites,
-                          const Cluster &cluster, bool keepOrder,
+                          const Cluster &cluster,
+                          bool keepOrder,
                           int doNotDoubleCountThisSiteIndex)
 {
     std::map<std::vector<int>, double> tmpCounts;
@@ -58,7 +59,8 @@ void ClusterCounts::countChange(const Structure &structure,
                                 const int flipIndex,
                                 const int newOccupation,
                                 const std::vector<std::vector<LatticeSite>> &latticeSites,
-                                const Cluster &cluster, bool keepOrder,
+                                const Cluster &cluster,
+                                bool keepOrder,
                                 int doNotDoubleCountThisSiteIndex)
 {
     std::map<std::vector<int>, double> tmpCounts;
@@ -153,12 +155,15 @@ void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &
  @param keepOrder if true do not reorder clusters before comparison (i.e., ABC != ACB)
  @param permuteSites if true the sites will be permuted according to the correspondin permutations in the orbit
  @param maxOrbit include only orbits with indices smaller than this (by default all orbits are included)
+  @param doNotDoubleCountThisSiteIndex In small supercells, clusters may include both a site and its periodic image. This argument can be used to avoid double counting in such cases.
 */
 void ClusterCounts::countOrbitListChange(const Structure &structure,
                                          const int flipIndex,
                                          const int newOccupation,
                                          const OrbitList &orbitList,
-                                         bool keepOrder, bool permuteSites, int maxOrbit,
+                                         bool keepOrder,
+                                         bool permuteSites,
+                                         int maxOrbit,
                                          int doNotDoubleCountThisSiteIndex)
 {
     if (maxOrbit == -1)

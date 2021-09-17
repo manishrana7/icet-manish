@@ -138,7 +138,7 @@ class ClusterExpansionCalculator(BaseCalculator):
         ----------
         occupations
             entire occupation vector
-        flip_index : int
+        flip_index
             lattice index for site where a flipped has occurred
         new_occupation
             atomic number of new occupation at site `flip_index`
