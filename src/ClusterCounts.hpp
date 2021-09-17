@@ -23,39 +23,37 @@ namespace py = pybind11;
 class ClusterCounts
 {
 public:
+  /// Constructor.
+  ClusterCounts() {}
+  void count(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool, int doNotDoubleCountThisSiteIndex = -1);
+  void countChange(const Structure &, const int, const int, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool, int doNotDoubleCountThisSiteIndex = -1);
+  void countOrbitList(const Structure &, const OrbitList &, bool keepOrder, bool permuteSites = false, int maxOrbit = -1, int doNotDoubleCountThisSiteIndex = -1);
+  void countOrbitListChange(const Structure &, const int, const int, const OrbitList &, bool keepOrder, bool permuteSites = false, int maxOrbit = -1, int doNotDoubleCountThisSiteIndex = -1);
 
-    /// Constructor.
-    ClusterCounts() {  }
-    void count(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool);
-    void countCluster(const Cluster &, const std::vector<int> &, bool, int unit = 1);
-    void countOrbitList(const Structure &, const OrbitList &, bool keepOrder, bool permuteSites = false, int maxOrbit = -1);
-    void countOrbitListChange(const Structure &, const int, const int, const OrbitList &, bool keepOrder, bool permuteSites = false, int maxOrbit = -1);
-    void countChange(const Structure &, const int, const int, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool);
-
-    /**
+  /**
     @details Returns a map representing the cluster counts. The key of the map
               represents a cluster, while the value is another map. In the
               latter the key represents the chemical species, while the value
               is the cluster count.
     **/
-    std::unordered_map<Cluster, std::map<std::vector<int>, int>> getClusterCounts() const { return _clusterCounts; }
+  std::unordered_map<Cluster, std::map<std::vector<int>, double>> getClusterCounts() const { return _clusterCounts; }
 
-    /// Returns the cluster counts size i.e. the total number of clusters
-    size_t size() const
-    {
-      return _clusterCounts.size();
-    }
-    /// Reset cluster counts
-    void reset()
-    {
-      _clusterCounts.clear();
-    }
+  /// Returns the cluster counts size i.e. the total number of clusters
+  size_t size() const
+  {
+    return _clusterCounts.size();
+  }
+  /// Reset cluster counts
+  void reset()
+  {
+    _clusterCounts.clear();
+  }
 
-    /**
+  /**
     @details Map representing cluster counts. The key represents a cluster,
               while the value is another map. In the latter the key represents
               the chemical species, while the value is the cluster count.
     @todo make private
     **/
-    std::unordered_map<Cluster, std::map<std::vector<int>, int>> _clusterCounts;
+  std::unordered_map<Cluster, std::map<std::vector<int>, double>> _clusterCounts;
 };

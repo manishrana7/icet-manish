@@ -470,7 +470,8 @@ PYBIND11_MODULE(_icet, m)
              (void (ClusterCounts::*)(const Structure &,
                                       const std::vector<std::vector<LatticeSite>> &,
                                       const Cluster &,
-                                      bool)) &
+                                      bool,
+                                      int)) &
                  ClusterCounts::count,
              R"pbdoc(
              Counts the vectors in `lattice_sites` assuming these sets of sites are
@@ -487,11 +488,15 @@ PYBIND11_MODULE(_icet, m)
              order_intact : bool
                 if true the order of the sites will remain the same otherwise the
                 vector of species being counted will be sorted
+            order_intact : bool
+                if true the order of the sites will remain the same otherwise the
+                vector of species being counted will be sorted
              )pbdoc",
              py::arg("structure"),
              py::arg("lattice_sites"),
              py::arg("cluster"),
-             py::arg("order_intact"))
+             py::arg("order_intact"),
+             py::arg("do_not_double_count_this_site_index") = -1)
         .def("count_orbit_list", &ClusterCounts::countOrbitList,
              R"pbdoc(
              Counts sites in orbit list.
@@ -514,7 +519,8 @@ PYBIND11_MODULE(_icet, m)
              py::arg("orbit_list"),
              py::arg("order_intact"),
              py::arg("permute_sites"),
-             py::arg("max_orbit") = -1)
+             py::arg("max_orbit") = -1,
+             py::arg("do_not_double_count_this_site_index") = -1)
         .def("__len__", &ClusterCounts::size)
         .def("reset", &ClusterCounts::reset)
         .def("get_cluster_counts", [](const ClusterCounts &clusterCounts)
@@ -523,15 +529,21 @@ PYBIND11_MODULE(_icet, m)
                  for (const auto &mapPair : clusterCounts.getClusterCounts())
                  {
                      py::dict d;
-                     for (const auto &vecInt_intPair : mapPair.second)
+                     for (const auto &vecInt_double_pair : mapPair.second)
                      {
                          py::list element_symbols;
-                         for (auto el : vecInt_intPair.first)
+                         for (auto el : vecInt_double_pair.first)
                          {
                              auto getElementSymbols = PeriodicTable::intStr[el];
                              element_symbols.append(getElementSymbols);
                          }
-                         d[py::tuple(element_symbols)] = vecInt_intPair.second;
+                         double count_double = vecInt_double_pair.second;
+                         if (std::abs(std::round(count_double) - count_double) > 1e-6)
+                         {
+                            std::runtime_error("Cluster count is a non-integer.");
+                         }
+                        int count = (int)std::round(count_double);
+                         d[py::tuple(element_symbols)] = count;
                      }
                      clusterCountDict[py::cast(mapPair.first)] = d;
                  }
@@ -954,20 +966,41 @@ PYBIND11_MODULE(_icet, m)
                 return py::array(cvChange.size(), cvChange.data());
             },
             R"pbdoc(
-              Returns a cluster vector that only considers clusters that contain the input index.
+              Returns the change in cluster vector upon flipping of one site.
 
               Parameters
               ----------
               occupations : list(int)
                   the occupation vector for the supercell before flip
-              flipIndex : int
+              flip_index : int
                   local index of the supercell where flip has occured
-              newOccupation : int
+              new_occupation : int
                   new atomic number of the flipped site
               )pbdoc",
             py::arg("occupations"),
             py::arg("flip_index"),
             py::arg("new_occupation"))
+        .def(
+            "get_local_cluster_vector",
+            [](ClusterExpansionCalculator &calc,
+               const py::array_t<int> &occupations,
+               const int index)
+            {
+                auto localCv = calc.getLocalClusterVector(occupations, index);
+                return py::array(localCv.size(), localCv.data());
+            },
+            R"pbdoc(
+              Returns a cluster vector that only considers clusters that contain the input index.
+
+              Parameters
+              ----------
+              occupations : list(int)
+                  the full occupation vector for the supercell
+              index : int
+                  index of site whose local cluster vector should be calculated
+              )pbdoc",
+            py::arg("occupations"),
+            py::arg("index"))
         .def(
             "get_cluster_vector",
             [](ClusterExpansionCalculator &calc,

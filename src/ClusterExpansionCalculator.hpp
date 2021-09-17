@@ -36,7 +36,13 @@ public:
     /// Returns the full cluster vector.
     std::vector<double> getClusterVector(const py::array_t<int> &);
 
+    /// Returns a local cluster vector; the contribution to the cluster vector from one site.
+    std::vector<double> getLocalClusterVector(const py::array_t<int> &, int);
+
 private:
+    /// Occupy a cluster vector based on an orbit list and already counted clusters
+    std::vector<double> _occupyClusterVector(const double);
+
     /// Maps offsets to local orbit lists.
     std::unordered_map<Vector3d, OrbitList, Vector3dHash> _localOrbitlists;
 
