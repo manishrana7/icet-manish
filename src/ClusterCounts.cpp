@@ -1,12 +1,16 @@
 #include "ClusterCounts.hpp"
 
 /**
-@details Will count the vectors in latticeSites and assuming these sets of sites are represented by the cluster 'cluster'.
-@param structure the structure that will have its clusters counted
-@param latticeSites A group of sites, represented by 'cluster', that will be counted
-@param cluster A cluster used as identification on what sites the clusters belong to
-@param keepOrder if true the order of the sites will stay the same otherwise the vector of species being counted will be sorted
-@param doNotDoubleCountThisSiteIndex Count clusters with this site index with a factor 1/n, where n is the number of occurences of this site in the cluster (to avoid double counting).
+ @details Will count the vectors in latticeSites and assuming these sets of sites are represented by the cluster 'cluster'.
+ @param structure the structure that will have its clusters counted
+ @param latticeSites A group of sites, represented by 'cluster', that will be counted
+ @param cluster A cluster used as identification on what sites the clusters belong to
+ @param keepOrder if true the order of the sites will stay the same otherwise the vector of species being counted will be sorted
+ @param doNotDoubleCountThisSiteIndex In small supercells, clusters may include both a site and its periodic image.
+                                      This argument can be used to avoid double counting in such cases; clusters
+                                      where a site with this index occurs more than once will only be counted
+                                      with a factor 1 / n, where n is the number of occurences of this index.
+                                      By default (doNotDoubleCountThisSiteIndex = -1) no such correction is done.
 */
 void ClusterCounts::count(const Structure &structure,
                           const std::vector<std::vector<LatticeSite>> &latticeSites,
@@ -46,14 +50,18 @@ void ClusterCounts::count(const Structure &structure,
 }
 
 /**
-@details Count the change on occupation of the clusters of an orbit.
-@param structure the structure that will have its clusters counted
-@param flipIndex index of site that has been flipped
-@param newOccupation new atomic number of site that has been flipped
-@param latticeSites A group of sites, represented by 'cluster', that will be counted
-@param cluster A cluster used as identification on what sites the clusters belong to
-@param keepOrder if true the order of the sites will stay the same otherwise the vector of species being counted will be sorted
-@param doNotDoubleCountThisSiteIndex Count clusters with this site index with a factor 1/n, where n is the number of occurences of this site in the cluster (to avoid double counting).
+ @details Count the change on occupation of the clusters of an orbit.
+ @param structure the structure that will have its clusters counted
+ @param flipIndex index of site that has been flipped
+ @param newOccupation new atomic number of site that has been flipped
+ @param latticeSites A group of sites, represented by 'cluster', that will be counted
+ @param cluster A cluster used as identification on what sites the clusters belong to
+ @param keepOrder if true the order of the sites will stay the same otherwise the vector of species being counted will be sorted
+ @param doNotDoubleCountThisSiteIndex In small supercells, clusters may include both a site and its periodic image.
+                                      This argument can be used to avoid double counting in such cases; clusters
+                                      where a site with this index occurs more than once will only be counted
+                                      with a factor 1 / n, where n is the number of occurences of this index.
+                                      By default (doNotDoubleCountThisSiteIndex = -1) no such correction is done.
 */
 void ClusterCounts::countChange(const Structure &structure,
                                 const int flipIndex,
@@ -121,7 +129,11 @@ void ClusterCounts::countChange(const Structure &structure,
  @param keepOrder if true do not reorder clusters before comparison (i.e., ABC != ACB)
  @param permuteSites if true the sites will be permuted according to the correspondin permutations in the orbit
  @param maxOrbit include only orbits with indices smaller than this (by default all orbits are included)
- @param doNotDoubleCountThisSiteIndex In small supercells, clusters may include both a site and its periodic image. This argument can be used to avoid double counting in such cases.
+ @param doNotDoubleCountThisSiteIndex In small supercells, clusters may include both a site and its periodic image.
+                                      This argument can be used to avoid double counting in such cases; clusters
+                                      where a site with this index occurs more than once will only be counted
+                                      with a factor 1 / n, where n is the number of occurences of this index.
+                                      By default (doNotDoubleCountThisSiteIndex = -1) no such correction is done.
 */
 void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &orbitList,
                                    bool keepOrder, bool permuteSites, int maxOrbit,
@@ -155,7 +167,11 @@ void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &
  @param keepOrder if true do not reorder clusters before comparison (i.e., ABC != ACB)
  @param permuteSites if true the sites will be permuted according to the correspondin permutations in the orbit
  @param maxOrbit include only orbits with indices smaller than this (by default all orbits are included)
-  @param doNotDoubleCountThisSiteIndex In small supercells, clusters may include both a site and its periodic image. This argument can be used to avoid double counting in such cases.
+ @param doNotDoubleCountThisSiteIndex In small supercells, clusters may include both a site and its periodic image.
+                                      This argument can be used to avoid double counting in such cases; clusters
+                                      where a site with this index occurs more than once will only be counted
+                                      with a factor 1 / n, where n is the number of occurences of this index.
+                                      By default (doNotDoubleCountThisSiteIndex = -1) no such correction is done.
 */
 void ClusterCounts::countOrbitListChange(const Structure &structure,
                                          const int flipIndex,
