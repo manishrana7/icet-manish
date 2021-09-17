@@ -8,11 +8,36 @@ from mchammer.calculators.cluster_expansion_calculator import \
 import numpy as np
 
 
-def get_complementary_symbol(symbol, chemical_symbols):
+def get_energy_changes(calc, structure, anti_structure, sites):
+    """
+    Calculates change in property upon some change in a structure
+    with three different methods.
+    """
+    change_local = calc.calculate_change(
+        sites=sites,
+        current_occupations=structure.get_atomic_numbers(),
+        new_site_occupations=anti_structure.get_atomic_numbers()[sites])
+
+    occupations_before = structure.get_atomic_numbers()
+    occupations_after = structure.get_atomic_numbers()
+    occupations_after[sites] = anti_structure.get_atomic_numbers()[sites]
+    change_global = calc.calculate_total(occupations=occupations_after) \
+        - calc.calculate_total(occupations=occupations_before)
+
+    e_before_ce = calc.cluster_expansion.predict(structure)
+    structure_copy = structure.copy()
+    structure_copy.set_atomic_numbers(occupations_after)
+    e_after_ce = calc.cluster_expansion.predict(structure_copy)
+    change_ce = e_after_ce - e_before_ce
+    change_ce *= len(structure)
+
+    return change_local, change_global, change_ce
+
+def get_complementary_chemical_symbol(symbol, chemical_symbols):
     for site_symbols in chemical_symbols:
         if symbol == site_symbols[0]:
             return site_symbols[-1]
-    raise Exception('Failed finding complementary symbol')
+    raise Exception('Failed to find complementary chemcial symbol')
 
 
 @pytest.fixture
@@ -85,7 +110,7 @@ def system(request):
     structure = prim.repeat((2, 2, 3))
     anti_structure = prim.copy()
     for atom in anti_structure:
-        atom.symbol = get_complementary_symbol(atom.symbol, chemical_symbols)
+        atom.symbol = get_complementary_chemical_symbol(atom.symbol, chemical_symbols)
     anti_structure = anti_structure.repeat((2, 2, 3))
 
     # Occupy supercell according to some pattern
@@ -148,7 +173,7 @@ for model in ['binary_fcc', 'ternary_fcc', 'binary_bcc', 'ternary_hcp',
                 systems_with_calculator_choice.append(((model, repeat, supercell), False))
 
 
-@pytest.mark.parametrize('system', systems, indirect=['system'])
+@pytest.mark.parametrize('system', systems[:5], indirect=['system'])
 def test_initialization(system):
     ce, structure, _ = system
     calc = ClusterExpansionCalculator(structure, ce, name='Test CE calc')
@@ -168,7 +193,7 @@ def test_initialization(system):
 
 
 @pytest.mark.parametrize('system', systems, indirect=['system'])
-def test_get_cluster_vector(system):
+def test_get_cluster_vector_against_cluster_space(system):
     """Tests retrieval of full cluster vector from C++ side calculator against
     full cluster vector calculation from cluster space."""
     ce, structure, anti_structure = system
@@ -212,7 +237,6 @@ def test_change_calculation_swap(system, use_local_energy_calculator):
     ce, structure, anti_structure = system
     calc = ClusterExpansionCalculator(structure, ce, name='Test CE calc',
                                       use_local_energy_calculator=use_local_energy_calculator)
-    print(structure, anti_structure)
     for i in range(len(structure)):
         for j in range(3):
             if structure[i].symbol == 'W' or structure[j].symbol == 'W':
@@ -220,36 +244,119 @@ def test_change_calculation_swap(system, use_local_energy_calculator):
                 continue
             if j >= len(structure) or i == j:
                 continue
-            print(i, j, structure)
             sites = [i, j]
             change_local, change_global, change_ce = \
                 get_energy_changes(calc, structure, anti_structure, sites)
-            print(change_local, change_global)
             assert abs(change_local - change_global) < 1e-6
             assert abs(change_global - change_ce) < 1e-6
 
+@pytest.mark.parametrize('system, expected_cluster_vector', [
+        (('binary_fcc', (2, 2, 2), 'ordered'), [1., 0., -0.22222222, 0.33333333, -0.11111111,
+                                                0., 0., 0., 0., 0., 0., 0., 0.33333333,
+                                                -0.22222222, 1.]),
+        (('ternary_fcc', (2, 2, 1), 'segregated'), [1., -0.25, 0., 0.0625, 0., -0.0625, -0.5,
+                                                    0., 0., 0.0625, 0., -0.0208333333, -0.015625,
+                                                    0., 0.015625, 0, 0.125, 0., 0., 0.0625,
+                                                    0.0, 0.0]),
+        (('binary_hcp', (2, 2, 3), 'ordered'), [1.0, 0.0, -1.0, 1.0, -1.0, 0.0, 0.0, 0.0]),
+        (('ternary_hcp', (1, 1, 1), 'ordered'), [1.0, 0.125, 0.2165063509461095, -0.125,
+                                                 -0.21650635094610976, -0.375, 0.0625,
+                                                 0.3247595264191646, 0.4375, -0.125,
+                                                 -0.21650635094610976, -0.3749999999999999,
+                                                 -0.0625, -0.10825317547305488,
+                                                 0., 0., -0.0625, -0.10825317547305477,
+                                                 0.125, 0.10825317547305496, 0.125,
+                                                 0.3247595264191642, 0.125,
+                                                 0.10825317547305496, 0.125,
+                                                 0.3247595264191642]),
+        (('sublattices_fcc', (3, 3, 1), 'pseudorandom'), [[1.0, 1/3, 1/6, 1 / 18, 1/9, -1/6,
+                                                          1/8, -1/3, 1/3, 1/36, 1/18, -1/9,
+                                                          0.0, -1/9, -1/18, 1/9, 0.0694444445,
+                                                          0.01388888889, 0., -1/6, -1/9, 1/18,
+                                                          1/12, 1/12]]),
+    ], indirect=['system'])
+def test_get_cluster_vector_against_reference(system, expected_cluster_vector):
+    ce, structure, _ = system
+    calc = ClusterExpansionCalculator(structure, ce)
+    cv = calc.cpp_calc.get_cluster_vector(structure.get_atomic_numbers())
+    assert np.allclose(cv, expected_cluster_vector)
 
-def get_energy_changes(calc, structure, anti_structure, sites):
-    """
-    Calculates change in property upon some change in a structure
-    with three different methods.
-    """
-    change_local = calc.calculate_change(
-        sites=sites,
-        current_occupations=structure.get_atomic_numbers(),
-        new_site_occupations=anti_structure.get_atomic_numbers()[sites])
+@pytest.mark.parametrize('system, expected_local_cluster_vector', [
+        (('binary_fcc', (2, 2, 2), 'ordered'), [0.08333333333, -0.08333333, -0.05555555556,
+                                                0.166666667, -0.0277777778, 0.0833333333,
+                                                -0.0277777778, 0.05555555556, 0.,
+                                                0.05555555556, 0.02777777778, 0.0,
+                                                0.3333333333, -0.1111111, 0.33333333]),
+        (('ternary_fcc', (2, 2, 1), 'segregated'), [0.0833333333, 0.0416666667,
+                                                    -0.0721687837, -0.02083333333,
+                                                    0.024056261216, -0.0208333333,
+                                                    -0.083333333, 0.07216878365, 0.0,
+                                                    -0.020833333333, 0.0180421959, 0.0,
+                                                    0.0078125, -0.00751758163,
+                                                    0.00260416666667, 0.0135316469, 0.0,
+                                                    -0.0240562612, 0.0240562612,
+                                                    0.0208333333, 0.0, 0.0]),
+        (('binary_hcp', (2, 2, 3), 'ordered'), [0.0416666667, 0.04166667, -0.08333333,
+                                                0.0833333333, -0.083333333, -0.041666666667,
+                                                0.125, 0.125]),
+        (('ternary_hcp', (2, 1, 1), 'ordered'), [0.04166666667, 0.02083333333, 0.0360843918,
+                                                -0.01041666667, -0.018042196, -0.03125,
+                                                0.02083333333, 0.03608439, 0.0625,
+                                                -0.0104166667, -0.018042196, -0.03125,
+                                                -0.0078125, -0.013531647, -0.004510549,
+                                                -0.0078125, -0.013020833, -0.022552745,
+                                                0.015625, 0.0270632939, 0.046875,
+                                                0.081189882, 0.015625, 0.02706329,
+                                                0.046875, 0.08118988160]),
+        (('sublattices_fcc', (3, 3, 1), 'pseudorandom'), [0.0416666667, 0.0, 0.08333333,
+                                                          0.027777777778, 0.0, 0.0, 0.0625, 0.0,
+                                                          0.1666666667, 0.0138888889, 0.0,
+                                                          -0.01388888889, 0.0, -0.02777777778,
+                                                          -0.0277777778, 0.0555555556,
+                                                          0.03472222222, 0.0208333333, 0.0,
+                                                          -0.0833333333, 0.0, 0.0277777778,
+                                                          0.041666666667, 0.125]),
+    ], indirect=['system'])
+def test_get_local_cluster_vector_against_reference(system, expected_local_cluster_vector):
+    ce, structure, _ = system
+    calc = ClusterExpansionCalculator(structure, ce)
+    local_cv = calc.cpp_calc.get_local_cluster_vector(structure.get_atomic_numbers(), 1)
+    assert np.allclose(local_cv, expected_local_cluster_vector)
 
-    occupations_before = structure.get_atomic_numbers()
-    occupations_after = structure.get_atomic_numbers()
-    occupations_after[sites] = anti_structure.get_atomic_numbers()[sites]
-    change_global = calc.calculate_total(occupations=occupations_after) \
-        - calc.calculate_total(occupations=occupations_before)
-
-    e_before_ce = calc.cluster_expansion.predict(structure)
-    structure_copy = structure.copy()
-    structure_copy.set_atomic_numbers(occupations_after)
-    e_after_ce = calc.cluster_expansion.predict(structure_copy)
-    change_ce = e_after_ce - e_before_ce
-    change_ce *= len(structure)
-
-    return change_local, change_global, change_ce
+@pytest.mark.parametrize('system, expected_cluster_vector_change', [
+        (('binary_fcc', (2, 2, 2), 'ordered'), [0.0, 0.1666666667, 0.111111111, -0.3333333333,
+                                                0.0555555556, -0.1666666667, 0.05555556,
+                                                -0.111111111, 0.0, -0.11111111, -0.05555555556,
+                                                0.0, -0.666666667, 0.222222222, -0.666666667]),
+        (('ternary_fcc', (2, 2, 1), 'segregated'), [0.0, -0.125, 0.07216878365, 0.0625,
+                                                    -0.0360843918, 0.020833333, 0.25,
+                                                    -0.07216878365, 0., 0.0625, -0.018042196,
+                                                    0., -0.0234375, 0.01353164693,
+                                                    0.0026041666667, -0.0135316469, 0.,
+                                                    0.0360843918, 0., -0.0208333333, 0.0, 0.0]),
+        (('binary_hcp', (2, 2, 3), 'ordered'), [0.0, -0.083333333, 0.1666666667,
+                                                -0.166666666667, 0.166666667, 0.0833333333,
+                                                -0.25, -0.25]),
+        (('ternary_hcp', (2, 1, 1), 'ordered'), [0.0, -0.0625, -0.0360843918, 0.03125,
+                                                 0.03608439182, 0.03125, -0.0625, -0.072168784,
+                                                 -0.0625, 0.03125, 0.0360843918, 0.03125,
+                                                 0.0234375, 0.0315738428, 0.004510549, 0.0234375,
+                                                 0.0078125, 0.022552745, -0.046875,
+                                                 -0.06314768569, -0.078125, -0.081189882,
+                                                 -0.046875, -0.0631476857, -0.078125,
+                                                 -0.08118988160]),
+        (('sublattices_fcc', (3, 3, 1), 'pseudorandom'), [0.0, 0.0, -0.166666667,
+                                                          -0.0555555556, 0.0, 0.0, -0.125, 0.0,
+                                                          -0.333333333, -0.0277777778, 0.0,
+                                                          0.027777777778, 0.0, 0.0555555556,
+                                                          0.055555555556, -0.111111111,
+                                                          -0.069444444, -0.041666666667, 0.0,
+                                                          0.166666666667, 0.0, -0.05555555555,
+                                                          -0.08333333333, -0.25]),
+    ], indirect=['system'])
+def test_get_cluster_vector_change_against_reference(system, expected_cluster_vector_change):
+    ce, structure, anti_structure = system
+    calc = ClusterExpansionCalculator(structure, ce)
+    cv_change = calc.cpp_calc.get_cluster_vector_change(structure.get_atomic_numbers(), 1,
+                                                       anti_structure.get_atomic_numbers()[1])
+    assert np.allclose(cv_change, expected_cluster_vector_change)
