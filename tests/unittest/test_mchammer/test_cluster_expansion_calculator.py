@@ -3,10 +3,8 @@ import pytest
 from ase import Atom
 from ase.build import bulk
 from icet import ClusterExpansion, ClusterSpace
-from icet.core.structure import Structure
 from mchammer.calculators.cluster_expansion_calculator import \
     ClusterExpansionCalculator
-from _icet import _ClusterExpansionCalculator
 import numpy as np
 
 
