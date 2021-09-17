@@ -33,6 +33,7 @@ def get_energy_changes(calc, structure, anti_structure, sites):
 
     return change_local, change_global, change_ce
 
+
 def get_complementary_chemical_symbol(symbol, chemical_symbols):
     for site_symbols in chemical_symbols:
         if symbol == site_symbols[0]:
@@ -250,6 +251,7 @@ def test_change_calculation_swap(system, use_local_energy_calculator):
             assert abs(change_local - change_global) < 1e-6
             assert abs(change_global - change_ce) < 1e-6
 
+
 @pytest.mark.parametrize('system, expected_cluster_vector', [
         (('binary_fcc', (2, 2, 2), 'ordered'), [1., 0., -0.22222222, 0.33333333, -0.11111111,
                                                 0., 0., 0., 0., 0., 0., 0., 0.33333333,
@@ -281,6 +283,7 @@ def test_get_cluster_vector_against_reference(system, expected_cluster_vector):
     cv = calc.cpp_calc.get_cluster_vector(structure.get_atomic_numbers())
     assert np.allclose(cv, expected_cluster_vector)
 
+
 @pytest.mark.parametrize('system, expected_local_cluster_vector', [
         (('binary_fcc', (2, 2, 2), 'ordered'), [0.08333333333, -0.08333333, -0.05555555556,
                                                 0.166666667, -0.0277777778, 0.0833333333,
@@ -300,14 +303,14 @@ def test_get_cluster_vector_against_reference(system, expected_cluster_vector):
                                                 0.0833333333, -0.083333333, -0.041666666667,
                                                 0.125, 0.125]),
         (('ternary_hcp', (2, 1, 1), 'ordered'), [0.04166666667, 0.02083333333, 0.0360843918,
-                                                -0.01041666667, -0.018042196, -0.03125,
-                                                0.02083333333, 0.03608439, 0.0625,
-                                                -0.0104166667, -0.018042196, -0.03125,
-                                                -0.0078125, -0.013531647, -0.004510549,
-                                                -0.0078125, -0.013020833, -0.022552745,
-                                                0.015625, 0.0270632939, 0.046875,
-                                                0.081189882, 0.015625, 0.02706329,
-                                                0.046875, 0.08118988160]),
+                                                 -0.01041666667, -0.018042196, -0.03125,
+                                                 0.02083333333, 0.03608439, 0.0625,
+                                                 -0.0104166667, -0.018042196, -0.03125,
+                                                 -0.0078125, -0.013531647, -0.004510549,
+                                                 -0.0078125, -0.013020833, -0.022552745,
+                                                 0.015625, 0.0270632939, 0.046875,
+                                                 0.081189882, 0.015625, 0.02706329,
+                                                 0.046875, 0.08118988160]),
         (('sublattices_fcc', (3, 3, 1), 'pseudorandom'), [0.0416666667, 0.0, 0.08333333,
                                                           0.027777777778, 0.0, 0.0, 0.0625, 0.0,
                                                           0.1666666667, 0.0138888889, 0.0,
@@ -322,6 +325,7 @@ def test_get_local_cluster_vector_against_reference(system, expected_local_clust
     calc = ClusterExpansionCalculator(structure, ce)
     local_cv = calc.cpp_calc.get_local_cluster_vector(structure.get_atomic_numbers(), 1)
     assert np.allclose(local_cv, expected_local_cluster_vector)
+
 
 @pytest.mark.parametrize('system, expected_cluster_vector_change', [
         (('binary_fcc', (2, 2, 2), 'ordered'), [0.0, 0.1666666667, 0.111111111, -0.3333333333,
@@ -358,5 +362,5 @@ def test_get_cluster_vector_change_against_reference(system, expected_cluster_ve
     ce, structure, anti_structure = system
     calc = ClusterExpansionCalculator(structure, ce)
     cv_change = calc.cpp_calc.get_cluster_vector_change(structure.get_atomic_numbers(), 1,
-                                                       anti_structure.get_atomic_numbers()[1])
+                                                        anti_structure.get_atomic_numbers()[1])
     assert np.allclose(cv_change, expected_cluster_vector_change)
