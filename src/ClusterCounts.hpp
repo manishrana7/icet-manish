@@ -28,7 +28,7 @@ public:
   void count(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool, int doNotDoubleCountThisSiteIndex = -1);
   void countChange(const Structure &, const int, const int, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool, int doNotDoubleCountThisSiteIndex = -1);
   void countOrbitList(const Structure &, const OrbitList &, bool keepOrder, bool permuteSites = false, int maxOrbit = -1, int doNotDoubleCountThisSiteIndex = -1);
-  void countOrbitListChange(const Structure &, const int, const int, const OrbitList &, bool keepOrder, bool permuteSites = false, int maxOrbit = -1, int doNotDoubleCountThisSiteIndex = -1);
+  void countOrbitListChange(const Structure &, const int, const int, const OrbitList &, bool keepOrder, int maxOrbit = -1, int doNotDoubleCountThisSiteIndex = -1);
 
   /**
     @details Returns a map representing the cluster counts. The key of the map

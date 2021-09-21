@@ -248,10 +248,6 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
     // do not sort the clusters
     bool keepOrder = true;
 
-    // Count the clusters in the order as in the equivalent clusters
-    // since these clusters are already in the permuted order
-    bool permuteSites = false;
-
     // Get one of the translated orbitlists
     _translatedOrbitList = _localOrbitlists[_indexToOffset[flipIndex]];
 
@@ -263,7 +259,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
     }
 
     // Count clusters and get cluster count map
-    _clusterCounts.countOrbitListChange(_supercell, flipIndex, newOccupation, _translatedOrbitList, keepOrder, permuteSites, -1, flipIndex);
+    _clusterCounts.countOrbitListChange(_supercell, flipIndex, newOccupation, _translatedOrbitList, keepOrder, -1, flipIndex);
 
     return _occupyClusterVector(0.0);
 }
@@ -321,7 +317,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array
     // do not sort the clusters
     bool keepOrder = true;
 
-    /// Permute the sites
+    /// Do not permute the sites, because we have already done that after initializing _fullOrbitList
     bool permuteSites = false;
 
     // Count clusters and get cluster count map

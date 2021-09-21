@@ -165,7 +165,6 @@ void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &
  @param newOccupation new atomic number of site that has been flipped
  @param orbitList orbit list
  @param keepOrder if true do not reorder clusters before comparison (i.e., ABC != ACB)
- @param permuteSites if true the sites will be permuted according to the correspondin permutations in the orbit
  @param maxOrbit include only orbits with indices smaller than this (by default all orbits are included)
  @param siteIndexForDoubleCountCorrection In small supercells, clusters may include both a site and its periodic image.
                                       This argument can be used to avoid double counting in such cases; clusters
@@ -178,7 +177,6 @@ void ClusterCounts::countOrbitListChange(const Structure &structure,
                                          const int newOccupation,
                                          const OrbitList &orbitList,
                                          bool keepOrder,
-                                         bool permuteSites,
                                          int maxOrbit,
                                          int siteIndexForDoubleCountCorrection)
 {
@@ -190,13 +188,7 @@ void ClusterCounts::countOrbitListChange(const Structure &structure,
     {
         Cluster representativeCluster = orbitList._orbits[i].getRepresentativeCluster();
         representativeCluster.setTag(i);
-        if (permuteSites && keepOrder && representativeCluster.order() != 1)
-        {
-            countChange(structure, flipIndex, newOccupation, orbitList.getOrbit(i).getPermutedEquivalentClusters(), representativeCluster, keepOrder, siteIndexForDoubleCountCorrection);
-        }
-        else
-        {
-            countChange(structure, flipIndex, newOccupation, orbitList._orbits[i]._equivalentClusters, representativeCluster, keepOrder, siteIndexForDoubleCountCorrection);
-        }
+        // Here we rely on _equivalentClusters being pre-permuted, as is done in the ClusterExpansionCalculator
+        countChange(structure, flipIndex, newOccupation, orbitList._orbits[i]._equivalentClusters, representativeCluster, keepOrder, siteIndexForDoubleCountCorrection);
     }
 }
