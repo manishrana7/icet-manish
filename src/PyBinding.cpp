@@ -496,7 +496,7 @@ PYBIND11_MODULE(_icet, m)
              py::arg("lattice_sites"),
              py::arg("cluster"),
              py::arg("order_intact"),
-             py::arg("do_not_double_count_this_site_index") = -1)
+             py::arg("site_index_for_double_count_correction") = -1)
         .def("count_orbit_list", &ClusterCounts::countOrbitList,
              R"pbdoc(
              Counts sites in orbit list.
@@ -520,7 +520,7 @@ PYBIND11_MODULE(_icet, m)
              py::arg("order_intact"),
              py::arg("permute_sites"),
              py::arg("max_orbit") = -1,
-             py::arg("do_not_double_count_this_site_index") = -1)
+             py::arg("site_index_for_double_count_correction") = -1)
         .def("__len__", &ClusterCounts::size)
         .def("reset", &ClusterCounts::reset)
         .def("get_cluster_counts", [](const ClusterCounts &clusterCounts)
@@ -540,9 +540,9 @@ PYBIND11_MODULE(_icet, m)
                          double count_double = vecInt_double_pair.second;
                          if (std::abs(std::round(count_double) - count_double) > 1e-6)
                          {
-                            std::runtime_error("Cluster count is a non-integer.");
+                             std::runtime_error("Cluster count is a non-integer.");
                          }
-                        int count = (int)std::round(count_double);
+                         int count = (int)std::round(count_double);
                          d[py::tuple(element_symbols)] = count;
                      }
                      clusterCountDict[py::cast(mapPair.first)] = d;

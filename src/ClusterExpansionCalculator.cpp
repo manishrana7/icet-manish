@@ -128,7 +128,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
 /**
 @details Occupy cluster vector based on information currently in _clusterCounts
-@param First element of the cluster vector
+@param firstElement First element of the cluster vector
 */
 std::vector<double> ClusterExpansionCalculator::_occupyClusterVector(const double firstElement)
 {

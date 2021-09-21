@@ -43,6 +43,7 @@ public:
   {
     return _clusterCounts.size();
   }
+
   /// Reset cluster counts
   void reset()
   {

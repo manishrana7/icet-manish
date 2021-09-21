@@ -50,8 +50,16 @@ def system(request):
         alat = 4.0
         chemical_symbols = [['Al', 'Ge']]
         prim = bulk(chemical_symbols[0][0], crystalstructure='fcc', a=alat)
-        cutoffs = [5, 5, 4]
+        cutoffs = [7, 6, 4]
         cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
+    elif model == 'binary_fcc_merged':
+        alat = 4.0
+        chemical_symbols = [['Al', 'Ge']]
+        prim = bulk(chemical_symbols[0][0], crystalstructure='fcc', a=alat)
+        cutoffs = [5, 5]
+        cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
+        merge_orbits_data = {2: [3], 7: [8, 9]}
+        cs.merge_orbits(merge_orbits_data)
     elif model == 'ternary_fcc':
         alat = 4.0
         chemical_symbols = [['Al', 'Ge', 'Ga']]
@@ -63,12 +71,6 @@ def system(request):
         chemical_symbols = [['Al', 'Ge']]
         prim = bulk(chemical_symbols[0][0], crystalstructure='bcc', a=alat)
         cutoffs = [10, 10, 4]
-        cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
-    elif model == 'ternary_bcc':
-        alat = 4.0
-        chemical_symbols = [['Al', 'Ge', 'Ga']]
-        prim = bulk(chemical_symbols[0][0], crystalstructure='bcc', a=alat)
-        cutoffs = [5, 4]
         cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
     elif model == 'binary_hcp':
         alat, clat = 3.4, 5.1
@@ -82,6 +84,15 @@ def system(request):
         prim = bulk(chemical_symbols[0][0], a=alat, c=clat, crystalstructure='hcp')
         cutoffs = [5, 4]
         cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
+    elif model == 'ternary_hcp_merged':
+        alat, clat = 3.4, 5.1
+        chemical_symbols = [['Ag', 'Pd', 'Cu'], ['Ag', 'Pd', 'Cu']]
+        prim = bulk(chemical_symbols[0][0], a=alat, c=clat, crystalstructure='hcp')
+        cutoffs = [5, 4]
+        cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
+        print(cs)
+        merge_orbits_data = {1: [3], 4: [5, 6]}
+        cs.merge_orbits(merge_orbits_data)
     elif model == 'sublattices_fcc':
         alat = 4.0
         chemical_symbols = [['Ag', 'Pd'], ['H', 'X']]
@@ -153,6 +164,10 @@ def system(request):
 
     # Define ECIs that are not all the same
     params = [(-1)**i * ((i + 1) / 10)**1.02 for i in range(len(cs))]
+
+    # Set one to zero so we test pruning
+    params[len(params) // 2] = 0
+
     ce = ClusterExpansion(cluster_space=cs, parameters=params)
     return ce, structure, anti_structure
 
@@ -172,6 +187,10 @@ for model in ['binary_fcc', 'ternary_fcc', 'binary_bcc', 'ternary_hcp',
             systems_with_calculator_choice.append(((model, repeat, supercell), True))
             if model == 'binary_bcc':
                 systems_with_calculator_choice.append(((model, repeat, supercell), False))
+systems.append((('binary_fcc_merged', (2, 2, 2), 'pseudorandom')))
+systems_with_calculator_choice.append((('binary_fcc_merged', (2, 2, 2), 'pseudorandom'), True))
+systems.append((('ternary_hcp_merged', (1, 2, 2), 'pseudorandom')))
+systems_with_calculator_choice.append((('ternary_hcp_merged', (1, 2, 2), 'pseudorandom'), True))
 
 
 @pytest.mark.parametrize('system', systems[:5], indirect=['system'])
@@ -253,30 +272,30 @@ def test_change_calculation_swap(system, use_local_energy_calculator):
 
 
 @pytest.mark.parametrize('system, expected_cluster_vector', [
-        (('binary_fcc', (2, 2, 2), 'ordered'), [1., 0., -0.22222222, 0.33333333, -0.11111111,
-                                                0., 0., 0., 0., 0., 0., 0., 0.33333333,
-                                                -0.22222222, 1.]),
-        (('ternary_fcc', (2, 2, 1), 'segregated'), [1., -0.25, 0., 0.0625, 0., -0.0625, -0.5,
-                                                    0., 0., 0.0625, 0., -0.0208333333, -0.015625,
-                                                    0., 0.015625, 0, 0.125, 0., 0., 0.0625,
-                                                    0.0, 0.0]),
-        (('binary_hcp', (2, 2, 3), 'ordered'), [1.0, 0.0, -1.0, 1.0, -1.0, 0.0, 0.0, 0.0]),
-        (('ternary_hcp', (1, 1, 1), 'ordered'), [1.0, 0.125, 0.2165063509461095, -0.125,
-                                                 -0.21650635094610976, -0.375, 0.0625,
-                                                 0.3247595264191646, 0.4375, -0.125,
-                                                 -0.21650635094610976, -0.3749999999999999,
-                                                 -0.0625, -0.10825317547305488,
-                                                 0., 0., -0.0625, -0.10825317547305477,
-                                                 0.125, 0.10825317547305496, 0.125,
-                                                 0.3247595264191642, 0.125,
-                                                 0.10825317547305496, 0.125,
-                                                 0.3247595264191642]),
-        (('sublattices_fcc', (3, 3, 1), 'pseudorandom'), [[1.0, 1/3, 1/6, 1 / 18, 1/9, -1/6,
-                                                          1/8, -1/3, 1/3, 1/36, 1/18, -1/9,
-                                                          0.0, -1/9, -1/18, 1/9, 0.0694444445,
-                                                          0.01388888889, 0., -1/6, -1/9, 1/18,
-                                                          1/12, 1/12]]),
-    ], indirect=['system'])
+    (('binary_fcc', (2, 2, 2), 'ordered'), [1., 0., -0.22222222, 0.33333333, -0.11111111,
+                                            0.33333333, 0., 0., 0., 0., 0., 0., 0., 0.,
+                                            0., 0., 0., 0., 0., 0.333333333, -0.22222222, 1.]),
+    (('ternary_fcc', (2, 2, 1), 'segregated'), [1., -0.25, 0., 0.0625, 0., -0.0625, -0.5,
+                                                0., 0., 0.0625, 0., -0.0208333333, -0.015625,
+                                                0., 0.015625, 0, 0.125, 0., 0., 0.0625,
+                                                0.0, 0.0]),
+    (('binary_hcp', (2, 2, 3), 'ordered'), [1.0, 0.0, -1.0, 1.0, 0.0, 0.0, 0.0]),
+    (('ternary_hcp', (1, 1, 1), 'ordered'), [1.0, 0.125, 0.2165063509461095, -0.125,
+                                             -0.21650635094610976, -0.375, 0.0625,
+                                             0.3247595264191646, 0.4375, -0.125,
+                                             -0.21650635094610976, -0.3749999999999999,
+                                             -0.0625, -0.10825317547305488,
+                                             0., 0., -0.0625, -0.10825317547305477,
+                                             0.125, 0.10825317547305496, 0.125,
+                                             0.3247595264191642, 0.125,
+                                             0.10825317547305496, 0.125,
+                                             0.3247595264191642]),
+    (('sublattices_fcc', (3, 3, 1), 'pseudorandom'), [[1.0, 1/3, 1/6, 1 / 18, 1/9, -1/6,
+                                                       1/8, -1/3, 1/3, 1/36, 1/18, -1/9,
+                                                       -1/9, -1/18, 1/9, 0.0694444445,
+                                                       0.01388888889, 0., -1/6, -1/9, 1/18,
+                                                       1/12, 1/12]]),
+], indirect=['system'])
 def test_get_cluster_vector_against_reference(system, expected_cluster_vector):
     ce, structure, _ = system
     calc = ClusterExpansionCalculator(structure, ce)
@@ -285,41 +304,44 @@ def test_get_cluster_vector_against_reference(system, expected_cluster_vector):
 
 
 @pytest.mark.parametrize('system, expected_local_cluster_vector', [
-        (('binary_fcc', (2, 2, 2), 'ordered'), [0.08333333333, -0.08333333, -0.05555555556,
-                                                0.166666667, -0.0277777778, 0.0833333333,
-                                                -0.0277777778, 0.05555555556, 0.,
-                                                0.05555555556, 0.02777777778, 0.0,
-                                                0.3333333333, -0.1111111, 0.33333333]),
-        (('ternary_fcc', (2, 2, 1), 'segregated'), [0.0833333333, 0.0416666667,
-                                                    -0.0721687837, -0.02083333333,
-                                                    0.024056261216, -0.0208333333,
-                                                    -0.083333333, 0.07216878365, 0.0,
-                                                    -0.020833333333, 0.0180421959, 0.0,
-                                                    0.0078125, -0.00751758163,
-                                                    0.00260416666667, 0.0135316469, 0.0,
-                                                    -0.0240562612, 0.0240562612,
-                                                    0.0208333333, 0.0, 0.0]),
-        (('binary_hcp', (2, 2, 3), 'ordered'), [0.0416666667, 0.04166667, -0.08333333,
-                                                0.0833333333, -0.083333333, -0.041666666667,
-                                                0.125, 0.125]),
-        (('ternary_hcp', (2, 1, 1), 'ordered'), [0.04166666667, 0.02083333333, 0.0360843918,
-                                                 -0.01041666667, -0.018042196, -0.03125,
-                                                 0.02083333333, 0.03608439, 0.0625,
-                                                 -0.0104166667, -0.018042196, -0.03125,
-                                                 -0.0078125, -0.013531647, -0.004510549,
-                                                 -0.0078125, -0.013020833, -0.022552745,
-                                                 0.015625, 0.0270632939, 0.046875,
-                                                 0.081189882, 0.015625, 0.02706329,
-                                                 0.046875, 0.08118988160]),
-        (('sublattices_fcc', (3, 3, 1), 'pseudorandom'), [0.0416666667, 0.0, 0.08333333,
-                                                          0.027777777778, 0.0, 0.0, 0.0625, 0.0,
-                                                          0.1666666667, 0.0138888889, 0.0,
-                                                          -0.01388888889, 0.0, -0.02777777778,
-                                                          -0.0277777778, 0.0555555556,
-                                                          0.03472222222, 0.0208333333, 0.0,
-                                                          -0.0833333333, 0.0, 0.0277777778,
-                                                          0.041666666667, 0.125]),
-    ], indirect=['system'])
+    (('binary_fcc', (2, 2, 2), 'ordered'), [0.08333333333, -0.08333333, -0.05555555556,
+                                            0.166666667, -0.0277777778, -0.04166666667,
+                                            0., 0.0833333333, 0.0833333333,
+                                            -0.0277777778, -0.09722222222, 0.,
+                                            0.05555555556, -0.041666666667,
+                                            -0.041666666667, 0.02777777778, 0.0,
+                                            0.0138888888889, -0.020833333333,
+                                            0.3333333333, -0.111111111, 0.3333333333]),
+    (('ternary_fcc', (2, 2, 1), 'segregated'), [0.0833333333, 0.0416666667,
+                                                -0.0721687837, -0.02083333333,
+                                                0.024056261216, -0.0208333333,
+                                                -0.083333333, 0.07216878365, 0.0,
+                                                -0.020833333333, 0.0180421959, 0.0,
+                                                0.0078125, -0.00751758163,
+                                                0.00260416666667, 0.0135316469, 0.0,
+                                                -0.0240562612, 0.0240562612,
+                                                0.0208333333, 0.0, 0.0]),
+    (('binary_hcp', (2, 2, 3), 'ordered'), [0.0416666667, 0.041666667, -0.08333333,
+                                            0.083333333, -0.041666666667,
+                                            0.125, 0.125]),
+    (('ternary_hcp', (2, 1, 1), 'ordered'), [0.04166666667, 0.02083333333, 0.0360843918,
+                                             -0.01041666667, -0.018042196, -0.03125,
+                                             0.02083333333, 0.03608439, 0.0625,
+                                             -0.0104166667, -0.018042196, -0.03125,
+                                             -0.0078125, -0.013531647, -0.004510549,
+                                             -0.0078125, -0.013020833, -0.022552745,
+                                             0.015625, 0.0270632939, 0.046875,
+                                             0.081189882, 0.015625, 0.02706329,
+                                             0.046875, 0.08118988160]),
+    (('sublattices_fcc', (3, 3, 1), 'pseudorandom'), [0.0416666667, 0.0, 0.08333333,
+                                                      0.027777777778, 0.0, 0.0, 0.0625, 0.0,
+                                                      0.1666666667, 0.0138888889, 0.0,
+                                                      -0.01388888889, -0.02777777778,
+                                                      -0.0277777778, 0.0555555556,
+                                                      0.03472222222, 0.0208333333, 0.0,
+                                                      -0.0833333333, 0.0, 0.0277777778,
+                                                      0.041666666667, 0.125]),
+], indirect=['system'])
 def test_get_local_cluster_vector_against_reference(system, expected_local_cluster_vector):
     ce, structure, _ = system
     calc = ClusterExpansionCalculator(structure, ce)
@@ -328,36 +350,39 @@ def test_get_local_cluster_vector_against_reference(system, expected_local_clust
 
 
 @pytest.mark.parametrize('system, expected_cluster_vector_change', [
-        (('binary_fcc', (2, 2, 2), 'ordered'), [0.0, 0.1666666667, 0.111111111, -0.3333333333,
-                                                0.0555555556, -0.1666666667, 0.05555556,
-                                                -0.111111111, 0.0, -0.11111111, -0.05555555556,
-                                                0.0, -0.666666667, 0.222222222, -0.666666667]),
-        (('ternary_fcc', (2, 2, 1), 'segregated'), [0.0, -0.125, 0.07216878365, 0.0625,
-                                                    -0.0360843918, 0.020833333, 0.25,
-                                                    -0.07216878365, 0., 0.0625, -0.018042196,
-                                                    0., -0.0234375, 0.01353164693,
-                                                    0.0026041666667, -0.0135316469, 0.,
-                                                    0.0360843918, 0., -0.0208333333, 0.0, 0.0]),
-        (('binary_hcp', (2, 2, 3), 'ordered'), [0.0, -0.083333333, 0.1666666667,
-                                                -0.166666666667, 0.166666667, 0.0833333333,
-                                                -0.25, -0.25]),
-        (('ternary_hcp', (2, 1, 1), 'ordered'), [0.0, -0.0625, -0.0360843918, 0.03125,
-                                                 0.03608439182, 0.03125, -0.0625, -0.072168784,
-                                                 -0.0625, 0.03125, 0.0360843918, 0.03125,
-                                                 0.0234375, 0.0315738428, 0.004510549, 0.0234375,
-                                                 0.0078125, 0.022552745, -0.046875,
-                                                 -0.06314768569, -0.078125, -0.081189882,
-                                                 -0.046875, -0.0631476857, -0.078125,
-                                                 -0.08118988160]),
-        (('sublattices_fcc', (3, 3, 1), 'pseudorandom'), [0.0, 0.0, -0.166666667,
-                                                          -0.0555555556, 0.0, 0.0, -0.125, 0.0,
-                                                          -0.333333333, -0.0277777778, 0.0,
-                                                          0.027777777778, 0.0, 0.0555555556,
-                                                          0.055555555556, -0.111111111,
-                                                          -0.069444444, -0.041666666667, 0.0,
-                                                          0.166666666667, 0.0, -0.05555555555,
-                                                          -0.08333333333, -0.25]),
-    ], indirect=['system'])
+    (('binary_fcc', (2, 2, 2), 'ordered'), [0.0, 0.1666666666667, 0.1111111111,
+                                            -0.33333333333, 0.05555555556, 0.166666666667,
+                                            0.0, -0.1666666666667, -0.1666666666667,
+                                            0.05555555555, 0.22222222222, 0.0,
+                                            -0.11111111111, 0.11111111111, 0.0,
+                                            -0.0555555555556, 0.0, 0.0, 0.1666666666667,
+                                            -0.66666666667, 0.222222222, -0.6666666667]),
+    (('ternary_fcc', (2, 2, 1), 'segregated'), [0.0, -0.125, 0.07216878365, 0.0625,
+                                                -0.0360843918, 0.020833333, 0.25,
+                                                -0.07216878365, 0., 0.0625, -0.018042196,
+                                                0., -0.0234375, 0.01353164693,
+                                                0.0026041666667, -0.0135316469, 0.,
+                                                0.0360843918, 0., -0.0208333333, 0.0, 0.0]),
+    (('binary_hcp', (2, 2, 3), 'ordered'), [0.0, -0.083333333, 0.1666666667,
+                                            -0.166666666667, 0.0833333333,
+                                            -0.25, -0.25]),
+    (('ternary_hcp', (2, 1, 1), 'ordered'), [0.0, -0.0625, -0.0360843918, 0.03125,
+                                             0.03608439182, 0.03125, -0.0625, -0.072168784,
+                                             -0.0625, 0.03125, 0.0360843918, 0.03125,
+                                             0.0234375, 0.0315738428, 0.004510549, 0.0234375,
+                                             0.0078125, 0.022552745, -0.046875,
+                                             -0.06314768569, -0.078125, -0.081189882,
+                                             -0.046875, -0.0631476857, -0.078125,
+                                             -0.08118988160]),
+    (('sublattices_fcc', (3, 3, 1), 'pseudorandom'), [0.0, 0.0, -0.166666667,
+                                                      -0.0555555556, 0.0, 0.0, -0.125, 0.0,
+                                                      -0.333333333, -0.0277777778, 0.0,
+                                                      0.027777777778, 0.0555555556,
+                                                      0.055555555556, -0.111111111,
+                                                      -0.069444444, -0.041666666667, 0.0,
+                                                      0.166666666667, 0.0, -0.05555555555,
+                                                      -0.08333333333, -0.25]),
+], indirect=['system'])
 def test_get_cluster_vector_change_against_reference(system, expected_cluster_vector_change):
     ce, structure, anti_structure = system
     calc = ClusterExpansionCalculator(structure, ce)
