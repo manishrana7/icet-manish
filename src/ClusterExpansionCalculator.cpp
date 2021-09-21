@@ -1,5 +1,6 @@
 #include "ClusterExpansionCalculator.hpp"
 #include <pybind11/stl.h>
+#include <omp.h>
 
 ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clusterSpace,
                                                        const Structure &structure,
@@ -143,9 +144,10 @@ std::vector<double> ClusterExpansionCalculator::occupyClusterVector(const OrbitL
                                                                     const int flipIndex,
                                                                     const int newOccupation)
 {
-    std::vector<double> clusterVector(_fullPrimitiveOrbitList.size() + 1);
+    std::vector<double> clusterVector(clusterVectorLength);
     clusterVector[0] = firstElement;
-    for (size_t i = 0; i < _fullPrimitiveOrbitList.size(); i++)
+#pragma omp parallel for
+    for (size_t currentOrbitIndex = 0; currentOrbitIndex < _fullPrimitiveOrbitList.size(); i++)
     {
         // Count clusters
         std::map<std::vector<int>, double> counts;
@@ -272,9 +274,6 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
         _translatedOrbitList.removeClustersWithoutIndex(flipIndex, true);
     }
 
-    // Count clusters and get cluster count map
-    //std::unordered_map<Cluster, std::map<std::vector<int>, double>> clusterCounts = countOrbitListChange(_supercell, flipIndex, newOccupation, _translatedOrbitList, keepOrder, -1, flipIndex);
-
     return occupyClusterVector(_translatedOrbitList, 0.0, flipIndex, newOccupation);
 }
 
@@ -309,9 +308,6 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
         _translatedOrbitList.removeClustersWithoutIndex(index, true);
     }
 
-    // Count clusters and get cluster count map
-    //std::unordered_map<Cluster, std::map<std::vector<int>, double>> clusterCounts = countOrbitList(_supercell, _translatedOrbitList, keepOrder, permuteSites, -1, index);
-
     return occupyClusterVector(_translatedOrbitList, 1.0 / _supercell.size(), index, -1);
 }
 
@@ -333,9 +329,6 @@ std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array
 
     /// Do not permute the sites, because we have already done that after initializing _fullOrbitList
     bool permuteSites = false;
-
-    // Count clusters and get cluster count map
-    //std::unordered_map<Cluster, std::map<std::vector<int>, double>> clusterCounts = countOrbitList(_supercell, _fullOrbitList, keepOrder, permuteSites);
 
     return occupyClusterVector(_fullOrbitList, 1.0, -1, -1);
 }
