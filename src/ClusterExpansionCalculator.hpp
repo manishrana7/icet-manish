@@ -41,7 +41,7 @@ public:
 
 private:
     /// Occupy a cluster vector based on an orbit list and already counted clusters
-    std::vector<double> occupyClusterVector(const std::unordered_map<Cluster, std::map<std::vector<int>, double>>, const double);
+    std::vector<double> occupyClusterVector(const OrbitList &, const double, const int, const int);
 
     /// Maps offsets to local orbit lists.
     std::unordered_map<Vector3d, OrbitList, Vector3dHash> _localOrbitlists;

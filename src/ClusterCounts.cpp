@@ -4,7 +4,6 @@
  @details Will count the vectors in latticeSites and assuming these sets of sites are represented by the cluster 'cluster'.
  @param structure the structure that will have its clusters counted
  @param latticeSites A group of sites, represented by 'cluster', that will be counted
- @param cluster A cluster used as identification on what sites the clusters belong to
  @param keepOrder if true the order of the sites will stay the same otherwise the vector of species being counted will be sorted
  @param siteIndexForDoubleCountCorrection In small supercells, clusters may include both a site and its periodic image.
                                       This argument can be used to avoid double counting in such cases; clusters
@@ -12,11 +11,10 @@
                                       with a factor 1 / n, where n is the number of occurences of this index.
                                       By default (siteIndexForDoubleCountCorrection = -1) no such correction is done.
 */
-std::map<std::vector<int>, double> count(const Structure &structure,
-                                         const std::vector<std::vector<LatticeSite>> &latticeSites,
-                                         const Cluster &cluster,
-                                         bool keepOrder,
-                                         int siteIndexForDoubleCountCorrection)
+std::map<std::vector<int>, double> countClusters(const Structure &structure,
+                                                 const std::vector<std::vector<LatticeSite>> &latticeSites,
+                                                 bool keepOrder,
+                                                 int siteIndexForDoubleCountCorrection)
 {
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elements(latticeSites[0].size());
@@ -51,7 +49,6 @@ std::map<std::vector<int>, double> count(const Structure &structure,
  @param flipIndex index of site that has been flipped
  @param newOccupation new atomic number of site that has been flipped
  @param latticeSites A group of sites, represented by 'cluster', that will be counted
- @param cluster A cluster used as identification on what sites the clusters belong to
  @param keepOrder if true the order of the sites will stay the same otherwise the vector of species being counted will be sorted
  @param siteIndexForDoubleCountCorrection In small supercells, clusters may include both a site and its periodic image.
                                       This argument can be used to avoid double counting in such cases; clusters
@@ -59,13 +56,12 @@ std::map<std::vector<int>, double> count(const Structure &structure,
                                       with a factor 1 / n, where n is the number of occurences of this index.
                                       By default (siteIndexForDoubleCountCorrection = -1) no such correction is done.
 */
-std::map<std::vector<int>, double> countChange(const Structure &structure,
-                                               const int flipIndex,
-                                               const int newOccupation,
-                                               const std::vector<std::vector<LatticeSite>> &latticeSites,
-                                               const Cluster &cluster,
-                                               bool keepOrder,
-                                               int siteIndexForDoubleCountCorrection)
+std::map<std::vector<int>, double> countClusterChanges(const Structure &structure,
+                                                       const int flipIndex,
+                                                       const int newOccupation,
+                                                       const std::vector<std::vector<LatticeSite>> &latticeSites,
+                                                       bool keepOrder,
+                                                       int siteIndexForDoubleCountCorrection)
 {
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elementsOld(latticeSites[0].size());
@@ -143,11 +139,11 @@ std::unordered_map<Cluster, std::map<std::vector<int>, double>> countOrbitList(c
         std::map<std::vector<int>, double> partialCounts;
         if (permuteSites && keepOrder && representativeCluster.order() != 1)
         {
-            partialCounts = count(structure, orbitList.getOrbit(i).getPermutedEquivalentClusters(), representativeCluster, keepOrder, siteIndexForDoubleCountCorrection);
+            partialCounts = countClusters(structure, orbitList.getOrbit(i).getPermutedEquivalentClusters(), keepOrder, siteIndexForDoubleCountCorrection);
         }
         else
         {
-            partialCounts = count(structure, orbitList._orbits[i]._equivalentClusters, representativeCluster, keepOrder, siteIndexForDoubleCountCorrection);
+            partialCounts = countClusters(structure, orbitList._orbits[i]._equivalentClusters, keepOrder, siteIndexForDoubleCountCorrection);
         }
         // Now add counts to the "master" _clusterCounts
         for (auto count : partialCounts)
@@ -190,7 +186,7 @@ std::unordered_map<Cluster, std::map<std::vector<int>, double>> countOrbitListCh
         Cluster representativeCluster = orbitList._orbits[i].getRepresentativeCluster();
         representativeCluster.setTag(i);
         // Here we rely on _equivalentClusters being pre-permuted, as is done in the ClusterExpansionCalculator
-        std::map<std::vector<int>, double> partialCounts = countChange(structure, flipIndex, newOccupation, orbitList._orbits[i]._equivalentClusters, representativeCluster, keepOrder, siteIndexForDoubleCountCorrection);
+        std::map<std::vector<int>, double> partialCounts = countClusterChanges(structure, flipIndex, newOccupation, orbitList._orbits[i]._equivalentClusters, keepOrder, siteIndexForDoubleCountCorrection);
 
         // Now add counts to the "master" _clusterCounts
         for (auto count : partialCounts)

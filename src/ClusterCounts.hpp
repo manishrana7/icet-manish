@@ -27,7 +27,7 @@ namespace py = pybind11;
     **/
 
 /// This class is used to generate a count of the number of different clusters.
-std::map<std::vector<int>, double> countClusters(const Structure &, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool, int doNotDoubleCountThisSiteIndex = -1);
-std::map<std::vector<int>, double> countClusterChanges(const Structure &, const int, const int, const std::vector<std::vector<LatticeSite>> &, const Cluster &, bool, int doNotDoubleCountThisSiteIndex = -1);
+std::map<std::vector<int>, double> countClusters(const Structure &, const std::vector<std::vector<LatticeSite>> &, bool, int doNotDoubleCountThisSiteIndex = -1);
+std::map<std::vector<int>, double> countClusterChanges(const Structure &, const int, const int, const std::vector<std::vector<LatticeSite>> &, bool, int doNotDoubleCountThisSiteIndex = -1);
 std::unordered_map<Cluster, std::map<std::vector<int>, double>> countOrbitList(const Structure &, const OrbitList &, bool keepOrder, bool permuteSites = false, int maxOrbit = -1, int doNotDoubleCountThisSiteIndex = -1);
 std::unordered_map<Cluster, std::map<std::vector<int>, double>> countOrbitListChange(const Structure &, const int, const int, const OrbitList &, bool keepOrder, int maxOrbit = -1, int doNotDoubleCountThisSiteIndex = -1);
