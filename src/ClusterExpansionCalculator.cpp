@@ -138,7 +138,8 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 @details Occupy cluster vector based on information currently in _clusterCounts
 @param firstElement First element of the cluster vector
 */
-std::vector<double> ClusterExpansionCalculator::_occupyClusterVector(const double firstElement)
+std::vector<double> ClusterExpansionCalculator::occupyClusterVector(const std::unordered_map<Cluster, std::map<std::vector<int>, double>> clusterCounts,
+                                                                    const double firstElement)
 {
     std::vector<double> clusterVector;
     clusterVector.push_back(firstElement);
@@ -184,10 +185,10 @@ std::vector<double> ClusterExpansionCalculator::_occupyClusterVector(const doubl
         {
             double clusterVectorElement = 0;
 
-            auto clusterFind = _clusterCounts._clusterCounts.find(representativeCluster);
+            auto clusterFind = clusterCounts.find(representativeCluster);
 
             /// Push back zero if nothing was counted for this orbit
-            if (clusterFind == _clusterCounts._clusterCounts.end())
+            if (clusterFind == clusterCounts.end())
             {
                 clusterVector.push_back(0);
                 continue;
@@ -197,7 +198,7 @@ std::vector<double> ClusterExpansionCalculator::_occupyClusterVector(const doubl
             std::vector<int> permutedAllowedOccupations;
             std::vector<int> permutedRepresentativeIndices;
             /// Loop over all the counts for this orbit
-            for (const auto &elementsCountPair : _clusterCounts._clusterCounts.at(representativeCluster))
+            for (const auto &elementsCountPair : clusterCounts.at(representativeCluster))
             {
                 /// Loop over all equivalent permutations for this orbit and mc vector
                 for (const auto &perm : _clusterSpace._sitePermutations[i][currentMCVectorIndex])
@@ -235,7 +236,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
                                                                        int newOccupation)
 {
     _supercell.setAtomicNumbers(occupationsBefore);
-    _clusterCounts.reset();
+    //_clusterCounts.reset();
     if (occupationsBefore.size() != _supercell.size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getClusterVectorChange)");
@@ -259,9 +260,9 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
     }
 
     // Count clusters and get cluster count map
-    _clusterCounts.countOrbitListChange(_supercell, flipIndex, newOccupation, _translatedOrbitList, keepOrder, -1, flipIndex);
+    std::unordered_map<Cluster, std::map<std::vector<int>, double>> clusterCounts = countOrbitListChange(_supercell, flipIndex, newOccupation, _translatedOrbitList, keepOrder, -1, flipIndex);
 
-    return _occupyClusterVector(0.0);
+    return occupyClusterVector(clusterCounts, 0.0);
 }
 
 /**
@@ -272,7 +273,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
 std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::array_t<int> &occupations, int index)
 {
     _supercell.setAtomicNumbers(occupations);
-    _clusterCounts.reset();
+    //_clusterCounts.reset();
     if (occupations.size() != _supercell.size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getLocalClusterVector)");
@@ -296,9 +297,9 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
     }
 
     // Count clusters and get cluster count map
-    _clusterCounts.countOrbitList(_supercell, _translatedOrbitList, keepOrder, permuteSites, -1, index);
+    std::unordered_map<Cluster, std::map<std::vector<int>, double>> clusterCounts = countOrbitList(_supercell, _translatedOrbitList, keepOrder, permuteSites, -1, index);
 
-    return _occupyClusterVector(1.0 / _supercell.size());
+    return occupyClusterVector(clusterCounts, 1.0 / _supercell.size());
 }
 
 /**
@@ -308,7 +309,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
 std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array_t<int> &occupations)
 {
     _supercell.setAtomicNumbers(occupations);
-    _clusterCounts.reset();
+    //_clusterCounts.reset();
     if (occupations.size() != _supercell.size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getLocalClusterVector)");
@@ -321,7 +322,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array
     bool permuteSites = false;
 
     // Count clusters and get cluster count map
-    _clusterCounts.countOrbitList(_supercell, _fullOrbitList, keepOrder, permuteSites);
+    std::unordered_map<Cluster, std::map<std::vector<int>, double>> clusterCounts = countOrbitList(_supercell, _fullOrbitList, keepOrder, permuteSites);
 
-    return _occupyClusterVector(1.0);
+    return occupyClusterVector(clusterCounts, 1.0);
 }

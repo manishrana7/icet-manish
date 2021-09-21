@@ -14,7 +14,7 @@ ClusterSpace::ClusterSpace(std::vector<std::vector<std::string>> &chemicalSymbol
                            const OrbitList &orbitList,
                            const double positionTolerance,
                            const double fractionalPositionTolerance)
-                           : _orbitList(orbitList), _chemicalSymbols(chemicalSymbols)
+    : _orbitList(orbitList), _chemicalSymbols(chemicalSymbols)
 {
     _primitiveStructure = orbitList.getPrimitiveStructure();
 
@@ -69,13 +69,15 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
 
     LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(_orbitList, structure, fractionalPositionTolerance);
     size_t uniqueOffsets = localOrbitListGenerator.getNumberOfUniqueOffsets();
-    ClusterCounts clusterCounts = ClusterCounts();
+    //ClusterCounts clusterCounts = ClusterCounts();
 
     // Create local orbit lists and count associated clusters.
+    std::unordered_map<Cluster, std::map<std::vector<int>, double>> clusterCounts;
+
     for (size_t i = 0; i < uniqueOffsets; i++)
     {
         const auto localOrbitList = localOrbitListGenerator.getLocalOrbitList(i);
-        clusterCounts.countOrbitList(structure, localOrbitList, keepOrder, permuteSites);
+        clusterCounts = countOrbitList(structure, localOrbitList, keepOrder, permuteSites);
     }
 
     // Check that the number of unique offsets equals the number of unit cells in the supercell.
@@ -89,7 +91,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
     }
 
     /// Get the cluster -> cluster counts map
-    const auto clusterMap = clusterCounts.getClusterCounts();
+    //const auto clusterMap = clusterCounts.getClusterCounts();
 
     // Initialize cluster vector and insert zerolet.
     std::vector<double> clusterVector;
@@ -118,13 +120,14 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
         }
 
         // Jump to the next orbit if any of the sites in the representative cluster are inactive (i.e. the number of allowed species on this site is less than 2).
-        if (any_of(numberOfAllowedSpeciesBySite.begin(), numberOfAllowedSpeciesBySite.end(), [](int n) { return n < 2; }))
+        if (any_of(numberOfAllowedSpeciesBySite.begin(), numberOfAllowedSpeciesBySite.end(), [](int n)
+                   { return n < 2; }))
         {
             continue;
         }
         auto sitesOfRepresentativeCluster = _orbitList.getOrbit(i).getSitesOfRepresentativeCluster();
         std::vector<int> representativeClusterIndices;
-        for(const auto site : sitesOfRepresentativeCluster)
+        for (const auto site : sitesOfRepresentativeCluster)
         {
             representativeClusterIndices.push_back(site.index());
         }
@@ -145,7 +148,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
             double clusterVectorElement = 0;
             int multiplicity = 0;
 
-            for (const auto &speciesCountPair : clusterMap.at(representativeCluster))
+            for (const auto &speciesCountPair : clusterCounts.at(representativeCluster))
             {
 
                 /// @todo Check if numberOfAllowedSpecies should be permuted as well. Is this todo still relevant?
@@ -309,7 +312,8 @@ void ClusterSpace::computeMultiComponentVectors()
         auto numberOfAllowedSpecies = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _orbitList.getOrbit(i).getSitesOfRepresentativeCluster());
 
         auto multiComponentVectors = _orbitList.getOrbit(i).getMultiComponentVectors(numberOfAllowedSpecies);
-        if (std::none_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n) { return n < 2; }))
+        if (std::none_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n)
+                         { return n < 2; }))
         {
             auto sitePermutations = getMultiComponentVectorPermutations(multiComponentVectors, i);
             _sitePermutations[i] = sitePermutations;
@@ -341,7 +345,6 @@ std::pair<int, std::vector<int>> ClusterSpace::getMultiComponentVectorsByOrbit(c
     return _multiComponentVectorsByOrbit[index];
 }
 
-
 /**
 @details This function removes orbits from the underlying orbit list.
 @param indices list of orbit indices
@@ -350,7 +353,7 @@ void ClusterSpace::removeOrbits(std::vector<size_t> &indices)
 {
     std::sort(indices.begin(), indices.end());
 
-    for(int i = indices.size()-1; i >=0; i--)
+    for (int i = indices.size() - 1; i >= 0; i--)
     {
         _orbitList.removeOrbit(indices[i]);
     }

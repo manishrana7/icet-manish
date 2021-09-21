@@ -12,11 +12,11 @@
                                       with a factor 1 / n, where n is the number of occurences of this index.
                                       By default (siteIndexForDoubleCountCorrection = -1) no such correction is done.
 */
-void ClusterCounts::count(const Structure &structure,
-                          const std::vector<std::vector<LatticeSite>> &latticeSites,
-                          const Cluster &cluster,
-                          bool keepOrder,
-                          int siteIndexForDoubleCountCorrection)
+std::map<std::vector<int>, double> count(const Structure &structure,
+                                         const std::vector<std::vector<LatticeSite>> &latticeSites,
+                                         const Cluster &cluster,
+                                         bool keepOrder,
+                                         int siteIndexForDoubleCountCorrection)
 {
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elements(latticeSites[0].size());
@@ -42,11 +42,7 @@ void ClusterCounts::count(const Structure &structure,
         }
         tmpCounts[elements] += unit;
     }
-    // Now add counts to the "master" _clusterCounts
-    for (auto count : tmpCounts)
-    {
-        _clusterCounts[cluster][count.first] += count.second;
-    }
+    return tmpCounts;
 }
 
 /**
@@ -63,13 +59,13 @@ void ClusterCounts::count(const Structure &structure,
                                       with a factor 1 / n, where n is the number of occurences of this index.
                                       By default (siteIndexForDoubleCountCorrection = -1) no such correction is done.
 */
-void ClusterCounts::countChange(const Structure &structure,
-                                const int flipIndex,
-                                const int newOccupation,
-                                const std::vector<std::vector<LatticeSite>> &latticeSites,
-                                const Cluster &cluster,
-                                bool keepOrder,
-                                int siteIndexForDoubleCountCorrection)
+std::map<std::vector<int>, double> countChange(const Structure &structure,
+                                               const int flipIndex,
+                                               const int newOccupation,
+                                               const std::vector<std::vector<LatticeSite>> &latticeSites,
+                                               const Cluster &cluster,
+                                               bool keepOrder,
+                                               int siteIndexForDoubleCountCorrection)
 {
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elementsOld(latticeSites[0].size());
@@ -115,11 +111,7 @@ void ClusterCounts::countChange(const Structure &structure,
         tmpCounts[elementsOld] -= unit;
         tmpCounts[elementsNew] += unit;
     }
-    // Now add counts to the "master" _clusterCounts
-    for (auto count : tmpCounts)
-    {
-        _clusterCounts[cluster][count.first] += count.second;
-    }
+    return tmpCounts;
 }
 
 /**
@@ -135,10 +127,11 @@ void ClusterCounts::countChange(const Structure &structure,
                                       with a factor 1 / n, where n is the number of occurences of this index.
                                       By default (siteIndexForDoubleCountCorrection = -1) no such correction is done.
 */
-void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &orbitList,
-                                   bool keepOrder, bool permuteSites, int maxOrbit,
-                                   int siteIndexForDoubleCountCorrection)
+std::unordered_map<Cluster, std::map<std::vector<int>, double>> countOrbitList(const Structure &structure, const OrbitList &orbitList,
+                                                                               bool keepOrder, bool permuteSites, int maxOrbit,
+                                                                               int siteIndexForDoubleCountCorrection)
 {
+    std::unordered_map<Cluster, std::map<std::vector<int>, double>> clusterCounts;
     if (maxOrbit == -1)
     {
         maxOrbit = orbitList.size();
@@ -147,15 +140,22 @@ void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &
     {
         Cluster representativeCluster = orbitList._orbits[i].getRepresentativeCluster();
         representativeCluster.setTag(i);
+        std::map<std::vector<int>, double> partialCounts;
         if (permuteSites && keepOrder && representativeCluster.order() != 1)
         {
-            count(structure, orbitList.getOrbit(i).getPermutedEquivalentClusters(), representativeCluster, keepOrder, siteIndexForDoubleCountCorrection);
+            partialCounts = count(structure, orbitList.getOrbit(i).getPermutedEquivalentClusters(), representativeCluster, keepOrder, siteIndexForDoubleCountCorrection);
         }
         else
         {
-            count(structure, orbitList._orbits[i]._equivalentClusters, representativeCluster, keepOrder, siteIndexForDoubleCountCorrection);
+            partialCounts = count(structure, orbitList._orbits[i]._equivalentClusters, representativeCluster, keepOrder, siteIndexForDoubleCountCorrection);
+        }
+        // Now add counts to the "master" _clusterCounts
+        for (auto count : partialCounts)
+        {
+            clusterCounts[representativeCluster][count.first] += count.second;
         }
     }
+    return clusterCounts;
 }
 
 /**
@@ -172,14 +172,15 @@ void ClusterCounts::countOrbitList(const Structure &structure, const OrbitList &
                                       with a factor 1 / n, where n is the number of occurences of this index.
                                       By default (siteIndexForDoubleCountCorrection = -1) no such correction is done.
 */
-void ClusterCounts::countOrbitListChange(const Structure &structure,
-                                         const int flipIndex,
-                                         const int newOccupation,
-                                         const OrbitList &orbitList,
-                                         bool keepOrder,
-                                         int maxOrbit,
-                                         int siteIndexForDoubleCountCorrection)
+std::unordered_map<Cluster, std::map<std::vector<int>, double>> countOrbitListChange(const Structure &structure,
+                                                                                     const int flipIndex,
+                                                                                     const int newOccupation,
+                                                                                     const OrbitList &orbitList,
+                                                                                     bool keepOrder,
+                                                                                     int maxOrbit,
+                                                                                     int siteIndexForDoubleCountCorrection)
 {
+    std::unordered_map<Cluster, std::map<std::vector<int>, double>> clusterCounts;
     if (maxOrbit == -1)
     {
         maxOrbit = orbitList.size();
@@ -189,6 +190,13 @@ void ClusterCounts::countOrbitListChange(const Structure &structure,
         Cluster representativeCluster = orbitList._orbits[i].getRepresentativeCluster();
         representativeCluster.setTag(i);
         // Here we rely on _equivalentClusters being pre-permuted, as is done in the ClusterExpansionCalculator
-        countChange(structure, flipIndex, newOccupation, orbitList._orbits[i]._equivalentClusters, representativeCluster, keepOrder, siteIndexForDoubleCountCorrection);
+        std::map<std::vector<int>, double> partialCounts = countChange(structure, flipIndex, newOccupation, orbitList._orbits[i]._equivalentClusters, representativeCluster, keepOrder, siteIndexForDoubleCountCorrection);
+
+        // Now add counts to the "master" _clusterCounts
+        for (auto count : partialCounts)
+        {
+            clusterCounts[representativeCluster][count.first] += count.second;
+        }
     }
+    return clusterCounts;
 }
