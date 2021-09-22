@@ -336,7 +336,7 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
         std::vector<int> allowedOccupations;
         try
         {
-            allowedOccupations = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _orbitList.getOrbit(currentOrbitIndex).getSitesOfRepresentativeCluster());
+            allowedOccupations = getNumberOfAllowedSpeciesBySite(_primitiveStructure, representativeSites);
         }
         catch (const std::exception &e)
         {

@@ -88,14 +88,6 @@ public:
   /// Returns the default cluster function.
   double evaluateClusterFunction(const int, const int, const int) const;
 
-  /// Precomputed multicomponent vectors for each orbit in _orbitlist.
-  /// @todo Make private.
-  //std::vector<std::vector<std::vector<int>>> _multiComponentVectors;
-
-  /// Precomputed site permutations for each orbit in _orbitlist.
-  /// @todo Make private.
-  //std::vector<std::vector<std::vector<std::vector<int>>>> _sitePermutations;
-
   /// Computes permutations and multicomponent vectors of each orbit.
   void computeMultiComponentVectors();
 
