@@ -299,7 +299,7 @@ void ClusterSpace::removeOrbits(std::vector<size_t> &indices)
 }
 
 /*
-@details Occupy cluster vector based on information currently in _clusterCounts
+@details Occupy cluster vector based on a supercell and a corresponding orbit list.
 @param firstElement First element of the cluster vector
 */
 const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orbitList,
@@ -310,6 +310,12 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
 {
     std::vector<double> clusterVector(_clusterVectorLength);
     clusterVector[0] = firstElement;
+
+    if (_orbitList.size() != orbitList.size())
+    {
+        std::cout << orbitList.size() << " >= " << _orbitList.size() << std::endl;
+        throw std::runtime_error("Orbit lists do no not match (ClusterSpace::occupyClusterVector)");
+    }
     //#pragma omp parallel for
     for (size_t currentOrbitIndex = 0; currentOrbitIndex < _orbitList.size(); currentOrbitIndex++)
     {
@@ -324,15 +330,10 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
             counts = countClusters(supercell, orbitList._orbits[currentOrbitIndex]._equivalentClusters, true, flipIndex);
         }
 
-        Cluster representativeCluster = orbitList._orbits[currentOrbitIndex]._representativeCluster;
+        Cluster representativeCluster = _orbitList._orbits[currentOrbitIndex]._representativeCluster;
         auto representativeSites = _orbitList._orbits[currentOrbitIndex].getSitesOfRepresentativeCluster();
-        std::vector<int> allowedOccupations;
 
-        if (currentOrbitIndex >= orbitList.size())
-        {
-            std::cout << orbitList.size() << " >= " << _orbitList.size() << std::endl;
-            throw std::runtime_error("Index i larger than cs.orbit_list.size() (ClusterSpace::occupyClusterVector)");
-        }
+        std::vector<int> allowedOccupations;
         try
         {
             allowedOccupations = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _orbitList.getOrbit(currentOrbitIndex).getSitesOfRepresentativeCluster());
@@ -384,7 +385,6 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
                 /// Loop over all equivalent permutations for this orbit and mc vector
                 for (const auto &perm : cvInfo.sitePermutations)
                 {
-
                     /// Permute the mc vector and the allowed occupations
                     permutedMCVector = icet::getPermutedVector(cvInfo.multiComponentVector, perm);
                     permutedAllowedOccupations = icet::getPermutedVector(allowedOccupations, perm);
