@@ -1,5 +1,6 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <omp.h>
 
 #include "ClusterSpace.hpp"
 
@@ -316,7 +317,7 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
         std::cout << orbitList.size() << " >= " << _orbitList.size() << std::endl;
         throw std::runtime_error("Orbit lists do no not match (ClusterSpace::occupyClusterVector)");
     }
-    //#pragma omp parallel for
+#pragma omp parallel for
     for (size_t currentOrbitIndex = 0; currentOrbitIndex < _orbitList.size(); currentOrbitIndex++)
     {
         // Count clusters

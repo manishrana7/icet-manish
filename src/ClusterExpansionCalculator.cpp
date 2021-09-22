@@ -1,6 +1,5 @@
 #include "ClusterExpansionCalculator.hpp"
 #include <pybind11/stl.h>
-#include <omp.h>
 
 ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clusterSpace,
                                                        const Structure &structure,
