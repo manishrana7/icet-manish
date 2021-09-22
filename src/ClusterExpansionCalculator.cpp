@@ -139,6 +139,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 @details Occupy cluster vector based on information currently in _clusterCounts
 @param firstElement First element of the cluster vector
 */
+/*
 std::vector<double> ClusterExpansionCalculator::occupyClusterVector(const OrbitList &orbitList,
                                                                     const double firstElement,
                                                                     const int flipIndex,
@@ -239,6 +240,7 @@ std::vector<double> ClusterExpansionCalculator::occupyClusterVector(const OrbitL
     }
     return clusterVector;
 }
+*/
 
 /**
 @details Calculate change in cluster vector upon change in occupation on one site
@@ -274,7 +276,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
         _translatedOrbitList.removeClustersWithoutIndex(flipIndex, true);
     }
 
-    return occupyClusterVector(_translatedOrbitList, 0.0, flipIndex, newOccupation);
+    return _clusterSpace.occupyClusterVector(_translatedOrbitList, _supercell, 0.0, flipIndex, newOccupation);
 }
 
 /**
@@ -308,7 +310,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
         _translatedOrbitList.removeClustersWithoutIndex(index, true);
     }
 
-    return occupyClusterVector(_translatedOrbitList, 1.0 / _supercell.size(), index, -1);
+    return _clusterSpace.occupyClusterVector(_translatedOrbitList, _supercell, 1.0 / _supercell.size(), index, -1);
 }
 
 /**
@@ -330,5 +332,5 @@ std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array
     /// Do not permute the sites, because we have already done that after initializing _fullOrbitList
     bool permuteSites = false;
 
-    return occupyClusterVector(_fullOrbitList, 1.0, -1, -1);
+    return _clusterSpace.occupyClusterVector(_fullOrbitList, _supercell, 1.0, -1, -1);
 }

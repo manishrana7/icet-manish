@@ -11,6 +11,17 @@
 #include "VectorOperations.hpp"
 
 /**
+@brief
+*/
+struct ClusterVectorElementInfo
+{
+  std::vector<int> multiComponentVector;
+  std::vector<std::vector<int>> sitePermutations;
+  int clusterVectorIndex;
+  double multiplicity;
+};
+
+/**
 @brief This class handles the cluster space.
 @details It provides functionality for setting up a cluster space, calculating
 cluster vectors as well as retrieving various types of associated information.
@@ -43,9 +54,14 @@ public:
   /// @todo Clean up this description.
   std::vector<std::vector<std::vector<int>>> getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &, const int) const;
 
+  const std::vector<double> occupyClusterVector(const OrbitList &, const Structure &, const double, const int, const int) const;
+
 public:
   /// Returns the cutoff for each order.
-  std::vector<double> getCutoffs() const { return _clusterCutoffs; }
+  std::vector<double> getCutoffs() const
+  {
+    return _clusterCutoffs;
+  }
 
   /// Returns the primitive structure.
   Structure getPrimitiveStructure() const { return _primitiveStructure; }
@@ -57,7 +73,7 @@ public:
   std::vector<std::vector<std::string>> getChemicalSymbols() const { return _chemicalSymbols; }
 
   /// Returns the cluster space size, i.e. the length of a cluster vector.
-  size_t getClusterSpaceSize() { return _multiComponentVectorsByOrbit.size(); }
+  size_t getClusterSpaceSize() { return _clusterVectorLength; }
 
   /// Returns the mapping between atomic numbers and the internal species enumeration scheme for each site.
   std::vector<std::unordered_map<int, int>> getSpeciesMaps() const { return _speciesMaps; }
@@ -74,11 +90,11 @@ public:
 
   /// Precomputed multicomponent vectors for each orbit in _orbitlist.
   /// @todo Make private.
-  std::vector<std::vector<std::vector<int>>> _multiComponentVectors;
+  //std::vector<std::vector<std::vector<int>>> _multiComponentVectors;
 
   /// Precomputed site permutations for each orbit in _orbitlist.
   /// @todo Make private.
-  std::vector<std::vector<std::vector<std::vector<int>>>> _sitePermutations;
+  //std::vector<std::vector<std::vector<std::vector<int>>>> _sitePermutations;
 
   /// Computes permutations and multicomponent vectors of each orbit.
   void computeMultiComponentVectors();
@@ -90,11 +106,6 @@ public:
   Structure _primitiveStructure;
 
 private:
-  /// Multi-component vectors for each orbit. The first index (int)
-  /// corresponds to the orbit index, the second index (vector of ints)
-  /// refers to a multi-component vector.
-  std::vector<std::pair<int, std::vector<int>>> _multiComponentVectorsByOrbit;
-
   /// Number of allowed components on each site of the primitive structure.
   std::vector<int> _numberOfAllowedSpeciesPerSite;
 
@@ -109,4 +120,8 @@ private:
 
   /// The allowed chemical symbols on each site in the primitive structure.
   std::vector<std::vector<std::string>> _chemicalSymbols;
+
+  std::vector<std::vector<ClusterVectorElementInfo>> _clusterVectorElementInfoList;
+
+  int _clusterVectorLength;
 };

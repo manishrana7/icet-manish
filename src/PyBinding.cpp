@@ -790,7 +790,7 @@ PYBIND11_MODULE(_icet, m)
         .def(
             "get_cluster_vector",
             [](const ClusterSpace &clusterSpace,
-               const Structure &structure,
+               Structure &structure,
                const double fractionalPositionTolerance)
             {
                 auto cv = clusterSpace.getClusterVector(structure, fractionalPositionTolerance);
