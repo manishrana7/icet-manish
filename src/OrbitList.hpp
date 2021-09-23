@@ -39,7 +39,7 @@ class OrbitList
     OrbitList &operator+=(const OrbitList &);
 
     /// Returns the orbit of the given index.
-    const Orbit &getOrbit(unsigned int) const;
+    const Orbit& getOrbit(unsigned int) const;
 
     /// Returns an orbit in the given (supercell) structure.
     Orbit getSuperCellOrbit(const Structure &,

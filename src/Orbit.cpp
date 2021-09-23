@@ -225,7 +225,7 @@ void Orbit::removeCluster(std::vector<LatticeSite> cluster)
                                       By default (siteIndexForDoubleCountCorrection = -1) no such correction is done.
 */
 std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structure,
-                                                        int siteIndexForDoubleCountCorrection)
+                                                        int siteIndexForDoubleCountCorrection) const
 {
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elements(order());
@@ -264,7 +264,7 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
 std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &structure,
                                                               const int flipIndex,
                                                               const int newOccupation,
-                                                              int siteIndexForDoubleCountCorrection)
+                                                              int siteIndexForDoubleCountCorrection) const
 {
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elementsOld(order());

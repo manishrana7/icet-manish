@@ -320,8 +320,8 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
 #pragma omp parallel for
     for (size_t currentOrbitIndex = 0; currentOrbitIndex < _orbitList.size(); currentOrbitIndex++)
     {
-        Orbit currentOrbit = orbitList.getOrbit(currentOrbitIndex);
-        Orbit currentPrimitiveOrbit = _orbitList.getOrbit(currentOrbitIndex);
+        const Orbit& currentOrbit = orbitList.getOrbit(currentOrbitIndex);
+        const Orbit& currentPrimitiveOrbit = _orbitList.getOrbit(currentOrbitIndex);
 
         // Count clusters
         std::map<std::vector<int>, double> counts;

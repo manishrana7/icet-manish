@@ -93,10 +93,10 @@ public:
     void removeCluster(std::vector<LatticeSite>);
 
     /// Counts occupations of clusters in this orbit
-    std::map<std::vector<int>, double> countClusters(const Structure &, int doNotDoubleCountThisSiteIndex = -1);
+    std::map<std::vector<int>, double> countClusters(const Structure &, int doNotDoubleCountThisSiteIndex = -1) const;
     
     /// Counts changes in the occupation of clusters in this orbit
-    std::map<std::vector<int>, double> countClusterChanges(const Structure &, const int, const int, int doNotDoubleCountThisSiteIndex = -1);
+    std::map<std::vector<int>, double> countClusterChanges(const Structure &, const int, const int, int doNotDoubleCountThisSiteIndex = -1) const;
 
     /// Comparison operator for automatic sorting in containers.
     friend bool operator==(const Orbit &orbit1, const Orbit &orbit2)

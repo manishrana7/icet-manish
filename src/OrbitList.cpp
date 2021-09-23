@@ -176,7 +176,7 @@ int OrbitList::findOrbitIndex(const Cluster &cluster,
 }
 
 /**
-@details Returns reference to the orbit at the given index.
+@details Returns pointer to the orbit at the given index.
 @param index index of orbit
 @returns reference to orbit
 **/
