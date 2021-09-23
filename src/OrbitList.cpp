@@ -176,11 +176,11 @@ int OrbitList::findOrbitIndex(const Cluster &cluster,
 }
 
 /**
-@details Returns a copy of the orbit at the given index.
+@details Returns reference to the orbit at the given index.
 @param index index of orbit
-@returns copy of orbit
+@returns reference to orbit
 **/
-Orbit OrbitList::getOrbit(unsigned int index) const
+const Orbit& OrbitList::getOrbit(unsigned int index) const
 {
     if (index >= size())
     {
@@ -730,28 +730,6 @@ void OrbitList::removeClustersWithoutIndex(const int index,
     for (auto &orbit : _orbits)
     {
         orbit.removeClustersWithoutIndex(index, onlyConsiderZeroOffset);
-    }
-}
-
-/**
-@details Removes from the current orbit list all clusters that are in the input orbit list.
-@param orbitList orbit list with clusters that are to be removed.
- **/
-void OrbitList::subtractClustersFromOrbitList(const OrbitList &orbitList)
-{
-    if (orbitList.size() != size())
-    {
-        throw std::runtime_error("Orbit lists differ in size (OrbitList::subtractClustersFromOrbitList)");
-    }
-    for (size_t i = 0; i < size(); i++)
-    {
-        for (const auto sites : orbitList.getOrbit(i)._equivalentClusters)
-        {
-            if (_orbits[i].contains(sites, true))
-            {
-                _orbits[i].removeCluster(sites);
-            }
-        }
     }
 }
 

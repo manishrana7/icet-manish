@@ -11,7 +11,6 @@
 #include "ClusterSpace.hpp"
 #include "OrbitList.hpp"
 #include "LocalOrbitListGenerator.hpp"
-#include "ClusterCounts.hpp"
 #include "PeriodicTable.hpp"
 #include "VectorOperations.hpp"
 using namespace Eigen;

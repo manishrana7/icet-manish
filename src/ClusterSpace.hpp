@@ -3,7 +3,6 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "ClusterCounts.hpp"
 #include "LocalOrbitListGenerator.hpp"
 #include "OrbitList.hpp"
 #include "PeriodicTable.hpp"

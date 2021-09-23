@@ -7,7 +7,6 @@
 #include <Eigen/Dense>
 
 #include "Cluster.hpp"
-#include "ClusterCounts.hpp"
 #include "ClusterExpansionCalculator.hpp"
 #include "ClusterSpace.hpp"
 #include "LatticeSite.hpp"
@@ -38,11 +37,6 @@ PYBIND11_MODULE(_icet, m)
         Cluster
         -------
         .. autoclass:: Cluster
-           :members:
-
-        ClusterCounts
-        -------------
-        .. autoclass:: ClusterCounts
            :members:
 
         ClusterSpace

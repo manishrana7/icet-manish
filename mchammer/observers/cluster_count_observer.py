@@ -2,7 +2,6 @@ from typing import Dict, List
 
 import pandas as pd
 
-from _icet import ClusterCounts as _ClusterCounts
 from ase import Atoms
 from icet.core.cluster import Cluster
 from icet.core.local_orbit_list_generator import LocalOrbitListGenerator

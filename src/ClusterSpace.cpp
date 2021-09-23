@@ -1,6 +1,6 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include <omp.h>
+//#include <omp.h>
 
 #include "ClusterSpace.hpp"
 
@@ -320,19 +320,22 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
 #pragma omp parallel for
     for (size_t currentOrbitIndex = 0; currentOrbitIndex < _orbitList.size(); currentOrbitIndex++)
     {
+        Orbit currentOrbit = orbitList.getOrbit(currentOrbitIndex);
+        Orbit currentPrimitiveOrbit = _orbitList.getOrbit(currentOrbitIndex);
+
         // Count clusters
         std::map<std::vector<int>, double> counts;
         if (newOccupation > -1)
         {
-            counts = countClusterChanges(supercell, flipIndex, newOccupation, orbitList._orbits[currentOrbitIndex]._equivalentClusters, true, flipIndex);
+            counts = currentOrbit.countClusterChanges(supercell, flipIndex, newOccupation, flipIndex);
         }
         else
         {
-            counts = countClusters(supercell, orbitList._orbits[currentOrbitIndex]._equivalentClusters, true, flipIndex);
+            counts = currentOrbit.countClusters(supercell, flipIndex);
         }
 
-        Cluster representativeCluster = _orbitList._orbits[currentOrbitIndex]._representativeCluster;
-        auto representativeSites = _orbitList._orbits[currentOrbitIndex].getSitesOfRepresentativeCluster();
+        Cluster representativeCluster = currentPrimitiveOrbit._representativeCluster;
+        auto representativeSites = currentPrimitiveOrbit.getSitesOfRepresentativeCluster();
 
         std::vector<int> allowedOccupations;
         try
@@ -342,7 +345,7 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
         catch (const std::exception &e)
         {
             std::cout << e.what() << std::endl;
-            throw std::runtime_error("Failed getting allowed occupations (ClusterExpansionCalculator::getLocalClusterVector)");
+            throw std::runtime_error("Failed getting allowed occupations (ClusterSpace::occupyClusterVector)");
         }
 
         // Skip the rest if any of the sites are inactive (i.e. allowed occupation < 2)

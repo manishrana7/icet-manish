@@ -145,7 +145,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
                                                                        int newOccupation)
 {
     _supercell.setAtomicNumbers(occupationsBefore);
-    //_clusterCounts.reset();
+
     if (occupationsBefore.size() != _supercell.size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getClusterVectorChange)");
@@ -179,7 +179,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
 std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::array_t<int> &occupations, int index)
 {
     _supercell.setAtomicNumbers(occupations);
-    //_clusterCounts.reset();
+
     if (occupations.size() != _supercell.size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getLocalClusterVector)");
@@ -212,10 +212,10 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
 std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array_t<int> &occupations)
 {
     _supercell.setAtomicNumbers(occupations);
-    //_clusterCounts.reset();
+
     if (occupations.size() != _supercell.size())
     {
-        throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getLocalClusterVector)");
+        throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getClusterVector)");
     }
 
     // do not sort the clusters
