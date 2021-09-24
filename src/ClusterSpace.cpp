@@ -1,6 +1,9 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
-//#include <omp.h>
+
+#if defined(_OPENMP)
+    #include <omp.h>
+#endif
 
 #include "ClusterSpace.hpp"
 

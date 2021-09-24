@@ -1,6 +1,8 @@
 # Require a modern version of CMake.
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0 FATAL_ERROR)
-PROJECT(icet)
+PROJECT(icet CXX)
+
+include(CheckCXXCompilerFlag)
 
 # Set default build type.
 IF(NOT CMAKE_BUILD_TYPE) 
@@ -17,7 +19,7 @@ IF(NOT CMAKE_VERSION VERSION_LESS "3.1")
     SET(CMAKE_CXX_STANDARD 11)
     SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 ELSE()
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -openmp")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 ENDIF()
 
 # Add third-party libraries.
@@ -27,12 +29,10 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 SET( EIGEN3_INCLUDE_DIR "src/3rdparty/eigen3/" )
 INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIR})
 
-FIND_PACKAGE(OpenMP)
-if(OPENMP_FOUND)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+check_cxx_compiler_flag("-fopenmp" COMPILER_SUPPORT_OPENMP)
+if(COMPILER_SUPPORT_OPENMP)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
 endif()
-include_directories(SYSTEM ${OpenMP_INCLUDE_PATH})
 
 # Add main sources.
 ADD_SUBDIRECTORY(src)
