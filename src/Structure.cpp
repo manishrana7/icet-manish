@@ -16,7 +16,7 @@ Structure::Structure(const Matrix<double, Dynamic, 3, RowMajor> &positions,
                      const std::vector<std::string> &chemicalSymbols,
                      const Matrix3d &cell,
                      const std::vector<bool> &pbc)
-                     : _cell(cell), _pbc(pbc)
+    : _cell(cell), _pbc(pbc)
 {
     setPositions(positions);
     setChemicalSymbols(chemicalSymbols);
@@ -96,7 +96,7 @@ int Structure::getAtomicNumber(const size_t index) const
         msg << " (Structure::getAtomicNumber)";
         throw std::out_of_range(msg.str());
     }
-    return _atomicNumbers[index];
+    return _atomicNumbers.at(index);
 }
 
 /**
@@ -130,7 +130,7 @@ size_t Structure::getUniqueSite(const size_t i) const
     {
         std::ostringstream msg;
         msg << "Site index out of bounds";
-        msg << " i: " << i ;
+        msg << " i: " << i;
         msg << " nsites: " << _uniqueSites.size();
         msg << " (Structure::getUniqueSite)";
         throw std::out_of_range(msg.str());
@@ -182,7 +182,6 @@ LatticeSite Structure::findLatticeSiteByPosition(const Vector3d &position, const
     msg << "fractional position: " << fractionalPosition[0] << " " << fractionalPosition[1] << " " << fractionalPosition[2] << std::endl;
     msg << "fractional position tolerance: " << fractionalPositionTolerance;
     throw std::runtime_error(msg.str());
-
 }
 
 /**
@@ -285,26 +284,27 @@ std::vector<int> Structure::getNumberOfAllowedSpeciesBySites(const std::vector<L
   @details This function turns a list of chemical symbols into a list of atomic numbers.
   @param chemicalSymbols vector of chemical symbols (strings) to be converted
 **/
-std::vector<int> Structure::convertChemicalSymbolsToAtomicNumbers(const std::vector<std::string> &chemicalSymbols) const
+py::array_t<int> Structure::convertChemicalSymbolsToAtomicNumbers(const std::vector<std::string> &chemicalSymbols) const
 {
     std::vector<int> atomicNumbers(chemicalSymbols.size());
     for (size_t i = 0; i < chemicalSymbols.size(); i++)
     {
         atomicNumbers[i] = PeriodicTable::strInt[chemicalSymbols[i]];
     }
-    return atomicNumbers;
+
+    return py::array(atomicNumbers.size(), atomicNumbers.data());
 }
 
 /**
   @details This function turns a list of atomic numbers into a list of chemical symbols.
   @param atomicNumbers vector of atomic numbers (ints) to be converted
 **/
-std::vector<std::string> Structure::convertAtomicNumbersToChemicalSymbols(const std::vector<int> &atomicNumbers) const
+std::vector<std::string> Structure::convertAtomicNumbersToChemicalSymbols(const py::array_t<int> &atomicNumbers) const
 {
     std::vector<std::string> chemicalSymbols(atomicNumbers.size());
     for (size_t i = 0; i < atomicNumbers.size(); i++)
     {
-        chemicalSymbols[i] = PeriodicTable::intStr[atomicNumbers[i]];
+        chemicalSymbols[i] = PeriodicTable::intStr[atomicNumbers.at(i)];
     }
     return chemicalSymbols;
 }

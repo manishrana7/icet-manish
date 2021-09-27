@@ -72,7 +72,7 @@ class TestStructure(unittest.TestCase):
 
     def test_atomic_numbers(self):
         """Tests atomic numbers."""
-        self.assertListEqual(self.icet_structure.atomic_numbers,
+        self.assertListEqual(list(self.icet_structure.atomic_numbers),
                              [47, 47])
 
     def test_cell(self):
@@ -109,7 +109,7 @@ class TestStructure(unittest.TestCase):
     def test_set_and_get_atomic_numbers(self):
         """Tests set and get atomic numbers."""
         self.icet_structure.set_atomic_numbers([48, 47])
-        retval = self.icet_structure.get_atomic_numbers()
+        retval = list(self.icet_structure.get_atomic_numbers())
         self.assertListEqual(retval, [48, 47])
 
     def test_set_and_get_unique_sites(self):
