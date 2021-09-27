@@ -163,35 +163,6 @@ bool Orbit::contains(const std::vector<LatticeSite> cluster, bool sorted) const
     return false;
 }
 
-
-/**
-@param indexToRemove index of site
-@param onlyConsiderSitesWithZeroOffset if true only consider sites with zero offset
-**/
-void Orbit::removeClustersWithSiteIndex(const size_t indexToRemove, bool onlyConsiderSitesWithZeroOffset)
-{
-    for (int i = _equivalentClusters.size() - 1; i >= 0; i--)
-    {
-        if (onlyConsiderSitesWithZeroOffset)
-        {
-            if (std::any_of(_equivalentClusters[i].begin(), _equivalentClusters[i].end(), [=](LatticeSite &ls) { return ls.index() == indexToRemove && ls.unitcellOffset().norm() < 1e-4; }))
-            {
-                _equivalentClusters.erase(_equivalentClusters.begin() + i);
-                _equivalentClusterPermutations.erase(_equivalentClusterPermutations.begin() + i);
-            }
-        }
-        else
-        {
-            if (std::any_of(_equivalentClusters[i].begin(), _equivalentClusters[i].end(), [=](LatticeSite &ls) { return ls.index() == indexToRemove; }))
-            {
-                _equivalentClusters.erase(_equivalentClusters.begin() + i);
-                _equivalentClusterPermutations.erase(_equivalentClusterPermutations.begin() + i);
-            }
-        }
-    }
-}
-
-
 /**
 @param index site index
 @param onlyConsiderSitesWithZeroOffset if true only consider sites with zero offset

@@ -720,20 +720,6 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &supercell,
 }
 
 /**
-@details This function will loop over all orbits in the list and remove from each orbit the clusters that match the given index.
-@param index the index for which to check
-@param onlyConsiderZeroOffset if true only clusters with zero offset will be removed
-**/
-void OrbitList::removeClustersContainingIndex(const int index,
-                                              bool onlyConsiderZeroOffset)
-{
-    for (auto &orbit : _orbits)
-    {
-        orbit.removeClustersWithSiteIndex(index, onlyConsiderZeroOffset);
-    }
-}
-
-/**
 @details This function will loop over all orbits in the list and remove from each orbit the clusters that _do _not_ match the given index.
 @param index the index for which to check
 @param onlyConsiderZeroOffset if true only clusters with zero offset will be removed

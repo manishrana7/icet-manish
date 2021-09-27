@@ -86,9 +86,6 @@ public:
     /// Returns true if the input sites exists in _equivalentClusters, order does not matter if sorted=false.
     bool contains(const std::vector<LatticeSite>, bool) const;
 
-    /// Removes all clusters from the list of equivalent clusters that contain the site with the given index.
-    void removeClustersWithSiteIndex(const size_t, bool);
-
     /// Removes all clusters from the list of equivalent clusters that do not contain the site with the given index.
     void removeClustersWithoutIndex(const size_t index, bool);
 

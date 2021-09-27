@@ -1,782 +1,495 @@
-import unittest
+import pytest
 
+from ase import Atom, Atoms
 from ase.build import bulk
 from icet import ClusterExpansion, ClusterSpace
-from icet.core.structure import Structure
 from mchammer.calculators.cluster_expansion_calculator import \
     ClusterExpansionCalculator
-from _icet import _ClusterExpansionCalculator
+import numpy as np
+from typing import List
 
 
-class TestCECalculatorBinary(unittest.TestCase):
+def get_energy_changes(calc: ClusterExpansionCalculator,
+                       structure: Atoms,
+                       inverted_structure: Atoms,
+                       sites: List[int]):
     """
-    Container for tests of the class functionality.
+    Calculates change in property upon some change in a structure
+    with three different methods.
 
-    Todo
-    ----
-        * add property test to calculate local contribution when that
-          method has been added as intended.
+    Parameters
+    ----------
+    structure
+        Structure to evaluate
+    inverted_structure
+        A structure whose occupations differ from structure, used to be
+        able to know what chemical symbols to switch to
+    sites
+        Sites in structures on which chemical symbols should change
 
+    Returns
+    -------
+    float
+        Change calculated with local cluster vectors
+    float
+        Change calculated with global calculation
+    float
+        Change calculated with custom cluster vector change calculation
     """
+    change_local = calc.calculate_change(
+        sites=sites,
+        current_occupations=structure.get_atomic_numbers(),
+        new_site_occupations=inverted_structure.get_atomic_numbers()[sites])
 
-    def __init__(self, *args, **kwargs):
-        super(TestCECalculatorBinary, self).__init__(*args, **kwargs)
+    occupations_before = structure.get_atomic_numbers()
+    occupations_after = structure.get_atomic_numbers()
+    occupations_after[sites] = inverted_structure.get_atomic_numbers()[sites]
+    change_global = calc.calculate_total(occupations=occupations_after) \
+        - calc.calculate_total(occupations=occupations_before)
 
-        self.structure = bulk('Al', 'fcc', a=4.0)
-        self.cutoffs = [5, 5]  # [2.9]
-        self.subelements = ['Al', 'Ge']
-        self.cs = ClusterSpace(self.structure, self.cutoffs, self.subelements)
-        params_len = len(self.cs)
-        params = [1.1] * params_len
+    e_before_ce = calc.cluster_expansion.predict(structure)
+    structure_copy = structure.copy()
+    structure_copy.set_atomic_numbers(occupations_after)
+    e_after_ce = calc.cluster_expansion.predict(structure_copy)
+    change_ce = e_after_ce - e_before_ce
+    change_ce *= len(structure)
 
-        self.ce = ClusterExpansion(self.cs, params)
-
-    def shortDescription(self):
-        """Silences unittest from printing the docstrings in test cases."""
-        return None
-
-    def setUp(self):
-        """Setup before each test."""
-        self.structure = bulk('Al', 'fcc', a=4.0).repeat(2)
-
-        self.calculator = ClusterExpansionCalculator(
-            self.structure, self.ce, name='Tests CE calc')
-
-    def test_property_cluster_expansion(self):
-        """Tests the cluster expansion property."""
-        self.assertIsInstance(
-            self.calculator.cluster_expansion, ClusterExpansion)
-
-    def _test_flip_changes(self, msg):
-        """Tests differences when flipping."""
-        for i in range(len(self.structure)):
-            indices = [i]
-            local_diff, total_diff = self._get_energy_diffs_local_and_total(
-                indices)
-            self.assertAlmostEqual(total_diff, local_diff, msg=msg)
-
-    def _test_swap_changes(self, msg):
-        """Tests differences when swapping."""
-        for i in range(len(self.structure)):
-            for j in range(len(self.structure)):
-                if j <= i:
-                    continue
-                indices = [i, j]
-                local_diff, total_diff = \
-                    self._get_energy_diffs_local_and_total(indices)
-                self.assertAlmostEqual(total_diff, local_diff, msg=msg)
-
-    def test_local_contribution_flip(self):
-        """Tests potential differences when flipping."""
-        # Tests original occupations
-        self._test_flip_changes('original occupations')
-
-        # Tests checkerboard-ish
-        for i in range(len(self.structure)):
-            if i % 2 == 0:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-
-        self._test_flip_changes('Checkerboard')
-
-        # Tests seggregated-ish
-        for i in range(len(self.structure)):
-            if i < len(self.structure) / 2:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-        self._test_flip_changes('Segregated')
-
-    def test_local_contribution_swap(self):
-        """Tests correct differences when swapping."""
-        # Tests original occupations
-        self._test_swap_changes('Original occupations')
-
-        # Tests checkerboard-ish
-        for i in range(len(self.structure)):
-            if i % 2 == 0:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-
-        self._test_swap_changes('checkerboard')
-
-        # Tests seggregated-ish
-        for i in range(len(self.structure)):
-            if i < len(self.structure) / 2:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-        self._test_swap_changes('segregated')
-
-    def _get_energy_diffs_local_and_total(self, indices):
-        """Get energy diffs using local and total."""
-
-        # Original occupations
-        original_occupations = self.structure.numbers.copy()
-        # Initial value total energy
-        initial_value_total = self.calculator.calculate_total(
-            occupations=self.structure.get_atomic_numbers())
-
-        # Flip indices
-        new_site_occupations = []
-        for index in indices:
-            if self.structure[index].number == 13:
-                self.structure[index].number = 32
-                new_site_occupations.append(32)
-            elif self.structure[index].number == 32:
-                self.structure[index].number = 13
-                new_site_occupations.append(13)
-
-        # Calculate new total energy
-        new_value_total = self.calculator.calculate_total(
-            occupations=self.structure.get_atomic_numbers().copy())
-
-        # Calculate change in energy
-        change = self.calculator.calculate_change(
-            sites=indices,
-            current_occupations=original_occupations,
-            new_site_occupations=new_site_occupations)
-
-        # difference in energy according to total energy
-        total_diff = new_value_total - initial_value_total
-
-        # Reset occupations
-        self.structure.set_atomic_numbers(original_occupations.copy())
-
-        return change, total_diff
-
-    def test_calculate_change(self):
-        """Tests calculate local change."""
-        indices = [3, 5]
-        current_occupations = self.structure.get_atomic_numbers()
-        new_site_occupations = []
-        for site in indices:
-            if current_occupations[site] == 13:
-                new_site_occupations.append(32)
-            elif current_occupations[site] == 32:
-                new_site_occupations.append(13)
-            else:
-                raise Exception(
-                    'Found unknown element in structure object. {}'.format(
-                        current_occupations[site]))
-
-        change = self.calculator.calculate_change(
-            sites=indices, current_occupations=current_occupations,
-            new_site_occupations=new_site_occupations)
-        self.assertIsInstance(change, float)
-
-        # test local contribution by comparing with differences
-        original_occupations = self.structure.numbers.copy()
-        initial_value_total = self.calculator.calculate_total(
-            occupations=self.structure.get_atomic_numbers())
-
-        self.structure.set_atomic_numbers(original_occupations.copy())
-        self.structure.set_atomic_numbers(original_occupations.copy())
-
-        new_occupations = self.structure.get_atomic_numbers().copy()
-        for index, element in zip(indices, new_site_occupations):
-            new_occupations[index] = element
-
-        new_value_total = self.calculator.calculate_total(
-            occupations=new_occupations.copy())
-
-        total_diff = new_value_total - initial_value_total
-        self.assertAlmostEqual(total_diff, change)
-
-        # Test using total energy calculator
-        self.calculator.use_local_energy_calculator = False
-        change_total = self.calculator.calculate_change(
-            sites=indices, current_occupations=current_occupations,
-            new_site_occupations=new_site_occupations)
-        self.calculator.use_local_energy_calculator = True
-        self.assertAlmostEqual(change_total, change)
-
-    def test_get_local_cluster_vector(self):
-        """Tests the get local clustervector method."""
-
-        cpp_calc = _ClusterExpansionCalculator(
-            self.cs, Structure.from_atoms(self.structure), self.cs.fractional_position_tolerance)
-
-        index = 4
-        cpp_calc.get_local_cluster_vector(
-            self.structure.get_atomic_numbers(), index, [])
-
-        self.structure[index].symbol = 'Ge'
-
-        cpp_calc.get_local_cluster_vector(
-            self.structure.get_atomic_numbers(), index, [])
+    return change_local, change_global, change_ce
 
 
-class TestMergedOrbitCECalculatorBinary(TestCECalculatorBinary):
+def get_inverted_structure(structure: Atoms, cluster_space: ClusterSpace):
     """
-    Container for tests of CE calculator based on a cluster space with merged
-    orbits
+    Make a copy of structure, the occupations of which are changed,
+    while still adhering to the constraints of cluster_space
+
+    Parameters
+    ----------
+    structure
+        Structure to be inverted
+    cluster_space
+        Implcitly defines available alternative symbols on each site
+
+    Returns
+    -------
+    Atoms
+        A structure that differs from structure on all sublattices with
+        more than one chemical symbol
     """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    inverted_structure = structure.copy()
+    sublattices = cluster_space.get_sublattices(structure)
+    for sublattice in sublattices:
+        chemical_symbols = sublattice.chemical_symbols
 
-        merge_orbits_data = {2: [3], 8: [6, 9, 10]}
-        self.cs.merge_orbits(merge_orbits_data)
-        params_len = len(self.cs)
-        params = [1.1] * params_len
-        self.ce = ClusterExpansion(self.cs, params)
+        # Just make sure all symbols are unique
+        assert len(set(chemical_symbols)) == len(chemical_symbols)
 
+        if len(chemical_symbols) == 1:
+            continue  # Inactive sublattice, nothing to do
 
-class TestCECalculatorBinaryHCP(unittest.TestCase):
-    """Container for tests of the class functionality."""
+        # Now change the identity of each atom in the sublattice
+        for ind in sublattice.indices:
 
-    def __init__(self, *args, **kwargs):
-        super(TestCECalculatorBinaryHCP,
-              self).__init__(*args, **kwargs)
+            current_symbol = structure[ind].symbol
+            assert current_symbol in chemical_symbols
 
-        self.structure = bulk('Al', 'hcp', a=4.0, c=3.1)
-        self.cutoffs = [6, 6, 6]  # [2.9]
-        self.subelements = ['Al', 'Ge']
-        self.cs = ClusterSpace(
-            self.structure.copy(), self.cutoffs, self.subelements)
-        params_len = len(self.cs)
-        params = [1.0] * params_len
+            # Determine a new symbol by using another one from the available chemical symbols
+            sym_ind = (chemical_symbols.index(current_symbol) + 1) % len(chemical_symbols)
+            new_symbol = chemical_symbols[sym_ind]
+            inverted_structure[ind].symbol = new_symbol
 
-        self.ce = ClusterExpansion(self.cs, params)
-
-    def shortDescription(self):
-        """Silences unittest from printing the docstrings in test cases."""
-        return None
-
-    def setUp(self):
-        """Setup before each test."""
-        self.structure = bulk('Al', 'hcp', a=4.0, c=3.1).repeat(2)
-
-        self.calculator = ClusterExpansionCalculator(
-            self.structure, self.ce, name='Tests CE calc')
-
-    def _test_flip_changes(self, msg):
-        """Tests differences when flipping."""
-        for i in range(len(self.structure)):
-            indices = [i]
-            local_diff, total_diff = self._get_energy_diffs_local_and_total(
-                indices)
-            msg += ', indices ' + str(indices) + \
-                ', len of structure ' + str(len(self.structure))
-            self.assertAlmostEqual(total_diff, local_diff, msg=msg)
-
-    def _test_swap_changes(self, msg):
-        """Tests differences when flipping."""
-        for i in range(len(self.structure)):
-            for j in range(len(self.structure)):
-                if j <= i:
-                    continue
-                indices = [i, j]
-                local_diff, total_diff = \
-                    self._get_energy_diffs_local_and_total(indices)
-                msg += ', indices ' + \
-                    str(indices) + ', len of structure ' + str(len(self.structure))
-                self.assertAlmostEqual(total_diff, local_diff, msg=msg)
-
-    def test_local_contribution_flip(self):
-        """Tests potential differences when flipping."""
-        # Tests original occupations
-        self._test_flip_changes('original occupations')
-
-        # Tests checkerboard-ish
-        for i in range(len(self.structure)):
-            if i % 2 == 0:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-
-        self._test_flip_changes('Checkerboard')
-
-        # Tests segregated-ish
-        for i in range(len(self.structure)):
-            if i < len(self.structure) / 2:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-        self._test_flip_changes('Segregated')
-
-    def test_local_contribution_swap(self):
-        """Tests correct differences when swapping."""
-        # Tests original occupations
-        self._test_swap_changes('Original occupations')
-
-        # Tests checkerboard-ish
-        for i in range(len(self.structure)):
-            if i % 2 == 0:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-
-        self._test_swap_changes('checkerboard')
-
-        # Tests segregated-ish
-        for i in range(len(self.structure)):
-            if i < len(self.structure) / 2:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-        self._test_swap_changes('segregated')
-
-    def _get_energy_diffs_local_and_total(self, indices):
-        """Get energy diffs using local and total."""
-
-        # Original occupations
-        original_occupations = self.structure.numbers.copy()
-        # Initial value total energy
-        initial_value_total = self.calculator.calculate_total(
-            occupations=self.structure.get_atomic_numbers())
-
-        # Flip indices
-        new_site_occupations = []
-        for index in indices:
-            if self.structure[index].number == 13:
-                self.structure[index].number = 32
-                new_site_occupations.append(32)
-            elif self.structure[index].number == 32:
-                self.structure[index].number = 13
-                new_site_occupations.append(13)
-
-        # Calculate new total energy
-        new_value_total = self.calculator.calculate_total(
-            occupations=self.structure.get_atomic_numbers().copy())
-
-        # Calculate change in energy
-        change = self.calculator.calculate_change(
-            sites=indices,
-            current_occupations=original_occupations,
-            new_site_occupations=new_site_occupations)
-
-        # difference in energy according to total energy
-        total_diff = new_value_total - initial_value_total
-
-        # Reset occupations
-        self.structure.set_atomic_numbers(original_occupations.copy())
-
-        return change, total_diff
+    # Make sure we did at least some change
+    assert tuple(inverted_structure.get_chemical_symbols()) \
+        != tuple(structure.get_chemical_symbols())
+    return inverted_structure
 
 
-class TestMergedOrbitCECalculatorBinaryHCP(TestCECalculatorBinaryHCP):
+def test_get_inverted_structure():
     """
-    Container for tests of CE calculator based on a cluster space with merged
-    orbits
+    Tests the above function to make sure it actually changes the structure
+    as it is supposed to.
     """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        merge_orbits_data = {2: [3], 7: [8, 9], 48: [49]}
-        self.cs.merge_orbits(merge_orbits_data)
-        params_len = len(self.cs)
-        params = [1.1] * params_len
-        self.ce = ClusterExpansion(self.cs, params)
+    prim = bulk('Au')
+    cs = ClusterSpace(prim, [0.0], ['Au', 'Pd'])
+    structure = prim.repeat((2, 1, 1))
+    structure[1].symbol = 'Pd'
+    inverted_structure = get_inverted_structure(structure, cs)
+    assert len(inverted_structure) == len(structure)
+    assert len(structure) == 2
+    assert structure[0].symbol == 'Au'
+    assert inverted_structure[0].symbol == 'Pd'
+    assert structure[1].symbol == 'Pd'
+    assert inverted_structure[1].symbol == 'Au'
 
 
-class TestCECalculatorBinaryBCC(unittest.TestCase):
+@pytest.fixture
+def system(request):
     """
-    Container for tests of the class functionality.
+    Constructs a cluster expansion, a supercell, and an "inverted" version
+    of that supercell.
 
-    Todo
-    ----
-        * add property test to calculate local contribution when that
-          method has been added as intended.
+    Parameters (in request)
+    =======================
+    model : str
+        string identifier of the system
+    repeat : tuple
+        Shape of the supercell, passed to ASE:s repeat function
+    supercell : str
+        such as "pseudorandom", specifies how to occupy the supercell
 
+    Returns
+    -------
+    ClusterExpansion
+        A cluster expansion
+    structure
+        A supercell of the primitive structure decorated in some fashion
+    inverted_structure
+        A supercell with the same shape as the other, but in which the occupation
+        on each site has been changed, while still adhering to the constraints
+        imposed by the cluster space. This structure can be used to facilitate
+        flipping of atoms in structure.
     """
+    model, repeat, supercell = request.param
 
-    def __init__(self, *args, **kwargs):
-        super(TestCECalculatorBinaryBCC,
-              self).__init__(*args, **kwargs)
+    # Create primitive structure and cluster space
+    if model == 'binary_fcc':
+        alat = 4.0
+        chemical_symbols = [['Al', 'Ge']]
+        prim = bulk(chemical_symbols[0][0], crystalstructure='fcc', a=alat)
+        cutoffs = [7, 6, 4]
+        cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
+    elif model == 'binary_fcc_merged':
+        alat = 4.0
+        chemical_symbols = [['Al', 'Ge']]
+        prim = bulk(chemical_symbols[0][0], crystalstructure='fcc', a=alat)
+        cutoffs = [5, 5]
+        cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
+        merge_orbits_data = {2: [3], 7: [8, 9]}
+        cs.merge_orbits(merge_orbits_data)
+    elif model == 'ternary_fcc':
+        alat = 4.0
+        chemical_symbols = [['Al', 'Ge', 'Ga']]
+        prim = bulk(chemical_symbols[0][0], crystalstructure='fcc', a=alat)
+        cutoffs = [5, 4]
+        cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
+    elif model == 'binary_bcc':
+        alat = 4.0
+        chemical_symbols = [['Al', 'Ge']]
+        prim = bulk(chemical_symbols[0][0], crystalstructure='bcc', a=alat)
+        cutoffs = [10, 10, 4]
+        cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
+    elif model == 'binary_hcp':
+        alat, clat = 3.4, 5.1
+        chemical_symbols = [['Ag', 'Pd'], ['Ag', 'Pd']]
+        prim = bulk(chemical_symbols[0][0], a=alat, c=clat, crystalstructure='hcp')
+        cutoffs = [5, 4]
+        cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
+    elif model == 'ternary_hcp':
+        alat, clat = 3.4, 5.1
+        chemical_symbols = [['Ag', 'Pd', 'Cu'], ['Ag', 'Pd', 'Cu']]
+        prim = bulk(chemical_symbols[0][0], a=alat, c=clat, crystalstructure='hcp')
+        cutoffs = [5, 4]
+        cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
+    elif model == 'ternary_hcp_merged':
+        alat, clat = 3.4, 5.1
+        chemical_symbols = [['Ag', 'Pd', 'Cu'], ['Ag', 'Pd', 'Cu']]
+        prim = bulk(chemical_symbols[0][0], a=alat, c=clat, crystalstructure='hcp')
+        cutoffs = [5, 4]
+        cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
+        print(cs)
+        merge_orbits_data = {1: [3], 4: [5, 6]}
+        cs.merge_orbits(merge_orbits_data)
+    elif model == 'sublattices_fcc':
+        alat = 4.0
+        chemical_symbols = [['Ag', 'Pd'], ['H', 'X']]
+        prim = bulk(chemical_symbols[0][0], a=alat, crystalstructure='fcc')
+        prim.append(Atom('H', (alat / 2, alat / 2, alat / 2)))
+        cutoffs = [5, 4]
+        cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
+    elif model == 'ternarysublattices_fcc':
+        alat = 4.0
+        chemical_symbols = [['Ag', 'Pd', 'Cu'], ['H', 'X']]
+        prim = bulk(chemical_symbols[0][0], a=alat, crystalstructure='fcc')
+        prim.append(Atom('H', (alat / 2, alat / 2, alat / 2)))
+        cutoffs = [5, 4]
+        cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
+    elif model == 'inactivesublattice_fcc':
+        alat = 4.0
+        chemical_symbols = [['Ag', 'Pd'], ['W']]
+        prim = bulk(chemical_symbols[0][0], a=alat, crystalstructure='fcc')
+        prim.append(Atom('W', (alat / 2, alat / 2, alat / 2)))
+        cutoffs = [5, 4]
+        cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
+    else:
+        raise Exception(f'Unknown model ({model})')
 
-        self.structure = bulk('Al', 'bcc', a=4.0)
-        self.cutoffs = [6, 6, 6]
-        self.subelements = ['Al', 'Ge']
-        self.cs = ClusterSpace(self.structure, self.cutoffs, self.subelements)
-        params_len = len(self.cs)
-        params = [1.1] * params_len
+    # Make a supercell as well as an "inverted" version of the supercell,
+    # the latter with the purpose of more easily decide how atoms can be changed
+    structure = prim.repeat(repeat)
+    inverted_structure = get_inverted_structure(structure, cs)
 
-        self.ce = ClusterExpansion(self.cs, params)
-
-    def shortDescription(self):
-        """Silences unittest from printing the docstrings in test cases."""
-        return None
-
-    def setUp(self):
-        """Setup before each test."""
-        self.structure = bulk('Al', 'bcc', a=4.0).repeat(2)
-        self.calculator = ClusterExpansionCalculator(
-            self.structure, self.ce, name='Tests CE calc')
-
-    def _test_flip_changes(self, msg):
-        """Tests differences when flipping."""
-        for i in range(len(self.structure)):
-            indices = [i]
-            local_diff, total_diff = self._get_energy_diffs_local_and_total(
-                indices)
-            self.assertAlmostEqual(total_diff, local_diff, msg=msg)
-
-    def _test_swap_changes(self, msg):
-        """Tests differences when flipping."""
-        for i in range(len(self.structure)):
-            for j in range(len(self.structure)):
-                if j <= i:
-                    continue
-                indices = [i, j]
-                local_diff, total_diff = \
-                    self._get_energy_diffs_local_and_total(indices)
-                self.assertAlmostEqual(total_diff, local_diff, msg=msg)
-
-    def test_local_contribution_flip(self):
-        """Tests potential differences when flipping."""
-
-        # Tests original occupations
-        self._test_flip_changes('original occupations')
-
-        # Tests checkerboard-ish
-        for i in range(len(self.structure)):
-            if i % 2 == 0:
-                self.structure[i].number = 13
+    # Occupy supercell according to some pattern
+    if supercell == 'homogeneous':
+        pass
+    elif supercell == 'pseudorandom':
+        for i in [2, 3, 4, 7, 11, 14, 15, 16, 17]:
+            if i >= len(structure):
+                break
+            structure[i].symbol = inverted_structure[i].symbol
+        if 'ternary' in model:
+            structure[0].symbol = chemical_symbols[0][1]
+    elif supercell == 'ordered':
+        for i in range(len(structure)):
+            if i % 2 == 1:
+                continue
+            if 'ternary' in model and i % 4 == 0:
+                structure[i].symbol = chemical_symbols[0][1]
             else:
-                self.structure[i].number = 32
-
-        self._test_flip_changes('Checkerboard')
-
-        # Tests segregated-ish
-        for i in range(len(self.structure)):
-            if i < len(self.structure) / 2:
-                self.structure[i].number = 13
+                structure[i].symbol = inverted_structure[i].symbol
+    elif supercell == 'segregated':
+        for i in range(len(structure) // 2):
+            if 'ternary' in model:
+                if i % 2 == 0:
+                    structure[i].symbol = chemical_symbols[0][1]
+                else:
+                    structure[i].symbol = inverted_structure[i].symbol
             else:
-                self.structure[i].number = 32
-        self._test_flip_changes('Segregated')
-
-    def test_local_contribution_swap(self):
-        """Tests correct differences when swapping."""
-        # Tests original occupations
-        self._test_swap_changes('Original occupations')
-
-        # Tests checkerboard-ish
-        for i in range(len(self.structure)):
-            if i % 2 == 0:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-
-        self._test_swap_changes('checkerboard')
-
-        # Tests segregated-ish
-        for i in range(len(self.structure)):
-            if i < len(self.structure) / 2:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-        self._test_swap_changes('segregated')
-
-    def _get_energy_diffs_local_and_total(self, indices):
-        """Get energy diffs using local and total."""
-
-        # Original occupations
-        original_occupations = self.structure.numbers.copy()
-        # Initial value total energy
-        initial_value_total = self.calculator.calculate_total(
-            occupations=self.structure.get_atomic_numbers())
-
-        # Flip indices
-        new_site_occupations = []
-        for index in indices:
-            if self.structure[index].number == 13:
-                self.structure[index].number = 32
-                new_site_occupations.append(32)
-            elif self.structure[index].number == 32:
-                self.structure[index].number = 13
-                new_site_occupations.append(13)
-
-        # Calculate new total energy
-        new_value_total = self.calculator.calculate_total(
-            occupations=self.structure.get_atomic_numbers().copy())
-
-        # Calculate change in energy
-        change = self.calculator.calculate_change(
-            sites=indices,
-            current_occupations=original_occupations,
-            new_site_occupations=new_site_occupations)
-
-        # difference in energy according to total energy
-        total_diff = new_value_total - initial_value_total
-
-        # Reset occupations
-        self.structure.set_atomic_numbers(original_occupations.copy())
-
-        return change, total_diff
-
-
-class TestCECalculatorTernaryBCC(unittest.TestCase):
-    """
-    Container for tests of the class functionality.
-
-    Todo
-    ----
-        * add property test to calculate local contribution when that
-          method has been added as intended.
-
-    """
-
-    def __init__(self, *args, **kwargs):
-        super(TestCECalculatorTernaryBCC,
-              self).__init__(*args, **kwargs)
-
-        self.structure = bulk('Al', 'bcc', a=4.0)
-        self.cutoffs = [6, 6, 6]
-        self.subelements = ['Al', 'Ge', 'H']
-        self.cs = ClusterSpace(self.structure, self.cutoffs, self.subelements)
-        params_len = len(self.cs)
-        params = [1.0] * params_len
-        self.ce = ClusterExpansion(self.cs, params)
-
-    def shortDescription(self):
-        """Silences unittest from printing the docstrings in test cases."""
-        return None
-
-    def setUp(self):
-        """Setup before each test."""
-        self.structure = bulk('Al', 'bcc', a=4.0).repeat(2)
-        self.calculator = ClusterExpansionCalculator(
-            self.structure, self.ce, name='Tests CE calc')
-
-    def _test_flip_changes(self, msg):
-        """Tests differences when flipping."""
-        for i in range(len(self.structure)):
-            indices = [i]
-            local_diff, total_diff = self._get_energy_diffs_local_and_total(
-                indices)
-            self.assertAlmostEqual(total_diff, local_diff, msg=msg)
-
-    def _test_swap_changes(self, msg):
-        """Tests differences when swapping."""
-        for i in range(len(self.structure)):
-            for j in range(len(self.structure)):
-                if j <= i:
-                    continue
-                indices = [i, j]
-                local_diff, total_diff = \
-                    self._get_energy_diffs_local_and_total(indices)
-                msg1 = '[{}, {}]'.format(i, j)
-                self.assertAlmostEqual(total_diff, local_diff, msg=msg1)
-
-    def test_local_contribution_flip(self):
-        """Tests potential differences when flipping."""
-
-        # Tests original occupations
-        self._test_flip_changes('original occupations')
-
-        # Tests checkerboard-ish
-        for i in range(len(self.structure)):
-            if i % 2 == 0:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-
-        self._test_flip_changes('Checkerboard')
-
-        # Tests segregated-ish
-        for i in range(len(self.structure)):
-            if i < len(self.structure) / 2:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-        self._test_flip_changes('Segregated')
-
-    def test_local_contribution_swap(self):
-        """Tests correct differences when swapping."""
-        # Tests original occupations
-        self._test_swap_changes('Original occupations')
-
-        # Tests checkerboard-ish
-        for i in range(len(self.structure)):
-            if i % 2 == 0:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-
-        self._test_swap_changes('checkerboard')
-
-        # Tests segregated-ish
-        for i in range(len(self.structure)):
-            if i < len(self.structure) / 2:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-        self._test_swap_changes('segregated')
-
-    def _get_energy_diffs_local_and_total(self, indices):
-        """Get energy diffs using local and total."""
-
-        # Original occupations
-        original_occupations = self.structure.numbers.copy()
-        # Initial value total energy
-        initial_value_total = self.calculator.calculate_total(
-            occupations=self.structure.get_atomic_numbers())
-
-        # Flip indices
-        new_site_occupations = []
-        for index in indices:
-            if self.structure[index].number == 13:
-                self.structure[index].number = 32
-                new_site_occupations.append(32)
-            elif self.structure[index].number == 32:
-                self.structure[index].number = 13
-                new_site_occupations.append(13)
-
-        # Calculate new total energy
-        new_value_total = self.calculator.calculate_total(
-            occupations=self.structure.get_atomic_numbers().copy())
-
-        # Calculate change in energy
-        change = self.calculator.calculate_change(
-            sites=indices,
-            current_occupations=original_occupations,
-            new_site_occupations=new_site_occupations)
-
-        # difference in energy according to total energy
-        total_diff = new_value_total - initial_value_total
-
-        # Reset occupations
-        self.structure.set_atomic_numbers(original_occupations.copy())
-
-        return change, total_diff
-
-
-class TestCECalculatorTernaryHCP(unittest.TestCase):
-    """
-    Container for tests of the class functionality.
-
-    Todo
-    ----
-        * add property test to calculate local contribution when that
-          method has been added as intended.
-
-    """
-
-    def __init__(self, *args, **kwargs):
-        super(TestCECalculatorTernaryHCP,
-              self).__init__(*args, **kwargs)
-
-        self.structure = bulk('Al', 'hcp', a=4.0, c=3.1)
-        self.cutoffs = [6, 6, 6]
-        self.subelements = ['Al', 'Ge', 'H']
-        self.cs = ClusterSpace(self.structure, self.cutoffs, self.subelements)
-        params_len = len(self.cs)
-        params = [1.0] * params_len
-        self.ce = ClusterExpansion(self.cs, params)
-
-    def shortDescription(self):
-        """Silences unittest from printing the docstrings in test cases."""
-        return None
-
-    def setUp(self):
-        """Setup before each test."""
-        self.structure = bulk('Al', 'hcp', a=4.0, c=3.1).repeat(2)
-        self.calculator = ClusterExpansionCalculator(
-            self.structure, self.ce, name='Tests CE calc')
-
-    def _test_flip_changes(self, msg):
-        """Tests differences when flipping."""
-        for i in range(len(self.structure)):
-            indices = [i]
-            local_diff, total_diff = self._get_energy_diffs_local_and_total(
-                indices)
-            self.assertAlmostEqual(total_diff, local_diff, msg=msg)
-
-    def _test_swap_changes(self, msg):
-        """Tests differences when swapping."""
-        for i in range(len(self.structure)):
-            for j in range(len(self.structure)):
-                if j <= i:
-                    continue
-                indices = [i, j]
-                local_diff, total_diff = \
-                    self._get_energy_diffs_local_and_total(indices)
-                msg1 = '[{}, {}]'.format(i, j)
-                self.assertAlmostEqual(total_diff, local_diff, msg=msg1)
-
-    def test_local_contribution_flip(self):
-        """Tests potential differences when flipping."""
-        # Tests original occupations
-        self._test_flip_changes('original occupations')
-
-        # Tests checkerboard-ish
-        for i in range(len(self.structure)):
-            if i % 2 == 0:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-
-        self._test_flip_changes('Checkerboard')
-
-        # Tests segregated-ish
-        for i in range(len(self.structure)):
-            if i < len(self.structure) / 2:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-        self._test_flip_changes('Segregated')
-
-    def test_local_contribution_swap(self):
-        """Tests correct differences when swapping."""
-        # Tests original occupations
-        self._test_swap_changes('Original occupations')
-
-        # Tests checkerboard-ish
-        for i in range(len(self.structure)):
-            if i % 2 == 0:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-
-        self._test_swap_changes('checkerboard')
-
-        # Tests segregated-ish
-        for i in range(len(self.structure)):
-            if i < len(self.structure) / 2:
-                self.structure[i].number = 13
-            else:
-                self.structure[i].number = 32
-        self._test_swap_changes('segregated')
-
-    def _get_energy_diffs_local_and_total(self, indices):
-        """Get energy diffs using local and total."""
-
-        # Original occupations
-        original_occupations = self.structure.numbers.copy()
-        # Initial value total energy
-        initial_value_total = self.calculator.calculate_total(
-            occupations=self.structure.get_atomic_numbers())
-
-        # Flip indices
-        new_site_occupations = []
-        for index in indices:
-            if self.structure[index].number == 13:
-                self.structure[index].number = 32
-                new_site_occupations.append(32)
-            elif self.structure[index].number == 32:
-                self.structure[index].number = 13
-                new_site_occupations.append(13)
-
-        # Calculate new total energy
-        new_value_total = self.calculator.calculate_total(
-            occupations=self.structure.get_atomic_numbers().copy())
-
-        # Calculate change in energy
-        change = self.calculator.calculate_change(
-            sites=indices,
-            current_occupations=original_occupations,
-            new_site_occupations=new_site_occupations)
-
-        # difference in energy according to total energy
-        total_diff = new_value_total - initial_value_total
-
-        # Reset occupations
-        self.structure.set_atomic_numbers(original_occupations.copy())
-
-        return change, total_diff
-
-
-if __name__ == '__main__':
-    unittest.main()
+                structure[i].symbol = inverted_structure[i].symbol
+    else:
+        raise Exception(f'Unknown supercell ({supercell})')
+
+    # Now that we have fiddled with the structure, we need a new inverted_structure
+    inverted_structure = get_inverted_structure(structure, cs)
+
+    # Define ECIs that are not all the same
+    params = [(-1)**i * ((i + 1) / 10)**1.02 for i in range(len(cs))]
+
+    # Set one to zero so we test pruning
+    params[len(params) // 2] = 0
+
+    ce = ClusterExpansion(cluster_space=cs, parameters=params)
+    return ce, structure, inverted_structure
+
+
+# Make a list of parameters; possible combinations of systems and supercells
+systems = []
+systems_with_calculator_choice = []
+for model in ['binary_fcc', 'ternary_fcc', 'binary_bcc', 'ternary_hcp',
+              'sublattices_fcc', 'ternarysublattices_fcc', 'inactivesublattice_fcc']:
+    for repeat in [(1, 1, 1), (2, 1, 1), (2, 2, 3)]:
+        for supercell in ['homogeneous', 'pseudorandom', 'ordered', 'segregated']:
+            if repeat in [(1, 1, 1), (2, 1, 1)] and supercell != 'ordered':
+                continue
+            elif 'ternary' in model and supercell == 'segregated':
+                continue
+            systems.append(((model, repeat, supercell)))
+            systems_with_calculator_choice.append(((model, repeat, supercell), True))
+            if model == 'binary_bcc':
+                systems_with_calculator_choice.append(((model, repeat, supercell), False))
+systems.append((('binary_fcc_merged', (2, 2, 2), 'pseudorandom')))
+systems_with_calculator_choice.append((('binary_fcc_merged', (2, 2, 2), 'pseudorandom'), True))
+systems.append((('ternary_hcp_merged', (1, 2, 2), 'pseudorandom')))
+systems_with_calculator_choice.append((('ternary_hcp_merged', (1, 2, 2), 'pseudorandom'), True))
+
+
+@pytest.mark.parametrize('system', systems[:5], indirect=['system'])
+def test_initialization(system):
+    ce, structure, _ = system
+    calc = ClusterExpansionCalculator(structure, ce, name='Test CE calc')
+    assert isinstance(calc, ClusterExpansionCalculator)
+    assert isinstance(calc.cluster_expansion, ClusterExpansion)
+    assert calc.name == 'Test CE calc'
+    assert abs(calc._property_scaling - len(structure)) < 1e-6
+    assert calc.use_local_energy_calculator
+
+    # Some alternative input parameters
+    calc = ClusterExpansionCalculator(structure, ce, scaling=5.0, use_local_energy_calculator=False)
+    assert isinstance(calc, ClusterExpansionCalculator)
+    assert isinstance(calc.cluster_expansion, ClusterExpansion)
+    assert calc.name == 'Cluster Expansion Calculator'
+    assert abs(calc._property_scaling - 5.0) < 1e-6
+    assert not calc.use_local_energy_calculator
+
+
+@pytest.mark.parametrize('system', systems, indirect=['system'])
+def test_get_cluster_vector_against_cluster_space(system):
+    """Tests retrieval of full cluster vector from C++ side calculator against
+    full cluster vector calculation from cluster space."""
+    ce, structure, inverted_structure = system
+    calc = ClusterExpansionCalculator(structure, ce, name='Test CE calc')
+    cv_calc = calc.cpp_calc.get_cluster_vector(structure.get_atomic_numbers())
+    cv_cs = ce.get_cluster_space_copy().get_cluster_vector(structure)
+    assert np.allclose(cv_calc, cv_cs)
+
+    # Make sure it works after modifying the structure
+    for i in range(min(2, len(structure))):
+        structure[i].symbol = inverted_structure[i].symbol
+    cv_calc = calc.cpp_calc.get_cluster_vector(structure.get_atomic_numbers())
+    cv_cs = ce.get_cluster_space_copy().get_cluster_vector(structure)
+    assert np.allclose(cv_calc, cv_cs)
+
+
+@pytest.mark.parametrize('system, use_local_energy_calculator',
+                         systems_with_calculator_choice[:30],
+                         indirect=['system'])
+def test_change_calculation_flip(system, use_local_energy_calculator):
+    """Tests differences when flipping."""
+    ce, structure, inverted_structure = system
+    calc = ClusterExpansionCalculator(structure, ce, name='Test CE calc',
+                                      use_local_energy_calculator=use_local_energy_calculator)
+    energy_changes = []
+    for i in range(len(structure)):
+        sites = [i]
+        change_local, change_global, change_ce = \
+            get_energy_changes(calc, structure, inverted_structure, sites)
+        assert abs(change_local - change_global) < 1e-6
+        assert abs(change_global - change_ce) < 1e-6
+        energy_changes.append(change_local)
+
+    # Finally make sure we did not test trivial cases only
+    if len(structure) > 2:
+        assert max(np.abs(energy_changes)) > 0
+
+
+@pytest.mark.parametrize('system, use_local_energy_calculator',
+                         systems_with_calculator_choice,
+                         indirect=['system'])
+def test_change_calculation_swap(system, use_local_energy_calculator):
+    """Tests differences when swapping."""
+    ce, structure, inverted_structure = system
+    calc = ClusterExpansionCalculator(structure, ce, name='Test CE calc',
+                                      use_local_energy_calculator=use_local_energy_calculator)
+    energy_changes = []
+    for i in range(len(structure)):
+        for j in range(3):
+            if j >= len(structure) or i == j:
+                continue
+            sites = [i, j]
+            change_local, change_global, change_ce = \
+                get_energy_changes(calc, structure, inverted_structure, sites)
+            assert abs(change_local - change_global) < 1e-6
+            assert abs(change_global - change_ce) < 1e-6
+            energy_changes.append(change_local)
+
+    # Finally make sure we did not test trivial cases only
+    if len(structure) > 2:
+        assert max(np.abs(energy_changes)) > 0
+
+
+@pytest.mark.parametrize('system, expected_cluster_vector', [
+    (('binary_fcc', (2, 2, 3), 'ordered'), [1., 0., -0.22222222, 0.33333333, -0.11111111,
+                                            0.33333333, 0., 0., 0., 0., 0., 0., 0., 0.,
+                                            0., 0., 0., 0., 0., 0.333333333, -0.22222222, 1.]),
+    (('ternary_fcc', (2, 2, 3), 'segregated'), [1., -0.25, 0., 0.0625, 0., -0.0625, -0.5,
+                                                0., 0., 0.0625, 0., -0.0208333333, -0.015625,
+                                                0., 0.015625, 0, 0.125, 0., 0., 0.0625,
+                                                0.0, 0.0]),
+    (('binary_hcp', (2, 2, 3), 'ordered'), [1.0, 0.0, -1.0, 1.0, 0.0, 0.0, 0.0]),
+    (('ternary_hcp', (2, 2, 3), 'ordered'), [1.0, 0.125, 0.2165063509461095, -0.125,
+                                             -0.21650635094610976, -0.375, 0.0625,
+                                             0.3247595264191646, 0.4375, -0.125,
+                                             -0.21650635094610976, -0.3749999999999999,
+                                             -0.0625, -0.10825317547305488,
+                                             0., 0., -0.0625, -0.10825317547305477,
+                                             0.125, 0.10825317547305496, 0.125,
+                                             0.3247595264191642, 0.125,
+                                             0.10825317547305496, 0.125,
+                                             0.3247595264191642]),
+    (('sublattices_fcc', (2, 2, 3), 'pseudorandom'), [[1.0, 1/3, 1/6, 1 / 18, 1/9, -1/6,
+                                                       1/8, -1/3, 1/3, 1/36, 1/18, -1/9,
+                                                       -1/9, -1/18, 1/9, 0.0694444445,
+                                                       0.01388888889, 0., -1/6, -1/9, 1/18,
+                                                       1/12, 1/12]]),
+], indirect=['system'])
+def test_get_cluster_vector_against_reference(system, expected_cluster_vector):
+    ce, structure, _ = system
+    calc = ClusterExpansionCalculator(structure, ce)
+    cv = calc.cpp_calc.get_cluster_vector(structure.get_atomic_numbers())
+    assert np.allclose(cv, expected_cluster_vector)
+
+
+@pytest.mark.parametrize('system, expected_local_cluster_vector', [
+    (('binary_fcc', (2, 2, 3), 'ordered'), [0.08333333333, -0.08333333, -0.05555555556,
+                                            0.166666667, -0.0277777778, -0.04166666667,
+                                            0., 0.0833333333, 0.0833333333,
+                                            -0.0277777778, -0.09722222222, 0.,
+                                            0.05555555556, -0.041666666667,
+                                            -0.041666666667, 0.02777777778, 0.0,
+                                            0.0138888888889, -0.020833333333,
+                                            0.3333333333, -0.111111111, 0.3333333333]),
+    (('ternary_fcc', (2, 2, 3), 'segregated'), [0.0833333333, 0.0416666667,
+                                                -0.0721687837, -0.02083333333,
+                                                0.024056261216, -0.0208333333,
+                                                -0.083333333, 0.07216878365, 0.0,
+                                                -0.020833333333, 0.0180421959, 0.0,
+                                                0.0078125, -0.00751758163,
+                                                0.00260416666667, 0.0135316469, 0.0,
+                                                -0.0240562612, 0.0240562612,
+                                                0.0208333333, 0.0, 0.0]),
+    (('binary_hcp', (2, 2, 3), 'ordered'), [0.0416666667, 0.041666667, -0.08333333,
+                                            0.083333333, -0.041666666667,
+                                            0.125, 0.125]),
+    (('ternary_hcp', (2, 2, 3), 'ordered'), [0.04166666667, 0.02083333333, 0.0360843918,
+                                             -0.01041666667, -0.018042196, -0.03125,
+                                             0.02083333333, 0.03608439, 0.0625,
+                                             -0.0104166667, -0.018042196, -0.03125,
+                                             -0.0078125, -0.013531647, -0.004510549,
+                                             -0.0078125, -0.013020833, -0.022552745,
+                                             0.015625, 0.0270632939, 0.046875,
+                                             0.081189882, 0.015625, 0.02706329,
+                                             0.046875, 0.08118988160]),
+    (('sublattices_fcc', (2, 2, 3), 'pseudorandom'), [0.0416666667, 0.0, 0.08333333,
+                                                      0.027777777778, 0.0, 0.0, 0.0625, 0.0,
+                                                      0.1666666667, 0.0138888889, 0.0,
+                                                      -0.01388888889, -0.02777777778,
+                                                      -0.0277777778, 0.0555555556,
+                                                      0.03472222222, 0.0208333333, 0.0,
+                                                      -0.0833333333, 0.0, 0.0277777778,
+                                                      0.041666666667, 0.125]),
+], indirect=['system'])
+def test_get_local_cluster_vector_against_reference(system, expected_local_cluster_vector):
+    ce, structure, _ = system
+    calc = ClusterExpansionCalculator(structure, ce)
+    local_cv = calc.cpp_calc.get_local_cluster_vector(structure.get_atomic_numbers(), 1)
+    assert np.allclose(local_cv, expected_local_cluster_vector)
+
+
+@pytest.mark.parametrize('system, expected_cluster_vector_change', [
+    (('binary_fcc', (2, 2, 3), 'ordered'), [0.0, 0.1666666666667, 0.1111111111,
+                                            -0.33333333333, 0.05555555556, 0.166666666667,
+                                            0.0, -0.1666666666667, -0.1666666666667,
+                                            0.05555555555, 0.22222222222, 0.0,
+                                            -0.11111111111, 0.11111111111, 0.0,
+                                            -0.0555555555556, 0.0, 0.0, 0.1666666666667,
+                                            -0.66666666667, 0.222222222, -0.6666666667]),
+    (('ternary_fcc', (2, 2, 3), 'segregated'), [0.0, 0.0, 0.144337567, 0.0, -0.0360843918,
+                                                0.0416666667, 0.0, -0.144337567, 0.0, 0.0,
+                                                -0.0360843918, 0.0, 0.0, 0.00902109796,
+                                                -0.0104166667, -0.0270632939, 0.0,
+                                                0.0360843918, -0.0721687836, -0.0416666667,
+                                                0.0, 0.0]),
+    (('binary_hcp', (2, 2, 3), 'ordered'), [0.0, -0.083333333, 0.1666666667,
+                                            -0.166666666667, 0.0833333333,
+                                            -0.25, -0.25]),
+    (('ternary_hcp', (2, 2, 3), 'ordered'), [0.0, -0.0625, -0.0360843918, 0.03125,
+                                             0.03608439182, 0.03125, -0.0625, -0.072168784,
+                                             -0.0625, 0.03125, 0.0360843918, 0.03125,
+                                             0.0234375, 0.0315738428, 0.004510549, 0.0234375,
+                                             0.0078125, 0.022552745, -0.046875,
+                                             -0.06314768569, -0.078125, -0.081189882,
+                                             -0.046875, -0.0631476857, -0.078125,
+                                             -0.08118988160]),
+    (('sublattices_fcc', (2, 2, 3), 'pseudorandom'), [0.0, 0.0, -0.166666667,
+                                                      -0.0555555556, 0.0, 0.0, -0.125, 0.0,
+                                                      -0.333333333, -0.0277777778, 0.0,
+                                                      0.027777777778, 0.0555555556,
+                                                      0.055555555556, -0.111111111,
+                                                      -0.069444444, -0.041666666667, 0.0,
+                                                      0.166666666667, 0.0, -0.05555555555,
+                                                      -0.08333333333, -0.25]),
+], indirect=['system'])
+def test_get_cluster_vector_change_against_reference(system, expected_cluster_vector_change):
+    ce, structure, inverted_structure = system
+    calc = ClusterExpansionCalculator(structure, ce)
+    cv_change = calc.cpp_calc.get_cluster_vector_change(structure.get_atomic_numbers(), 1,
+                                                        inverted_structure.get_atomic_numbers()[1])
+    assert np.allclose(cv_change, expected_cluster_vector_change)
