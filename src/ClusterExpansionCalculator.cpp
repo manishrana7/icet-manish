@@ -1,4 +1,5 @@
 #include "ClusterExpansionCalculator.hpp"
+#include <pybind11/stl.h>
 
 ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clusterSpace,
                                                        const Structure &structure,
@@ -203,7 +204,7 @@ std::vector<double> ClusterExpansionCalculator::_occupyClusterVector(const doubl
             }
 
             // Usually we could have counted multiplicity by simply adding the number of
-            // clusters in the orbit (elementsCountPair.second), but in the case of 
+            // clusters in the orbit (elementsCountPair.second), but in the case of
             // local cluster vectors or change in cluster vectors, we have only counted
             // a subset of the clusters. We thus need to compute the multiplicity by
             // analyzing the orbit in detail.
@@ -221,7 +222,7 @@ std::vector<double> ClusterExpansionCalculator::_occupyClusterVector(const doubl
 @param flipIndex the index in the supercell where occupation has changed
 @param newOccupation new atomic number on site index
 */
-std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const std::vector<int> &occupationsBefore,
+std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py::array_t<int> &occupationsBefore,
                                                                        int flipIndex,
                                                                        int newOccupation)
 {
@@ -264,7 +265,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const std
 @param occupations the occupation vector for the supercell
 @param index the local index of the supercell
 */
-std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std::vector<int> &occupations, int index)
+std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::array_t<int> &occupations, int index)
 {
     _supercell.setAtomicNumbers(occupations);
     _clusterCounts.reset();
@@ -300,7 +301,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const std:
 @details Calculate the cluster vector for a supercell.
 @param occupations the occupation vector of the supercell
 */
-std::vector<double> ClusterExpansionCalculator::getClusterVector(const std::vector<int> &occupations)
+std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array_t<int> &occupations)
 {
     _supercell.setAtomicNumbers(occupations);
     _clusterCounts.reset();

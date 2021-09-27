@@ -958,7 +958,7 @@ PYBIND11_MODULE(_icet, m)
         .def(
             "get_cluster_vector_change",
             [](ClusterExpansionCalculator &calc,
-               const std::vector<int> &occupations,
+               const py::array_t<int> &occupations,
                const int flipIndex,
                const int newOccupation)
             {
@@ -983,7 +983,7 @@ PYBIND11_MODULE(_icet, m)
         .def(
             "get_local_cluster_vector",
             [](ClusterExpansionCalculator &calc,
-               const std::vector<int> &occupations,
+               const py::array_t<int> &occupations,
                const int index)
             {
                 auto localCv = calc.getLocalClusterVector(occupations, index);
@@ -1004,7 +1004,7 @@ PYBIND11_MODULE(_icet, m)
         .def(
             "get_cluster_vector",
             [](ClusterExpansionCalculator &calc,
-               const std::vector<int> &occupations)
+               const py::array_t<int> &occupations)
             {
                 auto cv = calc.getClusterVector(occupations);
                 return py::array(cv.size(), cv.data());
