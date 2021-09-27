@@ -551,6 +551,11 @@ def _validate_concentrations(concentrations: dict,
     if not isinstance(list(concentrations.values())[0], dict):
         concentrations = {'A': concentrations}
 
+    # Ensure that all concentations are in the span 0 < c < 1
+    for sl_conc in concentrations.values():
+        if max(list(sl_conc.values())) > 1 + tol or min(list(sl_conc.values())) < - tol:
+            raise ValueError('Concentrations must lie between 0 and 1.')
+
     # Ensure concentrations sum to 1 at each sublattice
     for sl_conc in concentrations.values():
         conc_sum = sum(list(sl_conc.values()))
@@ -677,9 +682,9 @@ def _get_sqs_cluster_vector(cluster_space: ClusterSpace,
             for i, symbol in enumerate(symbols):
                 mc_vector_component = orbit['multi_component_vector'][i]
                 species_i = symbol_to_integer_map[symbol]
-                prod = cluster_space.evaluate_cluster_function(nbr_of_allowed_species[i],
-                                                               mc_vector_component,
-                                                               species_i)
+                prod = cluster_space.evaluate_trigonometric_cluster_function(nbr_of_allowed_species[i],
+                                                                             mc_vector_component,
+                                                                             species_i)
                 cluster_product *= probabilities[symbol] * prod
             cluster_product_average += cluster_product
         cv.append(cluster_product_average)

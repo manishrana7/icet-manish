@@ -4,7 +4,9 @@ Main module of the icet package.
 """
 
 from .core.cluster_space import ClusterSpace
+from .core.variable_basis_cluster_space import VariableBasisClusterSpace
 from .core.cluster_expansion import ClusterExpansion
+from .core.variable_basis_cluster_expansion import VariableBasisClusterExpansion
 from .core.structure_container import StructureContainer
 
 __project__ = 'icet'
@@ -19,4 +21,6 @@ __url__ = 'http://icet.materialsmodeling.org/'
 
 __all__ = ['ClusterSpace',
            'ClusterExpansion',
-           'StructureContainer']
+           'StructureContainer',
+           'VariableBasisClusterSpace',
+           'VariableBasisClusterExpansion']

@@ -360,7 +360,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
                          msg=info)
         for structure, target in zip(self.structure_list, target_cluster_vectors):
             retval = list(self.cs.get_cluster_vector(structure))
-            self.assertAlmostEqual(retval, target, places=9)
+            self.assertAlmostEqualList(retval, target, places=9)
 
         # Bad position
         structure = self.primitive_structure.repeat(3)
@@ -989,6 +989,97 @@ class TestClusterSpaceMergedOrbitsSublattices(unittest.TestCase):
         self.assertEqual(self.cs._input_chemical_symbols,
                          cs_read._input_chemical_symbols)
         self.assertEqual(len(self.cs), len(cs_read))
+
+
+class TestClusterSpaceHyperbolic(unittest.TestCase):
+    """Container for test of the class functionality with hyperbolic point functions."""
+
+    def __init__(self, *args, **kwargs):
+        super(TestClusterSpaceHyperbolic, self).__init__(*args, **kwargs)
+        self.chemical_symbols = ['Ag', 'Au']
+        self.cutoffs = [4.0] * 3
+        self.primitive_structure = bulk('Ag', a=4.09)
+        self.structure_list = []
+        for k in range(4):
+            structure = self.primitive_structure.repeat(2)
+            symbols = [self.chemical_symbols[0]] * len(structure)
+            symbols[:k] = [self.chemical_symbols[1]] * k
+            structure.set_chemical_symbols(symbols)
+            self.structure_list.append(structure)
+
+    def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
+        return None
+
+    def setUp(self):
+        """Setup before each test."""
+        self.cs = ClusterSpace(self.primitive_structure, self.cutoffs,
+                               self.chemical_symbols,
+                               point_function_form='hyperbolic')
+
+    def test_get_cluster_vector_as_trigonometric(self):
+        """
+        Tests get_cluster_vector functionality.
+        With point_function_parameter = tanh(mu) =  0, we should get the same
+        results as with trigonometric functions.
+        """
+        target_cluster_vectors = [
+            [1.0, -1.0, 1.0, -1.0, 1.0],
+            [1.0, -0.75, 0.5, -0.25, 0.0],
+            [1.0, -0.5, 0.16666666666666666, 0.0, 0.0],
+            [1.0, -0.25, 0.0, 0.0, 0.0]]
+        s = ['Error in test setup;']
+        s += ['number of cluster vectors ({})'.format(
+            len(target_cluster_vectors))]
+        s += ['does not match']
+        s += ['number of structures ({})'.format(len(self.structure_list))]
+        info = ' '.join(s)
+        self.assertEqual(len(target_cluster_vectors), len(self.structure_list),
+                         msg=info)
+        for structure, target in zip(self.structure_list, target_cluster_vectors):
+            retval = list(self.cs.get_cluster_vector(structure, point_function_parameter=0.0))
+            self.assertAlmostEqualList(retval, target, places=9)
+
+    def test_get_cluster_vector_solid_solution(self):
+        """
+        With point_function_parameter = tanh(mu) = 2 * concentration - 1,
+        the random solid solution should have a zero cluster vector.
+        Test that cluster vector of close to random structures close to zero.
+        """
+        structure = self.primitive_structure.repeat(3)
+        for occupations in [['Au', 'Au', 'Au', 'Au', 'Au', 'Au', 'Au', 'Au', 'Au', 'Au', 'Au',
+                             'Au', 'Ag', 'Au', 'Au', 'Au', 'Au', 'Ag', 'Au', 'Au', 'Au', 'Au',
+                             'Au', 'Au', 'Ag', 'Au', 'Au'],
+                            ['Au', 'Au', 'Ag', 'Ag', 'Au', 'Ag', 'Ag', 'Au', 'Au', 'Au', 'Au',
+                             'Au', 'Ag', 'Au', 'Au', 'Au', 'Au', 'Au', 'Au', 'Au', 'Au', 'Au',
+                             'Au', 'Au', 'Au', 'Au', 'Ag'],
+                            ['Ag', 'Ag', 'Au', 'Au', 'Au', 'Ag', 'Au', 'Au', 'Ag', 'Au', 'Au',
+                             'Au', 'Ag', 'Au', 'Au', 'Ag', 'Au', 'Au', 'Au', 'Au', 'Ag', 'Au',
+                             'Au', 'Au', 'Au', 'Ag', 'Ag'],
+                            ['Au', 'Au', 'Ag', 'Au', 'Au', 'Au', 'Ag', 'Ag', 'Ag', 'Au', 'Au',
+                             'Au', 'Ag', 'Au', 'Ag', 'Ag', 'Au', 'Au', 'Ag', 'Au', 'Au', 'Ag',
+                             'Ag', 'Ag', 'Ag', 'Au', 'Au'],
+                            ['Ag', 'Ag', 'Ag', 'Au', 'Ag', 'Au', 'Ag', 'Au', 'Au', 'Au', 'Ag',
+                             'Au', 'Au', 'Ag', 'Ag', 'Au', 'Ag', 'Ag', 'Ag', 'Au', 'Ag', 'Ag',
+                             'Au', 'Au', 'Au', 'Ag', 'Ag'],
+                            ['Ag', 'Au', 'Ag', 'Au', 'Ag', 'Ag', 'Ag', 'Au', 'Ag', 'Au', 'Ag',
+                             'Au', 'Au', 'Ag', 'Ag', 'Ag', 'Au', 'Au', 'Ag', 'Ag', 'Au', 'Ag',
+                             'Ag', 'Ag', 'Ag', 'Ag', 'Ag'],
+                            ['Ag', 'Ag', 'Ag', 'Au', 'Au', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag',
+                             'Ag', 'Au', 'Au', 'Ag', 'Ag', 'Ag', 'Ag', 'Au', 'Ag', 'Ag', 'Ag',
+                             'Ag', 'Ag', 'Au', 'Ag', 'Ag'],
+                            ['Ag', 'Au', 'Ag', 'Au', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag',
+                             'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Au', 'Ag', 'Ag', 'Ag',
+                             'Ag', 'Ag', 'Ag', 'Ag', 'Ag'],
+                            ['Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag',
+                             'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag', 'Ag',
+                             'Ag', 'Ag', 'Ag', 'Ag', 'Ag']]:
+            structure.set_chemical_symbols(occupations)
+            c = occupations.count('Ag') / len(occupations)
+            retval = self.cs.get_cluster_vector(structure, point_function_parameter=1 - 2 * c)
+            assert abs(retval[0] - 1) < 1e-6
+            assert abs(retval[1]) < 1e-4
+            assert np.abs(retval[2:]).max() < 0.3
 
 
 if __name__ == '__main__':

@@ -105,6 +105,7 @@ class ClusterSpace(_ClusterSpace):
                  structure: Atoms,
                  cutoffs: List[float],
                  chemical_symbols: Union[List[str], List[List[str]]],
+                 point_function_form: str = 'trigonometric',
                  symprec: float = 1e-5,
                  position_tolerance: float = None) -> None:
 
@@ -116,11 +117,18 @@ class ClusterSpace(_ClusterSpace):
         if symprec <= 0:
             raise ValueError('symprec must be a positive number.')
 
+        self._point_function_form = point_function_form
         self._config = {'symprec': symprec}
         self._cutoffs = cutoffs.copy()
         self._input_structure = structure.copy()
         self._input_chemical_symbols = copy.deepcopy(chemical_symbols)
         chemical_symbols = self._get_chemical_symbols()
+
+        # Check that system is not ternary or higher if we use hyperbolic point functions
+        if point_function_form == 'hyperbolic':
+            if max([len(syms) for syms in chemical_symbols]) > 2:
+                raise NotImplementedError('Hyperbolic basis functions can currently only be '
+                                          'used with binary systems.')
 
         self._pruning_history = []  # type: List[tuple]
 
@@ -156,7 +164,8 @@ class ClusterSpace(_ClusterSpace):
                                chemical_symbols=primitive_chemical_symbols,
                                orbit_list=self._orbit_list,
                                position_tolerance=self.position_tolerance,
-                               fractional_position_tolerance=self.fractional_position_tolerance)
+                               fractional_position_tolerance=self.fractional_position_tolerance,
+                               point_function_form=self.point_function_form)
 
     def _get_chemical_symbols(self):
         """ Returns chemical symbols using input structure and
@@ -393,7 +402,8 @@ class ClusterSpace(_ClusterSpace):
             count_orbits[k] = count_orbits.get(k, 0) + 1
         return OrderedDict(sorted(count_orbits.items()))
 
-    def get_cluster_vector(self, structure: Atoms) -> np.ndarray:
+    def get_cluster_vector(self, structure: Atoms,
+                           point_function_parameter: float = 0.0) -> np.ndarray:
         """
         Returns the cluster vector for a structure.
 
@@ -401,6 +411,9 @@ class ClusterSpace(_ClusterSpace):
         ----------
         structure
             atomic configuration
+        point_function_parameter
+            parameter passed to the calculation of point functions (only relevant
+            for hyperbolic point functions)
 
         Returns
         -------
@@ -413,10 +426,11 @@ class ClusterSpace(_ClusterSpace):
             cv = _ClusterSpace.get_cluster_vector(
                 self,
                 structure=Structure.from_atoms(structure),
-                fractional_position_tolerance=self.fractional_position_tolerance)
+                fractional_position_tolerance=self.fractional_position_tolerance,
+                point_function_parameter=point_function_parameter)
         except Exception as e:
             self.assert_structure_compatibility(structure)
-            raise(e)
+            raise(e)        
         return cv
 
     def get_coordinates_of_representative_cluster(self, orbit_index: int) -> List[Tuple[float]]:
@@ -492,6 +506,14 @@ class ClusterSpace(_ClusterSpace):
     def chemical_symbols(self) -> List[List[str]]:
         """ Species identified by their chemical symbols """
         return self._primitive_chemical_symbols.copy()
+
+    @property
+    def point_function_form(self) -> str:
+        """
+        Type of point function used for this cluster space
+        ('trigonometric' or 'hyperbolic')
+        """
+        return self._point_function_form
 
     @property
     def cutoffs(self) -> List[float]:
@@ -675,15 +697,8 @@ class ClusterSpace(_ClusterSpace):
         filename
             name of file to which to write
         """
-
+        items = self._get_cluster_space_parameters_dict(include_pruning_history=True)
         with tarfile.open(name=filename, mode='w') as tar_file:
-
-            # write items
-            items = dict(cutoffs=self._cutoffs,
-                         chemical_symbols=self._input_chemical_symbols,
-                         pruning_history=self._pruning_history,
-                         symprec=self.symprec,
-                         position_tolerance=self.position_tolerance)
             temp_file = tempfile.TemporaryFile()
             pickle.dump(items, temp_file)
             temp_file.seek(0)
@@ -699,8 +714,8 @@ class ClusterSpace(_ClusterSpace):
             tar_file.addfile(tar_info, temp_file)
             temp_file.close()
 
-    @staticmethod
-    def read(filename: str):
+    @classmethod
+    def read(cls, filename: str):
         """
         Reads cluster space from filename.
 
@@ -731,20 +746,24 @@ class ClusterSpace(_ClusterSpace):
         if 'position_tolerance' not in items:  # pragma: no cover
             items['position_tolerance'] = items['symprec']
 
-        cs = ClusterSpace(structure=structure,
-                          cutoffs=items['cutoffs'],
-                          chemical_symbols=items['chemical_symbols'],
-                          symprec=items['symprec'],
-                          position_tolerance=items['position_tolerance'])
-        if len(items['pruning_history']) > 0:
-            if isinstance(items['pruning_history'][0], tuple):
-                for key, value in items['pruning_history']:
+        # Extract pruning history before initialization
+        pruning_history = items['pruning_history']
+        del items['pruning_history']
+        
+        # Initialize (use cls so child classes can use this function)
+        cs = cls(structure=structure, 
+                 **items)
+
+        # Handle pruning/merge history
+        if len(pruning_history) > 0:
+            if isinstance(pruning_history[0], tuple):
+                for key, value in pruning_history:
                     if key == 'prune':
                         cs._prune_orbit_list(value)
                     elif key == 'merge':
                         cs.merge_orbits(value)
             else:  # for backwards compatibility
-                for value in items['pruning_history']:
+                for value in pruning_history:
                     cs._pruning_history(value)
 
         cs._rebuild_orbit_list()
@@ -752,12 +771,8 @@ class ClusterSpace(_ClusterSpace):
 
     def copy(self):
         """ Returns copy of ClusterSpace instance. """
-        cs_copy = ClusterSpace(structure=self._input_structure,
-                               cutoffs=self.cutoffs,
-                               chemical_symbols=self._input_chemical_symbols,
-                               symprec=self.symprec,
-                               position_tolerance=self.position_tolerance)
-
+        items = self._get_cluster_space_parameters_dict(include_input_structure=True)
+        cs_copy = self.__class__(**items)  # Use self.__class__ so child classes can use it
         for key, value in self._pruning_history:
             if key == 'prune':
                 cs_copy._prune_orbit_list(value)
@@ -765,3 +780,20 @@ class ClusterSpace(_ClusterSpace):
                 cs_copy.merge_orbits(value)
         cs_copy._rebuild_orbit_list()
         return cs_copy
+
+    def _get_cluster_space_parameters_dict(self,
+                                           include_input_structure: bool = False,
+                                           include_pruning_history: bool = False) -> Dict:
+        """
+        Returns a dict with parameters that specify this cluster space
+        (used for writing cluster space to file).
+        """
+        items = dict(cutoffs=self._cutoffs,
+                     chemical_symbols=self._input_chemical_symbols,
+                     symprec=self.symprec,
+                     position_tolerance=self.position_tolerance)
+        if include_input_structure:
+            items['structure'] = self._input_structure
+        if include_pruning_history:
+            items['pruning_history'] = self._pruning_history
+        return items

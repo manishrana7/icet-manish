@@ -21,10 +21,10 @@ class ClusterSpace
   public:
     /// Constructor.
     ClusterSpace() {};
-    ClusterSpace(std::vector<std::vector<std::string>> &, const OrbitList &, const double, const double);
+    ClusterSpace(std::vector<std::vector<std::string>> &, const OrbitList &, const double, const double, const std::string);
 
     /// Returns the cluster vector corresponding to the input structure.
-    std::vector<double> getClusterVector(const Structure &, const double) const;
+    std::vector<double> getClusterVector(const Structure &, const double, const double pointFunctionParameter = 0.0) const;
 
     /// Returns information concerning the association between orbits and multi-component vectors.
     std::pair<int, std::vector<int>> getMultiComponentVectorsByOrbit(const unsigned int);
@@ -68,11 +68,14 @@ class ClusterSpace
     OrbitList _orbitList;
 
     /// Returns the cluster product.
-    double evaluateClusterProduct(const std::vector<int> &, const std::vector<int> &, const std::vector<int> &, const std::vector<int>&) const;
+    double evaluateClusterProduct(const std::vector<int> &, const std::vector<int> &, const std::vector<int> &, const std::vector<int>&, const double pointFunctionParameter = 0) const;
 
-    /// Returns the default cluster function.
-    double evaluateClusterFunction(const int, const int, const int) const;
+    /// Returns the trigonometric cluster function.
+    double evaluateTrigonometricClusterFunction(const int, const int, const int) const;
 
+    /// Returns the trigonometric cluster function.
+    double evaluateHyperbolicClusterFunction(const int, const double) const;
+   
     /// Precomputed multicomponent vectors for each orbit in _orbitlist.
     /// @todo Make private.
     std::vector<std::vector<std::vector<int>>> _multiComponentVectors;
@@ -113,4 +116,7 @@ class ClusterSpace
 
     /// The allowed chemical symbols on each site in the primitive structure.
     std::vector<std::vector<std::string>> _chemicalSymbols;
+  
+    /// The form of point functions
+    enum PointFunctionForm {trigonometric, hyperbolic} _pointFunctionForm;
 };

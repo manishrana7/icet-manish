@@ -2,6 +2,7 @@
 #include <cmath>
 
 #include "ClusterSpace.hpp"
+#include "FloatType.hpp"
 
 /**
 @details This constructor initializes a ClusterSpace object.
@@ -13,11 +14,12 @@
 ClusterSpace::ClusterSpace(std::vector<std::vector<std::string>> &chemicalSymbols,
                            const OrbitList &orbitList,
                            const double positionTolerance,
-                           const double fractionalPositionTolerance)
+                           const double fractionalPositionTolerance,
+                           const std::string pointFunctionForm)
                            : _orbitList(orbitList), _chemicalSymbols(chemicalSymbols)
 {
     _primitiveStructure = orbitList.getPrimitiveStructure();
-
+    
     _numberOfAllowedSpeciesPerSite.resize(chemicalSymbols.size());
     for (size_t i = 0; i < _numberOfAllowedSpeciesPerSite.size(); i++)
     {
@@ -42,6 +44,26 @@ ClusterSpace::ClusterSpace(std::vector<std::vector<std::string>> &chemicalSymbol
         _speciesMaps.push_back(speciesMap);
     }
     computeMultiComponentVectors();
+
+    // Determine form of the point function and make sure the choice is sensible
+    // given limitationf of the current implementation
+    if (pointFunctionForm == "trigonometric") {
+        _pointFunctionForm = trigonometric; 
+    }
+    else if (pointFunctionForm == "hyperbolic") {
+        _pointFunctionForm = hyperbolic;
+        // Make sure this is not a ternary system or higher
+        if (*std::max_element(std::begin(_numberOfAllowedSpeciesPerSite), std::end(_numberOfAllowedSpeciesPerSite)) > 2) 
+        {
+            throw std::runtime_error("Hyperbolic point functions are currently only available for binary systems (ClusterSpace constructor).");
+        }
+    }
+    else
+    {
+        std::ostringstream msg;
+        msg << "Unknown pointFunctionType " << pointFunctionForm << " (ClusterSpace constructor)" << std::endl;
+        throw std::runtime_error(msg.str());
+    }
 }
 
 /**
@@ -58,9 +80,9 @@ over orbits (symmetry equivalent clusters) of increasing order and size.
 @todo review the necessity for having the keepOrder argument to e.g., countOrbitList.
 **/
 std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
-                                                   const double fractionalPositionTolerance) const
+                                                   const double fractionalPositionTolerance,
+                                                   const double pointFunctionParameter) const
 {
-
     // Do not sort clusters.
     bool keepOrder = true;
 
@@ -155,7 +177,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
                     auto permutedRepresentativeIndices = icet::getPermutedVector(representativeClusterIndices, perm);
                     auto permutedNumberOfAllowedSpeciesBySite = icet::getPermutedVector(numberOfAllowedSpeciesBySite, perm);
 
-                    clusterVectorElement += evaluateClusterProduct(permutedMultiComponentVector, permutedNumberOfAllowedSpeciesBySite, speciesCountPair.first, permutedRepresentativeIndices) * speciesCountPair.second;
+                    clusterVectorElement += evaluateClusterProduct(permutedMultiComponentVector, permutedNumberOfAllowedSpeciesBySite, speciesCountPair.first, permutedRepresentativeIndices, pointFunctionParameter) * speciesCountPair.second;
                     multiplicity += speciesCountPair.second;
                 }
             }
@@ -242,16 +264,31 @@ The cluster functions (also "orthogonal point functions") are defined as
 
 @returns the value of the cluster function
 */
-double ClusterSpace::evaluateClusterFunction(const int numberOfAllowedSpecies, const int clusterFunction, const int species) const
+double ClusterSpace::evaluateTrigonometricClusterFunction(const int numberOfAllowedSpecies, const int clusterFunction, const int species) const
 {
-    if (((clusterFunction + 2) % 2) == 0)
+    if (((clusterFunction + 2) % 2) == 0) // even
     {
         return -cos(2.0 * M_PI * (double)((int)(clusterFunction + 2) / 2) * (double)species / ((double)numberOfAllowedSpecies));
     }
-    else
-    {
+    else // odd
+    {        
         return -sin(2.0 * M_PI * (double)((int)(clusterFunction + 2) / 2) * (double)species / ((double)numberOfAllowedSpecies));
     }
+}
+
+double ClusterSpace::evaluateHyperbolicClusterFunction(const int species, double parameter) const
+{
+    if (parameter < -1 + FLOATTYPE_EPSILON)
+    {
+        parameter += FLOATTYPE_EPSILON; 
+    }   
+    else if (parameter > 1 - FLOATTYPE_EPSILON)
+    {
+        parameter -= FLOATTYPE_EPSILON;
+    }
+    double speciesAsSpin = 2 * species - 1;  // Species are gives as 0, 1 but we want -1, 1
+    return (speciesAsSpin - parameter) / sqrt(1 - parameter * parameter);
+
 }
 
 /**
@@ -264,13 +301,25 @@ double ClusterSpace::evaluateClusterFunction(const int numberOfAllowedSpecies, c
 
 @returns the cluster product
 **/
-double ClusterSpace::evaluateClusterProduct(const std::vector<int> &multiComponentVector, const std::vector<int> &numberOfAllowedSpecies, const std::vector<int> &species, const std::vector<int> &indices) const
+double ClusterSpace::evaluateClusterProduct(const std::vector<int> &multiComponentVector, const std::vector<int> &numberOfAllowedSpecies, const std::vector<int> &species, const std::vector<int> &indices, const double pointFunctionParameter) const
 {
     double clusterProduct = 1;
-
     for (size_t i = 0; i < species.size(); i++)
     {
-        clusterProduct *= evaluateClusterFunction(numberOfAllowedSpecies[i], multiComponentVector[i], _speciesMaps[indices[i]].at(species[i]));
+        
+        switch(_pointFunctionForm)
+        {
+            case trigonometric:
+                clusterProduct *= evaluateTrigonometricClusterFunction(numberOfAllowedSpecies[i], 
+                                                                   multiComponentVector[i],
+                                                                   _speciesMaps[indices[i]].at(species[i]));
+                break;
+
+            case hyperbolic:
+                clusterProduct *= evaluateHyperbolicClusterFunction(_speciesMaps[indices[i]].at(species[i]),
+                                                                pointFunctionParameter);
+                break;
+        }
     }
     return clusterProduct;
 }
