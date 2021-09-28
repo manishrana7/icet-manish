@@ -39,9 +39,6 @@ public:
     std::vector<double> getLocalClusterVector(const py::array_t<int> &, int);
 
 private:
-    /// Occupy a cluster vector based on an orbit list and already counted clusters
-    std::vector<double> occupyClusterVector(const OrbitList &, const double, const int, const int);
-
     /// Maps offsets to local orbit lists.
     std::unordered_map<Vector3d, OrbitList, Vector3dHash> _localOrbitlists;
 
