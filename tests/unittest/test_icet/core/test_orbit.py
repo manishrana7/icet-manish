@@ -49,9 +49,9 @@ class TestOrbit(unittest.TestCase):
 
         self.pair_cluster = Cluster(
             structure, [lattice_site_for_cluster[0],
-                        lattice_site_for_cluster[1]], True)
+                        lattice_site_for_cluster[1]])
         self.triplet_cluster = Cluster(
-            structure, lattice_site_for_cluster, True)
+            structure, lattice_site_for_cluster)
 
         self.orbit_pair = Orbit(self.pair_cluster)
         self.orbit_triplet = Orbit(self.triplet_cluster)
