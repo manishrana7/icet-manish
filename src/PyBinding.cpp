@@ -530,6 +530,48 @@ PYBIND11_MODULE(_icet, m)
                 allowed_components[i] correspond to the number
                 of allowed compoments at lattice site
                 orbit.representative_cluster[i].)pbdoc")
+        .def("count_clusters",
+             [](const Orbit & orbit,
+                const Structure & structure,
+                const int siteIndexForDoubleCountCorrection,
+                const int permuteClusters) {
+                    py::dict clusterCountDict;
+                    for (const auto &mapPair : orbit.countClusters(structure,
+                                                                   siteIndexForDoubleCountCorrection,
+                                                                   permuteClusters))
+                        {
+                            py::list element_symbols;
+                            for (auto el : mapPair.first)
+                            {
+                                auto getElementSymbols = PeriodicTable::intStr[el];
+                                element_symbols.append(getElementSymbols);
+                            }
+                            double countDouble = mapPair.second;
+                            if (std::abs(std::round(countDouble) - countDouble) > 1e-6)
+                            {
+                                std::runtime_error("Cluster count is a non-integer.");
+                            }
+                            int count = (int)std::round(countDouble);
+                            clusterCountDict[py::tuple(element_symbols)] = count;
+                        }
+                    return clusterCountDict;
+                },
+             R"pbdoc(
+             Count clusters in this orbit for a structure.
+
+             Parameters
+             ----------
+             structure : Structure
+                Structure to count clusters for
+             site_index_for_double_count_correction : int
+                Avoid double counting clusters containing this index
+                (default -1, no such correction)
+             permute_clusters : bool
+                Permute clusters before counting (default: false)
+             )pbdoc",
+             py::arg("structure"),
+             py::arg("site_index_for_double_count_correction") = -1,
+             py::arg("permute_sites") = false)
         .def("sort", &Orbit::sort,
              "Sorts the list of equivalent sites.")
         .def("get_all_possible_mc_vector_permutations",
@@ -613,7 +655,7 @@ PYBIND11_MODULE(_icet, m)
              "Adds an orbit.")
         .def("get_orbit",
              &OrbitList::getOrbit,
-             "Returns a copy of the orbit at position i in the orbit list.")
+             "Returns the orbit at position i in the orbit list.")
         .def("_remove_inactive_orbits",
              &OrbitList::removeInactiveOrbits)
         .def("clear",

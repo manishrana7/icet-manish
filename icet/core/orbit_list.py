@@ -2,7 +2,7 @@
 This module provides the OrbitList class.
 """
 
-from typing import List
+from typing import List, OrderedDict, Dict
 
 import numpy as np
 
@@ -15,6 +15,7 @@ from icet.core.matrix_of_equivalent_positions import \
     matrix_of_equivalent_positions_from_structure
 from icet.core.structure import Structure
 from icet.input_output.logging_tools import logger
+from icet.tools.geometry import atomic_number_to_chemical_symbol
 
 logger = logger.getChild('orbit_list')
 
@@ -135,3 +136,46 @@ class OrbitList(_OrbitList):
         number_of_allowed_species = [len(sym) for sym in allowed_species]
         prim_structure.set_number_of_allowed_species(number_of_allowed_species)
         self._remove_inactive_orbits(prim_structure)
+
+    def get_cluster_counts(self,
+                           structure: Atoms,
+                           fractional_position_tolerance,
+                           orbit_indices: List[int] = None) -> OrderedDict[int, Dict]:
+        """
+        Counts all clusters in a structure by finding their local orbit list.
+
+        Parameters
+        ----------
+        structure
+            Supercell (commensurate with the structure this orbit list is
+            based on) to count clusters for.
+        fractional_position_tolerance : float
+            tolerance applied when comparing positions in fractional coordinates
+        orbit_indices
+            Indices of orbits for which counts are desired. If None, all
+            orbits will be counted.
+        
+        Returns
+        -------
+        Ordered dict, the keys of which are orbit indices and the values
+        cluster counts. The latter are themselves dicts, with tuples
+        of chemical symbols as keys and the number of such clusters
+        as values.
+        """
+        supercell_orbit_list = self.get_supercell_orbit_list(
+            structure=structure,
+            fractional_position_tolerance=fractional_position_tolerance)
+
+        # Collect counts for all orbit_indices
+        if orbit_indices is None:
+            orbit_indices = range(len(self))
+        structure_icet = Structure.from_atoms(structure)
+        cluster_counts_full = OrderedDict()
+        for i in orbit_indices:
+            orbit = supercell_orbit_list.get_orbit(i)
+            counts = orbit.count_clusters(structure_icet)
+            sorted_counts = {}
+            for symbols, count in counts.items():
+                sorted_counts[tuple(sorted(symbols))] = sorted_counts.get(symbols, 0) + count
+            cluster_counts_full[i] = sorted_counts
+        return cluster_counts_full
