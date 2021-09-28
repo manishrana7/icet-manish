@@ -77,7 +77,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
     for (auto &orbit : currentOrbitList._orbits)
     {
         auto permutedClusters = orbit.getPermutedEquivalentClusters();
-        orbit._equivalentClusters = permutedClusters;
+        orbit.setEquivalentClusters(permutedClusters);
     }
 
     // Check that the number of unique offsets equals the number of unit cells in the supercell.
@@ -344,8 +344,8 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
             counts = currentOrbit.countClusters(supercell, flipIndex, permuteClusters);
         }
 
-        Cluster representativeCluster = currentPrimitiveOrbit._representativeCluster;
-        auto representativeSites = currentPrimitiveOrbit.getSitesOfRepresentativeCluster();
+        Cluster representativeCluster = currentPrimitiveOrbit.getRepresentativeCluster();
+        const std::vector<LatticeSite>& representativeSites = currentPrimitiveOrbit.getSitesOfRepresentativeCluster();
 
         std::vector<int> allowedOccupations;
         try

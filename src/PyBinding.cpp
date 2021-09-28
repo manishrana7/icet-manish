@@ -576,7 +576,7 @@ PYBIND11_MODULE(_icet, m)
                  }
                  msg << "equivalent_clusters:" << std::endl;
                  int k = -1;
-                 for (const auto sites : orbit._equivalentClusters)
+                 for (const auto sites : orbit.getEquivalentClusters())
                  {
                      k += 1;
                      msg << "  cluster: " << k << std::endl;

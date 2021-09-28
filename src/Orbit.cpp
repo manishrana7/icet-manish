@@ -243,7 +243,7 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
     {
         for (size_t i = 0; i < sites.size(); i++)
         {
-            elements[i] = structure._atomicNumbers.at(sites[i].index());
+            elements[i] = structure.getAtomicNumbers().at(sites[i].index());
         }
         double unit = 1;
         // If the present atom (siteIndexForDoubleCountCorrection) occurs more than once,
@@ -297,7 +297,7 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
         for (size_t i = 0; i < sites.size(); i++)
         {
             siteIndex = sites[i].index();
-            occupation = structure._atomicNumbers.at(siteIndex);
+            occupation = structure.getAtomicNumbers().at(siteIndex);
             elementsOld[i] = occupation;
 
             // If the present site index is the one that was changed,
@@ -334,7 +334,7 @@ namespace std {
     /// Stream operator.
     ostream& operator<<(ostream& os, const Orbit& orbit)
     {
-        for (const auto cluster : orbit._equivalentClusters)
+        for (const auto cluster : orbit.getEquivalentClusters())
         {
             os << "  ";
             for (const auto site : cluster)

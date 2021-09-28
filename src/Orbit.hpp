@@ -43,7 +43,7 @@ public:
     Cluster getRepresentativeCluster() const { return _representativeCluster; }
 
     /// Returns the sites that define the representative cluster of this orbit.
-    std::vector<LatticeSite> getSitesOfRepresentativeCluster() const { return _equivalentClusters[0]; }
+    const std::vector<LatticeSite>& getSitesOfRepresentativeCluster() const { return _equivalentClusters[0]; }
 
     /// Returns the equivalent cluster.
     std::vector<LatticeSite> getClusterByIndex(unsigned int) const;
@@ -52,7 +52,7 @@ public:
     std::vector<LatticeSite> getPermutedClusterByIndex(unsigned int) const;
 
     /// Returns all equivalent clusters.
-    std::vector<std::vector<LatticeSite>> getEquivalentClusters() const { return _equivalentClusters; }
+    const std::vector<std::vector<LatticeSite>>& getEquivalentClusters() const { return _equivalentClusters; }
 
     /// Returns all permuted equivalent clusters.
     std::vector<std::vector<LatticeSite>> getPermutedEquivalentClusters() const;
@@ -164,14 +164,13 @@ public:
         return *this;
     }
 
-public:
+private:
     /// Container of equivalent sites for this orbit
     std::vector<std::vector<LatticeSite>> _equivalentClusters;
 
     /// Representative sorted cluster for this orbit
     Cluster _representativeCluster;
 
-private:
     /// Contains the permutations of the equivalent sites which takes it to the order of the reference cluster
     std::vector<std::vector<int>> _equivalentClusterPermutations;
 

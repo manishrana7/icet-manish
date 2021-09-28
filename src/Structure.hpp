@@ -55,7 +55,6 @@ public:
   /// Return list of LatticeSite objects that matche a given list of positions.
   std::vector<LatticeSite> findLatticeSitesByPositions(const std::vector<Vector3d> &, const double) const;
 
-public:
   /// Returns the size of the structure, i.e., the number of sites.
   size_t size() const { return (_atomicNumbers.size()); }
 
@@ -69,7 +68,7 @@ public:
   void setAtomicNumbers(const py::array_t<int> &atomicNumbers) { _atomicNumbers = atomicNumbers; }
 
   /// Returns atomic numbers.
-  py::array_t<int> getAtomicNumbers() const { return _atomicNumbers; }
+  const py::array_t<int>& getAtomicNumbers() const { return _atomicNumbers; }
 
   /// Set atomic numbers via chemical symbols.
   void setChemicalSymbols(const std::vector<std::string> &chemicalSymbols) { setAtomicNumbers(convertChemicalSymbolsToAtomicNumbers(chemicalSymbols)); }
@@ -104,17 +103,16 @@ public:
   /// Returns number of allowed components on each site.
   std::vector<int> getNumberOfAllowedSpeciesBySites(const std::vector<LatticeSite> &) const;
 
+private:
   /// List of atomic numbers.
   py::array_t<int> _atomicNumbers;
 
-private:
   /// Convert chemical symbols to atomic numbers.
   py::array_t<int> convertChemicalSymbolsToAtomicNumbers(const std::vector<std::string> &) const;
 
   /// Convert chemical symbols to atomic numbers.
   std::vector<std::string> convertAtomicNumbersToChemicalSymbols(const py::array_t<int> &) const;
 
-private:
   /// Positions of sites in Cartesian coordinates.
   Matrix<double, Dynamic, 3, RowMajor> _positions;
 

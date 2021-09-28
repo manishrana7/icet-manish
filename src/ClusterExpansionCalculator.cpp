@@ -17,7 +17,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     for (auto &orbit : _fullOrbitList._orbits)
     {
         auto permutedClusters = orbit.getPermutedEquivalentClusters();
-        orbit._equivalentClusters = permutedClusters;
+        orbit.setEquivalentClusters(permutedClusters);
     }
 
     for (const auto orbit : clusterSpace._orbitList._orbits)
@@ -128,7 +128,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
             for (auto &orbit : _localOrbitlists[offsetVector]._orbits)
             {
                 auto permutedClusters = orbit.getPermutedEquivalentClusters();
-                orbit._equivalentClusters = permutedClusters;
+                orbit.setEquivalentClusters(permutedClusters);
             }
         }
     }
