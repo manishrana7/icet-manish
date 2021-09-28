@@ -83,7 +83,7 @@ public:
   OrbitList _orbitList;
 
   /// Returns the cluster product.
-  double evaluateClusterProduct(const std::vector<int> &, const std::vector<int> &, const std::vector<int> &, const std::vector<int> &) const;
+  double evaluateClusterProduct(const std::vector<int> &, const std::vector<int> &, const std::vector<int> &, const std::vector<int> &, const std::vector<int> &) const;
 
   /// Returns the default cluster function.
   double evaluateClusterFunction(const int, const int, const int) const;

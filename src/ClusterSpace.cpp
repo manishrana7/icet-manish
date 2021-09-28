@@ -185,16 +185,20 @@ double ClusterSpace::evaluateClusterFunction(const int numberOfAllowedSpecies, c
 @param numberOfAllowedSpecies number of species allowed on the sites in this cluster (all sites involved are assumed to have the same number of allowed species)
 @param species species that occupy (decorate) the cluster identified by atomic number
 @param indices representative lattice indices of the cluster being computed
+@param permutation Describes the desired order of the points in the cluster; for example,
+        if the current cluster is a triplet cluster and permutation = {1, 0, 2}, then multiComponentVector, numberOfAllowedSpecies, and indices should be permuted
+        such that their first two elements change places
 
 @returns the cluster product
 **/
-double ClusterSpace::evaluateClusterProduct(const std::vector<int> &multiComponentVector, const std::vector<int> &numberOfAllowedSpecies, const std::vector<int> &species, const std::vector<int> &indices) const
+double ClusterSpace::evaluateClusterProduct(const std::vector<int> &multiComponentVector, const std::vector<int> &numberOfAllowedSpecies, const std::vector<int> &species, const std::vector<int> &indices, const std::vector<int> & permutation) const
 {
     double clusterProduct = 1;
 
     for (size_t i = 0; i < species.size(); i++)
     {
-        clusterProduct *= evaluateClusterFunction(numberOfAllowedSpecies[i], multiComponentVector[i], _speciesMaps[indices[i]].at(species[i]));
+        int index = permutation[i];
+        clusterProduct *= evaluateClusterFunction(numberOfAllowedSpecies[index], multiComponentVector[index], _speciesMaps[indices[index]].at(species[i]));
     }
     return clusterProduct;
 }
@@ -374,7 +378,6 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
         /// Loop over all multi component vectors for this orbit
         for (size_t j = 0; j < _clusterVectorElementInfoList[currentOrbitIndex].size(); j++)
         {
-
             double clusterVectorElement = 0;
             const ClusterVectorElementInfo & cvInfo = _clusterVectorElementInfoList[currentOrbitIndex][j];
 
@@ -387,20 +390,13 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
                 continue;
             }
 
-            std::vector<int> permutedMCVector;
-            std::vector<int> permutedAllowedOccupations;
-            std::vector<int> permutedRepresentativeIndices;
             /// Loop over all the counts for this orbit
             for (const auto &elementsCountPair : counts)
             {
                 /// Loop over all equivalent permutations for this orbit and mc vector
                 for (const auto &perm : cvInfo.sitePermutations)
                 {
-                    /// Permute the mc vector and the allowed occupations
-                    permutedMCVector = icet::getPermutedVector(cvInfo.multiComponentVector, perm);
-                    permutedAllowedOccupations = icet::getPermutedVector(allowedOccupations, perm);
-                    permutedRepresentativeIndices = icet::getPermutedVector(indicesOfRepresentativeSites, perm);
-                    clusterVectorElement += evaluateClusterProduct(permutedMCVector, permutedAllowedOccupations, elementsCountPair.first, permutedRepresentativeIndices) * elementsCountPair.second;
+                    clusterVectorElement += evaluateClusterProduct(cvInfo.multiComponentVector, allowedOccupations, elementsCountPair.first, indicesOfRepresentativeSites, perm) * elementsCountPair.second;
                 }
             }
 
