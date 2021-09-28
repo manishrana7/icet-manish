@@ -12,6 +12,7 @@ from icet.tools.geometry import get_permutation
 from icet.core.matrix_of_equivalent_positions import \
     _get_lattice_site_matrix_of_equivalent_positions, \
     matrix_of_equivalent_positions_from_structure
+from io import StringIO
 
 
 class TestOrbitList(unittest.TestCase):
@@ -33,8 +34,7 @@ class TestOrbitList(unittest.TestCase):
         # for pair
         lattice_sites = [LatticeSite(0, [i, 0, 0]) for i in range(3)]
         self.cluster_pair = Cluster(Structure.from_atoms(self.structure),
-                                    [lattice_sites[0], lattice_sites[1]],
-                                    True)
+                                    [lattice_sites[0], lattice_sites[1]])
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
@@ -451,6 +451,55 @@ class TestOrbitList(unittest.TestCase):
             self.orbit_list.remove_orbit(i)
             current_size -= 1
             self.assertEqual(len(self.orbit_list), current_size)
+
+
+class TestClusterCounts(unittest.TestCase):
+    """
+    Tests the cluster counting functionality of the orbit list.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(TestClusterCounts, self).__init__(*args, **kwargs)
+        self.structure = bulk('Ni', 'hcp', a=2.0).repeat([2, 1, 1])
+        self.structure_prim = bulk('Ni', 'hcp', a=2.0)
+        self.structure.set_chemical_symbols('NiFeNi2')
+        self.icet_structure = Structure.from_atoms(self.structure)
+        self.cutoffs = [2.2]
+        self.symprec = 1e-5
+        self.position_tolerance = 1e-5
+        self.fractional_position_tolerance = 1e-6
+        self.orbit_list = OrbitList(self.structure_prim, self.cutoffs,
+                                    self.symprec, self.position_tolerance,
+                                    self.fractional_position_tolerance)
+        self.orbit_list.sort(self.position_tolerance)
+
+    def shortDescription(self):
+        """Silences unittest from printing the docstrings in test cases."""
+        return None
+
+    def test_get_all_cluster_counts(self):
+        """Tests get_cluster_counts given orbits in an orbit list and a structure."""
+        expected_counts = [{('Fe',): 1, ('Ni',): 3},
+                           {('Fe', 'Fe'): 1, ('Fe', 'Ni'): 4,
+                            ('Ni', 'Ni'): 7},
+                            {('Fe', 'Ni'): 6, ('Ni', 'Ni'): 6}]
+
+        counts = self.orbit_list.get_cluster_counts(self.structure,
+                                                    self.fractional_position_tolerance)
+        print(counts)
+        self.assertEqual(len(counts), 3)
+        for i in range(2):
+            self.assertEqual(counts[i], expected_counts[i])
+
+    def test_specific_cluster_counts(self):
+        """Tests get_cluster_counts for specific orbit a structure."""
+        expected_counts = {('Fe', 'Ni'): 6, ('Ni', 'Ni'): 6}
+        counts = self.orbit_list.get_cluster_counts(self.structure,
+                                                    self.fractional_position_tolerance,
+                                                    orbit_indices=[2])
+        self.assertEqual(len(counts), 1)
+        self.assertIn(2, counts)
+        self.assertEqual(counts[2], expected_counts)
 
 
 if __name__ == '__main__':

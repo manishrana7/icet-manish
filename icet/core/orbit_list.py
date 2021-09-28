@@ -176,6 +176,7 @@ class OrbitList(_OrbitList):
             counts = orbit.count_clusters(structure_icet)
             sorted_counts = {}
             for symbols, count in counts.items():
-                sorted_counts[tuple(sorted(symbols))] = sorted_counts.get(symbols, 0) + count
+                sorted_symbols = tuple(sorted(symbols))
+                sorted_counts[sorted_symbols] = sorted_counts.get(sorted_symbols, 0) + count
             cluster_counts_full[i] = sorted_counts
         return cluster_counts_full

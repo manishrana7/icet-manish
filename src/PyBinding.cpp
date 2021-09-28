@@ -539,21 +539,21 @@ PYBIND11_MODULE(_icet, m)
                     for (const auto &mapPair : orbit.countClusters(structure,
                                                                    siteIndexForDoubleCountCorrection,
                                                                    permuteClusters))
+                    {
+                        py::list element_symbols;
+                        for (auto el : mapPair.first)
                         {
-                            py::list element_symbols;
-                            for (auto el : mapPair.first)
-                            {
-                                auto getElementSymbols = PeriodicTable::intStr[el];
-                                element_symbols.append(getElementSymbols);
-                            }
-                            double countDouble = mapPair.second;
-                            if (std::abs(std::round(countDouble) - countDouble) > 1e-6)
-                            {
-                                std::runtime_error("Cluster count is a non-integer.");
-                            }
-                            int count = (int)std::round(countDouble);
-                            clusterCountDict[py::tuple(element_symbols)] = count;
+                            auto getElementSymbols = PeriodicTable::intStr[el];
+                            element_symbols.append(getElementSymbols);
                         }
+                        double countDouble = mapPair.second;
+                        if (std::abs(std::round(countDouble) - countDouble) > 1e-6)
+                        {
+                            std::runtime_error("Cluster count is a non-integer.");
+                        }
+                        int count = (int)std::round(countDouble);
+                        clusterCountDict[py::tuple(element_symbols)] = count;
+                    }
                     return clusterCountDict;
                 },
              R"pbdoc(
