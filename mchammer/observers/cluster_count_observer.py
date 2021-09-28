@@ -3,7 +3,6 @@ from typing import Dict, List
 import pandas as pd
 
 from ase import Atoms
-from icet.core.cluster import Cluster
 from icet.core.local_orbit_list_generator import LocalOrbitListGenerator
 from icet.core.orbit import Orbit
 from icet.core.structure import Structure
@@ -47,7 +46,7 @@ class ClusterCountObserver(BaseObserver):
 
     def __init__(self, cluster_space, structure: Atoms,
                  interval: int = None,
-                 max_orbit: int = None) -> None:
+                 orbit_indices: List[int] = None) -> None:
         super().__init__(interval=interval, return_type=dict, tag='ClusterCountObserver')
 
         self._cluster_space = cluster_space
@@ -57,31 +56,27 @@ class ClusterCountObserver(BaseObserver):
             fractional_position_tolerance=cluster_space.fractional_position_tolerance)
 
         self._full_orbit_list = local_orbit_list_generator.generate_full_orbit_list()
-        self._cluster_counts_cpp = _ClusterCounts()
 
-        if max_orbit is None:
-            self._max_orbit = len(self._full_orbit_list)
+        if orbit_indices is None:
+            self._orbit_indices = list(range(len(self._full_orbit_list)))
+        elif not isinstance(orbit_indices, List):
+            raise ValueError('Argument orbit_indices should be a list of integers, '
+                             f'not {type(orbit_indices)}')
         else:
-            self._max_orbit = max_orbit
-
-        self._cluster_keys = []  # type: List[Orbit]
-        for i, orbit in enumerate(self._full_orbit_list.orbits):
-            cluster = orbit.representative_cluster
-            cluster.tag = i
-            self._cluster_keys.append(cluster)
+            self._orbit_indices = orbit_indices
 
         self._empty_counts = self._get_empty_counts()
 
-    def _get_empty_counts(self) -> Dict[Cluster, Dict[List[str], int]]:
+    def _get_empty_counts(self) -> Dict[int, Dict[List[str], int]]:
         """ Returns the object which will be filled with counts. """
         counts = {}
-        for i, cluster in enumerate(self._cluster_keys):
-            order = len(cluster)
-            possible_occupations = self._cluster_space.get_possible_orbit_occupations(cluster.tag)
+        for i in self._orbit_indices:
+            order = self._full_orbit_list.get_orbit(i).order
+            possible_occupations = self._cluster_space.get_possible_orbit_occupations(i)
             assert order == len(possible_occupations[0]), '{} is not {}, {}'.format(
                 order, len(possible_occupations[0]), possible_occupations)
 
-            counts[cluster] = {occupation: 0 for occupation in possible_occupations}
+            counts[i] = {occupation: 0 for occupation in possible_occupations}
         return counts
 
     def _generate_counts(self, structure: Atoms) -> None:
@@ -93,35 +88,22 @@ class ClusterCountObserver(BaseObserver):
         structure
             input atomic structure.
         """
-        self._cluster_counts_cpp.count_orbit_list(Structure.from_atoms(structure),
-                                                  self._full_orbit_list, True, True,
-                                                  self._max_orbit)
-
-        # Getting the empty counts sometimes constitutes a large part of the total time.
-        # Thus copy a previously constructed dictionary.
-        # Since Cluster is not picklable, we need to do a slightly awkward manual copy.
-        empty_counts = {cluster: copy.deepcopy(item)
-                        for cluster, item in self._empty_counts.items()}
         pandas_rows = []
-
-        # std::unordered_map<Cluster, std::map<std::vector<int>, int>>
-        cluster_counts = self._cluster_counts_cpp.get_cluster_counts()
-
-        for cluster_key, chemical_number_counts_dict in cluster_counts.items():
-
-            for chemical_symbols in empty_counts[cluster_key].keys():
-
-                count = chemical_number_counts_dict.get(chemical_symbols, 0)
+        structure_icet = Structure.from_atoms(structure)
+        for i in self._orbit_indices:
+            orbit = self._full_orbit_list.get_orbit(i)
+            cluster_counts = self._full_orbit_list.get_orbit(i).count_clusters(structure_icet)
+            for chemical_symbols in self._empty_counts[i].keys():
+                count = cluster_counts.get(chemical_symbols, 0)
                 pandas_row = {}
-                pandas_row['dc_tag'] = '{}_{}'.format(cluster_key.tag, '_'.join(chemical_symbols))
+                pandas_row['dc_tag'] = '{}_{}'.format(i, '_'.join(chemical_symbols))
                 pandas_row['occupation'] = chemical_symbols
                 pandas_row['cluster_count'] = count
-                pandas_row['orbit_index'] = cluster_key.tag
-                pandas_row['order'] = len(cluster_key)
-                pandas_row['radius'] = cluster_key.radius
+                pandas_row['orbit_index'] = i
+                pandas_row['order'] = orbit.order
+                pandas_row['radius'] = orbit.radius
                 pandas_rows.append(pandas_row)
         self.count_frame = pd.DataFrame(pandas_rows)
-        self._cluster_counts_cpp.reset()
 
     def get_observable(self, structure: Atoms) -> dict:
         """
