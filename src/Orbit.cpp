@@ -223,10 +223,20 @@ void Orbit::removeCluster(std::vector<LatticeSite> cluster)
                                       in which a site with this index occurs more than once will only be counted
                                       with a factor 1 / n, where n is the number of occurences of this index.
                                       By default (siteIndexForDoubleCountCorrection = -1) no such correction is done.
+ @param permuteClusters If true, permute clusters equivalent clusters before counting
 */
 std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structure,
-                                                        int siteIndexForDoubleCountCorrection) const
+                                                        int siteIndexForDoubleCountCorrection,
+                                                        bool permuteClusters) const
 {
+    if (permuteClusters) {
+        // In this case we could just loop over getPermutedEquivalentClusters() instead of
+        // _equivalentClusters, but we then need to be very careful with performance.
+        // Since this should never happen unless someone does something very specific,
+        // we disallow it for now.
+        throw std::runtime_error("countClusterChanges does currently not support counting of clusters that are not permuted (Orbit::coundClusterChanges)");
+    }
+
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elements(order());
     for (const auto &sites : _equivalentClusters)
@@ -260,17 +270,28 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
                                       in which a site with this index occurs more than once will only be counted
                                       with a factor 1 / n, where n is the number of occurences of this index.
                                       By default (siteIndexForDoubleCountCorrection = -1) no such correction is done.
+ @param permuteClusters If true, permute clusters equivalent clusters before counting (not yet implemented, should normally never be done)
 */
 std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &structure,
                                                               const int flipIndex,
                                                               const int newOccupation,
-                                                              int siteIndexForDoubleCountCorrection) const
+                                                              int siteIndexForDoubleCountCorrection,
+                                                              const bool permuteClusters) const
 {
+    if (permuteClusters) {
+        // In this case we could just loop over getPermutedEquivalentClusters() instead of
+        // _equivalentClusters, but we then need to be very careful with performance.
+        // Since this should never happen unless someone does something very specific,
+        // we disallow it for now.
+        throw std::runtime_error("countClusterChanges does currently not support counting of clusters that are not permuted (Orbit::coundClusterChanges)");
+    }
+
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elementsOld(order());
     std::vector<int> elementsNew(order());
     int siteIndex;
     int occupation;
+
     for (const auto &sites : _equivalentClusters)
     {
         for (size_t i = 0; i < sites.size(); i++)

@@ -155,9 +155,6 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
         throw std::runtime_error("flipIndex larger than the length of the structure (ClusterExpansionCalculator::getClusterVectorChange)");
     }
 
-    // do not sort the clusters
-    bool keepOrder = true;
-
     // Get one of the translated orbitlists
     _translatedOrbitList = _localOrbitlists[_indexToOffset[flipIndex]];
 
@@ -185,9 +182,6 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getLocalClusterVector)");
     }
 
-    // do not sort the clusters
-    bool keepOrder = true;
-
     // Count the clusters in the order as in the equivalent clusters
     // since these clusters are already in the permuted order
     bool permuteSites = false;
@@ -202,7 +196,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
         _translatedOrbitList.removeClustersWithoutIndex(index, true);
     }
 
-    return _clusterSpace.occupyClusterVector(_translatedOrbitList, _supercell, 1.0 / _supercell.size(), index, -1);
+    return _clusterSpace.occupyClusterVector(_translatedOrbitList, _supercell, 1.0 / _supercell.size(), index);
 }
 
 /**
@@ -218,11 +212,8 @@ std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getClusterVector)");
     }
 
-    // do not sort the clusters
-    bool keepOrder = true;
-
     /// Do not permute the sites, because we have already done that after initializing _fullOrbitList
     bool permuteSites = false;
 
-    return _clusterSpace.occupyClusterVector(_fullOrbitList, _supercell, 1.0, -1, -1);
+    return _clusterSpace.occupyClusterVector(_fullOrbitList, _supercell);
 }

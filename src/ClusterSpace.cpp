@@ -1,10 +1,6 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#if defined(_OPENMP)
-    #include <omp.h>
-#endif
-
 #include "ClusterSpace.hpp"
 
 /**
@@ -93,7 +89,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
         msg << uniqueOffsets << " != " << numberOfUnitcellRepetitions;
         throw std::runtime_error(msg.str());
     }
-    return occupyClusterVector(currentOrbitList, structure, 1.0, -1, -1);
+    return occupyClusterVector(currentOrbitList, structure);
 }
 
 /**
@@ -304,14 +300,25 @@ void ClusterSpace::removeOrbits(std::vector<size_t> &indices)
 
 /*
 @details Occupy cluster vector based on a supercell and a corresponding orbit list.
-@param firstElement First element of the cluster vector
+@param orbitList An orbit list to be used for counting. Can be either a full orbit list or a "loca"
+ orbit list
+@param supercell Defines the occupations of the structure whose cluster vector should be computed
+@param firstElement First element of the cluster vector (default: 1.0)
+@param flipIndex If a local cluster vector should be calculated this argument is used to specify the index of the site whose local cluster vector should be computed. If calculating a change in cluster vector, this is the site whose occupation has changed. If -1 (default), the total cluster vector will be calculated.
+@param newOccupation New atomic number on the site with index flipIndex. If this argument is not -1, a change in cluster vector will be calculated.
+@param permuteClusters Set to true if the equivalent clusters of each orbit in the orbit list is not already permuted (default: false)
 */
 const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orbitList,
                                                             const Structure &supercell,
                                                             const double firstElement,
                                                             const int flipIndex,
-                                                            const int newOccupation) const
+                                                            const int newOccupation,
+                                                            const bool permuteClusters) const
 {
+    if (newOccupation >= 0 && flipIndex == -1)
+    {
+        throw std::runtime_error("flipIndex needs to be specified (larger than -1) if newOccupation is specified (ClusterSpace::occupyClusterVector)");
+    }
     std::vector<double> clusterVector(_clusterVectorLength);
     clusterVector[0] = firstElement;
 
@@ -320,7 +327,7 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
         std::cout << orbitList.size() << " >= " << _orbitList.size() << std::endl;
         throw std::runtime_error("Orbit lists do no not match (ClusterSpace::occupyClusterVector)");
     }
-#pragma omp parallel for
+
     for (size_t currentOrbitIndex = 0; currentOrbitIndex < _orbitList.size(); currentOrbitIndex++)
     {
         const Orbit& currentOrbit = orbitList.getOrbit(currentOrbitIndex);
@@ -330,11 +337,11 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
         std::map<std::vector<int>, double> counts;
         if (newOccupation > -1)
         {
-            counts = currentOrbit.countClusterChanges(supercell, flipIndex, newOccupation, flipIndex);
+            counts = currentOrbit.countClusterChanges(supercell, flipIndex, newOccupation, flipIndex, permuteClusters);
         }
         else
         {
-            counts = currentOrbit.countClusters(supercell, flipIndex);
+            counts = currentOrbit.countClusters(supercell, flipIndex, permuteClusters);
         }
 
         Cluster representativeCluster = currentPrimitiveOrbit._representativeCluster;
