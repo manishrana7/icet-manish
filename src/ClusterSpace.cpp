@@ -344,7 +344,7 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
             counts = currentOrbit.countClusters(supercell, flipIndex, permuteClusters);
         }
 
-        Cluster representativeCluster = currentPrimitiveOrbit.getRepresentativeCluster();
+        const Cluster& representativeCluster = currentPrimitiveOrbit.getRepresentativeCluster();
         const std::vector<LatticeSite>& representativeSites = currentPrimitiveOrbit.getSitesOfRepresentativeCluster();
 
         std::vector<int> allowedOccupations;
@@ -371,15 +371,12 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
             indicesOfRepresentativeSites.push_back(site.index());
         }
 
-        //const auto &mcVectors = _clusterSpace._multiComponentVectors[i];
-        representativeCluster.setTag(currentOrbitIndex);
-
         /// Loop over all multi component vectors for this orbit
         for (size_t j = 0; j < _clusterVectorElementInfoList[currentOrbitIndex].size(); j++)
         {
 
             double clusterVectorElement = 0;
-            ClusterVectorElementInfo cvInfo = _clusterVectorElementInfoList[currentOrbitIndex][j];
+            const ClusterVectorElementInfo & cvInfo = _clusterVectorElementInfoList[currentOrbitIndex][j];
 
             //auto clusterFind = clusterCounts.find(representativeCluster);
 

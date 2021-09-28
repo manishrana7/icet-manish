@@ -156,26 +156,6 @@ void OrbitList::addOrbit(const Orbit &orbit) {
 }
 
 /**
-@details Returns the index of the orbit for which the given cluster is representative.
-@param cluster cluster to search for
-@param clusterIndexMap map of cluster indices for fast lookup
-@returns orbit index; -1 if nothing is found
-**/
-int OrbitList::findOrbitIndex(const Cluster &cluster,
-                              const std::unordered_map<Cluster, int> &clusterIndexMap) const
-{
-    auto search = clusterIndexMap.find(cluster);
-    if (search != clusterIndexMap.end())
-    {
-        return search->second;
-    }
-    else
-    {
-        return -1;
-    }
-}
-
-/**
 @details Returns pointer to the orbit at the given index.
 @param index index of orbit
 @returns reference to orbit

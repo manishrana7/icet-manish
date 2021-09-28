@@ -335,16 +335,12 @@ PYBIND11_MODULE(_icet, m)
             atomic configuration
         lattice_sites : list(int)
             list of lattice sites that form the cluster
-        tag : int
-            cluster tag
         )pbdoc")
         .def(py::init<const Structure &,
-                      const std::vector<LatticeSite> &,
-                      const int>(),
+                      const std::vector<LatticeSite> &>(),
              "Initializes a cluster instance.",
              py::arg("structure"),
-             py::arg("lattice_sites"),
-             py::arg("tag") = 0)
+             py::arg("lattice_sites"))
         .def_property_readonly(
             "distances",
             &Cluster::distances,
@@ -353,10 +349,6 @@ PYBIND11_MODULE(_icet, m)
             "sites",
             &Cluster::sites,
             "list(int) : list of distances between sites")
-        .def_property(
-            "tag",
-            &Cluster::tag, &Cluster::setTag,
-            "int : cluster tag (defined for sorted cluster)")
         .def_property_readonly(
             "radius",
             &Cluster::radius,
@@ -365,11 +357,6 @@ PYBIND11_MODULE(_icet, m)
             "order",
             &Cluster::order,
             "int : order of the cluster (= number of sites)")
-        .def("__hash__",
-             [](const Cluster &cluster)
-             {
-                 return std::hash<Cluster>{}(cluster);
-             })
         .def("__len__",
              &Cluster::order)
         .def("__str__",
@@ -383,9 +370,7 @@ PYBIND11_MODULE(_icet, m)
                      msg << " " << std::to_string(dist);
                  }
                  return msg.str();
-             })
-        .def(py::self == py::self)
-        .def(py::self < py::self);
+             });
     ;
 
     py::class_<::MatrixOfEquivalentPositions>(m, "MatrixOfEquivalentPositions",

@@ -40,7 +40,7 @@ public:
     double radius() const { return _representativeCluster.radius(); }
 
     /// Returns the sorted, representative cluster for this orbit.
-    Cluster getRepresentativeCluster() const { return _representativeCluster; }
+    const Cluster & getRepresentativeCluster() const { return _representativeCluster; }
 
     /// Returns the sites that define the representative cluster of this orbit.
     const std::vector<LatticeSite>& getSitesOfRepresentativeCluster() const { return _equivalentClusters[0]; }
