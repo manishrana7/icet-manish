@@ -1,5 +1,4 @@
 import unittest
-import re
 from itertools import permutations
 from ase import Atoms
 from ase.build import bulk
