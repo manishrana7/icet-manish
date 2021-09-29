@@ -138,15 +138,11 @@ class OrbitList(_OrbitList):
         fractional_position_tolerance : float
             tolerance applied when comparing positions in fractional coordinates
         """
-        import time
-        start = time.time()
         lolg = LocalOrbitListGenerator(
             self,
             structure=Structure.from_atoms(structure),
             fractional_position_tolerance=fractional_position_tolerance)
         local_orbit_list = lolg.generate_local_orbit_list(index)
-        end = time.time()
-        print(end - start)
         return local_orbit_list
 
     def remove_inactive_orbits(self,

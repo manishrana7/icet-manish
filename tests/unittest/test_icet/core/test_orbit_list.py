@@ -1,4 +1,5 @@
 import unittest
+import re
 from itertools import permutations
 from ase import Atoms
 from ase.build import bulk
@@ -184,6 +185,21 @@ class TestOrbitList(unittest.TestCase):
             orbit_super = orbit_list_super.get_orbit(k)
             orbit = self.orbit_list.get_orbit(k)
             self.assertEqual(str(orbit), str(orbit_super))
+
+    def test_get_local_orbit_list(self):
+        """Tests orbit list is returned for the given supercell."""
+        structure_supercell = self.structure.copy().repeat(2)
+        orbit_list_local = \
+            self.orbit_list.get_local_orbit_list(
+                structure_supercell, 1, self.position_tolerance)
+        orbit_list_local.sort(self.position_tolerance)
+        self.orbit_list.sort(self.position_tolerance)
+        for k in range(len(orbit_list_local)):
+            orbit_local = orbit_list_local.get_orbit(k)
+            orbit = self.orbit_list.get_orbit(k)
+            self.assertEqual(orbit.order, orbit_local.order)
+            self.assertAlmostEqual(orbit.radius, orbit_local.radius)
+            self.assertEqual(len(orbit.equivalent_clusters), len(orbit_local.equivalent_clusters))
 
     def test_translate_sites_to_unitcell(self):
         """Tests the get all translated sites functionality."""
@@ -485,7 +501,6 @@ class TestClusterCounts(unittest.TestCase):
 
         counts = self.orbit_list.get_cluster_counts(self.structure,
                                                     self.fractional_position_tolerance)
-        print(counts)
         self.assertEqual(len(counts), 3)
         for i in range(2):
             self.assertEqual(counts[i], expected_counts[i])
