@@ -312,12 +312,12 @@ void ClusterSpace::removeOrbits(std::vector<size_t> &indices)
 @param newOccupation New atomic number on the site with index flipIndex. If this argument is not -1, a change in cluster vector will be calculated.
 @param permuteClusters Set to true if the equivalent clusters of each orbit in the orbit list is not already permuted (default: false)
 */
-const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orbitList,
-                                                            const Structure &supercell,
-                                                            const double firstElement,
-                                                            const int flipIndex,
-                                                            const int newOccupation,
-                                                            const bool permuteClusters) const
+std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orbitList,
+                                                      const Structure &supercell,
+                                                      const double firstElement,
+                                                      const int flipIndex,
+                                                      const int newOccupation,
+                                                      const bool permuteClusters) const
 {
     if (newOccupation >= 0 && flipIndex == -1)
     {
@@ -412,5 +412,6 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
             clusterVector[cvInfo.clusterVectorIndex] = clusterVectorElement / cvInfo.multiplicity / (double)supercell.size();
         }
     }
+
     return clusterVector;
 }

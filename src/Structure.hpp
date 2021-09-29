@@ -56,7 +56,7 @@ public:
   std::vector<LatticeSite> findLatticeSitesByPositions(const std::vector<Vector3d> &, const double) const;
 
   /// Returns the size of the structure, i.e., the number of sites.
-  size_t size() const { return (_atomicNumbers.size()); }
+  size_t size() const { return _atomicNumbers.size(); }
 
   /// Set the atomic positions.
   void setPositions(const Matrix<double, Dynamic, 3> &positions) { _positions = positions; }
@@ -68,7 +68,7 @@ public:
   void setAtomicNumbers(const py::array_t<int> &atomicNumbers) { _atomicNumbers = atomicNumbers; }
 
   /// Returns atomic numbers.
-  const py::array_t<int>& getAtomicNumbers() const { return _atomicNumbers; }
+  const py::array_t<int> &getAtomicNumbers() const { return _atomicNumbers; }
 
   /// Set atomic numbers via chemical symbols.
   void setChemicalSymbols(const std::vector<std::string> &chemicalSymbols) { setAtomicNumbers(convertChemicalSymbolsToAtomicNumbers(chemicalSymbols)); }

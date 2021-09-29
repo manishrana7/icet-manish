@@ -110,7 +110,6 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     //                                                           _clusterSpace.getOrbitList().getMatrixOfEquivalentSites());
 
     _primToSupercellMap.clear();
-    _indexToOffset.clear();
 
     // Precompute all possible local orbitlists for this supercell and map it to the offset
     for (size_t i = 0; i < structure.size(); i++)
@@ -118,18 +117,21 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         Vector3d localPosition = structure.getPositions().row(i);
         LatticeSite localSite = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(localPosition, fractionalPositionTolerance);
         Vector3d offsetVector = localSite.unitcellOffset();
-        _indexToOffset[i] = offsetVector;
 
-        if (_localOrbitlists.find(offsetVector) == _localOrbitlists.end())
+        _localOrbitLists.push_back(_fullPrimitiveOrbitList.getLocalOrbitList(structure, offsetVector, _primToSupercellMap, fractionalPositionTolerance));
+
+        // Set equivalent cluster equal to the permuted clusters so no permutation is required in the orbit list counting.
+        for (auto &orbit : _localOrbitLists[i]._orbits)
         {
-            _localOrbitlists[offsetVector] = _fullPrimitiveOrbitList.getLocalOrbitList(structure, offsetVector, _primToSupercellMap, fractionalPositionTolerance);
+            auto permutedClusters = orbit.getPermutedEquivalentClusters();
+            orbit.setEquivalentClusters(permutedClusters);
+        }
 
-            // Set equivalent cluster equal to the permuted clusters so no permutation is required in the orbit list counting.
-            for (auto &orbit : _localOrbitlists[offsetVector]._orbits)
-            {
-                auto permutedClusters = orbit.getPermutedEquivalentClusters();
-                orbit.setEquivalentClusters(permutedClusters);
-            }
+        // Remove sites not containing the local index
+        if (_clusterSpace.getPrimitiveStructure().size() > 1)
+        {
+            // true meaning we only look at zero offset sites
+            _localOrbitLists[i].removeClustersWithoutIndex(i, true);
         }
     }
 }
@@ -155,17 +157,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
         throw std::runtime_error("flipIndex larger than the length of the structure (ClusterExpansionCalculator::getClusterVectorChange)");
     }
 
-    // Get one of the translated orbitlists
-    _translatedOrbitList = _localOrbitlists[_indexToOffset[flipIndex]];
-
-    // Remove sites not containing the local index
-    if (_clusterSpace.getPrimitiveStructure().size() > 1)
-    {
-        // true meaning we only look at zero offset sites
-        _translatedOrbitList.removeClustersWithoutIndex(flipIndex, true);
-    }
-
-    return _clusterSpace.occupyClusterVector(_translatedOrbitList, _supercell, 0.0, flipIndex, newOccupation);
+    return _clusterSpace.occupyClusterVector(_localOrbitLists[flipIndex], _supercell, 0.0, flipIndex, newOccupation);
 }
 
 /**
@@ -182,17 +174,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
     }
     _supercell.setAtomicNumbers(occupations);
 
-    // Get one of the translated orbitlists
-    _translatedOrbitList = _localOrbitlists[_indexToOffset[index]];
-
-    // Remove sites not containing the local index
-    if (_clusterSpace.getPrimitiveStructure().size() > 1)
-    {
-        // true meaning we only look at zero offset sites
-        _translatedOrbitList.removeClustersWithoutIndex(index, true);
-    }
-
-    return _clusterSpace.occupyClusterVector(_translatedOrbitList, _supercell, 1.0 / _supercell.size(), index);
+    return _clusterSpace.occupyClusterVector(_localOrbitLists[index], _supercell, 1.0 / _supercell.size(), index);
 }
 
 /**
