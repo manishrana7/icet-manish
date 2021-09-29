@@ -12,6 +12,14 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     int numberOfOrbits = _clusterSpace._orbitList.size();
     std::vector<Orbit> orbitVector;
     _fullOrbitList = LOLG.getFullOrbitList();
+
+    // Set equivalent cluster equal to the permuted clusters so no permutation is required in the orbit list counting.
+    for (auto &orbit : _fullOrbitList._orbits)
+    {
+        auto permutedClusters = orbit.getPermutedEquivalentClusters();
+        orbit._equivalentClusters = permutedClusters;
+    }
+
     for (const auto orbit : clusterSpace._orbitList._orbits)
     {
         orbitVector.push_back(Orbit(orbit.getRepresentativeCluster()));
@@ -313,8 +321,8 @@ std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array
     // do not sort the clusters
     bool keepOrder = true;
 
-    /// Permute the sites
-    bool permuteSites = true;
+    /// Do not permute the sites, because we did that during initialization
+    bool permuteSites = false;
 
     // Count clusters and get cluster count map
     _clusterCounts.countOrbitList(_supercell, _fullOrbitList, keepOrder, permuteSites);
