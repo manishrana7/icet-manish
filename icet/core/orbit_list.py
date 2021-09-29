@@ -2,7 +2,8 @@
 This module provides the OrbitList class.
 """
 
-from typing import List, OrderedDict, Dict
+from typing import List, Dict
+from collections import OrderedDict
 
 import numpy as np
 
@@ -140,7 +141,7 @@ class OrbitList(_OrbitList):
     def get_cluster_counts(self,
                            structure: Atoms,
                            fractional_position_tolerance,
-                           orbit_indices: List[int] = None) -> OrderedDict[int, Dict]:
+                           orbit_indices: List[int] = None) -> OrderedDict:
         """
         Counts all clusters in a structure by finding their local orbit list.
 
