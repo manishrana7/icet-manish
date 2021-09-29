@@ -462,6 +462,7 @@ class ClusterSpace(_ClusterSpace):
         """
         size_before = len(self._orbit_list)
         self._remove_orbits_cpp(indices)
+        self._compute_multi_component_vectors()
         self._rebuild_orbit_list()
         size_after = len(self._orbit_list)
         assert size_before - len(indices) == size_after
