@@ -12,7 +12,6 @@ from icet.tools.geometry import get_permutation
 from icet.core.matrix_of_equivalent_positions import \
     _get_lattice_site_matrix_of_equivalent_positions, \
     matrix_of_equivalent_positions_from_structure
-from io import StringIO
 
 
 class TestOrbitList(unittest.TestCase):
@@ -482,7 +481,7 @@ class TestClusterCounts(unittest.TestCase):
         expected_counts = [{('Fe',): 1, ('Ni',): 3},
                            {('Fe', 'Fe'): 1, ('Fe', 'Ni'): 4,
                             ('Ni', 'Ni'): 7},
-                            {('Fe', 'Ni'): 6, ('Ni', 'Ni'): 6}]
+                           {('Fe', 'Ni'): 6, ('Ni', 'Ni'): 6}]
 
         counts = self.orbit_list.get_cluster_counts(self.structure,
                                                     self.fractional_position_tolerance)

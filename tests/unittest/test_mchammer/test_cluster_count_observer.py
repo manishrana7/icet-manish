@@ -139,6 +139,7 @@ class TestClusterCountSpecificOrbitIndices(unittest.TestCase):
         """
         with self.assertRaises(ValueError) as cm:
             ClusterCountObserver(self.cs, self.structure, self.interval, 1)
+        self.assertIn('should be a list', str(cm.exception))
 
     def test_get_observable(self):
         """Tests observable is returned accordingly."""

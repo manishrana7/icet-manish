@@ -4,10 +4,8 @@ import pandas as pd
 
 from ase import Atoms
 from icet.core.local_orbit_list_generator import LocalOrbitListGenerator
-from icet.core.orbit import Orbit
 from icet.core.structure import Structure
 from mchammer.observers.base_observer import BaseObserver
-import copy
 
 
 class ClusterCountObserver(BaseObserver):

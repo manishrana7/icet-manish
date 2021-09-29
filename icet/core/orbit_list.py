@@ -2,7 +2,7 @@
 This module provides the OrbitList class.
 """
 
-from typing import List, Dict
+from typing import List
 from collections import OrderedDict
 
 import numpy as np
@@ -16,7 +16,6 @@ from icet.core.matrix_of_equivalent_positions import \
     matrix_of_equivalent_positions_from_structure
 from icet.core.structure import Structure
 from icet.input_output.logging_tools import logger
-from icet.tools.geometry import atomic_number_to_chemical_symbol
 
 logger = logger.getChild('orbit_list')
 
@@ -155,7 +154,7 @@ class OrbitList(_OrbitList):
         orbit_indices
             Indices of orbits for which counts are desired. If None, all
             orbits will be counted.
-        
+
         Returns
         -------
         Ordered dict, the keys of which are orbit indices and the values
