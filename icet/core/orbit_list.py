@@ -106,7 +106,7 @@ class OrbitList(_OrbitList):
                                  structure: Atoms,
                                  fractional_position_tolerance: float):
         """
-        Returns an orbit list for a supercell structure.
+        Returns an full orbit list for a supercell structure.
 
         Parameters
         ----------
@@ -121,6 +121,33 @@ class OrbitList(_OrbitList):
             fractional_position_tolerance=fractional_position_tolerance)
         supercell_orbit_list = lolg.generate_full_orbit_list()
         return supercell_orbit_list
+
+    def get_local_orbit_list(self,
+                             structure: Atoms,
+                             index: int,
+                             fractional_position_tolerance: float):
+        """
+        Returns an full orbit list for a supercell structure.
+
+        Parameters
+        ----------
+        structure
+            supercell atomic structure
+        index
+            Index of site whose local orbit list should be generated
+        fractional_position_tolerance : float
+            tolerance applied when comparing positions in fractional coordinates
+        """
+        import time
+        start = time.time()
+        lolg = LocalOrbitListGenerator(
+            self,
+            structure=Structure.from_atoms(structure),
+            fractional_position_tolerance=fractional_position_tolerance)
+        local_orbit_list = lolg.generate_local_orbit_list(index)
+        end = time.time()
+        print(end - start)
+        return local_orbit_list
 
     def remove_inactive_orbits(self,
                                allowed_species: List[List[str]]) -> None:

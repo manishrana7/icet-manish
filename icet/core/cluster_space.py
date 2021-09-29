@@ -653,9 +653,11 @@ class ClusterSpace(_ClusterSpace):
             If True, the structure contains self-interactions via periodic
             boundary conditions, otherwise False.
         """
-        ol = self.orbit_list.get_supercell_orbit_list(
+        ol = self.orbit_list.get_local_orbit_list(
             structure=structure,
+            index=0,
             fractional_position_tolerance=self.fractional_position_tolerance)
+
         orbit_indices = set()
         for orbit in ol.orbits:
             for sites in orbit.equivalent_clusters:
@@ -664,6 +666,7 @@ class ClusterSpace(_ClusterSpace):
                     return True
                 else:
                     orbit_indices.add(indices)
+
         return False
 
     def write(self, filename: str) -> None:
