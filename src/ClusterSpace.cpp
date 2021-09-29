@@ -375,7 +375,11 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
             indicesOfRepresentativeSites.push_back(site.index());
         }
 
-        /// Loop over all multi component vectors for this orbit
+        // Loop over all multi component vectors for this orbit
+        // These are vectors of ints (where the int represents a cluster function index).
+        // Example 1: For an AB alloy we obtain [0, 0] and [0, 0, 0] for pair and triplet terms, respectively.
+        // Example 2: For an ABC alloy we obtain [0, 0], [0, 1], [1, 1] for pairs and similarly for triplets.
+        // Depending on the symmetry of the cluster one might also obtain [1, 0] (e.g., in a clathrate or for some clusters on a HCP lattice).
         for (size_t j = 0; j < _clusterVectorElementInfoList[currentOrbitIndex].size(); j++)
         {
             double clusterVectorElement = 0;

@@ -78,7 +78,7 @@ The resulting output should be similar to the following::
   Orbit index: 0
   Number of atoms in cluster: 1
   Cluster radius: 0.0000
-  Distances between atoms in the clusters: 
+  Distances between atoms in the clusters:
   Ti      1
   W       1
 
