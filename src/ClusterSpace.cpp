@@ -191,7 +191,7 @@ double ClusterSpace::evaluateClusterFunction(const int numberOfAllowedSpecies, c
 
 @returns the cluster product
 **/
-double ClusterSpace::evaluateClusterProduct(const std::vector<int> &multiComponentVector, const std::vector<int> &numberOfAllowedSpecies, const std::vector<int> &species, const std::vector<int> &indices, const std::vector<int> & permutation) const
+double ClusterSpace::evaluateClusterProduct(const std::vector<int> &multiComponentVector, const std::vector<int> &numberOfAllowedSpecies, const std::vector<int> &species, const std::vector<int> &indices, const std::vector<int> &permutation) const
 {
     double clusterProduct = 1;
 
@@ -334,8 +334,8 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
 
     for (size_t currentOrbitIndex = 0; currentOrbitIndex < _orbitList.size(); currentOrbitIndex++)
     {
-        const Orbit& currentOrbit = orbitList.getOrbit(currentOrbitIndex);
-        const Orbit& currentPrimitiveOrbit = _orbitList.getOrbit(currentOrbitIndex);
+        const Orbit &currentOrbit = orbitList.getOrbit(currentOrbitIndex);
+        const Orbit &currentPrimitiveOrbit = _orbitList.getOrbit(currentOrbitIndex);
 
         // Count clusters
         std::map<std::vector<int>, double> counts;
@@ -348,8 +348,8 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
             counts = currentOrbit.countClusters(supercell, flipIndex, permuteClusters);
         }
 
-        const Cluster& representativeCluster = currentPrimitiveOrbit.getRepresentativeCluster();
-        const std::vector<LatticeSite>& representativeSites = currentPrimitiveOrbit.getSitesOfRepresentativeCluster();
+        const Cluster &representativeCluster = currentPrimitiveOrbit.getRepresentativeCluster();
+        const std::vector<LatticeSite> &representativeSites = currentPrimitiveOrbit.getSitesOfRepresentativeCluster();
 
         std::vector<int> allowedOccupations;
         try
@@ -379,7 +379,7 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
         for (size_t j = 0; j < _clusterVectorElementInfoList[currentOrbitIndex].size(); j++)
         {
             double clusterVectorElement = 0;
-            const ClusterVectorElementInfo & cvInfo = _clusterVectorElementInfoList[currentOrbitIndex][j];
+            const ClusterVectorElementInfo &cvInfo = _clusterVectorElementInfoList[currentOrbitIndex][j];
 
             //auto clusterFind = clusterCounts.find(representativeCluster);
 

@@ -159,7 +159,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
     _translatedOrbitList = _localOrbitlists[_indexToOffset[flipIndex]];
 
     // Remove sites not containing the local index
-    if (_clusterSpace._primitiveStructure.size() > 1)
+    if (_clusterSpace.getPrimitiveStructure().size() > 1)
     {
         // true meaning we only look at zero offset sites
         _translatedOrbitList.removeClustersWithoutIndex(flipIndex, true);
@@ -186,7 +186,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
     _translatedOrbitList = _localOrbitlists[_indexToOffset[index]];
 
     // Remove sites not containing the local index
-    if (_clusterSpace._primitiveStructure.size() > 1)
+    if (_clusterSpace.getPrimitiveStructure().size() > 1)
     {
         // true meaning we only look at zero offset sites
         _translatedOrbitList.removeClustersWithoutIndex(index, true);
