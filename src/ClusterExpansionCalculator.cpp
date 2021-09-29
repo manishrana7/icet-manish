@@ -144,12 +144,12 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
                                                                        int flipIndex,
                                                                        int newOccupation)
 {
-    _supercell.setAtomicNumbers(occupationsBefore);
-
     if (occupationsBefore.size() != _supercell.size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getClusterVectorChange)");
     }
+    _supercell.setAtomicNumbers(occupationsBefore);
+
     if (flipIndex >= _supercell.size())
     {
         throw std::runtime_error("flipIndex larger than the length of the structure (ClusterExpansionCalculator::getClusterVectorChange)");
@@ -175,16 +175,12 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
 */
 std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::array_t<int> &occupations, int index)
 {
-    _supercell.setAtomicNumbers(occupations);
 
     if (occupations.size() != _supercell.size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getLocalClusterVector)");
     }
-
-    // Count the clusters in the order as in the equivalent clusters
-    // since these clusters are already in the permuted order
-    bool permuteSites = false;
+    _supercell.setAtomicNumbers(occupations);
 
     // Get one of the translated orbitlists
     _translatedOrbitList = _localOrbitlists[_indexToOffset[index]];
@@ -205,15 +201,11 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
 */
 std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array_t<int> &occupations)
 {
-    _supercell.setAtomicNumbers(occupations);
-
     if (occupations.size() != _supercell.size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getClusterVector)");
     }
-
-    /// Do not permute the sites, because we have already done that after initializing _fullOrbitList
-    bool permuteSites = false;
+    _supercell.setAtomicNumbers(occupations);
 
     return _clusterSpace.occupyClusterVector(_fullOrbitList, _supercell);
 }
