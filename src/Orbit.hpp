@@ -40,10 +40,10 @@ public:
     double radius() const { return _representativeCluster.radius(); }
 
     /// Returns the sorted, representative cluster for this orbit.
-    const Cluster & getRepresentativeCluster() const { return _representativeCluster; }
+    const Cluster &getRepresentativeCluster() const { return _representativeCluster; }
 
     /// Returns the sites that define the representative cluster of this orbit.
-    const std::vector<LatticeSite>& getSitesOfRepresentativeCluster() const { return _equivalentClusters[0]; }
+    const std::vector<LatticeSite> &getSitesOfRepresentativeCluster() const { return _equivalentClusters[0]; }
 
     /// Returns the equivalent cluster.
     std::vector<LatticeSite> getClusterByIndex(unsigned int) const;
@@ -52,7 +52,7 @@ public:
     std::vector<LatticeSite> getPermutedClusterByIndex(unsigned int) const;
 
     /// Returns all equivalent clusters.
-    const std::vector<std::vector<LatticeSite>>& getEquivalentClusters() const { return _equivalentClusters; }
+    const std::vector<std::vector<LatticeSite>> &getEquivalentClusters() const { return _equivalentClusters; }
 
     /// Returns all permuted equivalent clusters.
     std::vector<std::vector<LatticeSite>> getPermutedEquivalentClusters() const;
@@ -94,7 +94,7 @@ public:
 
     /// Counts occupations of clusters in this orbit
     std::map<std::vector<int>, double> countClusters(const Structure &, int doNotDoubleCountThisSiteIndex = -1, const bool permuteClusters = false) const;
-    
+
     /// Counts changes in the occupation of clusters in this orbit
     std::map<std::vector<int>, double> countClusterChanges(const Structure &, const int, const int, int doNotDoubleCountThisSiteIndex = -1, const bool permuteClusters = false) const;
 
@@ -178,9 +178,8 @@ private:
     std::set<std::vector<int>> _allowedClusterPermutations;
 };
 
-
 namespace std
 {
     /// Stream operator.
-    ostream& operator<<(ostream&, const Orbit&);
+    ostream &operator<<(ostream &, const Orbit &);
 }

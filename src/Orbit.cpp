@@ -80,7 +80,8 @@ std::vector<std::vector<LatticeSite>> Orbit::getPermutedEquivalentClusters() con
  */
 std::vector<std::vector<int>> Orbit::getMultiComponentVectors(const std::vector<int> &Mi_local) const
 {
-    if (std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i) { return i < 2; }))
+    if (std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i)
+                    { return i < 2; }))
     {
         std::vector<std::vector<int>> emptyVector;
         return emptyVector;
@@ -95,11 +96,11 @@ std::vector<std::vector<int>> Orbit::getMultiComponentVectors(const std::vector<
         {
             permutedMCVectors.push_back(icet::getPermutedVector<int>(mcVector, allowedPermutation));
         }
-        std::sort(permutedMCVectors.begin(),permutedMCVectors.end());
-
+        std::sort(permutedMCVectors.begin(), permutedMCVectors.end());
 
         // if not any of the vectors in permutedMCVectors exist in distinctMCVectors
-        if (!std::any_of(permutedMCVectors.begin(), permutedMCVectors.end(), [&](const std::vector<int> &permMcVector) { return !(std::find(distinctMCVectors.begin(), distinctMCVectors.end(), permMcVector) == distinctMCVectors.end()); }))
+        if (!std::any_of(permutedMCVectors.begin(), permutedMCVectors.end(), [&](const std::vector<int> &permMcVector)
+                         { return !(std::find(distinctMCVectors.begin(), distinctMCVectors.end(), permMcVector) == distinctMCVectors.end()); }))
         {
             distinctMCVectors.push_back(mcVector);
         }
@@ -173,7 +174,8 @@ void Orbit::removeClustersWithoutIndex(const size_t index, bool onlyConsiderSite
     {
         if (onlyConsiderSitesWithZeroOffset)
         {
-            if (std::none_of(_equivalentClusters[i].begin(), _equivalentClusters[i].end(), [=](LatticeSite &ls) { return ls.index() == index && ls.unitcellOffset().norm() < 1e-4; }))
+            if (std::none_of(_equivalentClusters[i].begin(), _equivalentClusters[i].end(), [=](LatticeSite &ls)
+                             { return ls.index() == index && ls.unitcellOffset().norm() < 1e-4; }))
             {
                 _equivalentClusters.erase(_equivalentClusters.begin() + i);
                 _equivalentClusterPermutations.erase(_equivalentClusterPermutations.begin() + i);
@@ -181,7 +183,8 @@ void Orbit::removeClustersWithoutIndex(const size_t index, bool onlyConsiderSite
         }
         else
         {
-            if (std::none_of(_equivalentClusters[i].begin(), _equivalentClusters[i].end(), [=](LatticeSite &ls) { return ls.index() == index; }))
+            if (std::none_of(_equivalentClusters[i].begin(), _equivalentClusters[i].end(), [=](LatticeSite &ls)
+                             { return ls.index() == index; }))
             {
                 _equivalentClusters.erase(_equivalentClusters.begin() + i);
                 _equivalentClusterPermutations.erase(_equivalentClusterPermutations.begin() + i);
@@ -189,7 +192,6 @@ void Orbit::removeClustersWithoutIndex(const size_t index, bool onlyConsiderSite
         }
     }
 }
-
 
 /**
 @param cluster cluster to be removed (represented by a list of sites); the order of sites is irrelevant
@@ -229,7 +231,8 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
                                                         int siteIndexForDoubleCountCorrection,
                                                         bool permuteClusters) const
 {
-    if (permuteClusters) {
+    if (permuteClusters)
+    {
         // In this case we could just loop over getPermutedEquivalentClusters() instead of
         // _equivalentClusters, but we then need to be very careful with performance.
         // Since this should never happen unless someone does something very specific,
@@ -278,7 +281,8 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
                                                               int siteIndexForDoubleCountCorrection,
                                                               const bool permuteClusters) const
 {
-    if (permuteClusters) {
+    if (permuteClusters)
+    {
         // In this case we could just loop over getPermutedEquivalentClusters() instead of
         // _equivalentClusters, but we then need to be very careful with performance.
         // Since this should never happen unless someone does something very specific,
@@ -328,11 +332,11 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
     return tmpCounts;
 }
 
-
-namespace std {
+namespace std
+{
 
     /// Stream operator.
-    ostream& operator<<(ostream& os, const Orbit& orbit)
+    ostream &operator<<(ostream &os, const Orbit &orbit)
     {
         for (const auto cluster : orbit.getEquivalentClusters())
         {

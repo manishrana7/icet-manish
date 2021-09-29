@@ -7,9 +7,9 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 {
     _clusterSpace = clusterSpace;
     _supercell = structure;
-    LocalOrbitListGenerator LOLG = LocalOrbitListGenerator(clusterSpace.getOrbitList(), _supercell, fractionalPositionTolerance);
+    LocalOrbitListGenerator LOLG = LocalOrbitListGenerator(clusterSpace.getPrimitiveOrbitList(), _supercell, fractionalPositionTolerance);
     size_t uniqueOffsets = LOLG.getNumberOfUniqueOffsets();
-    int numberOfOrbits = _clusterSpace._orbitList.size();
+    int numberOfOrbits = _clusterSpace.getPrimitiveOrbitList().size();
     std::vector<Orbit> orbitVector;
     _fullOrbitList = LOLG.getFullOrbitList();
 
@@ -20,7 +20,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         orbit.setEquivalentClusters(permutedClusters);
     }
 
-    for (const auto orbit : clusterSpace._orbitList._orbits)
+    for (const auto orbit : clusterSpace.getPrimitiveOrbitList().getOrbits())
     {
         orbitVector.push_back(Orbit(orbit.getRepresentativeCluster()));
     }
@@ -74,7 +74,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
                     auto primitiveSite = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(sitePosition, fractionalPositionTolerance);
                     primitiveEquivalentSites.push_back(primitiveSite);
                 }
-                std::vector<std::vector<LatticeSite>> translatedClusters = _clusterSpace._orbitList.getSitesTranslatedToUnitcell(primitiveEquivalentSites, false);
+                std::vector<std::vector<LatticeSite>> translatedClusters = _clusterSpace.getPrimitiveOrbitList().getSitesTranslatedToUnitcell(primitiveEquivalentSites, false);
 
                 for (auto translatedCluster : translatedClusters)
                 {

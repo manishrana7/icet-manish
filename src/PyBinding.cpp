@@ -530,33 +530,35 @@ PYBIND11_MODULE(_icet, m)
                 allowed_components[i] correspond to the number
                 of allowed compoments at lattice site
                 orbit.representative_cluster[i].)pbdoc")
-        .def("count_clusters",
-             [](const Orbit & orbit,
-                const Structure & structure,
-                const int siteIndexForDoubleCountCorrection,
-                const int permuteClusters) {
-                    py::dict clusterCountDict;
-                    for (const auto &mapPair : orbit.countClusters(structure,
-                                                                   siteIndexForDoubleCountCorrection,
-                                                                   permuteClusters))
+        .def(
+            "count_clusters",
+            [](const Orbit &orbit,
+               const Structure &structure,
+               const int siteIndexForDoubleCountCorrection,
+               const int permuteClusters)
+            {
+                py::dict clusterCountDict;
+                for (const auto &mapPair : orbit.countClusters(structure,
+                                                               siteIndexForDoubleCountCorrection,
+                                                               permuteClusters))
+                {
+                    py::list element_symbols;
+                    for (auto el : mapPair.first)
                     {
-                        py::list element_symbols;
-                        for (auto el : mapPair.first)
-                        {
-                            auto getElementSymbols = PeriodicTable::intStr[el];
-                            element_symbols.append(getElementSymbols);
-                        }
-                        double countDouble = mapPair.second;
-                        if (std::abs(std::round(countDouble) - countDouble) > 1e-6)
-                        {
-                            std::runtime_error("Cluster count is a non-integer.");
-                        }
-                        int count = (int)std::round(countDouble);
-                        clusterCountDict[py::tuple(element_symbols)] = count;
+                        auto getElementSymbols = PeriodicTable::intStr[el];
+                        element_symbols.append(getElementSymbols);
                     }
-                    return clusterCountDict;
-                },
-             R"pbdoc(
+                    double countDouble = mapPair.second;
+                    if (std::abs(std::round(countDouble) - countDouble) > 1e-6)
+                    {
+                        std::runtime_error("Cluster count is a non-integer.");
+                    }
+                    int count = (int)std::round(countDouble);
+                    clusterCountDict[py::tuple(element_symbols)] = count;
+                }
+                return clusterCountDict;
+            },
+            R"pbdoc(
              Count clusters in this orbit for a structure.
 
              Parameters
@@ -569,9 +571,9 @@ PYBIND11_MODULE(_icet, m)
              permute_clusters : bool
                 Permute clusters before counting (default: false)
              )pbdoc",
-             py::arg("structure"),
-             py::arg("site_index_for_double_count_correction") = -1,
-             py::arg("permute_sites") = false)
+            py::arg("structure"),
+            py::arg("site_index_for_double_count_correction") = -1,
+            py::arg("permute_sites") = false)
         .def("sort", &Orbit::sort,
              "Sorts the list of equivalent sites.")
         .def("get_all_possible_mc_vector_permutations",
@@ -834,12 +836,7 @@ PYBIND11_MODULE(_icet, m)
             py::arg("fractional_position_tolerance"))
         .def(
             "_merge_orbit",
-            [](ClusterSpace &clusterSpace,
-               int index1,
-               int index2)
-            {
-                clusterSpace._orbitList._orbits[index1] += clusterSpace._orbitList._orbits[index2];
-            },
+            &ClusterSpace::mergeOrbits,
             R"pbdoc(
              Merges the two orbits. This implies that the equivalent clusters
              from the second orbit are added to to the list of equivalent
@@ -856,7 +853,7 @@ PYBIND11_MODULE(_icet, m)
             py::arg("index1"),
             py::arg("index2"))
 
-        .def("_get_orbit_list", &ClusterSpace::getOrbitList)
+        .def("_get_orbit_list", &ClusterSpace::getPrimitiveOrbitList)
         .def("get_orbit", &ClusterSpace::getOrbit)
         .def_property_readonly("species_maps", &ClusterSpace::getSpeciesMaps)
         .def("get_multi_component_vectors_by_orbit", &ClusterSpace::getMultiComponentVectorsByOrbit)

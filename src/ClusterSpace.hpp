@@ -39,11 +39,11 @@ public:
   /// Returns information concerning the association between orbits and multi-component vectors.
   std::pair<int, std::vector<int>> getMultiComponentVectorsByOrbit(const unsigned int);
 
-  /// Returns the entire orbit list.
-  OrbitList getOrbitList() const { return _orbitList; }
+  /// Returns the entire primitive orbit list.
+  const OrbitList &getPrimitiveOrbitList() const { return _primitiveOrbitList; }
 
   /// Returns an orbit from the orbit list.
-  Orbit getOrbit(const size_t index) const { return _orbitList.getOrbit(index); }
+  const Orbit getOrbit(const size_t index) const { return _primitiveOrbitList.getOrbit(index); }
 
   /// Returns the native clusters.
   /// @todo What is a native cluster? Partial answer: clusters within the unit cell?
@@ -74,10 +74,6 @@ public:
   /// Returns the mapping between atomic numbers and the internal species enumeration scheme for each site.
   std::vector<std::unordered_map<int, int>> getSpeciesMaps() const { return _speciesMaps; }
 
-  /// Primitive orbit list based on the structure and the global cutoffs
-  /// @todo Make private.
-  OrbitList _orbitList;
-
   /// Returns the cluster product.
   double evaluateClusterProduct(const std::vector<int> &, const std::vector<int> &, const std::vector<int> &, const std::vector<int> &, const std::vector<int> &) const;
 
@@ -90,9 +86,15 @@ public:
   /// Removes orbits.
   void removeOrbits(std::vector<size_t> &);
 
+  /// Merge orbits
+  void mergeOrbits(const int index1, const int index2) { _primitiveOrbitList._orbits[index1] += _primitiveOrbitList._orbits[index2]; }
+
 private:
   /// Primitive (prototype) structure.
   Structure _primitiveStructure;
+
+  /// Primitive orbit list based on the structure and the global cutoffs
+  OrbitList _primitiveOrbitList;
 
   /// Number of allowed components on each site of the primitive structure.
   std::vector<int> _numberOfAllowedSpeciesPerSite;
