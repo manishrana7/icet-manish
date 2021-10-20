@@ -11,7 +11,6 @@
 #include "ClusterSpace.hpp"
 #include "OrbitList.hpp"
 #include "LocalOrbitListGenerator.hpp"
-#include "ClusterCounts.hpp"
 #include "PeriodicTable.hpp"
 #include "VectorOperations.hpp"
 using namespace Eigen;
@@ -40,9 +39,6 @@ public:
     std::vector<double> getLocalClusterVector(const py::array_t<int> &, int);
 
 private:
-    /// Occupy a cluster vector based on an orbit list and already counted clusters
-    std::vector<double> _occupyClusterVector(const double);
-
     /// Maps offsets to local orbit lists.
     std::unordered_map<Vector3d, OrbitList, Vector3dHash> _localOrbitlists;
 
@@ -63,9 +59,6 @@ private:
 
     /// Placeholder for translated orbitlist
     OrbitList _translatedOrbitList;
-
-    /// Placeholder for cluster coutns
-    ClusterCounts _clusterCounts;
 
     /// The full orbit list used when calculating full cluster vector
     OrbitList _fullOrbitList;

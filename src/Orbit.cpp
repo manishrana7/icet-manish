@@ -80,7 +80,8 @@ std::vector<std::vector<LatticeSite>> Orbit::getPermutedEquivalentClusters() con
  */
 std::vector<std::vector<int>> Orbit::getMultiComponentVectors(const std::vector<int> &Mi_local) const
 {
-    if (std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i) { return i < 2; }))
+    if (std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i)
+                    { return i < 2; }))
     {
         std::vector<std::vector<int>> emptyVector;
         return emptyVector;
@@ -95,11 +96,11 @@ std::vector<std::vector<int>> Orbit::getMultiComponentVectors(const std::vector<
         {
             permutedMCVectors.push_back(icet::getPermutedVector<int>(mcVector, allowedPermutation));
         }
-        std::sort(permutedMCVectors.begin(),permutedMCVectors.end());
-
+        std::sort(permutedMCVectors.begin(), permutedMCVectors.end());
 
         // if not any of the vectors in permutedMCVectors exist in distinctMCVectors
-        if (!std::any_of(permutedMCVectors.begin(), permutedMCVectors.end(), [&](const std::vector<int> &permMcVector) { return !(std::find(distinctMCVectors.begin(), distinctMCVectors.end(), permMcVector) == distinctMCVectors.end()); }))
+        if (!std::any_of(permutedMCVectors.begin(), permutedMCVectors.end(), [&](const std::vector<int> &permMcVector)
+                         { return !(std::find(distinctMCVectors.begin(), distinctMCVectors.end(), permMcVector) == distinctMCVectors.end()); }))
         {
             distinctMCVectors.push_back(mcVector);
         }
@@ -173,7 +174,8 @@ void Orbit::removeClustersWithoutIndex(const size_t index, bool onlyConsiderSite
     {
         if (onlyConsiderSitesWithZeroOffset)
         {
-            if (std::none_of(_equivalentClusters[i].begin(), _equivalentClusters[i].end(), [=](LatticeSite &ls) { return ls.index() == index && ls.unitcellOffset().norm() < 1e-4; }))
+            if (std::none_of(_equivalentClusters[i].begin(), _equivalentClusters[i].end(), [=](LatticeSite &ls)
+                             { return ls.index() == index && ls.unitcellOffset().norm() < 1e-4; }))
             {
                 _equivalentClusters.erase(_equivalentClusters.begin() + i);
                 _equivalentClusterPermutations.erase(_equivalentClusterPermutations.begin() + i);
@@ -181,7 +183,8 @@ void Orbit::removeClustersWithoutIndex(const size_t index, bool onlyConsiderSite
         }
         else
         {
-            if (std::none_of(_equivalentClusters[i].begin(), _equivalentClusters[i].end(), [=](LatticeSite &ls) { return ls.index() == index; }))
+            if (std::none_of(_equivalentClusters[i].begin(), _equivalentClusters[i].end(), [=](LatticeSite &ls)
+                             { return ls.index() == index; }))
             {
                 _equivalentClusters.erase(_equivalentClusters.begin() + i);
                 _equivalentClusterPermutations.erase(_equivalentClusterPermutations.begin() + i);
@@ -214,12 +217,143 @@ void Orbit::removeCluster(std::vector<LatticeSite> cluster)
     throw std::runtime_error("Did not find any matching clusters (Orbit::removeCluster)");
 }
 
-namespace std {
+/**
+ @brief Count the occupations of the clusters in this orbit.
+ @details
+    Note that the orderings of the sites in the clusters matter, meaning,
+    for example, that (47, 79) will be counted separately from (79, 47)
+    (here 47 and 79 are atomic numbers).
+ @param structure the structure that will have its clusters counted
+ @param siteIndexForDoubleCountCorrection
+   In small supercells, clusters may include both a site and its periodic image.
+   In such cases this argument can be used to avoid double counting.
+   Clusters in which a site with this index occurs more than once will only be counted with
+   a factor 1/n, where n is the number of occurrences of this index. By default
+   (i.e. siteIndexForDoubleCountCorrection = -1) no such correction is applied.
+ @param permuteClusters If true, permute clusters equivalent clusters before counting
+*/
+std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structure,
+                                                        int siteIndexForDoubleCountCorrection,
+                                                        bool permuteClusters) const
+{
+    if (permuteClusters)
+    {
+        // In this case we could just loop over getPermutedEquivalentClusters() instead of
+        // _equivalentClusters, but we then need to be very careful with performance.
+        // Since this should never happen unless someone does something very specific,
+        // we disallow it for now.
+        throw std::runtime_error("countClusterChanges does not support counting of clusters that are not permuted (Orbit::coundClusterChanges)");
+    }
+
+    std::map<std::vector<int>, double> tmpCounts;
+    std::vector<int> elements(order());
+    for (const auto &sites : _equivalentClusters)
+    {
+        for (size_t i = 0; i < sites.size(); i++)
+        {
+            elements[i] = structure.getAtomicNumbers().at(sites[i].index());
+        }
+        double unit = 1;
+        // If the current atom (siteIndexForDoubleCountCorrection) occurs more than once,
+        // we risk double counting it if we calculate a change in cluster vector or
+        // a local cluster vector. To avoid this, we count the clusters in units of
+        // 1 / n, where n is the number of occurences of the present atom in the cluster.
+        if (siteIndexForDoubleCountCorrection > -1)
+        {
+            unit /= (double)std::count_if(sites.begin(), sites.end(), [=](LatticeSite ls)
+                                          { return ls.index() == siteIndexForDoubleCountCorrection; });
+        }
+        tmpCounts[elements] += unit;
+    }
+    return tmpCounts;
+}
+
+/**
+ @brief 
+    Count the change in occupations of the clusters in this orbit caused
+    by changing the chemical identity of one site.
+ @details
+    `structure` should contain the original occupations, and the change
+    is defined by `flipIndex` (index of the site whose occupation
+    changes) and `newOccupation` (the new atomic number on that site).
+    Note that the orderings of the sites in the clusters matter, meaning,
+    for example, that (47, 79) will be counted separately from (79, 47)
+    (here 47 and 79 are atomic numbers).
+ @param structure the structure for which to count clusters, with occupations before change
+ @param flipIndex index of site that has been flipped
+ @param newOccupation new atomic number of site that has been flipped
+ @param siteIndexForDoubleCountCorrection
+   In small supercells, clusters may include both a site and its periodic image.
+   In such cases this argument can be used to avoid double counting.
+   Clusters in which a site with this index occurs more than once will only be counted with
+   a factor 1/n, where n is the number of occurrences of this index. By default
+   (i.e. siteIndexForDoubleCountCorrection = -1) no such correction is applied.
+ @param permuteClusters If true, permute clusters equivalent clusters before counting (not yet implemented, should normally never be done)
+*/
+std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &structure,
+                                                              const int flipIndex,
+                                                              const int newOccupation,
+                                                              int siteIndexForDoubleCountCorrection,
+                                                              const bool permuteClusters) const
+{
+    if (permuteClusters)
+    {
+        // In this case we could just loop over getPermutedEquivalentClusters() instead of
+        // _equivalentClusters, but we then need to be very careful with performance.
+        // Since this should never happen unless someone does something very specific,
+        // we disallow it for now.
+        throw std::runtime_error("countClusterChanges does not support counting of clusters that are not permuted (Orbit::coundClusterChanges)");
+    }
+
+    std::map<std::vector<int>, double> tmpCounts;
+    std::vector<int> elementsOld(order());
+    std::vector<int> elementsNew(order());
+    int siteIndex;
+    int occupation;
+
+    for (const auto &sites : _equivalentClusters)
+    {
+        for (size_t i = 0; i < sites.size(); i++)
+        {
+            siteIndex = sites[i].index();
+            occupation = structure.getAtomicNumbers().at(siteIndex);
+            elementsOld[i] = occupation;
+
+            // If the present site index is the one that was changed,
+            // we need to use a different atomic number
+            if (siteIndex == flipIndex)
+            {
+                elementsNew[i] = newOccupation;
+            }
+            else
+            {
+                elementsNew[i] = occupation;
+            }
+        }
+        double unit = 1;
+        // If the present atom (siteIndexForDoubleCountCorrection) occurs more than once,
+        // we risk double counting it if we calculate a change in cluster vector or
+        // a local cluster vector. To avoid this, we count the clusters in units of
+        // 1 / n, where n is the number of occurences of the present atom in the cluster.
+        if (siteIndexForDoubleCountCorrection > -1)
+        {
+            unit /= (double)std::count_if(sites.begin(), sites.end(), [=](LatticeSite ls)
+                                          { return ls.index() == siteIndexForDoubleCountCorrection; });
+        }
+        // The old cluster has disappeared and we have gotten elementNew instead; count that
+        tmpCounts[elementsOld] -= unit;
+        tmpCounts[elementsNew] += unit;
+    }
+    return tmpCounts;
+}
+
+namespace std
+{
 
     /// Stream operator.
-    ostream& operator<<(ostream& os, const Orbit& orbit)
+    ostream &operator<<(ostream &os, const Orbit &orbit)
     {
-        for (const auto cluster : orbit._equivalentClusters)
+        for (const auto cluster : orbit.getEquivalentClusters())
         {
             os << "  ";
             for (const auto site : cluster)

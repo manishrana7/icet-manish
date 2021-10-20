@@ -106,11 +106,11 @@ class TestClusterCountObserver(unittest.TestCase):
         self.assertEqual(expected_Au_Au_count, actual_counts)
 
 
-class TestClusterCountObserverMaxOrbit(unittest.TestCase):
+class TestClusterCountSpecificOrbitIndices(unittest.TestCase):
     """Container for tests of the class functionality."""
 
     def __init__(self, *args, **kwargs):
-        super(TestClusterCountObserverMaxOrbit,
+        super(TestClusterCountSpecificOrbitIndices,
               self).__init__(*args, **kwargs)
 
         prim = bulk('Au')
@@ -128,9 +128,18 @@ class TestClusterCountObserverMaxOrbit(unittest.TestCase):
         """Set up observer before each test."""
         self.observer_cut = ClusterCountObserver(
             cluster_space=self.cs, structure=self.structure, interval=self.interval,
-            max_orbit=3)
+            orbit_indices=[0, 1, 2])
         self.observer_full = ClusterCountObserver(
             cluster_space=self.cs, structure=self.structure, interval=self.interval)
+
+    def test_failing_initialization(self):
+        """
+        Tests that intiialization fails when orbit_indices is not a list
+        (i.e., the old interface is used)
+        """
+        with self.assertRaises(ValueError) as cm:
+            ClusterCountObserver(self.cs, self.structure, self.interval, 1)
+        self.assertIn('should be a list', str(cm.exception))
 
     def test_get_observable(self):
         """Tests observable is returned accordingly."""
@@ -139,7 +148,7 @@ class TestClusterCountObserverMaxOrbit(unittest.TestCase):
         # 1 Pd in pure Au sro
         structure[0].symbol = 'Pd'
 
-        # Observer with max_orbit
+        # Observer with orbit_indices
         counts = self.observer_cut.get_observable(structure)
         self.assertEqual(len(counts), 10)
 
@@ -151,7 +160,7 @@ class TestClusterCountObserverMaxOrbit(unittest.TestCase):
                 actual_counts += counts[count]
         self.assertEqual(expected_Au_Pd_count, actual_counts)
 
-        # Observer without max_orbit
+        # Observer without orbit_indices
         counts = self.observer_full.get_observable(structure)
         self.assertEqual(len(counts), 74)
 

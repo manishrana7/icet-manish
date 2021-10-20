@@ -122,8 +122,7 @@ class BinaryShortRangeOrderObserver(BaseObserver):
             input atomic structure
         """
 
-        self._cluster_count_observer._generate_counts(structure)
-        df = self._cluster_count_observer.count_frame
+        df = self._cluster_count_observer.get_cluster_counts(structure)
 
         symbol_counts = self._get_atom_count(structure)
         conc_B = self._get_concentrations(structure)[self._symbols[0]]

@@ -9,7 +9,6 @@ ADD_SUBDIRECTORY("3rdparty/pybind11" pybind11)
 # List of source files that need to be compiled:
 SET(SourceFiles
   Cluster.cpp
-  ClusterCounts.cpp
   ClusterExpansionCalculator.cpp
   ClusterSpace.cpp
   FloatType.cpp
