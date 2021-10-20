@@ -4,11 +4,9 @@
 @details Create an instance of a cluster.
 @param structure icet structure object
 @param latticeSites list of lattice sites that form the cluster
-@param tag integer identifier
 */
 Cluster::Cluster(const Structure &structure,
-                 const std::vector<LatticeSite> &latticeSites,
-                 const int tag)
+                 const std::vector<LatticeSite> &latticeSites)
 {
     size_t clusterSize = latticeSites.size();
     std::vector<int> sites(clusterSize);
@@ -28,7 +26,6 @@ Cluster::Cluster(const Structure &structure,
     }
     _sites = sites;
     _distances = distances;
-    _tag = tag;
     _radius = icet::getGeometricalRadius(latticeSites, structure);
 }
 

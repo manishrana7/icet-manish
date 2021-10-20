@@ -50,13 +50,13 @@ def print_timing_ratios(structure, local_iters, total_iters, sizes, cutoffs):
         t_total = time_total_energy(calculator, occupations, total_iters)
         print(f'{size:3d} {len(structure_cpy):5d} {local_iters:5d} {total_iters:2d} '
               f'{time_ce_init:10.6f} {t_local:10.6f} {t_total:10.6f} '
-              f'{t_total / (t_local / local_iters):12.4f}')
+              f'{(t_total / total_iters) / (t_local / local_iters):12.4f}')
 
 
 if __name__ == '__main__':
 
-    local_iters = 1000
-    total_iters = 1
+    local_iters = 10000
+    total_iters = 100
     structure = bulk('Al')
     cutoffs = [10, 6]
     chemical_symbols = ['Al', 'Ga']

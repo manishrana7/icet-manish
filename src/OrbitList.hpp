@@ -38,8 +38,8 @@ class OrbitList
     /// Adding-to-existing (+=) operator.
     OrbitList &operator+=(const OrbitList &);
 
-    /// Returns a copy of the orbit of the given index.
-    Orbit getOrbit(unsigned int) const;
+    /// Returns the orbit of the given index.
+    const Orbit& getOrbit(unsigned int) const;
 
     /// Returns an orbit in the given (supercell) structure.
     Orbit getSuperCellOrbit(const Structure &,
@@ -119,9 +119,6 @@ class OrbitList
     /// Returns the matrix of equivalent sites used to construct the orbit list.
     std::vector<std::vector<LatticeSite>> getMatrixOfEquivalentSites() const { return _matrixOfEquivalentSites; }
 
-    /// Removes all equivalent clusters that exist both in this orbit list and the input orbit list.
-    void subtractClustersFromOrbitList(const OrbitList &);
-
     /// Removes an orbit identified by its index.
     void removeOrbit(const size_t);
 
@@ -150,10 +147,6 @@ private:
 
     /// Matrix of equivalent sites.
     std::vector<std::vector<LatticeSite>> _matrixOfEquivalentSites;
-
-    /// @todo Add description.
-    /// @todo Why is this method private but its overloaded buddy is not?
-    int findOrbitIndex(const Cluster &, const std::unordered_map<Cluster, int> &) const;
 
     /// Primitive structure for which orbit list was constructed.
     Structure _primitiveStructure;

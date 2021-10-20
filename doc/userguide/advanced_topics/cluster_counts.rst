@@ -10,17 +10,16 @@ A cluster vector is essentially a count of clusters averaged and
 aggregated in a compact form. Sometimes it may be of interest to study
 the underlying cluster counts rather than the cluster vector. In a
 binary alloy with species A and B, for example, one may wonder how
-many nearest neighbor pairs are A-A, A-B, and B-B, respectively. To
-facilitate such analyses, :program:`icet` provides a cluster counts
-module. This example demonstrates how to use this module.
+many nearest neighbor pairs are A-A, A-B, and B-B, respectively. This
+tutorial demonstrates how such information can be extracted with
+:program:`icet`.
 
 Import modules
 --------------
 
-In addition to the :class:`~icet.core.cluster_counts.ClusterCounts`
-and :class:`~icet.core.orbit_list.OrbitList` classes, we also use the
-`ASE <https://wiki.fysik.dtu.dk/ase>`_ function :func:`~ase.build.bulk`
-to generate a prototype structure.
+In addition to the :class:`~icet.core.orbit_list.OrbitList` class, we also
+use the `ASE <https://wiki.fysik.dtu.dk/ase>`_ function
+:func:`~ase.build.bulk` to generate a prototype structure.
 
 .. literalinclude:: ../../../examples/advanced_topics/get_cluster_counts.py
    :start-after: # Start import
@@ -55,9 +54,9 @@ corresponds to an orbit).
 Count clusters
 --------------
 
-We are now ready to create a
-:class:`~icet.core.cluster_counts.ClusterCounts` object based on the
-orbit list and the above created supercell.
+We are now ready to count the clusters. We do this with the
+:func:`~icet.core.orbit_list.get_cluster_counts` function, and
+we provide the supercell as an argument.
 
 .. literalinclude:: ../../../examples/advanced_topics/get_cluster_counts.py
    :start-after: # Use the primitive
@@ -66,7 +65,7 @@ orbit list and the above created supercell.
 Print cluster counts
 --------------------
 
-The cluster counts can conveniently be printed like so:
+Finally, we print information about the orbit and the cluster counts.
 
 .. literalinclude:: ../../../examples/advanced_topics/get_cluster_counts.py
    :start-after: # Print all of
@@ -75,23 +74,29 @@ The resulting output should be similar to the following::
 
   Number of atoms: 2
   Found 3 orbits
-  ====================== Cluster Counts ======================
-  Singlet: [0] [] 0.0000
-  Ti  Ti   2
-  Ti  W    8
 
-  Pair: [0, 0] [3.0] 1.5000
-  W   W    2
-  Ti  Ti   2
-  Ti  W    2
+  Orbit index: 0
+  Number of atoms in cluster: 1 (singlet)
+  Ti      1
+  W       1
 
-  Pair: [0, 0] [4.242641] 2.1213
-  W   W    2
-  Ti   1
-  W    1
-  ============================================================
+  Orbit index: 1
+  Number of atoms in cluster: 2 (pair)
+  Cluster radius: 1.5000
+  Distances between atoms in the clusters: 3.0000
+  Ti  Ti      2
+  Ti  W       2
+  W   W       2
 
-The orbits are listed by increasing order (singles, pairs, triplets, ...) and
+  Orbit index: 2
+  Number of atoms in cluster: 2 (pair)
+  Cluster radius: 2.1213
+  Distances between atoms in the clusters: 4.2426
+  Ti  Ti      2
+  Ti  W       8
+  W   W       2
+
+The orbits are listed by increasing order (singlets, pairs, ...) and
 increasing size. For every orbit, the number of clusters containing a certain
 set of species is printed. Note that these are the numbers that would be used
 to construct a cluster vector for this particular structure.
