@@ -337,6 +337,7 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
         throw std::runtime_error("Orbit lists do no not match (ClusterSpace::occupyClusterVector)");
     }
 
+#pragma omp parallel for
     for (size_t currentOrbitIndex = 0; currentOrbitIndex < _primitiveOrbitList.size(); currentOrbitIndex++)
     {
         const Orbit &currentOrbit = orbitList.getOrbit(currentOrbitIndex);
