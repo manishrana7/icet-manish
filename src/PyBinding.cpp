@@ -335,16 +335,12 @@ PYBIND11_MODULE(_icet, m)
             atomic configuration
         lattice_sites : list(int)
             list of lattice sites that form the cluster
-        tag : int
-            cluster tag
         )pbdoc")
         .def(py::init<const Structure &,
-                      const std::vector<LatticeSite> &,
-                      const int>(),
+                      const std::vector<LatticeSite> &>(),
              "Initializes a cluster instance.",
              py::arg("structure"),
-             py::arg("lattice_sites"),
-             py::arg("tag") = 0)
+             py::arg("lattice_sites"))
         .def_property_readonly(
             "distances",
             &Cluster::distances,
@@ -353,10 +349,6 @@ PYBIND11_MODULE(_icet, m)
             "sites",
             &Cluster::sites,
             "list(int) : list of distances between sites")
-        .def_property(
-            "tag",
-            &Cluster::tag, &Cluster::setTag,
-            "int : cluster tag (defined for sorted cluster)")
         .def_property_readonly(
             "radius",
             &Cluster::radius,
@@ -365,11 +357,6 @@ PYBIND11_MODULE(_icet, m)
             "order",
             &Cluster::order,
             "int : order of the cluster (= number of sites)")
-        .def("__hash__",
-             [](const Cluster &cluster)
-             {
-                 return std::hash<Cluster>{}(cluster);
-             })
         .def("__len__",
              &Cluster::order)
         .def("__str__",
@@ -383,9 +370,7 @@ PYBIND11_MODULE(_icet, m)
                      msg << " " << std::to_string(dist);
                  }
                  return msg.str();
-             })
-        .def(py::self == py::self)
-        .def(py::self < py::self);
+             });
     ;
 
     py::class_<::MatrixOfEquivalentPositions>(m, "MatrixOfEquivalentPositions",
@@ -545,6 +530,50 @@ PYBIND11_MODULE(_icet, m)
                 allowed_components[i] correspond to the number
                 of allowed compoments at lattice site
                 orbit.representative_cluster[i].)pbdoc")
+        .def(
+            "count_clusters",
+            [](const Orbit &orbit,
+               const Structure &structure,
+               const int siteIndexForDoubleCountCorrection,
+               const int permuteClusters)
+            {
+                py::dict clusterCountDict;
+                for (const auto &mapPair : orbit.countClusters(structure,
+                                                               siteIndexForDoubleCountCorrection,
+                                                               permuteClusters))
+                {
+                    py::list element_symbols;
+                    for (auto el : mapPair.first)
+                    {
+                        auto getElementSymbols = PeriodicTable::intStr[el];
+                        element_symbols.append(getElementSymbols);
+                    }
+                    double countDouble = mapPair.second;
+                    if (std::abs(std::round(countDouble) - countDouble) > 1e-6)
+                    {
+                        std::runtime_error("Cluster count is a non-integer.");
+                    }
+                    int count = (int)std::round(countDouble);
+                    clusterCountDict[py::tuple(element_symbols)] = count;
+                }
+                return clusterCountDict;
+            },
+            R"pbdoc(
+             Count clusters in this orbit for a structure.
+
+             Parameters
+             ----------
+             structure : Structure
+                Structure to count clusters for
+             site_index_for_double_count_correction : int
+                Avoid double counting clusters containing this index
+                (default -1, no such correction)
+             permute_clusters : bool
+                Permute clusters before counting (default: false)
+             )pbdoc",
+            py::arg("structure"),
+            py::arg("site_index_for_double_count_correction") = -1,
+            py::arg("permute_sites") = false)
         .def("sort", &Orbit::sort,
              "Sorts the list of equivalent sites.")
         .def("get_all_possible_mc_vector_permutations",
@@ -576,7 +605,7 @@ PYBIND11_MODULE(_icet, m)
                  }
                  msg << "equivalent_clusters:" << std::endl;
                  int k = -1;
-                 for (const auto sites : orbit._equivalentClusters)
+                 for (const auto sites : orbit.getEquivalentClusters())
                  {
                      k += 1;
                      msg << "  cluster: " << k << std::endl;
@@ -628,7 +657,7 @@ PYBIND11_MODULE(_icet, m)
              "Adds an orbit.")
         .def("get_orbit",
              &OrbitList::getOrbit,
-             "Returns a copy of the orbit at position i in the orbit list.")
+             "Returns the orbit at position i in the orbit list.")
         .def("_remove_inactive_orbits",
              &OrbitList::removeInactiveOrbits)
         .def("clear",
@@ -807,14 +836,9 @@ PYBIND11_MODULE(_icet, m)
             py::arg("fractional_position_tolerance"))
         .def(
             "_merge_orbit",
-            [](ClusterSpace &clusterSpace,
-               int index1,
-               int index2)
-            {
-                clusterSpace._orbitList._orbits[index1] += clusterSpace._orbitList._orbits[index2];
-            },
+            &ClusterSpace::mergeOrbits,
             R"pbdoc(
-             Merges the two orbits. This implies that the equivalent clusters
+             Merges two orbits. This implies that the equivalent clusters
              from the second orbit are added to to the list of equivalent
              clusters of the first orbit, after which the second orbit is
              removed.
@@ -822,14 +846,14 @@ PYBIND11_MODULE(_icet, m)
              Parameters
              ----------
              index1 : int
-                 index of the first orbit in the list of orbits of the cluster space
-             index3 : int
-                 index of the first orbit in the list of orbits of the cluster space
+                 index of the first orbit in the orbit list of the cluster space
+             index2 : int
+                 index of the second orbit in the orbit list of the cluster space
              )pbdoc",
             py::arg("index1"),
             py::arg("index2"))
 
-        .def("_get_orbit_list", &ClusterSpace::getOrbitList)
+        .def("_get_orbit_list", &ClusterSpace::getPrimitiveOrbitList)
         .def("get_orbit", &ClusterSpace::getOrbit)
         .def_property_readonly("species_maps", &ClusterSpace::getSpeciesMaps)
         .def("get_multi_component_vectors_by_orbit", &ClusterSpace::getMultiComponentVectorsByOrbit)

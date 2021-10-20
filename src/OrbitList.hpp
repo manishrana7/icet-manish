@@ -148,10 +148,6 @@ private:
     /// Matrix of equivalent sites.
     std::vector<std::vector<LatticeSite>> _matrixOfEquivalentSites;
 
-    /// @todo Add description.
-    /// @todo Why is this method private but its overloaded buddy is not?
-    int findOrbitIndex(const Cluster &, const std::unordered_map<Cluster, int> &) const;
-
     /// Primitive structure for which orbit list was constructed.
     Structure _primitiveStructure;
 };

@@ -33,8 +33,7 @@ class TestOrbitList(unittest.TestCase):
         # for pair
         lattice_sites = [LatticeSite(0, [i, 0, 0]) for i in range(3)]
         self.cluster_pair = Cluster(Structure.from_atoms(self.structure),
-                                    [lattice_sites[0], lattice_sites[1]],
-                                    True)
+                                    [lattice_sites[0], lattice_sites[1]])
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""

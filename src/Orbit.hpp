@@ -40,10 +40,10 @@ public:
     double radius() const { return _representativeCluster.radius(); }
 
     /// Returns the sorted, representative cluster for this orbit.
-    Cluster getRepresentativeCluster() const { return _representativeCluster; }
+    const Cluster &getRepresentativeCluster() const { return _representativeCluster; }
 
     /// Returns the sites that define the representative cluster of this orbit.
-    std::vector<LatticeSite> getSitesOfRepresentativeCluster() const { return _equivalentClusters[0]; }
+    const std::vector<LatticeSite> &getSitesOfRepresentativeCluster() const { return _equivalentClusters[0]; }
 
     /// Returns the equivalent cluster.
     std::vector<LatticeSite> getClusterByIndex(unsigned int) const;
@@ -52,7 +52,7 @@ public:
     std::vector<LatticeSite> getPermutedClusterByIndex(unsigned int) const;
 
     /// Returns all equivalent clusters.
-    std::vector<std::vector<LatticeSite>> getEquivalentClusters() const { return _equivalentClusters; }
+    const std::vector<std::vector<LatticeSite>> &getEquivalentClusters() const { return _equivalentClusters; }
 
     /// Returns all permuted equivalent clusters.
     std::vector<std::vector<LatticeSite>> getPermutedEquivalentClusters() const;
@@ -93,10 +93,10 @@ public:
     void removeCluster(std::vector<LatticeSite>);
 
     /// Counts occupations of clusters in this orbit
-    std::map<std::vector<int>, double> countClusters(const Structure &, int doNotDoubleCountThisSiteIndex = -1) const;
-    
+    std::map<std::vector<int>, double> countClusters(const Structure &, int doNotDoubleCountThisSiteIndex = -1, const bool permuteClusters = false) const;
+
     /// Counts changes in the occupation of clusters in this orbit
-    std::map<std::vector<int>, double> countClusterChanges(const Structure &, const int, const int, int doNotDoubleCountThisSiteIndex = -1) const;
+    std::map<std::vector<int>, double> countClusterChanges(const Structure &, const int, const int, int doNotDoubleCountThisSiteIndex = -1, const bool permuteClusters = false) const;
 
     /// Comparison operator for automatic sorting in containers.
     friend bool operator==(const Orbit &orbit1, const Orbit &orbit2)
@@ -164,14 +164,13 @@ public:
         return *this;
     }
 
-public:
+private:
     /// Container of equivalent sites for this orbit
     std::vector<std::vector<LatticeSite>> _equivalentClusters;
 
     /// Representative sorted cluster for this orbit
     Cluster _representativeCluster;
 
-private:
     /// Contains the permutations of the equivalent sites which takes it to the order of the reference cluster
     std::vector<std::vector<int>> _equivalentClusterPermutations;
 
@@ -179,9 +178,8 @@ private:
     std::set<std::vector<int>> _allowedClusterPermutations;
 };
 
-
 namespace std
 {
     /// Stream operator.
-    ostream& operator<<(ostream&, const Orbit&);
+    ostream &operator<<(ostream &, const Orbit &);
 }

@@ -7,9 +7,9 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 {
     _clusterSpace = clusterSpace;
     _supercell = structure;
-    LocalOrbitListGenerator LOLG = LocalOrbitListGenerator(clusterSpace.getOrbitList(), _supercell, fractionalPositionTolerance);
+    LocalOrbitListGenerator LOLG = LocalOrbitListGenerator(clusterSpace.getPrimitiveOrbitList(), _supercell, fractionalPositionTolerance);
     size_t uniqueOffsets = LOLG.getNumberOfUniqueOffsets();
-    int numberOfOrbits = _clusterSpace._orbitList.size();
+    int numberOfOrbits = _clusterSpace.getPrimitiveOrbitList().size();
     std::vector<Orbit> orbitVector;
     _fullOrbitList = LOLG.getFullOrbitList();
 
@@ -17,10 +17,10 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     for (auto &orbit : _fullOrbitList._orbits)
     {
         auto permutedClusters = orbit.getPermutedEquivalentClusters();
-        orbit._equivalentClusters = permutedClusters;
+        orbit.setEquivalentClusters(permutedClusters);
     }
 
-    for (const auto orbit : clusterSpace._orbitList._orbits)
+    for (const auto orbit : clusterSpace.getPrimitiveOrbitList().getOrbits())
     {
         orbitVector.push_back(Orbit(orbit.getRepresentativeCluster()));
     }
@@ -74,7 +74,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
                     auto primitiveSite = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(sitePosition, fractionalPositionTolerance);
                     primitiveEquivalentSites.push_back(primitiveSite);
                 }
-                std::vector<std::vector<LatticeSite>> translatedClusters = _clusterSpace._orbitList.getSitesTranslatedToUnitcell(primitiveEquivalentSites, false);
+                std::vector<std::vector<LatticeSite>> translatedClusters = _clusterSpace.getPrimitiveOrbitList().getSitesTranslatedToUnitcell(primitiveEquivalentSites, false);
 
                 for (auto translatedCluster : translatedClusters)
                 {
@@ -128,7 +128,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
             for (auto &orbit : _localOrbitlists[offsetVector]._orbits)
             {
                 auto permutedClusters = orbit.getPermutedEquivalentClusters();
-                orbit._equivalentClusters = permutedClusters;
+                orbit.setEquivalentClusters(permutedClusters);
             }
         }
     }
@@ -144,31 +144,31 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
                                                                        int flipIndex,
                                                                        int newOccupation)
 {
-    _supercell.setAtomicNumbers(occupationsBefore);
-
     if (occupationsBefore.size() != _supercell.size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getClusterVectorChange)");
     }
+    _supercell.setAtomicNumbers(occupationsBefore);
+
     if (flipIndex >= _supercell.size())
     {
         throw std::runtime_error("flipIndex larger than the length of the structure (ClusterExpansionCalculator::getClusterVectorChange)");
     }
 
-    // do not sort the clusters
-    bool keepOrder = true;
-
     // Get one of the translated orbitlists
     _translatedOrbitList = _localOrbitlists[_indexToOffset[flipIndex]];
 
     // Remove sites not containing the local index
-    if (_clusterSpace._primitiveStructure.size() > 1)
+    if (_clusterSpace.getPrimitiveStructure().size() > 1)
     {
         // true meaning we only look at zero offset sites
         _translatedOrbitList.removeClustersWithoutIndex(flipIndex, true);
     }
 
-    return _clusterSpace.occupyClusterVector(_translatedOrbitList, _supercell, 0.0, flipIndex, newOccupation);
+    // The first element in the cluster vector (difference) should be zero (because we take 1 - 1)
+    double firstElement = 0.0;
+
+    return _clusterSpace.occupyClusterVector(_translatedOrbitList, _supercell, firstElement, flipIndex, newOccupation);
 }
 
 /**
@@ -178,31 +178,27 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
 */
 std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::array_t<int> &occupations, int index)
 {
-    _supercell.setAtomicNumbers(occupations);
 
     if (occupations.size() != _supercell.size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getLocalClusterVector)");
     }
-
-    // do not sort the clusters
-    bool keepOrder = true;
-
-    // Count the clusters in the order as in the equivalent clusters
-    // since these clusters are already in the permuted order
-    bool permuteSites = false;
+    _supercell.setAtomicNumbers(occupations);
 
     // Get one of the translated orbitlists
     _translatedOrbitList = _localOrbitlists[_indexToOffset[index]];
 
     // Remove sites not containing the local index
-    if (_clusterSpace._primitiveStructure.size() > 1)
+    if (_clusterSpace.getPrimitiveStructure().size() > 1)
     {
         // true meaning we only look at zero offset sites
         _translatedOrbitList.removeClustersWithoutIndex(index, true);
     }
 
-    return _clusterSpace.occupyClusterVector(_translatedOrbitList, _supercell, 1.0 / _supercell.size(), index, -1);
+    // The first element can be thought of as shared between all sites when constructing a local orbit list
+    double firstElement = 1.0 / _supercell.size();
+
+    return _clusterSpace.occupyClusterVector(_translatedOrbitList, _supercell, firstElement, index);
 }
 
 /**
@@ -211,18 +207,11 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
 */
 std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array_t<int> &occupations)
 {
-    _supercell.setAtomicNumbers(occupations);
-
     if (occupations.size() != _supercell.size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getClusterVector)");
     }
+    _supercell.setAtomicNumbers(occupations);
 
-    // do not sort the clusters
-    bool keepOrder = true;
-
-    /// Do not permute the sites, because we have already done that after initializing _fullOrbitList
-    bool permuteSites = false;
-
-    return _clusterSpace.occupyClusterVector(_fullOrbitList, _supercell, 1.0, -1, -1);
+    return _clusterSpace.occupyClusterVector(_fullOrbitList, _supercell);
 }

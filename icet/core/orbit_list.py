@@ -2,7 +2,8 @@
 This module provides the OrbitList class.
 """
 
-from typing import List
+from typing import List, Dict
+from collections import Counter
 
 import numpy as np
 
@@ -135,3 +136,47 @@ class OrbitList(_OrbitList):
         number_of_allowed_species = [len(sym) for sym in allowed_species]
         prim_structure.set_number_of_allowed_species(number_of_allowed_species)
         self._remove_inactive_orbits(prim_structure)
+
+    def get_cluster_counts(self,
+                           structure: Atoms,
+                           fractional_position_tolerance: float,
+                           orbit_indices: List[int] = None) -> Dict[int, Counter]:
+        """
+        Counts all clusters in a structure by finding their local orbit list.
+
+        Parameters
+        ----------
+        structure
+            supercell for which to count clusters; this structure needs to
+            be commensurate with the structure this orbit list is based on
+        fractional_position_tolerance
+            tolerance applied when comparing positions in fractional coordinates
+        orbit_indices
+            indices of orbits, for which counts are requested; if `None` all
+            orbits will be counted
+
+        Returns
+        -------
+        Dictionary, the keys of which are orbit indices and the values
+        cluster counts. The latter are themselves dicts, with tuples
+        of chemical symbols as keys and the number of such clusters
+        as values.
+        """
+        supercell_orbit_list = self.get_supercell_orbit_list(
+            structure=structure,
+            fractional_position_tolerance=fractional_position_tolerance)
+
+        # Collect counts for all orbit_indices
+        if orbit_indices is None:
+            orbit_indices = range(len(self))
+        structure_icet = Structure.from_atoms(structure)
+        cluster_counts_full = {}
+        for i in orbit_indices:
+            orbit = supercell_orbit_list.get_orbit(i)
+            counts = orbit.count_clusters(structure_icet)
+            sorted_counts = Counter()
+            for symbols, count in counts.items():
+                sorted_symbols = tuple(sorted(symbols))
+                sorted_counts[sorted_symbols] += count
+            cluster_counts_full[i] = sorted_counts
+        return cluster_counts_full

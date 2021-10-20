@@ -10,13 +10,22 @@
 #include "VectorOperations.hpp"
 
 /**
-@brief
+@brief This struct keeps track of information pertaining to a specific element
+       in the cluster vector.
 */
 struct ClusterVectorElementInfo
 {
+  /// A multi-component vector contains the indices of the point functions
+  /// (only non-trivial if the number of components are more than two)
   std::vector<int> multiComponentVector;
+
+  /// Site permutations describe how the sites in the cluster can be re-ordered
   std::vector<std::vector<int>> sitePermutations;
+
+  /// The index in the cluster vector for this element
   int clusterVectorIndex;
+
+  /// Multiplicity for this cluster vector element
   double multiplicity;
 };
 
@@ -25,7 +34,6 @@ struct ClusterVectorElementInfo
 @details It provides functionality for setting up a cluster space, calculating
 cluster vectors as well as retrieving various types of associated information.
 */
-
 class ClusterSpace
 {
 public:
@@ -39,31 +47,23 @@ public:
   /// Returns information concerning the association between orbits and multi-component vectors.
   std::pair<int, std::vector<int>> getMultiComponentVectorsByOrbit(const unsigned int);
 
-  /// Returns the entire orbit list.
-  OrbitList getOrbitList() const { return _orbitList; }
+  /// Returns the entire primitive orbit list.
+  const OrbitList &getPrimitiveOrbitList() const { return _primitiveOrbitList; }
 
   /// Returns an orbit from the orbit list.
-  Orbit getOrbit(const size_t index) const { return _orbitList.getOrbit(index); }
-
-  /// Returns the native clusters.
-  /// @todo What is a native cluster? Partial answer: clusters within the unit cell?
-  std::unordered_map<Cluster, std::map<std::vector<int>, double>> getNativeClusters(const Structure &structure) const;
+  const Orbit getOrbit(const size_t index) const { return _primitiveOrbitList.getOrbit(index); }
 
   /// Returns the multi-component (MC) vector permutations for each MC vector in the set of input vectors.
-  /// @todo Clean up this description.
   std::vector<std::vector<std::vector<int>>> getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &, const int) const;
 
-  const std::vector<double> occupyClusterVector(const OrbitList &, const Structure &, const double, const int, const int) const;
+  /// Returns the cluster vector given the orbit list and a structure.
+  const std::vector<double> occupyClusterVector(const OrbitList &, const Structure &, const double firstElement = 1.0, const int flipIndex = -1, const int newOccupation = -1, const bool permuteClusters = false) const;
 
-public:
   /// Returns the cutoff for each order.
-  std::vector<double> getCutoffs() const
-  {
-    return _clusterCutoffs;
-  }
+  std::vector<double> getCutoffs() const { return _clusterCutoffs; }
 
   /// Returns the primitive structure.
-  Structure getPrimitiveStructure() const { return _primitiveStructure; }
+  const Structure &getPrimitiveStructure() const { return _primitiveStructure; }
 
   /// Returns the number of allowed components for each site.
   std::vector<int> getNumberOfAllowedSpeciesBySite(const Structure &, const std::vector<LatticeSite> &) const;
@@ -77,26 +77,28 @@ public:
   /// Returns the mapping between atomic numbers and the internal species enumeration scheme for each site.
   std::vector<std::unordered_map<int, int>> getSpeciesMaps() const { return _speciesMaps; }
 
-  /// Primitive orbit list based on the structure and the global cutoffs
-  /// @todo Make private.
-  OrbitList _orbitList;
-
   /// Returns the cluster product.
-  double evaluateClusterProduct(const std::vector<int> &, const std::vector<int> &, const std::vector<int> &, const std::vector<int> &) const;
+  double evaluateClusterProduct(const std::vector<int> &, const std::vector<int> &, const std::vector<int> &, const std::vector<int> &, const std::vector<int> &) const;
 
   /// Returns the default cluster function.
   double evaluateClusterFunction(const int, const int, const int) const;
 
-  /// Computes permutations and multicomponent vectors of each orbit.
+  /// Computes permutations and multi-component vectors of each orbit.
   void computeMultiComponentVectors();
 
   /// Removes orbits.
   void removeOrbits(std::vector<size_t> &);
 
+  /// Merge orbits.
+  void mergeOrbits(const int index1, const int index2) { _primitiveOrbitList._orbits[index1] += _primitiveOrbitList._orbits[index2]; }
+
+private:
   /// Primitive (prototype) structure.
   Structure _primitiveStructure;
 
-private:
+  /// Primitive orbit list based on the structure and the cutoffs.
+  OrbitList _primitiveOrbitList;
+
   /// Number of allowed components on each site of the primitive structure.
   std::vector<int> _numberOfAllowedSpeciesPerSite;
 
@@ -112,7 +114,9 @@ private:
   /// The allowed chemical symbols on each site in the primitive structure.
   std::vector<std::vector<std::string>> _chemicalSymbols;
 
+  /// Information about each cluster vector element (multiplicity, multi-component vectors etc.).
   std::vector<std::vector<ClusterVectorElementInfo>> _clusterVectorElementInfoList;
 
+  /// Length of the cluster vector.
   int _clusterVectorLength;
 };
