@@ -8,13 +8,11 @@
 Cluster::Cluster(const Structure &structure,
                  const std::vector<LatticeSite> &latticeSites)
 {
-    size_t clusterSize = latticeSites.size();
-    std::vector<int> sites(clusterSize);
+    _order = latticeSites.size();
     std::vector<double> distances;
-    distances.reserve((clusterSize * (clusterSize - 1) / 2));
+    distances.reserve((_order * (_order - 1) / 2));
     for (size_t i = 0; i < latticeSites.size(); i++)
     {
-        sites[i] = structure.getUniqueSite(latticeSites[i].index());
         for (size_t j = i + 1; j < latticeSites.size(); j++)
         {
             double distance = structure.getDistance(latticeSites[i].index(),
@@ -24,7 +22,6 @@ Cluster::Cluster(const Structure &structure,
             distances.push_back(distance);
         }
     }
-    _sites = sites;
     _distances = distances;
     _radius = icet::getGeometricalRadius(latticeSites, structure);
 }

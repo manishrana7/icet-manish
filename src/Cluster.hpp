@@ -22,21 +22,15 @@ public:
             const std::vector<LatticeSite> &latticeSites);
 
     /// Returns the order (i.e., the number of sites) of the cluster.
-    unsigned int order() const { return _sites.size(); }
+    unsigned int order() const { return _order; }
 
     /// Returns the radius of the cluster.
     double radius() const { return _radius; }
-
-    /// Returns the sites in the cluster.
-    std::vector<int> sites() const { return _sites; }
 
     /// Returns distances between points in the cluster.
     std::vector<double> distances() const { return _distances; }
 
 private:
-
-    /// List of lattice sites.
-    std::vector<int> _sites;
 
     /// List of distances between points in cluster.
     std::vector<double> _distances;
@@ -44,4 +38,6 @@ private:
     /// Cluster radius.
     double _radius;
 
+    /// Cluster order (i.e., is it a singlet (1), pair (2), triplet(3), etc.)
+    size_t _order;
 };

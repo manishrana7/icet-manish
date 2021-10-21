@@ -1,26 +1,23 @@
 #include "Structure.hpp"
 
 #include "FloatType.hpp"
-#include "PeriodicTable.hpp"
 
 using namespace Eigen;
 
 /**
   @details Initializes an icet Structure instance.
   @param positions list of positions in Cartesian coordinates
-  @param chemicalSymbols list of chemical symbols
+  @param atomicNumbers list of atomic numbers
   @param cell cell metric
   @param pbc periodic boundary conditions
 **/
 Structure::Structure(const Matrix<double, Dynamic, 3, RowMajor> &positions,
-                     const std::vector<std::string> &chemicalSymbols,
+                     const py::array_t<int> &atomicNumbers,
                      const Matrix3d &cell,
                      const std::vector<bool> &pbc)
-    : _cell(cell), _pbc(pbc)
+    : _atomicNumbers(atomicNumbers), _cell(cell), _pbc(pbc)
 {
     setPositions(positions);
-    setChemicalSymbols(chemicalSymbols);
-    _uniqueSites.resize(chemicalSymbols.size());
     _numbersOfAllowedSpecies.resize(positions.rows());
 }
 
@@ -100,45 +97,6 @@ int Structure::getAtomicNumber(const size_t index) const
 }
 
 /**
-  @details This function sets the symmetrically distinct sites associated with
-      the structure. It requires a vector as input the length of which  must
-      match the number of positions.
-  @param sites list of integers
-**/
-void Structure::setUniqueSites(const std::vector<size_t> &sites)
-{
-    if (sites.size() != (size_t)_positions.rows())
-    {
-        std::ostringstream msg;
-        msg << "Length of input vector does not match number of sites";
-        msg << " nsites: " << sites.size();
-        msg << " positions: " << _positions.rows();
-        msg << " (Structure::setUniqueSites)";
-        throw std::out_of_range(msg.str());
-    }
-    _uniqueSites = sites;
-}
-
-/**
-  @details This function returns the index of a unique site from the list of unique sites.
-  @param i index of site
-  @returns index of unique site
-**/
-size_t Structure::getUniqueSite(const size_t i) const
-{
-    if (i >= _uniqueSites.size())
-    {
-        std::ostringstream msg;
-        msg << "Site index out of bounds";
-        msg << " i: " << i;
-        msg << " nsites: " << _uniqueSites.size();
-        msg << " (Structure::getUniqueSite)";
-        throw std::out_of_range(msg.str());
-    }
-    return _uniqueSites[i];
-}
-
-/**
   @details This function returns the LatticeSite object the position of
   which matches the input position to the tolerance specified for this
   structure.
@@ -185,30 +143,6 @@ LatticeSite Structure::findLatticeSiteByPosition(const Vector3d &position, const
 }
 
 /**
-  @details This function returns a list ofLatticeSite object the position
-  of each matches the respective entry in the list of input positions to the
-  tolerance specified for this structure. Internally this function uses
-  Structure::findLatticeSiteByPosition.
-
-  @param positions list of position to match in Cartesian coordinates
-  @param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
-
-  @returns list of LatticeSite objects
-*/
-std::vector<LatticeSite> Structure::findLatticeSitesByPositions(const std::vector<Vector3d> &positions, const double fractionalPositionTolerance) const
-{
-    std::vector<LatticeSite> latticeSites;
-    latticeSites.reserve(positions.size());
-
-    for (const Vector3d position : positions)
-    {
-        latticeSites.push_back(findLatticeSiteByPosition(position, fractionalPositionTolerance));
-    }
-
-    return latticeSites;
-}
-
-/**
   @details This function allows one to specify the number of components
   that are allowed on each lattice site via a vector. This can be employed to
   construct "parallel" cluster expansions such as in (A,B) on site #1 with
@@ -227,19 +161,6 @@ void Structure::setNumberOfAllowedSpecies(const std::vector<int> &numbersOfAllow
         msg << " (Structure::setNumberOfAllowedSpecies)";
         throw std::out_of_range(msg.str());
     }
-    _numbersOfAllowedSpecies = numbersOfAllowedSpecies;
-}
-
-/**
-  @details This function allows one to specify the number of components
-  that are allowed on each lattice site via a scalar. This can be employed to
-  construct "parallel" cluster expansions such as in (A,B) on site #1 with
-  (C,D) on site #2.
-  @param numberOfAllowedSpecies number of components allowed
-**/
-void Structure::setNumberOfAllowedSpecies(const int numberOfAllowedSpecies)
-{
-    std::vector<int> numbersOfAllowedSpecies(_atomicNumbers.size(), numberOfAllowedSpecies);
     _numbersOfAllowedSpecies = numbersOfAllowedSpecies;
 }
 
@@ -278,33 +199,4 @@ std::vector<int> Structure::getNumberOfAllowedSpeciesBySites(const std::vector<L
         numberOfAllowedSpecies[i] = getNumberOfAllowedSpeciesBySite(site.index());
     }
     return numberOfAllowedSpecies;
-}
-
-/**
-  @details This function turns a list of chemical symbols into a list of atomic numbers.
-  @param chemicalSymbols vector of chemical symbols (strings) to be converted
-**/
-py::array_t<int> Structure::convertChemicalSymbolsToAtomicNumbers(const std::vector<std::string> &chemicalSymbols) const
-{
-    std::vector<int> atomicNumbers(chemicalSymbols.size());
-    for (size_t i = 0; i < chemicalSymbols.size(); i++)
-    {
-        atomicNumbers[i] = PeriodicTable::strInt[chemicalSymbols[i]];
-    }
-
-    return py::array(atomicNumbers.size(), atomicNumbers.data());
-}
-
-/**
-  @details This function turns a list of atomic numbers into a list of chemical symbols.
-  @param atomicNumbers vector of atomic numbers (ints) to be converted
-**/
-std::vector<std::string> Structure::convertAtomicNumbersToChemicalSymbols(const py::array_t<int> &atomicNumbers) const
-{
-    std::vector<std::string> chemicalSymbols(atomicNumbers.size());
-    for (size_t i = 0; i < atomicNumbers.size(); i++)
-    {
-        chemicalSymbols[i] = PeriodicTable::intStr[atomicNumbers.at(i)];
-    }
-    return chemicalSymbols;
 }

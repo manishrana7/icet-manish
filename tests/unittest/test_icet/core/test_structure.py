@@ -36,7 +36,7 @@ class TestStructure(unittest.TestCase):
         self.fractional_position_tolerance = 2e-6
         self.positions = [[0., 0., 0.],
                           [0., 1.15470054, 1.63299316]]
-        self.chemical_symbols = ['Ag', 'Ag']
+        self.atomic_numbers = [47, 47]
         self.cell = [[2., 0., 0.],
                      [-1., 1.73205081, 0.],
                      [0., 0., 3.26598632]]
@@ -49,7 +49,7 @@ class TestStructure(unittest.TestCase):
         """Setup before each test."""
         self.icet_structure = Structure(
             positions=self.positions,
-            chemical_symbols=self.chemical_symbols,
+            atomic_numbers=self.atomic_numbers,
             cell=self.cell,
             pbc=[True, True, True])
         random.seed(113)
@@ -64,11 +64,6 @@ class TestStructure(unittest.TestCase):
         retval = self.icet_structure.positions
         for i, vec in enumerate(retval):
             self.assertListEqual(vec.tolist(), new_positions[i])
-
-    def test_chemical_symbols(self):
-        """Tests chemical symbols of atoms in structure."""
-        self.assertListEqual(self.icet_structure.chemical_symbols,
-                             self.chemical_symbols)
 
     def test_atomic_numbers(self):
         """Tests atomic numbers."""
@@ -94,29 +89,11 @@ class TestStructure(unittest.TestCase):
         retval = self.icet_structure.pbc
         self.assertListEqual(retval, [True, True, False])
 
-    def test_unique_sites(self):
-        """Tests unique sites."""
-        self.assertListEqual(self.icet_structure.unique_sites,
-                             [0, 0])
-
-    def test_set_and_get_chemical_symbols(self):
-        """Tests set and get chemical symbols."""
-        new_chemical_symbols = ['Au', 'Au']
-        self.icet_structure.set_chemical_symbols(new_chemical_symbols)
-        retval = self.icet_structure.get_chemical_symbols()
-        self.assertListEqual(retval, new_chemical_symbols)
-
     def test_set_and_get_atomic_numbers(self):
         """Tests set and get atomic numbers."""
-        self.icet_structure.set_atomic_numbers([48, 47])
-        retval = list(self.icet_structure.get_atomic_numbers())
+        self.icet_structure.atomic_numbers = [48, 47]
+        retval = list(self.icet_structure.atomic_numbers)
         self.assertListEqual(retval, [48, 47])
-
-    def test_set_and_get_unique_sites(self):
-        """Tests set and get unique sites."""
-        self.icet_structure.set_unique_sites([0, 1])
-        retval = self.icet_structure.get_unique_sites()
-        self.assertListEqual(retval, [0, 1])
 
     def test_get_position(self):
         """Tests get_position functionality."""
@@ -294,8 +271,7 @@ class TestStructure(unittest.TestCase):
         for icet_pos, ase_pos in zip(icet_structure.positions, self.ase_atoms.positions):
             self.assertListEqual(icet_pos.tolist(), ase_pos.tolist())
 
-        chem_symbols = icet_structure.get_chemical_symbols()
-        self.assertListEqual(chem_symbols, ['Ag', 'Ag'])
+        self.assertListEqual(list(icet_structure.atomic_numbers), [47, 47])
 
     def test_structure_to_atoms(self):
         """Tests icet Structure-to-ASE Atoms conversion."""
@@ -315,9 +291,9 @@ Cell:
  [-1.          1.73205081  0.        ]
  [ 0.          0.          3.26598632]]
 
-Element and positions:
-Ag  [0.0  0.0  0.0]
-Ag  [0.0  1.15470054  1.63299316]
+Atomic numbers and positions:
+47  [0.0  0.0  0.0]
+47  [0.0  1.15470054  1.63299316]
 """
         self.assertEqual(strip_surrounding_spaces(retval),
                          strip_surrounding_spaces(target))
