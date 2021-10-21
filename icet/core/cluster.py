@@ -12,8 +12,7 @@ __all__ = ['Cluster']
 
 
 def _from_python(ase_structure: Atoms,
-                 lattice_sites: List[LatticeSite],
-                 cluster_index: int = -1):
+                 lattice_sites: List[LatticeSite]):
     """
     Constructs a cluster from an ASE Atoms object and Python lattice sites.
 
@@ -23,8 +22,6 @@ def _from_python(ase_structure: Atoms,
         structure as ASE Atoms object
     lattice_sites
         lattice site objects
-    cluster_index
-        index used to identify cluster
     """
 
     structure = Structure.from_atoms(ase_structure)
@@ -32,7 +29,7 @@ def _from_python(ase_structure: Atoms,
     lattice_sites_cpp = [
         LatticeSite(ls.index, ls.unitcell_offset) for ls in lattice_sites]
 
-    return Cluster(structure, lattice_sites_cpp, cluster_index)
+    return Cluster(structure, lattice_sites_cpp)
 
 
 Cluster.from_python = _from_python
