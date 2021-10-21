@@ -224,16 +224,8 @@ def system(request):
 
     # Make a supercell as well as an "inverted" version of the supercell,
     # the latter with the purpose of more easily decide how atoms can be changed
-<<<<<<< HEAD
-    structure = prim.repeat((2, 2, 3))
-    anti_structure = prim.copy()
-    for atom in anti_structure:
-        atom.symbol = get_complementary_chemical_symbol(atom.symbol, chemical_symbols)
-    anti_structure = anti_structure.repeat((2, 2, 3))
-=======
     structure = prim.repeat(repeat)
     inverted_structure = get_inverted_structure(structure, cs)
->>>>>>> master
 
     # Occupy supercell according to some pattern
     if supercell == 'homogeneous':

@@ -193,7 +193,6 @@ void Orbit::removeClustersWithoutIndex(const size_t index, bool onlyConsiderSite
     }
 }
 
-
 /**
 @param cluster cluster to be removed (represented by a list of sites); the order of sites is irrelevant
 */
@@ -311,6 +310,7 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
     std::vector<int> elementsNew(order());
     int siteIndex;
     int occupation;
+
     for (const auto &sites : _equivalentClusters)
     {
         for (size_t i = 0; i < sites.size(); i++)
