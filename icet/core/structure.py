@@ -1,36 +1,93 @@
 """
 This module provides the Structure class.
 """
+from typing import List, Sequence
+from ase import Atom, Atoms
 
-from ase import Atoms
+from _icet import _Structure
+from .lattice_site import LatticeSite
 
-from _icet import Structure
 
-
-@classmethod
-def _structure_from_atoms(self, conf: Atoms):
+class Structure(_Structure):
     """
-    Returns the input configuration as an icet Structure object.
+    This class stores the cell metric, positions, chemical symbols,
+    and periodic boundary conditions that describe a structure. It
+    also holds information pertaining to the components that are
+    allowed on each site and provides functionality for computing
+    distances between sites.
 
     Parameters
     ----------
-    conf
-        input configuration
-
-    Returns
-    -------
-    atomic configuration
+    positions : list(list(float))
+        list of positions in Cartesian coordinates
+    atomic_numbers : list(int)
+        chemical symbol of each case
+    cell : list(list(float))
+            cell metric
+    pbc : list(bool)
+        periodic boundary conditions
     """
-    return self(conf.positions,
-                conf.get_chemical_symbols(),
-                conf.cell,
-                conf.pbc.tolist())
+
+    def __init__(self,
+                 positions: List[List[float]],
+                 atomic_numbers: List[int],
+                 cell: List[List[float]],
+                 pbc: List[bool]) -> None:
+        _Structure.__init__(self,
+                            positions=positions,
+                            atomic_numbers=atomic_numbers,
+                            cell=cell,
+                            pbc=pbc)
+
+    @classmethod
+    def from_atoms(self, conf: Atoms):
+        """
+        Returns the input configuration as an icet Structure object.
+
+        Parameters
+        ----------
+        conf
+            input configuration
+
+        Returns
+        -------
+        atomic configuration
+        """
+        return self(conf.positions,
+                    conf.get_atomic_numbers(),
+                    conf.cell,
+                    conf.pbc.tolist())
+
+    def __str__(self) -> str:
+        s = ['Cell:']
+        s += ['{}\n'.format(self.cell)]
+        s += ['Atomic numbers and positions:']
+        for atomic_number, position in zip(self.atomic_numbers, self.positions):
+            s += ['{}  [{:}  {:}  {:}]'.format(atomic_number, *position)]
+        return '\n'.join(s)
+
+    def find_lattice_sites_by_positions(self,
+                                        positions: List[Sequence],
+                                        fractional_position_tolerance: float) -> List[LatticeSite]:
+        """
+        Returns the lattice sites that match the positions.
+
+        Parameters
+        ----------
+        positions
+            list of positions in Cartesian coordinates
+        fractional_position_tolerance
+            tolerance for positions in fractional coordinates
+        """
+        lattice_sites = []
+        for position in positions:
+            lattice_sites.append(self.find_lattice_site_by_position(
+                position=position,
+                fractional_position_tolerance=fractional_position_tolerance))
+        return lattice_sites
 
 
-Structure.from_atoms = _structure_from_atoms
-
-
-def _structure_to_atoms(self) -> Atoms:
+def _structure_to_atoms(obj) -> Atoms:
     """
     Returns the structure as an ASE Atoms object.
 
@@ -38,24 +95,15 @@ def _structure_to_atoms(self) -> Atoms:
     -------
     atomic configuration
     """
-    import ase
-    conf = ase.Atoms(pbc=self.pbc)
-    conf.set_cell(self.cell)
-    for symbol, position in zip(self.chemical_symbols, self.positions):
-        conf.append(ase.Atom(symbol, position))
+    conf = Atoms(pbc=obj.pbc)
+    conf.set_cell(obj.cell)
+    for atomic_number, position in zip(obj.atomic_numbers, obj.positions):
+        conf.append(Atom(atomic_number, position))
     return conf
 
 
-Structure.to_atoms = _structure_to_atoms
-
-
-def _str_function(self) -> str:
-    s = ['Cell:']
-    s += ['{}\n'.format(self.cell)]
-    s += ['Element and positions:']
-    for symbol, position in zip(self.chemical_symbols, self.positions):
-        s += ['{}  [{:}  {:}  {:}]'.format(symbol, *position)]
-    return '\n'.join(s)
-
-
-Structure.__str__ = _str_function
+# We want to be able to create ASE Atoms objects also if we
+# have a _Structure object (returned from the C++ side) and not
+# only if we have a Structure object, so we bind this function
+# to _Structure instead of Structure
+_Structure.to_atoms = _structure_to_atoms

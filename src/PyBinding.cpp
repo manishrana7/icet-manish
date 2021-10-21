@@ -85,33 +85,15 @@ PYBIND11_MODULE(_icet, m)
     py::options options;
     options.disable_function_signatures();
 
-    py::class_<Structure>(m, "Structure",
-                          R"pbdoc(
-        This class stores the cell metric, positions, chemical symbols,
-        and periodic boundary conditions that describe a structure. It
-        also holds information pertaining to the components that are
-        allowed on each site and provides functionality for computing
-        distances between sites.
-
-        Parameters
-        ----------
-        positions : list(list(float))
-            list of positions in Cartesian coordinates
-        chemical_symbols : list(str)
-            chemical symbol of each case
-        cell : list(list(float))
-             cell metric
-        pbc : list(bool)
-            periodic boundary conditions
-        )pbdoc")
+    py::class_<Structure>(m, "_Structure")
         .def(py::init<>())
         .def(py::init<const Eigen::Matrix<double, Dynamic, 3, Eigen::RowMajor> &,
-                      const std::vector<std::string> &,
+                      const py::array_t<int> &,
                       const Eigen::Matrix3d &,
                       const std::vector<bool> &>(),
              "Initializes an icet Structure instance.",
              py::arg("positions"),
-             py::arg("chemical_symbols"),
+             py::arg("atomic_numbers"),
              py::arg("cell"),
              py::arg("pbc"))
         .def_property(
@@ -129,65 +111,10 @@ PYBIND11_MODULE(_icet, m)
             &Structure::getPositions,
             &Structure::setPositions,
             "list(list(float)) : atomic positions in Cartesian coordinates")
-        .def("get_atomic_numbers",
-             &Structure::getAtomicNumbers,
-             "Returns a list of the species occupying each site by atomic number.")
-        .def("set_atomic_numbers",
-             &Structure::setAtomicNumbers,
-             py::arg("atomic_numbers"),
-             R"pbdoc(
-             Sets the species occupying each site by atomic number.
-
-             Parameters
-             ----------
-             atomic_numbers : list(int)
-                new species by atomic number
-         )pbdoc")
         .def_property("atomic_numbers",
                       &Structure::getAtomicNumbers,
                       &Structure::setAtomicNumbers,
                       "list(int) : atomic numbers of species on each site")
-        .def("get_chemical_symbols",
-             &Structure::getChemicalSymbols,
-             "Returns a list of the species occupying each site by chemical symbol.")
-        .def("set_chemical_symbols",
-             &Structure::setChemicalSymbols,
-             py::arg("chemical_symbols"),
-             R"pbdoc(
-             Sets the species occupying each site by chemical symbol.
-
-             Parameters
-             ----------
-             chemical_symbols : list(str)
-                new species by chemical symbol
-         )pbdoc")
-        .def_property("chemical_symbols",
-                      &Structure::getChemicalSymbols,
-                      &Structure::setChemicalSymbols,
-                      "list(str) : chemical symbols of species on each site")
-        .def("set_unique_sites",
-             &Structure::setUniqueSites,
-             py::arg("unique_sites"),
-             R"pbdoc(
-             Sets the unique sites.
-
-             This method allows one to specify for each site in the structure
-             the unique site it is related to.
-
-             Parameters
-             ----------
-             unique_sites : list(int)
-                site of interest
-         )pbdoc")
-        .def("get_unique_sites",
-             &Structure::getUniqueSites,
-             R"pbdoc(
-             Returns the unique sites.
-
-             Returns
-             -------
-             list(int)
-         )pbdoc")
         .def("set_number_of_allowed_species",
              (void (Structure::*)(const std::vector<int> &)) & Structure::setNumberOfAllowedSpecies,
              py::arg("numbersOfAllowedSpecies"),
@@ -200,40 +127,6 @@ PYBIND11_MODULE(_icet, m)
              Parameters
              ----------
              numbersOfAllowedSpecies : list(int)
-             )pbdoc")
-        .def("set_number_of_allowed_species",
-             (void (Structure::*)(const int)) & Structure::setNumberOfAllowedSpecies,
-             py::arg("numbersOfAllowedSpecies"),
-             R"pbdoc(
-             Sets the number of allowed species on each site.
-
-             This method allows one to specify for each site in the structure
-             the number of species allowed on that site.
-
-             Parameters
-             ----------
-             numbersOfAllowedSpecies : int
-             )pbdoc")
-        .def_property(
-            "unique_sites",
-            &Structure::getUniqueSites,
-            &Structure::setUniqueSites,
-            "list(int) : unique sites")
-        .def("get_unique_site",
-             &Structure::getUniqueSite,
-             py::arg("index"),
-             R"pbdoc(
-             Returns the unique site.
-
-             Parameters
-             ----------
-             index : int
-                 index of site of interest
-
-             Returns
-             -------
-             int
-                 index of unique site
              )pbdoc")
         .def("get_position",
              &Structure::getPosition,
@@ -295,25 +188,6 @@ PYBIND11_MODULE(_icet, m)
              )pbdoc",
              py::arg("position"),
              py::arg("fractional_position_tolerance"))
-        .def("find_lattice_sites_by_positions",
-             &Structure::findLatticeSitesByPositions,
-             R"pbdoc(
-             Returns the lattice sites that match the positions.
-
-             Parameters
-             ----------
-             positions : list(list) or list(ndarray)
-                 list of positions in Cartesian coordinates
-             fractional_position_tolerance : float
-                 tolerance for positions in fractional coordinates
-
-             Returns
-             -------
-             list(_icet.LatticeSite)
-                 list of lattice sites
-             )pbdoc",
-             py::arg("positions"),
-             py::arg("fractional_position_tolerance"))
         .def("__len__", &Structure::size);
 
     // @todo document ManyBodyNeighborList in pybindings
@@ -345,10 +219,6 @@ PYBIND11_MODULE(_icet, m)
             "distances",
             &Cluster::distances,
             "list(float) : list of distances between sites")
-        .def_property_readonly(
-            "sites",
-            &Cluster::sites,
-            "list(int) : list of distances between sites")
         .def_property_readonly(
             "radius",
             &Cluster::radius,

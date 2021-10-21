@@ -8,6 +8,7 @@ from icet.core.cluster import Cluster
 from icet.core.orbit import Orbit
 from icet.core.orbit_list import OrbitList
 from icet.core.structure import Structure
+from _icet import _Structure
 from icet.tools.geometry import get_permutation
 from icet.core.matrix_of_equivalent_positions import \
     _get_lattice_site_matrix_of_equivalent_positions, \
@@ -165,7 +166,7 @@ class TestOrbitList(unittest.TestCase):
     def test_get_primitive_structure(self):
         """ Tests get primitive structure functionality. """
         self.assertIsInstance(
-            self.orbit_list.get_primitive_structure(), Structure)
+            self.orbit_list.get_primitive_structure(), _Structure)
 
     def test_len(self):
         """Tests length of orbit list."""
