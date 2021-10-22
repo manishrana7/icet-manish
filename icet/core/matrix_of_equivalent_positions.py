@@ -9,7 +9,6 @@ import numpy as np
 import spglib
 
 from ase import Atoms
-from _icet import MatrixOfEquivalentPositions
 from icet.core.lattice_site import LatticeSite
 from icet.core.neighbor_list import get_neighbor_lists
 from icet.core.structure import Structure
@@ -21,13 +20,62 @@ from icet.tools.geometry import (ase_atoms_to_spglib_cell,
 logger = logger.getChild('matrix_of_equivalent_positions')
 
 
+class MatrixOfEquivalentPositions:
+    """
+    This class handles a matrix of equivalent positions given the symmetry
+    elements of an atomic structure.
+
+    Parameters
+    ----------
+    translations : np.ndarray
+        Translational symmetry elements
+    rotations: np.ndarray
+        Rotational symmetry elements
+    """
+
+    def __init__(self, translations: np.ndarray, rotations: np.ndarray):
+        if len(translations) != len(rotations):
+            raise ValueError(f'The number of translations ({len(translations)})'
+                             f' must equal the number of rotations ({len(rotations)}).')
+        self.n_symmetries = len(rotations)
+        self.translations = np.array(translations)
+        self.rotations = np.array(rotations)
+
+    def build(self, fractional_positions: np.ndarray) -> None:
+        """
+        Builds a matrix of symmetry equivalent positions given a set of input
+        coordinates using the rotational and translational symmetries provided upon
+        initialization of the object.
+
+        Parameters
+        ----------
+        fractional_positions
+            Atomic positions in fractional coordinates
+            Dimensions: (number of atoms, 3 fractional coordinates)
+        """
+        positions = np.dot(self.rotations, fractional_positions.transpose())
+        positions = np.moveaxis(positions, 2, 0)
+        translations = self.translations[np.newaxis, :].repeat(len(fractional_positions), axis=0)
+        positions += translations
+        self.positions = positions
+
+    def get_equivalent_positions(self) -> np.ndarray:
+        """
+        Returns matrix of equivalent positions. Each row corresponds
+        to a set of symmetry equivalent positions. The entry in the
+        first column is commonly treated as the representative position.
+        Dimensions: (number of atoms, number of symmetries, 3 fractional coordinates)
+        """
+        return self.positions
+
+
 def matrix_of_equivalent_positions_from_structure(structure: Atoms,
                                                   cutoff: float,
                                                   position_tolerance: float,
                                                   symprec: float,
                                                   find_primitive: bool = True) \
         -> Tuple[np.ndarray, Structure, List]:
-    """Sets up a list of permutation maps from an Atoms object.
+    """Sets up a matrix of equivalent positions from an Atoms object.
 
     Parameters
     ----------
@@ -44,15 +92,15 @@ def matrix_of_equivalent_positions_from_structure(structure: Atoms,
 
     Returns
     -------
-    The tuple that is returned comprises the permutation matrix, the
-    primitive structure, and the neighbor list.
+    The tuple that is returned comprises the matrix of equivalent positions,
+    the primitive structure, and the neighbor list.
     """
 
     structure = structure.copy()
     structure_prim = structure
     if find_primitive:
         structure_prim = get_primitive_structure(structure, symprec=symprec)
-    logger.debug('Size of primitive structure: {}'.format(len(structure_prim)))
+    logger.debug(f'Size of primitive structure: {len(structure_prim)}')
 
     # get symmetry information
     structure_as_tuple = ase_atoms_to_spglib_cell(structure_prim)
@@ -60,10 +108,10 @@ def matrix_of_equivalent_positions_from_structure(structure: Atoms,
     translations = symmetry['translations']
     rotations = symmetry['rotations']
 
-    # set up a permutation map object
+    # set up a MatrixOfEquivalentPositions object
     matrix_of_equivalent_positions = MatrixOfEquivalentPositions(translations, rotations)
 
-    # create neighbor_lists from the different cutoffs
+    # create neighbor lists
     prim_icet_structure = Structure.from_atoms(structure_prim)
 
     neighbor_list = get_neighbor_lists(prim_icet_structure,
@@ -74,7 +122,7 @@ def matrix_of_equivalent_positions_from_structure(structure: Atoms,
     frac_positions = get_fractional_positions_from_neighbor_list(
         prim_icet_structure, neighbor_list)
 
-    logger.debug('Number of fractional positions: {}'.format(len(frac_positions)))
+    logger.debug(f'Number of fractional positions: {len(frac_positions)}')
     if frac_positions is not None:
         matrix_of_equivalent_positions.build(frac_positions)
 
@@ -87,56 +135,50 @@ def _get_lattice_site_matrix_of_equivalent_positions(
         fractional_position_tolerance: float,
         prune: bool = True) -> np.ndarray:
     """
-    Returns a transformed permutation matrix with lattice sites as entries
-    instead of fractional coordinates.
+    Returns a transformed matrix of equivalent positions with lattice sites as
+    entries instead of fractional coordinates.
 
     Parameters
     ----------
     structure
-        primitive atomic icet structure
+        primitive structure
     matrix_of_equivalent_positions
-        permutation matrix with fractional coordinates format entries
+        matrix of equivalent positions with fractional coordinates format entries
     fractional_position_tolerance
         tolerance applied when evaluating distances in fractional coordinates
     prune
-        if True the permutation matrix will be pruned
+        if True the matrix of equivalent positions will be pruned
 
     Returns
     -------
-    permutation matrix in a row major order with lattice site format entries
+    matrix of equivalent positions in row major order with entries in lattice site format
     """
-    pm_frac = matrix_of_equivalent_positions.get_equivalent_positions()
+    eqpos_frac = matrix_of_equivalent_positions.get_equivalent_positions()
 
-    pm_lattice_sites = []
-    for row in pm_frac:
+    eqpos_lattice_sites = []
+    for row in eqpos_frac:
         positions = _fractional_to_cartesian(row, structure.cell)
         lattice_sites = []
         if np.all(structure.pbc):
             lattice_sites = structure.find_lattice_sites_by_positions(
                 positions=positions, fractional_position_tolerance=fractional_position_tolerance)
         else:
-            for pos in positions:
-                try:
-                    lattice_site = structure.find_lattice_site_by_position(
-                        position=pos, fractional_position_tolerance=fractional_position_tolerance)
-                except RuntimeError:
-                    continue
-                lattice_sites.append(lattice_site)
+            raise ValueError('Input structure must have periodic boundary conditions.')
         if lattice_sites is not None:
-            pm_lattice_sites.append(lattice_sites)
+            eqpos_lattice_sites.append(lattice_sites)
         else:
             logger.warning('Unable to transform any element in a column of the'
-                           ' fractional permutation matrix to lattice site')
+                           ' fractional matrix of equivalent positions to lattice site')
     if prune:
-        logger.debug('Size of columns of the permutation matrix before'
-                     ' pruning {}'.format(len(pm_lattice_sites)))
+        logger.debug('Size of columns of the matrix of equivalent positions before'
+                     ' pruning {}'.format(len(eqpos_lattice_sites)))
 
-        pm_lattice_sites = _prune_matrix_of_equivalent_positions(pm_lattice_sites)
+        eqpos_lattice_sites = _prune_matrix_of_equivalent_positions(eqpos_lattice_sites)
 
-        logger.debug('Size of columns of the permutation matrix after'
-                     ' pruning {}'.format(len(pm_lattice_sites)))
+        logger.debug('Size of columns of the matrix of equivalent positions after'
+                     ' pruning {}'.format(len(eqpos_lattice_sites)))
 
-    return pm_lattice_sites
+    return eqpos_lattice_sites
 
 
 def _prune_matrix_of_equivalent_positions(matrix_of_equivalent_positions: List[List[LatticeSite]]):
@@ -155,7 +197,7 @@ def _prune_matrix_of_equivalent_positions(matrix_of_equivalent_positions: List[L
                 continue
             if matrix_of_equivalent_positions[i][0] == matrix_of_equivalent_positions[j][0]:
                 matrix_of_equivalent_positions.pop(j)
-                logger.debug('Removing duplicate in permutation matrix'
+                logger.debug('Removing duplicate in matrix of equivalent positions'
                              'i: {} j: {}'.format(i, j))
     return matrix_of_equivalent_positions
 

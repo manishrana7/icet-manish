@@ -16,7 +16,6 @@ SET(SourceFiles
   LatticeSite.cpp
   LocalOrbitListGenerator.cpp
   ManyBodyNeighborList.cpp
-  MatrixOfEquivalentPositions.cpp
   Orbit.cpp
   OrbitList.cpp
   PyBinding.cpp
