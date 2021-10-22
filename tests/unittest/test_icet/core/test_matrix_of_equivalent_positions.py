@@ -57,6 +57,12 @@ class TestMatrixOfEquivalentPositions(unittest.TestCase):
         """Test initializer."""
         self.assertIsInstance(self.pm, MatrixOfEquivalentPositions)
 
+    def test_init_with_nonmatching_symmetries(self):
+        """Test that exception is raised when symmetries do not match."""
+        with self.assertRaises(ValueError) as context:
+            MatrixOfEquivalentPositions(self.translations, self.rotations[:-1])
+        self.assertIn('The number of translations', str(context.exception))
+
     def test_dimension_matrix_of_equivalent_positions(self):
         """
         Tests dimensions of permutation matrix. Number of rows should

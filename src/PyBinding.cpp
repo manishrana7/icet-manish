@@ -15,7 +15,6 @@
 #include "Orbit.hpp"
 #include "OrbitList.hpp"
 #include "PeriodicTable.hpp"
-#include "MatrixOfEquivalentPositions.hpp"
 #include "Structure.hpp"
 #include "Symmetry.hpp"
 
@@ -57,11 +56,6 @@ PYBIND11_MODULE(_icet, m)
         ManyBodyNeighborList
         --------------------
         .. autoclass:: ManyBodyNeighborList
-           :members:
-
-        MatrixOfEquivalentPositions
-        ---------------------------
-        .. autoclass:: MatrixOfEquivalentPositions
            :members:
 
         Orbit
@@ -242,41 +236,6 @@ PYBIND11_MODULE(_icet, m)
                  return msg.str();
              });
     ;
-
-    py::class_<::MatrixOfEquivalentPositions>(m, "MatrixOfEquivalentPositions",
-                                              R"pbdoc(
-             This class handles a matrix of equivalent positions. Each row
-             corresponds to a set of symmetry equivalent positions. The entry in the
-             first column is commonly treated as the representative position.
-
-             Parameters
-             ----------
-             translations : list(list(float))
-                 translational symmetry operations
-             rotations : list(list(float))
-                 rotational symmetry operations
-             )pbdoc")
-        .def(py::init<const std::vector<Vector3d> &,
-                      const std::vector<Matrix3d> &>(),
-             "Initializes a matrix of equivalent positions.",
-             py::arg("translations"),
-             py::arg("rotations"))
-        .def("build",
-             &MatrixOfEquivalentPositions::build,
-             R"pbdoc(Generates the matrix of symmetry equivalent positions given a set of input
-             coordinates. To this end, the function uses the rotational and translational
-             symmetries provided when initializing the object.
-
-             Parameters
-             ----------
-			 fractional_positions : list(list(float))
-			 	positions of sites in fractional coordinates
-
-             )pbdoc",
-             py::arg("fractional_positions"))
-        .def("get_equivalent_positions",
-             &MatrixOfEquivalentPositions::getEquivalentPositions,
-             "Returns the matrix of symmetry equivalent positions.");
 
     py::class_<LatticeSite>(m, "LatticeSite",
                             R"pbdoc(
