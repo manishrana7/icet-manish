@@ -144,24 +144,7 @@ pages:
   script:
     - mkdir -p public/dev
     - mv htmlcov/ public/
-    # --------------------------
-    # STABLE VERSION
-    - tag=$(git tag | tail -1)
-    - echo "tag= $tag"
-    - git checkout $tag
-    - cd doc/apidoc/
-    - doxygen Doxyfile
-    - cd ../..
-    - mv doc/apidoc/html/ public/apidoc/
-    - ORIG_PYTHONPATH=$PYTHONPATH
-    - export PYTHONPATH=$PWD:$PYTHONPATH
-    - sphinx-build -W doc/userguide/source/ public/
-    - cd examples
-    - find tutorial/ -print | zip ../public/tutorial.zip -@
-    - find advanced_topics/ -print | zip ../public/advanced_topics.zip -@
-    - cd ..
-    - find tests/ -print | zip public/tests.zip tests/structure_databases/*.db -@
-    - export PYTHONPATH=$ORIG_PYTHONPATH
+
     # --------------------------
     # DEVELOPMENT VERSION
     - git checkout master
@@ -179,6 +162,28 @@ pages:
     - find advanced_topics/ -print | zip ../public/dev/advanced_topics.zip -@
     - cd ..
     - find tests/ -print | zip public/dev/tests.zip tests/structure_databases/*.db -@
+    - git checkout -- doc/userguide/conf.py
+    # --------------------------
+    # STABLE VERSION
+    - tag=$(git tag | tail -1)
+    - echo "tag= $tag"
+    - git checkout $tag
+    # We need to re-install because C++ objects are imported when building the documentation 
+    - pip3 install --upgrade --force-reinstall --target=$INSTDIR .
+    - cd doc/apidoc/
+    - doxygen Doxyfile
+    - cd ../..
+    - mv doc/apidoc/html/ public/apidoc/
+    - sed -i "s/version = ''/version = '$tag'/" doc/userguide/source/conf.py
+    - ORIG_PYTHONPATH=$PYTHONPATH
+    - export PYTHONPATH=$PWD:$PYTHONPATH
+    - sphinx-build -W doc/userguide/source/ public/
+    - cd examples
+    - find tutorial/ -print | zip ../public/tutorial.zip -@
+    - find advanced_topics/ -print | zip ../public/advanced_topics.zip -@
+    - cd ..
+    - find tests/ -print | zip public/tests.zip tests/structure_databases/*.db -@
+    - export PYTHONPATH=$ORIG_PYTHONPATH
     # --------------------------
     - ls -l public/
 
