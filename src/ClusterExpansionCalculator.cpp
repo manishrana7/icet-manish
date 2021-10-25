@@ -155,20 +155,10 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
         throw std::runtime_error("flipIndex larger than the length of the structure (ClusterExpansionCalculator::getClusterVectorChange)");
     }
 
-    // Get one of the translated orbitlists
-    _translatedOrbitList = _localOrbitlists[_indexToOffset[flipIndex]];
-
-    // Remove sites not containing the local index
-    if (_clusterSpace.getPrimitiveStructure().size() > 1)
-    {
-        // true meaning we only look at zero offset sites
-        _translatedOrbitList.removeClustersWithoutIndex(flipIndex, true);
-    }
-
     // The first element in the cluster vector (difference) should be zero (because we take 1 - 1)
     double firstElement = 0.0;
 
-    return _clusterSpace.occupyClusterVector(_translatedOrbitList, _supercell, firstElement, flipIndex, newOccupation);
+    return _clusterSpace.occupyClusterVector(_localOrbitlists[_indexToOffset[flipIndex]], _supercell, firstElement, flipIndex, newOccupation);
 }
 
 /**
@@ -185,20 +175,10 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
     }
     _supercell.setAtomicNumbers(occupations);
 
-    // Get one of the translated orbitlists
-    _translatedOrbitList = _localOrbitlists[_indexToOffset[index]];
-
-    // Remove sites not containing the local index
-    if (_clusterSpace.getPrimitiveStructure().size() > 1)
-    {
-        // true meaning we only look at zero offset sites
-        _translatedOrbitList.removeClustersWithoutIndex(index, true);
-    }
-
     // The first element can be thought of as shared between all sites when constructing a local orbit list
     double firstElement = 1.0 / _supercell.size();
 
-    return _clusterSpace.occupyClusterVector(_translatedOrbitList, _supercell, firstElement, index);
+    return _clusterSpace.occupyClusterVector(_localOrbitlists[_indexToOffset[index]], _supercell, firstElement, index);
 }
 
 /**

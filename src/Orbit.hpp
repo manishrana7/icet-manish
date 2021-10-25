@@ -86,9 +86,6 @@ public:
     /// Returns true if the input sites exists in _equivalentClusters, order does not matter if sorted=false.
     bool contains(const std::vector<LatticeSite>, bool) const;
 
-    /// Removes all clusters from the list of equivalent clusters that do not contain the site with the given index.
-    void removeClustersWithoutIndex(const size_t index, bool);
-
     /// Remove a specific cluster (defined by a list of lattice sites) from the list of equivalent clusters.
     void removeCluster(std::vector<LatticeSite>);
 
@@ -96,7 +93,7 @@ public:
     std::map<std::vector<int>, double> countClusters(const Structure &, int doNotDoubleCountThisSiteIndex = -1, const bool permuteClusters = false) const;
 
     /// Counts changes in the occupation of clusters in this orbit
-    std::map<std::vector<int>, double> countClusterChanges(const Structure &, const int, const int, int doNotDoubleCountThisSiteIndex = -1, const bool permuteClusters = false) const;
+    std::map<std::vector<int>, double> countClusterChanges(const Structure &, const int, const int, const bool permuteClusters = false) const;
 
     /// Comparison operator for automatic sorting in containers.
     friend bool operator==(const Orbit &orbit1, const Orbit &orbit2)
@@ -176,6 +173,8 @@ private:
 
     /// Contains the allowed sites permutations. i.e. if 0,2,1 is in this set then 0,1,0 is the same MC vector as 0,0,1
     std::set<std::vector<int>> _allowedClusterPermutations;
+
+    bool isSiteIncluded(const int, const std::vector<LatticeSite> &) const;
 };
 
 namespace std

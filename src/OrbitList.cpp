@@ -103,14 +103,12 @@ OrbitList::OrbitList(const Structure &structure,
             _orbits.back().addEquivalentCluster(cluster);
         }
         _orbits.back().sort();
-
     }
 
     addPermutationInformationToOrbits();
 
     // Sort the orbit list.
     sort(positionTolerance);
-
 }
 
 /**
@@ -120,7 +118,7 @@ OrbitList::OrbitList(const Structure &structure,
 void OrbitList::sort(const double positionTolerance)
 {
     std::sort(_orbits.begin(), _orbits.end(),
-              [positionTolerance](const Orbit& lhs, const Orbit& rhs)
+              [positionTolerance](const Orbit &lhs, const Orbit &rhs)
               {
                   // Test against number of bodies in cluster.
                   if (lhs.getRepresentativeCluster().order() != rhs.getRepresentativeCluster().order())
@@ -151,7 +149,8 @@ void OrbitList::sort(const double positionTolerance)
 /**
 @param orbit orbit to add to orbit list
 **/
-void OrbitList::addOrbit(const Orbit &orbit) {
+void OrbitList::addOrbit(const Orbit &orbit)
+{
     _orbits.push_back(orbit);
 }
 
@@ -160,7 +159,7 @@ void OrbitList::addOrbit(const Orbit &orbit) {
 @param index index of orbit
 @returns reference to orbit
 **/
-const Orbit& OrbitList::getOrbit(unsigned int index) const
+const Orbit &OrbitList::getOrbit(unsigned int index) const
 {
     if (index >= size())
     {
@@ -407,7 +406,7 @@ std::vector<std::vector<LatticeSite>> OrbitList::getSitesTranslatedToUnitcell(co
     Vector3d zeroVector = {0.0, 0.0, 0.0};
     for (size_t i = 0; i < latticeSites.size(); i++)
     {
-        if ((latticeSites[i].unitcellOffset() - zeroVector).norm() > 0.5)  // only translate those outside unitcell
+        if ((latticeSites[i].unitcellOffset() - zeroVector).norm() > 0.5) // only translate sites outside the primitive unitcell
         {
             auto translatedSites = translateSites(latticeSites, i);
             if (sort)
@@ -554,7 +553,7 @@ bool OrbitList::validCluster(const std::vector<LatticeSite> &latticeSites) const
 @return indices of entries in latticeSites that are equivalent to sites in the reference lattice sites
 **/
 std::vector<int> OrbitList::getIndicesOfEquivalentLatticeSites(const std::vector<LatticeSite> &latticeSites,
-							                                   bool sort) const
+                                                               bool sort) const
 {
     std::vector<int> rows;
     for (const auto &latticeSite : latticeSites)
@@ -700,20 +699,6 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &supercell,
 }
 
 /**
-@details This function will loop over all orbits in the list and remove from each orbit the clusters that _do _not_ match the given index.
-@param index the index for which to check
-@param onlyConsiderZeroOffset if true only clusters with zero offset will be removed
-**/
-void OrbitList::removeClustersWithoutIndex(const int index,
-                                           bool onlyConsiderZeroOffset)
-{
-    for (auto &orbit : _orbits)
-    {
-        orbit.removeClustersWithoutIndex(index, onlyConsiderZeroOffset);
-    }
-}
-
-/**
 @details This function removes an orbit identified by index from the orbit list.
 @param index index of the orbit in question
 **/
@@ -738,7 +723,8 @@ void OrbitList::removeInactiveOrbits(const Structure &structure)
     for (int i = _orbits.size() - 1; i >= 0; i--)
     {
         auto numberOfAllowedSpecies = structure.getNumberOfAllowedSpeciesBySites(_orbits[i].getSitesOfRepresentativeCluster());
-        if (std::any_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n) { return n < 2; }))
+        if (std::any_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n)
+                        { return n < 2; }))
         {
             removeOrbit(i);
         }
@@ -760,7 +746,7 @@ OrbitList &OrbitList::operator+=(const OrbitList &rhs_ol)
 
     if (size() != rhs_ol.size())
     {
-	    std::ostringstream msg;
+        std::ostringstream msg;
         msg << "Left (" << size() << ") and right hand side (" << rhs_ol.size();
         msg << ") differ in size (OrbitList& operator+=).";
         throw std::runtime_error(msg.str());

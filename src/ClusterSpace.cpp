@@ -342,7 +342,7 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
         std::map<std::vector<int>, double> counts;
         if (newOccupation > -1)
         {
-            counts = currentOrbit.countClusterChanges(supercell, flipIndex, newOccupation, flipIndex, permuteClusters);
+            counts = currentOrbit.countClusterChanges(supercell, flipIndex, newOccupation, permuteClusters);
         }
         else
         {
