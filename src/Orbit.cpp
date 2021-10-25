@@ -165,35 +165,6 @@ bool Orbit::contains(const std::vector<LatticeSite> cluster, bool sorted) const
 }
 
 /**
-@param index site index
-@param onlyConsiderSitesWithZeroOffset if true only consider sites with zero offset
-*/
-void Orbit::removeClustersWithoutIndex(const size_t index, bool onlyConsiderSitesWithZeroOffset)
-{
-    for (int i = _equivalentClusters.size() - 1; i >= 0; i--)
-    {
-        if (onlyConsiderSitesWithZeroOffset)
-        {
-            if (std::none_of(_equivalentClusters[i].begin(), _equivalentClusters[i].end(), [=](LatticeSite &ls)
-                             { return ls.index() == index && ls.unitcellOffset().norm() < 1e-4; }))
-            {
-                _equivalentClusters.erase(_equivalentClusters.begin() + i);
-                _equivalentClusterPermutations.erase(_equivalentClusterPermutations.begin() + i);
-            }
-        }
-        else
-        {
-            if (std::none_of(_equivalentClusters[i].begin(), _equivalentClusters[i].end(), [=](LatticeSite &ls)
-                             { return ls.index() == index; }))
-            {
-                _equivalentClusters.erase(_equivalentClusters.begin() + i);
-                _equivalentClusterPermutations.erase(_equivalentClusterPermutations.begin() + i);
-            }
-        }
-    }
-}
-
-/**
 @param cluster cluster to be removed (represented by a list of sites); the order of sites is irrelevant
 */
 void Orbit::removeCluster(std::vector<LatticeSite> cluster)
@@ -218,22 +189,37 @@ void Orbit::removeCluster(std::vector<LatticeSite> cluster)
 }
 
 /**
+@brief Check whether a site is included in a cluster
+@details A cluster will count as included if index is among the lattice sites
+         that have a zero offset.
+@param index Index of site to check whether it is included
+@param cluster
+    Vector of LatticeSite, at least one of which must contain index for this
+    function to return true
+*/
+bool Orbit::isSiteIncluded(int index, const std::vector<LatticeSite> &cluster) const
+{
+    return std::any_of(cluster.begin(), cluster.end(), [=](const LatticeSite &ls)
+                       { return ls.index() == index && ls.unitcellOffset().norm() < 1e-4; });
+}
+
+/**
  @brief Count the occupations of the clusters in this orbit.
  @details
     Note that the orderings of the sites in the clusters matter, meaning,
     for example, that (47, 79) will be counted separately from (79, 47)
     (here 47 and 79 are atomic numbers).
  @param structure the structure that will have its clusters counted
- @param siteIndexForDoubleCountCorrection
+ @param siteIndexForDoubleCountingCorrection
    In small supercells, clusters may include both a site and its periodic image.
    In such cases this argument can be used to avoid double counting.
    Clusters in which a site with this index occurs more than once will only be counted with
    a factor 1/n, where n is the number of occurrences of this index. By default
-   (i.e. siteIndexForDoubleCountCorrection = -1) no such correction is applied.
+   (i.e. siteIndexForDoubleCountingCorrection = -1) no such correction is applied.
  @param permuteClusters If true, permute clusters equivalent clusters before counting
 */
 std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structure,
-                                                        int siteIndexForDoubleCountCorrection,
+                                                        int siteIndexForDoubleCountingCorrection,
                                                         bool permuteClusters) const
 {
     if (permuteClusters)
@@ -249,21 +235,26 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
     std::vector<int> elements(order());
     for (const auto &sites : _equivalentClusters)
     {
-        for (size_t i = 0; i < sites.size(); i++)
+        // If we apply the double counting correction for some site we need
+        // to ensure that we only count clusters that include this site.
+        if (siteIndexForDoubleCountingCorrection < 0 || isSiteIncluded(siteIndexForDoubleCountingCorrection, sites))
         {
-            elements[i] = structure.getAtomicNumbers().at(sites[i].index());
+            for (size_t i = 0; i < sites.size(); i++)
+            {
+                elements[i] = structure.getAtomicNumbers().at(sites[i].index());
+            }
+            double unit = 1;
+            // If the current atom (siteIndexForDoubleCountingCorrection) occurs more than once,
+            // we risk double counting it if we calculate a change in cluster vector or
+            // a local cluster vector. To avoid this, we count the clusters in units of
+            // 1 / n, where n is the number of occurences of the present atom in the cluster.
+            if (siteIndexForDoubleCountingCorrection > -1)
+            {
+                unit /= (double)std::count_if(sites.begin(), sites.end(), [=](LatticeSite ls)
+                                              { return ls.index() == siteIndexForDoubleCountingCorrection; });
+            }
+            tmpCounts[elements] += unit;
         }
-        double unit = 1;
-        // If the current atom (siteIndexForDoubleCountCorrection) occurs more than once,
-        // we risk double counting it if we calculate a change in cluster vector or
-        // a local cluster vector. To avoid this, we count the clusters in units of
-        // 1 / n, where n is the number of occurences of the present atom in the cluster.
-        if (siteIndexForDoubleCountCorrection > -1)
-        {
-            unit /= (double)std::count_if(sites.begin(), sites.end(), [=](LatticeSite ls)
-                                          { return ls.index() == siteIndexForDoubleCountCorrection; });
-        }
-        tmpCounts[elements] += unit;
     }
     return tmpCounts;
 }
@@ -282,18 +273,11 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
  @param structure the structure for which to count clusters, with occupations before change
  @param flipIndex index of site that has been flipped
  @param newOccupation new atomic number of site that has been flipped
- @param siteIndexForDoubleCountCorrection
-   In small supercells, clusters may include both a site and its periodic image.
-   In such cases this argument can be used to avoid double counting.
-   Clusters in which a site with this index occurs more than once will only be counted with
-   a factor 1/n, where n is the number of occurrences of this index. By default
-   (i.e. siteIndexForDoubleCountCorrection = -1) no such correction is applied.
  @param permuteClusters If true, permute clusters equivalent clusters before counting (not yet implemented, should normally never be done)
 */
 std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &structure,
                                                               const int flipIndex,
                                                               const int newOccupation,
-                                                              int siteIndexForDoubleCountCorrection,
                                                               const bool permuteClusters) const
 {
     if (permuteClusters)
@@ -313,36 +297,36 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
 
     for (const auto &sites : _equivalentClusters)
     {
-        for (size_t i = 0; i < sites.size(); i++)
+        // Only count clusters where site flipIndex is included (with zero offset)
+        if (isSiteIncluded(flipIndex, sites))
         {
-            siteIndex = sites[i].index();
-            occupation = structure.getAtomicNumbers().at(siteIndex);
-            elementsOld[i] = occupation;
+            for (size_t i = 0; i < sites.size(); i++)
+            {
+                siteIndex = sites[i].index();
+                occupation = structure.getAtomicNumbers().at(siteIndex);
+                elementsOld[i] = occupation;
 
-            // If the present site index is the one that was changed,
-            // we need to use a different atomic number
-            if (siteIndex == flipIndex)
-            {
-                elementsNew[i] = newOccupation;
+                // If the present site is the one that was changed,
+                // we need to use a different atomic number
+                if (siteIndex == flipIndex)
+                {
+                    elementsNew[i] = newOccupation;
+                }
+                else
+                {
+                    elementsNew[i] = occupation;
+                }
             }
-            else
-            {
-                elementsNew[i] = occupation;
-            }
-        }
-        double unit = 1;
-        // If the present atom (siteIndexForDoubleCountCorrection) occurs more than once,
-        // we risk double counting it if we calculate a change in cluster vector or
-        // a local cluster vector. To avoid this, we count the clusters in units of
-        // 1 / n, where n is the number of occurences of the present atom in the cluster.
-        if (siteIndexForDoubleCountCorrection > -1)
-        {
+            double unit = 1;
+            // If the current site (flipIndex) occurs more than once,
+            // we risk double counting it. To avoid this, we count the clusters in units of
+            // 1 / n, where n is the number of occurrences of the present atom in the cluster.
             unit /= (double)std::count_if(sites.begin(), sites.end(), [=](LatticeSite ls)
-                                          { return ls.index() == siteIndexForDoubleCountCorrection; });
+                                          { return ls.index() == flipIndex; });
+            // The old cluster has disappeared and we got elementNew instead
+            tmpCounts[elementsOld] -= unit;
+            tmpCounts[elementsNew] += unit;
         }
-        // The old cluster has disappeared and we have gotten elementNew instead; count that
-        tmpCounts[elementsOld] -= unit;
-        tmpCounts[elementsNew] += unit;
     }
     return tmpCounts;
 }

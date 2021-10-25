@@ -18,10 +18,9 @@ This class serves as a container for a sorted list of orbits and provides associ
 
 class OrbitList
 {
-  public:
-
+public:
     /// Empty constructor.
-    OrbitList() { };
+    OrbitList(){};
 
     /// Constructs orbit list from a set of neighbor lists, a matrix of equivalent sites, and a structure.
     OrbitList(const Structure &,
@@ -39,7 +38,7 @@ class OrbitList
     OrbitList &operator+=(const OrbitList &);
 
     /// Returns the orbit of the given index.
-    const Orbit& getOrbit(unsigned int) const;
+    const Orbit &getOrbit(unsigned int) const;
 
     /// Returns an orbit in the given (supercell) structure.
     Orbit getSuperCellOrbit(const Structure &,
@@ -104,14 +103,11 @@ class OrbitList
     /// @todo Clarify description.
     /// First construct rows_sort = sorted(rows)  then returns true/false if rows_sort exists in taken_rows
     bool isRowsTaken(const std::unordered_set<std::vector<int>,
-                     VectorHash> &,
+                                              VectorHash> &,
                      std::vector<int>) const;
 
     /// Finds and returns sites in first column of matrix of equivalent sites along with their unit cell translated indistinguishable sites.
     std::vector<std::vector<LatticeSite>> getAllColumnsFromCluster(const std::vector<LatticeSite> &) const;
-
-    /// Removes from each orbit all clusters in equivalent sites that _do not_ involve the given site.
-    void removeClustersWithoutIndex(const int, bool);
 
     /// Returns the first column of the matrix of equivalent sites used to construct the orbit list.
     std::vector<LatticeSite> getFirstColumnOfMatrixOfEquivalentSites() const { return _referenceLatticeSites; }
@@ -135,13 +131,11 @@ class OrbitList
     void setPrimitiveStructure(const Structure &primitive) { _primitiveStructure = primitive; }
 
 public:
-
     /// Contains all the orbits in the orbit list.
     /// @todo why is this not private?
     std::vector<Orbit> _orbits;
 
 private:
-
     /// @todo Add description.
     std::vector<LatticeSite> _referenceLatticeSites;
 

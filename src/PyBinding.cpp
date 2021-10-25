@@ -363,12 +363,12 @@ PYBIND11_MODULE(_icet, m)
             "count_clusters",
             [](const Orbit &orbit,
                const Structure &structure,
-               const int siteIndexForDoubleCountCorrection,
+               const int siteIndexForDoubleCountingCorrection,
                const int permuteClusters)
             {
                 py::dict clusterCountDict;
                 for (const auto &mapPair : orbit.countClusters(structure,
-                                                               siteIndexForDoubleCountCorrection,
+                                                               siteIndexForDoubleCountingCorrection,
                                                                permuteClusters))
                 {
                     py::list element_symbols;
@@ -394,14 +394,14 @@ PYBIND11_MODULE(_icet, m)
              ----------
              structure : Structure
                 Structure to count clusters for
-             site_index_for_double_count_correction : int
+             site_index_for_double_counting_correction : int
                 Avoid double counting clusters containing this index
                 (default -1, no such correction)
              permute_clusters : bool
                 Permute clusters before counting (default: false)
              )pbdoc",
             py::arg("structure"),
-            py::arg("site_index_for_double_count_correction") = -1,
+            py::arg("site_index_for_double_counting_correction") = -1,
             py::arg("permute_sites") = false)
         .def("sort", &Orbit::sort,
              "Sorts the list of equivalent sites.")
