@@ -73,9 +73,6 @@ private:
     /// The unique offsets of the primitive cell required to "cover" the supercell.
     std::vector<Vector3d> _uniquePrimcellOffsets;
 
-    /// The sub permutation matrices that will together map the basis atoms unto the supercell.
-    std::vector<Matrix3i> _subPermutationMatrices;
-
     /// Tolerance applied when comparing positions in Cartesian coordinates.
     double _fractionalPositionTolerance;
 };
