@@ -28,9 +28,6 @@ std::vector<Vector3d> getUniqueOffsets() const;
 
 std::vector<Vector3d> primToSupercellMap() const;
 
-///clears primToSupercellMap and unique offsets
-void reset();
-
 etc...
 */
 
@@ -46,9 +43,6 @@ public:
 
     /// Generates the full orbit list from this structure.
     OrbitList getFullOrbitList();
-
-    /// Clears the unordered_map and the vector.
-    void clear();
 
     /// Returns the number of unique offsets.
     size_t getNumberOfUniqueOffsets() const { return _uniquePrimcellOffsets.size(); }
@@ -74,9 +68,6 @@ private:
 
     /// Finds the position of the atom that is closest to the origin.
     Vector3d getClosestToOrigin();
-
-    ///
-    Vector3d _positionClosestToOrigin;
 
     size_t _indexToClosestAtom;
     /// The unique offsets of the primitive cell required to "cover" the supercell.

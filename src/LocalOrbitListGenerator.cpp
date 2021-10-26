@@ -122,10 +122,3 @@ OrbitList LocalOrbitListGenerator::getFullOrbitList()
     }
     return orbitList;
 }
-
-// Clears the unordered_map and the vector.
-void LocalOrbitListGenerator::clear()
-{
-    _primToSupercellMap.clear();
-    _uniquePrimcellOffsets.clear();
-}

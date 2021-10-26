@@ -79,19 +79,6 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
                 for sites in orbit.equivalent_clusters:
                     self.assertIn(sites, orbit_.equivalent_clusters)
 
-    def test_clear(self):
-        """
-        Tests vector of unique offsets and primitive to supercell mapping
-        are cleared.
-        """
-
-        self.lolg.generate_local_orbit_list(2)
-        self.lolg.clear()
-        offsets_count = self.lolg.get_number_of_unique_offsets()
-        self.assertEqual(offsets_count, 0)
-        mapping = self.lolg._get_primitive_to_supercell_map()
-        self.assertEqual(len(mapping), 0)
-
     def test_unique_offset_count(self):
         """
         Tests number of unique offsets corresponds to the number of atoms

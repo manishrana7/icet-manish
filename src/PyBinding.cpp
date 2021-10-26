@@ -603,9 +603,6 @@ PYBIND11_MODULE(_icet, m)
              Generates and returns a local orbit list, which orbits included the equivalent sites
              of all local orbit list in the supercell.
              )pbdoc")
-        .def("clear",
-             &LocalOrbitListGenerator::clear,
-             "Clears the list of offsets and primitive-to-supercell map of the LocalOrbitListGenerator object.")
         .def("get_number_of_unique_offsets",
              &LocalOrbitListGenerator::getNumberOfUniqueOffsets,
              "Returns the number of unique offsets")
