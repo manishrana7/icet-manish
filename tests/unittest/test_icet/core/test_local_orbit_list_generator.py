@@ -38,7 +38,7 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
             self.orbit_list, self.supercell,
             fractional_position_tolerance=self.fractional_position_tolerance)
 
-    def test_generate_local_orbit_list_from_index(self):
+    def test_generate_local_orbit_list(self):
         """
         Tests that function generates an orbit list from
         an index of a specific offset of the primitive structure.
@@ -47,23 +47,6 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
 
         for index, offset in enumerate(unique_offsets):
             local_orbit_list = self.lolg.generate_local_orbit_list(index)
-            for orbit_prim, orbit_super in zip(self.orbit_list.orbits,
-                                               local_orbit_list.orbits):
-                for site_p, site_s in zip(orbit_prim.sites_of_representative_cluster,
-                                          orbit_super.sites_of_representative_cluster):
-                    site_p.unitcell_offset += offset
-                    pos_super = self.supercell.get_position(site_s)
-                    pos_prim = self.primitive.get_position(site_p)
-                    self.assertTrue(np.all(np.isclose(pos_super, pos_prim)))
-
-    def test_generate_local_orbit_list_from_offset(self):
-        """
-        Tests that function generates an orbit list for the given
-        offset of the primitive structure.
-        """
-        unique_offsets = self.lolg._get_unique_primcell_offsets()
-        for offset in unique_offsets:
-            local_orbit_list = self.lolg.generate_local_orbit_list(offset)
             for orbit_prim, orbit_super in zip(self.orbit_list.orbits,
                                                local_orbit_list.orbits):
                 for site_p, site_s in zip(orbit_prim.sites_of_representative_cluster,
@@ -90,8 +73,8 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
         as equivalent sites in the full orbit list.
         """
         fol = self.lolg.generate_full_orbit_list()
-        for offset in self.lolg._get_unique_primcell_offsets():
-            lol = self.lolg.generate_local_orbit_list(offset)
+        for index, _ in enumerate(self.lolg._get_unique_primcell_offsets()):
+            lol = self.lolg.generate_local_orbit_list(index)
             for orbit, orbit_ in zip(lol.orbits, fol.orbits):
                 for sites in orbit.equivalent_clusters:
                     self.assertIn(sites, orbit_.equivalent_clusters)
@@ -121,8 +104,8 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
         """Tests primitive to supercell mapping."""
         unique_offsets = self.lolg._get_unique_primcell_offsets()
 
-        for offset in unique_offsets:
-            self.lolg.generate_local_orbit_list(offset)
+        for index, _ in enumerate(unique_offsets):
+            self.lolg.generate_local_orbit_list(index)
             mapping = self.lolg._get_primitive_to_supercell_map()
             for sites_prim, sites_super in mapping.items():
                 pos_super = self.supercell.get_position(sites_super)
@@ -183,8 +166,8 @@ class TestLocalOrbitListGeneratorHCP(unittest.TestCase):
         offset of the primitive structure.
         """
         unique_offsets = self.lolg._get_unique_primcell_offsets()
-        for offset in unique_offsets:
-            local_orbit_list = self.lolg.generate_local_orbit_list(offset)
+        for index, offset in enumerate(unique_offsets):
+            local_orbit_list = self.lolg.generate_local_orbit_list(index)
             for orbit_prim, orbit_super in zip(self.orbit_list.orbits,
                                                local_orbit_list.orbits):
                 for site_p, site_s in zip(orbit_prim.sites_of_representative_cluster,
@@ -206,8 +189,8 @@ class TestLocalOrbitListGeneratorHCP(unittest.TestCase):
         """Tests primitive to supercell mapping."""
         unique_offsets = self.lolg._get_unique_primcell_offsets()
 
-        for offset in unique_offsets:
-            self.lolg.generate_local_orbit_list(offset)
+        for index, _ in enumerate(unique_offsets):
+            self.lolg.generate_local_orbit_list(index)
             mapping = self.lolg._get_primitive_to_supercell_map()
             for sites_prim, sites_super in mapping.items():
                 pos_super = self.supercell.get_position(sites_super)

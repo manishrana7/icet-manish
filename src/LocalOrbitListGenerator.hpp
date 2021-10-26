@@ -44,9 +44,6 @@ public:
     /// Generates and returns the local orbit list with the input index.
     OrbitList getLocalOrbitList(const size_t);
 
-    /// Generates and returns the local orbit list with the input offset (require that the offset is in uniquecell offset?).
-    OrbitList getLocalOrbitList(const Vector3d &);
-
     /// Generates the full orbit list from this structure.
     OrbitList getFullOrbitList();
 
@@ -63,7 +60,6 @@ public:
     std::vector<Vector3d> getUniquePrimitiveCellOffsets() const { return _uniquePrimcellOffsets; }
 
 private:
-
     /// Maps supercell positions to reference.
     void mapSitesAndFindCellOffsets();
 

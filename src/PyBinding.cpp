@@ -597,17 +597,6 @@ PYBIND11_MODULE(_icet, m)
                  index of the unique offsets list
              )pbdoc",
              py::arg("index"))
-        .def("generate_local_orbit_list",
-             (OrbitList(LocalOrbitListGenerator::*)(const Vector3d &)) & LocalOrbitListGenerator::getLocalOrbitList,
-             R"pbdoc(
-             Generates and returns the local orbit list from a specific offset of the primitive structure.
-
-             Parameters
-             ----------
-             unique_offset : numpy.ndarray
-                 offset of the primitive structure
-             )pbdoc",
-             py::arg("unique_offset"))
         .def("generate_full_orbit_list",
              &LocalOrbitListGenerator::getFullOrbitList,
              R"pbdoc(
