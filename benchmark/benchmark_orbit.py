@@ -46,9 +46,9 @@ def init_cpp_orbit(number_of_sites):
 
     pair_cluster = Cluster.from_python(
         structure, [lattice_site_for_cluster[0],
-                    lattice_site_for_cluster[1]], True)
+                    lattice_site_for_cluster[1]])
     triplet_cluster = Cluster.from_python(
-        structure, lattice_site_for_cluster, True)
+        structure, lattice_site_for_cluster)
 
     orbit_pair_cpp = Orbit(pair_cluster)
     orbit_pair_cpp.equivalent_clusters = lattice_sites_pairs_cpp
