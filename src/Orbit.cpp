@@ -1,5 +1,12 @@
 #include "Orbit.hpp"
 
+/**
+@details This constructor creates an orbit from a set of equivalent clusters and a structure.
+         Note that the sites of each cluster need to be ordered in a consistent manner
+         (this ordering is enforced when Orbits are created from the OrbitList class)
+@param equivalentClusters The clusters that together make up the orbit.
+@param structure structure that this orbit relates to
+**/
 Orbit::Orbit(std::vector<std::vector<LatticeSite>> equivalentClusters, const Structure &structure)
 {
     _representativeCluster = Cluster(structure, equivalentClusters[0]);
