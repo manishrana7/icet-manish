@@ -6,24 +6,22 @@ Installation
 General users
 =============
 
-Installation via pip
---------------------
+Installation via ``pip`` or ``conda``
+-------------------------------------
 
-Stable versions of :program:`icet` are provided via `PyPi
-<https://pypi.org/>`_. This implies that :program:`icet` can be installed via::
+Stable versions of :program:`icet` are provided via `PyPi <https://pypi.org/project/icet/>`_ and as part of `conda-forge <https://anaconda.org/conda-forge/icet>`_.
+This implies that :program:`icet` can be installed using `pip` via::
 
     pip3 install icet --user
 
-or alternatively::
+or using `conda` via::
 
-    python3 -m pip install icet --user
+    conda install -c conda-forge icet
 
-As the package is provided as a `source distribution
-<https://packaging.python.org/glossary/#term-source-distribution-or-sdist>`_
-the C++ core library is compiled as part of the installation. This requires a
-C++11 compliant compiler to be installed on your system, e.g., `GCC 4.8.1 and
-above <https://gcc.gnu.org/projects/cxx-status.html#cxx11>`_ or
-`Clang 3.3 and above <https://clang.llvm.org/cxx_status.html>`_.
+The `PyPI` package is provided as a `source distribution <https://packaging.python.org/glossary/#term-Source-Distribution-or-sdist>`_.
+As a result, the C++ core library has to be compiled as part of the installation, which requires a C++11 compliant compiler to be installed on your system, e.g., `GCC 4.8.1 and above <https://gcc.gnu.org/projects/cxx-status.html#cxx11>`_ or `Clang 3.3 and above <https://clang.llvm.org/cxx_status.html>`_.
+By contrast the `conda` package contains pre-compiled binaries.
+
 
 Installation via ``setup.py``
 -----------------------------
