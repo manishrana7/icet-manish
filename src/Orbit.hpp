@@ -61,7 +61,7 @@ public:
     void setAllowedClusterPermutations(std::set<std::vector<int>> &permutations) { _allowedClusterPermutations = permutations; }
 
     /// Gets the allowed permutations of clusters.
-    std::set<std::vector<int>> getAllowedClusterPermutations() const { return _allowedClusterPermutations; }
+    const std::set<std::vector<int>> &getAllowedClusterPermutations() const { return _allowedClusterPermutations; }
 
     /// Returns the relevant multicomponent vectors of this orbit given the number of allowed components.
     std::vector<std::vector<int>> getMultiComponentVectors(const std::vector<int> &Mi_local) const;
@@ -70,9 +70,6 @@ public:
 
     /// Returns true if the input sites exists in _equivalentClusters, order does not matter if sorted=false.
     bool contains(const std::vector<LatticeSite>, bool) const;
-
-    /// Remove a specific cluster (defined by a list of lattice sites) from the list of equivalent clusters.
-    void removeCluster(std::vector<LatticeSite>);
 
     /// Counts occupations of clusters in this orbit
     std::map<std::vector<int>, double> countClusters(const Structure &, int doNotDoubleCountThisSiteIndex = -1) const;
@@ -138,6 +135,7 @@ private:
     /// Contains the allowed sites permutations. i.e. if 0,2,1 is in this set then 0,1,0 is the same MC vector as 0,0,1
     std::set<std::vector<int>> _allowedClusterPermutations;
 
+    /// Check whether a site is included in a vector of lattice sites
     bool isSiteIncluded(const int, const std::vector<LatticeSite> &) const;
 };
 

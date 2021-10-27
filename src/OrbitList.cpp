@@ -160,7 +160,7 @@ const Orbit &OrbitList::getOrbit(unsigned int index) const
 
 /**
 @details
-This function adds permutation related information to the orbits.
+This function makes sure that the clusters in the orbit are properly permuted before the orbit is created.
 
 Algorithm
 ---------
@@ -277,8 +277,6 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
                 if (findOnePerm != p_equal_set.end()) // one perm is one of the equivalent sites. This means that eqOrbitSites is associated to p_equal
                 {
                     permutedEquivalentClusters.push_back(perm);
-                    //std::vector<int> permutationToEquivalentSites = icet::getPermutation<LatticeSite>(onePermPair.first, onePermPair.second);
-                    //sitePermutations.push_back(permutationToEquivalentSites);
                     break;
                 }
                 if (perm == translatedPermutationsOfSites.back())
