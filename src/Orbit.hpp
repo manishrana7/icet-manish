@@ -25,7 +25,7 @@ class Orbit
 {
 public:
     /// Constructor.
-    Orbit(std::vector<std::vector<LatticeSite>>, const Structure &);
+    Orbit(const std::vector<std::vector<LatticeSite>> &, const Structure &, const std::set<std::vector<int>> &);
 
     /// Adds one cluster to the orbit.
     void addEquivalentCluster(const std::vector<LatticeSite> &, bool = false);
@@ -56,9 +56,6 @@ public:
 
     /// Returns the number of bodies of the cluster that represent this orbit.
     unsigned int order() const { return _representativeCluster.order(); }
-
-    /// Assigns the allowed permutations.
-    void setAllowedClusterPermutations(std::set<std::vector<int>> &permutations) { _allowedClusterPermutations = permutations; }
 
     /// Gets the allowed permutations of clusters.
     const std::set<std::vector<int>> &getAllowedClusterPermutations() const { return _allowedClusterPermutations; }

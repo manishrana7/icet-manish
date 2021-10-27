@@ -37,6 +37,9 @@ class TestOrbit(unittest.TestCase):
                                        for index, unitcell_offset in
                                        zip(indices, unitcell_offsets)]
 
+        self.allowed_permutations_pair = set([(0, 1)])
+        self.allowed_permutations_triplet = set([(0, 2, 1)])
+
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
         return None
@@ -53,15 +56,17 @@ class TestOrbit(unittest.TestCase):
         self.pair_cluster = Cluster(self.structure, self.pair_sites)
         self.triplet_cluster = Cluster(self.structure, self.triplet_sites)
 
-        self.orbit_pair = Orbit([self.pair_sites], self.structure)
-        self.orbit_triplet = Orbit([self.triplet_sites], self.structure)
+        self.orbit_pair = Orbit([self.pair_sites], self.structure,
+                                self.allowed_permutations_pair)
+        self.orbit_triplet = Orbit([self.triplet_sites], self.structure,
+                                   self.allowed_permutations_triplet)
 
     def test_init(self):
         """Tests the initializer."""
-        orbit = Orbit([self.pair_sites], self.structure)
+        orbit = Orbit([self.pair_sites], self.structure, self.allowed_permutations_pair)
         self.assertIsInstance(orbit, Orbit)
 
-        orbit = Orbit([self.triplet_sites], self.structure)
+        orbit = Orbit([self.triplet_sites], self.structure, self.allowed_permutations_triplet)
         self.assertIsInstance(orbit, Orbit)
 
     def test_equivalent_clusters(self):
@@ -135,58 +140,49 @@ class TestOrbit(unittest.TestCase):
 
     def test_allowed_permutations(self):
         """Tests the allowed permutations property."""
-        allowed_permutations = [[1, 2, 3]]
-        self.assertEqual(self.orbit_pair.allowed_permutations, [])
-
-        self.orbit_pair.allowed_permutations = allowed_permutations
-        self.assertEqual(
-            self.orbit_pair.allowed_permutations, allowed_permutations)
+        self.assertEqual(self.orbit_pair.allowed_permutations,
+                         [list(i) for i in self.allowed_permutations_pair])
+        self.assertEqual(self.orbit_triplet.allowed_permutations,
+                         [list(i) for i in self.allowed_permutations_triplet])
 
     def test_get_mc_vectors_pairs(self):
         """Tests the get mc vectors functionality for a pair orbit."""
-        self.orbit_pair.equivalent_clusters = \
-            self.lattice_sites_pairs
         # Binary mc vectors
         # Allow only identity permutation
-        self.orbit_pair.allowed_permutations = [
-            [i for i in range(self.orbit_pair.order)]]
-        mc_vectors = self.orbit_pair.get_mc_vectors(
-            [2] * self.orbit_pair.order)
+        allowed_permutations = set([tuple(i for i in range(self.orbit_pair.order))])
+        orbit = Orbit([self.pair_sites], self.structure, allowed_permutations)
+        mc_vectors = orbit.get_mc_vectors([2] * orbit.order)
         self.assertEqual(mc_vectors, [[0, 0]])
 
         # Ternary mc vectors
-        mc_vectors = self.orbit_pair.get_mc_vectors(
-            [3] * self.orbit_pair.order)
+        mc_vectors = orbit.get_mc_vectors([3] * self.orbit_pair.order)
         target = [[0, 0], [0, 1], [1, 0], [1, 1]]
         self.assertEqual(mc_vectors, target)
 
-        # Allow the permutation [1,0] permutation
-        self.orbit_pair.allowed_permutations = ([0, 1], [1, 0])
-        mc_vectors = self.orbit_pair.get_mc_vectors(
-            [3] * self.orbit_pair.order)
+        # Allow the [1,0] permutation
+        allowed_permutations = set([(0, 1), (1, 0)])
+        orbit = Orbit([self.pair_sites], self.structure, allowed_permutations)
+        mc_vectors = orbit.get_mc_vectors([3] * self.orbit_pair.order)
         target = [[0, 0], [0, 1], [1, 1]]
         self.assertEqual(mc_vectors, target)
 
     def test_get_mc_vectors_triplets(self):
         """Tests  the get mc vectors functionality for a triplet orbit."""
-        self.orbit_triplet.equivalent_clusters = \
-            self.lattice_sites_triplets
         # Binary mc vectors
         # Allow only identity permutation
-        self.orbit_triplet.allowed_permutations = [
-            [i for i in range(self.orbit_triplet.order)]]
+        allowed_permutations = set([tuple(i for i in range(self.orbit_triplet.order))])
+        orbit = Orbit([self.triplet_sites], self.structure, allowed_permutations)
 
         # Ternary mc vectors
-        mc_vectors = self.orbit_triplet.get_mc_vectors(
-            [3] * self.orbit_triplet.order)
+        mc_vectors = orbit.get_mc_vectors([3] * self.orbit_triplet.order)
         target = [[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
                   [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]]
         self.assertEqual(mc_vectors, target)
 
-        # Allow the permutation [0,2,1] permutation
-        self.orbit_triplet.allowed_permutations = ([0, 1, 2], [0, 2, 1])
-        mc_vectors = self.orbit_triplet.get_mc_vectors(
-            [3] * self.orbit_triplet.order)
+        # Allow the [0, 2, 1] permutation
+        allowed_permutations = set([(0, 1, 2), (0, 2, 1)])
+        orbit = Orbit([self.triplet_sites], self.structure, allowed_permutations)
+        mc_vectors = self.orbit_triplet.get_mc_vectors([3] * self.orbit_triplet.order)
         target = [[0, 0, 0], [0, 0, 1], [0, 1, 1],
                   [1, 0, 0], [1, 0, 1], [1, 1, 1]]
         self.assertEqual(mc_vectors, target)

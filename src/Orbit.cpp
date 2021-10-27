@@ -6,11 +6,17 @@
          (this ordering is enforced when Orbits are created from the OrbitList class)
 @param equivalentClusters The clusters that together make up the orbit.
 @param structure structure that this orbit relates to
+@param allowedClusterPermutations
+    allowed permutations for this orbit; e.g., if 0,2,1 is in this set
+    then 0,1,0 is the same MC vector as 0,0,1
 **/
-Orbit::Orbit(std::vector<std::vector<LatticeSite>> equivalentClusters, const Structure &structure)
+Orbit::Orbit(const std::vector<std::vector<LatticeSite>> &equivalentClusters,
+             const Structure &structure,
+             const std::set<std::vector<int>> &allowedClusterPermutations)
 {
     _representativeCluster = Cluster(structure, equivalentClusters[0]);
     _equivalentClusters = equivalentClusters;
+    _allowedClusterPermutations = allowedClusterPermutations;
     sort();
 }
 

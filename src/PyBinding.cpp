@@ -268,8 +268,34 @@ PYBIND11_MODULE(_icet, m)
 
     // @todo convert getters to properties
     // @todo document Orbit in pybindings
-    py::class_<Orbit>(m, "Orbit")
-        .def(py::init<const std::vector<std::vector<LatticeSite>>, const Structure &>())
+    py::class_<Orbit>(m, "Orbit",
+                      R"pbdoc(
+        This class handles an orbit. This orbit consists of one or
+        more clusters that are equivalent by the symmetries of the
+        underlying structure. One of these clusters (the first in
+        the list of clusters handed to the constructor) will be
+        treated as the "representative cluster". All clusters
+        need to have sites that are permuted in a manner consistent
+        with the representative cluster. This is the responsibility
+        of the user when constructing an orbit (normally, orbits
+        are constructed internally in icet, in which case the user
+        need not think about this permutation).
+
+        Parameters
+        ----------
+        clusters : List[List[LatticeSite]]
+            A list of groups of sites, where each group is a cluster
+        structure : Structure
+            Atomic structure from which this orbit is derived
+        allowed_permutations : List[List[int]]
+            A list of the permutations allowed for this orbit
+            (for example, if [0, 2, 1] is in this list, the
+            multi-component vector [0, 1, 0] is the same as
+            [0, 0, 1])
+        )pbdoc")
+        .def(py::init<const std::vector<std::vector<LatticeSite>> &,
+                      const Structure &,
+                      const std::set<std::vector<int>> &>())
         .def_property_readonly(
             "representative_cluster",
             &Orbit::getRepresentativeCluster,
@@ -287,22 +313,13 @@ PYBIND11_MODULE(_icet, m)
             [](const Orbit &orbit)
             { return orbit.radius(); },
             "radius of the representative cluster")
-        .def_property(
+        .def_property_readonly(
             "allowed_permutations",
             [](const Orbit &orbit)
             {
                 std::set<std::vector<int>> allowedPermutations = orbit.getAllowedClusterPermutations();
                 std::vector<std::vector<int>> retPermutations(allowedPermutations.begin(), allowedPermutations.end());
                 return retPermutations;
-            },
-            [](Orbit &orbit, const std::vector<std::vector<int>> &newPermutations)
-            {
-                std::set<std::vector<int>> allowedPermutations;
-                for (const auto &perm : newPermutations)
-                {
-                    allowedPermutations.insert(perm);
-                }
-                orbit.setAllowedClusterPermutations(allowedPermutations);
             },
             R"pbdoc(
              Gets the list of equivalent permutations for this orbit. If this

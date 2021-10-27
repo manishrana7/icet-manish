@@ -15,7 +15,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
     for (const auto orbit : clusterSpace.getPrimitiveOrbitList().getOrbits())
     {
-        orbitVector.push_back(Orbit(orbit.getEquivalentClusters(), clusterSpace.getPrimitiveStructure()));
+        orbitVector.push_back(Orbit(orbit.getEquivalentClusters(), clusterSpace.getPrimitiveStructure(), orbit.getAllowedClusterPermutations()));
     }
 
     /* Strategy for constructing the "full" primitive orbit lists.
