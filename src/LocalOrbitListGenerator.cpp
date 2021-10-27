@@ -8,9 +8,9 @@
 LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &orbitList,
                                                  const Structure &supercell,
                                                  const double fractionalPositionTolerance)
-                                                 : _orbitList(orbitList),
-                                                   _supercell(supercell),
-                                                   _fractionalPositionTolerance(fractionalPositionTolerance)
+    : _orbitList(orbitList),
+      _supercell(supercell),
+      _fractionalPositionTolerance(fractionalPositionTolerance)
 {
     _positionClosestToOrigin = getClosestToOrigin();
     mapSitesAndFindCellOffsets();
@@ -103,20 +103,6 @@ OrbitList LocalOrbitListGenerator::getLocalOrbitList(const size_t index)
     return _orbitList.getLocalOrbitList(_supercell, _uniquePrimcellOffsets[index], _primToSupercellMap, _fractionalPositionTolerance);
 }
 
-/**
-@details Generates and returns the local orbit list.
-@param primOffset translate the unitcell by this offset and then generate the local orbit list
-*/
-OrbitList LocalOrbitListGenerator::getLocalOrbitList(const Vector3d &primOffset)
-{
-    auto find = std::find(_uniquePrimcellOffsets.begin(), _uniquePrimcellOffsets.end(), primOffset);
-    if (find == _uniquePrimcellOffsets.end())
-    {
-        std::cout << "Warning: Generating local orbit list with offset not found in _uniquePrimcellOffsets (LocalOrbitListGenerator::getLocalOrbitList)" << std::endl;
-    }
-    return _orbitList.getLocalOrbitList(_supercell, primOffset, _primToSupercellMap, _fractionalPositionTolerance);
-}
-
 /// Generates the complete orbit list (the sum of all local orbit lists).
 OrbitList LocalOrbitListGenerator::getFullOrbitList()
 {
@@ -135,11 +121,4 @@ OrbitList LocalOrbitListGenerator::getFullOrbitList()
         throw std::runtime_error(msg.str());
     }
     return orbitList;
-}
-
-// Clears the unordered_map and the vector.
-void LocalOrbitListGenerator::clear()
-{
-    _primToSupercellMap.clear();
-    _uniquePrimcellOffsets.clear();
 }

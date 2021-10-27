@@ -28,9 +28,6 @@ std::vector<Vector3d> getUniqueOffsets() const;
 
 std::vector<Vector3d> primToSupercellMap() const;
 
-///clears primToSupercellMap and unique offsets
-void reset();
-
 etc...
 */
 
@@ -44,14 +41,8 @@ public:
     /// Generates and returns the local orbit list with the input index.
     OrbitList getLocalOrbitList(const size_t);
 
-    /// Generates and returns the local orbit list with the input offset (require that the offset is in uniquecell offset?).
-    OrbitList getLocalOrbitList(const Vector3d &);
-
     /// Generates the full orbit list from this structure.
     OrbitList getFullOrbitList();
-
-    /// Clears the unordered_map and the vector.
-    void clear();
 
     /// Returns the number of unique offsets.
     size_t getNumberOfUniqueOffsets() const { return _uniquePrimcellOffsets.size(); }
@@ -63,7 +54,6 @@ public:
     std::vector<Vector3d> getUniquePrimitiveCellOffsets() const { return _uniquePrimcellOffsets; }
 
 private:
-
     /// Maps supercell positions to reference.
     void mapSitesAndFindCellOffsets();
 
@@ -85,9 +75,6 @@ private:
     size_t _indexToClosestAtom;
     /// The unique offsets of the primitive cell required to "cover" the supercell.
     std::vector<Vector3d> _uniquePrimcellOffsets;
-
-    /// The sub permutation matrices that will together map the basis atoms unto the supercell.
-    std::vector<Matrix3i> _subPermutationMatrices;
 
     /// Tolerance applied when comparing positions in Cartesian coordinates.
     double _fractionalPositionTolerance;
