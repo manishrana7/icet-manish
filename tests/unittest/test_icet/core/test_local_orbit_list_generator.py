@@ -73,7 +73,7 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
         as equivalent sites in the full orbit list.
         """
         fol = self.lolg.generate_full_orbit_list()
-        for index, _ in enumerate(self.lolg._get_unique_primcell_offsets()):
+        for index in range(self.lolg.get_number_of_unique_offsets()):
             lol = self.lolg.generate_local_orbit_list(index)
             for orbit, orbit_ in zip(lol.orbits, fol.orbits):
                 for sites in orbit.equivalent_clusters:
@@ -89,9 +89,7 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
 
     def test_get_primitive_to_supercell_map(self):
         """Tests primitive to supercell mapping."""
-        unique_offsets = self.lolg._get_unique_primcell_offsets()
-
-        for index, _ in enumerate(unique_offsets):
+        for index in range(self.lolg.get_number_of_unique_offsets()):
             self.lolg.generate_local_orbit_list(index)
             mapping = self.lolg._get_primitive_to_supercell_map()
             for sites_prim, sites_super in mapping.items():
@@ -174,9 +172,7 @@ class TestLocalOrbitListGeneratorHCP(unittest.TestCase):
 
     def test_get_primitive_to_supercell_map(self):
         """Tests primitive to supercell mapping."""
-        unique_offsets = self.lolg._get_unique_primcell_offsets()
-
-        for index, _ in enumerate(unique_offsets):
+        for index in range(self.lolg.get_number_of_unique_offsets()):
             self.lolg.generate_local_orbit_list(index)
             mapping = self.lolg._get_primitive_to_supercell_map()
             for sites_prim, sites_super in mapping.items():
