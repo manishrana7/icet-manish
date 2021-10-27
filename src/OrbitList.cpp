@@ -94,7 +94,7 @@ OrbitList::OrbitList(const Structure &structure,
     // Add orbits from list of equivalent clusters to this orbit list
     for (const auto &equivalentClusters : listOfEquivalentClusters)
     {
-        _orbits.push_back(createOrbit(equivalentClusters));
+        addOrbit(createOrbit(equivalentClusters));
     }
 
     // Sort the orbit list.
