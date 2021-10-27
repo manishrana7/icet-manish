@@ -311,7 +311,7 @@ class TestOrbitList(unittest.TestCase):
         Tests that the equivalent sites in each orbit are properly permuted
         (compared to each respresentative cluster).
         """
-        cutoffs = [1.6, 1.6]
+        cutoffs = [1.5, 1.4]
         orbit_list = OrbitList(
             structure, cutoffs,
             symprec=self.symprec, position_tolerance=self.position_tolerance,
