@@ -92,9 +92,6 @@ public:
                                   std::unordered_map<LatticeSite, LatticeSite> &,
                                   const double) const;
 
-    /// Adds the permutation information to the orbits.
-    void addPermutationInformationToOrbits();
-
     /// Returns all columns from the given rows in matrix of equivalent sites
     std::vector<std::vector<LatticeSite>> getAllColumnsFromRow(const std::vector<int> &,
                                                                bool,
@@ -144,4 +141,7 @@ private:
 
     /// Primitive structure for which orbit list was constructed.
     Structure _primitiveStructure;
+
+    /// Create an orbit by deducing the proper permutations
+    Orbit createOrbit(const std::vector<std::vector<LatticeSite>> &);
 };

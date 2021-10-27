@@ -1,5 +1,12 @@
 #include "Orbit.hpp"
 
+Orbit::Orbit(std::vector<std::vector<LatticeSite>> equivalentClusters, const Structure &structure)
+{
+    _representativeCluster = Cluster(structure, equivalentClusters[0]);
+    _equivalentClusters = equivalentClusters;
+    sort();
+}
+
 /**
 @param latticeSiteGroup cluster to be added represented by a group of lattice site
 @param sort_orbit if True the orbit will be sorted
@@ -7,19 +14,6 @@
 void Orbit::addEquivalentCluster(const std::vector<LatticeSite> &latticeSiteGroup, bool sort_orbit)
 {
     _equivalentClusters.push_back(latticeSiteGroup);
-    if (sort_orbit)
-    {
-        sort();
-    }
-}
-
-/**
-@param latticeSiteGroups list of cluster to be added, each represented by a group of lattice sites
-@param sort_orbit if True the orbit will be sorted
-*/
-void Orbit::addEquivalentClusters(const std::vector<std::vector<LatticeSite>> &latticeSiteGroups, bool sort_orbit)
-{
-    _equivalentClusters.insert(_equivalentClusters.end(), latticeSiteGroups.begin(), latticeSiteGroups.end());
     if (sort_orbit)
     {
         sort();
@@ -36,43 +30,6 @@ std::vector<LatticeSite> Orbit::getClusterByIndex(unsigned int index) const
         throw std::out_of_range("Index out of range (Orbit::getClusterByIndex)");
     }
     return _equivalentClusters[index];
-}
-
-/**
-@param index cluster index
-*/
-std::vector<LatticeSite> Orbit::getPermutedClusterByIndex(unsigned int index) const
-{
-    if (index >= _equivalentClusters.size())
-    {
-        std::ostringstream msg;
-        msg << "Index out of range (Orbit::getPermutedClusterByIndex).\n";
-        msg << " index: " << index << "\n";
-        msg << " size(_equivalentClusters): " << _equivalentClusters.size() << "\n";
-        throw std::out_of_range(msg.str());
-    }
-    if (index >= _equivalentClusterPermutations.size())
-    {
-        std::ostringstream msg;
-        msg << "Index out of range (Orbit::getPermutedClusterByIndex).\n";
-        msg << " index: " << index << "\n";
-        msg << " size(_equivalentClusterPermutations): " << _equivalentClusterPermutations.size();
-        throw std::out_of_range(msg.str());
-    }
-    return icet::getPermutedVector<LatticeSite>(_equivalentClusters[index], _equivalentClusterPermutations[index]);
-}
-
-/**
-@brief Returns all permuted equivalent sites.
-*/
-std::vector<std::vector<LatticeSite>> Orbit::getPermutedEquivalentClusters() const
-{
-    std::vector<std::vector<LatticeSite>> permutedSites(_equivalentClusters.size());
-    for (size_t i = 0; i < _equivalentClusters.size(); i++)
-    {
-        permutedSites[i] = getPermutedClusterByIndex(i);
-    }
-    return permutedSites;
 }
 
 /**
@@ -165,30 +122,6 @@ bool Orbit::contains(const std::vector<LatticeSite> cluster, bool sorted) const
 }
 
 /**
-@param cluster cluster to be removed (represented by a list of sites); the order of sites is irrelevant
-*/
-void Orbit::removeCluster(std::vector<LatticeSite> cluster)
-{
-
-    std::sort(cluster.begin(), cluster.end());
-    for (size_t i = 0; i < _equivalentClusters.size(); i++)
-    {
-        auto sites = _equivalentClusters[i];
-
-        // compare the sorted sites
-        std::sort(sites.begin(), sites.end());
-
-        if (sites == cluster)
-        {
-            _equivalentClusters.erase(_equivalentClusters.begin() + i);
-            _equivalentClusterPermutations.erase(_equivalentClusterPermutations.begin() + i);
-            return;
-        }
-    }
-    throw std::runtime_error("Did not find any matching clusters (Orbit::removeCluster)");
-}
-
-/**
 @brief Check whether a site is included in a cluster
 @details A cluster will count as included if index is among the lattice sites
          that have a zero offset.
@@ -216,21 +149,10 @@ bool Orbit::isSiteIncluded(int index, const std::vector<LatticeSite> &cluster) c
    Clusters in which a site with this index occurs more than once will only be counted with
    a factor 1/n, where n is the number of occurrences of this index. By default
    (i.e. siteIndexForDoubleCountingCorrection = -1) no such correction is applied.
- @param permuteClusters If true, permute clusters equivalent clusters before counting
 */
 std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structure,
-                                                        int siteIndexForDoubleCountingCorrection,
-                                                        bool permuteClusters) const
+                                                        int siteIndexForDoubleCountingCorrection) const
 {
-    if (permuteClusters)
-    {
-        // In this case we could just loop over getPermutedEquivalentClusters() instead of
-        // _equivalentClusters, but we then need to be very careful with performance.
-        // Since this should never happen unless someone does something very specific,
-        // we disallow it for now.
-        throw std::runtime_error("countClusterChanges does not support counting of clusters that are not permuted (Orbit::coundClusterChanges)");
-    }
-
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elements(order());
     for (const auto &sites : _equivalentClusters)
@@ -273,22 +195,11 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
  @param structure the structure for which to count clusters, with occupations before change
  @param flipIndex index of site that has been flipped
  @param newOccupation new atomic number of site that has been flipped
- @param permuteClusters If true, permute clusters equivalent clusters before counting (not yet implemented, should normally never be done)
 */
 std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &structure,
                                                               const int flipIndex,
-                                                              const int newOccupation,
-                                                              const bool permuteClusters) const
+                                                              const int newOccupation) const
 {
-    if (permuteClusters)
-    {
-        // In this case we could just loop over getPermutedEquivalentClusters() instead of
-        // _equivalentClusters, but we then need to be very careful with performance.
-        // Since this should never happen unless someone does something very specific,
-        // we disallow it for now.
-        throw std::runtime_error("countClusterChanges does not support counting of clusters that are not permuted (Orbit::coundClusterChanges)");
-    }
-
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elementsOld(order());
     std::vector<int> elementsNew(order());

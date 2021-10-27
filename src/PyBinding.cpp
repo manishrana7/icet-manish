@@ -269,7 +269,7 @@ PYBIND11_MODULE(_icet, m)
     // @todo convert getters to properties
     // @todo document Orbit in pybindings
     py::class_<Orbit>(m, "Orbit")
-        .def(py::init<const Cluster &>())
+        .def(py::init<const std::vector<std::vector<LatticeSite>>, const Structure &>())
         .def_property_readonly(
             "representative_cluster",
             &Orbit::getRepresentativeCluster,
@@ -287,20 +287,6 @@ PYBIND11_MODULE(_icet, m)
             [](const Orbit &orbit)
             { return orbit.radius(); },
             "radius of the representative cluster")
-        .def_property(
-            "permutations_to_representative",
-            &Orbit::getPermutationsOfEquivalentClusters,
-            &Orbit::setPermutationsOfEquivalentClusters,
-            R"pbdoc(
-             list of permutations;
-             permutations_to_representative[i] takes self.equivalent_clusters[i] to
-             the same sorting as self.representative_cluster.
-
-             This can be used if you for example want to count elements and are
-             interested in difference between ABB, BAB, BBA and so on. If you count
-             the lattice sites that are permuted according to these permutations
-             then you will get the correct counts.
-             )pbdoc")
         .def_property(
             "allowed_permutations",
             [](const Orbit &orbit)
@@ -331,22 +317,6 @@ PYBIND11_MODULE(_icet, m)
             &Orbit::getEquivalentClusters,
             &Orbit::setEquivalentClusters,
             "list of symmetry equivalent clusters")
-        .def_property_readonly(
-            "permuted_equivalent_clusters",
-            &Orbit::getPermutedEquivalentClusters,
-            "equivalent clusters permuted to match the sorting of the representative cluster")
-        .def("get_permuted_cluster_by_index",
-             &Orbit::getPermutedClusterByIndex,
-             R"pbdoc(
-             Returns the equivalent cluster at position `index` using
-             the permutation of the representative cluster.
-
-             Parameters
-             ----------
-             index : int
-                index of site to return
-             )pbdoc",
-             py::arg("index"))
         .def("get_mc_vectors", &Orbit::getMultiComponentVectors,
              R"pbdoc(
              Return the multi-component vectors for this orbit given the allowed components.
@@ -363,13 +333,11 @@ PYBIND11_MODULE(_icet, m)
             "count_clusters",
             [](const Orbit &orbit,
                const Structure &structure,
-               const int siteIndexForDoubleCountingCorrection,
-               const int permuteClusters)
+               const int siteIndexForDoubleCountingCorrection)
             {
                 py::dict clusterCountDict;
                 for (const auto &mapPair : orbit.countClusters(structure,
-                                                               siteIndexForDoubleCountingCorrection,
-                                                               permuteClusters))
+                                                               siteIndexForDoubleCountingCorrection))
                 {
                     py::list element_symbols;
                     for (auto el : mapPair.first)
@@ -397,12 +365,9 @@ PYBIND11_MODULE(_icet, m)
              site_index_for_double_counting_correction : int
                 Avoid double counting clusters containing this index
                 (default -1, no such correction)
-             permute_clusters : bool
-                Permute clusters before counting (default: false)
              )pbdoc",
             py::arg("structure"),
-            py::arg("site_index_for_double_counting_correction") = -1,
-            py::arg("permute_sites") = false)
+            py::arg("site_index_for_double_counting_correction") = -1)
         .def("sort", &Orbit::sort,
              "Sorts the list of equivalent sites.")
         .def("get_all_possible_mc_vector_permutations",

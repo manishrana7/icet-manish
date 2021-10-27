@@ -73,13 +73,6 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
     size_t uniqueOffsets = localOrbitListGenerator.getNumberOfUniqueOffsets();
     auto currentOrbitList = localOrbitListGenerator.getFullOrbitList();
 
-    // Set equivalent cluster equal to the permuted clusters so no permutation is required in the orbit list counting.
-    for (auto &orbit : currentOrbitList._orbits)
-    {
-        auto permutedClusters = orbit.getPermutedEquivalentClusters();
-        orbit.setEquivalentClusters(permutedClusters);
-    }
-
     // Check that the number of unique offsets equals the number of unit cells in the supercell.
     size_t numberOfUnitcellRepetitions = structure.size() / _primitiveStructure.size();
     if (uniqueOffsets != numberOfUnitcellRepetitions)
@@ -311,14 +304,12 @@ void ClusterSpace::removeOrbits(std::vector<size_t> &indices)
 @param firstElement First element of the cluster vector (default: 1.0)
 @param flipIndex If a local cluster vector should be calculated this argument is used to specify the index of the site whose local cluster vector should be computed. If calculating a change in cluster vector, this is the site whose occupation has changed. If -1 (default), the total cluster vector will be calculated.
 @param newOccupation New atomic number on the site with index flipIndex. If this argument is not -1, a change in cluster vector will be calculated.
-@param permuteClusters Set to true if the equivalent clusters of each orbit in the orbit list is not already permuted (default: false)
 */
 const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orbitList,
                                                             const Structure &supercell,
                                                             const double firstElement,
                                                             const int flipIndex,
-                                                            const int newOccupation,
-                                                            const bool permuteClusters) const
+                                                            const int newOccupation) const
 {
     if (newOccupation >= 0 && flipIndex == -1)
     {
@@ -342,11 +333,11 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
         std::map<std::vector<int>, double> counts;
         if (newOccupation > -1)
         {
-            counts = currentOrbit.countClusterChanges(supercell, flipIndex, newOccupation, permuteClusters);
+            counts = currentOrbit.countClusterChanges(supercell, flipIndex, newOccupation);
         }
         else
         {
-            counts = currentOrbit.countClusters(supercell, flipIndex, permuteClusters);
+            counts = currentOrbit.countClusters(supercell, flipIndex);
         }
 
         const std::vector<LatticeSite> &representativeSites = currentPrimitiveOrbit.getSitesOfRepresentativeCluster();

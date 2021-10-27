@@ -13,20 +13,10 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     std::vector<Orbit> orbitVector;
     _fullOrbitList = LOLG.getFullOrbitList();
 
-    // Set equivalent cluster equal to the permuted clusters so no permutation is required in the orbit list counting.
-    for (auto &orbit : _fullOrbitList._orbits)
-    {
-        auto permutedClusters = orbit.getPermutedEquivalentClusters();
-        orbit.setEquivalentClusters(permutedClusters);
-    }
-
     for (const auto orbit : clusterSpace.getPrimitiveOrbitList().getOrbits())
     {
-        orbitVector.push_back(Orbit(orbit.getRepresentativeCluster()));
+        orbitVector.push_back(Orbit(orbit.getEquivalentClusters(), clusterSpace.getPrimitiveStructure()));
     }
-
-    // Permutations for the clusters in the orbits
-    std::vector<std::vector<std::vector<int>>> permutations(numberOfOrbits);
 
     /* Strategy for constructing the "full" primitive orbit lists.
 
@@ -59,8 +49,6 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         {
             orbitIndex++;
 
-            auto orbitPermutations = orbit.getPermutationsOfEquivalentClusters();
-
             int eqSiteIndex = -1;
 
             for (const auto cluster : orbit.getEquivalentClusters())
@@ -85,7 +73,6 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
                         if (!orbitVector[orbitIndex].contains(translatedCluster, true))
                         {
                             orbitVector[orbitIndex].addEquivalentCluster(translatedCluster);
-                            permutations[orbitIndex].push_back(orbitPermutations[eqSiteIndex]);
                         }
                     }
                 }
@@ -99,7 +86,6 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     for (auto orbit : orbitVector)
     {
         orbitIndex++;
-        orbit.setPermutationsOfEquivalentClusters(permutations[orbitIndex]);
         _fullPrimitiveOrbitList.addOrbit(orbit);
     }
 
@@ -123,13 +109,6 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         if (_localOrbitlists.find(offsetVector) == _localOrbitlists.end())
         {
             _localOrbitlists[offsetVector] = _fullPrimitiveOrbitList.getLocalOrbitList(structure, offsetVector, _primToSupercellMap, fractionalPositionTolerance);
-
-            // Set equivalent cluster equal to the permuted clusters so no permutation is required in the orbit list counting.
-            for (auto &orbit : _localOrbitlists[offsetVector]._orbits)
-            {
-                auto permutedClusters = orbit.getPermutedEquivalentClusters();
-                orbit.setEquivalentClusters(permutedClusters);
-            }
         }
     }
 }
