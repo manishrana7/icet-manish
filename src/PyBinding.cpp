@@ -210,6 +210,10 @@ PYBIND11_MODULE(_icet, m)
              py::arg("structure"),
              py::arg("lattice_sites"))
         .def_property_readonly(
+            "lattice_sites",
+            &Cluster::getLatticeSites,
+            "list(LatticeSite) : list of the lattice sites that constitute the cluster")
+        .def_property_readonly(
             "distances",
             &Cluster::distances,
             "list(float) : list of distances between sites")
@@ -293,8 +297,7 @@ PYBIND11_MODULE(_icet, m)
             multi-component vector [0, 1, 0] is the same as
             [0, 0, 1])
         )pbdoc")
-        .def(py::init<const Structure &,
-                      const std::vector<std::vector<LatticeSite>>,
+        .def(py::init<const std::vector<Cluster>,
                       const std::set<std::vector<int>>>())
         .def_property_readonly(
             "representative_cluster",
@@ -416,11 +419,11 @@ PYBIND11_MODULE(_icet, m)
                  }
                  msg << "equivalent_clusters:" << std::endl;
                  int k = -1;
-                 for (const auto sites : orbit.getEquivalentClusters())
+                 for (const auto cluster : orbit.getEquivalentClusters())
                  {
                      k += 1;
                      msg << "  cluster: " << k << std::endl;
-                     for (const auto site : sites)
+                     for (const auto site : cluster.getLatticeSites())
                      {
                          msg << "    site: " << site << std::endl;
                      }

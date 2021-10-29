@@ -658,8 +658,8 @@ class ClusterSpace(_ClusterSpace):
             fractional_position_tolerance=self.fractional_position_tolerance)
         orbit_indices = set()
         for orbit in ol.orbits:
-            for sites in orbit.equivalent_clusters:
-                indices = tuple(sorted([site.index for site in sites]))
+            for cluster in orbit.equivalent_clusters:
+                indices = tuple(sorted([site.index for site in cluster.lattice_sites]))
                 if indices in orbit_indices:
                     return True
                 else:

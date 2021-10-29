@@ -10,11 +10,9 @@
     allowed permutations for this orbit; e.g., if 0,2,1 is in this set
     then 0,1,0 is the same MC vector as 0,0,1
 **/
-Orbit::Orbit(const Structure &structure,
-             const std::vector<std::vector<LatticeSite>> equivalentClusters,
+Orbit::Orbit(const std::vector<Cluster> equivalentClusters,
              const std::set<std::vector<int>> allowedClusterPermutations)
 {
-    _representativeCluster = Cluster(structure, equivalentClusters[0]);
     _equivalentClusters = equivalentClusters;
     _allowedClusterPermutations = allowedClusterPermutations;
     sort();
@@ -24,9 +22,9 @@ Orbit::Orbit(const Structure &structure,
 @param latticeSiteGroup cluster to be added represented by a group of lattice site
 @param sort_orbit if True the orbit will be sorted
 */
-void Orbit::addEquivalentCluster(const std::vector<LatticeSite> &latticeSiteGroup, bool sort_orbit)
+void Orbit::addEquivalentCluster(const Cluster &cluster, bool sort_orbit)
 {
-    _equivalentClusters.push_back(latticeSiteGroup);
+    _equivalentClusters.push_back(cluster);
     if (sort_orbit)
     {
         sort();
@@ -36,7 +34,7 @@ void Orbit::addEquivalentCluster(const std::vector<LatticeSite> &latticeSiteGrou
 /**
 @param index cluster index
 */
-std::vector<LatticeSite> Orbit::getClusterByIndex(unsigned int index) const
+Cluster Orbit::getClusterByIndex(unsigned int index) const
 {
     if (index >= _equivalentClusters.size())
     {
@@ -118,7 +116,7 @@ bool Orbit::contains(const std::vector<LatticeSite> cluster, bool sorted) const
 
     for (size_t i = 0; i < _equivalentClusters.size(); i++)
     {
-        auto sites = _equivalentClusters[i];
+        auto sites = _equivalentClusters[i].getLatticeSites();
 
         // compare the sorted sites
         if (sorted)
@@ -168,8 +166,9 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
 {
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elements(order());
-    for (const auto &sites : _equivalentClusters)
+    for (const auto &cluster : _equivalentClusters)
     {
+        const std::vector<LatticeSite> &sites = cluster.getLatticeSites();
         // If we apply the double counting correction for some site we need
         // to ensure that we only count clusters that include this site.
         if (siteIndexForDoubleCountingCorrection < 0 || isSiteIncluded(siteIndexForDoubleCountingCorrection, sites))
@@ -219,8 +218,9 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
     int siteIndex;
     int occupation;
 
-    for (const auto &sites : _equivalentClusters)
+    for (const auto &cluster : _equivalentClusters)
     {
+        const std::vector<LatticeSite> &sites = cluster.getLatticeSites();
         // Only count clusters where site flipIndex is included (with zero offset)
         if (isSiteIncluded(flipIndex, sites))
         {
@@ -264,7 +264,7 @@ namespace std
         for (const auto cluster : orbit.getEquivalentClusters())
         {
             os << "  ";
-            for (const auto site : cluster)
+            for (const auto site : cluster.getLatticeSites())
             {
                 os << " " << site;
             }

@@ -25,37 +25,37 @@ class Orbit
 {
 public:
     /// Constructor.
-    Orbit(const Structure &, const std::vector<std::vector<LatticeSite>>, const std::set<std::vector<int>>);
+    Orbit(const std::vector<Cluster>, const std::set<std::vector<int>>);
 
     /// Adds one cluster to the orbit.
-    void addEquivalentCluster(const std::vector<LatticeSite> &, bool = false);
+    void addEquivalentCluster(const Cluster &, bool = false);
 
     /// Returns the number of equivalent clusters in this orbit.
     size_t size() const { return _equivalentClusters.size(); }
 
     /// Returns the radius of the representative cluster in this orbit.
-    double radius() const { return _representativeCluster.radius(); }
+    double radius() const { return getRepresentativeCluster().radius(); }
 
-    /// Returns the sorted, representative cluster for this orbit.
-    const Cluster &getRepresentativeCluster() const { return _representativeCluster; }
+    /// Returns the representative cluster for this orbit
+    const Cluster &getRepresentativeCluster() const { return _equivalentClusters[0]; }
 
     /// Returns the sites that define the representative cluster of this orbit.
-    const std::vector<LatticeSite> &getSitesOfRepresentativeCluster() const { return _equivalentClusters[0]; }
+    const std::vector<LatticeSite> getSitesOfRepresentativeCluster() const { return getRepresentativeCluster().getLatticeSites(); }
 
     /// Returns the equivalent cluster.
-    std::vector<LatticeSite> getClusterByIndex(unsigned int) const;
+    Cluster getClusterByIndex(unsigned int) const;
 
     /// Returns all equivalent clusters.
-    const std::vector<std::vector<LatticeSite>> &getEquivalentClusters() const { return _equivalentClusters; }
+    const std::vector<Cluster> &getEquivalentClusters() const { return _equivalentClusters; }
 
     /// Sets the equivalent clusters.
-    void setEquivalentClusters(const std::vector<std::vector<LatticeSite>> &equivalentClusters) { _equivalentClusters = equivalentClusters; }
+    void setEquivalentClusters(const std::vector<Cluster> &equivalentClusters) { _equivalentClusters = equivalentClusters; }
 
     /// Sorts equivalent clusters.
     void sort() { std::sort(_equivalentClusters.begin(), _equivalentClusters.end()); }
 
     /// Returns the number of bodies of the cluster that represent this orbit.
-    unsigned int order() const { return _representativeCluster.order(); }
+    unsigned int order() const { return getRepresentativeCluster().order(); }
 
     /// Gets the allowed permutations of clusters.
     const std::set<std::vector<int>> getAllowedClusterPermutations() const { return _allowedClusterPermutations; }
@@ -93,9 +93,9 @@ public:
     friend Orbit operator+(const Orbit &orbit, const Eigen::Vector3d &offset)
     {
         Orbit orbitOffset = orbit;
-        for (auto &latticeSites : orbitOffset._equivalentClusters)
+        for (auto &cluster : orbitOffset._equivalentClusters)
         {
-            for (auto &latticeSite : latticeSites)
+            for (auto &latticeSite : cluster.getLatticeSites())
             {
                 latticeSite = latticeSite + offset;
             }
@@ -124,10 +124,7 @@ public:
 
 private:
     /// Container of equivalent sites for this orbit
-    std::vector<std::vector<LatticeSite>> _equivalentClusters;
-
-    /// Representative sorted cluster for this orbit
-    Cluster _representativeCluster;
+    std::vector<Cluster> _equivalentClusters;
 
     /// Contains the allowed sites permutations. i.e. if 0,2,1 is in this set then 0,1,0 is the same MC vector as 0,0,1
     std::set<std::vector<int>> _allowedClusterPermutations;

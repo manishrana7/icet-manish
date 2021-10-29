@@ -299,7 +299,14 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
         throw std::runtime_error(msg.str());
     }
 
-    Orbit newOrbit = Orbit(_primitiveStructure, permutedEquivalentClusters, allowedPermutations);
+    // Turn the permuted equivalent clusters into actual Cluster objects
+    std::vector<Cluster> clusters;
+    for (auto cluster : permutedEquivalentClusters)
+    {
+        clusters.push_back(Cluster(_primitiveStructure, cluster));
+    }
+
+    Orbit newOrbit = Orbit(clusters, allowedPermutations);
     return newOrbit;
 }
 
@@ -604,11 +611,11 @@ Orbit OrbitList::getSuperCellOrbit(const Structure &supercell,
 
     Orbit supercellOrbit = _orbits[orbitIndex] + cellOffset;
 
-    auto equivalentSites = supercellOrbit.getEquivalentClusters();
+    auto equivalentClusters = supercellOrbit.getEquivalentClusters();
 
-    for (auto &sites : equivalentSites)
+    for (auto &cluster : equivalentClusters)
     {
-        for (auto &site : sites)
+        for (auto &site : cluster.getLatticeSites())
         {
             // Technically we should use the fractional position tolerance
             // corresponding to the cell metric of the supercell structure.
@@ -624,7 +631,7 @@ Orbit OrbitList::getSuperCellOrbit(const Structure &supercell,
         }
     }
 
-    supercellOrbit.setEquivalentClusters(equivalentSites);
+    supercellOrbit.setEquivalentClusters(equivalentClusters);
     return supercellOrbit;
 }
 

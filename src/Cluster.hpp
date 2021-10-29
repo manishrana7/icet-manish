@@ -13,31 +13,39 @@ using boost::hash_combine;
 class Cluster
 {
 public:
-
-    // Empty constructor
-    Cluster() { }
+    /// Empty constructor.
+    Cluster() {}
 
     /// Creates cluster from a structure and a set of lattice sites.
     Cluster(const Structure &structure,
             const std::vector<LatticeSite> &latticeSites);
 
+    /// Returns the lattice sites of this cluster.
+    std::vector<LatticeSite> getLatticeSites() const { return _latticeSites; }
+
     /// Returns the order (i.e., the number of sites) of the cluster.
-    unsigned int order() const { return _order; }
+    unsigned int order() const { return _latticeSites.size(); }
 
     /// Returns the radius of the cluster.
-    double radius() const { return _radius; }
+    double radius() const;
 
     /// Returns distances between points in the cluster.
-    std::vector<double> distances() const { return _distances; }
+    std::vector<double> distances() const;
+
+    /// Comparison operator for automatic sorting.
+    friend bool operator<(const Cluster &cluster1, const Cluster &cluster2)
+    {
+        return cluster1.getLatticeSites() < cluster2.getLatticeSites();
+    }
 
 private:
+    /// The lattice sites in the cluster.
+    std::vector<LatticeSite> _latticeSites;
 
-    /// List of distances between points in cluster.
+    /// The structure that the lattice sites refer to.
+    Structure _structure;
+
     std::vector<double> _distances;
 
-    /// Cluster radius.
-    double _radius;
-
-    /// Cluster order (i.e., is it a singlet (1), pair (2), triplet(3), etc.)
-    size_t _order;
+    float _radius;
 };

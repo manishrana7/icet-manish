@@ -8,22 +8,54 @@
 Cluster::Cluster(const Structure &structure,
                  const std::vector<LatticeSite> &latticeSites)
 {
-    _order = latticeSites.size();
+    _latticeSites = latticeSites;
+    //_structure = structure;
+
     std::vector<double> distances;
-    distances.reserve((_order * (_order - 1) / 2));
-    for (size_t i = 0; i < latticeSites.size(); i++)
+    float thisOrder = order();
+    distances.reserve((thisOrder * (thisOrder - 1) / 2));
+    for (size_t i = 0; i < thisOrder; i++)
     {
-        for (size_t j = i + 1; j < latticeSites.size(); j++)
+        for (size_t j = i + 1; j < thisOrder; j++)
         {
-            double distance = structure.getDistance(latticeSites[i].index(),
-                                                    latticeSites[j].index(),
-                                                    latticeSites[i].unitcellOffset(),
-                                                    latticeSites[j].unitcellOffset());
+            double distance = structure.getDistance(_latticeSites[i].index(),
+                                                    _latticeSites[j].index(),
+                                                    _latticeSites[i].unitcellOffset(),
+                                                    _latticeSites[j].unitcellOffset());
             distances.push_back(distance);
         }
     }
     _distances = distances;
-    _radius = icet::getGeometricalRadius(latticeSites, structure);
+
+    _radius = icet::getGeometricalRadius(_latticeSites, structure);
+}
+
+std::vector<double> Cluster::distances() const
+{
+    return _distances;
+    /*
+    std::vector<double> distances;
+    float thisOrder = order();
+    distances.reserve((thisOrder * (thisOrder - 1) / 2));
+    for (size_t i = 0; i < thisOrder; i++)
+    {
+        for (size_t j = i + 1; j < thisOrder; j++)
+        {
+            double distance = _structure.getDistance(_latticeSites[i].index(),
+                                                     _latticeSites[j].index(),
+                                                     _latticeSites[i].unitcellOffset(),
+                                                     _latticeSites[j].unitcellOffset());
+            distances.push_back(distance);
+        }
+    }
+    return distances;
+    */
+}
+
+double Cluster::radius() const
+{
+    return _radius;
+    //return icet::getGeometricalRadius(_latticeSites, _structure);
 }
 
 namespace std
