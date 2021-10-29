@@ -160,7 +160,8 @@ const Orbit &OrbitList::getOrbit(unsigned int index) const
 
 /**
 @details
-This function makes sure that the clusters in the orbit are properly permuted before the orbit is created.
+This function permutes the sites in a set of equivalent clusters (such that the ordering of the sites
+are consistent with the first cluster), then creates an orbit based on the permuted clusters.
 
 Algorithm
 ---------
@@ -250,7 +251,6 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
     }
 
     // Step seven: Relate equivalent clusters to the representative cluster, i.e. what is the consistent ordering of the cluster
-    //const auto orbitSites = _orbits[i].getEquivalentClusters();
     std::unordered_set<std::vector<LatticeSite>> p_equal_set;
     p_equal_set.insert(equivalentClustersWithTranslations.begin(), equivalentClustersWithTranslations.end());
 

@@ -270,16 +270,16 @@ PYBIND11_MODULE(_icet, m)
     // @todo document Orbit in pybindings
     py::class_<Orbit>(m, "Orbit",
                       R"pbdoc(
-        This class handles an orbit. This orbit consists of one or
+        This class handles an orbit. An orbit consists of one or
         more clusters that are equivalent by the symmetries of the
         underlying structure. One of these clusters (the first in
         the list of clusters handed to the constructor) will be
         treated as the "representative cluster". All clusters
         need to have sites that are permuted in a manner consistent
         with the representative cluster. This is the responsibility
-        of the user when constructing an orbit (normally, orbits
-        are constructed internally in icet, in which case the user
-        need not think about this permutation).
+        of the user when constructing an orbit (normally, however,
+        orbits are constructed internally in icet, in which case
+        the user need not think about this permutation).
 
         Parameters
         ----------
