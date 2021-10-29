@@ -90,7 +90,7 @@ public:
   void removeOrbits(std::vector<size_t> &);
 
   /// Merge orbits.
-  void mergeOrbits(const int index1, const int index2) { _primitiveOrbitList._orbits[index1] += _primitiveOrbitList._orbits[index2]; }
+  void mergeOrbits(const int index1, const int index2) { _primitiveOrbitList.mergeOrbits(index1, index2); }
 
 private:
   /// Primitive (prototype) structure.

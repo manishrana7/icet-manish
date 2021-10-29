@@ -293,8 +293,8 @@ PYBIND11_MODULE(_icet, m)
             multi-component vector [0, 1, 0] is the same as
             [0, 0, 1])
         )pbdoc")
-        .def(py::init<const std::vector<std::vector<LatticeSite>>,
-                      const Structure &,
+        .def(py::init<const Structure &,
+                      const std::vector<std::vector<LatticeSite>>,
                       const std::set<std::vector<int>>>())
         .def_property_readonly(
             "representative_cluster",

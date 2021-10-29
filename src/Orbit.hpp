@@ -25,7 +25,7 @@ class Orbit
 {
 public:
     /// Constructor.
-    Orbit(const std::vector<std::vector<LatticeSite>>, const Structure &, const std::set<std::vector<int>>);
+    Orbit(const Structure &, const std::vector<std::vector<LatticeSite>>, const std::set<std::vector<int>>);
 
     /// Adds one cluster to the orbit.
     void addEquivalentCluster(const std::vector<LatticeSite> &, bool = false);
@@ -58,7 +58,7 @@ public:
     unsigned int order() const { return _representativeCluster.order(); }
 
     /// Gets the allowed permutations of clusters.
-    const std::set<std::vector<int>> &getAllowedClusterPermutations() const { return _allowedClusterPermutations; }
+    const std::set<std::vector<int>> getAllowedClusterPermutations() const { return _allowedClusterPermutations; }
 
     /// Returns the relevant multicomponent vectors of this orbit given the number of allowed components.
     std::vector<std::vector<int>> getMultiComponentVectors(const std::vector<int> &Mi_local) const;

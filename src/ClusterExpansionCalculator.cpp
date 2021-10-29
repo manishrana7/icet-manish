@@ -15,7 +15,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
     for (const auto orbit : clusterSpace.getPrimitiveOrbitList().getOrbits())
     {
-        orbitVector.push_back(Orbit(orbit.getEquivalentClusters(), clusterSpace.getPrimitiveStructure(), orbit.getAllowedClusterPermutations()));
+        orbitVector.push_back(Orbit(clusterSpace.getPrimitiveStructure(), orbit.getEquivalentClusters(), orbit.getAllowedClusterPermutations()));
     }
 
     /* Strategy for constructing the "full" primitive orbit lists.
@@ -29,10 +29,9 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
     Now we do something similar by looping over each local orbit list
     (by looping over `offsetIndex`).
-    The local orbitlist is retrieved here:
-        `LOLG.getLocalOrbitList(offsetIndex).getOrbits()`
+    The local orbitlist is retrieved here: `LOLG.getLocalOrbitList(offsetIndex)`
 
-    Then for each orbit `orbitIndex` in `LOLG.getLocalOrbitList(offsetIndex).getOrbits()`
+    Then for each `orbit` in `LOLG.getLocalOrbitList(offsetIndex)`
     each group of lattice sites in `orbit.equivalentSites()` is added to
     `orbitVector[orbitIndex]` if the lattice sites have a site with offset `[0, 0, 0]`.
 
@@ -43,15 +42,13 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
     for (size_t offsetIndex = 0; offsetIndex < uniqueOffsets; offsetIndex++)
     {
-        int orbitIndex = -1;
-        // This orbit is a local orbit related to the supercell
-        for (const auto orbit : LOLG.getLocalOrbitList(offsetIndex).getOrbits())
+        // This orbit list is a local orbit list related to the supercell
+        OrbitList localOrbitList = LOLG.getLocalOrbitList(offsetIndex);
+        for (int orbitIndex = 0; orbitIndex < numberOfOrbits; orbitIndex++)
         {
-            orbitIndex++;
-
             int eqSiteIndex = -1;
 
-            for (const auto cluster : orbit.getEquivalentClusters())
+            for (const auto cluster : localOrbitList.getOrbit(orbitIndex).getEquivalentClusters())
             {
                 eqSiteIndex++;
 
@@ -88,12 +85,6 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         orbitIndex++;
         _fullPrimitiveOrbitList.addOrbit(orbit);
     }
-
-    // Calculate the permutation for each orbit in this orbit list.
-    // This is normally done in the constructor but since we made one manually
-    // we have to do this ourself.
-    // _fullPrimitiveOrbitList.addPermutationInformationToOrbits(_clusterSpace.getOrbitList().getFirstColumnOfMatrixOfEquivalentSites(),
-    //                                                           _clusterSpace.getOrbitList().getMatrixOfEquivalentSites());
 
     _primToSupercellMap.clear();
     _indexToOffset.clear();

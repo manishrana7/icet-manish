@@ -119,7 +119,7 @@ public:
     void removeInactiveOrbits(const Structure &);
 
     /// Returns the orbits in this orbit list.
-    std::vector<Orbit> getOrbits() const { return _orbits; }
+    const std::vector<Orbit> getOrbits() const { return _orbits; }
 
     /// Returns the primitive structure.
     Structure getPrimitiveStructure() const { return _primitiveStructure; }
@@ -127,12 +127,13 @@ public:
     /// Sets primitive structure.
     void setPrimitiveStructure(const Structure &primitive) { _primitiveStructure = primitive; }
 
-public:
-    /// Contains all the orbits in the orbit list.
-    /// @todo why is this not private?
-    std::vector<Orbit> _orbits;
+    /// Merge two orbits.
+    void mergeOrbits(int index1, int index2) { _orbits[index1] += _orbits[index2]; }
 
 private:
+    /// Contains all the orbits in the orbit list.
+    std::vector<Orbit> _orbits;
+
     /// @todo Add description.
     std::vector<LatticeSite> _referenceLatticeSites;
 

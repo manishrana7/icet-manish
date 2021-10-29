@@ -299,7 +299,7 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
         throw std::runtime_error(msg.str());
     }
 
-    Orbit newOrbit = Orbit(permutedEquivalentClusters, _primitiveStructure, allowedPermutations);
+    Orbit newOrbit = Orbit(_primitiveStructure, permutedEquivalentClusters, allowedPermutations);
     return newOrbit;
 }
 
