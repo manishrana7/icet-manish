@@ -10,9 +10,9 @@
     allowed permutations for this orbit; e.g., if 0,2,1 is in this set
     then 0,1,0 is the same MC vector as 0,0,1
 **/
-Orbit::Orbit(const std::vector<std::vector<LatticeSite>> &equivalentClusters,
+Orbit::Orbit(const std::vector<std::vector<LatticeSite>> equivalentClusters,
              const Structure &structure,
-             const std::set<std::vector<int>> &allowedClusterPermutations)
+             const std::set<std::vector<int>> allowedClusterPermutations)
 {
     _representativeCluster = Cluster(structure, equivalentClusters[0]);
     _equivalentClusters = equivalentClusters;

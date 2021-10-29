@@ -25,7 +25,7 @@ class Orbit
 {
 public:
     /// Constructor.
-    Orbit(const std::vector<std::vector<LatticeSite>> &, const Structure &, const std::set<std::vector<int>> &);
+    Orbit(const std::vector<std::vector<LatticeSite>>, const Structure &, const std::set<std::vector<int>>);
 
     /// Adds one cluster to the orbit.
     void addEquivalentCluster(const std::vector<LatticeSite> &, bool = false);
