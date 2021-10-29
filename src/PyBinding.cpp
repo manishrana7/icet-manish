@@ -204,7 +204,7 @@ PYBIND11_MODULE(_icet, m)
         lattice_sites : list(int)
             list of lattice sites that form the cluster
         )pbdoc")
-        .def(py::init<const Structure &,
+        .def(py::init<const std::shared_ptr<Structure>,
                       const std::vector<LatticeSite> &>(),
              "Initializes a cluster instance.",
              py::arg("structure"),

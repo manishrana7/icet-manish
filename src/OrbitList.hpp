@@ -145,4 +145,6 @@ private:
 
     /// Create an orbit by deducing the proper permutations
     Orbit createOrbit(const std::vector<std::vector<LatticeSite>> &);
+
+    std::shared_ptr<Structure> _primitiveStructurePtr;
 };

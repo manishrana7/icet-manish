@@ -17,8 +17,8 @@ public:
     Cluster() {}
 
     /// Creates cluster from a structure and a set of lattice sites.
-    Cluster(const Structure &structure,
-            const std::vector<LatticeSite> &latticeSites);
+    Cluster(const std::shared_ptr<Structure>,
+            const std::vector<LatticeSite> &);
 
     /// Returns the lattice sites of this cluster.
     std::vector<LatticeSite> getLatticeSites() const { return _latticeSites; }
@@ -43,7 +43,7 @@ private:
     std::vector<LatticeSite> _latticeSites;
 
     /// The structure that the lattice sites refer to.
-    Structure _structure;
+    std::shared_ptr<Structure> _structurePtr;
 
     std::vector<double> _distances;
 

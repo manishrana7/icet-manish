@@ -13,6 +13,7 @@ OrbitList::OrbitList(const Structure &structure,
                      const double positionTolerance)
 {
     _primitiveStructure = structure;
+    _primitiveStructurePtr = std::make_shared<Structure>(structure);
     _matrixOfEquivalentSites = matrixOfEquivalentSites;
     _referenceLatticeSites = getReferenceLatticeSites(false);
 
@@ -303,7 +304,7 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
     std::vector<Cluster> clusters;
     for (auto cluster : permutedEquivalentClusters)
     {
-        clusters.push_back(Cluster(_primitiveStructure, cluster));
+        clusters.push_back(Cluster(_primitiveStructurePtr, cluster));
     }
 
     Orbit newOrbit = Orbit(clusters, allowedPermutations);
