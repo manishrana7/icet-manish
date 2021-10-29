@@ -348,7 +348,7 @@ bool OrbitList::isRowsTaken(const std::unordered_set<std::vector<int>, VectorHas
 }
 
 /**
-@brief Returns all columns from the given rows in matrix of symmetry equivalent sites
+@brief Returns the lattice sites in all columns from the given rows in matrix of symmetry equivalent sites
 @param rows indices of rows to return
 @param includeTranslatedSites If true it will also include the equivalent sites found from the rows by moving each site into the unitcell.
 @param sort if true (default) the first column will be sorted
@@ -417,7 +417,7 @@ std::vector<std::vector<LatticeSite>> OrbitList::getSitesTranslatedToUnitcell(co
         }
     }
 
-    // sort this so that the lowest vec<latticeSite> will be chosen and therefore the sorting of orbits should be consistent.
+    // Sort this so that the lowest vec<latticeSite> will be chosen and therefore the sorting of orbits should be consistent.
     std::sort(listOfTranslatedLatticeSites.begin(), listOfTranslatedLatticeSites.end());
 
     return listOfTranslatedLatticeSites;
