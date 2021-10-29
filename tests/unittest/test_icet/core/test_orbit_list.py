@@ -96,7 +96,8 @@ class TestOrbitList(unittest.TestCase):
     def test_add_orbit(self):
         """Tests add_orbit funcionality."""
         n_orbits_before = len(self.orbit_list)
-        orbit = Orbit([self.lattice_sites], Structure.from_atoms(self.structure),
+        orbit = Orbit(Structure.from_atoms(self.structure),
+                      [self.lattice_sites],
                       set([tuple(0 for _ in self.lattice_sites)]))
         self.orbit_list.add_orbit(orbit)
         self.assertEqual(len(self.orbit_list), n_orbits_before + 1)

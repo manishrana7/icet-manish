@@ -56,17 +56,17 @@ class TestOrbit(unittest.TestCase):
         self.pair_cluster = Cluster(self.structure, self.pair_sites)
         self.triplet_cluster = Cluster(self.structure, self.triplet_sites)
 
-        self.orbit_pair = Orbit([self.pair_sites], self.structure,
+        self.orbit_pair = Orbit(self.structure, [self.pair_sites],
                                 self.allowed_permutations_pair)
-        self.orbit_triplet = Orbit([self.triplet_sites], self.structure,
+        self.orbit_triplet = Orbit(self.structure, [self.triplet_sites],
                                    self.allowed_permutations_triplet)
 
     def test_init(self):
         """Tests the initializer."""
-        orbit = Orbit([self.pair_sites], self.structure, self.allowed_permutations_pair)
+        orbit = Orbit(self.structure, [self.pair_sites], self.allowed_permutations_pair)
         self.assertIsInstance(orbit, Orbit)
 
-        orbit = Orbit([self.triplet_sites], self.structure, self.allowed_permutations_triplet)
+        orbit = Orbit(self.structure, [self.triplet_sites], self.allowed_permutations_triplet)
         self.assertIsInstance(orbit, Orbit)
 
     def test_equivalent_clusters(self):
@@ -150,7 +150,7 @@ class TestOrbit(unittest.TestCase):
         # Binary mc vectors
         # Allow only identity permutation
         allowed_permutations = set([tuple(i for i in range(self.orbit_pair.order))])
-        orbit = Orbit([self.pair_sites], self.structure, allowed_permutations)
+        orbit = Orbit(self.structure, [self.pair_sites], allowed_permutations)
         mc_vectors = orbit.get_mc_vectors([2] * orbit.order)
         self.assertEqual(mc_vectors, [[0, 0]])
 
@@ -161,7 +161,7 @@ class TestOrbit(unittest.TestCase):
 
         # Allow the [1,0] permutation
         allowed_permutations = set([(0, 1), (1, 0)])
-        orbit = Orbit([self.pair_sites], self.structure, allowed_permutations)
+        orbit = Orbit(self.structure, [self.pair_sites], allowed_permutations)
         mc_vectors = orbit.get_mc_vectors([3] * self.orbit_pair.order)
         target = [[0, 0], [0, 1], [1, 1]]
         self.assertEqual(mc_vectors, target)
@@ -171,7 +171,7 @@ class TestOrbit(unittest.TestCase):
         # Binary mc vectors
         # Allow only identity permutation
         allowed_permutations = set([tuple(i for i in range(self.orbit_triplet.order))])
-        orbit = Orbit([self.triplet_sites], self.structure, allowed_permutations)
+        orbit = Orbit(self.structure, [self.triplet_sites], allowed_permutations)
 
         # Ternary mc vectors
         mc_vectors = orbit.get_mc_vectors([3] * self.orbit_triplet.order)
@@ -181,7 +181,7 @@ class TestOrbit(unittest.TestCase):
 
         # Allow the [0, 2, 1] permutation
         allowed_permutations = set([(0, 1, 2), (0, 2, 1)])
-        orbit = Orbit([self.triplet_sites], self.structure, allowed_permutations)
+        orbit = Orbit(self.structure, [self.triplet_sites], allowed_permutations)
         mc_vectors = self.orbit_triplet.get_mc_vectors([3] * self.orbit_triplet.order)
         target = [[0, 0, 0], [0, 0, 1], [0, 1, 1],
                   [1, 0, 0], [1, 0, 1], [1, 1, 1]]

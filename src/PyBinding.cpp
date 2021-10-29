@@ -283,10 +283,10 @@ PYBIND11_MODULE(_icet, m)
 
         Parameters
         ----------
-        clusters : List[List[LatticeSite]]
-            A list of groups of sites, where each group is a cluster
         structure : Structure
             Atomic structure from which this orbit is derived
+        clusters : List[List[LatticeSite]]
+            A list of groups of sites, where each group is a cluster
         allowed_permutations : List[List[int]]
             A list of the permutations allowed for this orbit
             (for example, if [0, 2, 1] is in this list, the

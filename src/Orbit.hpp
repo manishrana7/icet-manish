@@ -117,7 +117,7 @@ public:
 
         const auto rhsEquivalentClusters = orbit_rhs.getEquivalentClusters();
 
-        // Insert rhs eq sites and corresponding permutations
+        // Insert rhs eq sites
         _equivalentClusters.insert(_equivalentClusters.end(), rhsEquivalentClusters.begin(), rhsEquivalentClusters.end());
         return *this;
     }
