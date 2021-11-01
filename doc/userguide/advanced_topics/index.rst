@@ -25,6 +25,5 @@ command line::
    sqs_generation
    customizing_cluster_spaces
    constituent_strain
-   cluster_counts
    cluster_vectors
    data_container

@@ -86,8 +86,8 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
 }
 
 /**
-  @details This method return the multi-component vector permutations for each
-  multi-component vector.
+  @details This method returns the multi-component vector permutations for
+  each multi-component vector.
 
   Example 1: Given multi-component vectors [0, 0], [0, 1] and [1, 1]
   the returned permutations should be [[1, 0]], [[0, 1],[1, 0]], [1, 1].

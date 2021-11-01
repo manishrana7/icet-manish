@@ -8,7 +8,7 @@
     std::vector<std::pair<originalNeighbors, manyNeigbhors>>
     @endcode
 
-    The many body neigbhors can be retrieved by doing:
+    The many body neighbors can be retrieved by doing:
     @code{.cpp}
     for (const auto nbr : manyBodyNeighborIndices)
     {
@@ -49,7 +49,7 @@ std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> ManyB
         auto Ni = neighborLists[c - 2][index];
         Vector3d zeroVector = {0.0, 0.0, 0.0};
         std::vector<LatticeSite> currentOriginalNeighbors;
-        currentOriginalNeighbors.push_back(LatticeSite(index, zeroVector));  // index is always first index
+        currentOriginalNeighbors.push_back(LatticeSite(index, zeroVector)); // index is always first index
 
         combineToHigherOrder(neighborLists[c - 2], manyBodyNeighborIndices, Ni, currentOriginalNeighbors, saveBothWays, c);
     }
@@ -233,7 +233,7 @@ size_t ManyBodyNeighborList::getNumberOfSites(const unsigned int index) const
     in _latticeNeighbors and _latticeNeighbors[firstIndex] respectively
 */
 std::vector<LatticeSite> ManyBodyNeighborList::getSites(const unsigned int &firstIndex,
-                                                            const unsigned int &secondIndex) const
+                                                        const unsigned int &secondIndex) const
 {
     std::vector<LatticeSite> sites = _latticeNeighbors[firstIndex].first;
     //If zero then this is a singlet

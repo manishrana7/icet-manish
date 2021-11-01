@@ -174,10 +174,10 @@ pages:
     - doxygen Doxyfile
     - cd ../..
     - mv doc/apidoc/html/ public/apidoc/
-    - sed -i "s/version = ''/version = '$tag'/" doc/userguide/source/conf.py
+    - sed -i "s/version = ''/version = '$tag'/" doc/userguide/conf.py
     - ORIG_PYTHONPATH=$PYTHONPATH
     - export PYTHONPATH=$PWD:$PYTHONPATH
-    - sphinx-build -W doc/userguide/source/ public/
+    - sphinx-build -W doc/userguide/ public/
     - cd examples
     - find tutorial/ -print | zip ../public/tutorial.zip -@
     - find advanced_topics/ -print | zip ../public/advanced_topics.zip -@
