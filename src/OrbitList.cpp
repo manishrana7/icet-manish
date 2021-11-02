@@ -161,7 +161,7 @@ const Orbit &OrbitList::getOrbit(unsigned int index) const
 /**
 @details
 This function permutes the sites in a set of equivalent clusters (such that the ordering of the sites
-are consistent with the first cluster), then creates an orbit based on the permuted clusters.
+is consistent with the first cluster), then creates an orbit based on the permuted clusters.
 
 Algorithm
 ---------

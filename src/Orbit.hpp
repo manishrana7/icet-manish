@@ -126,7 +126,7 @@ private:
     /// Representative sorted cluster for this orbit
     Cluster _representativeCluster;
 
-    /// Contains the allowed sites permutations. i.e. if 0,2,1 is in this set then 0,1,0 is the same MC vector as 0,0,1
+    /// Contains the allowed sites permutations. i.e. if 0, 2, 1 is in this set then 0, 1, 0 is the same multi-component vector as 0, 0, 1
     std::set<std::vector<int>> _allowedClusterPermutations;
 
     /// Check whether a site is included in a vector of lattice sites
