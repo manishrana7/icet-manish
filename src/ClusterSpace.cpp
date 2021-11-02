@@ -61,25 +61,16 @@ over orbits (symmetry equivalent clusters) of increasing order and size.
 std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
                                                    const double fractionalPositionTolerance) const
 {
-
-    // Do not sort clusters.
-    bool keepOrder = true;
-
-    // Count the clusters in the orbit with the same order as the prototype cluster.
-    bool permuteSites = true;
-
     // Construct orbit list for this structure.
     LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(_primitiveOrbitList, structure, fractionalPositionTolerance);
-    size_t uniqueOffsets = localOrbitListGenerator.getNumberOfUniqueOffsets();
     auto currentOrbitList = localOrbitListGenerator.getFullOrbitList();
 
     // Check that the number of unique offsets equals the number of unit cells in the supercell.
-    size_t numberOfUnitcellRepetitions = structure.size() / _primitiveStructure.size();
-    if (uniqueOffsets != numberOfUnitcellRepetitions)
+    if (localOrbitListGenerator.getNumberOfUniqueOffsets() != structure.size() / _primitiveStructure.size())
     {
         std::ostringstream msg;
         msg << "The number of unique offsets does not match the number of primitive units in the input structure (ClusterSpace::getClusterVector)" << std::endl;
-        msg << uniqueOffsets << " != " << numberOfUnitcellRepetitions;
+        msg << localOrbitListGenerator.getNumberOfUniqueOffsets() << " != " << structure.size() / _primitiveStructure.size();
         throw std::runtime_error(msg.str());
     }
     return getClusterVectorFromOrbitList(currentOrbitList, structure);

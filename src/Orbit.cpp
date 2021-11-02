@@ -258,6 +258,16 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
     return tmpCounts;
 }
 
+void Orbit::transformClustersToSupercell(const Structure &supercell,
+                                         std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
+                                         const double fractionalPositionTolerance)
+{
+    for (Cluster &cluster : _equivalentClusters)
+    {
+        cluster.transformSitesToSupercell(supercell, primToSuperMap, fractionalPositionTolerance);
+    }
+}
+
 namespace std
 {
 

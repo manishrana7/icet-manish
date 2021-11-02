@@ -614,63 +614,9 @@ Orbit OrbitList::getSuperCellOrbit(const Structure &supercell,
         msg << orbitIndex << " >= " << _orbits.size();
         throw std::out_of_range(msg.str());
     }
-
     Orbit supercellOrbit = _orbits[orbitIndex] + cellOffset;
-
-    auto equivalentClusters = supercellOrbit.getEquivalentClusters();
-
-    for (auto &cluster : equivalentClusters)
-    {
-        for (auto &site : cluster.getLatticeSites())
-        {
-            // Technically we should use the fractional position tolerance
-            // corresponding to the cell metric of the supercell structure.
-            // This is, however, not uniquely defined. Moreover, the difference
-            // would only matter for very large supercells. We (@angqvist,
-            // @erikfransson, @erhart) therefore decide to defer this issue
-            // until someone encounters the problem in a practical situation.
-            // In principle, one should not handle coordinates (floats) at this
-            // level anymore. Rather one should transform any (supercell)
-            // structure into an effective representation in terms of lattice
-            // sites before any further operations.
-            transformSiteToSupercell(site, supercell, primToSuperMap, fractionalPositionTolerance);
-        }
-    }
-
-    supercellOrbit.setEquivalentClusters(equivalentClusters);
+    supercellOrbit.transformClustersToSupercell(supercell, primToSuperMap, fractionalPositionTolerance);
     return supercellOrbit;
-}
-
-/**
-@details Transforms a site from the primitive structure to a given supercell.
-This involves finding a map from the site in the primitive cell to the supercell.
-If no map is found mapping is attempted based on the position of the site in the supercell.
-@param site lattice site to transform
-@param supercell supercell structure
-@param primToSuperMap map from primitive to supercell
-@param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
-**/
-void OrbitList::transformSiteToSupercell(LatticeSite &site,
-                                         const Structure &supercell,
-                                         std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
-                                         const double fractionalPositionTolerance) const
-{
-    auto find = primToSuperMap.find(site);
-    LatticeSite supercellSite;
-    if (find == primToSuperMap.end())
-    {
-        Vector3d sitePosition = _primitiveStructure.getPosition(site);
-        supercellSite = supercell.findLatticeSiteByPosition(sitePosition, fractionalPositionTolerance);
-        primToSuperMap[site] = supercellSite;
-    }
-    else
-    {
-        supercellSite = primToSuperMap[site];
-    }
-
-    // overwrite site to match supercell index offset
-    site.setIndex(supercellSite.index());
-    site.setUnitcellOffset(supercellSite.unitcellOffset());
 }
 
 /**

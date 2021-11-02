@@ -18,7 +18,7 @@ struct LatticeSite
 
 public:
     /// Empty constructor.
-    LatticeSite() { }
+    LatticeSite() {}
 
     /**
     @brief Constructor.
@@ -102,20 +102,19 @@ public:
     }
 
 private:
-
     /// Site index.
     size_t _index;
 
     /// Offset relative to the unit cell at the origin in units of lattice vectors.
     Eigen::Vector3d _unitcellOffset;
-
 };
 
 namespace std
 {
 
     /// Compute hash for an individual lattice site.
-    template <> struct hash<LatticeSite>
+    template <>
+    struct hash<LatticeSite>
     {
         /// Hash operator.
         size_t operator()(const LatticeSite &k) const
@@ -135,7 +134,8 @@ namespace std
     };
 
     /// Compute hash for a list of lattice sites.
-    template <> struct hash<std::vector<LatticeSite>>
+    template <>
+    struct hash<std::vector<LatticeSite>>
     {
         /// Hash operator.
         size_t operator()(const std::vector<LatticeSite> &k) const
@@ -153,5 +153,5 @@ namespace std
     };
 
     /// Stream operator.
-    ostream& operator<<(ostream&, const LatticeSite&);
+    ostream &operator<<(ostream &, const LatticeSite &);
 }

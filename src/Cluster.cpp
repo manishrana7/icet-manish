@@ -28,6 +28,47 @@ std::vector<double> Cluster::distances() const
     return distances;
 }
 
+void Cluster::translate(const Eigen::Vector3d &offset)
+{
+    for (LatticeSite &site : _latticeSites)
+    {
+        site.addUnitcellOffset(offset);
+    }
+}
+
+/**
+@details Transforms a site from the primitive structure to a given supercell.
+This involves finding a map from the site in the primitive cell to the supercell.
+If no map is found mapping is attempted based on the position of the site in the supercell.
+@param supercell supercell structure
+@param primToSuperMap map from primitive to supercell
+@param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
+**/
+void Cluster::transformSitesToSupercell(const Structure &supercell,
+                                        std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
+                                        const double fractionalPositionTolerance)
+{
+    for (LatticeSite &site : _latticeSites)
+    {
+        auto find = primToSuperMap.find(site);
+        LatticeSite supercellSite;
+        if (find == primToSuperMap.end())
+        {
+            Vector3d sitePosition = (*_structurePtr).getPosition(site);
+            supercellSite = supercell.findLatticeSiteByPosition(sitePosition, fractionalPositionTolerance);
+            primToSuperMap[site] = supercellSite;
+        }
+        else
+        {
+            supercellSite = primToSuperMap[site];
+        }
+
+        // overwrite site to match supercell index offset
+        site.setIndex(supercellSite.index());
+        site.setUnitcellOffset(supercellSite.unitcellOffset());
+    }
+}
+
 double Cluster::radius() const
 {
     return icet::getGeometricalRadius(_latticeSites, *_structurePtr);

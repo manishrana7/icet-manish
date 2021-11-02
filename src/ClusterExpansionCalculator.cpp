@@ -7,7 +7,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 {
     _clusterSpace = clusterSpace;
     _supercell = structure;
-    std::shared_ptr<Structure> structurePtr = std::make_shared<Structure>(structure);
+    std::shared_ptr<Structure> structurePtr = std::make_shared<Structure>(_clusterSpace.getPrimitiveStructure());
 
     LocalOrbitListGenerator LOLG = LocalOrbitListGenerator(clusterSpace.getPrimitiveOrbitList(), _supercell, fractionalPositionTolerance);
     size_t uniqueOffsets = LOLG.getNumberOfUniqueOffsets();

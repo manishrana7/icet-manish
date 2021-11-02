@@ -21,7 +21,7 @@ public:
             const std::vector<LatticeSite> &);
 
     /// Returns the lattice sites of this cluster.
-    std::vector<LatticeSite> getLatticeSites() const { return _latticeSites; }
+    const std::vector<LatticeSite> &getLatticeSites() const { return _latticeSites; }
 
     /// Returns the order (i.e., the number of sites) of the cluster.
     unsigned int order() const { return _latticeSites.size(); }
@@ -37,6 +37,13 @@ public:
     {
         return cluster1.getLatticeSites() < cluster2.getLatticeSites();
     }
+
+    /// Translate the sites of the cluster by a constant vector
+    void translate(const Eigen::Vector3d &offset);
+
+    void transformSitesToSupercell(const Structure &,
+                                   std::unordered_map<LatticeSite, LatticeSite> &,
+                                   const double fractionalPositionTolerance);
 
 private:
     /// The lattice sites in the cluster.
