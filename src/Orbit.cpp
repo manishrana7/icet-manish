@@ -3,12 +3,12 @@
 /**
 @details This constructor creates an orbit from a set of equivalent clusters and a structure.
          Note that the sites of each cluster need to be ordered in a consistent manner
-         (this ordering is enforced when Orbits are created from the OrbitList class)
+         (This ordering is enforced when Orbit objects are created via an OrbitList object)
 @param equivalentClusters The clusters that together make up the orbit.
-@param structure structure that this orbit relates to
+@param structure Structure that this orbit relates to
 @param allowedClusterPermutations
-    allowed permutations for this orbit; e.g., if 0,2,1 is in this set
-    then 0,1,0 is the same MC vector as 0,0,1
+    Allowed permutations for this orbit; e.g., if 0, 2, 1 is in this set
+    then 0, 1, 0 is the same multi-component vector as 0, 0, 1
 **/
 Orbit::Orbit(const Structure &structure,
              const std::vector<std::vector<LatticeSite>> equivalentClusters,
