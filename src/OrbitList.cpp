@@ -261,16 +261,16 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
 
     std::vector<std::vector<LatticeSite>> permutedEquivalentClusters;
 
-    for (const auto &eqOrbitSites : equivalentClusters)
+    for (const auto &equivalentOrbitSites : equivalentClusters)
     {
-        if (p_equal_set.find(eqOrbitSites) == p_equal_set.end())
+        if (p_equal_set.find(equivalentOrbitSites) == p_equal_set.end())
         {
             // Did not find the cluster in p_equal_set meaning that this cluster is not permuted as it should
-            auto equivalently_translated_eqOrbitsites = getSitesTranslatedToUnitcell(eqOrbitSites, sortRows);
+            auto equivalentlyTranslatedEquivalentOrbitSites = getSitesTranslatedToUnitcell(equivalentOrbitSites, sortRows);
             std::vector<std::vector<LatticeSite>> translatedPermutationsOfSites;
-            for (const auto eq_trans_eqOrbitsites : equivalently_translated_eqOrbitsites)
+            for (const auto eq_trans_equivalentOrbitsites : equivalentlyTranslatedEquivalentOrbitSites)
             {
-                const auto allPermutationsOfSites_i = icet::getAllPermutations<LatticeSite>(eq_trans_eqOrbitsites);
+                const auto allPermutationsOfSites_i = icet::getAllPermutations<LatticeSite>(eq_trans_equivalentOrbitsites);
                 for (const auto perm : allPermutationsOfSites_i)
                 {
                     translatedPermutationsOfSites.push_back(perm);
@@ -279,7 +279,7 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
             for (const auto &perm : translatedPermutationsOfSites)
             {
                 const auto findOnePerm = p_equal_set.find(perm);
-                if (findOnePerm != p_equal_set.end()) // one perm is one of the equivalent sites. This means that eqOrbitSites is associated to p_equal
+                if (findOnePerm != p_equal_set.end()) // one perm is one of the equivalent sites. This means that equivalentOrbitSites is associated to p_equal
                 {
                     permutedEquivalentClusters.push_back(perm);
                     break;
@@ -292,7 +292,7 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
         }
         else
         {
-            permutedEquivalentClusters.push_back(eqOrbitSites);
+            permutedEquivalentClusters.push_back(equivalentOrbitSites);
         }
     }
 
@@ -718,6 +718,20 @@ void OrbitList::removeInactiveOrbits(const Structure &structure)
             removeOrbit(i);
         }
     }
+}
+
+/**
+@brief Adds an orbit to another orbit.
+@details
+    This function adds the clusters of the orbit with orbit index index2
+    to the clusters of orbit with index1. The orbit with index2 is not
+    affected.
+@param index1 Orbit index of the orbit that will get new clusters
+@param index2 Orbit index of the orbit whose clusters will be added to orbit with index index1
+**/
+void OrbitList::mergeOrbits(int index1, int index2)
+{
+    _orbits[index1] += _orbits[index2];
 }
 
 /**
