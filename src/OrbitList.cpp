@@ -97,12 +97,12 @@ OrbitList::OrbitList(const Structure &structure,
         addOrbit(createOrbit(equivalentClusters));
     }
 
-    // Sort the orbit list.
+    // Sort the orbit list by (1) and (2) radius.
     sort(positionTolerance);
 }
 
 /**
-@details This function sorts the orbit list by order and radius. This is done to obtain a reproducable (stable) order of the orbit list.
+@details This function sorts the orbit list by (1) order and (2) radius. This produces a reproducable (stable) order of the orbit list.
 @param positionTolerance tolerance applied when comparing positions in Cartesian coordinates
 */
 void OrbitList::sort(const double positionTolerance)

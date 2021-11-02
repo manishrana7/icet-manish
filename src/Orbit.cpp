@@ -17,11 +17,18 @@ Orbit::Orbit(const Structure &structure,
     _representativeCluster = Cluster(structure, equivalentClusters[0]);
     _equivalentClusters = equivalentClusters;
     _allowedClusterPermutations = allowedClusterPermutations;
+
+    // Sort equivalent clusters according the coordinates of their sites.
+    // This is done only to achieve a reproducible ordering, which under some
+    // circumstances matters when sorting the orbit list (and thereby the
+    // cluster vector).
+    std::sort(_equivalentClusters.begin(), _equivalentClusters.end());
 }
 
 /**
 @brief Add a cluster to the orbit.
-@param latticeSiteGroup cluster to be added represented by a group of lattice site
+@details Note that this function only appends the new cluster to the end without resorting.
+@param latticeSiteGroup Cluster to be added represented by a group of lattice sites
 */
 void Orbit::addEquivalentCluster(const std::vector<LatticeSite> &latticeSiteGroup)
 {
