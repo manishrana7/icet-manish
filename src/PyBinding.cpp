@@ -334,7 +334,7 @@ PYBIND11_MODULE(_icet, m)
             &Orbit::getEquivalentClusters,
             &Orbit::setEquivalentClusters,
             "list of symmetry equivalent clusters")
-        .def("get_mc_vectors", &Orbit::getMultiComponentVectors,
+        .def("get_multicomponent_vectors", &Orbit::getMultiComponentVectors,
              R"pbdoc(
              Return the multi-component vectors for this orbit given the allowed components.
              The multi-component vectors are returned as a list of tuples.
@@ -651,15 +651,15 @@ PYBIND11_MODULE(_icet, m)
         .def("_get_orbit_list", &ClusterSpace::getPrimitiveOrbitList)
         .def("get_orbit", &ClusterSpace::getOrbit)
         .def_property_readonly("species_maps", &ClusterSpace::getSpeciesMaps)
-        .def("get_multi_component_vectors_by_orbit", &ClusterSpace::getMultiComponentVectorsByOrbit)
+        .def("get_multicomponent_vectors_by_orbit", &ClusterSpace::getMultiComponentVectorsByOrbit)
         .def("get_chemical_symbols",
              &ClusterSpace::getChemicalSymbols,
              "Returns list of species associated with cluster space as chemical symbols.")
         .def("get_cutoffs", &ClusterSpace::getCutoffs)
         .def("_get_primitive_structure", &ClusterSpace::getPrimitiveStructure)
-        .def("get_multi_component_vector_permutations", &ClusterSpace::getMultiComponentVectorPermutations)
+        .def("get_multicomponent_vector_permutations", &ClusterSpace::getMultiComponentVectorPermutations)
         .def("get_number_of_allowed_species_by_site", &ClusterSpace::getNumberOfAllowedSpeciesBySite)
-        .def("_compute_multi_component_vectors",
+        .def("_compute_multicomponent_vectors",
              &ClusterSpace::computeMultiComponentVectors,
              "Compute the multi-component vectors (internal).")
         .def("_remove_orbits_cpp", &ClusterSpace::removeOrbits)
