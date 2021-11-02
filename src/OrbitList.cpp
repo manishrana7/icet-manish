@@ -97,12 +97,17 @@ OrbitList::OrbitList(const Structure &structure,
         addOrbit(createOrbit(equivalentClusters));
     }
 
-    // Sort the orbit list by (1) and (2) radius.
+    // Sort the orbit list by order and radius.
     sort(positionTolerance);
 }
 
 /**
-@details This function sorts the orbit list by (1) order and (2) radius. This produces a reproducable (stable) order of the orbit list.
+@brief Sort the orbit list
+@details
+    This function sorts the orbit list by (1) order, (2) radius,
+    (3) number of clusters in the orbit, and (4) coordinates of
+    the sites in the clusters. This produces a reproducable
+    (stable) order of the orbit list (and thereby the cluster vector).
 @param positionTolerance tolerance applied when comparing positions in Cartesian coordinates
 */
 void OrbitList::sort(const double positionTolerance)
@@ -110,18 +115,18 @@ void OrbitList::sort(const double positionTolerance)
     std::sort(_orbits.begin(), _orbits.end(),
               [positionTolerance](const Orbit &lhs, const Orbit &rhs)
               {
-                  // Test against number of bodies in cluster.
+                  // (1) Test against number of bodies in cluster.
                   if (lhs.getRepresentativeCluster().order() != rhs.getRepresentativeCluster().order())
                   {
                       return lhs.getRepresentativeCluster().order() < rhs.getRepresentativeCluster().order();
                   }
-                  // Compare by radius.
+                  // (2) Compare by radius.
                   if (fabs(lhs.radius() - rhs.radius()) > positionTolerance)
                   {
                       return lhs.radius() < rhs.radius();
                   }
 
-                  // Check size of vector of equivalent sites.
+                  // (3) Check size of vector of equivalent sites.
                   if (lhs.size() < rhs.size())
                   {
                       return true;
@@ -131,7 +136,7 @@ void OrbitList::sort(const double positionTolerance)
                       return false;
                   }
 
-                  // Check the individual equivalent sites.
+                  // (4) Check the individual equivalent sites.
                   return lhs.getEquivalentClusters() < rhs.getEquivalentClusters();
               });
 }
