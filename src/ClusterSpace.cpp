@@ -82,7 +82,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
         msg << uniqueOffsets << " != " << numberOfUnitcellRepetitions;
         throw std::runtime_error(msg.str());
     }
-    return occupyClusterVector(currentOrbitList, structure);
+    return getClusterVectorFromOrbitList(currentOrbitList, structure);
 }
 
 /**
@@ -305,15 +305,15 @@ void ClusterSpace::removeOrbits(std::vector<size_t> &indices)
 @param flipIndex If a local cluster vector should be calculated this argument is used to specify the index of the site whose local cluster vector should be computed. If calculating a change in cluster vector, this is the site whose occupation has changed. If -1 (default), the total cluster vector will be calculated.
 @param newOccupation New atomic number on the site with index flipIndex. If this argument is not -1, a change in cluster vector will be calculated.
 */
-const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orbitList,
-                                                            const Structure &supercell,
-                                                            const double firstElement,
-                                                            const int flipIndex,
-                                                            const int newOccupation) const
+const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const OrbitList &orbitList,
+                                                                      const Structure &supercell,
+                                                                      const double firstElement,
+                                                                      const int flipIndex,
+                                                                      const int newOccupation) const
 {
     if (newOccupation >= 0 && flipIndex == -1)
     {
-        throw std::runtime_error("flipIndex needs to be specified (larger than -1) if newOccupation is specified (ClusterSpace::occupyClusterVector)");
+        throw std::runtime_error("flipIndex needs to be specified (larger than -1) if newOccupation is specified (ClusterSpace::getClusterVectorFromOrbitList)");
     }
     std::vector<double> clusterVector(_clusterVectorLength);
     clusterVector[0] = firstElement;
@@ -321,7 +321,7 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
     if (_primitiveOrbitList.size() != orbitList.size())
     {
         std::cout << orbitList.size() << " >= " << _primitiveOrbitList.size() << std::endl;
-        throw std::runtime_error("Orbit lists do no not match (ClusterSpace::occupyClusterVector)");
+        throw std::runtime_error("Orbit lists do no not match (ClusterSpace::getClusterVectorFromOrbitList)");
     }
 
     for (size_t currentOrbitIndex = 0; currentOrbitIndex < _primitiveOrbitList.size(); currentOrbitIndex++)
@@ -350,7 +350,7 @@ const std::vector<double> ClusterSpace::occupyClusterVector(const OrbitList &orb
         catch (const std::exception &e)
         {
             std::cout << e.what() << std::endl;
-            throw std::runtime_error("Failed getting allowed occupations (ClusterSpace::occupyClusterVector)");
+            throw std::runtime_error("Failed getting allowed occupations (ClusterSpace::getClusterVectorFromOrbitList)");
         }
 
         // Skip the rest if any of the sites are inactive (i.e. allowed occupation < 2)
