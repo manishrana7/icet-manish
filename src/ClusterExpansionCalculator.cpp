@@ -48,12 +48,8 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         OrbitList localOrbitList = LOLG.getLocalOrbitList(offsetIndex);
         for (int orbitIndex = 0; orbitIndex < numberOfOrbits; orbitIndex++)
         {
-            int eqSiteIndex = -1;
-
             for (const auto cluster : localOrbitList.getOrbit(orbitIndex).getEquivalentClusters())
             {
-                eqSiteIndex++;
-
                 std::vector<LatticeSite> primitiveEquivalentSites;
                 for (const auto site : cluster.getLatticeSites())
                 {
@@ -130,7 +126,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
     // The first element in the cluster vector (difference) should be zero (because we take 1 - 1)
     double firstElement = 0.0;
 
-    return _clusterSpace.occupyClusterVector(_localOrbitlists[_indexToOffset[flipIndex]], _supercell, firstElement, flipIndex, newOccupation);
+    return _clusterSpace.getClusterVectorFromOrbitList(_localOrbitlists[_indexToOffset[flipIndex]], _supercell, firstElement, flipIndex, newOccupation);
 }
 
 /**
@@ -150,7 +146,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
     // The first element can be thought of as shared between all sites when constructing a local orbit list
     double firstElement = 1.0 / _supercell.size();
 
-    return _clusterSpace.occupyClusterVector(_localOrbitlists[_indexToOffset[index]], _supercell, firstElement, index);
+    return _clusterSpace.getClusterVectorFromOrbitList(_localOrbitlists[_indexToOffset[index]], _supercell, firstElement, index);
 }
 
 /**
@@ -165,5 +161,5 @@ std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array
     }
     _supercell.setAtomicNumbers(occupations);
 
-    return _clusterSpace.occupyClusterVector(_fullOrbitList, _supercell);
+    return _clusterSpace.getClusterVectorFromOrbitList(_fullOrbitList, _supercell);
 }

@@ -28,7 +28,7 @@ public:
     Orbit(const std::vector<Cluster>, const std::set<std::vector<int>>);
 
     /// Adds one cluster to the orbit.
-    void addEquivalentCluster(const Cluster &, bool = false);
+    void addEquivalentCluster(const Cluster &);
 
     /// Returns the number of equivalent clusters in this orbit.
     size_t size() const { return _equivalentClusters.size(); }
@@ -37,7 +37,7 @@ public:
     double radius() const { return getRepresentativeCluster().radius(); }
 
     /// Returns the representative cluster for this orbit
-    const Cluster &getRepresentativeCluster() const { return _equivalentClusters[0]; }
+    const Cluster &getRepresentativeCluster() const { return _representativeCluster; }
 
     /// Returns the sites that define the representative cluster of this orbit.
     const std::vector<LatticeSite> getSitesOfRepresentativeCluster() const { return getRepresentativeCluster().getLatticeSites(); }
@@ -51,14 +51,11 @@ public:
     /// Sets the equivalent clusters.
     void setEquivalentClusters(const std::vector<Cluster> &equivalentClusters) { _equivalentClusters = equivalentClusters; }
 
-    /// Sorts equivalent clusters.
-    void sort() { std::sort(_equivalentClusters.begin(), _equivalentClusters.end()); }
-
     /// Returns the number of bodies of the cluster that represent this orbit.
     unsigned int order() const { return getRepresentativeCluster().order(); }
 
     /// Gets the allowed permutations of clusters.
-    const std::set<std::vector<int>> getAllowedClusterPermutations() const { return _allowedClusterPermutations; }
+    std::set<std::vector<int>> getAllowedClusterPermutations() const { return _allowedClusterPermutations; }
 
     /// Returns the relevant multicomponent vectors of this orbit given the number of allowed components.
     std::vector<std::vector<int>> getMultiComponentVectors(const std::vector<int> &Mi_local) const;
@@ -123,10 +120,12 @@ public:
     }
 
 private:
+    Cluster _representativeCluster;
+
     /// Container of equivalent sites for this orbit
     std::vector<Cluster> _equivalentClusters;
 
-    /// Contains the allowed sites permutations. i.e. if 0,2,1 is in this set then 0,1,0 is the same MC vector as 0,0,1
+    /// Contains the allowed sites permutations. i.e. if 0, 2, 1 is in this set then 0, 1, 0 is the same multi-component vector as 0, 0, 1
     std::set<std::vector<int>> _allowedClusterPermutations;
 
     /// Check whether a site is included in a vector of lattice sites

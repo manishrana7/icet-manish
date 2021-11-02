@@ -128,7 +128,7 @@ public:
     void setPrimitiveStructure(const Structure &primitive) { _primitiveStructure = primitive; }
 
     /// Merge two orbits.
-    void mergeOrbits(int index1, int index2) { _orbits[index1] += _orbits[index2]; }
+    void mergeOrbits(int index1, int index2);
 
 private:
     /// Contains all the orbits in the orbit list.

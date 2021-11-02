@@ -675,7 +675,7 @@ def _get_sqs_cluster_vector(cluster_space: ClusterSpace,
         for symbols in itertools.product(*symbol_groups):
             cluster_product = 1
             for i, symbol in enumerate(symbols):
-                mc_vector_component = orbit['multi_component_vector'][i]
+                mc_vector_component = orbit['multicomponent_vector'][i]
                 species_i = symbol_to_integer_map[symbol]
                 prod = cluster_space.evaluate_cluster_function(nbr_of_allowed_species[i],
                                                                mc_vector_component,

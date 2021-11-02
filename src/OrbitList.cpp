@@ -98,12 +98,17 @@ OrbitList::OrbitList(const Structure &structure,
         addOrbit(createOrbit(equivalentClusters));
     }
 
-    // Sort the orbit list.
+    // Sort the orbit list by order and radius.
     sort(positionTolerance);
 }
 
 /**
-@details This function sorts the orbit list by order and radius. This is done to obtain a reproducable (stable) order of the orbit list.
+@brief Sort the orbit list
+@details
+    This function sorts the orbit list by (1) order, (2) radius,
+    (3) number of clusters in the orbit, and (4) coordinates of
+    the sites in the clusters. This produces a reproducable
+    (stable) order of the orbit list (and thereby the cluster vector).
 @param positionTolerance tolerance applied when comparing positions in Cartesian coordinates
 */
 void OrbitList::sort(const double positionTolerance)
@@ -111,18 +116,18 @@ void OrbitList::sort(const double positionTolerance)
     std::sort(_orbits.begin(), _orbits.end(),
               [positionTolerance](const Orbit &lhs, const Orbit &rhs)
               {
-                  // Test against number of bodies in cluster.
+                  // (1) Test against number of bodies in cluster.
                   if (lhs.getRepresentativeCluster().order() != rhs.getRepresentativeCluster().order())
                   {
                       return lhs.getRepresentativeCluster().order() < rhs.getRepresentativeCluster().order();
                   }
-                  // Compare by radius.
+                  // (2) Compare by radius.
                   if (fabs(lhs.radius() - rhs.radius()) > positionTolerance)
                   {
                       return lhs.radius() < rhs.radius();
                   }
 
-                  // Check size of vector of equivalent sites.
+                  // (3) Check size of vector of equivalent sites.
                   if (lhs.size() < rhs.size())
                   {
                       return true;
@@ -132,7 +137,7 @@ void OrbitList::sort(const double positionTolerance)
                       return false;
                   }
 
-                  // Check the individual equivalent sites.
+                  // (4) Check the individual equivalent sites.
                   return lhs.getEquivalentClusters() < rhs.getEquivalentClusters();
               });
 }
@@ -162,7 +167,7 @@ const Orbit &OrbitList::getOrbit(unsigned int index) const
 /**
 @details
 This function permutes the sites in a set of equivalent clusters (such that the ordering of the sites
-are consistent with the first cluster), then creates an orbit based on the permuted clusters.
+is consistent with the first cluster), then creates an orbit based on the permuted clusters.
 
 Algorithm
 ---------
@@ -257,16 +262,16 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
 
     std::vector<std::vector<LatticeSite>> permutedEquivalentClusters;
 
-    for (const auto &eqOrbitSites : equivalentClusters)
+    for (const auto &equivalentOrbitSites : equivalentClusters)
     {
-        if (p_equal_set.find(eqOrbitSites) == p_equal_set.end())
+        if (p_equal_set.find(equivalentOrbitSites) == p_equal_set.end())
         {
             // Did not find the cluster in p_equal_set meaning that this cluster is not permuted as it should
-            auto equivalently_translated_eqOrbitsites = getSitesTranslatedToUnitcell(eqOrbitSites, sortRows);
+            auto equivalentlyTranslatedEquivalentOrbitSites = getSitesTranslatedToUnitcell(equivalentOrbitSites, sortRows);
             std::vector<std::vector<LatticeSite>> translatedPermutationsOfSites;
-            for (const auto eq_trans_eqOrbitsites : equivalently_translated_eqOrbitsites)
+            for (const auto eq_trans_equivalentOrbitsites : equivalentlyTranslatedEquivalentOrbitSites)
             {
-                const auto allPermutationsOfSites_i = icet::getAllPermutations<LatticeSite>(eq_trans_eqOrbitsites);
+                const auto allPermutationsOfSites_i = icet::getAllPermutations<LatticeSite>(eq_trans_equivalentOrbitsites);
                 for (const auto perm : allPermutationsOfSites_i)
                 {
                     translatedPermutationsOfSites.push_back(perm);
@@ -275,7 +280,7 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
             for (const auto &perm : translatedPermutationsOfSites)
             {
                 const auto findOnePerm = p_equal_set.find(perm);
-                if (findOnePerm != p_equal_set.end()) // one perm is one of the equivalent sites. This means that eqOrbitSites is associated to p_equal
+                if (findOnePerm != p_equal_set.end()) // one perm is one of the equivalent sites. This means that equivalentOrbitSites is associated to p_equal
                 {
                     permutedEquivalentClusters.push_back(perm);
                     break;
@@ -288,7 +293,7 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
         }
         else
         {
-            permutedEquivalentClusters.push_back(eqOrbitSites);
+            permutedEquivalentClusters.push_back(equivalentOrbitSites);
         }
     }
 
@@ -721,6 +726,20 @@ void OrbitList::removeInactiveOrbits(const Structure &structure)
             removeOrbit(i);
         }
     }
+}
+
+/**
+@brief Adds an orbit to another orbit.
+@details
+    This function adds the clusters of the orbit with orbit index index2
+    to the clusters of orbit with index1. The orbit with index2 is not
+    affected.
+@param index1 Orbit index of the orbit that will get new clusters
+@param index2 Orbit index of the orbit whose clusters will be added to orbit with index index1
+**/
+void OrbitList::mergeOrbits(int index1, int index2)
+{
+    _orbits[index1] += _orbits[index2];
 }
 
 /**

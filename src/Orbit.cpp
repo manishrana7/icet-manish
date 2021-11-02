@@ -3,32 +3,35 @@
 /**
 @details This constructor creates an orbit from a set of equivalent clusters and a structure.
          Note that the sites of each cluster need to be ordered in a consistent manner
-         (this ordering is enforced when Orbits are created from the OrbitList class)
+         (This ordering is enforced when Orbit objects are created via an OrbitList object)
 @param equivalentClusters The clusters that together make up the orbit.
-@param structure structure that this orbit relates to
+@param structure Structure that this orbit relates to
 @param allowedClusterPermutations
-    allowed permutations for this orbit; e.g., if 0,2,1 is in this set
-    then 0,1,0 is the same MC vector as 0,0,1
+    Allowed permutations for this orbit; e.g., if 0, 2, 1 is in this set
+    then 0, 1, 0 is the same multi-component vector as 0, 0, 1
 **/
 Orbit::Orbit(const std::vector<Cluster> equivalentClusters,
              const std::set<std::vector<int>> allowedClusterPermutations)
 {
+    _representativeCluster = equivalentClusters[0];
     _equivalentClusters = equivalentClusters;
     _allowedClusterPermutations = allowedClusterPermutations;
-    sort();
+
+    // Sort equivalent clusters according the coordinates of their sites.
+    // This is done only to achieve a reproducible ordering, which under some
+    // circumstances matters when sorting the orbit list (and thereby the
+    // cluster vector).
+    std::sort(_equivalentClusters.begin(), _equivalentClusters.end());
 }
 
 /**
-@param latticeSiteGroup cluster to be added represented by a group of lattice site
-@param sort_orbit if True the orbit will be sorted
+@brief Add a cluster to the orbit.
+@details Note that this function only appends the new cluster to the end without resorting.
+@param latticeSiteGroup Cluster to be added represented by a group of lattice sites
 */
-void Orbit::addEquivalentCluster(const Cluster &cluster, bool sort_orbit)
+void Orbit::addEquivalentCluster(const Cluster &cluster)
 {
     _equivalentClusters.push_back(cluster);
-    if (sort_orbit)
-    {
-        sort();
-    }
 }
 
 /**
@@ -44,8 +47,8 @@ Cluster Orbit::getClusterByIndex(unsigned int index) const
 }
 
 /**
-  @param Mi_local list of the number of allowed species per site
- */
+@param Mi_local list of the number of allowed species per site
+*/
 std::vector<std::vector<int>> Orbit::getMultiComponentVectors(const std::vector<int> &Mi_local) const
 {
     if (std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i)
@@ -148,13 +151,13 @@ bool Orbit::isSiteIncluded(int index, const std::vector<LatticeSite> &cluster) c
 }
 
 /**
- @brief Count the occupations of the clusters in this orbit.
- @details
+@brief Count the occupations of the clusters in this orbit.
+@details
     Note that the orderings of the sites in the clusters matter, meaning,
     for example, that (47, 79) will be counted separately from (79, 47)
     (here 47 and 79 are atomic numbers).
- @param structure the structure that will have its clusters counted
- @param siteIndexForDoubleCountingCorrection
+@param structure the structure that will have its clusters counted
+@param siteIndexForDoubleCountingCorrection
    In small supercells, clusters may include both a site and its periodic image.
    In such cases this argument can be used to avoid double counting.
    Clusters in which a site with this index occurs more than once will only be counted with
@@ -194,19 +197,19 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
 }
 
 /**
- @brief 
+@brief
     Count the change in occupations of the clusters in this orbit caused
     by changing the chemical identity of one site.
- @details
+@details
     `structure` should contain the original occupations, and the change
     is defined by `flipIndex` (index of the site whose occupation
     changes) and `newOccupation` (the new atomic number on that site).
     Note that the orderings of the sites in the clusters matter, meaning,
     for example, that (47, 79) will be counted separately from (79, 47)
     (here 47 and 79 are atomic numbers).
- @param structure the structure for which to count clusters, with occupations before change
- @param flipIndex index of site that has been flipped
- @param newOccupation new atomic number of site that has been flipped
+@param structure the structure for which to count clusters, with occupations before change
+@param flipIndex index of site that has been flipped
+@param newOccupation new atomic number of site that has been flipped
 */
 std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &structure,
                                                               const int flipIndex,

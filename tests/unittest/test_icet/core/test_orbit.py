@@ -107,14 +107,6 @@ class TestOrbit(unittest.TestCase):
         """Tests geometrical size of orbit."""
         self.orbit_pair.radius
 
-    def test_sort(self):
-        """Tests sorting functionality of orbit."""
-        self.orbit_pair.equivalent_clusters = sorted(
-            self.lattice_sites_pairs, reverse=True)
-        self.orbit_pair.sort()
-        self.assertEqual(self.orbit_pair.equivalent_clusters,
-                         sorted(self.lattice_sites_pairs))
-
     def test_add(self):
         """Tests that offset is effectively added to orbit."""
         added_offset = np.array((1., 1., 1.))
@@ -145,28 +137,28 @@ class TestOrbit(unittest.TestCase):
         self.assertEqual(self.orbit_triplet.allowed_permutations,
                          [list(i) for i in self.allowed_permutations_triplet])
 
-    def test_get_mc_vectors_pairs(self):
+    def test_get_multicomponent_vectors_pairs(self):
         """Tests the get mc vectors functionality for a pair orbit."""
         # Binary mc vectors
         # Allow only identity permutation
         allowed_permutations = set([tuple(i for i in range(self.orbit_pair.order))])
         orbit = Orbit(self.structure, [self.pair_sites], allowed_permutations)
-        mc_vectors = orbit.get_mc_vectors([2] * orbit.order)
+        mc_vectors = orbit.get_multicomponent_vectors([2] * orbit.order)
         self.assertEqual(mc_vectors, [[0, 0]])
 
         # Ternary mc vectors
-        mc_vectors = orbit.get_mc_vectors([3] * self.orbit_pair.order)
+        mc_vectors = orbit.get_multicomponent_vectors([3] * self.orbit_pair.order)
         target = [[0, 0], [0, 1], [1, 0], [1, 1]]
         self.assertEqual(mc_vectors, target)
 
         # Allow the [1,0] permutation
         allowed_permutations = set([(0, 1), (1, 0)])
         orbit = Orbit(self.structure, [self.pair_sites], allowed_permutations)
-        mc_vectors = orbit.get_mc_vectors([3] * self.orbit_pair.order)
+        mc_vectors = orbit.get_multicomponent_vectors([3] * self.orbit_pair.order)
         target = [[0, 0], [0, 1], [1, 1]]
         self.assertEqual(mc_vectors, target)
 
-    def test_get_mc_vectors_triplets(self):
+    def test_get_multicomponent_vectors_triplets(self):
         """Tests  the get mc vectors functionality for a triplet orbit."""
         # Binary mc vectors
         # Allow only identity permutation
@@ -174,7 +166,7 @@ class TestOrbit(unittest.TestCase):
         orbit = Orbit(self.structure, [self.triplet_sites], allowed_permutations)
 
         # Ternary mc vectors
-        mc_vectors = orbit.get_mc_vectors([3] * self.orbit_triplet.order)
+        mc_vectors = orbit.get_multicomponent_vectors([3] * self.orbit_triplet.order)
         target = [[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
                   [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]]
         self.assertEqual(mc_vectors, target)
@@ -182,7 +174,7 @@ class TestOrbit(unittest.TestCase):
         # Allow the [0, 2, 1] permutation
         allowed_permutations = set([(0, 1, 2), (0, 2, 1)])
         orbit = Orbit(self.structure, [self.triplet_sites], allowed_permutations)
-        mc_vectors = self.orbit_triplet.get_mc_vectors([3] * self.orbit_triplet.order)
+        mc_vectors = self.orbit_triplet.get_multicomponent_vectors([3] * self.orbit_triplet.order)
         target = [[0, 0, 0], [0, 0, 1], [0, 1, 1],
                   [1, 0, 0], [1, 0, 1], [1, 1, 1]]
         self.assertEqual(mc_vectors, target)
