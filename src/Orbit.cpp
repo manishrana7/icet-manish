@@ -1,29 +1,38 @@
 #include "Orbit.hpp"
 
 /**
-@param latticeSiteGroup cluster to be added represented by a group of lattice site
-@param sort_orbit if True the orbit will be sorted
-*/
-void Orbit::addEquivalentCluster(const std::vector<LatticeSite> &latticeSiteGroup, bool sort_orbit)
+@details This constructor creates an orbit from a set of equivalent clusters and a structure.
+         Note that the sites of each cluster need to be ordered in a consistent manner
+         (This ordering is enforced when Orbit objects are created via an OrbitList object)
+@param equivalentClusters The clusters that together make up the orbit.
+@param structure Structure that this orbit relates to
+@param allowedClusterPermutations
+    Allowed permutations for this orbit; e.g., if 0, 2, 1 is in this set
+    then 0, 1, 0 is the same multi-component vector as 0, 0, 1
+**/
+Orbit::Orbit(const Structure &structure,
+             const std::vector<std::vector<LatticeSite>> equivalentClusters,
+             const std::set<std::vector<int>> allowedClusterPermutations)
 {
-    _equivalentClusters.push_back(latticeSiteGroup);
-    if (sort_orbit)
-    {
-        sort();
-    }
+    _representativeCluster = Cluster(structure, equivalentClusters[0]);
+    _equivalentClusters = equivalentClusters;
+    _allowedClusterPermutations = allowedClusterPermutations;
+
+    // Sort equivalent clusters according the coordinates of their sites.
+    // This is done only to achieve a reproducible ordering, which under some
+    // circumstances matters when sorting the orbit list (and thereby the
+    // cluster vector).
+    std::sort(_equivalentClusters.begin(), _equivalentClusters.end());
 }
 
 /**
-@param latticeSiteGroups list of cluster to be added, each represented by a group of lattice sites
-@param sort_orbit if True the orbit will be sorted
+@brief Add a cluster to the orbit.
+@details Note that this function only appends the new cluster to the end without resorting.
+@param latticeSiteGroup Cluster to be added represented by a group of lattice sites
 */
-void Orbit::addEquivalentClusters(const std::vector<std::vector<LatticeSite>> &latticeSiteGroups, bool sort_orbit)
+void Orbit::addEquivalentCluster(const std::vector<LatticeSite> &latticeSiteGroup)
 {
-    _equivalentClusters.insert(_equivalentClusters.end(), latticeSiteGroups.begin(), latticeSiteGroups.end());
-    if (sort_orbit)
-    {
-        sort();
-    }
+    _equivalentClusters.push_back(latticeSiteGroup);
 }
 
 /**
@@ -39,45 +48,8 @@ std::vector<LatticeSite> Orbit::getClusterByIndex(unsigned int index) const
 }
 
 /**
-@param index cluster index
+@param Mi_local list of the number of allowed species per site
 */
-std::vector<LatticeSite> Orbit::getPermutedClusterByIndex(unsigned int index) const
-{
-    if (index >= _equivalentClusters.size())
-    {
-        std::ostringstream msg;
-        msg << "Index out of range (Orbit::getPermutedClusterByIndex).\n";
-        msg << " index: " << index << "\n";
-        msg << " size(_equivalentClusters): " << _equivalentClusters.size() << "\n";
-        throw std::out_of_range(msg.str());
-    }
-    if (index >= _equivalentClusterPermutations.size())
-    {
-        std::ostringstream msg;
-        msg << "Index out of range (Orbit::getPermutedClusterByIndex).\n";
-        msg << " index: " << index << "\n";
-        msg << " size(_equivalentClusterPermutations): " << _equivalentClusterPermutations.size();
-        throw std::out_of_range(msg.str());
-    }
-    return icet::getPermutedVector<LatticeSite>(_equivalentClusters[index], _equivalentClusterPermutations[index]);
-}
-
-/**
-@brief Returns all permuted equivalent sites.
-*/
-std::vector<std::vector<LatticeSite>> Orbit::getPermutedEquivalentClusters() const
-{
-    std::vector<std::vector<LatticeSite>> permutedSites(_equivalentClusters.size());
-    for (size_t i = 0; i < _equivalentClusters.size(); i++)
-    {
-        permutedSites[i] = getPermutedClusterByIndex(i);
-    }
-    return permutedSites;
-}
-
-/**
-  @param Mi_local list of the number of allowed species per site
- */
 std::vector<std::vector<int>> Orbit::getMultiComponentVectors(const std::vector<int> &Mi_local) const
 {
     if (std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i)
@@ -165,30 +137,6 @@ bool Orbit::contains(const std::vector<LatticeSite> cluster, bool sorted) const
 }
 
 /**
-@param cluster cluster to be removed (represented by a list of sites); the order of sites is irrelevant
-*/
-void Orbit::removeCluster(std::vector<LatticeSite> cluster)
-{
-
-    std::sort(cluster.begin(), cluster.end());
-    for (size_t i = 0; i < _equivalentClusters.size(); i++)
-    {
-        auto sites = _equivalentClusters[i];
-
-        // compare the sorted sites
-        std::sort(sites.begin(), sites.end());
-
-        if (sites == cluster)
-        {
-            _equivalentClusters.erase(_equivalentClusters.begin() + i);
-            _equivalentClusterPermutations.erase(_equivalentClusterPermutations.begin() + i);
-            return;
-        }
-    }
-    throw std::runtime_error("Did not find any matching clusters (Orbit::removeCluster)");
-}
-
-/**
 @brief Check whether a site is included in a cluster
 @details A cluster will count as included if index is among the lattice sites
          that have a zero offset.
@@ -204,33 +152,22 @@ bool Orbit::isSiteIncluded(int index, const std::vector<LatticeSite> &cluster) c
 }
 
 /**
- @brief Count the occupations of the clusters in this orbit.
- @details
+@brief Count the occupations of the clusters in this orbit.
+@details
     Note that the orderings of the sites in the clusters matter, meaning,
     for example, that (47, 79) will be counted separately from (79, 47)
     (here 47 and 79 are atomic numbers).
- @param structure the structure that will have its clusters counted
- @param siteIndexForDoubleCountingCorrection
+@param structure the structure that will have its clusters counted
+@param siteIndexForDoubleCountingCorrection
    In small supercells, clusters may include both a site and its periodic image.
    In such cases this argument can be used to avoid double counting.
    Clusters in which a site with this index occurs more than once will only be counted with
    a factor 1/n, where n is the number of occurrences of this index. By default
    (i.e. siteIndexForDoubleCountingCorrection = -1) no such correction is applied.
- @param permuteClusters If true, permute clusters equivalent clusters before counting
 */
 std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structure,
-                                                        int siteIndexForDoubleCountingCorrection,
-                                                        bool permuteClusters) const
+                                                        int siteIndexForDoubleCountingCorrection) const
 {
-    if (permuteClusters)
-    {
-        // In this case we could just loop over getPermutedEquivalentClusters() instead of
-        // _equivalentClusters, but we then need to be very careful with performance.
-        // Since this should never happen unless someone does something very specific,
-        // we disallow it for now.
-        throw std::runtime_error("countClusterChanges does not support counting of clusters that are not permuted (Orbit::coundClusterChanges)");
-    }
-
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elements(order());
     for (const auto &sites : _equivalentClusters)
@@ -260,35 +197,24 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
 }
 
 /**
- @brief 
+@brief
     Count the change in occupations of the clusters in this orbit caused
     by changing the chemical identity of one site.
- @details
+@details
     `structure` should contain the original occupations, and the change
     is defined by `flipIndex` (index of the site whose occupation
     changes) and `newOccupation` (the new atomic number on that site).
     Note that the orderings of the sites in the clusters matter, meaning,
     for example, that (47, 79) will be counted separately from (79, 47)
     (here 47 and 79 are atomic numbers).
- @param structure the structure for which to count clusters, with occupations before change
- @param flipIndex index of site that has been flipped
- @param newOccupation new atomic number of site that has been flipped
- @param permuteClusters If true, permute clusters equivalent clusters before counting (not yet implemented, should normally never be done)
+@param structure the structure for which to count clusters, with occupations before change
+@param flipIndex index of site that has been flipped
+@param newOccupation new atomic number of site that has been flipped
 */
 std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &structure,
                                                               const int flipIndex,
-                                                              const int newOccupation,
-                                                              const bool permuteClusters) const
+                                                              const int newOccupation) const
 {
-    if (permuteClusters)
-    {
-        // In this case we could just loop over getPermutedEquivalentClusters() instead of
-        // _equivalentClusters, but we then need to be very careful with performance.
-        // Since this should never happen unless someone does something very specific,
-        // we disallow it for now.
-        throw std::runtime_error("countClusterChanges does not support counting of clusters that are not permuted (Orbit::coundClusterChanges)");
-    }
-
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elementsOld(order());
     std::vector<int> elementsNew(order());

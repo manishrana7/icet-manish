@@ -228,7 +228,7 @@ class ClusterSpace(_ClusterSpace):
                        'multiplicity': '{:4}',
                        'index': '{:4}',
                        'orbit_index': '{:4}',
-                       'multi_component_vector': '{:}',
+                       'multicomponent_vector': '{:}',
                        'sublattices': '{:}'}
             s = []
             for name, value in orbit.items():
@@ -344,15 +344,15 @@ class ClusterSpace(_ClusterSpace):
                                ('radius', 0),
                                ('multiplicity', 1),
                                ('orbit_index', -1),
-                               ('multi_component_vector', '.'),
+                               ('multicomponent_vector', '.'),
                                ('sublattices', '.')])
         sublattices = self.get_sublattices(self.primitive_structure)
         data.append(zerolet)
         index = 1
         while index < len(self):
-            multi_component_vectors_by_orbit = self.get_multi_component_vectors_by_orbit(index)
-            orbit_index = multi_component_vectors_by_orbit[0]
-            mc_vector = multi_component_vectors_by_orbit[1]
+            multicomponent_vectors_by_orbit = self.get_multicomponent_vectors_by_orbit(index)
+            orbit_index = multicomponent_vectors_by_orbit[0]
+            mc_vector = multicomponent_vectors_by_orbit[1]
             orbit = self.get_orbit(orbit_index)
             repr_sites = orbit.sites_of_representative_cluster
             orbit_sublattices = '-'.join(
@@ -360,8 +360,8 @@ class ClusterSpace(_ClusterSpace):
                  for ls in repr_sites])
             local_Mi = self.get_number_of_allowed_species_by_site(
                 self._get_primitive_structure(), orbit.sites_of_representative_cluster)
-            mc_vectors = orbit.get_mc_vectors(local_Mi)
-            mc_permutations = self.get_multi_component_vector_permutations(mc_vectors, orbit_index)
+            mc_vectors = orbit.get_multicomponent_vectors(local_Mi)
+            mc_permutations = self.get_multicomponent_vector_permutations(mc_vectors, orbit_index)
             mc_index = mc_vectors.index(mc_vector)
             mc_permutations_multiplicity = len(mc_permutations[mc_index])
             cluster = self.get_orbit(orbit_index).representative_cluster
@@ -372,7 +372,7 @@ class ClusterSpace(_ClusterSpace):
                                   ('radius', cluster.radius),
                                   ('multiplicity', multiplicity * mc_permutations_multiplicity),
                                   ('orbit_index', orbit_index)])
-            record['multi_component_vector'] = mc_vector
+            record['multicomponent_vector'] = mc_vector
             record['sublattices'] = orbit_sublattices
             data.append(record)
             index += 1
@@ -462,7 +462,7 @@ class ClusterSpace(_ClusterSpace):
         """
         size_before = len(self._orbit_list)
         self._remove_orbits_cpp(indices)
-        self._compute_multi_component_vectors()
+        self._compute_multicomponent_vectors()
         self._rebuild_orbit_list()
         size_after = len(self._orbit_list)
         assert size_before - len(indices) == size_after
