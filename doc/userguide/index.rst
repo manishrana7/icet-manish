@@ -7,16 +7,9 @@
 :program:`icet` — A Pythonic approach to cluster expansions
 ***********************************************************
 
-:program:`icet` is a tool for the construction and sampling of alloy cluster
-expansions. A detailed description of the functionality provided as well as an
-extensive tutorial can be found in the `user guide
-<https://icet.materialsmodeling.org/>`_.
-
-:program:`icet` is written in Python, which enables easy integration with
-many first-principles codes and analysis tools accessible from Python, and
-allows for a simple and intuitive user interface. All computationally demanding
-parts are, however, written in C++ ensuring performance while maintaining
-portability.
+:program:`icet` is a tool for the construction and sampling of alloy cluster expansions.
+It is written in Python, which enables easy integration with many first-principles codes and analysis tools accessible from Python, and allows for a simple and intuitive user interface.
+All computationally demanding parts are, however, written in C++ ensuring performance while maintaining portability.
 
 The following snippet provides a minimal example for its usage:
 
@@ -56,7 +49,8 @@ The following snippet provides a minimal example for its usage:
    >>> opt.train()
    >>> ce = ClusterExpansion(cs, opt.parameters)
 
-:program:`icet` has been developed at the `Department of Physics <https://www.chalmers.se/en/departments/physics/Pages/default.aspx>`_ of `Chalmers University of Technology <https://www.chalmers.se/>`_ (Gothenburg, Sweden) and the `Data and Software Management Center <https://europeanspallationsource.se/data-management-software#data-analysis-modelling>`_ at the European Spallation Source (Copenhagen, Denmark).
+
+:program:`icet` has been developed at the `Department of Physics <https://www.chalmers.se/en/departments/physics/Pages/default.aspx>`_ of `Chalmers University of Technology <https://www.chalmers.se/>`_ (Gothenburg, Sweden) and the `Data and Software Management Center <https://europeanspallationsource.se/data-management-software>`_ at the European Spallation Source (Copenhagen, Denmark).
 Please consult the :ref:`credits page <credits>` for information on how to cite :program:`icet`.
 
 For questions and help please use the `icet discussion forum on matsci.org <https://matsci.org/icet>`_.

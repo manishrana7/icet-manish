@@ -20,6 +20,9 @@ The following snippet illustrates how one can train a cluster expansion:
 
 Afterwards the cluster expansion can be used, e.g., for finding ground state structures or sampled via Monte Carlo simulations.
 
+For questions and help please use the `icet discussion forum on matsci.org <https://matsci.org/icet>`_.
+**icet** and its development are hosted on `gitlab <https://gitlab.com/materials-modeling/icet>`_.
+
 
 Installation
 ------------
@@ -38,6 +41,7 @@ Please consult the `installation section of the user guide <https://icet.materia
 **icet** is based on Python3 and invokes functionality from other Python libraries including
 `ase <https://wiki.fysik.dtu.dk/ase>`_,
 `pandas <https://pandas.pydata.org/>`_,
+`numba <https://numba.pydata.org/>`_,
 `numpy <http://www.numpy.org/>`_,
 `scipy <https://www.scipy.org/>`_,
 `spglib <https://atztogo.github.io/spglib/>`_, and
@@ -47,7 +51,7 @@ Please consult the `installation section of the user guide <https://icet.materia
 Credits
 -------
 
-**icet** has been developed at the Department of Physics at Chalmers University of Technology (Gothenburg, Sweden), in collaboration with the Data Analysis group at the `Data Management and Software Center of the European Spallation Source <https://europeanspallationsource.se/data-management-software#data-analysis-modelling>`_ (Copenhagen, Denmark).
+**icet** has been developed at the `Department of Physics <https://www.chalmers.se/en/departments/physics/Pages/default.aspx>`_ of `Chalmers University of Technology <https://www.chalmers.se/>`_ (Gothenburg, Sweden) and the `Data and Software Management Center <https://europeanspallationsource.se/data-management-software>`_ at the European Spallation Source (Copenhagen, Denmark).
 
 When using **icet** in your research please cite
 
@@ -57,6 +61,3 @@ When using **icet** in your research please cite
 | `doi: 10.1002/adts.201900015 <https://doi.org/10.1002/adts.201900015>`_
 
 Also consult the `credits <https://icet.materialsmodeling.org/credits>`_ page of the documentation for additional references.
-
-For questions and help please use the `icet discussion forum on matsci.org <https://matsci.org/icet>`_.
-**icet** and its development are hosted on `gitlab <https://gitlab.com/materials-modeling/icet>`_.
