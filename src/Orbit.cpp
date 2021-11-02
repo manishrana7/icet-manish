@@ -17,20 +17,15 @@ Orbit::Orbit(const Structure &structure,
     _representativeCluster = Cluster(structure, equivalentClusters[0]);
     _equivalentClusters = equivalentClusters;
     _allowedClusterPermutations = allowedClusterPermutations;
-    sort();
 }
 
 /**
+@brief Add a cluster to the orbit.
 @param latticeSiteGroup cluster to be added represented by a group of lattice site
-@param sort_orbit if True the orbit will be sorted
 */
-void Orbit::addEquivalentCluster(const std::vector<LatticeSite> &latticeSiteGroup, bool sort_orbit)
+void Orbit::addEquivalentCluster(const std::vector<LatticeSite> &latticeSiteGroup)
 {
     _equivalentClusters.push_back(latticeSiteGroup);
-    if (sort_orbit)
-    {
-        sort();
-    }
 }
 
 /**
@@ -46,8 +41,8 @@ std::vector<LatticeSite> Orbit::getClusterByIndex(unsigned int index) const
 }
 
 /**
-  @param Mi_local list of the number of allowed species per site
- */
+@param Mi_local list of the number of allowed species per site
+*/
 std::vector<std::vector<int>> Orbit::getMultiComponentVectors(const std::vector<int> &Mi_local) const
 {
     if (std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i)
@@ -150,13 +145,13 @@ bool Orbit::isSiteIncluded(int index, const std::vector<LatticeSite> &cluster) c
 }
 
 /**
- @brief Count the occupations of the clusters in this orbit.
- @details
+@brief Count the occupations of the clusters in this orbit.
+@details
     Note that the orderings of the sites in the clusters matter, meaning,
     for example, that (47, 79) will be counted separately from (79, 47)
     (here 47 and 79 are atomic numbers).
- @param structure the structure that will have its clusters counted
- @param siteIndexForDoubleCountingCorrection
+@param structure the structure that will have its clusters counted
+@param siteIndexForDoubleCountingCorrection
    In small supercells, clusters may include both a site and its periodic image.
    In such cases this argument can be used to avoid double counting.
    Clusters in which a site with this index occurs more than once will only be counted with
@@ -195,19 +190,19 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
 }
 
 /**
- @brief 
+@brief
     Count the change in occupations of the clusters in this orbit caused
     by changing the chemical identity of one site.
- @details
+@details
     `structure` should contain the original occupations, and the change
     is defined by `flipIndex` (index of the site whose occupation
     changes) and `newOccupation` (the new atomic number on that site).
     Note that the orderings of the sites in the clusters matter, meaning,
     for example, that (47, 79) will be counted separately from (79, 47)
     (here 47 and 79 are atomic numbers).
- @param structure the structure for which to count clusters, with occupations before change
- @param flipIndex index of site that has been flipped
- @param newOccupation new atomic number of site that has been flipped
+@param structure the structure for which to count clusters, with occupations before change
+@param flipIndex index of site that has been flipped
+@param newOccupation new atomic number of site that has been flipped
 */
 std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &structure,
                                                               const int flipIndex,

@@ -28,7 +28,7 @@ public:
     Orbit(const Structure &, const std::vector<std::vector<LatticeSite>>, const std::set<std::vector<int>>);
 
     /// Adds one cluster to the orbit.
-    void addEquivalentCluster(const std::vector<LatticeSite> &, bool = false);
+    void addEquivalentCluster(const std::vector<LatticeSite> &);
 
     /// Returns the number of equivalent clusters in this orbit.
     size_t size() const { return _equivalentClusters.size(); }
@@ -50,9 +50,6 @@ public:
 
     /// Sets the equivalent clusters.
     void setEquivalentClusters(const std::vector<std::vector<LatticeSite>> &equivalentClusters) { _equivalentClusters = equivalentClusters; }
-
-    /// Sorts equivalent clusters.
-    void sort() { std::sort(_equivalentClusters.begin(), _equivalentClusters.end()); }
 
     /// Returns the number of bodies of the cluster that represent this orbit.
     unsigned int order() const { return _representativeCluster.order(); }

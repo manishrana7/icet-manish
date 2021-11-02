@@ -107,14 +107,6 @@ class TestOrbit(unittest.TestCase):
         """Tests geometrical size of orbit."""
         self.orbit_pair.radius
 
-    def test_sort(self):
-        """Tests sorting functionality of orbit."""
-        self.orbit_pair.equivalent_clusters = sorted(
-            self.lattice_sites_pairs, reverse=True)
-        self.orbit_pair.sort()
-        self.assertEqual(self.orbit_pair.equivalent_clusters,
-                         sorted(self.lattice_sites_pairs))
-
     def test_add(self):
         """Tests that offset is effectively added to orbit."""
         added_offset = np.array((1., 1., 1.))

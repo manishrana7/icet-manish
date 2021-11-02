@@ -385,8 +385,6 @@ PYBIND11_MODULE(_icet, m)
              )pbdoc",
             py::arg("structure"),
             py::arg("site_index_for_double_counting_correction") = -1)
-        .def("sort", &Orbit::sort,
-             "Sorts the list of equivalent sites.")
         .def("get_all_possible_mc_vector_permutations",
              &Orbit::getAllPossibleMultiComponentVectorPermutations,
              R"pbdoc(
