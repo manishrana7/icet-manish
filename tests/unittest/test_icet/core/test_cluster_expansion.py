@@ -192,7 +192,7 @@ class TestClusterExpansion(unittest.TestCase):
         """Tests __str__ method."""
         retval = self.ce.__str__()
         target = """
-================================================ Cluster Expansion =================================================
+================================================ Cluster Expansion ================================================
  space group                            : Fm-3m (225)
  chemical species                       : ['Au', 'Pd'] (sublattice A)
  cutoffs                                : 3.0000 3.0000 3.0000
@@ -203,15 +203,15 @@ class TestClusterExpansion(unittest.TestCase):
  symprec                                : 1e-05
  total number of nonzero parameters     : 4
  number of nonzero parameters by order  : 0= 0  1= 1  2= 1  3= 1  4= 1
---------------------------------------------------------------------------------------------------------------------
-index | order |  radius  | multiplicity | orbit_index | multi_component_vector | sublattices | parameter |    ECI
---------------------------------------------------------------------------------------------------------------------
-   0  |   0   |   0.0000 |        1     |      -1     |           .            |      .      |         0 |         0
-   1  |   1   |   0.0000 |        1     |       0     |          [0]           |      A      |         1 |         1
-   2  |   2   |   1.4425 |        6     |       1     |         [0, 0]         |     A-A     |         2 |     0.333
-   3  |   3   |   1.6657 |        8     |       2     |       [0, 0, 0]        |    A-A-A    |         3 |     0.375
-   4  |   4   |   1.7667 |        2     |       3     |      [0, 0, 0, 0]      |   A-A-A-A   |         4 |         2
-====================================================================================================================
+-------------------------------------------------------------------------------------------------------------------
+index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | sublattices | parameter |    ECI
+-------------------------------------------------------------------------------------------------------------------
+   0  |   0   |   0.0000 |        1     |      -1     |           .           |      .      |         0 |         0
+   1  |   1   |   0.0000 |        1     |       0     |          [0]          |      A      |         1 |         1
+   2  |   2   |   1.4425 |        6     |       1     |        [0, 0]         |     A-A     |         2 |     0.333
+   3  |   3   |   1.6657 |        8     |       2     |       [0, 0, 0]       |    A-A-A    |         3 |     0.375
+   4  |   4   |   1.7667 |        2     |       3     |     [0, 0, 0, 0]      |   A-A-A-A   |         4 |         2
+===================================================================================================================
 """  # noqa
 
         self.assertEqual(strip_surrounding_spaces(target), strip_surrounding_spaces(retval))
@@ -220,7 +220,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
         """Tests _get_string_representation functionality."""
         retval = self.ce._get_string_representation(print_threshold=2, print_minimum=1)
         target = """
-================================================ Cluster Expansion =================================================
+================================================ Cluster Expansion ================================================
  space group                            : Fm-3m (225)
  chemical species                       : ['Au', 'Pd'] (sublattice A)
  cutoffs                                : 3.0000 3.0000 3.0000
@@ -231,14 +231,17 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
  symprec                                : 1e-05
  total number of nonzero parameters     : 4
  number of nonzero parameters by order  : 0= 0  1= 1  2= 1  3= 1  4= 1
---------------------------------------------------------------------------------------------------------------------
-index | order |  radius  | multiplicity | orbit_index | multi_component_vector | sublattices | parameter |    ECI
---------------------------------------------------------------------------------------------------------------------
-   0  |   0   |   0.0000 |        1     |      -1     |           .            |      .      |         0 |         0
+-------------------------------------------------------------------------------------------------------------------
+index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | sublattices | parameter |    ECI
+-------------------------------------------------------------------------------------------------------------------
+   0  |   0   |   0.0000 |        1     |      -1     |           .           |      .      |         0 |         0
  ...
-   4  |   4   |   1.7667 |        2     |       3     |      [0, 0, 0, 0]      |   A-A-A-A   |         4 |         2
-====================================================================================================================
+   4  |   4   |   1.7667 |        2     |       3     |     [0, 0, 0, 0]      |   A-A-A-A   |         4 |         2
+===================================================================================================================
 """  # noqa
+
+        print(target)
+        print(retval)
         self.assertEqual(strip_surrounding_spaces(target), strip_surrounding_spaces(retval))
 
     def test_print_overview(self):

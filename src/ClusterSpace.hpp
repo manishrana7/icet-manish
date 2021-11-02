@@ -57,7 +57,7 @@ public:
   std::vector<std::vector<std::vector<int>>> getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &, const int) const;
 
   /// Returns the cluster vector given the orbit list and a structure.
-  const std::vector<double> occupyClusterVector(const OrbitList &, const Structure &, const double firstElement = 1.0, const int flipIndex = -1, const int newOccupation = -1, const bool permuteClusters = false) const;
+  const std::vector<double> getClusterVectorFromOrbitList(const OrbitList &, const Structure &, const double firstElement = 1.0, const int flipIndex = -1, const int newOccupation = -1) const;
 
   /// Returns the cutoff for each order.
   std::vector<double> getCutoffs() const { return _clusterCutoffs; }
@@ -90,7 +90,7 @@ public:
   void removeOrbits(std::vector<size_t> &);
 
   /// Merge orbits.
-  void mergeOrbits(const int index1, const int index2) { _primitiveOrbitList._orbits[index1] += _primitiveOrbitList._orbits[index2]; }
+  void mergeOrbits(const int index1, const int index2) { _primitiveOrbitList.mergeOrbits(index1, index2); }
 
 private:
   /// Primitive (prototype) structure.

@@ -32,9 +32,9 @@ class TestOrbitList(unittest.TestCase):
             Structure.from_atoms(self.structure),
             [LatticeSite(0, [0, 0, 0])])
         # for pair
-        lattice_sites = [LatticeSite(0, [i, 0, 0]) for i in range(3)]
+        self.lattice_sites = [LatticeSite(0, [i, 0, 0]) for i in range(3)]
         self.cluster_pair = Cluster(Structure.from_atoms(self.structure),
-                                    [lattice_sites[0], lattice_sites[1]])
+                                    [self.lattice_sites[0], self.lattice_sites[1]])
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
@@ -95,9 +95,12 @@ class TestOrbitList(unittest.TestCase):
 
     def test_add_orbit(self):
         """Tests add_orbit funcionality."""
-        orbit = Orbit(self.cluster_pair)
+        n_orbits_before = len(self.orbit_list)
+        orbit = Orbit(Structure.from_atoms(self.structure),
+                      [self.lattice_sites],
+                      set([tuple(0 for _ in self.lattice_sites)]))
         self.orbit_list.add_orbit(orbit)
-        self.assertEqual(len(self.orbit_list), 3)
+        self.assertEqual(len(self.orbit_list), n_orbits_before + 1)
 
     def test_get_orbit(self):
         """Tests function returns the number of orbits of a given order."""
@@ -307,9 +310,10 @@ class TestOrbitList(unittest.TestCase):
 
     def _test_equivalent_sites(self, structure):
         """
-        Tests permutations taken equivalent sites to representative sites.
+        Tests that the equivalent sites in each orbit are properly permuted
+        (compared to each respresentative cluster).
         """
-        cutoffs = [1.6, 1.6]
+        cutoffs = [1.5, 1.4]
         orbit_list = OrbitList(
             structure, cutoffs,
             symprec=self.symprec, position_tolerance=self.position_tolerance,
@@ -320,14 +324,12 @@ class TestOrbitList(unittest.TestCase):
             # Take representative sites and translate them into unitcell
             repr_sites = orbit.sites_of_representative_cluster
             # Take equivalent sites and its permutations_to_representative
-            for eq_sites, perm in zip(orbit.equivalent_clusters,
-                                      orbit.permutations_to_representative):
+            for eq_sites in orbit.equivalent_clusters:
                 trans_eq_sites = orbit_list._get_sites_translated_to_unitcell(eq_sites, False)
-                # Permute equivalent sites and get all columns from those sites
+                # Get all columns from each group of sites
                 for sites in trans_eq_sites:
-                    perm_sites = get_permutation(sites, perm)
-                    columns = orbit_list._get_all_columns_from_sites(perm_sites)
-                    # Check representative sites can be found in columns
+                    columns = orbit_list._get_all_columns_from_sites(sites)
+                    # Check that representative sites can be found in columns
                     if repr_sites in columns:
                         match_repr_site = True
             self.assertTrue(match_repr_site)

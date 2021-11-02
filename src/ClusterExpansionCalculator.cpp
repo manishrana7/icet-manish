@@ -13,20 +13,10 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     std::vector<Orbit> orbitVector;
     _fullOrbitList = LOLG.getFullOrbitList();
 
-    // Set equivalent cluster equal to the permuted clusters so no permutation is required in the orbit list counting.
-    for (auto &orbit : _fullOrbitList._orbits)
-    {
-        auto permutedClusters = orbit.getPermutedEquivalentClusters();
-        orbit.setEquivalentClusters(permutedClusters);
-    }
-
     for (const auto orbit : clusterSpace.getPrimitiveOrbitList().getOrbits())
     {
-        orbitVector.push_back(Orbit(orbit.getRepresentativeCluster()));
+        orbitVector.push_back(Orbit(clusterSpace.getPrimitiveStructure(), orbit.getEquivalentClusters(), orbit.getAllowedClusterPermutations()));
     }
-
-    // Permutations for the clusters in the orbits
-    std::vector<std::vector<std::vector<int>>> permutations(numberOfOrbits);
 
     /* Strategy for constructing the "full" primitive orbit lists.
 
@@ -39,10 +29,9 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
     Now we do something similar by looping over each local orbit list
     (by looping over `offsetIndex`).
-    The local orbitlist is retrieved here:
-        `LOLG.getLocalOrbitList(offsetIndex).getOrbits()`
+    The local orbitlist is retrieved here: `LOLG.getLocalOrbitList(offsetIndex)`
 
-    Then for each orbit `orbitIndex` in `LOLG.getLocalOrbitList(offsetIndex).getOrbits()`
+    Then for each `orbit` in `LOLG.getLocalOrbitList(offsetIndex)`
     each group of lattice sites in `orbit.equivalentSites()` is added to
     `orbitVector[orbitIndex]` if the lattice sites have a site with offset `[0, 0, 0]`.
 
@@ -53,20 +42,12 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
     for (size_t offsetIndex = 0; offsetIndex < uniqueOffsets; offsetIndex++)
     {
-        int orbitIndex = -1;
-        // This orbit is a local orbit related to the supercell
-        for (const auto orbit : LOLG.getLocalOrbitList(offsetIndex).getOrbits())
+        // This orbit list is a local orbit list related to the supercell
+        OrbitList localOrbitList = LOLG.getLocalOrbitList(offsetIndex);
+        for (int orbitIndex = 0; orbitIndex < numberOfOrbits; orbitIndex++)
         {
-            orbitIndex++;
-
-            auto orbitPermutations = orbit.getPermutationsOfEquivalentClusters();
-
-            int eqSiteIndex = -1;
-
-            for (const auto cluster : orbit.getEquivalentClusters())
+            for (const auto cluster : localOrbitList.getOrbit(orbitIndex).getEquivalentClusters())
             {
-                eqSiteIndex++;
-
                 std::vector<LatticeSite> primitiveEquivalentSites;
                 for (const auto site : cluster)
                 {
@@ -85,7 +66,6 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
                         if (!orbitVector[orbitIndex].contains(translatedCluster, true))
                         {
                             orbitVector[orbitIndex].addEquivalentCluster(translatedCluster);
-                            permutations[orbitIndex].push_back(orbitPermutations[eqSiteIndex]);
                         }
                     }
                 }
@@ -99,15 +79,8 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     for (auto orbit : orbitVector)
     {
         orbitIndex++;
-        orbit.setPermutationsOfEquivalentClusters(permutations[orbitIndex]);
         _fullPrimitiveOrbitList.addOrbit(orbit);
     }
-
-    // Calculate the permutation for each orbit in this orbit list.
-    // This is normally done in the constructor but since we made one manually
-    // we have to do this ourself.
-    // _fullPrimitiveOrbitList.addPermutationInformationToOrbits(_clusterSpace.getOrbitList().getFirstColumnOfMatrixOfEquivalentSites(),
-    //                                                           _clusterSpace.getOrbitList().getMatrixOfEquivalentSites());
 
     _primToSupercellMap.clear();
     _indexToOffset.clear();
@@ -123,13 +96,6 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         if (_localOrbitlists.find(offsetVector) == _localOrbitlists.end())
         {
             _localOrbitlists[offsetVector] = _fullPrimitiveOrbitList.getLocalOrbitList(structure, offsetVector, _primToSupercellMap, fractionalPositionTolerance);
-
-            // Set equivalent cluster equal to the permuted clusters so no permutation is required in the orbit list counting.
-            for (auto &orbit : _localOrbitlists[offsetVector]._orbits)
-            {
-                auto permutedClusters = orbit.getPermutedEquivalentClusters();
-                orbit.setEquivalentClusters(permutedClusters);
-            }
         }
     }
 }
@@ -158,7 +124,7 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
     // The first element in the cluster vector (difference) should be zero (because we take 1 - 1)
     double firstElement = 0.0;
 
-    return _clusterSpace.occupyClusterVector(_localOrbitlists[_indexToOffset[flipIndex]], _supercell, firstElement, flipIndex, newOccupation);
+    return _clusterSpace.getClusterVectorFromOrbitList(_localOrbitlists[_indexToOffset[flipIndex]], _supercell, firstElement, flipIndex, newOccupation);
 }
 
 /**
@@ -178,7 +144,7 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
     // The first element can be thought of as shared between all sites when constructing a local orbit list
     double firstElement = 1.0 / _supercell.size();
 
-    return _clusterSpace.occupyClusterVector(_localOrbitlists[_indexToOffset[index]], _supercell, firstElement, index);
+    return _clusterSpace.getClusterVectorFromOrbitList(_localOrbitlists[_indexToOffset[index]], _supercell, firstElement, index);
 }
 
 /**
@@ -193,5 +159,5 @@ std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array
     }
     _supercell.setAtomicNumbers(occupations);
 
-    return _clusterSpace.occupyClusterVector(_fullOrbitList, _supercell);
+    return _clusterSpace.getClusterVectorFromOrbitList(_fullOrbitList, _supercell);
 }

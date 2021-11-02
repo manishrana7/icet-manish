@@ -123,7 +123,7 @@ class TestEnsemble(unittest.TestCase):
 
     def test_init_fails_for_faulty_chemical_symbols(self):
         """Tests that initialization fails if species exists  on
-        mutliple sublattices"""
+        multiple sublattices"""
         structure = bulk('Al').repeat(2)
         cutoffs = [4.0]
         elements = [['Al', 'Ga']] * 4 + [['Al', 'Ge']] * 4

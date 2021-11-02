@@ -92,9 +92,6 @@ public:
                                   std::unordered_map<LatticeSite, LatticeSite> &,
                                   const double) const;
 
-    /// Adds the permutation information to the orbits.
-    void addPermutationInformationToOrbits();
-
     /// Returns all columns from the given rows in matrix of equivalent sites
     std::vector<std::vector<LatticeSite>> getAllColumnsFromRow(const std::vector<int> &,
                                                                bool,
@@ -122,7 +119,7 @@ public:
     void removeInactiveOrbits(const Structure &);
 
     /// Returns the orbits in this orbit list.
-    std::vector<Orbit> getOrbits() const { return _orbits; }
+    const std::vector<Orbit> getOrbits() const { return _orbits; }
 
     /// Returns the primitive structure.
     Structure getPrimitiveStructure() const { return _primitiveStructure; }
@@ -130,12 +127,13 @@ public:
     /// Sets primitive structure.
     void setPrimitiveStructure(const Structure &primitive) { _primitiveStructure = primitive; }
 
-public:
-    /// Contains all the orbits in the orbit list.
-    /// @todo why is this not private?
-    std::vector<Orbit> _orbits;
+    /// Merge two orbits.
+    void mergeOrbits(int index1, int index2);
 
 private:
+    /// Contains all the orbits in the orbit list.
+    std::vector<Orbit> _orbits;
+
     /// @todo Add description.
     std::vector<LatticeSite> _referenceLatticeSites;
 
@@ -144,4 +142,7 @@ private:
 
     /// Primitive structure for which orbit list was constructed.
     Structure _primitiveStructure;
+
+    /// Create an orbit by deducing the proper permutations
+    Orbit createOrbit(const std::vector<std::vector<LatticeSite>> &);
 };

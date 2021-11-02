@@ -251,22 +251,22 @@ class TestClusterSpace(unittest.TestCase):
                                ('radius', 0.0),
                                ('multiplicity', 1),
                                ('orbit_index', 0),
-                               ('multi_component_vector', [0])]),
+                               ('multicomponent_vector', [0])]),
                   OrderedDict([('index', 2), ('order', 2),
                                ('radius', 1.4460333675264896),
                                ('multiplicity', 6),
                                ('orbit_index', 1),
-                               ('multi_component_vector', [0, 0])]),
+                               ('multicomponent_vector', [0, 0])]),
                   OrderedDict([('index', 3), ('order', 3),
                                ('radius', 1.6697355079971996),
                                ('multiplicity', 8),
                                ('orbit_index', 2),
-                               ('multi_component_vector', [0, 0, 0])]),
+                               ('multicomponent_vector', [0, 0, 0])]),
                   OrderedDict([('index', 4), ('order', 4),
                                ('radius', 1.771021950739177),
                                ('multiplicity', 2),
                                ('orbit_index', 3),
-                               ('multi_component_vector', [0, 0, 0, 0])])]
+                               ('multicomponent_vector', [0, 0, 0, 0])])]
         self.assertEqualComplexList(self.cs.orbit_data, target)
 
     def test_repr(self):
@@ -283,7 +283,7 @@ class TestClusterSpace(unittest.TestCase):
         """Tests __str__ method."""
         retval = self.cs.__str__()
         target = """
-====================================== Cluster Space =======================================
+====================================== Cluster Space ======================================
  space group                            : Fm-3m (225)
  chemical species                       : ['Ag', 'Au'] (sublattice A)
  cutoffs                                : 4.0000 4.0000 4.0000
@@ -292,15 +292,15 @@ class TestClusterSpace(unittest.TestCase):
  fractional_position_tolerance          : 2e-06
  position_tolerance                     : 1e-05
  symprec                                : 1e-05
---------------------------------------------------------------------------------------------
-index | order |  radius  | multiplicity | orbit_index | multi_component_vector | sublattices
---------------------------------------------------------------------------------------------
-   0  |   0   |   0.0000 |        1     |      -1     |           .            |      .
-   1  |   1   |   0.0000 |        1     |       0     |          [0]           |      A
-   2  |   2   |   1.4460 |        6     |       1     |         [0, 0]         |     A-A
-   3  |   3   |   1.6697 |        8     |       2     |       [0, 0, 0]        |    A-A-A
-   4  |   4   |   1.7710 |        2     |       3     |      [0, 0, 0, 0]      |   A-A-A-A
-============================================================================================
+-------------------------------------------------------------------------------------------
+index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | sublattices
+-------------------------------------------------------------------------------------------
+   0  |   0   |   0.0000 |        1     |      -1     |           .           |      .
+   1  |   1   |   0.0000 |        1     |       0     |          [0]          |      A
+   2  |   2   |   1.4460 |        6     |       1     |        [0, 0]         |     A-A
+   3  |   3   |   1.6697 |        8     |       2     |       [0, 0, 0]       |    A-A-A
+   4  |   4   |   1.7710 |        2     |       3     |     [0, 0, 0, 0]      |   A-A-A-A
+===========================================================================================
 """
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
@@ -309,7 +309,7 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
         """Tests _get_string_representation functionality."""
         retval = self.cs._get_string_representation(print_threshold=2, print_minimum=1)
         target = """
-====================================== Cluster Space =======================================
+====================================== Cluster Space ======================================
  space group                            : Fm-3m (225)
  chemical species                       : ['Ag', 'Au'] (sublattice A)
  cutoffs                                : 4.0000 4.0000 4.0000
@@ -318,13 +318,13 @@ index | order |  radius  | multiplicity | orbit_index | multi_component_vector |
  fractional_position_tolerance          : 2e-06
  position_tolerance                     : 1e-05
  symprec                                : 1e-05
---------------------------------------------------------------------------------------------
-index | order |  radius  | multiplicity | orbit_index | multi_component_vector | sublattices
---------------------------------------------------------------------------------------------
-   0  |   0   |   0.0000 |        1     |      -1     |           .            |      .
+-------------------------------------------------------------------------------------------
+index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | sublattices
+-------------------------------------------------------------------------------------------
+   0  |   0   |   0.0000 |        1     |      -1     |           .           |      .
  ...
-   4  |   4   |   1.7710 |        2     |       3     |      [0, 0, 0, 0]      |   A-A-A-A
-============================================================================================
+   4  |   4   |   1.7710 |        2     |       3     |     [0, 0, 0, 0]      |   A-A-A-A
+===========================================================================================
 """
         self.assertEqual(strip_surrounding_spaces(target),
                          strip_surrounding_spaces(retval))
@@ -587,7 +587,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
         """Silences unittest from printing the docstrings in test cases."""
         return None
 
-    def _get_mc_vector(self, cluster_space, orbit_index):
+    def _get_multicomponent_vector(self, cluster_space, orbit_index):
         """
         Helper function to  return the mc vectors for a
         particular orbit.
@@ -603,21 +603,21 @@ class TestClusterSpaceTernary(unittest.TestCase):
             cluster_space._get_primitive_structure(),
             orbit.sites_of_representative_cluster)
 
-        mc_vectors = orbit.get_mc_vectors(local_Mi)
+        mc_vectors = orbit.get_multicomponent_vectors(local_Mi)
         return mc_vectors
 
-    def test_multi_component_cluster_vector_permutation(self):
+    def test_multicomponent_cluster_vector_permutation(self):
         """Tests the multicomponent permutation functionality."""
         # Test orbit number 1
         orbit_index = 1
         mc_vector_target = [[0, 0], [0, 1], [1, 1]]
-        mc_vector_retval = self._get_mc_vector(self.cs, orbit_index)
+        mc_vector_retval = self._get_multicomponent_vector(self.cs, orbit_index)
         self.assertEqual(mc_vector_retval, mc_vector_target)
 
         permutations_target = [[[0, 1]],
                                [[0, 1], [1, 0]],
                                [[0, 1]]]
-        permutation_retval = self.cs.get_multi_component_vector_permutations(
+        permutation_retval = self.cs.get_multicomponent_vector_permutations(
             mc_vector_target, orbit_index)
         self.assertEqual(permutations_target, permutation_retval)
 
@@ -627,14 +627,14 @@ class TestClusterSpaceTernary(unittest.TestCase):
                             [0, 0, 1],
                             [0, 1, 1],
                             [1, 1, 1]]
-        mc_vector_retval = self._get_mc_vector(self.cs, orbit_index)
+        mc_vector_retval = self._get_multicomponent_vector(self.cs, orbit_index)
         self.assertEqual(mc_vector_retval, mc_vector_target)
 
         permutations_target = [[[0, 1, 2]],
                                [[0, 1, 2], [0, 2, 1], [2, 0, 1]],
                                [[0, 1, 2], [1, 0, 2], [1, 2, 0]],
                                [[0, 1, 2]]]
-        permutation_retval = self.cs.get_multi_component_vector_permutations(
+        permutation_retval = self.cs.get_multicomponent_vector_permutations(
             mc_vector_target, orbit_index)
         self.assertEqual(permutations_target, permutation_retval)
 
@@ -646,7 +646,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
                             [0, 0, 1, 1],
                             [0, 1, 1, 1],
                             [1, 1, 1, 1]]
-        mc_vector_retval = self._get_mc_vector(self.cs, orbit_index)
+        mc_vector_retval = self._get_multicomponent_vector(self.cs, orbit_index)
         self.assertEqual(mc_vector_retval, mc_vector_target)
 
         permutations_target = [[[0, 1, 2, 3]],
@@ -655,7 +655,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
                                 [2, 0, 3, 1], [2, 3, 0, 1]],
                                [[0, 1, 2, 3], [1, 0, 2, 3], [1, 2, 0, 3], [1, 2, 3, 0]],
                                [[0, 1, 2, 3]]]
-        permutation_retval = self.cs.get_multi_component_vector_permutations(
+        permutation_retval = self.cs.get_multicomponent_vector_permutations(
             mc_vector_target, orbit_index)
 
         self.assertEqual(permutations_target, permutation_retval)

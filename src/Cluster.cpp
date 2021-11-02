@@ -29,7 +29,7 @@ Cluster::Cluster(const Structure &structure,
 namespace std
 {
     /// Stream operator.
-    ostream& operator<<(ostream& os, const Cluster& cluster)
+    ostream &operator<<(ostream &os, const Cluster &cluster)
     {
         for (const auto d : cluster.distances())
         {

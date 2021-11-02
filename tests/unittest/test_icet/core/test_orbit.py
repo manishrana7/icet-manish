@@ -37,31 +37,36 @@ class TestOrbit(unittest.TestCase):
                                        for index, unitcell_offset in
                                        zip(indices, unitcell_offsets)]
 
+        self.allowed_permutations_pair = set([(0, 1)])
+        self.allowed_permutations_triplet = set([(0, 2, 1)])
+
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
         return None
 
     def setUp(self):
         """Instantiates class before each test."""
-        structure = Structure.from_atoms(bulk('Al'))
-        lattice_site_for_cluster = [
-            LatticeSite(0, [i, 0, 0]) for i in range(3)]
+        self.structure = Structure.from_atoms(bulk('Al'))
+        lattice_site_for_cluster = [LatticeSite(0, [i, 0, 0]) for i in range(3)]
 
-        self.pair_cluster = Cluster(
-            structure, [lattice_site_for_cluster[0],
-                        lattice_site_for_cluster[1]])
-        self.triplet_cluster = Cluster(
-            structure, lattice_site_for_cluster)
+        self.pair_sites = [lattice_site_for_cluster[0],
+                           lattice_site_for_cluster[1]]
+        self.triplet_sites = lattice_site_for_cluster
 
-        self.orbit_pair = Orbit(self.pair_cluster)
-        self.orbit_triplet = Orbit(self.triplet_cluster)
+        self.pair_cluster = Cluster(self.structure, self.pair_sites)
+        self.triplet_cluster = Cluster(self.structure, self.triplet_sites)
+
+        self.orbit_pair = Orbit(self.structure, [self.pair_sites],
+                                self.allowed_permutations_pair)
+        self.orbit_triplet = Orbit(self.structure, [self.triplet_sites],
+                                   self.allowed_permutations_triplet)
 
     def test_init(self):
         """Tests the initializer."""
-        orbit = Orbit(self.pair_cluster)
+        orbit = Orbit(self.structure, [self.pair_sites], self.allowed_permutations_pair)
         self.assertIsInstance(orbit, Orbit)
 
-        orbit = Orbit(self.triplet_cluster)
+        orbit = Orbit(self.structure, [self.triplet_sites], self.allowed_permutations_triplet)
         self.assertIsInstance(orbit, Orbit)
 
     def test_equivalent_clusters(self):
@@ -93,7 +98,7 @@ class TestOrbit(unittest.TestCase):
 
     def test_len(self):
         """Tests lenght of orbit."""
-        self.assertEqual(len(self.orbit_pair), 0)
+        self.assertEqual(len(self.orbit_pair), 1)
         self.orbit_pair.equivalent_clusters = self.lattice_sites_pairs
         self.assertEqual(len(self.orbit_pair),
                          len(self.lattice_sites_pairs))
@@ -102,19 +107,10 @@ class TestOrbit(unittest.TestCase):
         """Tests geometrical size of orbit."""
         self.orbit_pair.radius
 
-    def test_sort(self):
-        """Tests sorting functionality of orbit."""
-        self.orbit_pair.equivalent_clusters = sorted(
-            self.lattice_sites_pairs, reverse=True)
-        self.orbit_pair.sort()
-        self.assertEqual(self.orbit_pair.equivalent_clusters,
-                         sorted(self.lattice_sites_pairs))
-
     def test_add(self):
         """Tests that offset is effectively added to orbit."""
         added_offset = np.array((1., 1., 1.))
-        self.orbit_pair.equivalent_clusters =\
-            self.lattice_sites_pairs
+        self.orbit_pair.equivalent_clusters = self.lattice_sites_pairs
 
         # Create a new orbit with offseted equivalent lattice sites
         orbit = self.orbit_pair + added_offset
@@ -134,105 +130,51 @@ class TestOrbit(unittest.TestCase):
         with self.assertRaises(TypeError):
             orbit + np.array([1, 1, 1, 1])
 
-    def test_permutations_to_representative(self):
-        """Tests the permutations to representative property."""
-        allowed_permutations = [[1, 2, 3]]
-
-        self.assertEqual(
-            self.orbit_pair.permutations_to_representative, [])
-        self.orbit_pair.permutations_to_representative = \
-            allowed_permutations
-        self.assertListEqual(
-            self.orbit_pair.permutations_to_representative,
-            allowed_permutations)
-
     def test_allowed_permutations(self):
         """Tests the allowed permutations property."""
-        allowed_permutations = [[1, 2, 3]]
-        self.assertEqual(self.orbit_pair.allowed_permutations, [])
+        self.assertEqual(self.orbit_pair.allowed_permutations,
+                         [list(i) for i in self.allowed_permutations_pair])
+        self.assertEqual(self.orbit_triplet.allowed_permutations,
+                         [list(i) for i in self.allowed_permutations_triplet])
 
-        self.orbit_pair.allowed_permutations = allowed_permutations
-        self.assertEqual(
-            self.orbit_pair.allowed_permutations, allowed_permutations)
-
-    def test_permuted_equivalent_clusters(self):
-        """Tests the permuted sites property."""
-        self.orbit_pair.equivalent_clusters = self.lattice_sites_pairs
-        # Raises IndexError when permutations to primitive is not set
-        with self.assertRaises(IndexError):
-            self.orbit_pair.permuted_equivalent_clusters
-        # Provide the identity permutation
-        self.orbit_pair.permutations_to_representative = [
-            [i for i in range(
-                self.orbit_pair.order)]] * len(self.orbit_pair)
-
-        self.assertEqual(self.orbit_pair.permuted_equivalent_clusters,
-                         self.orbit_pair.equivalent_clusters)
-
-        # Provide a completely reversed permutation, [i,j,k] ->[k,j,i]
-        self.orbit_pair.permutations_to_representative = [
-            [i for i in reversed(range(
-                self.orbit_pair.order))]] * len(self.orbit_pair)
-
-        for perm_sites, sites in zip(self.orbit_pair.permuted_equivalent_clusters,
-                                     self.orbit_pair.equivalent_clusters):
-            self.assertEqual(perm_sites, list(reversed(sites)))
-
-    def test_get_permuted_cluster_by_index(self):
-        """Tests the get sites with permutation functionality."""
-        target = [LatticeSite(0, [0., 0., 0.]), LatticeSite(1, [0., 0., 0.])]
-        self.orbit_pair.equivalent_clusters = self.lattice_sites_pairs
-        self.orbit_pair.permutations_to_representative = [
-            [i for i in range(
-                self.orbit_pair.order)]] * len(self.orbit_pair)
-        retval = self.orbit_pair.get_permuted_cluster_by_index(0)
-        self.assertEqual(retval, target)
-
-    def test_get_mc_vectors_pairs(self):
+    def test_get_multicomponent_vectors_pairs(self):
         """Tests the get mc vectors functionality for a pair orbit."""
-        self.orbit_pair.equivalent_clusters = \
-            self.lattice_sites_pairs
         # Binary mc vectors
         # Allow only identity permutation
-        self.orbit_pair.allowed_permutations = [
-            [i for i in range(self.orbit_pair.order)]]
-        mc_vectors = self.orbit_pair.get_mc_vectors(
-            [2] * self.orbit_pair.order)
+        allowed_permutations = set([tuple(i for i in range(self.orbit_pair.order))])
+        orbit = Orbit(self.structure, [self.pair_sites], allowed_permutations)
+        mc_vectors = orbit.get_multicomponent_vectors([2] * orbit.order)
         self.assertEqual(mc_vectors, [[0, 0]])
 
         # Ternary mc vectors
-        mc_vectors = self.orbit_pair.get_mc_vectors(
-            [3] * self.orbit_pair.order)
+        mc_vectors = orbit.get_multicomponent_vectors([3] * self.orbit_pair.order)
         target = [[0, 0], [0, 1], [1, 0], [1, 1]]
         self.assertEqual(mc_vectors, target)
 
-        # Allow the permutation [1,0] permutation
-        self.orbit_pair.allowed_permutations = ([0, 1], [1, 0])
-        mc_vectors = self.orbit_pair.get_mc_vectors(
-            [3] * self.orbit_pair.order)
+        # Allow the [1,0] permutation
+        allowed_permutations = set([(0, 1), (1, 0)])
+        orbit = Orbit(self.structure, [self.pair_sites], allowed_permutations)
+        mc_vectors = orbit.get_multicomponent_vectors([3] * self.orbit_pair.order)
         target = [[0, 0], [0, 1], [1, 1]]
         self.assertEqual(mc_vectors, target)
 
-    def test_get_mc_vectors_triplets(self):
+    def test_get_multicomponent_vectors_triplets(self):
         """Tests  the get mc vectors functionality for a triplet orbit."""
-        self.orbit_triplet.equivalent_clusters = \
-            self.lattice_sites_triplets
         # Binary mc vectors
         # Allow only identity permutation
-        self.orbit_triplet.allowed_permutations = [
-            [i for i in range(self.orbit_triplet.order)]]
+        allowed_permutations = set([tuple(i for i in range(self.orbit_triplet.order))])
+        orbit = Orbit(self.structure, [self.triplet_sites], allowed_permutations)
 
         # Ternary mc vectors
-        mc_vectors = self.orbit_triplet.get_mc_vectors(
-            [3] * self.orbit_triplet.order)
+        mc_vectors = orbit.get_multicomponent_vectors([3] * self.orbit_triplet.order)
         target = [[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
                   [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]]
         self.assertEqual(mc_vectors, target)
 
-        # Allow the permutation [0,2,1] permutation
-        self.orbit_triplet.allowed_permutations = ([0, 1, 2], [0, 2, 1])
-        mc_vectors = self.orbit_triplet.get_mc_vectors(
-            [3] * self.orbit_triplet.order)
+        # Allow the [0, 2, 1] permutation
+        allowed_permutations = set([(0, 1, 2), (0, 2, 1)])
+        orbit = Orbit(self.structure, [self.triplet_sites], allowed_permutations)
+        mc_vectors = self.orbit_triplet.get_multicomponent_vectors([3] * self.orbit_triplet.order)
         target = [[0, 0, 0], [0, 0, 1], [0, 1, 1],
                   [1, 0, 0], [1, 0, 1], [1, 1, 1]]
         self.assertEqual(mc_vectors, target)
