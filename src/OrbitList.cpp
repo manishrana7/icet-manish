@@ -311,7 +311,6 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
     {
         clusters.push_back(Cluster(_primitiveStructurePtr, cluster));
     }
-
     Orbit newOrbit = Orbit(clusters, allowedPermutations);
     return newOrbit;
 }
