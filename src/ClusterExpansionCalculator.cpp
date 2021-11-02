@@ -46,12 +46,8 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         OrbitList localOrbitList = LOLG.getLocalOrbitList(offsetIndex);
         for (int orbitIndex = 0; orbitIndex < numberOfOrbits; orbitIndex++)
         {
-            int eqSiteIndex = -1;
-
             for (const auto cluster : localOrbitList.getOrbit(orbitIndex).getEquivalentClusters())
             {
-                eqSiteIndex++;
-
                 std::vector<LatticeSite> primitiveEquivalentSites;
                 for (const auto site : cluster)
                 {
