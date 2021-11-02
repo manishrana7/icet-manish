@@ -58,7 +58,7 @@ public:
     unsigned int order() const { return _representativeCluster.order(); }
 
     /// Gets the allowed permutations of clusters.
-    const std::set<std::vector<int>> getAllowedClusterPermutations() const { return _allowedClusterPermutations; }
+    std::set<std::vector<int>> getAllowedClusterPermutations() const { return _allowedClusterPermutations; }
 
     /// Returns the relevant multicomponent vectors of this orbit given the number of allowed components.
     std::vector<std::vector<int>> getMultiComponentVectors(const std::vector<int> &Mi_local) const;
