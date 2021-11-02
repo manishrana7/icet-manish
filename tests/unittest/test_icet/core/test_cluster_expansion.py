@@ -219,7 +219,6 @@ index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | 
     def test_get_string_representation(self):
         """Tests _get_string_representation functionality."""
         retval = self.ce._get_string_representation(print_threshold=2, print_minimum=1)
-        self.maxDiff = None
         target = """
 ================================================ Cluster Expansion ================================================
  space group                            : Fm-3m (225)
