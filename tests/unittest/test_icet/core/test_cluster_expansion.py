@@ -191,7 +191,6 @@ class TestClusterExpansion(unittest.TestCase):
     def test_str(self):
         """Tests __str__ method."""
         retval = self.ce.__str__()
-        print(retval)
         target = """
 ================================================ Cluster Expansion ================================================
  space group                            : Fm-3m (225)
@@ -205,7 +204,7 @@ class TestClusterExpansion(unittest.TestCase):
  total number of nonzero parameters     : 4
  number of nonzero parameters by order  : 0= 0  1= 1  2= 1  3= 1  4= 1
 -------------------------------------------------------------------------------------------------------------------
-index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | sublattices | parameter |    ECI   
+index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | sublattices | parameter |    ECI
 -------------------------------------------------------------------------------------------------------------------
    0  |   0   |   0.0000 |        1     |      -1     |           .           |      .      |         0 |         0
    1  |   1   |   0.0000 |        1     |       0     |          [0]          |      A      |         1 |         1
@@ -234,7 +233,7 @@ index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | 
  total number of nonzero parameters     : 4
  number of nonzero parameters by order  : 0= 0  1= 1  2= 1  3= 1  4= 1
 -------------------------------------------------------------------------------------------------------------------
-index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | sublattices | parameter |    ECI   
+index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | sublattices | parameter |    ECI
 -------------------------------------------------------------------------------------------------------------------
    0  |   0   |   0.0000 |        1     |      -1     |           .           |      .      |         0 |         0
  ...
