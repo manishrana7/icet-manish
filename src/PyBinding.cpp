@@ -288,9 +288,6 @@ PYBIND11_MODULE(_icet, m)
             &Orbit::getRepresentativeCluster,
             "cluster to which all other symmetry equivalent clusters can be related")
         .def_property_readonly(
-            "sites_of_representative_cluster", &Orbit::getSitesOfRepresentativeCluster,
-            "list of sites that comprise the representative cluster")
-        .def_property_readonly(
             "order",
             [](const Orbit &orbit)
             { return orbit.order(); },
@@ -395,7 +392,7 @@ PYBIND11_MODULE(_icet, m)
                  msg << "multiplicity: " << orbit.size() << std::endl;
                  msg << "radius: " << orbit.radius() << std::endl;
                  msg << "representative_cluster:" << std::endl;
-                 for (const auto site : orbit.getSitesOfRepresentativeCluster())
+                 for (const auto site : orbit.getRepresentativeCluster().getLatticeSites())
                  {
                      msg << "    site: " << site << std::endl;
                  }

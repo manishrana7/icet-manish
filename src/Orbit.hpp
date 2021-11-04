@@ -39,9 +39,6 @@ public:
     /// Returns the representative cluster for this orbit
     const Cluster &getRepresentativeCluster() const { return _representativeCluster; }
 
-    /// Returns the sites that define the representative cluster of this orbit.
-    const std::vector<LatticeSite> getSitesOfRepresentativeCluster() const { return getRepresentativeCluster().getLatticeSites(); }
-
     /// Returns the equivalent cluster.
     Cluster getClusterByIndex(unsigned int) const;
 
@@ -103,8 +100,8 @@ public:
     Orbit &operator+=(const Orbit &orbit_rhs)
     {
         // Get representative sites
-        auto rep_sites_rhs = orbit_rhs.getSitesOfRepresentativeCluster();
-        auto rep_sites_this = getSitesOfRepresentativeCluster();
+        auto rep_sites_rhs = orbit_rhs.getRepresentativeCluster().getLatticeSites();
+        auto rep_sites_this = _representativeCluster.getLatticeSites();
 
         if (rep_sites_this.size() != rep_sites_rhs.size())
         {

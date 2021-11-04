@@ -218,7 +218,7 @@ void ClusterSpace::computeMultiComponentVectors()
     {
 
         std::vector<std::vector<int>> permutedMCVector;
-        auto numberOfAllowedSpecies = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _primitiveOrbitList.getOrbit(orbitIndex).getSitesOfRepresentativeCluster());
+        const auto numberOfAllowedSpecies = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _primitiveOrbitList.getOrbit(orbitIndex).getRepresentativeCluster().getLatticeSites());
 
         auto multiComponentVectors = _primitiveOrbitList.getOrbit(orbitIndex).getMultiComponentVectors(numberOfAllowedSpecies);
         if (std::none_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n)
@@ -331,7 +331,7 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
             counts = currentOrbit.countClusters(supercell, flipIndex);
         }
 
-        const std::vector<LatticeSite> &representativeSites = currentPrimitiveOrbit.getSitesOfRepresentativeCluster();
+        const std::vector<LatticeSite> &representativeSites = currentPrimitiveOrbit.getRepresentativeCluster().getLatticeSites();
 
         std::vector<int> allowedOccupations;
         try
