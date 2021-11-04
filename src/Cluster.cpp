@@ -5,27 +5,10 @@
 @param structure icet structure object
 @param latticeSites list of lattice sites that form the cluster
 */
-Cluster::Cluster(const std::shared_ptr<Structure> structurePtr,
-                 const std::vector<LatticeSite> &latticeSites)
+Cluster::Cluster(const std::vector<LatticeSite> &latticeSites, const Structure *structure)
 {
     _latticeSites = latticeSites;
-    _structurePtr = structurePtr;
-}
-
-std::vector<double> Cluster::distances() const
-{
-    std::vector<double> distances;
-    float thisOrder = order();
-    distances.reserve((thisOrder * (thisOrder - 1) / 2));
-    for (size_t i = 0; i < thisOrder; i++)
-    {
-        for (size_t j = i + 1; j < thisOrder; j++)
-        {
-            double distance = (*_structurePtr).getDistance(_latticeSites[i].index(), _latticeSites[j].index(), _latticeSites[i].unitcellOffset(), _latticeSites[j].unitcellOffset());
-            distances.push_back(distance);
-        }
-    }
-    return distances;
+    _structure = structure;
 }
 
 void Cluster::translate(const Eigen::Vector3d &offset)
@@ -40,22 +23,25 @@ void Cluster::translate(const Eigen::Vector3d &offset)
 @details Transforms a site from the primitive structure to a given supercell.
 This involves finding a map from the site in the primitive cell to the supercell.
 If no map is found mapping is attempted based on the position of the site in the supercell.
+(The map is important for performance.)
 @param supercell supercell structure
 @param primToSuperMap map from primitive to supercell
 @param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
 **/
-void Cluster::transformSitesToSupercell(const Structure &supercell,
-                                        std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
-                                        const double fractionalPositionTolerance)
+void Cluster::transformToSupercell(const Structure *supercell,
+                                   std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
+                                   const double fractionalPositionTolerance)
 {
+    LatticeSite supercellSite;
+    Vector3d sitePosition;
     for (LatticeSite &site : _latticeSites)
     {
         auto find = primToSuperMap.find(site);
-        LatticeSite supercellSite;
+
         if (find == primToSuperMap.end())
         {
-            Vector3d sitePosition = (*_structurePtr).getPosition(site);
-            supercellSite = supercell.findLatticeSiteByPosition(sitePosition, fractionalPositionTolerance);
+            sitePosition = _structure->getPosition(site);
+            supercellSite = supercell->findLatticeSiteByPosition(sitePosition, fractionalPositionTolerance);
             primToSuperMap[site] = supercellSite;
         }
         else
@@ -67,23 +53,29 @@ void Cluster::transformSitesToSupercell(const Structure &supercell,
         site.setIndex(supercellSite.index());
         site.setUnitcellOffset(supercellSite.unitcellOffset());
     }
+    // Now all sites refer to the supercell, so we change the _structure to point to the supercell
+    _structure = supercell;
 }
 
+/**
+@details This function computes the geometrical radius of the cluster.
+*/
 double Cluster::radius() const
 {
-    return icet::getGeometricalRadius(_latticeSites, *_structurePtr);
-}
-
-namespace std
-{
-    /// Stream operator.
-    ostream &operator<<(ostream &os, const Cluster &cluster)
+    // Compute the center of the cluster.
+    Vector3d centerPosition = {0.0, 0.0, 0.0};
+    for (const auto &site : _latticeSites)
     {
-        for (const auto d : cluster.distances())
-        {
-            os << d << " ";
-        }
-        os << cluster.radius();
-        return os;
+        centerPosition += _structure->getPosition(site);
     }
+    centerPosition /= _latticeSites.size();
+
+    // Compute the average distance of the points in the cluster to its center.
+    double avgDistanceToCenter = 0.0;
+    for (const auto &site : _latticeSites)
+    {
+        avgDistanceToCenter += (centerPosition - _structure->getPosition(site)).norm();
+    }
+    avgDistanceToCenter /= _latticeSites.size();
+    return avgDistanceToCenter;
 }

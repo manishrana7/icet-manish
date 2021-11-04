@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "Cluster.hpp"
-#include "Geometry.hpp"
 #include "LatticeSite.hpp"
 #include "ManyBodyNeighborList.hpp"
 #include "Orbit.hpp"

@@ -204,8 +204,8 @@ PYBIND11_MODULE(_icet, m)
         lattice_sites : list(int)
             list of lattice sites that form the cluster
         )pbdoc")
-        .def(py::init<const std::shared_ptr<Structure>,
-                      const std::vector<LatticeSite> &>(),
+        .def(py::init<const std::vector<LatticeSite> &,
+                      const Structure *>(),
              "Initializes a cluster instance.",
              py::arg("structure"),
              py::arg("lattice_sites"))
@@ -213,10 +213,6 @@ PYBIND11_MODULE(_icet, m)
             "lattice_sites",
             &Cluster::getLatticeSites,
             "list(LatticeSite) : list of the lattice sites that constitute the cluster")
-        .def_property_readonly(
-            "distances",
-            &Cluster::distances,
-            "list(float) : list of distances between sites")
         .def_property_readonly(
             "radius",
             &Cluster::radius,
@@ -226,19 +222,7 @@ PYBIND11_MODULE(_icet, m)
             &Cluster::order,
             "int : order of the cluster (= number of sites)")
         .def("__len__",
-             &Cluster::order)
-        .def("__str__",
-             [](const Cluster &cluster)
-             {
-                 std::ostringstream msg;
-                 msg << "radius: " << cluster.radius();
-                 msg << " vertices:";
-                 for (const auto dist : cluster.distances())
-                 {
-                     msg << " " << std::to_string(dist);
-                 }
-                 return msg.str();
-             });
+             &Cluster::order);
     ;
 
     py::class_<LatticeSite>(m, "LatticeSite",

@@ -12,7 +12,6 @@ SET(SourceFiles
   ClusterExpansionCalculator.cpp
   ClusterSpace.cpp
   FloatType.cpp
-  Geometry.cpp
   LatticeSite.cpp
   LocalOrbitListGenerator.cpp
   ManyBodyNeighborList.cpp

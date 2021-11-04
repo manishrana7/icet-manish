@@ -264,7 +264,7 @@ void Orbit::transformClustersToSupercell(const Structure &supercell,
 {
     for (Cluster &cluster : _equivalentClusters)
     {
-        cluster.transformSitesToSupercell(supercell, primToSuperMap, fractionalPositionTolerance);
+        cluster.transformToSupercell(&supercell, primToSuperMap, fractionalPositionTolerance);
     }
 }
 

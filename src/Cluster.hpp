@@ -2,7 +2,6 @@
 
 #include <boost/functional/hash.hpp>
 #include "FloatType.hpp"
-#include "Geometry.hpp"
 #include "LatticeSite.hpp"
 #include "Structure.hpp"
 
@@ -17,8 +16,8 @@ public:
     Cluster() {}
 
     /// Creates cluster from a structure and a set of lattice sites.
-    Cluster(const std::shared_ptr<Structure>,
-            const std::vector<LatticeSite> &);
+    Cluster(const std::vector<LatticeSite> &,
+            const Structure *);
 
     /// Returns the lattice sites of this cluster.
     const std::vector<LatticeSite> &getLatticeSites() const { return _latticeSites; }
@@ -29,9 +28,6 @@ public:
     /// Returns the radius of the cluster.
     double radius() const;
 
-    /// Returns distances between points in the cluster.
-    std::vector<double> distances() const;
-
     /// Comparison operator for automatic sorting.
     friend bool operator<(const Cluster &cluster1, const Cluster &cluster2)
     {
@@ -41,18 +37,14 @@ public:
     /// Translate the sites of the cluster by a constant vector
     void translate(const Eigen::Vector3d &offset);
 
-    void transformSitesToSupercell(const Structure &,
-                                   std::unordered_map<LatticeSite, LatticeSite> &,
-                                   const double fractionalPositionTolerance);
+    void transformToSupercell(const Structure *,
+                              std::unordered_map<LatticeSite, LatticeSite> &,
+                              const double fractionalPositionTolerance);
 
 private:
     /// The lattice sites in the cluster.
     std::vector<LatticeSite> _latticeSites;
 
     /// The structure that the lattice sites refer to.
-    std::shared_ptr<Structure> _structurePtr;
-
-    std::vector<double> _distances;
-
-    float _radius;
+    const Structure *_structure;
 };
