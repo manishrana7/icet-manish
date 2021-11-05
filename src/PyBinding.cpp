@@ -409,7 +409,6 @@ PYBIND11_MODULE(_icet, m)
                  return msg.str();
              })
         .def(py::self < py::self)
-        .def(py::self + Eigen::Vector3d())
         .def(py::self += py::self);
 
     py::class_<OrbitList>(m, "_OrbitList",

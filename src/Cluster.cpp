@@ -82,10 +82,20 @@ double Cluster::radius() const
 
 /**
 @brief Check whether a site index is included with a zero offset.
-@param index Index of site to check whether it is included
+@param siteIndex Index of site to check whether it is included
 */
-bool Cluster::isSiteIndexIncludedWithZeroOffset(int index) const
+bool Cluster::isSiteIndexIncludedWithZeroOffset(int siteIndex) const
 {
     return std::any_of(_latticeSites.begin(), _latticeSites.end(), [=](const LatticeSite &ls)
-                       { return ls.index() == index && ls.unitcellOffset().norm() < 1e-4; });
+                       { return ls.index() == siteIndex && ls.unitcellOffset().norm() < 1e-4; });
+}
+
+/**
+@brief Count the number of occurences of a site index among the sites in this cluster
+@param siteIndex Index of site to count
+*/
+unsigned int Cluster::countOccurencesOfSiteIndex(int siteIndex) const
+{
+    return std::count_if(_latticeSites.begin(), _latticeSites.end(), [=](const LatticeSite &ls)
+                         { return ls.index() == siteIndex; });
 }

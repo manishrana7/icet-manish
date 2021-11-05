@@ -44,6 +44,9 @@ public:
     /// Check whether a site index is included with a zero offset.
     bool isSiteIndexIncludedWithZeroOffset(const int index) const;
 
+    /// Count the number of occurences of a site index among the sites in this cluster
+    unsigned int countOccurencesOfSiteIndex(int) const;
+
 private:
     /// The lattice sites in the cluster.
     std::vector<LatticeSite> _latticeSites;

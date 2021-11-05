@@ -62,7 +62,13 @@ public:
     /// Counts changes in the occupation of clusters in this orbit
     std::map<std::vector<int>, double> countClusterChanges(const Structure &, const int, const int) const;
 
-    void transformClustersToSupercell(const Structure &, std::unordered_map<LatticeSite, LatticeSite> &, const double);
+    /// Returns a copy of this orbit in the given (supercell) structure.
+    void transformToSupercell(const Structure &,
+                              std::unordered_map<LatticeSite, LatticeSite> &,
+                              const double);
+
+    /// Translates the orbit with an offset
+    void translate(const Vector3d &);
 
     /// Comparison operator for automatic sorting in containers.
     friend bool
@@ -75,19 +81,6 @@ public:
     friend bool operator<(const Orbit &orbit1, const Orbit &orbit2)
     {
         throw std::logic_error("Reached < operator in Orbit");
-    }
-
-    /**
-    Creates a copy of this orbit and translates all LatticeSite offsets in equivalent sites.
-    */
-    friend Orbit operator+(const Orbit &orbit, const Eigen::Vector3d &offset)
-    {
-        Orbit orbitOffset = orbit;
-        for (auto &cluster : orbitOffset._equivalentClusters)
-        {
-            cluster.translate(offset);
-        }
-        return orbitOffset;
     }
 
     /// Appends an orbit to this orbit.

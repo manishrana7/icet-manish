@@ -592,32 +592,6 @@ std::vector<LatticeSite> OrbitList::getReferenceLatticeSites(bool sort) const
 }
 
 /**
-@details This function returns the orbit for a supercell that is associated with a given orbit in the primitive structure.
-@param supercell input structure
-@param cellOffset offset by which to translate the orbit
-@param orbitIndex index of orbit in list of orbits
-@param primToSuperMap map from sites in the primitive cell to sites in the supercell
-@param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
-**/
-Orbit OrbitList::getSuperCellOrbit(const Structure &supercell,
-                                   const Vector3d &cellOffset,
-                                   const unsigned int orbitIndex,
-                                   std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
-                                   const double fractionalPositionTolerance) const
-{
-    if (orbitIndex >= _orbits.size())
-    {
-        std::ostringstream msg;
-        msg << "Orbit index out of range (OrbitList::getSuperCellOrbit): ";
-        msg << orbitIndex << " >= " << _orbits.size();
-        throw std::out_of_range(msg.str());
-    }
-    Orbit supercellOrbit = _orbits[orbitIndex] + cellOffset;
-    supercellOrbit.transformClustersToSupercell(supercell, primToSuperMap, fractionalPositionTolerance);
-    return supercellOrbit;
-}
-
-/**
 @details Returns a "local" orbitList by offsetting each site in the primitive cell by an offset.
 @param supercell supercell structure
 @param cellOffset offset to be applied to sites
@@ -632,9 +606,26 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &supercell,
     OrbitList localOrbitList = OrbitList();
     localOrbitList.setPrimitiveStructure(_primitiveStructure);
 
-    for (size_t orbitIndex = 0; orbitIndex < _orbits.size(); orbitIndex++)
+    for (const auto &orbit : _orbits)
     {
-        localOrbitList.addOrbit(getSuperCellOrbit(supercell, cellOffset, orbitIndex, primToSuperMap, fractionalPositionTolerance));
+        // Copy the orbit
+        Orbit supercellOrbit = orbit;
+
+        // Translate all clusters of the new orbit
+        supercellOrbit.translate(cellOffset);
+
+        // Technically we should use the fractional position tolerance
+        // corresponding to the cell metric of the supercell structure.
+        // This is, however, not uniquely defined. Moreover, the difference
+        // would only matter for very large supercells. We (@angqvist,
+        // @erikfransson, @erhart) therefore decide to defer this issue
+        // until someone encounters the problem in a practical situation.
+        // In principle, one should not handle coordinates (floats) at this
+        // level anymore. Rather one should transform any (supercell)
+        // structure into an effective representation in terms of lattice
+        // sites before any further operations.
+        supercellOrbit.transformToSupercell(supercell, primToSuperMap, fractionalPositionTolerance);
+        localOrbitList.addOrbit(supercellOrbit);
     }
     return localOrbitList;
 }

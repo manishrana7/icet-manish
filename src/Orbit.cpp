@@ -154,15 +154,14 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
             {
                 elements[i] = structure.getAtomicNumbers().at(sites[i].index());
             }
-            double unit = 1;
             // If the current atom (siteIndexForDoubleCountingCorrection) occurs more than once,
-            // we risk double counting it if we calculate a change in cluster vector or
-            // a local cluster vector. To avoid this, we count the clusters in units of
-            // 1 / n, where n is the number of occurences of the present atom in the cluster.
+            // we risk double counting it if we calculate a local cluster vector. To avoid this,
+            // we count the clusters in units of 1 / n, where n is the number of occurences of
+            // the present atom in the cluster.
+            double unit = 1;
             if (siteIndexForDoubleCountingCorrection > -1)
             {
-                unit /= (double)std::count_if(sites.begin(), sites.end(), [=](LatticeSite ls)
-                                              { return ls.index() == siteIndexForDoubleCountingCorrection; });
+                unit /= cluster.countOccurencesOfSiteIndex(siteIndexForDoubleCountingCorrection);
             }
             tmpCounts[elements] += unit;
         }
@@ -218,12 +217,11 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
                     elementsNew[i] = occupation;
                 }
             }
-            double unit = 1;
             // If the current site (flipIndex) occurs more than once,
             // we risk double counting it. To avoid this, we count the clusters in units of
             // 1 / n, where n is the number of occurrences of the present atom in the cluster.
-            unit /= (double)std::count_if(sites.begin(), sites.end(), [=](LatticeSite ls)
-                                          { return ls.index() == flipIndex; });
+            double unit = 1.0 / (double)cluster.countOccurencesOfSiteIndex(flipIndex);
+
             // The old cluster has disappeared and we got elementNew instead
             tmpCounts[elementsOld] -= unit;
             tmpCounts[elementsNew] += unit;
@@ -232,11 +230,41 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
     return tmpCounts;
 }
 
-void Orbit::transformClustersToSupercell(const Structure &supercell,
-                                         std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
-                                         const double fractionalPositionTolerance)
+/**
+**/
+void Orbit::translate(const Vector3d &cellOffset) 
 {
-    for (Cluster &cluster : _equivalentClusters)
+    _representativeCluster.translate(cellOffset);
+    for (auto &cluster : _equivalentClusters) {
+        cluster.translate(cellOffset);
+    }
+}
+
+/**
+@brief Transforms the clusters to a new cell
+@details
+    Each cluster in the orbit consists of a vector of lattice sites, and
+    these sites are defined in relation to a specific atomic structure
+    (typically a primitive structure), and a pointer to this structure
+    is stored in each cluster. This function redefines the sites
+    such that they refer to a new cell (typically a supercell).
+@param supercell The new atomic structure
+@param cellOffset
+    Offset to be applied to sites before transformation to supercell.
+    This offset is specified in terms of the old (primitive) structure. 
+@param primToSuperMap
+    Map from lattice site referring to old structure to lattice site
+    referring to the new structure. This map will successivelly be
+    populated when executing the function, and is only used for
+    reasons of performance.
+@fractionalPositionTolerance 
+**/
+void Orbit::transformToSupercell(const Structure &supercell,
+                                 std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
+                                 const double fractionalPositionTolerance)
+{   
+    _representativeCluster.transformToSupercell(&supercell, primToSuperMap, fractionalPositionTolerance);
+    for (auto &cluster : _equivalentClusters)
     {
         cluster.transformToSupercell(&supercell, primToSuperMap, fractionalPositionTolerance);
     }
