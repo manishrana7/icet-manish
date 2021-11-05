@@ -126,7 +126,7 @@ void OrbitList::sort(const double positionTolerance)
                       return lhs.radius() < rhs.radius();
                   }
 
-                  // (3) Check size of vector of equivalent sites.
+                  // (3) Compare by the number of clusters in the orbit.
                   if (lhs.size() < rhs.size())
                   {
                       return true;
@@ -136,8 +136,8 @@ void OrbitList::sort(const double positionTolerance)
                       return false;
                   }
 
-                  // (4) Check the individual equivalent sites.
-                  return lhs.getEquivalentClusters() < rhs.getEquivalentClusters();
+                  // (4) Check the individual sites.
+                  return lhs.getClusters() < rhs.getClusters();
               });
 }
 

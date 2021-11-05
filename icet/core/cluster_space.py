@@ -365,7 +365,7 @@ class ClusterSpace(_ClusterSpace):
             mc_index = mc_vectors.index(mc_vector)
             mc_permutations_multiplicity = len(mc_permutations[mc_index])
             cluster = self.get_orbit(orbit_index).representative_cluster
-            multiplicity = len(self.get_orbit(orbit_index).equivalent_clusters)
+            multiplicity = len(self.get_orbit(orbit_index).clusters)
 
             record = OrderedDict([('index', index),
                                   ('order', cluster.order),
@@ -658,7 +658,7 @@ class ClusterSpace(_ClusterSpace):
             fractional_position_tolerance=self.fractional_position_tolerance)
         orbit_indices = set()
         for orbit in ol.orbits:
-            for cluster in orbit.equivalent_clusters:
+            for cluster in orbit.clusters:
                 indices = tuple(sorted([site.index for site in cluster.lattice_sites]))
                 if indices in orbit_indices:
                     return True

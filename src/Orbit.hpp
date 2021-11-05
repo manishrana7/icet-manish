@@ -28,10 +28,10 @@ public:
     Orbit(const std::vector<Cluster>, const std::set<std::vector<int>>);
 
     /// Adds one cluster to the orbit.
-    void addEquivalentCluster(const Cluster &);
+    void addCluster(const Cluster &);
 
-    /// Returns the number of equivalent clusters in this orbit.
-    size_t size() const { return _equivalentClusters.size(); }
+    /// Returns the number of clusters in this orbit.
+    size_t size() const { return _clusters.size(); }
 
     /// Returns the radius of the representative cluster in this orbit.
     double radius() const { return getRepresentativeCluster().radius(); }
@@ -39,8 +39,8 @@ public:
     /// Returns the representative cluster for this orbit
     const Cluster &getRepresentativeCluster() const { return _representativeCluster; }
 
-    /// Returns all equivalent clusters.
-    const std::vector<Cluster> &getEquivalentClusters() const { return _equivalentClusters; }
+    /// Returns all clusters in this orbit.
+    const std::vector<Cluster> &getClusters() const { return _clusters; }
 
     /// Returns the number of bodies of the cluster that represent this orbit.
     unsigned int order() const { return getRepresentativeCluster().order(); }
@@ -53,7 +53,7 @@ public:
 
     std::vector<std::vector<int>> getAllPossibleMultiComponentVectorPermutations(const std::vector<int> &Mi_local) const;
 
-    /// Returns true if the input sites exists in _equivalentClusters, order does not matter if sorted=false.
+    /// Returns true if the input sites exists in _clusters, order does not matter if sorted=false.
     bool contains(const std::vector<LatticeSite>, bool) const;
 
     /// Counts occupations of clusters in this orbit
@@ -95,18 +95,19 @@ public:
             throw std::runtime_error("Orbit order is not equal (Orbit &operator+=)");
         }
 
-        const auto rhsEquivalentClusters = orbit_rhs.getEquivalentClusters();
+        const auto rhsClusters = orbit_rhs.getClusters();
 
         // Insert rhs eq sites
-        _equivalentClusters.insert(_equivalentClusters.end(), rhsEquivalentClusters.begin(), rhsEquivalentClusters.end());
+        _clusters.insert(_clusters.end(), rhsClusters.begin(), rhsClusters.end());
         return *this;
     }
 
 private:
-    Cluster _representativeCluster;
+    /// Container of all clusters in this orbit
+    std::vector<Cluster> _clusters;
 
-    /// Container of equivalent sites for this orbit
-    std::vector<Cluster> _equivalentClusters;
+    /// One of the clusters chosen to represent the orbit
+    Cluster _representativeCluster;
 
     /// Contains the allowed sites permutations. i.e. if 0, 2, 1 is in this set then 0, 1, 0 is the same multi-component vector as 0, 0, 1
     std::set<std::vector<int>> _allowedClusterPermutations;

@@ -4,24 +4,26 @@
 @details This constructor creates an orbit from a set of equivalent clusters and a structure.
          Note that the sites of each cluster need to be ordered in a consistent manner
          (This ordering is enforced when Orbit objects are created via an OrbitList object)
-@param equivalentClusters The clusters that together make up the orbit.
-@param structure Structure that this orbit relates to
+@param clusters
+    The clusters that together make up the orbit. Normally, these should be symmetry equivalent,
+    but note that this needs to be ensured before constructing the orbit; it is not enforced by
+    the constructor.
 @param allowedClusterPermutations
     Allowed permutations for this orbit; e.g., if 0, 2, 1 is in this set
     then 0, 1, 0 is the same multi-component vector as 0, 0, 1
 **/
-Orbit::Orbit(const std::vector<Cluster> equivalentClusters,
+Orbit::Orbit(const std::vector<Cluster> clusters,
              const std::set<std::vector<int>> allowedClusterPermutations)
 {
-    _representativeCluster = equivalentClusters[0];
-    _equivalentClusters = equivalentClusters;
+    _representativeCluster = clusters[0];
+    _clusters = clusters;
     _allowedClusterPermutations = allowedClusterPermutations;
 
-    // Sort equivalent clusters according the coordinates of their sites.
+    // Sort clusters according the coordinates of their sites.
     // This is done only to achieve a reproducible ordering, which under some
     // circumstances matters when sorting the orbit list (and thereby the
     // cluster vector).
-    std::sort(_equivalentClusters.begin(), _equivalentClusters.end());
+    std::sort(_clusters.begin(), _clusters.end());
 }
 
 /**
@@ -29,9 +31,9 @@ Orbit::Orbit(const std::vector<Cluster> equivalentClusters,
 @details Note that this function only appends the new cluster to the end without resorting.
 @param latticeSiteGroup Cluster to be added represented by a group of lattice sites
 */
-void Orbit::addEquivalentCluster(const Cluster &cluster)
+void Orbit::addCluster(const Cluster &cluster)
 {
-    _equivalentClusters.push_back(cluster);
+    _clusters.push_back(cluster);
 }
 
 /**
@@ -92,7 +94,7 @@ std::vector<std::vector<int>> Orbit::getAllPossibleMultiComponentVectorPermutati
 }
 
 /**
-@details Check if this orbit contains a cluster in its list of equivalent clusters.
+@details Check if this orbit contains a cluster in its list of clusters.
 @param cluster cluster (represented by a list of sites) to look for
 @param sorted if true the order of sites in the cluster is irrelevant
 @returns true if the cluster is present in the orbit
@@ -105,9 +107,9 @@ bool Orbit::contains(const std::vector<LatticeSite> cluster, bool sorted) const
         std::sort(clusterCopy.begin(), clusterCopy.end());
     }
 
-    for (size_t i = 0; i < _equivalentClusters.size(); i++)
+    for (size_t i = 0; i < _clusters.size(); i++)
     {
-        auto sites = _equivalentClusters[i].getLatticeSites();
+        auto sites = _clusters[i].getLatticeSites();
 
         // compare the sorted sites
         if (sorted)
@@ -142,7 +144,7 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
 {
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elements(order());
-    for (const auto &cluster : _equivalentClusters)
+    for (const auto &cluster : _clusters)
     {
 
         // If we apply the double counting correction for some site we need
@@ -194,7 +196,7 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
     int siteIndex;
     int occupation;
 
-    for (const auto &cluster : _equivalentClusters)
+    for (const auto &cluster : _clusters)
     {
         // Only count clusters where site flipIndex is included (with zero offset)
         if (cluster.isSiteIndexIncludedWithZeroOffset(flipIndex))
@@ -235,7 +237,7 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
 void Orbit::translate(const Vector3d &cellOffset) 
 {
     _representativeCluster.translate(cellOffset);
-    for (auto &cluster : _equivalentClusters) {
+    for (auto &cluster : _clusters) {
         cluster.translate(cellOffset);
     }
 }
@@ -264,7 +266,7 @@ void Orbit::transformToSupercell(const Structure &supercell,
                                  const double fractionalPositionTolerance)
 {   
     _representativeCluster.transformToSupercell(&supercell, primToSuperMap, fractionalPositionTolerance);
-    for (auto &cluster : _equivalentClusters)
+    for (auto &cluster : _clusters)
     {
         cluster.transformToSupercell(&supercell, primToSuperMap, fractionalPositionTolerance);
     }
@@ -276,7 +278,7 @@ namespace std
     /// Stream operator.
     ostream &operator<<(ostream &os, const Orbit &orbit)
     {
-        for (const auto cluster : orbit.getEquivalentClusters())
+        for (const auto cluster : orbit.getClusters())
         {
             os << "  ";
             for (const auto site : cluster.getLatticeSites())

@@ -17,7 +17,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
     for (const auto orbit : clusterSpace.getPrimitiveOrbitList().getOrbits())
     {
-        orbitVector.push_back(Orbit(orbit.getEquivalentClusters(), orbit.getAllowedClusterPermutations()));
+        orbitVector.push_back(Orbit(orbit.getClusters(), orbit.getAllowedClusterPermutations()));
     }
 
     /* Strategy for constructing the "full" primitive orbit lists.
@@ -48,7 +48,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         OrbitList localOrbitList = LOLG.getLocalOrbitList(offsetIndex);
         for (int orbitIndex = 0; orbitIndex < numberOfOrbits; orbitIndex++)
         {
-            for (const auto cluster : localOrbitList.getOrbit(orbitIndex).getEquivalentClusters())
+            for (const auto cluster : localOrbitList.getOrbit(orbitIndex).getClusters())
             {
                 std::vector<LatticeSite> primitiveEquivalentSites;
                 for (const auto site : cluster.getLatticeSites())
@@ -67,7 +67,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
                         // false or true here does not seem to matter
                         if (!orbitVector[orbitIndex].contains(translatedCluster, true))
                         {
-                            orbitVector[orbitIndex].addEquivalentCluster(Cluster(translatedCluster, &_clusterSpace.getPrimitiveStructure()));
+                            orbitVector[orbitIndex].addCluster(Cluster(translatedCluster, &_clusterSpace.getPrimitiveStructure()));
                         }
                     }
                 }

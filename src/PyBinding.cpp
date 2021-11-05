@@ -314,9 +314,9 @@ PYBIND11_MODULE(_icet, m)
              to (0,0,1).
              )pbdoc")
         .def_property_readonly(
-            "equivalent_clusters",
-            &Orbit::getEquivalentClusters,
-            "list of symmetry equivalent clusters")
+            "clusters",
+            &Orbit::getClusters,
+            "list of the clusters in this orbit")
         .def("get_multicomponent_vectors", &Orbit::getMultiComponentVectors,
              R"pbdoc(
              Return the multi-component vectors for this orbit given the allowed components.
@@ -395,9 +395,9 @@ PYBIND11_MODULE(_icet, m)
                  {
                      msg << "    site: " << site << std::endl;
                  }
-                 msg << "equivalent_clusters:" << std::endl;
+                 msg << "clusters:" << std::endl;
                  int k = -1;
-                 for (const auto cluster : orbit.getEquivalentClusters())
+                 for (const auto cluster : orbit.getClusters())
                  {
                      k += 1;
                      msg << "  cluster: " << k << std::endl;
