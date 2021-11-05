@@ -207,8 +207,8 @@ PYBIND11_MODULE(_icet, m)
         .def(py::init<const std::vector<LatticeSite> &,
                       const Structure *>(),
              "Initializes a cluster instance.",
-             py::arg("structure"),
-             py::arg("lattice_sites"))
+             py::arg("lattice_sites"),
+             py::arg("structure"))
         .def_property_readonly(
             "lattice_sites",
             &Cluster::getLatticeSites,
@@ -307,15 +307,20 @@ PYBIND11_MODULE(_icet, m)
             },
             R"pbdoc(
              Gets the list of equivalent permutations for this orbit. If this
-             orbit is a triplet and the permutation [0,2,1] exists this means
+             orbit is a triplet and the permutation [0, 2, 1] exists this means
              that The lattice sites [s1, s2, s3] are equivalent to [s1, s3,
              s2] This will have the effect that for a ternary CE the cluster
-             functions (0,1,0) will not be considered since it is equivalent
-             to (0,0,1).
+             functions (0, 1, 0) will not be considered since it is equivalent
+             to (0, 0, 1).
              )pbdoc")
         .def_property_readonly(
             "clusters",
-            &Orbit::getClusters,
+            // Directly binding &Orbit::getClusters causes modifications
+            // of the Clusters (deletion of their LatticeSites) from the
+            // Python side, even when setting return_value_policy to copy.
+            // The below solution (which seems identical) fixes that for
+            // unknown reasons.
+            [](const Orbit &orbit) { return orbit.getClusters(); },
             "list of the clusters in this orbit")
         .def("get_multicomponent_vectors", &Orbit::getMultiComponentVectors,
              R"pbdoc(
@@ -381,6 +386,19 @@ PYBIND11_MODULE(_icet, m)
                  `self.representative_cluster[i]`.
 
              returns all_mc_vectors : list(list(int)
+             )pbdoc")
+        .def("translate",
+             &Orbit::translate,
+             py::arg("offset"),
+             R"pbdoc(
+             Translate the clusters in the orbit by a constant offset.
+
+             Parameters
+             ----------
+             offset : List[int]
+                scaled coordinates in terms of the cell vectors of
+                the structure used to define the clusters in this orbit
+                (typically the primitive structure)
              )pbdoc")
         .def("__len__", &Orbit::size)
         .def("__str__",
