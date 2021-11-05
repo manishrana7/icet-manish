@@ -354,12 +354,12 @@ class ClusterSpace(_ClusterSpace):
             orbit_index = multicomponent_vectors_by_orbit[0]
             mc_vector = multicomponent_vectors_by_orbit[1]
             orbit = self.get_orbit(orbit_index)
-            repr_sites = orbit.sites_of_representative_cluster
+            repr_sites = orbit.representative_cluster.lattice_sites
             orbit_sublattices = '-'.join(
                 [sublattices[sublattices.get_sublattice_index(ls.index)].symbol
                  for ls in repr_sites])
             local_Mi = self.get_number_of_allowed_species_by_site(
-                self._get_primitive_structure(), orbit.sites_of_representative_cluster)
+                self._get_primitive_structure(), repr_sites)
             mc_vectors = orbit.get_multicomponent_vectors(local_Mi)
             mc_permutations = self.get_multicomponent_vector_permutations(mc_vectors, orbit_index)
             mc_index = mc_vectors.index(mc_vector)

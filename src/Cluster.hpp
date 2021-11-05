@@ -34,12 +34,15 @@ public:
         return cluster1.getLatticeSites() < cluster2.getLatticeSites();
     }
 
-    /// Translate the sites of the cluster by a constant vector
+    /// Translate the sites of the cluster by a constant vector.
     void translate(const Eigen::Vector3d &offset);
 
     void transformToSupercell(const Structure *,
                               std::unordered_map<LatticeSite, LatticeSite> &,
                               const double fractionalPositionTolerance);
+
+    /// Check whether a site index is included with a zero offset.
+    bool isSiteIndexIncludedWithZeroOffset(const int index) const;
 
 private:
     /// The lattice sites in the cluster.

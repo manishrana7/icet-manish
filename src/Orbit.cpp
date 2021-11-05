@@ -35,18 +35,6 @@ void Orbit::addEquivalentCluster(const Cluster &cluster)
 }
 
 /**
-@param index cluster index
-*/
-Cluster Orbit::getClusterByIndex(unsigned int index) const
-{
-    if (index >= _equivalentClusters.size())
-    {
-        throw std::out_of_range("Index out of range (Orbit::getClusterByIndex)");
-    }
-    return _equivalentClusters[index];
-}
-
-/**
 @param Mi_local list of the number of allowed species per site
 */
 std::vector<std::vector<int>> Orbit::getMultiComponentVectors(const std::vector<int> &Mi_local) const
@@ -136,21 +124,6 @@ bool Orbit::contains(const std::vector<LatticeSite> cluster, bool sorted) const
 }
 
 /**
-@brief Check whether a site is included in a cluster
-@details A cluster will count as included if index is among the lattice sites
-         that have a zero offset.
-@param index Index of site to check whether it is included
-@param cluster
-    Vector of LatticeSite, at least one of which must contain index for this
-    function to return true
-*/
-bool Orbit::isSiteIncluded(int index, const std::vector<LatticeSite> &cluster) const
-{
-    return std::any_of(cluster.begin(), cluster.end(), [=](const LatticeSite &ls)
-                       { return ls.index() == index && ls.unitcellOffset().norm() < 1e-4; });
-}
-
-/**
 @brief Count the occupations of the clusters in this orbit.
 @details
     Note that the orderings of the sites in the clusters matter, meaning,
@@ -171,11 +144,12 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
     std::vector<int> elements(order());
     for (const auto &cluster : _equivalentClusters)
     {
-        const std::vector<LatticeSite> &sites = cluster.getLatticeSites();
+
         // If we apply the double counting correction for some site we need
         // to ensure that we only count clusters that include this site.
-        if (siteIndexForDoubleCountingCorrection < 0 || isSiteIncluded(siteIndexForDoubleCountingCorrection, sites))
+        if (siteIndexForDoubleCountingCorrection < 0 || cluster.isSiteIndexIncludedWithZeroOffset(siteIndexForDoubleCountingCorrection))
         {
+            const std::vector<LatticeSite> &sites = cluster.getLatticeSites();
             for (size_t i = 0; i < sites.size(); i++)
             {
                 elements[i] = structure.getAtomicNumbers().at(sites[i].index());
@@ -223,10 +197,10 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
 
     for (const auto &cluster : _equivalentClusters)
     {
-        const std::vector<LatticeSite> &sites = cluster.getLatticeSites();
         // Only count clusters where site flipIndex is included (with zero offset)
-        if (isSiteIncluded(flipIndex, sites))
+        if (cluster.isSiteIndexIncludedWithZeroOffset(flipIndex))
         {
+            const std::vector<LatticeSite> &sites = cluster.getLatticeSites();
             for (size_t i = 0; i < sites.size(); i++)
             {
                 siteIndex = sites[i].index();

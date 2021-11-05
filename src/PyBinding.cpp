@@ -313,10 +313,9 @@ PYBIND11_MODULE(_icet, m)
              functions (0,1,0) will not be considered since it is equivalent
              to (0,0,1).
              )pbdoc")
-        .def_property(
+        .def_property_readonly(
             "equivalent_clusters",
             &Orbit::getEquivalentClusters,
-            &Orbit::setEquivalentClusters,
             "list of symmetry equivalent clusters")
         .def("get_multicomponent_vectors", &Orbit::getMultiComponentVectors,
              R"pbdoc(

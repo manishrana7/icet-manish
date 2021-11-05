@@ -79,3 +79,13 @@ double Cluster::radius() const
     avgDistanceToCenter /= _latticeSites.size();
     return avgDistanceToCenter;
 }
+
+/**
+@brief Check whether a site index is included with a zero offset.
+@param index Index of site to check whether it is included
+*/
+bool Cluster::isSiteIndexIncludedWithZeroOffset(int index) const
+{
+    return std::any_of(_latticeSites.begin(), _latticeSites.end(), [=](const LatticeSite &ls)
+                       { return ls.index() == index && ls.unitcellOffset().norm() < 1e-4; });
+}

@@ -39,14 +39,8 @@ public:
     /// Returns the representative cluster for this orbit
     const Cluster &getRepresentativeCluster() const { return _representativeCluster; }
 
-    /// Returns the equivalent cluster.
-    Cluster getClusterByIndex(unsigned int) const;
-
     /// Returns all equivalent clusters.
     const std::vector<Cluster> &getEquivalentClusters() const { return _equivalentClusters; }
-
-    /// Sets the equivalent clusters.
-    void setEquivalentClusters(const std::vector<Cluster> &equivalentClusters) { _equivalentClusters = equivalentClusters; }
 
     /// Returns the number of bodies of the cluster that represent this orbit.
     unsigned int order() const { return getRepresentativeCluster().order(); }
@@ -123,9 +117,6 @@ private:
 
     /// Contains the allowed sites permutations. i.e. if 0, 2, 1 is in this set then 0, 1, 0 is the same multi-component vector as 0, 0, 1
     std::set<std::vector<int>> _allowedClusterPermutations;
-
-    /// Check whether a site is included in a vector of lattice sites
-    bool isSiteIncluded(const int, const std::vector<LatticeSite> &) const;
 };
 
 namespace std
