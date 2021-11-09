@@ -605,8 +605,8 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &supercell,
 {
     OrbitList localOrbitList = OrbitList();
     localOrbitList.setPrimitiveStructure(_primitiveStructure);
-
-    for (const auto &orbit : _orbits)
+    std::cout << "hejhej\n";
+    for (const auto orbit : _orbits)
     {
         // Copy the orbit
         Orbit supercellOrbit = orbit;
@@ -627,6 +627,7 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &supercell,
         supercellOrbit.transformToSupercell(supercell, primToSuperMap, fractionalPositionTolerance);
         localOrbitList.addOrbit(supercellOrbit);
     }
+    std::cout << "after loop\n";
     return localOrbitList;
 }
 

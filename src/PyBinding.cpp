@@ -405,10 +405,15 @@ PYBIND11_MODULE(_icet, m)
              [](const Orbit &orbit)
              {
                  std::ostringstream msg;
+                 std::cout << "order: " << orbit.order() << std::endl;
                  msg << "order: " << orbit.order() << std::endl;
+                 std::cout << "multiplicity: " << orbit.size() << std::endl;
                  msg << "multiplicity: " << orbit.size() << std::endl;
+                 std::cout << " access repres lat. sites" << orbit.getRepresentativeCluster().getLatticeSites().size() << std::endl;
+                 std::cout << "radius: " << orbit.radius() << std::endl;
                  msg << "radius: " << orbit.radius() << std::endl;
                  msg << "representative_cluster:" << std::endl;
+                 std::cout << "before first loop" << std::endl;
                  for (const auto site : orbit.getRepresentativeCluster().getLatticeSites())
                  {
                      msg << "    site: " << site << std::endl;

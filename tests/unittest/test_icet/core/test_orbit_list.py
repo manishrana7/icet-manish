@@ -28,13 +28,12 @@ class TestOrbitList(unittest.TestCase):
 
         # representative clusters for testing
         # for singlet
-        self.cluster_singlet = Cluster(
-            Structure.from_atoms(self.structure),
-            [LatticeSite(0, [0, 0, 0])])
+        self.cluster_singlet = Cluster([LatticeSite(0, [0, 0, 0])],
+                                       Structure.from_atoms(self.structure))
         # for pair
         self.lattice_sites = [LatticeSite(0, [i, 0, 0]) for i in range(3)]
-        self.cluster_pair = Cluster(Structure.from_atoms(self.structure),
-                                    [self.lattice_sites[0], self.lattice_sites[1]])
+        self.cluster_pair = Cluster([self.lattice_sites[0], self.lattice_sites[1]],
+                                    Structure.from_atoms(self.structure))
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
@@ -179,15 +178,24 @@ class TestOrbitList(unittest.TestCase):
         """Tests orbit list is returned for the given supercell."""
         # TODO : Tests fails for an actual supercell of the testing structure
         structure_supercell = self.structure.copy()
+        print('------1')
         orbit_list_super = \
             self.orbit_list.get_supercell_orbit_list(
                 structure_supercell, self.position_tolerance)
+        print('------2')
         orbit_list_super.sort(self.position_tolerance)
+        print('------3')
         self.orbit_list.sort(self.position_tolerance)
+        print('------4')
         for k in range(len(orbit_list_super)):
+            print('------5')
             orbit_super = orbit_list_super.get_orbit(k)
+            print('------6')
             orbit = self.orbit_list.get_orbit(k)
+            print('------7')
             self.assertEqual(str(orbit), str(orbit_super))
+            print('------8')
+        print('------done')
 
     def test_translate_sites_to_unitcell(self):
         """Tests the get all translated sites functionality."""

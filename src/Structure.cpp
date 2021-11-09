@@ -56,6 +56,8 @@ double Structure::getDistance(const size_t index1,
 */
 Vector3d Structure::getPosition(const LatticeSite &latticeNeighbor) const
 {
+    std::cout << "positions row " << _positions.size() << std::endl;
+    std::cout << "index " << latticeNeighbor.index() << std::endl;
     if (latticeNeighbor.index() >= (size_t)_positions.rows())
     {
         std::ostringstream msg;

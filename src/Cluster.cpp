@@ -63,13 +63,17 @@ void Cluster::transformToSupercell(const Structure *supercell,
 double Cluster::radius() const
 {
     // Compute the center of the cluster.
+    std::cout << "Calculate radius" << std::endl;
     Vector3d centerPosition = {0.0, 0.0, 0.0};
     for (const auto &site : _latticeSites)
-    {
+    {   
+        std::cout << "start iter" << std::endl;
         centerPosition += _structure->getPosition(site);
+        std::cout << "end iter" << std::endl;
     }
     centerPosition /= _latticeSites.size();
 
+    std::cout << "Middle radius" << std::endl;
     // Compute the average distance of the points in the cluster to its center.
     double avgDistanceToCenter = 0.0;
     for (const auto &site : _latticeSites)
@@ -77,6 +81,7 @@ double Cluster::radius() const
         avgDistanceToCenter += (centerPosition - _structure->getPosition(site)).norm();
     }
     avgDistanceToCenter /= _latticeSites.size();
+    std::cout << "Done radius" << std::endl;
     return avgDistanceToCenter;
 }
 
