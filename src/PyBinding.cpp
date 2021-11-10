@@ -221,6 +221,11 @@ PYBIND11_MODULE(_icet, m)
             "order",
             &Cluster::order,
             "int : order of the cluster (= number of sites)")
+        .def_property_readonly(
+            "postiions",
+            &Cluster::getPositions,
+            "List[float] : positions of the sites in the cluster in Cartesian coordinates"
+        )
         .def("__len__",
              &Cluster::order);
     ;
@@ -649,7 +654,6 @@ PYBIND11_MODULE(_icet, m)
             py::arg("index2"))
 
         .def("_get_orbit_list", &ClusterSpace::getPrimitiveOrbitList)
-        .def("get_orbit", &ClusterSpace::getOrbit)
         .def_property_readonly("species_maps", &ClusterSpace::getSpeciesMaps)
         .def("get_multicomponent_vectors_by_orbit", &ClusterSpace::getMultiComponentVectorsByOrbit)
         .def("get_chemical_symbols",

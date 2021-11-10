@@ -50,9 +50,6 @@ public:
   /// Returns the entire primitive orbit list.
   const OrbitList &getPrimitiveOrbitList() const { return _primitiveOrbitList; }
 
-  /// Returns an orbit from the orbit list.
-  const Orbit getOrbit(const size_t index) const { return _primitiveOrbitList.getOrbit(index); }
-
   /// Returns the multi-component (MC) vector permutations for each MC vector in the set of input vectors.
   std::vector<std::vector<std::vector<int>>> getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &, const int) const;
 

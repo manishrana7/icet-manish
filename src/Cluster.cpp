@@ -12,6 +12,10 @@ Cluster::Cluster(const std::vector<LatticeSite> &latticeSites,
     _structure = structure;
 }
 
+/** 
+@brief Translate this cluster by an offset.
+@param offset Coordinates referring to the axes of the structure in this cluster
+**/
 void Cluster::translate(const Eigen::Vector3d &offset)
 {
     for (LatticeSite &site : _latticeSites)
@@ -59,7 +63,7 @@ void Cluster::transformToSupercell(std::shared_ptr<const Structure> supercell,
 }
 
 /**
-@details This function computes the geometrical radius of the cluster.
+@brief This function computes the geometrical radius of the cluster.
 */
 double Cluster::radius() const
 {
@@ -79,6 +83,17 @@ double Cluster::radius() const
     }
     avgDistanceToCenter /= _latticeSites.size();
     return avgDistanceToCenter;
+}
+
+/**
+@brief Returns the positions of the sites in this cluster in Cartesian coordinates.
+**/
+std::vector<Vector3d> Cluster::getPositions() const {
+    std::vector<Vector3d> positions;
+    for (const LatticeSite &site : _latticeSites) {
+        positions.push_back(_structure->getPosition(site));
+    }
+    return positions;
 }
 
 /**

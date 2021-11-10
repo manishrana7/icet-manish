@@ -353,7 +353,7 @@ class ClusterSpace(_ClusterSpace):
             multicomponent_vectors_by_orbit = self.get_multicomponent_vectors_by_orbit(index)
             orbit_index = multicomponent_vectors_by_orbit[0]
             mc_vector = multicomponent_vectors_by_orbit[1]
-            orbit = self.get_orbit(orbit_index)
+            orbit = self._orbit_list.get_orbit(orbit_index)
             repr_sites = orbit.representative_cluster.lattice_sites
             orbit_sublattices = '-'.join(
                 [sublattices[sublattices.get_sublattice_index(ls.index)].symbol
@@ -364,8 +364,8 @@ class ClusterSpace(_ClusterSpace):
             mc_permutations = self.get_multicomponent_vector_permutations(mc_vectors, orbit_index)
             mc_index = mc_vectors.index(mc_vector)
             mc_permutations_multiplicity = len(mc_permutations[mc_index])
-            cluster = self.get_orbit(orbit_index).representative_cluster
-            multiplicity = len(self.get_orbit(orbit_index).clusters)
+            cluster = orbit.representative_cluster
+            multiplicity = len(orbit.clusters)
 
             record = OrderedDict([('index', index),
                                   ('order', cluster.order),
@@ -431,25 +431,17 @@ class ClusterSpace(_ClusterSpace):
         # Raise exception if chosen orbit index not in current list of orbit indices
         if orbit_index not in range(len(self._orbit_list)):
             raise ValueError('The input orbit index is not in the list of possible values.')
-
-        lattice_sites = self._orbit_list.get_orbit(orbit_index).sites_of_representative_cluster
-        positions = []
-
-        for site in lattice_sites:
-            pos = get_position_from_lattice_site(structure=self.primitive_structure,
-                                                 lattice_site=site)
-            positions.append(pos)
-
-        return positions
+        return self._orbit_list.get_orbit(orbit_index).representative_cluster.cartesian_coordinates
 
     def _rebuild_orbit_list(self) -> None:
         """Rebuild the Python-side orbit list using the orbits from the
         C++-side orbit list. This is necessary in order to ensure the
         consistency of Python and C++ orbit lists in particular after merging
         orbits."""
+        cpp_orbit_list = self._get_orbit_list()
         self._orbit_list.clear()
         for i in range(max([(d['orbit_index']) for d in self.orbit_data])+1):
-            self._orbit_list.add_orbit(self.get_orbit(i))
+            self._orbit_list.add_orbit(cpp_orbit_list.get_orbit(i))
 
     def _remove_orbits(self, indices: List[int]) -> None:
         """
@@ -615,7 +607,7 @@ class ClusterSpace(_ClusterSpace):
         self._pruning_history.append(('merge', equivalent_orbits))
         orbits_to_delete = []
         for k1, orbit_indices in equivalent_orbits.items():
-            order1 = self.get_orbit(k1).order
+            order1 = self._orbit_list.get_orbit(k1).order
 
             for k2 in orbit_indices:
 
@@ -625,7 +617,7 @@ class ClusterSpace(_ClusterSpace):
                 if k2 in orbits_to_delete:
                     raise ValueError(f'Orbit {k2} cannot be merged into orbit {k1}'
                                      ' since it was already merged with another orbit.')
-                order2 = self.get_orbit(k2).order
+                order2 = self._orbit_list.get_orbit(k2).order
                 if order1 != order2:
                     raise ValueError(f'The order of orbit {k1} ({order1}) does not'
                                      f' match the order of orbit {k2} ({order2}).')
