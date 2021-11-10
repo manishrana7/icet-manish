@@ -122,16 +122,6 @@ class TestOrbitList(unittest.TestCase):
         """Tests orbits in orbit list are sorted."""
         self.orbit_list.sort(self.position_tolerance)
 
-#    def test_find_orbit_index(self):
-#        """
-#        Tests that orbit index returned for the given representative cluster.
-#        """
-#        # TODO: test that a non-representative cluster returns -1
-#        self.assertEqual(
-#            self.orbit_list._find_orbit_index(self.cluster_singlet), 0)
-#        self.assertEqual(
-#            self.orbit_list._find_orbit_index(self.cluster_pair), 1)
-
     def test_is_row_taken(self):
         """Tests is_row_taken (private) functionality."""
         taken_rows = set()
