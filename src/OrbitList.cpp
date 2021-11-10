@@ -306,9 +306,10 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
 
     // Turn the permuted equivalent clusters into actual Cluster objects
     std::vector<Cluster> clusters;
+    std::shared_ptr<Structure> primStructurePtr = std::make_shared<Structure>(_primitiveStructure);
     for (auto cluster : permutedEquivalentClusters)
     {
-        clusters.push_back(Cluster(cluster, &_primitiveStructure));
+        clusters.push_back(Cluster(cluster, primStructurePtr));
     }
     Orbit newOrbit = Orbit(clusters, allowedPermutations);
     return newOrbit;
@@ -605,7 +606,6 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &supercell,
 {
     OrbitList localOrbitList = OrbitList();
     localOrbitList.setPrimitiveStructure(_primitiveStructure);
-    std::cout << "hejhej\n";
     for (const auto orbit : _orbits)
     {
         // Copy the orbit
@@ -627,7 +627,6 @@ OrbitList OrbitList::getLocalOrbitList(const Structure &supercell,
         supercellOrbit.transformToSupercell(supercell, primToSuperMap, fractionalPositionTolerance);
         localOrbitList.addOrbit(supercellOrbit);
     }
-    std::cout << "after loop\n";
     return localOrbitList;
 }
 

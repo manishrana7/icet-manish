@@ -265,10 +265,11 @@ void Orbit::transformToSupercell(const Structure &supercell,
                                  std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
                                  const double fractionalPositionTolerance)
 {   
-    _representativeCluster.transformToSupercell(&supercell, primToSuperMap, fractionalPositionTolerance);
+    std::shared_ptr<Structure> supercellPtr = std::make_shared<Structure>(supercell);
+    _representativeCluster.transformToSupercell(supercellPtr, primToSuperMap, fractionalPositionTolerance);
     for (auto &cluster : _clusters)
     {
-        cluster.transformToSupercell(&supercell, primToSuperMap, fractionalPositionTolerance);
+        cluster.transformToSupercell(supercellPtr, primToSuperMap, fractionalPositionTolerance);
     }
 }
 

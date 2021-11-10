@@ -5,7 +5,8 @@
 @param structure icet structure object
 @param latticeSites list of lattice sites that form the cluster
 */
-Cluster::Cluster(const std::vector<LatticeSite> &latticeSites, const Structure *structure)
+Cluster::Cluster(const std::vector<LatticeSite> &latticeSites,
+                 std::shared_ptr<const Structure> structure)
 {
     _latticeSites = latticeSites;
     _structure = structure;
@@ -28,7 +29,7 @@ If no map is found mapping is attempted based on the position of the site in the
 @param primToSuperMap map from primitive to supercell
 @param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
 **/
-void Cluster::transformToSupercell(const Structure *supercell,
+void Cluster::transformToSupercell(std::shared_ptr<const Structure> supercell,
                                    std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
                                    const double fractionalPositionTolerance)
 {
@@ -63,17 +64,13 @@ void Cluster::transformToSupercell(const Structure *supercell,
 double Cluster::radius() const
 {
     // Compute the center of the cluster.
-    std::cout << "Calculate radius" << std::endl;
     Vector3d centerPosition = {0.0, 0.0, 0.0};
     for (const auto &site : _latticeSites)
     {   
-        std::cout << "start iter" << std::endl;
         centerPosition += _structure->getPosition(site);
-        std::cout << "end iter" << std::endl;
     }
     centerPosition /= _latticeSites.size();
 
-    std::cout << "Middle radius" << std::endl;
     // Compute the average distance of the points in the cluster to its center.
     double avgDistanceToCenter = 0.0;
     for (const auto &site : _latticeSites)
@@ -81,7 +78,6 @@ double Cluster::radius() const
         avgDistanceToCenter += (centerPosition - _structure->getPosition(site)).norm();
     }
     avgDistanceToCenter /= _latticeSites.size();
-    std::cout << "Done radius" << std::endl;
     return avgDistanceToCenter;
 }
 

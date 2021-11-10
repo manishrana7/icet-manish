@@ -79,7 +79,7 @@ PYBIND11_MODULE(_icet, m)
     py::options options;
     options.disable_function_signatures();
 
-    py::class_<Structure>(m, "_Structure")
+    py::class_<Structure, std::shared_ptr<Structure>>(m, "_Structure")
         .def(py::init<>())
         .def(py::init<const Eigen::Matrix<double, Dynamic, 3, Eigen::RowMajor> &,
                       const py::array_t<int> &,
@@ -205,7 +205,7 @@ PYBIND11_MODULE(_icet, m)
             list of lattice sites that form the cluster
         )pbdoc")
         .def(py::init<const std::vector<LatticeSite> &,
-                      const Structure *>(),
+                      std::shared_ptr<const Structure>>(),
              "Initializes a cluster instance.",
              py::arg("lattice_sites"),
              py::arg("structure"))
@@ -405,15 +405,10 @@ PYBIND11_MODULE(_icet, m)
              [](const Orbit &orbit)
              {
                  std::ostringstream msg;
-                 std::cout << "order: " << orbit.order() << std::endl;
                  msg << "order: " << orbit.order() << std::endl;
-                 std::cout << "multiplicity: " << orbit.size() << std::endl;
                  msg << "multiplicity: " << orbit.size() << std::endl;
-                 std::cout << " access repres lat. sites" << orbit.getRepresentativeCluster().getLatticeSites().size() << std::endl;
-                 std::cout << "radius: " << orbit.radius() << std::endl;
                  msg << "radius: " << orbit.radius() << std::endl;
                  msg << "representative_cluster:" << std::endl;
-                 std::cout << "before first loop" << std::endl;
                  for (const auto site : orbit.getRepresentativeCluster().getLatticeSites())
                  {
                      msg << "    site: " << site << std::endl;

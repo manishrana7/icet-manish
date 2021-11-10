@@ -17,7 +17,7 @@ public:
 
     /// Creates cluster from a structure and a set of lattice sites.
     Cluster(const std::vector<LatticeSite> &,
-            const Structure *);
+            std::shared_ptr<const Structure>);
 
     /// Returns the lattice sites of this cluster.
     const std::vector<LatticeSite> &getLatticeSites() const { return _latticeSites; }
@@ -37,7 +37,7 @@ public:
     /// Translate the sites of the cluster by a constant vector.
     void translate(const Eigen::Vector3d &offset);
 
-    void transformToSupercell(const Structure *,
+    void transformToSupercell(std::shared_ptr<const Structure>,
                               std::unordered_map<LatticeSite, LatticeSite> &,
                               const double fractionalPositionTolerance);
 
@@ -51,6 +51,13 @@ private:
     /// The lattice sites in the cluster.
     std::vector<LatticeSite> _latticeSites;
 
-    /// The structure that the lattice sites refer to.
-    const Structure *_structure;
+    /**
+    @brief The structure that the lattice sites of this cluster refers to. 
+    @details
+        We use a shared pointer to make this work with PyBind; if a Cluster
+        is initilized from the Python side, the structure will get deleted
+        (causing a segmentation fault) if a regular pointer rather than
+        a share pointer is used. 
+     */
+    std::shared_ptr<const Structure> _structure;
 };

@@ -95,8 +95,7 @@ class TestOrbitList(unittest.TestCase):
     def test_add_orbit(self):
         """Tests add_orbit funcionality."""
         n_orbits_before = len(self.orbit_list)
-        orbit = Orbit(Structure.from_atoms(self.structure),
-                      [self.lattice_sites],
+        orbit = Orbit([Cluster(self.lattice_sites, Structure.from_atoms(self.structure))],
                       set([tuple(0 for _ in self.lattice_sites)]))
         self.orbit_list.add_orbit(orbit)
         self.assertEqual(len(self.orbit_list), n_orbits_before + 1)
@@ -151,8 +150,9 @@ class TestOrbitList(unittest.TestCase):
 
         for k, orbit in enumerate(self.orbit_list.orbits):
             with self.subTest(orbit=orbit):
-                self.assertEqual(str(orbit.representative_cluster),
-                                 str(repr_clusters[k]))
+                ret_repr_cluster = orbit.representative_cluster
+                self.assertEqual(ret_repr_cluster.order, repr_clusters[k].order)
+                self.assertEqual(ret_repr_cluster.radius, repr_clusters[k].radius)
 
     def test_remove_all_orbits(self):
         """Tests removing all orbits."""
@@ -178,24 +178,15 @@ class TestOrbitList(unittest.TestCase):
         """Tests orbit list is returned for the given supercell."""
         # TODO : Tests fails for an actual supercell of the testing structure
         structure_supercell = self.structure.copy()
-        print('------1')
         orbit_list_super = \
             self.orbit_list.get_supercell_orbit_list(
                 structure_supercell, self.position_tolerance)
-        print('------2')
         orbit_list_super.sort(self.position_tolerance)
-        print('------3')
         self.orbit_list.sort(self.position_tolerance)
-        print('------4')
         for k in range(len(orbit_list_super)):
-            print('------5')
             orbit_super = orbit_list_super.get_orbit(k)
-            print('------6')
             orbit = self.orbit_list.get_orbit(k)
-            print('------7')
             self.assertEqual(str(orbit), str(orbit_super))
-            print('------8')
-        print('------done')
 
     def test_translate_sites_to_unitcell(self):
         """Tests the get all translated sites functionality."""
@@ -289,12 +280,10 @@ class TestOrbitList(unittest.TestCase):
         for orbit in orbit_list.orbits:
             # Set up all possible permutations
             allowed_perm = []
-            all_perm = \
-                [list(perm) for perm in permutations(range(orbit.order))]
+            all_perm = [list(perm) for perm in permutations(range(orbit.order))]
             # Get representative site of orbit
-            repr_sites = orbit.sites_of_representative_cluster
-            translated_sites = \
-                orbit_list._get_sites_translated_to_unitcell(repr_sites, False)
+            repr_sites = orbit.representative_cluster.lattice_sites
+            translated_sites = orbit_list._get_sites_translated_to_unitcell(repr_sites, False)
             for sites in translated_sites:
                 for perm in all_perm:
                     # Permute translated sites
@@ -330,10 +319,11 @@ class TestOrbitList(unittest.TestCase):
         for orbit in orbit_list.orbits:
             match_repr_site = False
             # Take representative sites and translate them into unitcell
-            repr_sites = orbit.sites_of_representative_cluster
+            repr_sites = orbit.representative_cluster.lattice_sites
             # Take equivalent sites and its permutations_to_representative
-            for eq_sites in orbit.equivalent_clusters:
-                trans_eq_sites = orbit_list._get_sites_translated_to_unitcell(eq_sites, False)
+            for cluster in orbit.clusters:
+                trans_eq_sites = orbit_list._get_sites_translated_to_unitcell(
+                    cluster.lattice_sites, False)
                 # Get all columns from each group of sites
                 for sites in trans_eq_sites:
                     columns = orbit_list._get_all_columns_from_sites(sites)

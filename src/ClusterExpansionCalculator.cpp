@@ -67,7 +67,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
                         // false or true here does not seem to matter
                         if (!orbitVector[orbitIndex].contains(translatedCluster, true))
                         {
-                            orbitVector[orbitIndex].addCluster(Cluster(translatedCluster, &_clusterSpace.getPrimitiveStructure()));
+                            orbitVector[orbitIndex].addCluster(Cluster(translatedCluster, structurePtr));
                         }
                     }
                 }
