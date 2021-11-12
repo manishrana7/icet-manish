@@ -429,7 +429,7 @@ class ClusterSpace(_ClusterSpace):
         # Raise exception if chosen orbit index not in current list of orbit indices
         if orbit_index not in range(len(self._orbit_list)):
             raise ValueError('The input orbit index is not in the list of possible values.')
-        return self._orbit_list.get_orbit(orbit_index).positions
+        return self._orbit_list.get_orbit(orbit_index).representative_cluster.positions
 
     def _remove_orbits(self, indices: List[int]) -> None:
         """
