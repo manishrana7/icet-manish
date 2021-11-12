@@ -433,16 +433,6 @@ class ClusterSpace(_ClusterSpace):
             raise ValueError('The input orbit index is not in the list of possible values.')
         return self._orbit_list.get_orbit(orbit_index).representative_cluster.cartesian_coordinates
 
-    def _rebuild_orbit_list(self) -> None:
-        """Rebuild the Python-side orbit list using the orbits from the
-        C++-side orbit list. This is necessary in order to ensure the
-        consistency of Python and C++ orbit lists in particular after merging
-        orbits."""
-        cpp_orbit_list = self._get_orbit_list()
-        self._orbit_list.clear()
-        for i in range(max([(d['orbit_index']) for d in self.orbit_data])+1):
-            self._orbit_list.add_orbit(cpp_orbit_list.get_orbit(i))
-
     def _remove_orbits(self, indices: List[int]) -> None:
         """
         Removes orbits.
@@ -454,8 +444,6 @@ class ClusterSpace(_ClusterSpace):
         """
         size_before = len(self._orbit_list)
         self._remove_orbits_cpp(indices)
-        self._compute_multicomponent_vectors()
-        self._rebuild_orbit_list()
         size_after = len(self._orbit_list)
         assert size_before - len(indices) == size_after
 
@@ -739,7 +727,6 @@ class ClusterSpace(_ClusterSpace):
                 for value in items['pruning_history']:
                     cs._pruning_history(value)
 
-        cs._rebuild_orbit_list()
         return cs
 
     def copy(self):
@@ -755,5 +742,4 @@ class ClusterSpace(_ClusterSpace):
                 cs_copy._prune_orbit_list(value)
             elif key == 'merge':
                 cs_copy.merge_orbits(value)
-        cs_copy._rebuild_orbit_list()
         return cs_copy

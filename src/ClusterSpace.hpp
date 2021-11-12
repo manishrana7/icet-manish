@@ -39,7 +39,7 @@ class ClusterSpace
 public:
   /// Constructor.
   ClusterSpace(){};
-  ClusterSpace(std::vector<std::vector<std::string>> &, const OrbitList &, const double, const double);
+  ClusterSpace(std::vector<std::vector<std::string>> &, std::shared_ptr<OrbitList>, const double, const double);
 
   /// Returns the cluster vector corresponding to the input structure.
   std::vector<double> getClusterVector(const Structure &, const double) const;
@@ -48,7 +48,7 @@ public:
   std::pair<int, std::vector<int>> getMultiComponentVectorsByOrbit(const unsigned int);
 
   /// Returns the entire primitive orbit list.
-  const OrbitList &getPrimitiveOrbitList() const { return _primitiveOrbitList; }
+  const OrbitList &getPrimitiveOrbitList() const { return *_primitiveOrbitList; }
 
   /// Returns the multi-component (MC) vector permutations for each MC vector in the set of input vectors.
   std::vector<std::vector<std::vector<int>>> getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &, const int) const;
@@ -87,14 +87,14 @@ public:
   void removeOrbits(std::vector<size_t> &);
 
   /// Merge orbits.
-  void mergeOrbits(const int index1, const int index2) { _primitiveOrbitList.mergeOrbits(index1, index2); }
+  void mergeOrbits(const int index1, const int index2) { _primitiveOrbitList->mergeOrbits(index1, index2); }
 
 private:
   /// Primitive (prototype) structure.
   Structure _primitiveStructure;
 
   /// Primitive orbit list based on the structure and the cutoffs.
-  OrbitList _primitiveOrbitList;
+  std::shared_ptr<OrbitList> _primitiveOrbitList;
 
   /// Number of allowed components on each site of the primitive structure.
   std::vector<int> _numberOfAllowedSpeciesPerSite;
