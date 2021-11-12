@@ -8,6 +8,7 @@ import pickle
 import tarfile
 import tempfile
 from collections import OrderedDict
+from collections.abc import Iterable
 from math import log10, floor
 from typing import Dict, List, Union, Tuple
 
@@ -164,10 +165,12 @@ class ClusterSpace(_ClusterSpace):
 
         # setup chemical symbols as List[List[str]]
         if all(isinstance(i, str) for i in self._input_chemical_symbols):
-            chemical_symbols = [
-                self._input_chemical_symbols] * len(self._input_structure)
-        elif not all(isinstance(i, list) for i in self._input_chemical_symbols):
-            raise TypeError("chemical_symbols must be List[str] or List[List[str]], not {}".format(
+            chemical_symbols = [self._input_chemical_symbols] * len(self._input_structure)
+        # also accept tuples and other iterables but not, e.g., List[List, str]
+        # (need to check for str explicitly here because str is an Iterable)
+        elif not all(isinstance(i, Iterable) and not isinstance(i, str)
+                     for i in self._input_chemical_symbols):
+            raise TypeError('chemical_symbols must be List[str] or List[List[str]], not {}'.format(
                 type(self._input_chemical_symbols)))
         elif len(self._input_chemical_symbols) != len(self._input_structure):
             msg = 'chemical_symbols must have same length as structure. '
