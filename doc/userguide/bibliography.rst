@@ -83,6 +83,12 @@ Bibliography
    | Phys. Rev. B **57**, 4816 (1998)
    | `doi: 10.1103/PhysRevB.57.4816 <http://dx.doi.org/10.1103/PhysRevB.57.4816>`_
 
+.. [RahLofFra21]
+   | J. M. Rahm, J. Löfgren, E. Fransson, and P. Erhart
+   | *A tale of two phase diagrams: Interplay of ordering and hydrogen uptake in Pd–Au–H*
+   | Acta Materialia **211**, 116893 (2021)
+   | `doi: 10.1016/j.actamat.2021.116893 <https://doi.org/10.1016/j.actamat.2021.116893>`_
+
 .. [SadErh12]
    | B. Sadigh, and P. Erhart
    | *Calculation of excess free energies of precipitates via direct thermodynamic integration across phase boundaries*

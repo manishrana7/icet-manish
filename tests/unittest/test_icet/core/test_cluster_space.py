@@ -157,10 +157,12 @@ class TestClusterSpace(unittest.TestCase):
         structure = bulk('Ag', a=4.09).repeat(2)
         chemical_symbols1 = ['Ag', 'Pd']
         chemical_symbols2 = [['Ag', 'Pd']] * len(structure)
+        chemical_symbols3 = [('Ag', 'Pd')] * len(structure)
 
         # no problems
         ClusterSpace(structure, self.cutoffs, chemical_symbols1)
         ClusterSpace(structure, self.cutoffs, chemical_symbols2)
+        ClusterSpace(structure, self.cutoffs, chemical_symbols3)
 
         # bad type
         chemical_symbols_bad = chemical_symbols2 + ['Ag']
