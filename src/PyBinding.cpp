@@ -222,10 +222,9 @@ PYBIND11_MODULE(_icet, m)
             &Cluster::order,
             "int : order of the cluster (= number of sites)")
         .def_property_readonly(
-            "postiions",
+            "positions",
             &Cluster::getPositions,
-            "List[float] : positions of the sites in the cluster in Cartesian coordinates"
-        )
+            "List[float] : positions of the sites in the cluster in Cartesian coordinates")
         .def("__len__",
              &Cluster::order);
     ;
@@ -325,7 +324,8 @@ PYBIND11_MODULE(_icet, m)
             // Python side, even when setting return_value_policy to copy.
             // The below solution (which seems identical) fixes that for
             // unknown reasons.
-            [](const Orbit &orbit) { return orbit.getClusters(); },
+            [](const Orbit &orbit)
+            { return orbit.getClusters(); },
             "list of the clusters in this orbit")
         .def("get_multicomponent_vectors", &Orbit::getMultiComponentVectors,
              R"pbdoc(
@@ -435,7 +435,7 @@ PYBIND11_MODULE(_icet, m)
         .def(py::self += py::self);
 
     py::class_<OrbitList, std::shared_ptr<OrbitList>>(m, "_OrbitList",
-                          R"pbdoc(
+                                                      R"pbdoc(
         This class manages an orbit list. The orbit list is constructed for the given
         structure using the matrix of equivalent sites and a list of neighbor lists.
 

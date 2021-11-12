@@ -96,10 +96,6 @@ class TestOrbit(unittest.TestCase):
         for site_ret, site_tgt in zip(representative_cluster.lattice_sites, self.triplet_sites):
             self.assertEqual(site_ret, site_tgt)
 
-    def test_sites_of_representative_cluster(self):
-        """Tests getting the representative sites of orbit."""
-
-
     def test_order(self):
         """Tests getting the order of orbit."""
         self.assertEqual(

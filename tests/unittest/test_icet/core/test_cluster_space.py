@@ -376,22 +376,18 @@ index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | 
         # check calculation of positions for all the orbit indices for the Cluster Space
         for orbit_index in range(len(cs.orbit_list)):
             # check number of positions for each orbit index
-            self.assertEqual(len(cs.get_coordinates_of_representative_cluster(orbit_index)),
-                             orbit_index+1)
+            self.assertEqual(
+                len(cs.orbit_list.get_orbit(orbit_index).representative_cluster.positions),
+                orbit_index+1)
 
         # check positions of each atom for largest value of orbit_index
         positions_for_last_orbit_index = [[0., -2.045, -2.045], [-2.045,  0., -2.045],
                                           [-2.045, -2.045,  0.], [0., 0., 0.]]
 
         for i in range(len(positions_for_last_orbit_index)):
-            self.assertAlmostEqualList(cs.get_coordinates_of_representative_cluster(3)[i].tolist(),
-                                       positions_for_last_orbit_index[i])
-
-        # check raised exception if orbit_index outside of the list of possible values
-        with self.assertRaises(ValueError) as cm:
-            cs.get_coordinates_of_representative_cluster(4)
-        self.assertTrue('The input orbit index is not in the list of possible values.'
-                        in str(cm.exception))
+            self.assertAlmostEqualList(
+                cs.orbit_list.get_orbit(3).representative_cluster.positions[i].tolist(),
+                positions_for_last_orbit_index[i])
 
     def test_cutoffs(self):
         """Tests cutoffs property."""
@@ -598,10 +594,10 @@ class TestClusterSpaceTernary(unittest.TestCase):
         orbit_index : int
             The orbit which the mc vectors should be returned from.
         """
-        orbit = cluster_space.get_orbit(orbit_index)
+        orbit = cluster_space.orbit_list.get_orbit(orbit_index)
         local_Mi = cluster_space.get_number_of_allowed_species_by_site(
             cluster_space._get_primitive_structure(),
-            orbit.sites_of_representative_cluster)
+            orbit.representative_cluster.lattice_sites)
 
         mc_vectors = orbit.get_multicomponent_vectors(local_Mi)
         return mc_vectors

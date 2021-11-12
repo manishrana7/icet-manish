@@ -49,8 +49,8 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
             local_orbit_list = self.lolg.generate_local_orbit_list(index)
             for orbit_prim, orbit_super in zip(self.orbit_list.orbits,
                                                local_orbit_list.orbits):
-                for site_p, site_s in zip(orbit_prim.sites_of_representative_cluster,
-                                          orbit_super.sites_of_representative_cluster):
+                for site_p, site_s in zip(orbit_prim.representative_cluster.lattice_sites,
+                                          orbit_super.representative_cluster.lattice_sites):
                     site_p.unitcell_offset += offset
                     pos_super = self.supercell.get_position(site_s)
                     pos_prim = self.primitive.get_position(site_p)
@@ -76,8 +76,9 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
         for index in range(self.lolg.get_number_of_unique_offsets()):
             lol = self.lolg.generate_local_orbit_list(index)
             for orbit, orbit_ in zip(lol.orbits, fol.orbits):
-                for sites in orbit.equivalent_clusters:
-                    self.assertIn(sites, orbit_.equivalent_clusters)
+                for cluster in orbit.clusters:
+                    self.assertIn(cluster.lattice_sites,
+                                  [cluster.lattice_sites for cluster in orbit_.clusters])
 
     def test_unique_offset_count(self):
         """
@@ -155,8 +156,8 @@ class TestLocalOrbitListGeneratorHCP(unittest.TestCase):
             local_orbit_list = self.lolg.generate_local_orbit_list(index)
             for orbit_prim, orbit_super in zip(self.orbit_list.orbits,
                                                local_orbit_list.orbits):
-                for site_p, site_s in zip(orbit_prim.sites_of_representative_cluster,
-                                          orbit_super.sites_of_representative_cluster):
+                for site_p, site_s in zip(orbit_prim.representative_cluster.lattice_sites,
+                                          orbit_super.representative_cluster.lattice_sites):
                     site_p.unitcell_offset += offset
                     pos_super = self.supercell.get_position(site_s)
                     pos_prim = self.primitive.get_position(site_p)

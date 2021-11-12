@@ -495,12 +495,9 @@ class ClusterSpace(_ClusterSpace):
         orbit_index
         """
         orbit = self.orbit_list.orbits[orbit_index]
-
-        indices = [
-            lattice_site.index for lattice_site in orbit.sites_of_representative_cluster]
-
+        indices = [lattice_site.index
+                   for lattice_site in orbit.representative_cluster.lattice_sites]
         allowed_species = [self.chemical_symbols[index] for index in indices]
-
         return list(itertools.product(*allowed_species))
 
     def get_sublattices(self, structure: Atoms) -> Sublattices:
