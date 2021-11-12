@@ -27,7 +27,7 @@ def _is_sites_in_orbit(orbit: Orbit, sites: List[LatticeSite]) -> bool:
     clusters = orbit.clusters
 
     # Check if the set of lattice sites is found among the equivalent sites
-    if set(sites) in [set(es) for es.lattice_sites in clusters]:
+    if set(sites) in [set(cluster.lattice_sites) for cluster in clusters]:
         return True
 
     # Go through all clusters
@@ -41,7 +41,7 @@ def _is_sites_in_orbit(orbit: Orbit, sites: List[LatticeSite]) -> bool:
 
         # Loop over all possible ways of pairing sites from the two lists
         for comb_sites in [list(zip(sites, pos))
-                           for pos in permutations(orbit_sites)]:
+                           for pos in permutations(cluster.lattice_sites)]:
 
             # Skip all cases that include pairs of sites with different site
             # indices
