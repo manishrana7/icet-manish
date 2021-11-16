@@ -429,7 +429,7 @@ PYBIND11_MODULE(_icet, m)
         .def(py::self + Eigen::Vector3d())
         .def(py::self += py::self);
 
-    py::class_<OrbitList>(m, "_OrbitList",
+    py::class_<OrbitList, std::shared_ptr<OrbitList>>(m, "_OrbitList",
                           R"pbdoc(
         This class manages an orbit list. The orbit list is constructed for the given
         structure using the matrix of equivalent sites and a list of neighbor lists.
@@ -469,9 +469,6 @@ PYBIND11_MODULE(_icet, m)
              "Returns the orbit at position i in the orbit list.")
         .def("_remove_inactive_orbits",
              &OrbitList::removeInactiveOrbits)
-        .def("clear",
-             &OrbitList::clear,
-             "Clears the list of orbits.")
         .def("sort", &OrbitList::sort,
              R"pbdoc(
              Sorts the orbits by order and radius.
@@ -595,9 +592,9 @@ PYBIND11_MODULE(_icet, m)
 
     /// @todo Check which of the following members must actually be exposed.
     /// @todo Turn getters into properties if possible. (Some might require massaging in cluster_space.py.)
-    py::class_<ClusterSpace>(m, "ClusterSpace", py::dynamic_attr())
+    py::class_<ClusterSpace>(m, "ClusterSpace")
         .def(py::init<std::vector<std::vector<std::string>> &,
-                      const OrbitList,
+                      std::shared_ptr<OrbitList>,
                       const double,
                       const double>(),
              "Initializes an icet ClusterSpace instance.",
@@ -648,8 +645,6 @@ PYBIND11_MODULE(_icet, m)
             py::arg("index1"),
             py::arg("index2"))
 
-        .def("_get_orbit_list", &ClusterSpace::getPrimitiveOrbitList)
-        .def("get_orbit", &ClusterSpace::getOrbit)
         .def_property_readonly("species_maps", &ClusterSpace::getSpeciesMaps)
         .def("get_multicomponent_vectors_by_orbit", &ClusterSpace::getMultiComponentVectorsByOrbit)
         .def("get_chemical_symbols",
@@ -659,9 +654,6 @@ PYBIND11_MODULE(_icet, m)
         .def("_get_primitive_structure", &ClusterSpace::getPrimitiveStructure)
         .def("get_multicomponent_vector_permutations", &ClusterSpace::getMultiComponentVectorPermutations)
         .def("get_number_of_allowed_species_by_site", &ClusterSpace::getNumberOfAllowedSpeciesBySite)
-        .def("_compute_multicomponent_vectors",
-             &ClusterSpace::computeMultiComponentVectors,
-             "Compute the multi-component vectors (internal).")
         .def("_remove_orbits_cpp", &ClusterSpace::removeOrbits)
         .def("evaluate_cluster_function",
              &ClusterSpace::evaluateClusterFunction,

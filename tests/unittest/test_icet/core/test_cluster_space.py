@@ -194,7 +194,7 @@ class TestClusterSpace(unittest.TestCase):
     def test_len(self):
         """Tests length functionality."""
         number_orbits = self.cs.__len__()
-        self.assertEqual(number_orbits, len(self.cs._get_orbit_list()) + 1)
+        self.assertEqual(number_orbits, len(self.cs.orbit_list) + 1)
 
     def test_symprec(self):
         """Tests symprec property."""
@@ -600,7 +600,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
         orbit_index : int
             The orbit which the mc vectors should be returned from.
         """
-        orbit = cluster_space.get_orbit(orbit_index)
+        orbit = cluster_space.orbit_list.get_orbit(orbit_index)
         local_Mi = cluster_space.get_number_of_allowed_species_by_site(
             cluster_space._get_primitive_structure(),
             orbit.sites_of_representative_cluster)
