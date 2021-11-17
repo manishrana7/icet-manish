@@ -139,7 +139,7 @@ bool Orbit::contains(const std::vector<LatticeSite> cluster, bool sorted) const
    a factor 1/n, where n is the number of occurrences of this index. By default
    (i.e. siteIndexForDoubleCountingCorrection = -1) no such correction is applied.
 */
-std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structure,
+std::map<std::vector<int>, double> Orbit::countClusters(const std::shared_ptr<Structure> structure,
                                                         int siteIndexForDoubleCountingCorrection) const
 {
     std::map<std::vector<int>, double> tmpCounts;
@@ -154,7 +154,7 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
             const std::vector<LatticeSite> &sites = cluster.getLatticeSites();
             for (size_t i = 0; i < sites.size(); i++)
             {
-                elements[i] = structure.getAtomicNumbers().at(sites[i].index());
+                elements[i] = structure->getAtomicNumbers().at(sites[i].index());
             }
             // If the current atom (siteIndexForDoubleCountingCorrection) occurs more than once,
             // we risk double counting it if we calculate a local cluster vector. To avoid this,
@@ -186,7 +186,7 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
 @param flipIndex index of site that has been flipped
 @param newOccupation new atomic number of site that has been flipped
 */
-std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &structure,
+std::map<std::vector<int>, double> Orbit::countClusterChanges(const std::shared_ptr<Structure> structure,
                                                               const int flipIndex,
                                                               const int newOccupation) const
 {
@@ -205,7 +205,7 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
             for (size_t i = 0; i < sites.size(); i++)
             {
                 siteIndex = sites[i].index();
-                occupation = structure.getAtomicNumbers().at(siteIndex);
+                occupation = structure->getAtomicNumbers().at(siteIndex);
                 elementsOld[i] = occupation;
 
                 // If the present site is the one that was changed,
@@ -261,11 +261,10 @@ void Orbit::translate(const Vector3d &cellOffset)
     reasons of performance.
 @fractionalPositionTolerance 
 **/
-void Orbit::transformToSupercell(const Structure &supercell,
+void Orbit::transformToSupercell(std::shared_ptr<Structure> supercellPtr,
                                  std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
                                  const double fractionalPositionTolerance)
 {   
-    std::shared_ptr<Structure> supercellPtr = std::make_shared<Structure>(supercell);
     _representativeCluster.transformToSupercell(supercellPtr, primToSuperMap, fractionalPositionTolerance);
     for (auto &cluster : _clusters)
     {

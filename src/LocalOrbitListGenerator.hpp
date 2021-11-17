@@ -36,7 +36,7 @@ class LocalOrbitListGenerator
 public:
     /// Constructor.
     LocalOrbitListGenerator(){};
-    LocalOrbitListGenerator(const OrbitList &, const Structure &, const double);
+    LocalOrbitListGenerator(const OrbitList &, std::shared_ptr<Structure>, const double);
 
     /// Generates and returns the local orbit list with the input index.
     OrbitList getLocalOrbitList(const size_t);
@@ -61,7 +61,7 @@ private:
     OrbitList _orbitList;
 
     /// Supercell structure from which the local orbit list will be based upon.
-    Structure _supercell;
+    std::shared_ptr<Structure> _supercell;
 
     /// Maps a latticeNeighbor from the primitive and get the equivalent in supercell.
     std::unordered_map<LatticeSite, LatticeSite> _primToSupercellMap;

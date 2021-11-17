@@ -46,7 +46,7 @@ private:
     ClusterSpace _clusterSpace;
 
     /// The supercell the calculator is created for.
-    Structure _supercell;
+    std::shared_ptr<Structure> _supercell;
 
     /// The full primitive orbit list, contains all clusters for the primitive cell.
     OrbitList _fullPrimitiveOrbitList;

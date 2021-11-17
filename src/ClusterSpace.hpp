@@ -54,7 +54,7 @@ public:
   std::vector<std::vector<std::vector<int>>> getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &, const int) const;
 
   /// Returns the cluster vector given the orbit list and a structure.
-  const std::vector<double> getClusterVectorFromOrbitList(const OrbitList &, const Structure &, const double firstElement = 1.0, const int flipIndex = -1, const int newOccupation = -1) const;
+  const std::vector<double> getClusterVectorFromOrbitList(const OrbitList &, const std::shared_ptr<Structure>, const double firstElement = 1.0, const int flipIndex = -1, const int newOccupation = -1) const;
 
   /// Returns the cutoff for each order.
   std::vector<double> getCutoffs() const { return _clusterCutoffs; }

@@ -62,7 +62,8 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
                                                    const double fractionalPositionTolerance) const
 {
     // Construct orbit list for this structure.
-    LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(*_primitiveOrbitList, structure, fractionalPositionTolerance);
+    std::shared_ptr<Structure> supercell = std::make_shared<Structure>(structure);
+    LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(*_primitiveOrbitList, supercell, fractionalPositionTolerance);
     auto currentOrbitList = localOrbitListGenerator.getFullOrbitList();
 
     // Check that the number of unique offsets equals the number of unit cells in the supercell.
@@ -73,7 +74,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
         msg << localOrbitListGenerator.getNumberOfUniqueOffsets() << " != " << structure.size() / _primitiveStructure.size();
         throw std::runtime_error(msg.str());
     }
-    return getClusterVectorFromOrbitList(currentOrbitList, structure);
+    return getClusterVectorFromOrbitList(currentOrbitList, supercell);
 }
 
 /**
@@ -297,7 +298,7 @@ void ClusterSpace::removeOrbits(std::vector<size_t> &indices)
 @param newOccupation New atomic number on the site with index flipIndex. If this argument is not -1, a change in cluster vector will be calculated.
 */
 const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const OrbitList &orbitList,
-                                                                      const Structure &supercell,
+                                                                      const std::shared_ptr<Structure> supercell,
                                                                       const double firstElement,
                                                                       const int flipIndex,
                                                                       const int newOccupation) const
@@ -389,7 +390,7 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
             // local cluster vectors or changes in cluster vectors, we have only counted
             // a subset of the clusters. We thus need to compute the multiplicity by
             // analyzing the orbit in detail.
-            clusterVector[cvInfo.clusterVectorIndex] = clusterVectorElement / cvInfo.multiplicity / (double)supercell.size();
+            clusterVector[cvInfo.clusterVectorIndex] = clusterVectorElement / cvInfo.multiplicity / (double)supercell->size();
         }
     }
     return clusterVector;

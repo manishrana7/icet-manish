@@ -57,13 +57,13 @@ public:
     bool contains(const std::vector<LatticeSite>, bool) const;
 
     /// Counts occupations of clusters in this orbit
-    std::map<std::vector<int>, double> countClusters(const Structure &, int doNotDoubleCountThisSiteIndex = -1) const;
+    std::map<std::vector<int>, double> countClusters(std::shared_ptr<Structure>, int doNotDoubleCountThisSiteIndex = -1) const;
 
     /// Counts changes in the occupation of clusters in this orbit
-    std::map<std::vector<int>, double> countClusterChanges(const Structure &, const int, const int) const;
+    std::map<std::vector<int>, double> countClusterChanges(std::shared_ptr<Structure>, const int, const int) const;
 
     /// Returns a copy of this orbit in the given (supercell) structure.
-    void transformToSupercell(const Structure &,
+    void transformToSupercell(std::shared_ptr<Structure>,
                               std::unordered_map<LatticeSite, LatticeSite> &,
                               const double);
 

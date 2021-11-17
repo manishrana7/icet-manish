@@ -40,7 +40,7 @@ public:
     const Orbit &getOrbit(unsigned int) const;
 
     /// Returns the local orbit list for a site.
-    OrbitList getLocalOrbitList(const Structure &,
+    OrbitList getLocalOrbitList(std::shared_ptr<Structure>,
                                 const Vector3d &,
                                 std::unordered_map<LatticeSite, LatticeSite> &,
                                 const double) const;

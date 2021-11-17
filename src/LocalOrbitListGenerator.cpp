@@ -6,7 +6,7 @@
 @param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
 */
 LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &orbitList,
-                                                 const Structure &supercell,
+                                                 std::shared_ptr<Structure> supercell,
                                                  const double fractionalPositionTolerance)
     : _orbitList(orbitList),
       _supercell(supercell),
@@ -53,9 +53,9 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
     std::set<Vector3d, Vector3dCompare> uniqueCellOffsets;
 
     // Map all sites
-    for (size_t i = 0; i < _supercell.size(); i++)
+    for (size_t i = 0; i < _supercell->size(); i++)
     {
-        Vector3d position_i = _supercell.getPositions().row(i);
+        Vector3d position_i = _supercell->getPositions().row(i);
 
         LatticeSite primitive_site = _orbitList.getPrimitiveStructure().findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
 
@@ -76,11 +76,11 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
 
     _uniquePrimcellOffsets.assign(uniqueCellOffsets.begin(), uniqueCellOffsets.end());
 
-    if (_uniquePrimcellOffsets.size() != _supercell.size() / _orbitList.getPrimitiveStructure().size())
+    if (_uniquePrimcellOffsets.size() != _supercell->size() / _orbitList.getPrimitiveStructure().size())
     {
         std::ostringstream msg;
         msg << "Wrong number of unitcell offsets found (LocalOrbitListGenerator::mapSitesAndFindCellOffsets)." << std::endl;
-        msg << "Expected: " << _supercell.size() / _orbitList.getPrimitiveStructure().size() << std::endl;
+        msg << "Expected: " << _supercell->size() / _orbitList.getPrimitiveStructure().size() << std::endl;
         msg << "Found:    " << _uniquePrimcellOffsets.size();
         throw std::runtime_error(msg.str());
     }

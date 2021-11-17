@@ -342,7 +342,7 @@ PYBIND11_MODULE(_icet, m)
         .def(
             "count_clusters",
             [](const Orbit &orbit,
-               const Structure &structure,
+               std::shared_ptr<Structure> structure,
                const int siteIndexForDoubleCountingCorrection)
             {
                 py::dict clusterCountDict;
@@ -564,7 +564,7 @@ PYBIND11_MODULE(_icet, m)
             tolerance for positions in fractional coordinates
         )pbdoc")
         .def(py::init<const OrbitList &,
-                      const Structure &,
+                      std::shared_ptr<Structure>,
                       const double>(),
              "Constructs a LocalOrbitListGenerator object from an orbit list and a structure.",
              py::arg("orbit_list"),

@@ -599,7 +599,7 @@ std::vector<LatticeSite> OrbitList::getReferenceLatticeSites(bool sort) const
 @param primToSuperMap map from primitive to supercell
 @param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
 **/
-OrbitList OrbitList::getLocalOrbitList(const Structure &supercell,
+OrbitList OrbitList::getLocalOrbitList(std::shared_ptr<Structure> supercell,
                                        const Vector3d &cellOffset,
                                        std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
                                        const double fractionalPositionTolerance) const

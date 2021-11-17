@@ -6,8 +6,8 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
                                                        const double fractionalPositionTolerance)
 {
     _clusterSpace = clusterSpace;
-    _supercell = structure;
-    std::shared_ptr<Structure> structurePtr = std::make_shared<Structure>(_clusterSpace.getPrimitiveStructure());
+    _supercell = std::make_shared<Structure>(structure);
+    std::shared_ptr<Structure> primitiveStructure = std::make_shared<Structure>(_clusterSpace.getPrimitiveStructure());
 
     LocalOrbitListGenerator LOLG = LocalOrbitListGenerator(clusterSpace.getPrimitiveOrbitList(), _supercell, fractionalPositionTolerance);
     size_t uniqueOffsets = LOLG.getNumberOfUniqueOffsets();
@@ -53,7 +53,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
                 std::vector<LatticeSite> primitiveEquivalentSites;
                 for (const auto site : cluster.getLatticeSites())
                 {
-                    Vector3d sitePosition = _supercell.getPosition(site);
+                    Vector3d sitePosition = _supercell->getPosition(site);
                     auto primitiveSite = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(sitePosition, fractionalPositionTolerance);
                     primitiveEquivalentSites.push_back(primitiveSite);
                 }
@@ -67,7 +67,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
                         // false or true here does not seem to matter
                         if (!orbitVector[orbitIndex].contains(translatedCluster, true))
                         {
-                            orbitVector[orbitIndex].addCluster(Cluster(translatedCluster, structurePtr));
+                            orbitVector[orbitIndex].addCluster(Cluster(translatedCluster, primitiveStructure));
                         }
                     }
                 }
@@ -97,7 +97,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
         if (_localOrbitlists.find(offsetVector) == _localOrbitlists.end())
         {
-            _localOrbitlists[offsetVector] = _fullPrimitiveOrbitList.getLocalOrbitList(structure, offsetVector, _primToSupercellMap, fractionalPositionTolerance);
+            _localOrbitlists[offsetVector] = _fullPrimitiveOrbitList.getLocalOrbitList(_supercell, offsetVector, _primToSupercellMap, fractionalPositionTolerance);
         }
     }
 }
@@ -112,13 +112,13 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
                                                                        int flipIndex,
                                                                        int newOccupation)
 {
-    if (occupationsBefore.size() != _supercell.size())
+    if (occupationsBefore.size() != _supercell->size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getClusterVectorChange)");
     }
-    _supercell.setAtomicNumbers(occupationsBefore);
+    _supercell->setAtomicNumbers(occupationsBefore);
 
-    if (flipIndex >= _supercell.size())
+    if (flipIndex >= _supercell->size())
     {
         throw std::runtime_error("flipIndex larger than the length of the structure (ClusterExpansionCalculator::getClusterVectorChange)");
     }
@@ -137,14 +137,14 @@ std::vector<double> ClusterExpansionCalculator::getClusterVectorChange(const py:
 std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::array_t<int> &occupations, int index)
 {
 
-    if (occupations.size() != _supercell.size())
+    if (occupations.size() != _supercell->size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getLocalClusterVector)");
     }
-    _supercell.setAtomicNumbers(occupations);
+    _supercell->setAtomicNumbers(occupations);
 
     // The first element can be thought of as shared between all sites when constructing a local orbit list
-    double firstElement = 1.0 / _supercell.size();
+    double firstElement = 1.0 / _supercell->size();
 
     return _clusterSpace.getClusterVectorFromOrbitList(_localOrbitlists[_indexToOffset[index]], _supercell, firstElement, index);
 }
@@ -155,11 +155,11 @@ std::vector<double> ClusterExpansionCalculator::getLocalClusterVector(const py::
 */
 std::vector<double> ClusterExpansionCalculator::getClusterVector(const py::array_t<int> &occupations)
 {
-    if (occupations.size() != _supercell.size())
+    if (occupations.size() != _supercell->size())
     {
         throw std::runtime_error("Input occupations and internal supercell structure mismatch in size (ClusterExpansionCalculator::getClusterVector)");
     }
-    _supercell.setAtomicNumbers(occupations);
+    _supercell->setAtomicNumbers(occupations);
 
     return _clusterSpace.getClusterVectorFromOrbitList(_fullOrbitList, _supercell);
 }
