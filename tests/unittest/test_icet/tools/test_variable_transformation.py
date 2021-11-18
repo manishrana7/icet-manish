@@ -29,9 +29,9 @@ from icet import ClusterExpansion, ClusterSpace
 from icet.tools.variable_transformation import _is_sites_in_orbit
 
 
-def find_orbit_and_equivalent_site_with_indices(orbit_list, site_indices):
+def find_orbit_and_cluster_with_indices(orbit_list, site_indices):
     """
-    Go through the orbit list and find the equivalent with the specified list
+    Go through the orbit list and find the cluster with the specified list
     of site indices
     ----------
     orbit_list
@@ -47,11 +47,11 @@ def find_orbit_and_equivalent_site_with_indices(orbit_list, site_indices):
         if len(site_indices) != orbit.order:
             continue
 
-        for sites in orbit.equivalent:
+        for cluster in orbit.clusters:
 
-            # Check if the list of site indices matches those for the equivalent site
-            if all(sites[j].index == site_indices[j] for j in range(len(site_indices))):
-                return orbit, sites
+            # Check if the list of site indices matches those for the cluster
+            if all(cluster[j].index == site_indices[j] for j in range(len(site_indices))):
+                return orbit, cluster
 
         return None, None
 
@@ -146,27 +146,27 @@ class TestVariableTransformationTriplets(unittest.TestCase):
 
         # Check that a pair for which all sites have the different indices and but the same offset
         # gives true
-        orbit, sites = find_orbit_and_equivalent_site_with_indices(self.cs.orbit_list, [2, 3])
-        for i in range(len(sites)):
-            sites[i].unitcell_offset += np.array([-2., -2., -2.])
-        self.assertTrue(_is_sites_in_orbit(orbit, sites))
+        orbit, cluster = find_orbit_and_cluster_with_indices(self.cs.orbit_list, [2, 3])
+        for i in range(len(cluster)):
+            cluster[i].unitcell_offset += np.array([-2., -2., -2.])
+        self.assertTrue(_is_sites_in_orbit(orbit, cluster))
 
         # Check that a pair for which all sites have the different indices and one has been offset
         # still gives true
-        orbit, sites = find_orbit_and_equivalent_site_with_indices(self.cs.orbit_list, [2, 3])
-        sites[0].unitcell_offset += np.array([-2., -2., -2.])
-        self.assertFalse(_is_sites_in_orbit(orbit, sites))
+        orbit, cluster = find_orbit_and_cluster_with_indices(self.cs.orbit_list, [2, 3])
+        cluster[0].unitcell_offset += np.array([-2., -2., -2.])
+        self.assertFalse(_is_sites_in_orbit(orbit, cluster))
 
         # Check that a triplet for which all sites have the same offset gives true
-        orbit, sites = find_orbit_and_equivalent_site_with_indices(self.cs.orbit_list, [0, 0, 0])
-        for i in range(len(sites)):
-            sites[i].unitcell_offset += np.array([-2., -2., -2.])
-        self.assertTrue(_is_sites_in_orbit(orbit, sites))
+        orbit, cluster = find_orbit_and_cluster_with_indices(self.cs.orbit_list, [0, 0, 0])
+        for i in range(len(cluster)):
+            cluster[i].unitcell_offset += np.array([-2., -2., -2.])
+        self.assertTrue(_is_sites_in_orbit(orbit, cluster))
 
         # Check that a triplet in which one site has a different offset gives false
-        orbit, sites = find_orbit_and_equivalent_site_with_indices(self.cs.orbit_list, [0, 0, 0])
-        sites[0].unitcell_offset += np.array([-2., -2., -2.])
-        self.assertFalse(_is_sites_in_orbit(orbit, sites))
+        orbit, cluster = find_orbit_and_cluster_with_indices(self.cs.orbit_list, [0, 0, 0])
+        cluster[0].unitcell_offset += np.array([-2., -2., -2.])
+        self.assertFalse(_is_sites_in_orbit(orbit, cluster))
 
 
 if __name__ == '__main__':
