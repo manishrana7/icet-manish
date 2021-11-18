@@ -157,10 +157,12 @@ class TestClusterSpace(unittest.TestCase):
         structure = bulk('Ag', a=4.09).repeat(2)
         chemical_symbols1 = ['Ag', 'Pd']
         chemical_symbols2 = [['Ag', 'Pd']] * len(structure)
+        chemical_symbols3 = [('Ag', 'Pd')] * len(structure)
 
         # no problems
         ClusterSpace(structure, self.cutoffs, chemical_symbols1)
         ClusterSpace(structure, self.cutoffs, chemical_symbols2)
+        ClusterSpace(structure, self.cutoffs, chemical_symbols3)
 
         # bad type
         chemical_symbols_bad = chemical_symbols2 + ['Ag']
@@ -192,7 +194,7 @@ class TestClusterSpace(unittest.TestCase):
     def test_len(self):
         """Tests length functionality."""
         number_orbits = self.cs.__len__()
-        self.assertEqual(number_orbits, len(self.cs._get_orbit_list()) + 1)
+        self.assertEqual(number_orbits, len(self.cs.orbit_list) + 1)
 
     def test_symprec(self):
         """Tests symprec property."""

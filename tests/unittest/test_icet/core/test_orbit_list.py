@@ -112,12 +112,6 @@ class TestOrbitList(unittest.TestCase):
         with self.assertRaises(IndexError):
             self.orbit_list.get_orbit(3)
 
-    def test_clear(self):
-        """Tests orbit list is empty after calling this function."""
-        self.orbit_list.clear()
-        with self.assertRaises(IndexError):
-            self.orbit_list.get_orbit(0)
-
     def test_sort(self):
         """Tests orbits in orbit list are sorted."""
         self.orbit_list.sort(self.position_tolerance)

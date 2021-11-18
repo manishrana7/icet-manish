@@ -169,7 +169,9 @@ pages:
     - echo "tag= $tag"
     - git checkout $tag
     # We need to re-install because C++ objects are imported when building the documentation 
-    - pip3 install --upgrade --force-reinstall --target=$INSTDIR .
+    - rm -r $INSTDIR
+    - mkdir $INSTDIR
+    - pip3 install --target=$INSTDIR .
     - cd doc/apidoc/
     - doxygen Doxyfile
     - cd ../..

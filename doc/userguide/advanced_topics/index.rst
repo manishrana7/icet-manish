@@ -22,6 +22,7 @@ command line::
    mapping_structures
    wang_landau_simulations
    parallel_monte_carlo
+   hybrid_ensembles
    sqs_generation
    customizing_cluster_spaces
    constituent_strain

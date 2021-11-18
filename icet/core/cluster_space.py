@@ -8,6 +8,7 @@ import pickle
 import tarfile
 import tempfile
 from collections import OrderedDict
+from collections.abc import Iterable
 from math import log10, floor
 from typing import Dict, List, Union, Tuple
 
@@ -163,10 +164,12 @@ class ClusterSpace(_ClusterSpace):
 
         # setup chemical symbols as List[List[str]]
         if all(isinstance(i, str) for i in self._input_chemical_symbols):
-            chemical_symbols = [
-                self._input_chemical_symbols] * len(self._input_structure)
-        elif not all(isinstance(i, list) for i in self._input_chemical_symbols):
-            raise TypeError("chemical_symbols must be List[str] or List[List[str]], not {}".format(
+            chemical_symbols = [self._input_chemical_symbols] * len(self._input_structure)
+        # also accept tuples and other iterables but not, e.g., List[List, str]
+        # (need to check for str explicitly here because str is an Iterable)
+        elif not all(isinstance(i, Iterable) and not isinstance(i, str)
+                     for i in self._input_chemical_symbols):
+            raise TypeError('chemical_symbols must be List[str] or List[List[str]], not {}'.format(
                 type(self._input_chemical_symbols)))
         elif len(self._input_chemical_symbols) != len(self._input_structure):
             msg = 'chemical_symbols must have same length as structure. '
@@ -352,7 +355,7 @@ class ClusterSpace(_ClusterSpace):
             multicomponent_vectors_by_orbit = self.get_multicomponent_vectors_by_orbit(index)
             orbit_index = multicomponent_vectors_by_orbit[0]
             mc_vector = multicomponent_vectors_by_orbit[1]
-            orbit = self._orbit_list.get_orbit(orbit_index)
+            orbit = self.orbit_list.get_orbit(orbit_index)
             repr_sites = orbit.representative_cluster.lattice_sites
             orbit_sublattices = '-'.join(
                 [sublattices[sublattices.get_sublattice_index(ls.index)].symbol
@@ -590,7 +593,7 @@ class ClusterSpace(_ClusterSpace):
         self._pruning_history.append(('merge', equivalent_orbits))
         orbits_to_delete = []
         for k1, orbit_indices in equivalent_orbits.items():
-            order1 = self._orbit_list.get_orbit(k1).order
+            order1 = self.orbit_list.get_orbit(k1).order
 
             for k2 in orbit_indices:
 
@@ -600,7 +603,7 @@ class ClusterSpace(_ClusterSpace):
                 if k2 in orbits_to_delete:
                     raise ValueError(f'Orbit {k2} cannot be merged into orbit {k1}'
                                      ' since it was already merged with another orbit.')
-                order2 = self._orbit_list.get_orbit(k2).order
+                order2 = self.orbit_list.get_orbit(k2).order
                 if order1 != order2:
                     raise ValueError(f'The order of orbit {k1} ({order1}) does not'
                                      f' match the order of orbit {k2} ({order2}).')

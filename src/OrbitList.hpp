@@ -51,9 +51,6 @@ public:
                                                const std::vector<int> &,
                                                bool) const;
 
-    /// Clears the orbit list.
-    void clear() { _orbits.clear(); }
-
     /// Returns the number of orbits.
     size_t size() const { return _orbits.size(); }
 
