@@ -138,31 +138,6 @@ PYBIND11_MODULE(_icet, m)
              vector
                  position in Cartesian coordinates
              )pbdoc")
-        .def("get_distance",
-             &Structure::getDistance,
-             py::arg("index1"),
-             py::arg("index2"),
-             py::arg("offset1") = Vector3d(0, 0, 0),
-             py::arg("offset2") = Vector3d(0, 0, 0),
-             R"pbdoc(
-             Returns the distance between two sites
-
-             Parameters
-             ----------
-             index1 : int
-                 index of the first site
-             index2 : int
-                 index of the second site
-             offset1 : vector
-                 offset to be applied to the first site
-             offset2 : vector
-                 offset to be applied to the second site
-
-             Returns
-             -------
-             float
-                 distance in length units
-             )pbdoc")
         .def("find_lattice_site_by_position",
              &Structure::findLatticeSiteByPosition,
              R"pbdoc(
