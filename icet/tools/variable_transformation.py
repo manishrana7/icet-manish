@@ -4,44 +4,42 @@ from typing import List
 import numpy as np
 from ase import Atoms
 from ..core.orbit import Orbit
+from ..core.cluster import Cluster
 from ..core.orbit_list import OrbitList
 from ..core.lattice_site import LatticeSite
 
 
-def _is_sites_in_orbit(orbit: Orbit, sites: List[LatticeSite]) -> bool:
-    """Checks if the list of lattice sites is found among the equivalent
-    sites for the orbit.
+def _is_cluster_in_orbit(orbit: Orbit, cluster: Cluster) -> bool:
+    """Checks if the cluster is found among the clusters in the orbit.
 
     Parameters
     ----------
     orbit
         orbit
-    sites
-        list of lattice sites
+    cluster
+        cluster to be searched for
     """
 
     # Ensure that the number of sites matches the order of the orbit
-    if len(sites) != orbit.order:
+    if len(cluster) != orbit.order:
         return False
 
-    clusters = orbit.clusters
-
     # Check if the set of lattice sites is found among the equivalent sites
-    if set(sites) in [set(cluster.lattice_sites) for cluster in clusters]:
+    if set(cluster.lattice_sites) in [set(cl.lattice_sites) for cl in orbit.clusters]:
         return True
 
     # Go through all clusters
-    sites_indices = [s.index for s in sites]
-    for cluster in clusters:
-        orbit_sites_indices = [s.index for s in cluster.lattice_sites]
+    sites_indices = [lattice_site.index for lattice_site in cluster.lattice_sites]
+    for cl in orbit.clusters:
+        orbit_sites_indices = [s.index for s in cl.lattice_sites]
 
         # Skip if the site indices do not match
         if set(sites_indices) != set(orbit_sites_indices):
             continue
 
         # Loop over all possible ways of pairing sites from the two lists
-        for comb_sites in [list(zip(sites, pos))
-                           for pos in permutations(cluster.lattice_sites)]:
+        for comb_sites in [list(zip(cluster.lattice_sites, pos))
+                           for pos in permutations(cl.lattice_sites)]:
 
             # Skip all cases that include pairs of sites with different site
             # indices
@@ -101,7 +99,7 @@ def get_transformation_matrix(structure: Atoms,
                         sub_orbit = full_orbit_list.get_orbit(sub_index)
                         if sub_orbit.order != sub_order:
                             continue
-                        if _is_sites_in_orbit(sub_orbit, sub_sites):
+                        if _is_cluster_in_orbit(sub_orbit, sub_sites):
                             transformation[j, i] += (-2.0) ** (sub_order)
                             n_terms_actual += 1
             # check that the number of contributions matches the number
