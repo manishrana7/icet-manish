@@ -29,7 +29,7 @@ from icet import ClusterExpansion, ClusterSpace
 from icet.core.structure import Structure
 from icet.core.cluster import Cluster
 from icet.core.lattice_site import LatticeSite
-from icet.tools.variable_transformation import _is_cluster_in_orbit
+from icet.tools.variable_transformation import _is_sites_in_orbit
 
 
 def find_orbit_and_cluster_with_indices(orbit_list, site_indices):
@@ -145,14 +145,14 @@ class TestVariableTransformationTriplets(unittest.TestCase):
         """Silences unittest from printing the docstrings in test cases."""
         return None
 
-    def test_is_cluster_in_orbit(self):
-        """Tests _is_cluster_in_orbit functionality """
+    def test_is_sites_in_orbit(self):
+        """Tests _is_sites_in_orbit functionality """
 
         # Check that a pair for which all sites have the different indices and but the same offset
         # gives true
         orbit, cluster = find_orbit_and_cluster_with_indices(self.cs.orbit_list, [2, 3])
         orbit.translate([2, 2, 2])
-        self.assertTrue(_is_cluster_in_orbit(orbit, cluster))
+        self.assertTrue(_is_sites_in_orbit(orbit, cluster.lattice_sites))
 
         # Check that a pair for which all sites have the different indices and one has been offset
         # gives false
@@ -160,21 +160,19 @@ class TestVariableTransformationTriplets(unittest.TestCase):
         lattice_sites = cluster.lattice_sites
         lattice_sites[0] = LatticeSite(lattice_sites[0].index,
                                        lattice_sites[0].unitcell_offset + np.array([-2, -2, -2]))
-        cluster = Cluster(lattice_sites, Structure.from_atoms(self.structure_prim))
-        self.assertFalse(_is_cluster_in_orbit(orbit, cluster))
+        self.assertFalse(_is_sites_in_orbit(orbit, lattice_sites))
 
         # Check that a triplet for which all sites have the same offset gives true
         orbit, cluster = find_orbit_and_cluster_with_indices(self.cs.orbit_list, [0, 0, 0])
         orbit.translate([2, 2, 2])
-        self.assertTrue(_is_cluster_in_orbit(orbit, cluster))
+        self.assertTrue(_is_sites_in_orbit(orbit, cluster.lattice_sites))
 
         # Check that a triplet in which one site has a different offset gives false
         orbit, cluster = find_orbit_and_cluster_with_indices(self.cs.orbit_list, [0, 0, 0])
         lattice_sites = cluster.lattice_sites
         lattice_sites[0] = LatticeSite(lattice_sites[0].index,
                                        lattice_sites[0].unitcell_offset + np.array([-2, -2, -2]))
-        cluster = Cluster(lattice_sites, Structure.from_atoms(self.structure_prim))
-        self.assertFalse(_is_cluster_in_orbit(orbit, cluster))
+        self.assertFalse(_is_sites_in_orbit(orbit, lattice_sites))
 
 
 if __name__ == '__main__':
