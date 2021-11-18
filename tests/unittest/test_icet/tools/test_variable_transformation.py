@@ -26,8 +26,6 @@ from io import StringIO
 import numpy as np
 from ase.build import fcc111
 from icet import ClusterExpansion, ClusterSpace
-from icet.core.structure import Structure
-from icet.core.cluster import Cluster
 from icet.core.lattice_site import LatticeSite
 from icet.tools.variable_transformation import _is_sites_in_orbit
 
