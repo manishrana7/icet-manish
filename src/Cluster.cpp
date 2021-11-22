@@ -67,10 +67,15 @@ void Cluster::transformToSupercell(std::shared_ptr<const Structure> supercell,
 */
 double Cluster::radius() const
 {
+    // The radius is always zero for singlets
+    if (order() <= 1)
+    {
+        return 0.0;
+    }
     // Compute the center of the cluster.
     Vector3d centerPosition = {0.0, 0.0, 0.0};
     for (const auto &site : _latticeSites)
-    {   
+    {
         centerPosition += _structure->getPosition(site);
     }
     centerPosition /= _latticeSites.size();
@@ -81,16 +86,18 @@ double Cluster::radius() const
     {
         avgDistanceToCenter += (centerPosition - _structure->getPosition(site)).norm();
     }
-    avgDistanceToCenter /= _latticeSites.size();
+    avgDistanceToCenter /= order();
     return avgDistanceToCenter;
 }
 
 /**
 @brief Returns the positions of the sites in this cluster in Cartesian coordinates.
 **/
-std::vector<Vector3d> Cluster::getPositions() const {
+std::vector<Vector3d> Cluster::getPositions() const
+{
     std::vector<Vector3d> positions;
-    for (const LatticeSite &site : _latticeSites) {
+    for (const LatticeSite &site : _latticeSites)
+    {
         positions.push_back(_structure->getPosition(site));
     }
     return positions;
