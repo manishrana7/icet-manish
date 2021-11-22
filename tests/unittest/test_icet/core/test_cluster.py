@@ -1,4 +1,5 @@
 import pytest
+from io import StringIO
 
 from icet.core.cluster import Cluster
 from icet.core.structure import Structure
@@ -6,6 +7,24 @@ from icet.core.lattice_site import LatticeSite
 
 from ase.build import bulk
 import numpy as np
+
+
+def strip_surrounding_spaces(input_string: str) -> str:
+    """
+    Helper function that removes both leading and trailing spaces from a
+    multi-line string.
+
+    Returns
+    -------
+    str
+        original string minus surrounding spaces and empty lines
+    """
+    s = []
+    for line in StringIO(input_string):
+        if len(line.strip()) == 0:
+            continue
+        s += [line.strip()]
+    return '\n'.join(s)
 
 
 @pytest.fixture
@@ -78,3 +97,39 @@ def test_get_distances(lattice_sites, target_distances, structure):
     """Test get_distances function."""
     cluster = Cluster(lattice_sites, structure)
     assert np.allclose(cluster.get_distances(), target_distances)
+
+
+expected_singlet_string = """
+===================================== Cluster ======================================
+ order        : 1
+ radius       : 0.00000
+ distances    : 
+------------------------------------------------------------------------------------
+unitcell_index |         unitcell_offset          |             position            
+------------------------------------------------------------------------------------
+       0       |    1.00000    0.00000    0.00000 |   12.00000    0.00000    0.00000
+====================================================================================
+"""
+
+expected_triplet_string = """
+===================================== Cluster ======================================
+ order        : 3
+ radius       : 8.00000
+ distances    : 16.00000 4.00000 20.00000
+------------------------------------------------------------------------------------
+unitcell_index |         unitcell_offset          |             position            
+------------------------------------------------------------------------------------
+       0       |    0.00000    0.00000    0.00000 |    0.00000    0.00000    0.00000
+       1       |    1.00000    0.00000    0.00000 |   16.00000    0.00000    0.00000
+       2       |   -1.00000    0.00000    0.00000 |   -4.00000    0.00000    0.00000
+====================================================================================
+"""
+
+
+@pytest.mark.parametrize('lattice_sites, target_str', [
+    ('singlet', expected_singlet_string),
+    ('triplet', expected_triplet_string)],
+    indirect=['lattice_sites'])
+def test_string_representation(lattice_sites, target_str, structure):
+    cluster = Cluster(lattice_sites, structure)
+    assert strip_surrounding_spaces(cluster.__str__()) == strip_surrounding_spaces(target_str)
