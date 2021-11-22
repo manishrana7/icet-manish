@@ -48,17 +48,8 @@ private:
     /// The supercell the calculator is created for.
     std::shared_ptr<Structure> _supercell;
 
-    /// The full primitive orbit list, contains all clusters for the primitive cell.
-    OrbitList _fullPrimitiveOrbitList;
-
-    /// Maps a lattice site from the primitive and get the equivalent in the supercell.
-    std::unordered_map<LatticeSite, LatticeSite> _primToSupercellMap;
-
     /// Maps supercell index to its corresponding primitive cell offset.
     std::map<int, Vector3d> _indexToOffset;
-
-    /// Placeholder for translated orbitlist
-    OrbitList _translatedOrbitList;
 
     /// The full orbit list used when calculating full cluster vector
     OrbitList _fullOrbitList;

@@ -88,16 +88,6 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
         self.assertEqual(self.lolg.get_number_of_unique_offsets(),
                          len(self.supercell))
 
-    def test_get_primitive_to_supercell_map(self):
-        """Tests primitive to supercell mapping."""
-        for index in range(self.lolg.get_number_of_unique_offsets()):
-            self.lolg.generate_local_orbit_list(index)
-            mapping = self.lolg._get_primitive_to_supercell_map()
-            for sites_prim, sites_super in mapping.items():
-                pos_super = self.supercell.get_position(sites_super)
-                pos_prim = self.primitive.get_position(sites_prim)
-                self.assertTrue(np.all(np.isclose(pos_super, pos_prim)))
-
     def test_unique_primcell_offsets(self):
         """
         Tests primitive offsets are unique and take to positions that
@@ -170,16 +160,6 @@ class TestLocalOrbitListGeneratorHCP(unittest.TestCase):
         """
         self.assertEqual(self.lolg.get_number_of_unique_offsets(),
                          len(self.supercell) / 2)
-
-    def test_get_primitive_to_supercell_map(self):
-        """Tests primitive to supercell mapping."""
-        for index in range(self.lolg.get_number_of_unique_offsets()):
-            self.lolg.generate_local_orbit_list(index)
-            mapping = self.lolg._get_primitive_to_supercell_map()
-            for sites_prim, sites_super in mapping.items():
-                pos_super = self.supercell.get_position(sites_super)
-                pos_prim = self.primitive.get_position(sites_prim)
-                self.assertTrue(np.all(np.isclose(pos_super, pos_prim)))
 
     def test_unique_primcell_offsets(self):
         """

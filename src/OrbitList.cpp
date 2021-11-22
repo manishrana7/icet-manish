@@ -13,6 +13,7 @@ OrbitList::OrbitList(const Structure &structure,
                      const double positionTolerance)
 {
     _primitiveStructure = structure;
+    _primitiveStructurePtr = std::make_shared<Structure>(structure);
     _matrixOfEquivalentSites = matrixOfEquivalentSites;
     _referenceLatticeSites = getReferenceLatticeSites(false);
 
@@ -399,12 +400,11 @@ std::vector<std::vector<LatticeSite>> OrbitList::getSitesTranslatedToUnitcell(co
 
     std::vector<std::vector<LatticeSite>> listOfTranslatedLatticeSites;
     listOfTranslatedLatticeSites.push_back(latticeSites);
-    Vector3d zeroVector = {0.0, 0.0, 0.0};
     for (size_t i = 0; i < latticeSites.size(); i++)
     {
-        if ((latticeSites[i].unitcellOffset() - zeroVector).norm() > 0.5) // only translate sites outside the primitive unitcell
+        if (latticeSites[i].unitcellOffset().norm() > 0.5) // only translate sites outside the primitive unitcell
         {
-            auto translatedSites = translateSites(latticeSites, i);
+            auto translatedSites = getTranslatedSites(latticeSites, i);
             if (sort)
             {
                 std::sort(translatedSites.begin(), translatedSites.end());
@@ -421,11 +421,11 @@ std::vector<std::vector<LatticeSite>> OrbitList::getSitesTranslatedToUnitcell(co
 
 /**
 @details Takes all lattice sites in vector latticeSites and subtracts the unitcell offset of site latticeSites[index].
-@param latticeSites list of lattice sites, typically a cluster
-@param index index of site relative to which to shift
+@param latticeSites List of lattice sites, typically a cluster
+@param index Index of site relative to which to shift
 */
-std::vector<LatticeSite> OrbitList::translateSites(const std::vector<LatticeSite> &latticeSites,
-                                                   const unsigned int index) const
+std::vector<LatticeSite> OrbitList::getTranslatedSites(const std::vector<LatticeSite> &latticeSites,
+                                                       const unsigned int index) const
 {
     Vector3d offset = latticeSites[index].unitcellOffset();
     auto translatedSites = latticeSites;
@@ -594,24 +594,58 @@ std::vector<LatticeSite> OrbitList::getReferenceLatticeSites(bool sort) const
 
 /**
 @details Returns a "local" orbitList by offsetting each site in the primitive cell by an offset.
-@param supercell supercell structure
-@param cellOffset offset to be applied to sites
-@param primToSuperMap map from primitive to supercell
-@param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
+@param supercell Supercell structure.
+@param cellOffset Offset to be applied to sites.
+@param primToSuperMap Map from primitive lattice sites to supercell lattice sites.
+@param fractionalPositionTolerance
+    Tolerance applied when comparing positions in fractional coordinates.
+@param selfContained
+    If this orbit list will be used on its own to calculate local cluster vectors or
+    differences in cluster vector, this parameter needs to be true.
 **/
 OrbitList OrbitList::getLocalOrbitList(std::shared_ptr<Structure> supercell,
                                        const Vector3d &cellOffset,
                                        std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
-                                       const double fractionalPositionTolerance) const
+                                       const double fractionalPositionTolerance,
+                                       bool selfContained = false) const
 {
     OrbitList localOrbitList = OrbitList();
     localOrbitList.setPrimitiveStructure(_primitiveStructure);
     for (const auto orbit : _orbits)
     {
-        // Copy the orbit
+        // Copy the orbit.
         Orbit supercellOrbit = orbit;
 
-        // Translate all clusters of the new orbit
+        // If this orbit list will be used standalone for calculating
+        // local cluster vectors or cluster vector differences,
+        // we need to add clusters that include the present cell offset,
+        // but would otherwise belong to the local orbit list of
+        // another cell offset.
+        if (selfContained)
+        {
+            // We will loop over the clusters in the orbit and add more
+            // clusters inside the loop, so we first extract the original
+            // clusters to avoid modifying the list we are looping over.
+            std::vector<Cluster> clusters = supercellOrbit.getClusters();
+            for (auto cluster : clusters)
+            {
+                // Extract all versions of the clusters for which the
+                // original cluster has been translated such that one
+                // of the sites sits in the {0, 0, 0} cell offset.
+                std::vector<std::vector<LatticeSite>> translatedSiteGroups = getSitesTranslatedToUnitcell(cluster.getLatticeSites(), false);
+                for (auto translatedSites : translatedSiteGroups)
+                {
+                    // Only add clusters that are not duplicates of previus clusters.
+                    // false or true here does not seem to matter.
+                    if (!supercellOrbit.contains(translatedSites, true))
+                    {
+                        supercellOrbit.addCluster(Cluster(translatedSites, _primitiveStructurePtr));
+                    }
+                }
+            }
+        }
+
+        // Translate all clusters of the new orbit.
         supercellOrbit.translate(cellOffset);
 
         // Technically we should use the fractional position tolerance

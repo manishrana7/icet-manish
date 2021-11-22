@@ -43,7 +43,8 @@ public:
     OrbitList getLocalOrbitList(std::shared_ptr<Structure>,
                                 const Vector3d &,
                                 std::unordered_map<LatticeSite, LatticeSite> &,
-                                const double) const;
+                                const double,
+                                bool) const;
 
     // @todo Add description.
     void addColumnsFromMatrixOfEquivalentSites(std::vector<std::vector<std::vector<LatticeSite>>> &,
@@ -65,12 +66,12 @@ public:
     bool validCluster(const std::vector<LatticeSite> &) const;
 
     // @todo Add description.
-    std::vector<LatticeSite> translateSites(const std::vector<LatticeSite> &,
-                                            const unsigned int) const;
+    std::vector<LatticeSite> getTranslatedSites(const std::vector<LatticeSite> &,
+                                                const unsigned int) const;
 
     /// @todo Add description.
     std::vector<std::vector<LatticeSite>> getSitesTranslatedToUnitcell(const std::vector<LatticeSite> &,
-                                                                       bool sortit = true) const;
+                                                                       bool sort = true) const;
 
     /// @todo Add description.
     std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> getMatchesInMatrixOfEquivalenSites(const std::vector<std::vector<LatticeSite>> &) const;

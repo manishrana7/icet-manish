@@ -39,7 +39,7 @@ public:
     LocalOrbitListGenerator(const OrbitList &, std::shared_ptr<Structure>, const double);
 
     /// Generates and returns the local orbit list with the input index.
-    OrbitList getLocalOrbitList(const size_t);
+    OrbitList getLocalOrbitList(const Vector3d &, bool);
 
     /// Generates the full orbit list from this structure.
     OrbitList getFullOrbitList();
@@ -66,13 +66,12 @@ private:
     /// Maps a latticeNeighbor from the primitive and get the equivalent in supercell.
     std::unordered_map<LatticeSite, LatticeSite> _primToSupercellMap;
 
-    /// Finds the position of the atom that is closest to the origin.
-    Vector3d getClosestToOrigin();
+    /// Finds the index of the atom that is closest to the origin.
+    int getIndexOfAtomClosestToOrigin();
 
-    ///
-    Vector3d _positionClosestToOrigin;
-
+    /// @todo Add description
     size_t _indexToClosestAtom;
+
     /// The unique offsets of the primitive cell required to "cover" the supercell.
     std::vector<Vector3d> _uniquePrimcellOffsets;
 

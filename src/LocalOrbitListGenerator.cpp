@@ -12,15 +12,15 @@ LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &orbitList,
       _supercell(supercell),
       _fractionalPositionTolerance(fractionalPositionTolerance)
 {
-    _positionClosestToOrigin = getClosestToOrigin();
+    _indexToClosestAtom = getIndexOfAtomClosestToOrigin();
     mapSitesAndFindCellOffsets();
 }
 
 /// @details This position is used for extracting unit cell offsets later on.
-Vector3d LocalOrbitListGenerator::getClosestToOrigin()
+int LocalOrbitListGenerator::getIndexOfAtomClosestToOrigin()
 {
-    Vector3d closestToOrigin;
     double distanceToOrigin = 1e6;
+    int indexToClosestAtom;
     for (size_t i = 0; i < _orbitList.getPrimitiveStructure().size(); i++)
     {
         Vector3d position_i = _orbitList.getPrimitiveStructure().getPositions().row(i);
@@ -33,11 +33,10 @@ Vector3d LocalOrbitListGenerator::getClosestToOrigin()
         if (position_i.norm() < distanceToOrigin)
         {
             distanceToOrigin = position_i.norm();
-            closestToOrigin = position_i;
-            _indexToClosestAtom = i;
+            indexToClosestAtom = i;
         }
     }
-    return closestToOrigin;
+    return indexToClosestAtom;
 }
 
 /**
@@ -59,6 +58,8 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
 
         LatticeSite primitive_site = _orbitList.getPrimitiveStructure().findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
 
+        // @todo Can we just use zero and remove
+        // the getIndexOfAtomClosestToOrigin function?
         if (primitive_site.index() == _indexToClosestAtom)
         {
             uniqueCellOffsets.insert(primitive_site.unitcellOffset());
@@ -89,27 +90,27 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
 
 /**
 @details Generates and returns the local orbit list with the input index.
-@param index index in unique primitive cell offsets
+@param CXXXXXXX
 */
-OrbitList LocalOrbitListGenerator::getLocalOrbitList(const size_t index)
+OrbitList LocalOrbitListGenerator::getLocalOrbitList(const Vector3d &offset, bool selfContained = false)
 {
-    if (index >= _uniquePrimcellOffsets.size())
+    if (std::find(_uniquePrimcellOffsets.begin(), _uniquePrimcellOffsets.end(),
+                  offset) == _uniquePrimcellOffsets.end())
     {
         std::ostringstream msg;
-        msg << "Failed to run with index " << index << " (LocalOrbitListGenerator::getLocalOrbitList)" << std::endl;
-        msg << " Size of _uniquePrimcellOffsets: " << _uniquePrimcellOffsets.size();
+        msg << "The offset " << offset << "was not found in _uniquePrimcellOffsets(LocalOrbitListGenerator::getLocalOrbitList)" << std::endl;
         throw std::out_of_range(msg.str());
     }
-    return _orbitList.getLocalOrbitList(_supercell, _uniquePrimcellOffsets[index], _primToSupercellMap, _fractionalPositionTolerance);
+    return _orbitList.getLocalOrbitList(_supercell, offset, _primToSupercellMap, _fractionalPositionTolerance, selfContained);
 }
 
 /// Generates the complete orbit list (the sum of all local orbit lists).
 OrbitList LocalOrbitListGenerator::getFullOrbitList()
 {
     OrbitList orbitList = OrbitList();
-    for (size_t i = 0; i < getNumberOfUniqueOffsets(); i++)
+    for (auto offset : _uniquePrimcellOffsets)
     {
-        orbitList += getLocalOrbitList(i);
+        orbitList += getLocalOrbitList(offset);
     }
 
     if (orbitList.size() != _orbitList.size())

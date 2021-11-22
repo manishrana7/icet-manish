@@ -493,7 +493,7 @@ PYBIND11_MODULE(_icet, m)
              lattice_neighbors : list(_icet.LatticeSite)
                 set of lattice sites that might be representative for a cluster
              sort : bool
-                If true sort translasted sites.
+                If true sort translated sites.
              )pbdoc",
              py::arg("lattice_neighbors"),
              py::arg("sort"))
@@ -563,9 +563,6 @@ PYBIND11_MODULE(_icet, m)
         .def("get_number_of_unique_offsets",
              &LocalOrbitListGenerator::getNumberOfUniqueOffsets,
              "Returns the number of unique offsets")
-        .def("_get_primitive_to_supercell_map",
-             &LocalOrbitListGenerator::getMapFromPrimitiveToSupercell,
-             "Returns the primitive to supercell mapping")
         .def("_get_unique_primcell_offsets",
              &LocalOrbitListGenerator::getUniquePrimitiveCellOffsets,
              "Returns a list with offsets of primitive structure that span to position of atoms in the supercell.");
