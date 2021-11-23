@@ -10,6 +10,7 @@ from ..core.lattice_site import LatticeSite
 
 def _is_sites_in_orbit(orbit: Orbit, sites: List[LatticeSite]) -> bool:
     """Checks if a list of sites is found among the clusters in an orbit.
+    The number of sites must match the order of the orbit.
 
     Parameters
     ----------
