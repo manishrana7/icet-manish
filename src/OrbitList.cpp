@@ -142,7 +142,8 @@ void OrbitList::sort(const double positionTolerance)
 }
 
 /**
-@param orbit orbit to add to orbit list
+@details Adds an orbit the this orbit list.
+@param orbit Orbit to add.
 **/
 void OrbitList::addOrbit(const Orbit &orbit)
 {
@@ -150,7 +151,7 @@ void OrbitList::addOrbit(const Orbit &orbit)
 }
 
 /**
-@details Returns pointer to the orbit at the given index.
+@details Returns reference to the orbit at the given index.
 @param index index of orbit
 @returns reference to orbit
 **/
@@ -165,7 +166,7 @@ const Orbit &OrbitList::getOrbit(unsigned int index) const
 
 /**
 @details
-This function permutes the sites in a set of equivalent clusters (such that the ordering of the sites
+Permutes the sites in a set of equivalent clusters (such that the ordering of the sites
 is consistent with the first cluster), then creates an orbit based on the permuted clusters.
 
 Algorithm
@@ -596,12 +597,12 @@ std::vector<LatticeSite> OrbitList::getReferenceLatticeSites(bool sort) const
 @details Returns a "local" orbitList by offsetting each site in the primitive cell by an offset.
 @param supercell supercell structure
 @param cellOffset offset to be applied to sites
-@param primToSuperMap map from primitive to supercell
+@param primitiveToSupercellMap map from primitive to supercell
 @param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
 **/
 OrbitList OrbitList::getLocalOrbitList(std::shared_ptr<Structure> supercell,
                                        const Vector3d &cellOffset,
-                                       std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
+                                       std::unordered_map<LatticeSite, LatticeSite> &primitiveToSupercellMap,
                                        const double fractionalPositionTolerance) const
 {
     OrbitList localOrbitList = OrbitList();
@@ -624,14 +625,14 @@ OrbitList OrbitList::getLocalOrbitList(std::shared_ptr<Structure> supercell,
         // level anymore. Rather one should transform any (supercell)
         // structure into an effective representation in terms of lattice
         // sites before any further operations.
-        supercellOrbit.transformToSupercell(supercell, primToSuperMap, fractionalPositionTolerance);
+        supercellOrbit.transformToSupercell(supercell, primitiveToSupercellMap, fractionalPositionTolerance);
         localOrbitList.addOrbit(supercellOrbit);
     }
     return localOrbitList;
 }
 
 /**
-@details This function removes an orbit identified by index from the orbit list.
+@details Removes an orbit identified by index from the orbit list.
 @param index index of the orbit in question
 **/
 void OrbitList::removeOrbit(const size_t index)

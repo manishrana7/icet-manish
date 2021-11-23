@@ -52,7 +52,7 @@ private:
     OrbitList _fullPrimitiveOrbitList;
 
     /// Maps a lattice site from the primitive and get the equivalent in the supercell.
-    std::unordered_map<LatticeSite, LatticeSite> _primToSupercellMap;
+    std::unordered_map<LatticeSite, LatticeSite> _primitiveToSupercellMap;
 
     /// Maps supercell index to its corresponding primitive cell offset.
     std::map<int, Vector3d> _indexToOffset;

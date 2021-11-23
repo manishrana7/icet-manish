@@ -53,7 +53,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
                 std::vector<LatticeSite> primitiveEquivalentSites;
                 for (const auto site : cluster.getLatticeSites())
                 {
-                    Vector3d sitePosition = _supercell->getPosition(site);
+                    Vector3d sitePosition = _supercell->position(site);
                     auto primitiveSite = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(sitePosition, fractionalPositionTolerance);
                     primitiveEquivalentSites.push_back(primitiveSite);
                 }
@@ -84,20 +84,20 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         _fullPrimitiveOrbitList.addOrbit(orbit);
     }
 
-    _primToSupercellMap.clear();
+    _primitiveToSupercellMap.clear();
     _indexToOffset.clear();
 
     // Precompute all possible local orbitlists for this supercell and map it to the offset
     for (size_t i = 0; i < structure.size(); i++)
     {
-        Vector3d localPosition = structure.getPositions().row(i);
+        Vector3d localPosition = structure.positions().row(i);
         LatticeSite localSite = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(localPosition, fractionalPositionTolerance);
         Vector3d offsetVector = localSite.unitcellOffset();
         _indexToOffset[i] = offsetVector;
 
         if (_localOrbitlists.find(offsetVector) == _localOrbitlists.end())
         {
-            _localOrbitlists[offsetVector] = _fullPrimitiveOrbitList.getLocalOrbitList(_supercell, offsetVector, _primToSupercellMap, fractionalPositionTolerance);
+            _localOrbitlists[offsetVector] = _fullPrimitiveOrbitList.getLocalOrbitList(_supercell, offsetVector, _primitiveToSupercellMap, fractionalPositionTolerance);
         }
     }
 }

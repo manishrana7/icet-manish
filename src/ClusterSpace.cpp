@@ -325,11 +325,11 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
         std::map<std::vector<int>, double> counts;
         if (newOccupation > -1)
         {
-            counts = currentOrbit.countClusterChanges(supercell, flipIndex, newOccupation);
+            counts = currentOrbit.getClusterCountChanges(supercell, flipIndex, newOccupation);
         }
         else
         {
-            counts = currentOrbit.countClusters(supercell, flipIndex);
+            counts = currentOrbit.getClusterCounts(supercell, flipIndex);
         }
 
         const std::vector<LatticeSite> &representativeSites = currentPrimitiveOrbit.getRepresentativeCluster().getLatticeSites();

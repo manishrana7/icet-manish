@@ -23,7 +23,7 @@ Vector3d LocalOrbitListGenerator::getClosestToOrigin()
     double distanceToOrigin = 1e6;
     for (size_t i = 0; i < _orbitList.getPrimitiveStructure().size(); i++)
     {
-        Vector3d position_i = _orbitList.getPrimitiveStructure().getPositions().row(i);
+        Vector3d position_i = _orbitList.getPrimitiveStructure().positions().row(i);
         LatticeSite lattice_site = _orbitList.getPrimitiveStructure().findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
         // @todo Can this be removed?
         if (lattice_site.unitcellOffset().norm() > FLOATTYPE_EPSILON)
@@ -48,14 +48,14 @@ offsets.
 */
 void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
 {
-    _primToSupercellMap.clear();
+    _primitiveToSupercellMap.clear();
 
     std::set<Vector3d, Vector3dCompare> uniqueCellOffsets;
 
     // Map all sites
     for (size_t i = 0; i < _supercell->size(); i++)
     {
-        Vector3d position_i = _supercell->getPositions().row(i);
+        Vector3d position_i = _supercell->positions().row(i);
 
         LatticeSite primitive_site = _orbitList.getPrimitiveStructure().findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
 
@@ -100,7 +100,7 @@ OrbitList LocalOrbitListGenerator::getLocalOrbitList(const size_t index)
         msg << " Size of _uniquePrimcellOffsets: " << _uniquePrimcellOffsets.size();
         throw std::out_of_range(msg.str());
     }
-    return _orbitList.getLocalOrbitList(_supercell, _uniquePrimcellOffsets[index], _primToSupercellMap, _fractionalPositionTolerance);
+    return _orbitList.getLocalOrbitList(_supercell, _uniquePrimcellOffsets[index], _primitiveToSupercellMap, _fractionalPositionTolerance);
 }
 
 /// Generates the complete orbit list (the sum of all local orbit lists).

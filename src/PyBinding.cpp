@@ -102,7 +102,7 @@ PYBIND11_MODULE(_icet, m)
             "list(list(float)) : cell metric")
         .def_property(
             "positions",
-            &Structure::getPositions,
+            &Structure::positions,
             &Structure::setPositions,
             "list(list(float)) : atomic positions in Cartesian coordinates")
         .def_property("atomic_numbers",
@@ -123,7 +123,7 @@ PYBIND11_MODULE(_icet, m)
              numbersOfAllowedSpecies : list(int)
              )pbdoc")
         .def("get_position",
-             &Structure::getPosition,
+             &Structure::position,
              py::arg("site"),
              R"pbdoc(
              Returns the position of a specified site
@@ -202,7 +202,7 @@ PYBIND11_MODULE(_icet, m)
             "int : order of the cluster (= number of sites)")
         .def_property_readonly(
             "positions",
-            &Cluster::getPositions,
+            &Cluster::positions,
             "List[float] : positions of the sites in the cluster in Cartesian coordinates")
         .def("__len__",
              &Cluster::order)
@@ -326,14 +326,14 @@ PYBIND11_MODULE(_icet, m)
                 of allowed compoments at lattice site
                 orbit.representative_cluster[i].)pbdoc")
         .def(
-            "count_clusters",
+            "get_cluster_counts",
             [](const Orbit &orbit,
                std::shared_ptr<Structure> structure,
                const int siteIndexForDoubleCountingCorrection)
             {
                 py::dict clusterCountDict;
-                for (const auto &mapPair : orbit.countClusters(structure,
-                                                               siteIndexForDoubleCountingCorrection))
+                for (const auto &mapPair : orbit.getClusterCounts(structure,
+                                                                  siteIndexForDoubleCountingCorrection))
                 {
                     py::list element_symbols;
                     for (auto el : mapPair.first)

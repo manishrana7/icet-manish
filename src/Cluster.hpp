@@ -33,7 +33,7 @@ public:
     std::vector<float> distances() const;
 
     /// Returns the positions of the sites in this cluster in Cartesian coordinates.
-    std::vector<Vector3d> getPositions() const;
+    std::vector<Vector3d> positions() const;
 
     /// Comparison operator for automatic sorting.
     friend bool operator<(const Cluster &cluster1, const Cluster &cluster2)
@@ -52,7 +52,7 @@ public:
     bool isSiteIndexIncludedWithZeroOffset(const int index) const;
 
     /// Count the number of occurences of a site index among the sites in this cluster
-    unsigned int countOccurencesOfSiteIndex(int) const;
+    unsigned int getCountOfOccurencesOfSiteIndex(int) const;
 
     /// Stream operator
     friend std::ostream &operator<<(std::ostream &os, const Cluster &cluster);
