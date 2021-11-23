@@ -203,7 +203,7 @@ PYBIND11_MODULE(_icet, m)
         .def_property_readonly(
             "positions",
             &Cluster::positions,
-            "List[float] : positions of the sites in the cluster in Cartesian coordinates")
+            "List[float] : positions of sites in the cluster in Cartesian coordinates")
         .def("__len__",
              &Cluster::order)
         .def(
