@@ -11,7 +11,6 @@
 #include "ClusterSpace.hpp"
 #include "OrbitList.hpp"
 #include "LocalOrbitListGenerator.hpp"
-#include "PeriodicTable.hpp"
 #include "VectorOperations.hpp"
 using namespace Eigen;
 
@@ -39,6 +38,9 @@ public:
     std::vector<double> getLocalClusterVector(const py::array_t<int> &, int);
 
 private:
+    /// The full orbit list used when calculating full cluster vector
+    OrbitList _fullOrbitList;
+
     /// Maps offsets to local orbit lists.
     std::unordered_map<Vector3d, OrbitList, Vector3dHash> _localOrbitlists;
 
@@ -50,7 +52,4 @@ private:
 
     /// Maps supercell index to its corresponding primitive cell offset.
     std::map<int, Vector3d> _indexToOffset;
-
-    /// The full orbit list used when calculating full cluster vector
-    OrbitList _fullOrbitList;
 };

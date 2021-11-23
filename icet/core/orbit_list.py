@@ -173,7 +173,7 @@ class OrbitList(_OrbitList):
         cluster_counts_full = {}
         for i in orbit_indices:
             orbit = supercell_orbit_list.get_orbit(i)
-            counts = orbit.count_clusters(structure_icet)
+            counts = orbit.get_cluster_counts(structure_icet)
             sorted_counts = Counter()
             for symbols, count in counts.items():
                 sorted_symbols = tuple(sorted(symbols))

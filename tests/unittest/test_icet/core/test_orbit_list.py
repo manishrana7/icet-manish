@@ -4,11 +4,11 @@ from ase import Atoms
 from ase.build import bulk
 
 from icet.core.lattice_site import LatticeSite
-from icet.core.cluster import Cluster
 from icet.core.orbit import Orbit
 from icet.core.orbit_list import OrbitList
 from icet.core.structure import Structure
 from _icet import _Structure
+from _icet import Cluster
 from icet.tools.geometry import get_permutation
 from icet.core.matrix_of_equivalent_positions import \
     _get_lattice_site_matrix_of_equivalent_positions, \

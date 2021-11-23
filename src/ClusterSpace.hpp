@@ -60,7 +60,7 @@ public:
   std::vector<double> getCutoffs() const { return _clusterCutoffs; }
 
   /// Returns the primitive structure.
-  const Structure &getPrimitiveStructure() const { return _primitiveStructure; }
+  const Structure &primitiveStructure() const { return _primitiveStructure; }
 
   /// Returns the number of allowed components for each site.
   std::vector<int> getNumberOfAllowedSpeciesBySite(const Structure &, const std::vector<LatticeSite> &) const;

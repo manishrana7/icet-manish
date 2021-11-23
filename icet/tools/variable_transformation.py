@@ -8,48 +8,48 @@ from ..core.orbit_list import OrbitList
 from ..core.lattice_site import LatticeSite
 
 
-def _is_sites_in_orbit(orbit: Orbit, sites: List[LatticeSite]) -> bool:
+def _is_site_group_in_orbit(orbit: Orbit, site_group: List[LatticeSite]) -> bool:
     """Checks if a list of sites is found among the clusters in an orbit.
+    The number of sites must match the order of the orbit.
 
     Parameters
     ----------
     orbit
         orbit
-    sites
+    site_group
         sites to be searched for
     """
 
     # Ensure that the number of sites matches the order of the orbit
-    if len(sites) != orbit.order:
+    if len(site_group) != orbit.order:
         return False
 
     # Check if the set of lattice sites is found among the equivalent sites
-    if set(sites) in [set(cl.lattice_sites) for cl in orbit.clusters]:
+    if set(site_group) in [set(cl.lattice_sites) for cl in orbit.clusters]:
         return True
 
     # Go through all clusters
-    sites_indices = [site.index for site in sites]
-    for cl in orbit.clusters:
-        orbit_sites_indices = [s.index for s in cl.lattice_sites]
+    site_indices = [site.index for site in site_group]
+    for cluster in orbit.clusters:
+        cluster_site_indices = [s.index for s in cluster.lattice_sites]
 
         # Skip if the site indices do not match
-        if set(sites_indices) != set(orbit_sites_indices):
+        if set(site_indices) != set(cluster_site_indices):
             continue
 
-        # Loop over all possible ways of pairing sites from the two lists
-        for comb_sites in [list(zip(sites, pos)) for pos in permutations(cl.lattice_sites)]:
+        # Loop over all permutations of the lattice sites in cluster
+        for cluster_site_group in permutations(cluster.lattice_sites):
 
-            # Skip all cases that include pairs of sites with different site
-            # indices
-            if any(cs[0].index != cs[1].index for cs in comb_sites):
+            # Skip all cases that include pairs of sites with different site indices
+            if any(site1.index != site2.index
+                   for site1, site2 in zip(site_group, cluster_site_group)):
                 continue
 
             # If the relative offsets for all pairs of sites match, the two
             # clusters are equivalent
-            relative_offsets = [cs[0].unitcell_offset - cs[1].unitcell_offset
-                                for cs in comb_sites]
-            if all(np.array_equal(ro, relative_offsets[0])
-                   for ro in relative_offsets):
+            relative_offsets = [site1.unitcell_offset - site2.unitcell_offset
+                                for site1, site2 in zip(site_group, cluster_site_group)]
+            if all(np.array_equal(ro, relative_offsets[0]) for ro in relative_offsets):
                 return True
     return False
 
@@ -98,7 +98,7 @@ def get_transformation_matrix(structure: Atoms,
                         sub_orbit = full_orbit_list.get_orbit(sub_index)
                         if sub_orbit.order != sub_order:
                             continue
-                        if _is_sites_in_orbit(sub_orbit, sub_sites):
+                        if _is_site_group_in_orbit(sub_orbit, sub_sites):
                             transformation[j, i] += (-2.0) ** (sub_order)
                             n_terms_actual += 1
             # check that the number of contributions matches the number

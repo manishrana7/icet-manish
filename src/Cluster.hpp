@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/functional/hash.hpp>
+#include <iostream>
 #include "FloatType.hpp"
 #include "LatticeSite.hpp"
 #include "Structure.hpp"
@@ -20,7 +21,7 @@ public:
             std::shared_ptr<const Structure>);
 
     /// Returns the lattice sites of this cluster.
-    const std::vector<LatticeSite> &getLatticeSites() const { return _latticeSites; }
+    const std::vector<LatticeSite> &latticeSites() const { return _latticeSites; }
 
     /// Returns the order (i.e., the number of sites) of the cluster.
     unsigned int order() const { return _latticeSites.size(); }
@@ -28,13 +29,16 @@ public:
     /// Returns the radius of the cluster.
     double radius() const;
 
+    /// Returns the distances between the points in the cluster
+    std::vector<float> distances() const;
+
     /// Returns the positions of the sites in this cluster in Cartesian coordinates.
-    std::vector<Vector3d> getPositions() const;
+    std::vector<Vector3d> positions() const;
 
     /// Comparison operator for automatic sorting.
     friend bool operator<(const Cluster &cluster1, const Cluster &cluster2)
     {
-        return cluster1.getLatticeSites() < cluster2.getLatticeSites();
+        return cluster1.latticeSites() < cluster2.latticeSites();
     }
 
     /// Translate the sites of the cluster by a constant vector.
@@ -48,7 +52,10 @@ public:
     bool isSiteIndexIncludedWithZeroOffset(const int index) const;
 
     /// Count the number of occurences of a site index among the sites in this cluster
-    unsigned int countOccurencesOfSiteIndex(int) const;
+    unsigned int getCountOfOccurencesOfSiteIndex(int) const;
+
+    /// Stream operator
+    friend std::ostream &operator<<(std::ostream &os, const Cluster &cluster);
 
 private:
     /// The lattice sites in the cluster.

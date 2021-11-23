@@ -21,6 +21,9 @@ public:
     /// Empty constructor.
     OrbitList(){};
 
+    /// Constructor with structure only.
+    OrbitList(const Structure &structure) { _primitiveStructure = structure; };
+
     /// Constructs orbit list from a set of neighbor lists, a matrix of equivalent sites, and a structure.
     OrbitList(const Structure &,
               const std::vector<std::vector<LatticeSite>> &,
@@ -39,13 +42,6 @@ public:
     /// Returns the orbit of the given index.
     const Orbit &getOrbit(unsigned int) const;
 
-    /// Returns the local orbit list for a site.
-    OrbitList getLocalOrbitList(std::shared_ptr<Structure>,
-                                const Vector3d &,
-                                std::unordered_map<LatticeSite, LatticeSite> &,
-                                const double,
-                                bool) const;
-
     // @todo Add description.
     void addColumnsFromMatrixOfEquivalentSites(std::vector<std::vector<std::vector<LatticeSite>>> &,
                                                std::unordered_set<std::vector<int>, VectorHash> &,
@@ -53,7 +49,10 @@ public:
                                                bool) const;
 
     /// Returns the number of orbits.
-    size_t size() const { return _orbits.size(); }
+    size_t size() const
+    {
+        return _orbits.size();
+    }
 
     // Returns the first column of the matrix of equivalent sites.
     std::vector<LatticeSite> getReferenceLatticeSites(bool = true) const;
@@ -89,9 +88,7 @@ public:
 
     /// @todo Clarify description.
     /// First construct rows_sort = sorted(rows)  then returns true/false if rows_sort exists in taken_rows
-    bool isRowsTaken(const std::unordered_set<std::vector<int>,
-                                              VectorHash> &,
-                     std::vector<int>) const;
+    bool isRowsTaken(const std::unordered_set<std::vector<int>, VectorHash> &, std::vector<int>) const;
 
     /// Finds and returns sites in first column of matrix of equivalent sites along with their unit cell translated indistinguishable sites.
     std::vector<std::vector<LatticeSite>> getAllColumnsFromCluster(const std::vector<LatticeSite> &) const;
@@ -109,13 +106,10 @@ public:
     void removeInactiveOrbits(const Structure &);
 
     /// Returns the orbits in this orbit list.
-    const std::vector<Orbit> getOrbits() const { return _orbits; }
+    const std::vector<Orbit> &orbits() const { return _orbits; }
 
     /// Returns the primitive structure.
-    Structure getPrimitiveStructure() const { return _primitiveStructure; }
-
-    /// Sets primitive structure.
-    void setPrimitiveStructure(const Structure &primitive) { _primitiveStructure = primitive; }
+    const Structure &primitiveStructure() const { return _primitiveStructure; }
 
     /// Merge two orbits.
     void mergeOrbits(int index1, int index2);
@@ -135,6 +129,4 @@ private:
 
     /// Create an orbit by deducing the proper permutations
     Orbit createOrbit(const std::vector<std::vector<LatticeSite>> &);
-
-    std::shared_ptr<Structure> _primitiveStructurePtr;
 };

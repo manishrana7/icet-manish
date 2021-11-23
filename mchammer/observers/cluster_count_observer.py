@@ -93,7 +93,7 @@ class ClusterCountObserver(BaseObserver):
         structure_icet = Structure.from_atoms(structure)
         for i in self._orbit_indices:
             orbit = self._full_orbit_list.get_orbit(i)
-            cluster_counts = orbit.count_clusters(structure_icet)
+            cluster_counts = orbit.get_cluster_counts(structure_icet)
             for chemical_symbols in self._possible_occupations[i]:
                 count = cluster_counts.get(chemical_symbols, 0)
                 row = {}

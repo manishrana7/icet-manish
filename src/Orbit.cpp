@@ -109,7 +109,7 @@ bool Orbit::contains(const std::vector<LatticeSite> cluster, bool sorted) const
 
     for (size_t i = 0; i < _clusters.size(); i++)
     {
-        auto sites = _clusters[i].getLatticeSites();
+        auto sites = _clusters[i].latticeSites();
 
         // compare the sorted sites
         if (sorted)
@@ -139,8 +139,8 @@ bool Orbit::contains(const std::vector<LatticeSite> cluster, bool sorted) const
    a factor 1/n, where n is the number of occurrences of this index. By default
    (i.e. siteIndexForDoubleCountingCorrection = -1) no such correction is applied.
 */
-std::map<std::vector<int>, double> Orbit::countClusters(const std::shared_ptr<Structure> structure,
-                                                        int siteIndexForDoubleCountingCorrection) const
+std::map<std::vector<int>, double> Orbit::getClusterCounts(const std::shared_ptr<Structure> structure,
+                                                           int siteIndexForDoubleCountingCorrection) const
 {
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elements(order());
@@ -151,7 +151,7 @@ std::map<std::vector<int>, double> Orbit::countClusters(const std::shared_ptr<St
         // to ensure that we only count clusters that include this site.
         if (siteIndexForDoubleCountingCorrection < 0 || cluster.isSiteIndexIncludedWithZeroOffset(siteIndexForDoubleCountingCorrection))
         {
-            const std::vector<LatticeSite> &sites = cluster.getLatticeSites();
+            const std::vector<LatticeSite> &sites = cluster.latticeSites();
             for (size_t i = 0; i < sites.size(); i++)
             {
                 elements[i] = structure->getAtomicNumbers().at(sites[i].index());
@@ -163,7 +163,7 @@ std::map<std::vector<int>, double> Orbit::countClusters(const std::shared_ptr<St
             double unit = 1;
             if (siteIndexForDoubleCountingCorrection > -1)
             {
-                unit /= cluster.countOccurencesOfSiteIndex(siteIndexForDoubleCountingCorrection);
+                unit /= cluster.getCountOfOccurencesOfSiteIndex(siteIndexForDoubleCountingCorrection);
             }
             tmpCounts[elements] += unit;
         }
@@ -186,9 +186,9 @@ std::map<std::vector<int>, double> Orbit::countClusters(const std::shared_ptr<St
 @param flipIndex index of site that has been flipped
 @param newOccupation new atomic number of site that has been flipped
 */
-std::map<std::vector<int>, double> Orbit::countClusterChanges(const std::shared_ptr<Structure> structure,
-                                                              const int flipIndex,
-                                                              const int newOccupation) const
+std::map<std::vector<int>, double> Orbit::getClusterCountChanges(const std::shared_ptr<Structure> structure,
+                                                                 const int flipIndex,
+                                                                 const int newOccupation) const
 {
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elementsOld(order());
@@ -201,7 +201,7 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const std::shared_
         // Only count clusters where site flipIndex is included (with zero offset)
         if (cluster.isSiteIndexIncludedWithZeroOffset(flipIndex))
         {
-            const std::vector<LatticeSite> &sites = cluster.getLatticeSites();
+            const std::vector<LatticeSite> &sites = cluster.latticeSites();
             for (size_t i = 0; i < sites.size(); i++)
             {
                 siteIndex = sites[i].index();
@@ -222,7 +222,7 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const std::shared_
             // If the current site (flipIndex) occurs more than once,
             // we risk double counting it. To avoid this, we count the clusters in units of
             // 1 / n, where n is the number of occurrences of the present atom in the cluster.
-            double unit = 1.0 / (double)cluster.countOccurencesOfSiteIndex(flipIndex);
+            double unit = 1.0 / (double)cluster.getCountOfOccurencesOfSiteIndex(flipIndex);
 
             // The old cluster has disappeared and we got elementNew instead
             tmpCounts[elementsOld] -= unit;
@@ -233,11 +233,14 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const std::shared_
 }
 
 /**
+@brief Translates the clusters of this orbit by an offset.
+@param cellOffset Offset to translate with.
 **/
-void Orbit::translate(const Vector3d &cellOffset) 
+void Orbit::translate(const Vector3d &cellOffset)
 {
     _representativeCluster.translate(cellOffset);
-    for (auto &cluster : _clusters) {
+    for (auto &cluster : _clusters)
+    {
         cluster.translate(cellOffset);
     }
 }
@@ -254,7 +257,7 @@ void Orbit::translate(const Vector3d &cellOffset)
 @param cellOffset
     Offset to be applied to sites before transformation to supercell.
     This offset is specified in terms of the old (primitive) structure. 
-@param primToSuperMap
+@param primitiveToSupercellMap
     Map from lattice site referring to old structure to lattice site
     referring to the new structure. This map will successivelly be
     populated when executing the function, and is only used for
@@ -262,13 +265,13 @@ void Orbit::translate(const Vector3d &cellOffset)
 @fractionalPositionTolerance 
 **/
 void Orbit::transformToSupercell(std::shared_ptr<Structure> supercellPtr,
-                                 std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
+                                 std::unordered_map<LatticeSite, LatticeSite> &primitiveToSupercellMap,
                                  const double fractionalPositionTolerance)
-{   
-    _representativeCluster.transformToSupercell(supercellPtr, primToSuperMap, fractionalPositionTolerance);
+{
+    _representativeCluster.transformToSupercell(supercellPtr, primitiveToSupercellMap, fractionalPositionTolerance);
     for (auto &cluster : _clusters)
     {
-        cluster.transformToSupercell(supercellPtr, primToSuperMap, fractionalPositionTolerance);
+        cluster.transformToSupercell(supercellPtr, primitiveToSupercellMap, fractionalPositionTolerance);
     }
 }
 
@@ -278,10 +281,10 @@ namespace std
     /// Stream operator.
     ostream &operator<<(ostream &os, const Orbit &orbit)
     {
-        for (const auto cluster : orbit.getClusters())
+        for (const auto cluster : orbit.clusters())
         {
             os << "  ";
-            for (const auto site : cluster.getLatticeSites())
+            for (const auto site : cluster.latticeSites())
             {
                 os << " " << site;
             }

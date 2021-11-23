@@ -13,7 +13,6 @@ OrbitList::OrbitList(const Structure &structure,
                      const double positionTolerance)
 {
     _primitiveStructure = structure;
-    _primitiveStructurePtr = std::make_shared<Structure>(structure);
     _matrixOfEquivalentSites = matrixOfEquivalentSites;
     _referenceLatticeSites = getReferenceLatticeSites(false);
 
@@ -117,9 +116,9 @@ void OrbitList::sort(const double positionTolerance)
               [positionTolerance](const Orbit &lhs, const Orbit &rhs)
               {
                   // (1) Test against number of bodies in cluster.
-                  if (lhs.getRepresentativeCluster().order() != rhs.getRepresentativeCluster().order())
+                  if (lhs.representativeCluster().order() != rhs.representativeCluster().order())
                   {
-                      return lhs.getRepresentativeCluster().order() < rhs.getRepresentativeCluster().order();
+                      return lhs.representativeCluster().order() < rhs.representativeCluster().order();
                   }
                   // (2) Compare by radius.
                   if (fabs(lhs.radius() - rhs.radius()) > positionTolerance)
@@ -138,12 +137,13 @@ void OrbitList::sort(const double positionTolerance)
                   }
 
                   // (4) Check the individual sites.
-                  return lhs.getClusters() < rhs.getClusters();
+                  return lhs.clusters() < rhs.clusters();
               });
 }
 
 /**
-@param orbit orbit to add to orbit list
+@details Adds an orbit the this orbit list.
+@param orbit Orbit to add.
 **/
 void OrbitList::addOrbit(const Orbit &orbit)
 {
@@ -151,7 +151,7 @@ void OrbitList::addOrbit(const Orbit &orbit)
 }
 
 /**
-@details Returns pointer to the orbit at the given index.
+@details Returns reference to the orbit at the given index.
 @param index index of orbit
 @returns reference to orbit
 **/
@@ -166,7 +166,7 @@ const Orbit &OrbitList::getOrbit(unsigned int index) const
 
 /**
 @details
-This function permutes the sites in a set of equivalent clusters (such that the ordering of the sites
+Permutes the sites in a set of equivalent clusters (such that the ordering of the sites
 is consistent with the first cluster), then creates an orbit based on the permuted clusters.
 
 Algorithm
@@ -593,79 +593,7 @@ std::vector<LatticeSite> OrbitList::getReferenceLatticeSites(bool sort) const
 }
 
 /**
-@details Returns a "local" orbitList by offsetting each site in the primitive cell by an offset.
-@param supercell Supercell structure.
-@param cellOffset Offset to be applied to sites.
-@param primToSuperMap Map from primitive lattice sites to supercell lattice sites.
-@param fractionalPositionTolerance
-    Tolerance applied when comparing positions in fractional coordinates.
-@param selfContained
-    If this orbit list will be used on its own to calculate local cluster vectors or
-    differences in cluster vector, this parameter needs to be true.
-**/
-OrbitList OrbitList::getLocalOrbitList(std::shared_ptr<Structure> supercell,
-                                       const Vector3d &cellOffset,
-                                       std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
-                                       const double fractionalPositionTolerance,
-                                       bool selfContained = false) const
-{
-    OrbitList localOrbitList = OrbitList();
-    localOrbitList.setPrimitiveStructure(_primitiveStructure);
-    for (const auto orbit : _orbits)
-    {
-        // Copy the orbit.
-        Orbit supercellOrbit = orbit;
-
-        // If this orbit list will be used standalone for calculating
-        // local cluster vectors or cluster vector differences,
-        // we need to add clusters that include the present cell offset,
-        // but would otherwise belong to the local orbit list of
-        // another cell offset.
-        if (selfContained)
-        {
-            // We will loop over the clusters in the orbit and add more
-            // clusters inside the loop, so we first extract the original
-            // clusters to avoid modifying the list we are looping over.
-            std::vector<Cluster> clusters = supercellOrbit.getClusters();
-            for (auto cluster : clusters)
-            {
-                // Extract all versions of the clusters for which the
-                // original cluster has been translated such that one
-                // of the sites sits in the {0, 0, 0} cell offset.
-                std::vector<std::vector<LatticeSite>> translatedSiteGroups = getSitesTranslatedToUnitcell(cluster.getLatticeSites(), false);
-                for (auto translatedSites : translatedSiteGroups)
-                {
-                    // Only add clusters that are not duplicates of previus clusters.
-                    // false or true here does not seem to matter.
-                    if (!supercellOrbit.contains(translatedSites, true))
-                    {
-                        supercellOrbit.addCluster(Cluster(translatedSites, _primitiveStructurePtr));
-                    }
-                }
-            }
-        }
-
-        // Translate all clusters of the new orbit.
-        supercellOrbit.translate(cellOffset);
-
-        // Technically we should use the fractional position tolerance
-        // corresponding to the cell metric of the supercell structure.
-        // This is, however, not uniquely defined. Moreover, the difference
-        // would only matter for very large supercells. We (@angqvist,
-        // @erikfransson, @erhart) therefore decide to defer this issue
-        // until someone encounters the problem in a practical situation.
-        // In principle, one should not handle coordinates (floats) at this
-        // level anymore. Rather one should transform any (supercell)
-        // structure into an effective representation in terms of lattice
-        // sites before any further operations.
-        supercellOrbit.transformToSupercell(supercell, primToSuperMap, fractionalPositionTolerance);
-        localOrbitList.addOrbit(supercellOrbit);
-    }
-    return localOrbitList;
-}
-
-/**
-@details This function removes an orbit identified by index from the orbit list.
+@details Removes an orbit identified by index from the orbit list.
 @param index index of the orbit in question
 **/
 void OrbitList::removeOrbit(const size_t index)
@@ -688,7 +616,7 @@ void OrbitList::removeInactiveOrbits(const Structure &structure)
 {
     for (int i = _orbits.size() - 1; i >= 0; i--)
     {
-        auto numberOfAllowedSpecies = structure.getNumberOfAllowedSpeciesBySites(_orbits[i].getRepresentativeCluster().getLatticeSites());
+        auto numberOfAllowedSpecies = structure.getNumberOfAllowedSpeciesBySites(_orbits[i].representativeCluster().latticeSites());
         if (std::any_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n)
                         { return n < 2; }))
         {
@@ -720,7 +648,7 @@ OrbitList &OrbitList::operator+=(const OrbitList &rhs_ol)
 {
     if (size() == 0)
     {
-        _orbits = rhs_ol.getOrbits();
+        _orbits = rhs_ol.orbits();
         return *this;
     }
 
