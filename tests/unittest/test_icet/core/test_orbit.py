@@ -2,7 +2,7 @@ import unittest
 
 from icet.core.lattice_site import LatticeSite
 from icet.core.structure import Structure
-from icet.core.cluster import Cluster
+from _icet import Cluster
 from icet.core.orbit import Orbit
 from ase.build import bulk
 import itertools

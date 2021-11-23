@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/functional/hash.hpp>
+#include <iostream>
 #include "FloatType.hpp"
 #include "LatticeSite.hpp"
 #include "Structure.hpp"
@@ -28,6 +29,9 @@ public:
     /// Returns the radius of the cluster.
     double radius() const;
 
+    /// Returns the distances between the points in the cluster
+    std::vector<float> distances() const;
+
     /// Returns the positions of the sites in this cluster in Cartesian coordinates.
     std::vector<Vector3d> getPositions() const;
 
@@ -49,6 +53,9 @@ public:
 
     /// Count the number of occurences of a site index among the sites in this cluster
     unsigned int countOccurencesOfSiteIndex(int) const;
+
+    /// Stream operator
+    friend std::ostream &operator<<(std::ostream &os, const Cluster &cluster);
 
 private:
     /// The lattice sites in the cluster.

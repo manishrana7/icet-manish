@@ -1,7 +1,7 @@
 import pytest
 from io import StringIO
 
-from icet.core.cluster import Cluster
+from _icet import Cluster
 from icet.core.structure import Structure
 from icet.core.lattice_site import LatticeSite
 
@@ -93,36 +93,35 @@ def test_positions(lattice_sites, target_positions, structure):
     ('singlet', []),
     ('triplet', [16, 4, 20])],
     indirect=['lattice_sites'])
-def test_get_distances(lattice_sites, target_distances, structure):
+def test_distances(lattice_sites, target_distances, structure):
     """Test get_distances function."""
     cluster = Cluster(lattice_sites, structure)
-    assert np.allclose(cluster.get_distances(), target_distances)
+    assert np.allclose(cluster.distances, target_distances)
 
 
 expected_singlet_string = """
-===================================== Cluster ======================================
- order        : 1
- radius       : 0.00000
- distances    : 
-------------------------------------------------------------------------------------
-unitcell_index |         unitcell_offset          |             position            
-------------------------------------------------------------------------------------
-       0       |    1.00000    0.00000    0.00000 |   12.00000    0.00000    0.00000
-====================================================================================
+================================== Cluster ==================================
+ Order:      1
+ Radius:     0
+-----------------------------------------------------------------------------
+ Unitcell index |   Unitcell offset   |    Position
+-----------------------------------------------------------------------------
+             0  |      1     0     0  |   12.000000    0.000000    0.000000
+=============================================================================
 """
 
 expected_triplet_string = """
-===================================== Cluster ======================================
- order        : 3
- radius       : 8.00000
- distances    : 16.00000 4.00000 20.00000
-------------------------------------------------------------------------------------
-unitcell_index |         unitcell_offset          |             position            
-------------------------------------------------------------------------------------
-       0       |    0.00000    0.00000    0.00000 |    0.00000    0.00000    0.00000
-       1       |    1.00000    0.00000    0.00000 |   16.00000    0.00000    0.00000
-       2       |   -1.00000    0.00000    0.00000 |   -4.00000    0.00000    0.00000
-====================================================================================
+================================== Cluster ==================================
+ Order:      3
+ Radius:     8
+ Distances:  16  4  20
+-----------------------------------------------------------------------------
+ Unitcell index |   Unitcell offset   |    Position
+-----------------------------------------------------------------------------
+             0  |      0     0     0  |    0.000000    0.000000    0.000000
+             1  |      1     0     0  |   16.000000    0.000000    0.000000
+             2  |     -1     0     0  |   -4.000000    0.000000    0.000000
+=============================================================================
 """
 
 

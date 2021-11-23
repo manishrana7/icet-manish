@@ -104,6 +104,23 @@ std::vector<Vector3d> Cluster::getPositions() const
 }
 
 /**
+@brief Returns the distances between the points in this cluster.
+**/
+std::vector<float> Cluster::distances() const
+{
+    std::vector<Vector3d> positions = getPositions();
+    std::vector<float> distances = {};
+    for (int i = 1; i < positions.size(); i++)
+    {
+        for (int j = 0; j < i; j++)
+        {
+            distances.push_back((positions[j] - positions[i]).norm());
+        }
+    }
+    return distances;
+}
+
+/**
 @brief Check whether a site index is included with a zero offset.
 @param siteIndex Index of site to check whether it is included
 */
@@ -121,4 +138,69 @@ unsigned int Cluster::countOccurencesOfSiteIndex(int siteIndex) const
 {
     return std::count_if(_latticeSites.begin(), _latticeSites.end(), [=](const LatticeSite &ls)
                          { return ls.index() == siteIndex; });
+}
+
+/**
+@brief Stream operator for a Cluster.
+*/
+std::ostream &operator<<(std::ostream &os, const Cluster &cluster)
+{
+    int width = 77;
+    std::string padding((width - 9) / 2, '=');
+
+    // Print general information
+    os << padding << " Cluster " << padding << std::endl;
+    os << " Order:      " << cluster.order() << std::endl;
+    os << " Radius:     " << cluster.radius() << std::endl;
+    if (cluster.order() > 1)
+    {
+        os << " Distances:";
+        for (float d : cluster.distances())
+        {
+            os << "  " << d;
+        }
+        os << std::endl;
+    }
+
+    // Print lattice sites
+    os << std::string(width, '-') << std::endl;
+    os << " Unitcell index |   Unitcell offset   |    Position" << std::endl;
+    os << std::string(width, '-') << std::endl;
+    for (int site_i = 0; site_i < cluster.order(); site_i++)
+    {
+        LatticeSite site = cluster.getLatticeSites()[site_i];
+        Vector3d position = cluster.getPositions()[site_i];
+
+        // Print index
+        std::string s = std::to_string(site.index());
+        padding = std::string(14 - s.size(), ' ');
+        os << padding << s << "  |";
+
+        // Print offset
+        Vector3d offset = site.unitcellOffset();
+        s = "";
+        std::string sPart;
+        for (int i = 0; i < 3; i++)
+        {
+            sPart = std::to_string((int)offset[i]);
+            padding = std::string(5 - sPart.size(), ' ');
+            s += " " + padding + sPart;
+        }
+        padding = std::string(19 - s.size(), ' ');
+        os << padding << s << "  |";
+
+        // Print position
+        s = "";
+        for (int i = 0; i < 3; i++)
+        {
+            sPart = std::to_string(position[i]);
+            padding = std::string(11 - sPart.size(), ' ');
+            s += " " + padding + sPart;
+        }
+        padding = std::string(36 - s.size(), ' ');
+        os << padding << s << std::endl;
+    }
+
+    os << std::string(width, '=');
+    return os;
 }

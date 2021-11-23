@@ -193,6 +193,10 @@ PYBIND11_MODULE(_icet, m)
             &Cluster::radius,
             "float : the radius of the cluster")
         .def_property_readonly(
+            "distances",
+            &Cluster::distances,
+            "List[float] : the distances between the points in the cluster")
+        .def_property_readonly(
             "order",
             &Cluster::order,
             "int : order of the cluster (= number of sites)")
@@ -201,8 +205,15 @@ PYBIND11_MODULE(_icet, m)
             &Cluster::getPositions,
             "List[float] : positions of the sites in the cluster in Cartesian coordinates")
         .def("__len__",
-             &Cluster::order);
-    ;
+             &Cluster::order)
+        .def(
+            "__str__",
+            [](const Cluster &cluster)
+            {
+                std::ostringstream msg;
+                msg << cluster;
+                return msg.str();
+            });
 
     py::class_<LatticeSite>(m, "LatticeSite",
                             R"pbdoc(

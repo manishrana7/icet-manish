@@ -234,10 +234,11 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const std::shared_
 
 /**
 **/
-void Orbit::translate(const Vector3d &cellOffset) 
+void Orbit::translate(const Vector3d &cellOffset)
 {
     _representativeCluster.translate(cellOffset);
-    for (auto &cluster : _clusters) {
+    for (auto &cluster : _clusters)
+    {
         cluster.translate(cellOffset);
     }
 }
@@ -264,7 +265,7 @@ void Orbit::translate(const Vector3d &cellOffset)
 void Orbit::transformToSupercell(std::shared_ptr<Structure> supercellPtr,
                                  std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
                                  const double fractionalPositionTolerance)
-{   
+{
     _representativeCluster.transformToSupercell(supercellPtr, primToSuperMap, fractionalPositionTolerance);
     for (auto &cluster : _clusters)
     {
