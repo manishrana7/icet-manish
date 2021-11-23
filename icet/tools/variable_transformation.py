@@ -37,21 +37,19 @@ def _is_site_group_in_orbit(orbit: Orbit, site_group: List[LatticeSite]) -> bool
         if set(site_indices) != set(cluster_site_indices):
             continue
 
-        # Loop over all possible ways of pairing sites from the two lists
-        for comb_sites in [list(zip(site_group, cluster_site))
-                           for cluster_site in permutations(cluster.lattice_sites)]:
+        # Loop over all permutations of the lattice sites in cluster
+        for cluster_site_group in permutations(cluster.lattice_sites):
 
-            # Skip all cases that include pairs of sites with different site
-            # indices
-            if any(cs[0].index != cs[1].index for cs in comb_sites):
+            # Skip all cases that include pairs of sites with different site indices
+            if any(site1.index != site2.index
+                   for site1, site2 in zip(site_group, cluster_site_group)):
                 continue
 
             # If the relative offsets for all pairs of sites match, the two
             # clusters are equivalent
-            relative_offsets = [cs[0].unitcell_offset - cs[1].unitcell_offset
-                                for cs in comb_sites]
-            if all(np.array_equal(ro, relative_offsets[0])
-                   for ro in relative_offsets):
+            relative_offsets = [site1.unitcell_offset - site2.unitcell_offset
+                                for site1, site2 in zip(site_group, cluster_site_group)]
+            if all(np.array_equal(ro, relative_offsets[0]) for ro in relative_offsets):
                 return True
     return False
 
