@@ -7,7 +7,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 {
     _clusterSpace = clusterSpace;
     _supercell = std::make_shared<Structure>(structure);
-    std::shared_ptr<Structure> primitiveStructure = std::make_shared<Structure>(_clusterSpace.getPrimitiveStructure());
+    std::shared_ptr<Structure> primitiveStructure = std::make_shared<Structure>(_clusterSpace.primitiveStructure());
 
     LocalOrbitListGenerator LOLG = LocalOrbitListGenerator(clusterSpace.getPrimitiveOrbitList(), _supercell, fractionalPositionTolerance);
     size_t uniqueOffsets = LOLG.getNumberOfUniqueOffsets();
@@ -17,7 +17,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 
     for (const auto orbit : clusterSpace.getPrimitiveOrbitList().getOrbits())
     {
-        orbitVector.push_back(Orbit(orbit.getClusters(), orbit.getAllowedClusterPermutations()));
+        orbitVector.push_back(Orbit(orbit.clusters(), orbit.getAllowedClusterPermutations()));
     }
 
     /* Strategy for constructing the "full" primitive orbit lists.
@@ -48,13 +48,13 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
         OrbitList localOrbitList = LOLG.getLocalOrbitList(offsetIndex);
         for (int orbitIndex = 0; orbitIndex < numberOfOrbits; orbitIndex++)
         {
-            for (const auto cluster : localOrbitList.getOrbit(orbitIndex).getClusters())
+            for (const auto cluster : localOrbitList.getOrbit(orbitIndex).clusters())
             {
                 std::vector<LatticeSite> primitiveEquivalentSites;
-                for (const auto site : cluster.getLatticeSites())
+                for (const auto site : cluster.latticeSites())
                 {
                     Vector3d sitePosition = _supercell->position(site);
-                    auto primitiveSite = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(sitePosition, fractionalPositionTolerance);
+                    auto primitiveSite = _clusterSpace.primitiveStructure().findLatticeSiteByPosition(sitePosition, fractionalPositionTolerance);
                     primitiveEquivalentSites.push_back(primitiveSite);
                 }
                 std::vector<std::vector<LatticeSite>> translatedClusters = _clusterSpace.getPrimitiveOrbitList().getSitesTranslatedToUnitcell(primitiveEquivalentSites, false);
@@ -76,7 +76,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     }
 
     // Now create the full primitive orbit list using the vector<orbit>
-    _fullPrimitiveOrbitList.setPrimitiveStructure(_clusterSpace.getPrimitiveStructure());
+    _fullPrimitiveOrbitList.setPrimitiveStructure(_clusterSpace.primitiveStructure());
     int orbitIndex = -1;
     for (auto orbit : orbitVector)
     {
@@ -91,7 +91,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     for (size_t i = 0; i < structure.size(); i++)
     {
         Vector3d localPosition = structure.positions().row(i);
-        LatticeSite localSite = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(localPosition, fractionalPositionTolerance);
+        LatticeSite localSite = _clusterSpace.primitiveStructure().findLatticeSiteByPosition(localPosition, fractionalPositionTolerance);
         Vector3d offsetVector = localSite.unitcellOffset();
         _indexToOffset[i] = offsetVector;
 

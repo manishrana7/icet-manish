@@ -21,10 +21,10 @@ Vector3d LocalOrbitListGenerator::getClosestToOrigin()
 {
     Vector3d closestToOrigin;
     double distanceToOrigin = 1e6;
-    for (size_t i = 0; i < _orbitList.getPrimitiveStructure().size(); i++)
+    for (size_t i = 0; i < _orbitList.primitiveStructure().size(); i++)
     {
-        Vector3d position_i = _orbitList.getPrimitiveStructure().positions().row(i);
-        LatticeSite lattice_site = _orbitList.getPrimitiveStructure().findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
+        Vector3d position_i = _orbitList.primitiveStructure().positions().row(i);
+        LatticeSite lattice_site = _orbitList.primitiveStructure().findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
         // @todo Can this be removed?
         if (lattice_site.unitcellOffset().norm() > FLOATTYPE_EPSILON)
         {
@@ -57,7 +57,7 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
     {
         Vector3d position_i = _supercell->positions().row(i);
 
-        LatticeSite primitive_site = _orbitList.getPrimitiveStructure().findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
+        LatticeSite primitive_site = _orbitList.primitiveStructure().findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
 
         if (primitive_site.index() == _indexToClosestAtom)
         {
@@ -76,11 +76,11 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
 
     _uniquePrimcellOffsets.assign(uniqueCellOffsets.begin(), uniqueCellOffsets.end());
 
-    if (_uniquePrimcellOffsets.size() != _supercell->size() / _orbitList.getPrimitiveStructure().size())
+    if (_uniquePrimcellOffsets.size() != _supercell->size() / _orbitList.primitiveStructure().size())
     {
         std::ostringstream msg;
         msg << "Wrong number of unitcell offsets found (LocalOrbitListGenerator::mapSitesAndFindCellOffsets)." << std::endl;
-        msg << "Expected: " << _supercell->size() / _orbitList.getPrimitiveStructure().size() << std::endl;
+        msg << "Expected: " << _supercell->size() / _orbitList.primitiveStructure().size() << std::endl;
         msg << "Found:    " << _uniquePrimcellOffsets.size();
         throw std::runtime_error(msg.str());
     }

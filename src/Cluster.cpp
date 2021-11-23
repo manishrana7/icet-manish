@@ -168,7 +168,7 @@ std::ostream &operator<<(std::ostream &os, const Cluster &cluster)
     os << std::string(width, '-') << std::endl;
     for (int site_i = 0; site_i < cluster.order(); site_i++)
     {
-        LatticeSite site = cluster.getLatticeSites()[site_i];
+        LatticeSite site = cluster.latticeSites()[site_i];
         Vector3d position = cluster.positions()[site_i];
 
         // Print index

@@ -21,7 +21,7 @@ public:
             std::shared_ptr<const Structure>);
 
     /// Returns the lattice sites of this cluster.
-    const std::vector<LatticeSite> &getLatticeSites() const { return _latticeSites; }
+    const std::vector<LatticeSite> &latticeSites() const { return _latticeSites; }
 
     /// Returns the order (i.e., the number of sites) of the cluster.
     unsigned int order() const { return _latticeSites.size(); }
@@ -38,7 +38,7 @@ public:
     /// Comparison operator for automatic sorting.
     friend bool operator<(const Cluster &cluster1, const Cluster &cluster2)
     {
-        return cluster1.getLatticeSites() < cluster2.getLatticeSites();
+        return cluster1.latticeSites() < cluster2.latticeSites();
     }
 
     /// Translate the sites of the cluster by a constant vector.

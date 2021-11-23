@@ -177,7 +177,7 @@ PYBIND11_MODULE(_icet, m)
         structure : icet Structure instance
             atomic configuration
         lattice_sites : list(int)
-            list of lattice sites that form the cluster
+            list of the lattice sites that form the cluster
         )pbdoc")
         .def(py::init<const std::vector<LatticeSite> &,
                       std::shared_ptr<const Structure>>(),
@@ -186,7 +186,7 @@ PYBIND11_MODULE(_icet, m)
              py::arg("structure"))
         .def_property_readonly(
             "lattice_sites",
-            &Cluster::getLatticeSites,
+            &Cluster::latticeSites,
             "list(LatticeSite) : list of the lattice sites that constitute the cluster")
         .def_property_readonly(
             "radius",
@@ -275,7 +275,7 @@ PYBIND11_MODULE(_icet, m)
                       const std::set<std::vector<int>>>())
         .def_property_readonly(
             "representative_cluster",
-            &Orbit::getRepresentativeCluster,
+            &Orbit::representativeCluster,
             "cluster to which all other symmetry equivalent clusters can be related")
         .def_property_readonly(
             "order",
@@ -311,7 +311,7 @@ PYBIND11_MODULE(_icet, m)
             // The below solution (which seems identical) fixes that for
             // unknown reasons.
             [](const Orbit &orbit)
-            { return orbit.getClusters(); },
+            { return orbit.clusters(); },
             "list of the clusters in this orbit")
         .def("get_multicomponent_vectors", &Orbit::getMultiComponentVectors,
              R"pbdoc(
@@ -400,17 +400,17 @@ PYBIND11_MODULE(_icet, m)
                  msg << "multiplicity: " << orbit.size() << std::endl;
                  msg << "radius: " << orbit.radius() << std::endl;
                  msg << "representative_cluster:" << std::endl;
-                 for (const auto site : orbit.getRepresentativeCluster().getLatticeSites())
+                 for (const auto site : orbit.representativeCluster().latticeSites())
                  {
                      msg << "    site: " << site << std::endl;
                  }
                  msg << "clusters:" << std::endl;
                  int k = -1;
-                 for (const auto cluster : orbit.getClusters())
+                 for (const auto cluster : orbit.clusters())
                  {
                      k += 1;
                      msg << "  cluster: " << k << std::endl;
-                     for (const auto site : cluster.getLatticeSites())
+                     for (const auto site : cluster.latticeSites())
                      {
                          msg << "    site: " << site << std::endl;
                      }
@@ -521,7 +521,7 @@ PYBIND11_MODULE(_icet, m)
              )pbdoc",
              py::arg("sites"))
         .def("get_primitive_structure",
-             &OrbitList::getPrimitiveStructure,
+             &OrbitList::primitiveStructure,
              "Returns the primitive atomic structure used to construct the OrbitList instance.")
         .def("__len__",
              &OrbitList::size,
@@ -642,7 +642,7 @@ PYBIND11_MODULE(_icet, m)
              &ClusterSpace::getChemicalSymbols,
              "Returns list of species associated with cluster space as chemical symbols.")
         .def("get_cutoffs", &ClusterSpace::getCutoffs)
-        .def("_get_primitive_structure", &ClusterSpace::getPrimitiveStructure)
+        .def("_get_primitive_structure", &ClusterSpace::primitiveStructure)
         .def("get_multicomponent_vector_permutations", &ClusterSpace::getMultiComponentVectorPermutations)
         .def("get_number_of_allowed_species_by_site", &ClusterSpace::getNumberOfAllowedSpeciesBySite)
         .def("_remove_orbits_cpp", &ClusterSpace::removeOrbits)

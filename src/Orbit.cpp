@@ -109,7 +109,7 @@ bool Orbit::contains(const std::vector<LatticeSite> cluster, bool sorted) const
 
     for (size_t i = 0; i < _clusters.size(); i++)
     {
-        auto sites = _clusters[i].getLatticeSites();
+        auto sites = _clusters[i].latticeSites();
 
         // compare the sorted sites
         if (sorted)
@@ -151,7 +151,7 @@ std::map<std::vector<int>, double> Orbit::getClusterCounts(const std::shared_ptr
         // to ensure that we only count clusters that include this site.
         if (siteIndexForDoubleCountingCorrection < 0 || cluster.isSiteIndexIncludedWithZeroOffset(siteIndexForDoubleCountingCorrection))
         {
-            const std::vector<LatticeSite> &sites = cluster.getLatticeSites();
+            const std::vector<LatticeSite> &sites = cluster.latticeSites();
             for (size_t i = 0; i < sites.size(); i++)
             {
                 elements[i] = structure->getAtomicNumbers().at(sites[i].index());
@@ -163,7 +163,7 @@ std::map<std::vector<int>, double> Orbit::getClusterCounts(const std::shared_ptr
             double unit = 1;
             if (siteIndexForDoubleCountingCorrection > -1)
             {
-                unit /= cluster.countOccurencesOfSiteIndex(siteIndexForDoubleCountingCorrection);
+                unit /= cluster.getCountOfOccurencesOfSiteIndex(siteIndexForDoubleCountingCorrection);
             }
             tmpCounts[elements] += unit;
         }
@@ -201,7 +201,7 @@ std::map<std::vector<int>, double> Orbit::getClusterCountChanges(const std::shar
         // Only count clusters where site flipIndex is included (with zero offset)
         if (cluster.isSiteIndexIncludedWithZeroOffset(flipIndex))
         {
-            const std::vector<LatticeSite> &sites = cluster.getLatticeSites();
+            const std::vector<LatticeSite> &sites = cluster.latticeSites();
             for (size_t i = 0; i < sites.size(); i++)
             {
                 siteIndex = sites[i].index();
@@ -222,7 +222,7 @@ std::map<std::vector<int>, double> Orbit::getClusterCountChanges(const std::shar
             // If the current site (flipIndex) occurs more than once,
             // we risk double counting it. To avoid this, we count the clusters in units of
             // 1 / n, where n is the number of occurrences of the present atom in the cluster.
-            double unit = 1.0 / (double)cluster.countOccurencesOfSiteIndex(flipIndex);
+            double unit = 1.0 / (double)cluster.getCountOfOccurencesOfSiteIndex(flipIndex);
 
             // The old cluster has disappeared and we got elementNew instead
             tmpCounts[elementsOld] -= unit;
@@ -281,10 +281,10 @@ namespace std
     /// Stream operator.
     ostream &operator<<(ostream &os, const Orbit &orbit)
     {
-        for (const auto cluster : orbit.getClusters())
+        for (const auto cluster : orbit.clusters())
         {
             os << "  ";
-            for (const auto site : cluster.getLatticeSites())
+            for (const auto site : cluster.latticeSites())
             {
                 os << " " << site;
             }

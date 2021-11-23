@@ -34,16 +34,16 @@ public:
     size_t size() const { return _clusters.size(); }
 
     /// Returns the radius of the representative cluster in this orbit.
-    double radius() const { return getRepresentativeCluster().radius(); }
+    double radius() const { return representativeCluster().radius(); }
 
     /// Returns the representative cluster for this orbit
-    const Cluster &getRepresentativeCluster() const { return _representativeCluster; }
+    const Cluster &representativeCluster() const { return _representativeCluster; }
 
     /// Returns all clusters in this orbit.
-    const std::vector<Cluster> &getClusters() const { return _clusters; }
+    const std::vector<Cluster> &clusters() const { return _clusters; }
 
     /// Returns the number of bodies of the cluster that represent this orbit.
-    unsigned int order() const { return getRepresentativeCluster().order(); }
+    unsigned int order() const { return representativeCluster().order(); }
 
     /// Gets the allowed permutations of clusters.
     std::set<std::vector<int>> getAllowedClusterPermutations() const { return _allowedClusterPermutations; }
@@ -87,15 +87,15 @@ public:
     Orbit &operator+=(const Orbit &orbit_rhs)
     {
         // Get representative sites
-        auto rep_sites_rhs = orbit_rhs.getRepresentativeCluster().getLatticeSites();
-        auto rep_sites_this = _representativeCluster.getLatticeSites();
+        auto rep_sites_rhs = orbit_rhs.representativeCluster().latticeSites();
+        auto rep_sites_this = _representativeCluster.latticeSites();
 
         if (rep_sites_this.size() != rep_sites_rhs.size())
         {
             throw std::runtime_error("Orbit order is not equal (Orbit &operator+=)");
         }
 
-        const auto rhsClusters = orbit_rhs.getClusters();
+        const auto rhsClusters = orbit_rhs.clusters();
 
         // Insert rhs eq sites
         _clusters.insert(_clusters.end(), rhsClusters.begin(), rhsClusters.end());

@@ -111,7 +111,7 @@ public:
     const std::vector<Orbit> getOrbits() const { return _orbits; }
 
     /// Returns the primitive structure.
-    Structure getPrimitiveStructure() const { return _primitiveStructure; }
+    const Structure &primitiveStructure() const { return _primitiveStructure; }
 
     /// Sets primitive structure.
     void setPrimitiveStructure(const Structure &primitive) { _primitiveStructure = primitive; }
@@ -134,6 +134,4 @@ private:
 
     /// Create an orbit by deducing the proper permutations
     Orbit createOrbit(const std::vector<std::vector<LatticeSite>> &);
-
-    std::shared_ptr<Structure> _primitiveStructurePtr;
 };

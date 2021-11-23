@@ -16,7 +16,7 @@ ClusterSpace::ClusterSpace(std::vector<std::vector<std::string>> &chemicalSymbol
                            const double fractionalPositionTolerance)
     : _primitiveOrbitList(orbitList), _chemicalSymbols(chemicalSymbols)
 {
-    _primitiveStructure = _primitiveOrbitList->getPrimitiveStructure();
+    _primitiveStructure = _primitiveOrbitList->primitiveStructure();
 
     _numberOfAllowedSpeciesPerSite.resize(chemicalSymbols.size());
     for (size_t i = 0; i < _numberOfAllowedSpeciesPerSite.size(); i++)
@@ -219,7 +219,7 @@ void ClusterSpace::computeMultiComponentVectors()
     {
 
         std::vector<std::vector<int>> permutedMCVector;
-        auto numberOfAllowedSpecies = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _primitiveOrbitList->getOrbit(orbitIndex).getRepresentativeCluster().getLatticeSites());
+        auto numberOfAllowedSpecies = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _primitiveOrbitList->getOrbit(orbitIndex).representativeCluster().latticeSites());
 
         auto multiComponentVectors = _primitiveOrbitList->getOrbit(orbitIndex).getMultiComponentVectors(numberOfAllowedSpecies);
         if (std::none_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n)
@@ -332,7 +332,7 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
             counts = currentOrbit.getClusterCounts(supercell, flipIndex);
         }
 
-        const std::vector<LatticeSite> &representativeSites = currentPrimitiveOrbit.getRepresentativeCluster().getLatticeSites();
+        const std::vector<LatticeSite> &representativeSites = currentPrimitiveOrbit.representativeCluster().latticeSites();
 
         std::vector<int> allowedOccupations;
         try

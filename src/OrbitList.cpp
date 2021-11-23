@@ -116,9 +116,9 @@ void OrbitList::sort(const double positionTolerance)
               [positionTolerance](const Orbit &lhs, const Orbit &rhs)
               {
                   // (1) Test against number of bodies in cluster.
-                  if (lhs.getRepresentativeCluster().order() != rhs.getRepresentativeCluster().order())
+                  if (lhs.representativeCluster().order() != rhs.representativeCluster().order())
                   {
-                      return lhs.getRepresentativeCluster().order() < rhs.getRepresentativeCluster().order();
+                      return lhs.representativeCluster().order() < rhs.representativeCluster().order();
                   }
                   // (2) Compare by radius.
                   if (fabs(lhs.radius() - rhs.radius()) > positionTolerance)
@@ -137,7 +137,7 @@ void OrbitList::sort(const double positionTolerance)
                   }
 
                   // (4) Check the individual sites.
-                  return lhs.getClusters() < rhs.getClusters();
+                  return lhs.clusters() < rhs.clusters();
               });
 }
 
@@ -655,7 +655,7 @@ void OrbitList::removeInactiveOrbits(const Structure &structure)
 {
     for (int i = _orbits.size() - 1; i >= 0; i--)
     {
-        auto numberOfAllowedSpecies = structure.getNumberOfAllowedSpeciesBySites(_orbits[i].getRepresentativeCluster().getLatticeSites());
+        auto numberOfAllowedSpecies = structure.getNumberOfAllowedSpeciesBySites(_orbits[i].representativeCluster().latticeSites());
         if (std::any_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n)
                         { return n < 2; }))
         {
