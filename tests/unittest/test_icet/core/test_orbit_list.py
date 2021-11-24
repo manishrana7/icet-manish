@@ -116,17 +116,6 @@ class TestOrbitList(unittest.TestCase):
         """Tests orbits in orbit list are sorted."""
         self.orbit_list.sort(self.position_tolerance)
 
-    def test_is_row_taken(self):
-        """Tests is_row_taken (private) functionality."""
-        taken_rows = set()
-        row_indices = [0, 1, 2]
-        self.assertFalse(self.orbit_list._is_row_taken(
-            taken_rows, row_indices))
-
-        taken_rows = set([tuple(row_indices)])
-        self.assertTrue(self.orbit_list._is_row_taken(
-            taken_rows, row_indices))
-
     def test_get_orbit_list(self):
         """Tests a list of orbits is returned from this function."""
         # clusters for testing

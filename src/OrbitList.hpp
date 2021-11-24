@@ -55,7 +55,7 @@ public:
     }
 
     // Returns the first column of the matrix of equivalent sites.
-    std::vector<LatticeSite> getReferenceLatticeSites(bool = true) const;
+    std::vector<LatticeSite> getReferenceLatticeSites() const;
 
     // Returns rows of the matrix of equivalent sites that match the lattice sites.
     std::vector<int> getIndicesOfEquivalentLatticeSites(const std::vector<LatticeSite> &,
@@ -86,15 +86,8 @@ public:
                                                                bool,
                                                                bool) const;
 
-    /// @todo Clarify description.
-    /// First construct rows_sort = sorted(rows)  then returns true/false if rows_sort exists in taken_rows
-    bool isRowsTaken(const std::unordered_set<std::vector<int>, VectorHash> &, std::vector<int>) const;
-
     /// Finds and returns sites in first column of matrix of equivalent sites along with their unit cell translated indistinguishable sites.
     std::vector<std::vector<LatticeSite>> getAllColumnsFromCluster(const std::vector<LatticeSite> &) const;
-
-    /// Returns the first column of the matrix of equivalent sites used to construct the orbit list.
-    std::vector<LatticeSite> getFirstColumnOfMatrixOfEquivalentSites() const { return _referenceLatticeSites; }
 
     /// Returns the matrix of equivalent sites used to construct the orbit list.
     std::vector<std::vector<LatticeSite>> getMatrixOfEquivalentSites() const { return _matrixOfEquivalentSites; }

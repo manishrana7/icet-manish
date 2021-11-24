@@ -14,7 +14,7 @@ OrbitList::OrbitList(const Structure &structure,
 {
     _primitiveStructure = structure;
     _matrixOfEquivalentSites = matrixOfEquivalentSites;
-    _referenceLatticeSites = getReferenceLatticeSites(false);
+    _referenceLatticeSites = getReferenceLatticeSites();
 
     /**
     The following list is used to compile "raw data" for the orbit list.
@@ -63,7 +63,8 @@ OrbitList::OrbitList(const Structure &structure,
 
                 // get all sites from the matrix of equivalent sites
                 auto pairsOfSiteAndIndex = getMatchesInMatrixOfEquivalenSites(clusterWithTranslations);
-                if (!isRowsTaken(rowsTaken, pairsOfSiteAndIndex[0].second))
+
+                if (rowsTaken.find(pairsOfSiteAndIndex[0].second) == rowsTaken.end())
                 {
                     // Found new stuff
                     addColumnsFromMatrixOfEquivalentSites(listOfEquivalentClusters, rowsTaken, pairsOfSiteAndIndex[0].second, true);
@@ -329,21 +330,6 @@ std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromCluster(const 
     return p_equal;
 }
 
-/// Returns true if rows_sort exists in rowsTaken.
-bool OrbitList::isRowsTaken(const std::unordered_set<std::vector<int>, VectorHash> &rowsTaken,
-                            std::vector<int> rows) const
-{
-    const auto find = rowsTaken.find(rows);
-    if (find == rowsTaken.end())
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
-}
-
 /**
 @brief Returns the lattice sites in all columns from the given rows in matrix of symmetry equivalent sites
 @param rows indices of rows to return
@@ -531,10 +517,9 @@ std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> OrbitList::ge
 */
 bool OrbitList::validCluster(const std::vector<LatticeSite> &latticeSites) const
 {
-    Vector3d zeroVector = {0., 0., 0.};
     for (const auto &latticeSite : latticeSites)
     {
-        if (latticeSite.unitcellOffset() == zeroVector)
+        if (latticeSite.unitcellOffset().norm() < 0.5)
         {
             return true;
         }
@@ -575,9 +560,8 @@ std::vector<int> OrbitList::getIndicesOfEquivalentLatticeSites(const std::vector
 /**
 @details Returns reference lattice sites, which is equivalent to returning the first column of the matrix of equivalent sites.
 @todo Expand description.
-@param sort if true (default) the first column will be sorted
 **/
-std::vector<LatticeSite> OrbitList::getReferenceLatticeSites(bool sort) const
+std::vector<LatticeSite> OrbitList::getReferenceLatticeSites() const
 {
     std::vector<LatticeSite> referenceLatticeSites;
     referenceLatticeSites.reserve(_matrixOfEquivalentSites[0].size());
@@ -585,10 +569,7 @@ std::vector<LatticeSite> OrbitList::getReferenceLatticeSites(bool sort) const
     {
         referenceLatticeSites.push_back(row[0]);
     }
-    if (sort)
-    {
-        std::sort(referenceLatticeSites.begin(), referenceLatticeSites.end());
-    }
+    std::sort(referenceLatticeSites.begin(), referenceLatticeSites.end());
     return referenceLatticeSites;
 }
 
