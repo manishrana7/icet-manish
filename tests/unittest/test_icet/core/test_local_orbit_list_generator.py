@@ -54,6 +54,9 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
                     pos_prim = self.primitive.get_position(site_p)
                     self.assertTrue(np.all(np.isclose(pos_super, pos_prim)))
 
+                    # Since we have modified the lattice site, we need to restore it
+                    site_p.unitcell_offset -= offset
+
     def test_generating_full_orbit_list_with_primitive(self):
         """
         Tests creating a full orbit list using the primitive as the supercell.
@@ -151,7 +154,10 @@ class TestLocalOrbitListGeneratorHCP(unittest.TestCase):
                     site_p.unitcell_offset += offset
                     pos_super = self.supercell.get_position(site_s)
                     pos_prim = self.primitive.get_position(site_p)
-                    self.assertTrue(np.all(np.isclose(pos_super, pos_prim)))
+                    self.assertTrue(np.allclose(pos_super, pos_prim))
+
+                    # Since we have modified the lattice site, we need to restore it
+                    site_p.unitcell_offset -= offset
 
     def test_unique_offset_count(self):
         """

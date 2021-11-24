@@ -122,6 +122,8 @@ PYBIND11_MODULE(_icet, m)
              ----------
              numbersOfAllowedSpecies : list(int)
              )pbdoc")
+        .def("get_number_of_allowed_species_by_sites",
+             &Structure::getNumberOfAllowedSpeciesBySites)
         .def("get_position",
              &Structure::position,
              py::arg("site"),
@@ -279,13 +281,11 @@ PYBIND11_MODULE(_icet, m)
             "cluster to which all other symmetry equivalent clusters can be related")
         .def_property_readonly(
             "order",
-            [](const Orbit &orbit)
-            { return orbit.order(); },
+            &Orbit::order,
             "number of sites in the representative cluster")
         .def_property_readonly(
             "radius",
-            [](const Orbit &orbit)
-            { return orbit.radius(); },
+            &Orbit::radius,
             "radius of the representative cluster")
         .def_property_readonly(
             "allowed_permutations",
@@ -305,13 +305,7 @@ PYBIND11_MODULE(_icet, m)
              )pbdoc")
         .def_property_readonly(
             "clusters",
-            // Directly binding &Orbit::getClusters causes modifications
-            // of the Clusters (deletion of their LatticeSites) from the
-            // Python side, even when setting return_value_policy to copy.
-            // The below solution (which seems identical) fixes that for
-            // unknown reasons.
-            [](const Orbit &orbit)
-            { return orbit.clusters(); },
+            &Orbit::clusters,
             "list of the clusters in this orbit")
         .def("get_multicomponent_vectors", &Orbit::getMultiComponentVectors,
              R"pbdoc(
@@ -540,17 +534,22 @@ PYBIND11_MODULE(_icet, m)
              py::arg("structure"),
              py::arg("fractional_position_tolerance"))
         .def("generate_local_orbit_list",
-             (OrbitList(LocalOrbitListGenerator::*)(const size_t)) & LocalOrbitListGenerator::getLocalOrbitList,
+             &LocalOrbitListGenerator::getLocalOrbitList,
              R"pbdoc(
-             Generates and returns the local orbit list from an input index corresponding a specific offset of
+             Generates and returns the local orbit list for an offset of
              the primitive structure.
 
              Parameters
              ----------
-             index : int
-                 index of the unique offsets list
+             offset : int
+                 Offset in terms of primitive cell vectors
+             self_contained : bool
+                 If this orbit list will be used on its own to calculate local cluster vectors or
+                 differences in cluster vector, this parameter needs to be true (if false, not all
+                 clusters involving this offset will be included).
              )pbdoc",
-             py::arg("index"))
+             py::arg("offset"),
+             py::arg("self_contained") = false)
         .def("generate_full_orbit_list",
              &LocalOrbitListGenerator::getFullOrbitList,
              R"pbdoc(

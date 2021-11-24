@@ -101,7 +101,7 @@ public:
     /// Returns the orbits in this orbit list.
     const std::vector<Orbit> &orbits() const { return _orbits; }
 
-    /// Returns the primitive structure.
+    /// Returns the structure.
     const Structure &structure() const { return _structure; }
 
     /// Merge two orbits.

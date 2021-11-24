@@ -360,8 +360,8 @@ class ClusterSpace(_ClusterSpace):
             orbit_sublattices = '-'.join(
                 [sublattices[sublattices.get_sublattice_index(ls.index)].symbol
                  for ls in repr_sites])
-            local_Mi = self.get_number_of_allowed_species_by_site(
-                self._get_primitive_structure(), repr_sites)
+            local_Mi = self._get_primitive_structure().get_number_of_allowed_species_by_sites(
+                repr_sites)
             mc_vectors = orbit.get_multicomponent_vectors(local_Mi)
             mc_permutations = self.get_multicomponent_vector_permutations(mc_vectors, orbit_index)
             mc_index = mc_vectors.index(mc_vector)

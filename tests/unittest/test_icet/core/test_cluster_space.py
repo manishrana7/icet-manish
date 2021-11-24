@@ -362,7 +362,7 @@ index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | 
                          msg=info)
         for structure, target in zip(self.structure_list, target_cluster_vectors):
             retval = list(self.cs.get_cluster_vector(structure))
-            self.assertAlmostEqual(retval, target, places=9)
+            self.assertAlmostEqualList(retval, target, places=9)
 
         # Bad position
         structure = self.primitive_structure.repeat(3)
@@ -601,8 +601,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
             The orbit which the mc vectors should be returned from.
         """
         orbit = cluster_space.orbit_list.get_orbit(orbit_index)
-        local_Mi = cluster_space.get_number_of_allowed_species_by_site(
-            cluster_space._get_primitive_structure(),
+        local_Mi = cluster_space._get_primitive_structure().get_number_of_allowed_species_by_sites(
             orbit.representative_cluster.lattice_sites)
 
         mc_vectors = orbit.get_multicomponent_vectors(local_Mi)

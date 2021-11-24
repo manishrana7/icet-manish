@@ -18,12 +18,12 @@ ClusterSpace::ClusterSpace(std::vector<std::vector<std::string>> &chemicalSymbol
 {
     _primitiveStructure = std::make_shared<Structure>(_primitiveOrbitList->structure());
 
-    _numberOfAllowedSpeciesPerSite.resize(chemicalSymbols.size());
-    for (size_t i = 0; i < _numberOfAllowedSpeciesPerSite.size(); i++)
+    std::vector<int> numberOfAllowedSpeciesPerSite(chemicalSymbols.size());
+    for (size_t i = 0; i < numberOfAllowedSpeciesPerSite.size(); i++)
     {
-        _numberOfAllowedSpeciesPerSite[i] = chemicalSymbols[i].size();
+        numberOfAllowedSpeciesPerSite[i] = chemicalSymbols[i].size();
     }
-    _primitiveStructure->setNumberOfAllowedSpecies(_numberOfAllowedSpeciesPerSite);
+    _primitiveStructure->setNumberOfAllowedSpecies(numberOfAllowedSpeciesPerSite);
 
     // Set up a map between chemical species and the internal species enumeration scheme.
     for (size_t i = 0; i < _primitiveStructure->size(); i++)
@@ -199,9 +199,7 @@ void ClusterSpace::computeMultiComponentVectors()
     for (size_t orbitIndex = 0; orbitIndex < _primitiveOrbitList->size(); orbitIndex++)
     {
 
-        std::vector<std::vector<int>> permutedMCVector;
-        auto numberOfAllowedSpecies = _primitiveOrbitList->getOrbit(orbitIndex).representativeCluster().getNumberOfAllowedSpecies();
-
+        auto numberOfAllowedSpecies = _primitiveStructure->getNumberOfAllowedSpeciesBySites(_primitiveOrbitList->getOrbit(orbitIndex).representativeCluster().latticeSites());
         auto multiComponentVectors = _primitiveOrbitList->getOrbit(orbitIndex).getMultiComponentVectors(numberOfAllowedSpecies);
         if (std::none_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n)
                          { return n < 2; }))
@@ -314,7 +312,7 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
         }
 
         // Extract allowed occupations
-        std::vector<int> allowedOccupations = currentPrimitiveOrbit.representativeCluster().getNumberOfAllowedSpecies();
+        std::vector<int> allowedOccupations = _primitiveStructure->getNumberOfAllowedSpeciesBySites(currentPrimitiveOrbit.representativeCluster().latticeSites());
 
         // Skip the rest if any of the sites are inactive (i.e. allowed occupation < 2)
         if (std::any_of(allowedOccupations.begin(), allowedOccupations.end(), [](int allowedOccupation)

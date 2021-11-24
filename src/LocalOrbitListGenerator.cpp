@@ -164,6 +164,7 @@ OrbitList LocalOrbitListGenerator::getLocalOrbitList(const Vector3d &offset, boo
 OrbitList LocalOrbitListGenerator::getFullOrbitList()
 {
     OrbitList orbitList = OrbitList(*_supercell);
+
     for (auto &offset : _uniquePrimcellOffsets)
     {
         orbitList += getLocalOrbitList(offset);
