@@ -569,7 +569,6 @@ std::vector<LatticeSite> OrbitList::getReferenceLatticeSites() const
     {
         referenceLatticeSites.push_back(row[0]);
     }
-    std::sort(referenceLatticeSites.begin(), referenceLatticeSites.end());
     return referenceLatticeSites;
 }
 

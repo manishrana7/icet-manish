@@ -131,17 +131,17 @@ class TestOrbitList(unittest.TestCase):
         """Tests removing all orbits."""
 
         chemical_symbols = [
-            ['Al'] * len(self.orbit_list.get_primitive_structure())]
+            ['Al'] * len(self.orbit_list.get_structure())]
         len_before = len(self.orbit_list)
         self.assertNotEqual(len_before, 0)
         self.orbit_list.remove_inactive_orbits(chemical_symbols)
         len_after = len(self.orbit_list)
         self.assertEqual(len_after, 0)
 
-    def test_get_primitive_structure(self):
+    def test_get_structure(self):
         """ Tests get primitive structure functionality. """
         self.assertIsInstance(
-            self.orbit_list.get_primitive_structure(), _Structure)
+            self.orbit_list.get_structure(), _Structure)
 
     def test_len(self):
         """Tests length of orbit list."""

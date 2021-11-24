@@ -28,7 +28,7 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
             prim_structure, cutoffs,
             symprec=self.symprec, position_tolerance=self.position_tolerance,
             fractional_position_tolerance=self.fractional_position_tolerance)
-        self.primitive = self.orbit_list.get_primitive_structure()
+        self.primitive = self.orbit_list.get_structure()
         super_structure = make_supercell(prim_structure, [[2, 0, 1000],
                                                           [0, 2, 0],
                                                           [0, 0, 2]])
@@ -43,10 +43,8 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
         Tests that function generates an orbit list from
         an index of a specific offset of the primitive structure.
         """
-        unique_offsets = self.lolg._get_unique_primcell_offsets()
-
-        for index, offset in enumerate(unique_offsets):
-            local_orbit_list = self.lolg.generate_local_orbit_list(index)
+        for offset in self.lolg._get_unique_primcell_offsets():
+            local_orbit_list = self.lolg.generate_local_orbit_list(offset, False)
             for orbit_prim, orbit_super in zip(self.orbit_list.orbits,
                                                local_orbit_list.orbits):
                 for site_p, site_s in zip(orbit_prim.representative_cluster.lattice_sites,
@@ -72,13 +70,16 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
         Tests that equivalent sites of all local orbit lists are listed
         as equivalent sites in the full orbit list.
         """
+        print('nu')
         fol = self.lolg.generate_full_orbit_list()
-        for index in range(self.lolg.get_number_of_unique_offsets()):
-            lol = self.lolg.generate_local_orbit_list(index)
+        for offset in self.lolg._get_unique_primcell_offsets():
+            print(offset)
+            lol = self.lolg.generate_local_orbit_list(offset)
             for orbit, orbit_ in zip(lol.orbits, fol.orbits):
+                print(len(orbit_.clusters))
                 for cluster in orbit.clusters:
                     self.assertIn(cluster.lattice_sites,
-                                  [cluster.lattice_sites for cluster in orbit_.clusters])
+                                  [cluster_.lattice_sites for cluster_ in orbit_.clusters])
 
     def test_unique_offset_count(self):
         """
@@ -121,7 +122,7 @@ class TestLocalOrbitListGeneratorHCP(unittest.TestCase):
             prim_structure, cutoffs,
             symprec=self.symprec, position_tolerance=self.position_tolerance,
             fractional_position_tolerance=self.fractional_position_tolerance)
-        self.primitive = self.orbit_list.get_primitive_structure()
+        self.primitive = self.orbit_list.get_structure()
         super_structure = make_supercell(prim_structure, [[2, 0, 1000],
                                                           [0, 2, 0],
                                                           [0, 0, 2]])
@@ -141,9 +142,8 @@ class TestLocalOrbitListGeneratorHCP(unittest.TestCase):
         Tests that function generates an orbit list for the given
         offset of the primitive structure.
         """
-        unique_offsets = self.lolg._get_unique_primcell_offsets()
-        for index, offset in enumerate(unique_offsets):
-            local_orbit_list = self.lolg.generate_local_orbit_list(index)
+        for offset in self.lolg._get_unique_primcell_offsets():
+            local_orbit_list = self.lolg.generate_local_orbit_list(offset)
             for orbit_prim, orbit_super in zip(self.orbit_list.orbits,
                                                local_orbit_list.orbits):
                 for site_p, site_s in zip(orbit_prim.representative_cluster.lattice_sites,

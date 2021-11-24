@@ -99,15 +99,14 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
 */
 OrbitList LocalOrbitListGenerator::getLocalOrbitList(const Vector3d &offset, bool selfContained = false)
 {
-    if (std::find(_uniquePrimcellOffsets.begin(), _uniquePrimcellOffsets.end(),
-                  offset) == _uniquePrimcellOffsets.end())
+    if (std::find(_uniquePrimcellOffsets.begin(), _uniquePrimcellOffsets.end(), offset) == _uniquePrimcellOffsets.end())
     {
         std::ostringstream msg;
-        msg << "The offset " << offset << "was not found in _uniquePrimcellOffsets(LocalOrbitListGenerator::getLocalOrbitList)" << std::endl;
-        throw std::out_of_range(msg.str());
+        msg << "The offset " << offset << "was not found in _uniquePrimcellOffsets (LocalOrbitListGenerator::getLocalOrbitList)" << std::endl;
+        throw std::runtime_error(msg.str());
     }
-    OrbitList localOrbitList = OrbitList(*_supercell);
 
+    OrbitList localOrbitList = OrbitList(*_supercell);
     for (const Orbit &orbit : _primitiveOrbitList.orbits())
     {
         // Copy the orbit.
@@ -165,7 +164,7 @@ OrbitList LocalOrbitListGenerator::getLocalOrbitList(const Vector3d &offset, boo
 OrbitList LocalOrbitListGenerator::getFullOrbitList()
 {
     OrbitList orbitList = OrbitList(*_supercell);
-    for (auto offset : _uniquePrimcellOffsets)
+    for (auto &offset : _uniquePrimcellOffsets)
     {
         orbitList += getLocalOrbitList(offset);
     }
