@@ -41,6 +41,8 @@ public:
         return cluster1.latticeSites() < cluster2.latticeSites();
     }
 
+    std::vector<int> getNumberOfAllowedSpecies() const;
+
     /// Translate the sites of the cluster by a constant vector.
     void translate(const Eigen::Vector3d &offset);
 

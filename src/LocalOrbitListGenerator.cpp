@@ -1,17 +1,18 @@
 #include "LocalOrbitListGenerator.hpp"
 
 /**
-@param orbitList orbit list for the underlying primitive cell
+@param primitiveOrbitList orbit list for the underlying primitive cell
 @param supercell supercell structure for which to set up the local orbit list generation
 @param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
 */
-LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &orbitList,
+LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &primitiveOrbitList,
                                                  std::shared_ptr<Structure> supercell,
                                                  const double fractionalPositionTolerance)
-    : _orbitList(orbitList),
+    : _primitiveOrbitList(primitiveOrbitList),
       _supercell(supercell),
       _fractionalPositionTolerance(fractionalPositionTolerance)
 {
+    _primitiveStructure = std::make_shared<Structure>(primitiveOrbitList.structure());
     _indexToClosestAtom = getIndexOfAtomClosestToOrigin();
     mapSitesAndFindCellOffsets();
 }
@@ -21,10 +22,10 @@ int LocalOrbitListGenerator::getIndexOfAtomClosestToOrigin()
 {
     double distanceToOrigin = 1e6;
     int indexToClosestAtom;
-    for (size_t i = 0; i < _orbitList.primitiveStructure().size(); i++)
+    for (size_t i = 0; i < _primitiveStructure->size(); i++)
     {
-        Vector3d position_i = _orbitList.primitiveStructure().positions().row(i);
-        LatticeSite lattice_site = _orbitList.primitiveStructure().findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
+        Vector3d position_i = _primitiveStructure->positions().row(i);
+        LatticeSite lattice_site = _primitiveStructure->findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
         // @todo Can this be removed?
         if (lattice_site.unitcellOffset().norm() > FLOATTYPE_EPSILON)
         {
@@ -56,7 +57,7 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
     {
         Vector3d position_i = _supercell->positions().row(i);
 
-        LatticeSite primitive_site = _orbitList.primitiveStructure().findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
+        LatticeSite primitive_site = _primitiveStructure->findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
 
         // @todo Can we just use zero and remove
         // the getIndexOfAtomClosestToOrigin function?
@@ -77,11 +78,11 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
 
     _uniquePrimcellOffsets.assign(uniqueCellOffsets.begin(), uniqueCellOffsets.end());
 
-    if (_uniquePrimcellOffsets.size() != _supercell->size() / _orbitList.primitiveStructure().size())
+    if (_uniquePrimcellOffsets.size() != _supercell->size() / _primitiveStructure->size())
     {
         std::ostringstream msg;
         msg << "Wrong number of unitcell offsets found (LocalOrbitListGenerator::mapSitesAndFindCellOffsets)." << std::endl;
-        msg << "Expected: " << _supercell->size() / _orbitList.primitiveStructure().size() << std::endl;
+        msg << "Expected: " << _supercell->size() / _primitiveStructure->size() << std::endl;
         msg << "Found:    " << _uniquePrimcellOffsets.size();
         throw std::runtime_error(msg.str());
     }
@@ -89,11 +90,12 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
 }
 
 /**
-@details Generates and returns the local orbit list with the input index.
+@details Generates and returns a local orbit for the supplied offset.
 @param offset Cell offset in multiples of primitive lattice vectors
 @param selfContained
     If this orbit list will be used on its own to calculate local cluster vectors or
-    differences in cluster vector, this parameter needs to be true.
+    differences in cluster vector, this parameter needs to be true (if false, not all
+    clusters involving this offset will be included).
 */
 OrbitList LocalOrbitListGenerator::getLocalOrbitList(const Vector3d &offset, bool selfContained = false)
 {
@@ -104,9 +106,9 @@ OrbitList LocalOrbitListGenerator::getLocalOrbitList(const Vector3d &offset, boo
         msg << "The offset " << offset << "was not found in _uniquePrimcellOffsets(LocalOrbitListGenerator::getLocalOrbitList)" << std::endl;
         throw std::out_of_range(msg.str());
     }
-    std::shared_ptr<Structure> primitiveStructure = std::make_shared<Structure>(_orbitList.primitiveStructure());
-    OrbitList localOrbitList = OrbitList(_orbitList.primitiveStructure());
-    for (const Orbit &orbit : _orbitList.orbits())
+    OrbitList localOrbitList = OrbitList(*_supercell);
+
+    for (const Orbit &orbit : _primitiveOrbitList.orbits())
     {
         // Copy the orbit.
         Orbit supercellOrbit = orbit;
@@ -127,14 +129,14 @@ OrbitList LocalOrbitListGenerator::getLocalOrbitList(const Vector3d &offset, boo
                 // Extract all versions of the clusters for which the
                 // original cluster has been translated such that one
                 // of the sites sits in the {0, 0, 0} cell offset.
-                std::vector<std::vector<LatticeSite>> translatedSiteGroups = _orbitList.getSitesTranslatedToUnitcell(cluster.latticeSites(), false);
+                std::vector<std::vector<LatticeSite>> translatedSiteGroups = _primitiveOrbitList.getSitesTranslatedToUnitcell(cluster.latticeSites(), false);
                 for (auto translatedSites : translatedSiteGroups)
                 {
                     // Only add clusters that are not duplicates of previus clusters.
                     // false or true here does not seem to matter.
                     if (!supercellOrbit.contains(translatedSites, true))
                     {
-                        supercellOrbit.addCluster(Cluster(translatedSites, primitiveStructure));
+                        supercellOrbit.addCluster(Cluster(translatedSites, _primitiveStructure));
                     }
                 }
             }
@@ -168,12 +170,12 @@ OrbitList LocalOrbitListGenerator::getFullOrbitList()
         orbitList += getLocalOrbitList(offset);
     }
 
-    if (orbitList.size() != _orbitList.size())
+    if (orbitList.size() != _primitiveOrbitList.size())
     {
         std::ostringstream msg;
         msg << "Full orbitlist size is not the same as local orbitlist size (LocalOrbitListGenerator::getFullOrbitList)" << std::endl;
         msg << " full orbitlist size: " << orbitList.size() << std::endl;
-        msg << " local orbitlist size: " << _orbitList.size() << std::endl;
+        msg << " local orbitlist size: " << _primitiveOrbitList.size() << std::endl;
         throw std::runtime_error(msg.str());
     }
     return orbitList;

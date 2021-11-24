@@ -122,6 +122,19 @@ std::vector<float> Cluster::distances() const
 }
 
 /**
+@brief Returns the number of species allowed on each site of this cluster.
+**/
+std::vector<int> Cluster::getNumberOfAllowedSpecies() const
+{
+    std::vector<int> numberOfAllowedSpecies(order());
+    for (const auto &site : _latticeSites)
+    {
+        numberOfAllowedSpecies.push_back(_structure->getNumberOfAllowedSpeciesBySite(site.index()));
+    }
+    return numberOfAllowedSpecies;
+}
+
+/**
 @brief Checks whether a site index is included with a zero offset.
 @param siteIndex Index of site to check whether it is included
 */

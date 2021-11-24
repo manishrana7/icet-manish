@@ -506,9 +506,9 @@ PYBIND11_MODULE(_icet, m)
                  sites that correspond to the columns that will be returned
              )pbdoc",
              py::arg("sites"))
-        .def("get_primitive_structure",
-             &OrbitList::primitiveStructure,
-             "Returns the primitive atomic structure used to construct the OrbitList instance.")
+        .def("get_structure",
+             &OrbitList::structure,
+             "Returns the atomic structure used to construct the OrbitList instance.")
         .def("__len__",
              &OrbitList::size,
              "Returns the total number of orbits counted in the OrbitList instance.")
@@ -627,7 +627,6 @@ PYBIND11_MODULE(_icet, m)
         .def("get_cutoffs", &ClusterSpace::getCutoffs)
         .def("_get_primitive_structure", &ClusterSpace::primitiveStructure)
         .def("get_multicomponent_vector_permutations", &ClusterSpace::getMultiComponentVectorPermutations)
-        .def("get_number_of_allowed_species_by_site", &ClusterSpace::getNumberOfAllowedSpeciesBySite)
         .def("_remove_orbits_cpp", &ClusterSpace::removeOrbits)
         .def("evaluate_cluster_function",
              &ClusterSpace::evaluateClusterFunction,

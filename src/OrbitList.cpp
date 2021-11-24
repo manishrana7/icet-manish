@@ -2,7 +2,7 @@
 
 /**
 @details This constructor generates an orbit list for the given (supercell) structure from a set of neighbor lists and a matrix of (symmetry) equivalent sites.
-@param structure (supercell) structure for which to generate orbit list
+@param structure Structure that the orbits will be based on
 @param matrixOfEquivalentSites matrix of symmetry equivalent sites
 @param neighborLists neighbor lists for each (cluster) order (0=pairs, 1=triplets etc)
 @param positionTolerance tolerance applied when comparing positions in Cartesian coordinates
@@ -12,7 +12,7 @@ OrbitList::OrbitList(const Structure &structure,
                      const std::vector<std::vector<std::vector<LatticeSite>>> &neighborLists,
                      const double positionTolerance)
 {
-    _primitiveStructure = structure;
+    _structure = structure;
     _matrixOfEquivalentSites = matrixOfEquivalentSites;
     _referenceLatticeSites = getReferenceLatticeSites();
 
@@ -249,7 +249,7 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
                     failedLoops++;
                     if (failedLoops == representativeClusterWithTranslations.size())
                     {
-                        throw std::runtime_error("Did not find integer permutation from allowed permutation to any translated representative site (OrbitList::addPermutationInformationToOrbits)");
+                        throw std::runtime_error("Did not find integer permutation from allowed permutation to any translated representative site (OrbitList::createOrbit)");
                     }
                     continue;
                 }
@@ -288,7 +288,7 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
                 }
                 if (perm == translatedPermutationsOfSites.back())
                 {
-                    throw std::runtime_error("Did not find a permutation of the orbit sites to the permutations of the representative sites (OrbitList::addPermutationInformationToOrbits)");
+                    throw std::runtime_error("Did not find a permutation of the orbit sites to the permutations of the representative sites (OrbitList::createOrbit)");
                 }
             }
         }
@@ -308,10 +308,10 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
 
     // Turn the permuted equivalent clusters into actual Cluster objects
     std::vector<Cluster> clusters;
-    std::shared_ptr<Structure> primStructurePtr = std::make_shared<Structure>(_primitiveStructure);
+    std::shared_ptr<Structure> structurePtr = std::make_shared<Structure>(_structure);
     for (auto cluster : permutedEquivalentClusters)
     {
-        clusters.push_back(Cluster(cluster, primStructurePtr));
+        clusters.push_back(Cluster(cluster, structurePtr));
     }
     Orbit newOrbit = Orbit(clusters, allowedPermutations);
     return newOrbit;

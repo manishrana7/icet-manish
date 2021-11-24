@@ -20,7 +20,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     for (size_t i = 0; i < _supercell->size(); i++)
     {
         Vector3d position = _supercell->positions().row(i);
-        Vector3d offset = _clusterSpace.primitiveStructure().findLatticeSiteByPosition(position, fractionalPositionTolerance).unitcellOffset();
+        Vector3d offset = _clusterSpace.primitiveStructure()->findLatticeSiteByPosition(position, fractionalPositionTolerance).unitcellOffset();
         _indexToOffset[i] = offset;
         if (_localOrbitlists.find(offset) == _localOrbitlists.end())
         {

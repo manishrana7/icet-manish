@@ -57,12 +57,15 @@ private:
     void mapSitesAndFindCellOffsets();
 
     /// Primitive orbit list.
-    OrbitList _orbitList;
+    OrbitList _primitiveOrbitList;
 
-    /// Supercell structure from which the local orbit list will be based upon.
+    /// Primitive structure on which the supercell is based.
+    std::shared_ptr<Structure> _primitiveStructure;
+
+    /// Supercell structure on which the local orbit list will be based.
     std::shared_ptr<Structure> _supercell;
 
-    /// Maps a latticeNeighbor from the primitive and get the equivalent in supercell.
+    /// Maps a lattice site from the primitive cell to an equivalent lattice site in the supercell.
     std::unordered_map<LatticeSite, LatticeSite> _primitiveToSupercellMap;
 
     /// Finds the index of the atom that is closest to the origin.

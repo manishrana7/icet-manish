@@ -22,7 +22,7 @@ public:
     OrbitList(){};
 
     /// Constructor with structure only.
-    OrbitList(const Structure &structure) { _primitiveStructure = structure; };
+    OrbitList(const Structure &structure) { _structure = structure; };
 
     /// Constructs orbit list from a set of neighbor lists, a matrix of equivalent sites, and a structure.
     OrbitList(const Structure &,
@@ -102,7 +102,7 @@ public:
     const std::vector<Orbit> &orbits() const { return _orbits; }
 
     /// Returns the primitive structure.
-    const Structure &primitiveStructure() const { return _primitiveStructure; }
+    const Structure &structure() const { return _structure; }
 
     /// Merge two orbits.
     void mergeOrbits(int index1, int index2);
@@ -117,8 +117,8 @@ private:
     /// Matrix of equivalent sites.
     std::vector<std::vector<LatticeSite>> _matrixOfEquivalentSites;
 
-    /// Primitive structure for which orbit list was constructed.
-    Structure _primitiveStructure;
+    /// Structure for which orbit list was constructed.
+    Structure _structure;
 
     /// Create an orbit by deducing the proper permutations
     Orbit createOrbit(const std::vector<std::vector<LatticeSite>> &);
