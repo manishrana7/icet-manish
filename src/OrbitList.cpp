@@ -63,7 +63,8 @@ OrbitList::OrbitList(const Structure &structure,
 
                 // get all sites from the matrix of equivalent sites
                 auto pairsOfSiteAndIndex = getMatchesInMatrixOfEquivalenSites(clusterWithTranslations);
-                if (!isRowsTaken(rowsTaken, pairsOfSiteAndIndex[0].second))
+
+                if (rowsTaken.find(pairsOfSiteAndIndex[0].second) == rowsTaken.end())
                 {
                     // Found new stuff
                     addColumnsFromMatrixOfEquivalentSites(listOfEquivalentClusters, rowsTaken, pairsOfSiteAndIndex[0].second, true);
@@ -327,21 +328,6 @@ std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromCluster(const 
     std::vector<int> rowsFromReferenceLatticeSites = getIndicesOfEquivalentLatticeSites(sites, sortRows);
     std::vector<std::vector<LatticeSite>> p_equal = getAllColumnsFromRow(rowsFromReferenceLatticeSites, true, sortRows);
     return p_equal;
-}
-
-/// Returns true if rows_sort exists in rowsTaken.
-bool OrbitList::isRowsTaken(const std::unordered_set<std::vector<int>, VectorHash> &rowsTaken,
-                            std::vector<int> rows) const
-{
-    const auto find = rowsTaken.find(rows);
-    if (find == rowsTaken.end())
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
 }
 
 /**

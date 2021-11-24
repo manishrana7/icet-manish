@@ -480,20 +480,6 @@ PYBIND11_MODULE(_icet, m)
              index : int
                  index of the orbit to be removed
              )pbdoc")
-        .def("_is_row_taken",
-             &OrbitList::isRowsTaken,
-             R"pbdoc(
-             Returns true if rows exist in taken_rows.
-
-             Parameters
-             ----------
-             taken_rows : set(tuple(int))
-                 unique collection of row index
-             rows : list(int)
-                 row indices
-             )pbdoc",
-             py::arg("taken_rows"),
-             py::arg("rows"))
         .def("_get_sites_translated_to_unitcell",
              &OrbitList::getSitesTranslatedToUnitcell,
              R"pbdoc(

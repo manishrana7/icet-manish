@@ -86,12 +86,6 @@ public:
                                                                bool,
                                                                bool) const;
 
-    /// @todo Clarify description.
-    /// First construct rows_sort = sorted(rows)  then returns true/false if rows_sort exists in taken_rows
-    bool isRowsTaken(const std::unordered_set<std::vector<int>,
-                                              VectorHash> &,
-                     std::vector<int>) const;
-
     /// Finds and returns sites in first column of matrix of equivalent sites along with their unit cell translated indistinguishable sites.
     std::vector<std::vector<LatticeSite>> getAllColumnsFromCluster(const std::vector<LatticeSite> &) const;
 
