@@ -279,13 +279,11 @@ PYBIND11_MODULE(_icet, m)
             "cluster to which all other symmetry equivalent clusters can be related")
         .def_property_readonly(
             "order",
-            [](const Orbit &orbit)
-            { return orbit.order(); },
+            &Orbit::order,
             "number of sites in the representative cluster")
         .def_property_readonly(
             "radius",
-            [](const Orbit &orbit)
-            { return orbit.radius(); },
+            &Orbit::radius,
             "radius of the representative cluster")
         .def_property_readonly(
             "allowed_permutations",
@@ -305,13 +303,7 @@ PYBIND11_MODULE(_icet, m)
              )pbdoc")
         .def_property_readonly(
             "clusters",
-            // Directly binding &Orbit::getClusters causes modifications
-            // of the Clusters (deletion of their LatticeSites) from the
-            // Python side, even when setting return_value_policy to copy.
-            // The below solution (which seems identical) fixes that for
-            // unknown reasons.
-            [](const Orbit &orbit)
-            { return orbit.clusters(); },
+            &Orbit::clusters,
             "list of the clusters in this orbit")
         .def("get_multicomponent_vectors", &Orbit::getMultiComponentVectors,
              R"pbdoc(
