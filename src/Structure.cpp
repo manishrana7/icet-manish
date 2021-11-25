@@ -1,7 +1,5 @@
 #include "Structure.hpp"
 
-#include "FloatType.hpp"
-
 using namespace Eigen;
 
 /**
@@ -30,8 +28,8 @@ Structure::Structure(const Matrix<double, Dynamic, 3, RowMajor> &positions,
 */
 double Structure::getDistance(const size_t index1,
                               const size_t index2,
-                              const Vector3d offset1 = {0.0, 0.0, 0.0},
-                              const Vector3d offset2 = {0.0, 0.0, 0.0}) const
+                              const Vector3i offset1 = {0, 0, 0},
+                              const Vector3i offset2 = {0, 0, 0}) const
 {
     if (index1 >= (size_t)_positions.rows() ||
         index2 >= (size_t)_positions.rows())
@@ -44,8 +42,8 @@ double Structure::getDistance(const size_t index1,
         msg << " (Structure::getDistance)";
         throw std::out_of_range(msg.str());
     }
-    Vector3d pos1 = _positions.row(index1) + offset1.transpose() * _cell;
-    Vector3d pos2 = _positions.row(index2) + offset2.transpose() * _cell;
+    Vector3d pos1 = _positions.row(index1) + offset1.transpose().cast<double>() * _cell;
+    Vector3d pos2 = _positions.row(index2) + offset2.transpose().cast<double>() * _cell;
     return (pos1 - pos2).norm();
 }
 
@@ -65,7 +63,7 @@ Vector3d Structure::getPosition(const LatticeSite &latticeNeighbor) const
         msg << " (Structure::getPosition)";
         throw std::out_of_range(msg.str());
     }
-    Vector3d position = _positions.row(latticeNeighbor.index()) + latticeNeighbor.unitcellOffset().transpose() * _cell;
+    Vector3d position = _positions.row(latticeNeighbor.index()) + latticeNeighbor.unitcellOffset().transpose().cast<double>() * _cell;
     return position;
 }
 /**
@@ -122,13 +120,15 @@ LatticeSite Structure::findLatticeSiteByPosition(const Vector3d &position, const
     {
         Vector3d distanceVector = position - _positions.row(i).transpose();
         Vector3d fractionalDistanceVector = _cell.transpose().partialPivLu().solve(distanceVector);
-        icet::roundVector3d(fractionalDistanceVector, FLOATTYPE_EPSILON);
+
+        // Check whether whether the fractionalDistanceVector is all integers,
+        // if it is we have found the corresponding lattice site
         Vector3d latticeVector = {round(fractionalDistanceVector[0]),
                                   round(fractionalDistanceVector[1]),
                                   round(fractionalDistanceVector[2])};
         if ((fractionalDistanceVector - latticeVector).norm() < fractionalPositionTolerance)
         {
-            return LatticeSite(i, latticeVector);
+            return LatticeSite(i, latticeVector.cast<int>());
         }
     }
 

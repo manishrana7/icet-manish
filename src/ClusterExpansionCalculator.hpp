@@ -40,7 +40,7 @@ public:
 
 private:
     /// Maps offsets to local orbit lists.
-    std::unordered_map<Vector3d, OrbitList, Vector3dHash> _localOrbitlists;
+    std::unordered_map<Vector3i, OrbitList, Vector3iHash> _localOrbitlists;
 
     /// Internal cluster space.
     ClusterSpace _clusterSpace;
@@ -55,7 +55,7 @@ private:
     std::unordered_map<LatticeSite, LatticeSite> _primToSupercellMap;
 
     /// Maps supercell index to its corresponding primitive cell offset.
-    std::map<int, Vector3d> _indexToOffset;
+    std::map<int, Vector3i> _indexToOffset;
 
     /// Placeholder for translated orbitlist
     OrbitList _translatedOrbitList;

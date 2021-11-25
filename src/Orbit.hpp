@@ -87,7 +87,7 @@ public:
     Creates a copy of this orbit and translates all LatticeSite offsets in equivalent sites.
     This will also transfer any existing permutations directly, which should be fine since an offset does not change permutations to the prototype sites.
     */
-    friend Orbit operator+(const Orbit &orbit, const Eigen::Vector3d &offset)
+    friend Orbit operator+(const Orbit &orbit, const Eigen::Vector3i &offset)
     {
         Orbit orbitOffset = orbit;
         for (auto &latticeSites : orbitOffset._equivalentClusters)
