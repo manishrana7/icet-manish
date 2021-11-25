@@ -379,7 +379,7 @@ PYBIND11_MODULE(_icet, m)
              Parameters
              ----------
              offset : List[int]
-                scaled coordinates in terms of the cell vectors of
+                offset in multiples of the cell vectors of
                 the structure used to define the clusters in this orbit
                 (typically the primitive structure)
              )pbdoc")
