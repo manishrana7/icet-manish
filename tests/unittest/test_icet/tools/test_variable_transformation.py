@@ -148,24 +148,24 @@ class TestVariableTransformationTriplets(unittest.TestCase):
         # gives true
         orbit, sites = find_orbit_and_equivalent_site_with_indices(self.cs.orbit_list, [2, 3])
         for i in range(len(sites)):
-            sites[i].unitcell_offset += np.array([-2., -2., -2.])
+            sites[i].unitcell_offset += np.array([-2, -2, -2])
         self.assertTrue(_is_sites_in_orbit(orbit, sites))
 
         # Check that a pair for which all sites have the different indices and one has been offset
         # still gives true
         orbit, sites = find_orbit_and_equivalent_site_with_indices(self.cs.orbit_list, [2, 3])
-        sites[0].unitcell_offset += np.array([-2., -2., -2.])
+        sites[0].unitcell_offset += np.array([-2, -2, -2])
         self.assertFalse(_is_sites_in_orbit(orbit, sites))
 
         # Check that a triplet for which all sites have the same offset gives true
         orbit, sites = find_orbit_and_equivalent_site_with_indices(self.cs.orbit_list, [0, 0, 0])
         for i in range(len(sites)):
-            sites[i].unitcell_offset += np.array([-2., -2., -2.])
+            sites[i].unitcell_offset += np.array([-2, -2, -2])
         self.assertTrue(_is_sites_in_orbit(orbit, sites))
 
         # Check that a triplet in which one site has a different offset gives false
         orbit, sites = find_orbit_and_equivalent_site_with_indices(self.cs.orbit_list, [0, 0, 0])
-        sites[0].unitcell_offset += np.array([-2., -2., -2.])
+        sites[0].unitcell_offset += np.array([-2, -2, -2])
         self.assertFalse(_is_sites_in_orbit(orbit, sites))
 
 

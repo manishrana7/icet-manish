@@ -1,7 +1,6 @@
 #pragma once
 
 #include <boost/functional/hash.hpp>
-#include "FloatType.hpp"
 #include "Geometry.hpp"
 #include "LatticeSite.hpp"
 #include "Structure.hpp"

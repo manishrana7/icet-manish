@@ -42,14 +42,14 @@ public:
 
     /// Returns an orbit in the given (supercell) structure.
     Orbit getSuperCellOrbit(const Structure &,
-                            const Vector3d &,
+                            const Vector3i &,
                             const unsigned int,
                             std::unordered_map<LatticeSite, LatticeSite> &,
                             const double) const;
 
     /// Returns the local orbit list for a site.
     OrbitList getLocalOrbitList(const Structure &,
-                                const Vector3d &,
+                                const Vector3i &,
                                 std::unordered_map<LatticeSite, LatticeSite> &,
                                 const double) const;
 

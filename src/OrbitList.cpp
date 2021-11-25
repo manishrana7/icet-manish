@@ -392,7 +392,7 @@ std::vector<std::vector<LatticeSite>> OrbitList::getSitesTranslatedToUnitcell(co
 
     std::vector<std::vector<LatticeSite>> listOfTranslatedLatticeSites;
     listOfTranslatedLatticeSites.push_back(latticeSites);
-    Vector3d zeroVector = {0.0, 0.0, 0.0};
+    Vector3i zeroVector = {0, 0, 0};
     for (size_t i = 0; i < latticeSites.size(); i++)
     {
         if ((latticeSites[i].unitcellOffset() - zeroVector).norm() > 0.5) // only translate sites outside the primitive unitcell
@@ -420,7 +420,7 @@ std::vector<std::vector<LatticeSite>> OrbitList::getSitesTranslatedToUnitcell(co
 std::vector<LatticeSite> OrbitList::translateSites(const std::vector<LatticeSite> &latticeSites,
                                                    const unsigned int index) const
 {
-    Vector3d offset = latticeSites[index].unitcellOffset();
+    Vector3i offset = latticeSites[index].unitcellOffset();
     auto translatedSites = latticeSites;
     for (auto &latticeSite : translatedSites)
     {
@@ -524,7 +524,7 @@ std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> OrbitList::ge
 */
 bool OrbitList::validCluster(const std::vector<LatticeSite> &latticeSites) const
 {
-    Vector3d zeroVector = {0., 0., 0.};
+    Vector3i zeroVector = {0, 0, 0};
     for (const auto &latticeSite : latticeSites)
     {
         if (latticeSite.unitcellOffset() == zeroVector)
@@ -594,7 +594,7 @@ std::vector<LatticeSite> OrbitList::getReferenceLatticeSites(bool sort) const
 @param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
 **/
 Orbit OrbitList::getSuperCellOrbit(const Structure &supercell,
-                                   const Vector3d &cellOffset,
+                                   const Vector3i &cellOffset,
                                    const unsigned int orbitIndex,
                                    std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
                                    const double fractionalPositionTolerance) const
@@ -673,7 +673,7 @@ void OrbitList::transformSiteToSupercell(LatticeSite &site,
 @param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
 **/
 OrbitList OrbitList::getLocalOrbitList(const Structure &supercell,
-                                       const Vector3d &cellOffset,
+                                       const Vector3i &cellOffset,
                                        std::unordered_map<LatticeSite, LatticeSite> &primToSuperMap,
                                        const double fractionalPositionTolerance) const
 {

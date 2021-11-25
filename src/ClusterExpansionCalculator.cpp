@@ -90,7 +90,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     {
         Vector3d localPosition = structure.getPositions().row(i);
         LatticeSite localSite = _clusterSpace.getPrimitiveStructure().findLatticeSiteByPosition(localPosition, fractionalPositionTolerance);
-        Vector3d offsetVector = localSite.unitcellOffset();
+        Vector3i offsetVector = localSite.unitcellOffset();
         _indexToOffset[i] = offsetVector;
 
         if (_localOrbitlists.find(offsetVector) == _localOrbitlists.end())

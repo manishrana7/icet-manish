@@ -28,7 +28,7 @@ public:
             const std::vector<bool> &);
 
   /// Returns distance vector between two sites.
-  double getDistance(const size_t, const size_t, const Vector3d, const Vector3d) const;
+  double getDistance(const size_t, const size_t, const Vector3i, const Vector3i) const;
 
   /// Return the position of a site in Cartesian coordinates.
   Vector3d getPosition(const LatticeSite &) const;
