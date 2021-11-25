@@ -23,7 +23,7 @@ the cluster_space.py file
 import unittest
 from io import StringIO
 
-import numpy as np
+# import numpy as np
 from ase.build import fcc111
 from icet import ClusterExpansion, ClusterSpace
 from icet.core.lattice_site import LatticeSite
@@ -145,7 +145,6 @@ class TestVariableTransformationTriplets(unittest.TestCase):
 
     def test_is_site_group_in_orbit(self):
         """Tests _is_site_group_in_orbit functionality """
-
         # Check that a pair for which all sites have the different indices and but the same offset
         # gives true
         orbit, cluster = find_orbit_and_cluster_with_indices(self.cs.orbit_list, [2, 3])
