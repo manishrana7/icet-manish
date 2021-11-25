@@ -23,7 +23,7 @@ the cluster_space.py file
 import unittest
 from io import StringIO
 
-# import numpy as np
+import numpy as np
 from ase.build import fcc111
 from icet import ClusterExpansion, ClusterSpace
 from icet.core.lattice_site import LatticeSite
