@@ -49,10 +49,7 @@ public:
                                                bool) const;
 
     /// Returns the number of orbits.
-    size_t size() const
-    {
-        return _orbits.size();
-    }
+    size_t size() const { return _orbits.size(); }
 
     // Returns the first column of the matrix of equivalent sites.
     std::vector<LatticeSite> getReferenceLatticeSites() const;

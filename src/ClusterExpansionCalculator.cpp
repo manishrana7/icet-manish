@@ -19,9 +19,14 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     // and cluster vector differences.
     for (size_t i = 0; i < _supercell->size(); i++)
     {
+        // Find offset of this atom in terms of the primitive structure
         Vector3d position = _supercell->positionByIndex(i);
         Vector3i offset = _clusterSpace.primitiveStructure()->findLatticeSiteByPosition(position, fractionalPositionTolerance).unitcellOffset();
+
+        // Create map from atom index to offset
         _indexToOffset[i] = offset;
+
+        // If we still have not created a local orbit list for this offset, we should make one
         if (_localOrbitlists.find(offset) == _localOrbitlists.end())
         {
             _localOrbitlists[offset] = LOLG.getLocalOrbitList(offset, true);

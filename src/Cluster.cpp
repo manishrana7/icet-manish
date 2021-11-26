@@ -39,7 +39,6 @@ void Cluster::transformToSupercell(std::shared_ptr<const Structure> supercell,
 {
     LatticeSite supercellSite;
     Vector3d sitePosition;
-
     for (LatticeSite &site : _latticeSites)
     {
         auto find = primitiveToSupercellMap.find(site);
