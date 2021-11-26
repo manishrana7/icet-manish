@@ -47,7 +47,7 @@ std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> ManyB
     {
         //auto Ni = neighborLists[c - 2].getNeighbors(index);
         auto Ni = neighborLists[c - 2][index];
-        Vector3d zeroVector = {0.0, 0.0, 0.0};
+        Vector3i zeroVector = {0, 0, 0};
         std::vector<LatticeSite> currentOriginalNeighbors;
         currentOriginalNeighbors.push_back(LatticeSite(index, zeroVector)); // index is always first index
 
@@ -61,7 +61,7 @@ std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> ManyB
 void ManyBodyNeighborList::addSinglet(const int index,
                                       std::vector<std::pair<std::vector<LatticeSite>, std::vector<LatticeSite>>> &manyBodyNeighborIndices) const
 {
-    Vector3d zeroVector = {0.0, 0.0, 0.0};
+    Vector3i zeroVector = {0, 0, 0};
     LatticeSite latticeNeighborSinglet = LatticeSite(index, zeroVector);
     std::vector<LatticeSite> singletLatticeSites;
     singletLatticeSites.push_back(latticeNeighborSinglet);
@@ -77,7 +77,7 @@ void ManyBodyNeighborList::addPairs(const int index,
                                     bool saveBothWays) const
 
 {
-    Vector3d zeroVector = {0.0, 0.0, 0.0};
+    Vector3i zeroVector = {0, 0, 0};
     LatticeSite latticeNeighborIndex = LatticeSite(index, zeroVector);
 
     std::vector<LatticeSite> firstSite = {latticeNeighborIndex};
@@ -214,7 +214,7 @@ std::vector<LatticeSite> ManyBodyNeighborList::getFilteredNj(const std::vector<L
      offset j.offset with "unitCellOffset"
 
 */
-void ManyBodyNeighborList::translateAllNi(std::vector<LatticeSite> &Ni, const Vector3d &offset) const
+void ManyBodyNeighborList::translateAllNi(std::vector<LatticeSite> &Ni, const Vector3i &offset) const
 {
     for (auto &latticeSite : Ni)
     {

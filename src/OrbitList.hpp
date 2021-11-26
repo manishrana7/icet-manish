@@ -41,7 +41,7 @@ public:
 
     /// Returns the local orbit list for a site.
     OrbitList getLocalOrbitList(std::shared_ptr<Structure>,
-                                const Vector3d &,
+                                const Vector3i &,
                                 std::unordered_map<LatticeSite, LatticeSite> &,
                                 const double) const;
 

@@ -68,7 +68,7 @@ public:
                               const double);
 
     /// Translates the orbit with an offset
-    void translate(const Vector3d &);
+    void translate(const Vector3i &);
 
     /// Comparison operator for automatic sorting in containers.
     friend bool

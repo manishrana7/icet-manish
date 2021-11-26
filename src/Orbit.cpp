@@ -236,7 +236,7 @@ std::map<std::vector<int>, double> Orbit::getClusterCountChanges(const std::shar
 @brief Translates the clusters of this orbit by an offset.
 @param cellOffset Offset to translate with.
 **/
-void Orbit::translate(const Vector3d &cellOffset)
+void Orbit::translate(const Vector3i &cellOffset)
 {
     _representativeCluster.translate(cellOffset);
     for (auto &cluster : _clusters)
