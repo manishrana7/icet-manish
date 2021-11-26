@@ -13,31 +13,7 @@ LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &primitiveOrbit
       _fractionalPositionTolerance(fractionalPositionTolerance)
 {
     _primitiveStructure = std::make_shared<Structure>(primitiveOrbitList.structure());
-    _indexToClosestAtom = getIndexOfAtomClosestToOrigin();
-    mapSitesAndFindCellOffsets();
-}
-
-/// @details This position is used for extracting unit cell offsets later on.
-int LocalOrbitListGenerator::getIndexOfAtomClosestToOrigin()
-{
-    double distanceToOrigin = 1e6;
-    int indexToClosestAtom;
-    for (size_t i = 0; i < _primitiveStructure->size(); i++)
-    {
-        Vector3d position_i = _primitiveStructure->positions().row(i);
-        LatticeSite lattice_site = _primitiveStructure->findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
-        // @todo Can this be removed?
-        if (lattice_site.unitcellOffset().norm() > _fractionalPositionTolerance)
-        {
-            continue;
-        }
-        if (position_i.norm() < distanceToOrigin)
-        {
-            distanceToOrigin = position_i.norm();
-            indexToClosestAtom = i;
-        }
-    }
-    return indexToClosestAtom;
+    _mapSitesAndFindCellOffsets();
 }
 
 /**
@@ -46,7 +22,7 @@ unique primitive cell offsets. Loops through all sites in supercell and
 map them to the primitive structures cell and find the unique primitive cell
 offsets.
 */
-void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
+void LocalOrbitListGenerator::_mapSitesAndFindCellOffsets()
 {
     _primitiveToSupercellMap.clear();
 
@@ -55,29 +31,25 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
     // Map all sites
     for (size_t i = 0; i < _supercell->size(); i++)
     {
-        Vector3d position_i = _supercell->positions().row(i);
+        Vector3d position_i = _supercell->positionByIndex(i);
+        LatticeSite primitiveSite = _primitiveStructure->findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
 
-        LatticeSite primitive_site = _primitiveStructure->findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
-
-        // @todo Can we just use zero and remove
-        // the getIndexOfAtomClosestToOrigin function?
-        if (primitive_site.index() == _indexToClosestAtom)
+        // We only add the cell offsets for atoms with primitive index 0.
+        // An atom with another index that belongs to the same primitive cell,
+        // but sits on the edge of said primitive cell, may be assigned to a
+        // different offset. Such offsets are not added here, because here we
+        // only want to make sure that we have sufficient offsets
+        // to tile the supercell with primitive cells. This means that
+        // getLocalOrbitList may be called with an offset that is not in
+        // uniqueCellOffets, but that is not a problem.
+        if (primitiveSite.index() == 0)
         {
-            uniqueCellOffsets.insert(primitive_site.unitcellOffset());
+            uniqueCellOffsets.insert(primitiveSite.unitcellOffset());
         }
     }
 
-    // If empty: add zero offset
-    if (uniqueCellOffsets.size() == 0)
-    {
-        Vector3i zeroVector = {0, 0, 0};
-        uniqueCellOffsets.insert(zeroVector);
-    }
-
     _uniquePrimcellOffsets.clear();
-
     _uniquePrimcellOffsets.assign(uniqueCellOffsets.begin(), uniqueCellOffsets.end());
-
     if (_uniquePrimcellOffsets.size() != _supercell->size() / _primitiveStructure->size())
     {
         std::ostringstream msg;
@@ -99,13 +71,6 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
 */
 OrbitList LocalOrbitListGenerator::getLocalOrbitList(const Vector3i &offset, bool selfContained = false)
 {
-    if (std::find(_uniquePrimcellOffsets.begin(), _uniquePrimcellOffsets.end(), offset) == _uniquePrimcellOffsets.end())
-    {
-        std::ostringstream msg;
-        msg << "The offset " << offset << "was not found in _uniquePrimcellOffsets (LocalOrbitListGenerator::getLocalOrbitList)" << std::endl;
-        throw std::runtime_error(msg.str());
-    }
-
     OrbitList localOrbitList = OrbitList(*_supercell);
     for (const Orbit &orbit : _primitiveOrbitList.orbits())
     {

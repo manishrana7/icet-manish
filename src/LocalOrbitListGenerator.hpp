@@ -46,15 +46,12 @@ public:
     /// Returns the number of unique offsets.
     size_t getNumberOfUniqueOffsets() const { return _uniquePrimcellOffsets.size(); }
 
-    /// Returns the primitive lattice neighbor to supercell lattice neigbhor map.
-    std::unordered_map<LatticeSite, LatticeSite> getMapFromPrimitiveToSupercell() const { return _primitiveToSupercellMap; }
-
     /// Returns the unique primitive cells
     std::vector<Vector3i> getUniquePrimitiveCellOffsets() const { return _uniquePrimcellOffsets; }
 
 private:
     /// Maps supercell positions to reference.
-    void mapSitesAndFindCellOffsets();
+    void _mapSitesAndFindCellOffsets();
 
     /// Primitive orbit list.
     OrbitList _primitiveOrbitList;
@@ -67,12 +64,6 @@ private:
 
     /// Maps a lattice site from the primitive cell to an equivalent lattice site in the supercell.
     std::unordered_map<LatticeSite, LatticeSite> _primitiveToSupercellMap;
-
-    /// Finds the index of the atom that is closest to the origin.
-    int getIndexOfAtomClosestToOrigin();
-
-    /// @todo Add description
-    size_t _indexToClosestAtom;
 
     /// The unique offsets of the primitive cell required to "cover" the supercell.
     std::vector<Vector3i> _uniquePrimcellOffsets;
