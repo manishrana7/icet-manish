@@ -4,11 +4,11 @@ from ase import Atoms
 from ase.build import bulk
 
 from icet.core.lattice_site import LatticeSite
-from icet.core.cluster import Cluster
 from icet.core.orbit import Orbit
 from icet.core.orbit_list import OrbitList
 from icet.core.structure import Structure
 from _icet import _Structure
+from _icet import Cluster
 from icet.tools.geometry import get_permutation
 from icet.core.matrix_of_equivalent_positions import \
     _get_lattice_site_matrix_of_equivalent_positions, \
@@ -28,13 +28,12 @@ class TestOrbitList(unittest.TestCase):
 
         # representative clusters for testing
         # for singlet
-        self.cluster_singlet = Cluster(
-            Structure.from_atoms(self.structure),
-            [LatticeSite(0, [0, 0, 0])])
+        self.cluster_singlet = Cluster([LatticeSite(0, [0, 0, 0])],
+                                       Structure.from_atoms(self.structure))
         # for pair
         self.lattice_sites = [LatticeSite(0, [i, 0, 0]) for i in range(3)]
-        self.cluster_pair = Cluster(Structure.from_atoms(self.structure),
-                                    [self.lattice_sites[0], self.lattice_sites[1]])
+        self.cluster_pair = Cluster([self.lattice_sites[0], self.lattice_sites[1]],
+                                    Structure.from_atoms(self.structure))
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
@@ -96,8 +95,7 @@ class TestOrbitList(unittest.TestCase):
     def test_add_orbit(self):
         """Tests add_orbit funcionality."""
         n_orbits_before = len(self.orbit_list)
-        orbit = Orbit(Structure.from_atoms(self.structure),
-                      [self.lattice_sites],
+        orbit = Orbit([Cluster(self.lattice_sites, Structure.from_atoms(self.structure))],
                       set([tuple(0 for _ in self.lattice_sites)]))
         self.orbit_list.add_orbit(orbit)
         self.assertEqual(len(self.orbit_list), n_orbits_before + 1)
@@ -118,27 +116,6 @@ class TestOrbitList(unittest.TestCase):
         """Tests orbits in orbit list are sorted."""
         self.orbit_list.sort(self.position_tolerance)
 
-#    def test_find_orbit_index(self):
-#        """
-#        Tests that orbit index returned for the given representative cluster.
-#        """
-#        # TODO: test that a non-representative cluster returns -1
-#        self.assertEqual(
-#            self.orbit_list._find_orbit_index(self.cluster_singlet), 0)
-#        self.assertEqual(
-#            self.orbit_list._find_orbit_index(self.cluster_pair), 1)
-
-    def test_is_row_taken(self):
-        """Tests is_row_taken (private) functionality."""
-        taken_rows = set()
-        row_indices = [0, 1, 2]
-        self.assertFalse(self.orbit_list._is_row_taken(
-            taken_rows, row_indices))
-
-        taken_rows = set([tuple(row_indices)])
-        self.assertTrue(self.orbit_list._is_row_taken(
-            taken_rows, row_indices))
-
     def test_get_orbit_list(self):
         """Tests a list of orbits is returned from this function."""
         # clusters for testing
@@ -146,8 +123,9 @@ class TestOrbitList(unittest.TestCase):
 
         for k, orbit in enumerate(self.orbit_list.orbits):
             with self.subTest(orbit=orbit):
-                self.assertEqual(str(orbit.representative_cluster),
-                                 str(repr_clusters[k]))
+                ret_repr_cluster = orbit.representative_cluster
+                self.assertEqual(ret_repr_cluster.order, repr_clusters[k].order)
+                self.assertEqual(ret_repr_cluster.radius, repr_clusters[k].radius)
 
     def test_remove_all_orbits(self):
         """Tests removing all orbits."""
@@ -275,12 +253,10 @@ class TestOrbitList(unittest.TestCase):
         for orbit in orbit_list.orbits:
             # Set up all possible permutations
             allowed_perm = []
-            all_perm = \
-                [list(perm) for perm in permutations(range(orbit.order))]
+            all_perm = [list(perm) for perm in permutations(range(orbit.order))]
             # Get representative site of orbit
-            repr_sites = orbit.sites_of_representative_cluster
-            translated_sites = \
-                orbit_list._get_sites_translated_to_unitcell(repr_sites, False)
+            repr_sites = orbit.representative_cluster.lattice_sites
+            translated_sites = orbit_list._get_sites_translated_to_unitcell(repr_sites, False)
             for sites in translated_sites:
                 for perm in all_perm:
                     # Permute translated sites
@@ -316,10 +292,11 @@ class TestOrbitList(unittest.TestCase):
         for orbit in orbit_list.orbits:
             match_repr_site = False
             # Take representative sites and translate them into unitcell
-            repr_sites = orbit.sites_of_representative_cluster
+            repr_sites = orbit.representative_cluster.lattice_sites
             # Take equivalent sites and its permutations_to_representative
-            for eq_sites in orbit.equivalent_clusters:
-                trans_eq_sites = orbit_list._get_sites_translated_to_unitcell(eq_sites, False)
+            for cluster in orbit.clusters:
+                trans_eq_sites = orbit_list._get_sites_translated_to_unitcell(
+                    cluster.lattice_sites, False)
                 # Get all columns from each group of sites
                 for sites in trans_eq_sites:
                     columns = orbit_list._get_all_columns_from_sites(sites)

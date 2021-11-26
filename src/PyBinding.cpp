@@ -79,7 +79,7 @@ PYBIND11_MODULE(_icet, m)
     py::options options;
     options.disable_function_signatures();
 
-    py::class_<Structure>(m, "_Structure")
+    py::class_<Structure, std::shared_ptr<Structure>>(m, "_Structure")
         .def(py::init<>())
         .def(py::init<const Eigen::Matrix<double, Dynamic, 3, Eigen::RowMajor> &,
                       const py::array_t<int> &,
@@ -102,7 +102,7 @@ PYBIND11_MODULE(_icet, m)
             "list(list(float)) : cell metric")
         .def_property(
             "positions",
-            &Structure::getPositions,
+            &Structure::positions,
             &Structure::setPositions,
             "list(list(float)) : atomic positions in Cartesian coordinates")
         .def_property("atomic_numbers",
@@ -123,7 +123,7 @@ PYBIND11_MODULE(_icet, m)
              numbersOfAllowedSpecies : list(int)
              )pbdoc")
         .def("get_position",
-             &Structure::getPosition,
+             &Structure::position,
              py::arg("site"),
              R"pbdoc(
              Returns the position of a specified site
@@ -137,31 +137,6 @@ PYBIND11_MODULE(_icet, m)
              -------
              vector
                  position in Cartesian coordinates
-             )pbdoc")
-        .def("get_distance",
-             &Structure::getDistance,
-             py::arg("index1"),
-             py::arg("index2"),
-             py::arg("offset1") = Vector3d(0, 0, 0),
-             py::arg("offset2") = Vector3d(0, 0, 0),
-             R"pbdoc(
-             Returns the distance between two sites
-
-             Parameters
-             ----------
-             index1 : int
-                 index of the first site
-             index2 : int
-                 index of the second site
-             offset1 : vector
-                 offset to be applied to the first site
-             offset2 : vector
-                 offset to be applied to the second site
-
-             Returns
-             -------
-             float
-                 distance in length units
              )pbdoc")
         .def("find_lattice_site_by_position",
              &Structure::findLatticeSiteByPosition,
@@ -202,40 +177,43 @@ PYBIND11_MODULE(_icet, m)
         structure : icet Structure instance
             atomic configuration
         lattice_sites : list(int)
-            list of lattice sites that form the cluster
+            list of the lattice sites that form the cluster
         )pbdoc")
-        .def(py::init<const Structure &,
-                      const std::vector<LatticeSite> &>(),
+        .def(py::init<const std::vector<LatticeSite> &,
+                      std::shared_ptr<const Structure>>(),
              "Initializes a cluster instance.",
-             py::arg("structure"),
-             py::arg("lattice_sites"))
+             py::arg("lattice_sites"),
+             py::arg("structure"))
         .def_property_readonly(
-            "distances",
-            &Cluster::distances,
-            "list(float) : list of distances between sites")
+            "lattice_sites",
+            &Cluster::latticeSites,
+            "list(LatticeSite) : list of the lattice sites that constitute the cluster")
         .def_property_readonly(
             "radius",
             &Cluster::radius,
             "float : the radius of the cluster")
         .def_property_readonly(
+            "distances",
+            &Cluster::distances,
+            "List[float] : the distances between the points in the cluster")
+        .def_property_readonly(
             "order",
             &Cluster::order,
             "int : order of the cluster (= number of sites)")
+        .def_property_readonly(
+            "positions",
+            &Cluster::positions,
+            "List[float] : positions of sites in the cluster in Cartesian coordinates")
         .def("__len__",
              &Cluster::order)
-        .def("__str__",
-             [](const Cluster &cluster)
-             {
-                 std::ostringstream msg;
-                 msg << "radius: " << cluster.radius();
-                 msg << " vertices:";
-                 for (const auto dist : cluster.distances())
-                 {
-                     msg << " " << std::to_string(dist);
-                 }
-                 return msg.str();
-             });
-    ;
+        .def(
+            "__str__",
+            [](const Cluster &cluster)
+            {
+                std::ostringstream msg;
+                msg << cluster;
+                return msg.str();
+            });
 
     py::class_<LatticeSite>(m, "LatticeSite",
                             R"pbdoc(
@@ -293,25 +271,19 @@ PYBIND11_MODULE(_icet, m)
             multi-component vector [0, 1, 0] is the same as
             [0, 0, 1])
         )pbdoc")
-        .def(py::init<const Structure &,
-                      const std::vector<std::vector<LatticeSite>>,
+        .def(py::init<const std::vector<Cluster>,
                       const std::set<std::vector<int>>>())
         .def_property_readonly(
             "representative_cluster",
-            &Orbit::getRepresentativeCluster,
+            &Orbit::representativeCluster,
             "cluster to which all other symmetry equivalent clusters can be related")
         .def_property_readonly(
-            "sites_of_representative_cluster", &Orbit::getSitesOfRepresentativeCluster,
-            "list of sites that comprise the representative cluster")
-        .def_property_readonly(
             "order",
-            [](const Orbit &orbit)
-            { return orbit.order(); },
+            &Orbit::order,
             "number of sites in the representative cluster")
         .def_property_readonly(
             "radius",
-            [](const Orbit &orbit)
-            { return orbit.radius(); },
+            &Orbit::radius,
             "radius of the representative cluster")
         .def_property_readonly(
             "allowed_permutations",
@@ -323,17 +295,16 @@ PYBIND11_MODULE(_icet, m)
             },
             R"pbdoc(
              Gets the list of equivalent permutations for this orbit. If this
-             orbit is a triplet and the permutation [0,2,1] exists this means
+             orbit is a triplet and the permutation [0, 2, 1] exists this means
              that The lattice sites [s1, s2, s3] are equivalent to [s1, s3,
              s2] This will have the effect that for a ternary CE the cluster
-             functions (0,1,0) will not be considered since it is equivalent
-             to (0,0,1).
+             functions (0, 1, 0) will not be considered since it is equivalent
+             to (0, 0, 1).
              )pbdoc")
-        .def_property(
-            "equivalent_clusters",
-            &Orbit::getEquivalentClusters,
-            &Orbit::setEquivalentClusters,
-            "list of symmetry equivalent clusters")
+        .def_property_readonly(
+            "clusters",
+            &Orbit::clusters,
+            "list of the clusters in this orbit")
         .def("get_multicomponent_vectors", &Orbit::getMultiComponentVectors,
              R"pbdoc(
              Return the multi-component vectors for this orbit given the allowed components.
@@ -347,14 +318,14 @@ PYBIND11_MODULE(_icet, m)
                 of allowed compoments at lattice site
                 orbit.representative_cluster[i].)pbdoc")
         .def(
-            "count_clusters",
+            "get_cluster_counts",
             [](const Orbit &orbit,
-               const Structure &structure,
+               std::shared_ptr<Structure> structure,
                const int siteIndexForDoubleCountingCorrection)
             {
                 py::dict clusterCountDict;
-                for (const auto &mapPair : orbit.countClusters(structure,
-                                                               siteIndexForDoubleCountingCorrection))
+                for (const auto &mapPair : orbit.getClusterCounts(structure,
+                                                                  siteIndexForDoubleCountingCorrection))
                 {
                     py::list element_symbols;
                     for (auto el : mapPair.first)
@@ -399,6 +370,19 @@ PYBIND11_MODULE(_icet, m)
 
              returns all_mc_vectors : list(list(int)
              )pbdoc")
+        .def("translate",
+             &Orbit::translate,
+             py::arg("offset"),
+             R"pbdoc(
+             Translate the clusters in the orbit by a constant offset.
+
+             Parameters
+             ----------
+             offset : List[int]
+                offset in multiples of the cell vectors of
+                the structure used to define the clusters in this orbit
+                (typically the primitive structure)
+             )pbdoc")
         .def("__len__", &Orbit::size)
         .def("__str__",
              [](const Orbit &orbit)
@@ -408,17 +392,17 @@ PYBIND11_MODULE(_icet, m)
                  msg << "multiplicity: " << orbit.size() << std::endl;
                  msg << "radius: " << orbit.radius() << std::endl;
                  msg << "representative_cluster:" << std::endl;
-                 for (const auto site : orbit.getSitesOfRepresentativeCluster())
+                 for (const auto site : orbit.representativeCluster().latticeSites())
                  {
                      msg << "    site: " << site << std::endl;
                  }
-                 msg << "equivalent_clusters:" << std::endl;
+                 msg << "clusters:" << std::endl;
                  int k = -1;
-                 for (const auto sites : orbit.getEquivalentClusters())
+                 for (const auto cluster : orbit.clusters())
                  {
                      k += 1;
                      msg << "  cluster: " << k << std::endl;
-                     for (const auto site : sites)
+                     for (const auto site : cluster.latticeSites())
                      {
                          msg << "    site: " << site << std::endl;
                      }
@@ -426,11 +410,10 @@ PYBIND11_MODULE(_icet, m)
                  return msg.str();
              })
         .def(py::self < py::self)
-        .def(py::self + Eigen::Vector3i())
         .def(py::self += py::self);
 
     py::class_<OrbitList, std::shared_ptr<OrbitList>>(m, "_OrbitList",
-                          R"pbdoc(
+                                                      R"pbdoc(
         This class manages an orbit list. The orbit list is constructed for the given
         structure using the matrix of equivalent sites and a list of neighbor lists.
 
@@ -489,20 +472,6 @@ PYBIND11_MODULE(_icet, m)
              index : int
                  index of the orbit to be removed
              )pbdoc")
-        .def("_is_row_taken",
-             &OrbitList::isRowsTaken,
-             R"pbdoc(
-             Returns true if rows exist in taken_rows.
-
-             Parameters
-             ----------
-             taken_rows : set(tuple(int))
-                 unique collection of row index
-             rows : list(int)
-                 row indices
-             )pbdoc",
-             py::arg("taken_rows"),
-             py::arg("rows"))
         .def("_get_sites_translated_to_unitcell",
              &OrbitList::getSitesTranslatedToUnitcell,
              R"pbdoc(
@@ -530,7 +499,7 @@ PYBIND11_MODULE(_icet, m)
              )pbdoc",
              py::arg("sites"))
         .def("get_primitive_structure",
-             &OrbitList::getPrimitiveStructure,
+             &OrbitList::primitiveStructure,
              "Returns the primitive atomic structure used to construct the OrbitList instance.")
         .def("__len__",
              &OrbitList::size,
@@ -556,7 +525,7 @@ PYBIND11_MODULE(_icet, m)
             tolerance for positions in fractional coordinates
         )pbdoc")
         .def(py::init<const OrbitList &,
-                      const Structure &,
+                      std::shared_ptr<Structure>,
                       const double>(),
              "Constructs a LocalOrbitListGenerator object from an orbit list and a structure.",
              py::arg("orbit_list"),
@@ -651,7 +620,7 @@ PYBIND11_MODULE(_icet, m)
              &ClusterSpace::getChemicalSymbols,
              "Returns list of species associated with cluster space as chemical symbols.")
         .def("get_cutoffs", &ClusterSpace::getCutoffs)
-        .def("_get_primitive_structure", &ClusterSpace::getPrimitiveStructure)
+        .def("_get_primitive_structure", &ClusterSpace::primitiveStructure)
         .def("get_multicomponent_vector_permutations", &ClusterSpace::getMultiComponentVectorPermutations)
         .def("get_number_of_allowed_species_by_site", &ClusterSpace::getNumberOfAllowedSpeciesBySite)
         .def("_remove_orbits_cpp", &ClusterSpace::removeOrbits)

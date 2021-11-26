@@ -25,34 +25,25 @@ class Orbit
 {
 public:
     /// Constructor.
-    Orbit(const Structure &, const std::vector<std::vector<LatticeSite>>, const std::set<std::vector<int>>);
+    Orbit(const std::vector<Cluster>, const std::set<std::vector<int>>);
 
     /// Adds one cluster to the orbit.
-    void addEquivalentCluster(const std::vector<LatticeSite> &);
+    void addCluster(const Cluster &);
 
-    /// Returns the number of equivalent clusters in this orbit.
-    size_t size() const { return _equivalentClusters.size(); }
+    /// Returns the number of clusters in this orbit.
+    size_t size() const { return _clusters.size(); }
 
     /// Returns the radius of the representative cluster in this orbit.
-    double radius() const { return _representativeCluster.radius(); }
+    double radius() const { return representativeCluster().radius(); }
 
-    /// Returns the sorted, representative cluster for this orbit.
-    const Cluster &getRepresentativeCluster() const { return _representativeCluster; }
+    /// Returns the representative cluster for this orbit
+    const Cluster &representativeCluster() const { return _representativeCluster; }
 
-    /// Returns the sites that define the representative cluster of this orbit.
-    const std::vector<LatticeSite> &getSitesOfRepresentativeCluster() const { return _equivalentClusters[0]; }
-
-    /// Returns the equivalent cluster.
-    std::vector<LatticeSite> getClusterByIndex(unsigned int) const;
-
-    /// Returns all equivalent clusters.
-    const std::vector<std::vector<LatticeSite>> &getEquivalentClusters() const { return _equivalentClusters; }
-
-    /// Sets the equivalent clusters.
-    void setEquivalentClusters(const std::vector<std::vector<LatticeSite>> &equivalentClusters) { _equivalentClusters = equivalentClusters; }
+    /// Returns all clusters in this orbit.
+    const std::vector<Cluster> &clusters() const { return _clusters; }
 
     /// Returns the number of bodies of the cluster that represent this orbit.
-    unsigned int order() const { return _representativeCluster.order(); }
+    unsigned int order() const { return representativeCluster().order(); }
 
     /// Gets the allowed permutations of clusters.
     std::set<std::vector<int>> getAllowedClusterPermutations() const { return _allowedClusterPermutations; }
@@ -62,17 +53,26 @@ public:
 
     std::vector<std::vector<int>> getAllPossibleMultiComponentVectorPermutations(const std::vector<int> &Mi_local) const;
 
-    /// Returns true if the input sites exists in _equivalentClusters, order does not matter if sorted=false.
+    /// Returns true if the input sites exists in _clusters, order does not matter if sorted=false.
     bool contains(const std::vector<LatticeSite>, bool) const;
 
-    /// Counts occupations of clusters in this orbit
-    std::map<std::vector<int>, double> countClusters(const Structure &, int doNotDoubleCountThisSiteIndex = -1) const;
+    /// Counts occupations of clusters in this orbit.
+    std::map<std::vector<int>, double> getClusterCounts(std::shared_ptr<Structure>, int doNotDoubleCountThisSiteIndex = -1) const;
 
-    /// Counts changes in the occupation of clusters in this orbit
-    std::map<std::vector<int>, double> countClusterChanges(const Structure &, const int, const int) const;
+    /// Counts changes in the occupation of clusters in this orbit.
+    std::map<std::vector<int>, double> getClusterCountChanges(std::shared_ptr<Structure>, const int, const int) const;
+
+    /// Returns a copy of this orbit in the given (supercell) structure.
+    void transformToSupercell(std::shared_ptr<Structure>,
+                              std::unordered_map<LatticeSite, LatticeSite> &,
+                              const double);
+
+    /// Translates the orbit with an offset
+    void translate(const Vector3i &);
 
     /// Comparison operator for automatic sorting in containers.
-    friend bool operator==(const Orbit &orbit1, const Orbit &orbit2)
+    friend bool
+    operator==(const Orbit &orbit1, const Orbit &orbit2)
     {
         throw std::logic_error("Reached equal operator in Orbit");
     }
@@ -83,54 +83,34 @@ public:
         throw std::logic_error("Reached < operator in Orbit");
     }
 
-    /**
-    Creates a copy of this orbit and translates all LatticeSite offsets in equivalent sites.
-    This will also transfer any existing permutations directly, which should be fine since an offset does not change permutations to the prototype sites.
-    */
-    friend Orbit operator+(const Orbit &orbit, const Eigen::Vector3i &offset)
-    {
-        Orbit orbitOffset = orbit;
-        for (auto &latticeSites : orbitOffset._equivalentClusters)
-        {
-            for (auto &latticeSite : latticeSites)
-            {
-                latticeSite = latticeSite + offset;
-            }
-        }
-        return orbitOffset;
-    }
-
     /// Appends an orbit to this orbit.
     Orbit &operator+=(const Orbit &orbit_rhs)
     {
         // Get representative sites
-        auto rep_sites_rhs = orbit_rhs.getSitesOfRepresentativeCluster();
-        auto rep_sites_this = getSitesOfRepresentativeCluster();
+        auto rep_sites_rhs = orbit_rhs.representativeCluster().latticeSites();
+        auto rep_sites_this = _representativeCluster.latticeSites();
 
         if (rep_sites_this.size() != rep_sites_rhs.size())
         {
             throw std::runtime_error("Orbit order is not equal (Orbit &operator+=)");
         }
 
-        const auto rhsEquivalentClusters = orbit_rhs.getEquivalentClusters();
+        const auto rhsClusters = orbit_rhs.clusters();
 
         // Insert rhs eq sites
-        _equivalentClusters.insert(_equivalentClusters.end(), rhsEquivalentClusters.begin(), rhsEquivalentClusters.end());
+        _clusters.insert(_clusters.end(), rhsClusters.begin(), rhsClusters.end());
         return *this;
     }
 
 private:
-    /// Container of equivalent sites for this orbit
-    std::vector<std::vector<LatticeSite>> _equivalentClusters;
+    /// Container of all clusters in this orbit
+    std::vector<Cluster> _clusters;
 
-    /// Representative sorted cluster for this orbit
+    /// One of the clusters chosen to represent the orbit
     Cluster _representativeCluster;
 
     /// Contains the allowed sites permutations. i.e. if 0, 2, 1 is in this set then 0, 1, 0 is the same multi-component vector as 0, 0, 1
     std::set<std::vector<int>> _allowedClusterPermutations;
-
-    /// Check whether a site is included in a vector of lattice sites
-    bool isSiteIncluded(const int, const std::vector<LatticeSite> &) const;
 };
 
 namespace std

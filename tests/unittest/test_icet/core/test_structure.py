@@ -100,15 +100,6 @@ class TestStructure(unittest.TestCase):
         retval = self.icet_structure.get_position(LatticeSite(1, [0, 0, 0]))
         self.assertListEqual(retval.tolist(), self.positions[1])
 
-    def test_get_distance(self):
-        """Tests get_distance functionality."""
-        retval = self.icet_structure.get_distance(0, 1,
-                                                  [0., 0., 0.],
-                                                  [0., 0., 0.])
-
-        target = self.icet_structure.get_distance(0, 1)
-        self.assertAlmostEqual(retval, target)
-
     def test_find_lattice_site_by_position_with_tolerance(self):
         """Tests the find lattice site by position method
            by varying the tolerance

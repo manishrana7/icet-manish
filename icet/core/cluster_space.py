@@ -23,8 +23,7 @@ from icet.core.orbit_list import OrbitList
 from icet.core.structure import Structure
 from icet.core.sublattices import Sublattices
 from icet.tools.geometry import (ase_atoms_to_spglib_cell,
-                                 get_occupied_primitive_structure,
-                                 get_position_from_lattice_site)
+                                 get_occupied_primitive_structure)
 
 
 class ClusterSpace(_ClusterSpace):
@@ -357,7 +356,7 @@ class ClusterSpace(_ClusterSpace):
             orbit_index = multicomponent_vectors_by_orbit[0]
             mc_vector = multicomponent_vectors_by_orbit[1]
             orbit = self.orbit_list.get_orbit(orbit_index)
-            repr_sites = orbit.sites_of_representative_cluster
+            repr_sites = orbit.representative_cluster.lattice_sites
             orbit_sublattices = '-'.join(
                 [sublattices[sublattices.get_sublattice_index(ls.index)].symbol
                  for ls in repr_sites])
@@ -368,7 +367,7 @@ class ClusterSpace(_ClusterSpace):
             mc_index = mc_vectors.index(mc_vector)
             mc_permutations_multiplicity = len(mc_permutations[mc_index])
             cluster = orbit.representative_cluster
-            multiplicity = len(orbit.equivalent_clusters)
+            multiplicity = len(orbit.clusters)
 
             record = OrderedDict([('index', index),
                                   ('order', cluster.order),
@@ -425,7 +424,6 @@ class ClusterSpace(_ClusterSpace):
     def get_coordinates_of_representative_cluster(self, orbit_index: int) -> List[Tuple[float]]:
         """
         Returns the positions of the sites in the representative cluster of the selected orbit.
-
         Parameters
         ----------
         orbit_index
@@ -434,16 +432,7 @@ class ClusterSpace(_ClusterSpace):
         # Raise exception if chosen orbit index not in current list of orbit indices
         if orbit_index not in range(len(self._orbit_list)):
             raise ValueError('The input orbit index is not in the list of possible values.')
-
-        lattice_sites = self._orbit_list.get_orbit(orbit_index).sites_of_representative_cluster
-        positions = []
-
-        for site in lattice_sites:
-            pos = get_position_from_lattice_site(structure=self.primitive_structure,
-                                                 lattice_site=site)
-            positions.append(pos)
-
-        return positions
+        return self._orbit_list.get_orbit(orbit_index).representative_cluster.positions
 
     def _remove_orbits(self, indices: List[int]) -> None:
         """
@@ -507,12 +496,9 @@ class ClusterSpace(_ClusterSpace):
         orbit_index
         """
         orbit = self.orbit_list.orbits[orbit_index]
-
-        indices = [
-            lattice_site.index for lattice_site in orbit.sites_of_representative_cluster]
-
+        indices = [lattice_site.index
+                   for lattice_site in orbit.representative_cluster.lattice_sites]
         allowed_species = [self.chemical_symbols[index] for index in indices]
-
         return list(itertools.product(*allowed_species))
 
     def get_sublattices(self, structure: Atoms) -> Sublattices:
@@ -595,8 +581,8 @@ class ClusterSpace(_ClusterSpace):
             >>> cs = ClusterSpace(structure=structure, cutoffs=[3.8], chemical_symbols=['Au', 'Ag'])
             >>>
             >>> # At this point, one can inspect the orbits in the cluster space by printing the
-            >>> #  `cs` object and by using its `get_coordinates_of_representative_cluster()`
-            >>> # method. There will be 4 singlets and 8 pairs.
+            >>> # `cs` object and accessing the individial orbits.
+            >>> # There will be 4 singlets and 8 pairs.
             >>>
             >>> # Merge singlets for third and fourth layers as well as all pairs except for
             >>> # the one corresponding to the in-plane interaction in the outmost surface
@@ -650,8 +636,8 @@ class ClusterSpace(_ClusterSpace):
             fractional_position_tolerance=self.fractional_position_tolerance)
         orbit_indices = set()
         for orbit in ol.orbits:
-            for sites in orbit.equivalent_clusters:
-                indices = tuple(sorted([site.index for site in sites]))
+            for cluster in orbit.clusters:
+                indices = tuple(sorted([site.index for site in cluster.lattice_sites]))
                 if indices in orbit_indices:
                     return True
                 else:

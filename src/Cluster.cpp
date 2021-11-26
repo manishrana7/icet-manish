@@ -1,41 +1,206 @@
 #include "Cluster.hpp"
 
 /**
-@details Create an instance of a cluster.
+@details Creates an instance of a cluster.
 @param structure icet structure object
 @param latticeSites list of lattice sites that form the cluster
 */
-Cluster::Cluster(const Structure &structure,
-                 const std::vector<LatticeSite> &latticeSites)
+Cluster::Cluster(const std::vector<LatticeSite> &latticeSites,
+                 std::shared_ptr<const Structure> structure)
 {
-    _order = latticeSites.size();
-    std::vector<double> distances;
-    distances.reserve((_order * (_order - 1) / 2));
-    for (size_t i = 0; i < latticeSites.size(); i++)
-    {
-        for (size_t j = i + 1; j < latticeSites.size(); j++)
-        {
-            double distance = structure.getDistance(latticeSites[i].index(),
-                                                    latticeSites[j].index(),
-                                                    latticeSites[i].unitcellOffset(),
-                                                    latticeSites[j].unitcellOffset());
-            distances.push_back(distance);
-        }
-    }
-    _distances = distances;
-    _radius = icet::getGeometricalRadius(latticeSites, structure);
+    _latticeSites = latticeSites;
+    _structure = structure;
 }
 
-namespace std
+/** 
+@brief Translates this cluster by an offset.
+@param offset Coordinates referring to the axes of the structure in this cluster
+**/
+void Cluster::translate(const Eigen::Vector3i &offset)
 {
-    /// Stream operator.
-    ostream &operator<<(ostream &os, const Cluster &cluster)
+    for (LatticeSite &site : _latticeSites)
     {
-        for (const auto d : cluster.distances())
-        {
-            os << d << " ";
-        }
-        os << cluster.radius();
-        return os;
+        site.addUnitcellOffset(offset);
     }
+}
+
+/**
+@details Transforms a site from the primitive structure to a given supercell.
+This involves finding a map from the site in the primitive cell to the supercell.
+If no map is found mapping is attempted based on the position of the site in the supercell.
+(The map is important for performance.)
+@param supercell supercell structure
+@param primitiveToSupercellMap map from primitive to supercell
+@param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
+**/
+void Cluster::transformToSupercell(std::shared_ptr<const Structure> supercell,
+                                   std::unordered_map<LatticeSite, LatticeSite> &primitiveToSupercellMap,
+                                   const double fractionalPositionTolerance)
+{
+    LatticeSite supercellSite;
+    Vector3d sitePosition;
+    for (LatticeSite &site : _latticeSites)
+    {
+        auto find = primitiveToSupercellMap.find(site);
+
+        if (find == primitiveToSupercellMap.end())
+        {
+            sitePosition = _structure->position(site);
+            supercellSite = supercell->findLatticeSiteByPosition(sitePosition, fractionalPositionTolerance);
+            primitiveToSupercellMap[site] = supercellSite;
+        }
+        else
+        {
+            supercellSite = primitiveToSupercellMap[site];
+        }
+
+        // overwrite site to match supercell index offset
+        site.setIndex(supercellSite.index());
+        site.setUnitcellOffset(supercellSite.unitcellOffset());
+    }
+    // Now all sites refer to the supercell, so we change the _structure to point to the supercell
+    _structure = supercell;
+}
+
+/**
+@brief Computes the geometrical radius of the cluster.
+*/
+double Cluster::radius() const
+{
+    // The radius is always zero for singlets
+    if (order() <= 1)
+    {
+        return 0.0;
+    }
+    // Compute the center of the cluster.
+    Vector3d centerPosition = {0.0, 0.0, 0.0};
+    for (const auto &site : _latticeSites)
+    {
+        centerPosition += _structure->position(site);
+    }
+    centerPosition /= _latticeSites.size();
+
+    // Compute the average distance of the points in the cluster to its center.
+    double avgDistanceToCenter = 0.0;
+    for (const auto &site : _latticeSites)
+    {
+        avgDistanceToCenter += (centerPosition - _structure->position(site)).norm();
+    }
+    avgDistanceToCenter /= order();
+    return avgDistanceToCenter;
+}
+
+/**
+@brief Returns the positions of the sites in this cluster in Cartesian coordinates.
+**/
+std::vector<Vector3d> Cluster::positions() const
+{
+    std::vector<Vector3d> currentPositions;
+    for (const LatticeSite &site : _latticeSites)
+    {
+        currentPositions.push_back(_structure->position(site));
+    }
+    return currentPositions;
+}
+
+/**
+@brief Returns the distances between the points in this cluster.
+**/
+std::vector<float> Cluster::distances() const
+{
+    std::vector<Vector3d> currentPositions = positions();
+    std::vector<float> distances = {};
+    for (int i = 1; i < currentPositions.size(); i++)
+    {
+        for (int j = 0; j < i; j++)
+        {
+            distances.push_back((currentPositions[j] - currentPositions[i]).norm());
+        }
+    }
+    return distances;
+}
+
+/**
+@brief Checks whether a site index is included with a zero offset.
+@param siteIndex Index of site to check whether it is included
+*/
+bool Cluster::isSiteIndexIncludedWithZeroOffset(int siteIndex) const
+{
+    return std::any_of(_latticeSites.begin(), _latticeSites.end(), [=](const LatticeSite &ls)
+                       { return ls.index() == siteIndex && ls.unitcellOffset().norm() < 1e-4; });
+}
+
+/**
+@brief Counts the number of occurences of a site index among the sites in this cluster
+@param siteIndex Index of site to count
+*/
+unsigned int Cluster::getCountOfOccurencesOfSiteIndex(int siteIndex) const
+{
+    return std::count_if(_latticeSites.begin(), _latticeSites.end(), [=](const LatticeSite &ls)
+                         { return ls.index() == siteIndex; });
+}
+
+/**
+@brief Stream operator for a Cluster.
+*/
+std::ostream &operator<<(std::ostream &os, const Cluster &cluster)
+{
+    int width = 77;
+    std::string padding((width - 9) / 2, '=');
+
+    // Print general information
+    os << padding << " Cluster " << padding << std::endl;
+    os << " Order:      " << cluster.order() << std::endl;
+    os << " Radius:     " << cluster.radius() << std::endl;
+    if (cluster.order() > 1)
+    {
+        os << " Distances:";
+        for (float d : cluster.distances())
+        {
+            os << "  " << d;
+        }
+        os << std::endl;
+    }
+
+    // Print lattice sites
+    os << std::string(width, '-') << std::endl;
+    os << " Unitcell index |   Unitcell offset   |    Position" << std::endl;
+    os << std::string(width, '-') << std::endl;
+    for (int site_i = 0; site_i < cluster.order(); site_i++)
+    {
+        LatticeSite site = cluster.latticeSites()[site_i];
+        Vector3d position = cluster.positions()[site_i];
+
+        // Print index
+        std::string s = std::to_string(site.index());
+        padding = std::string(14 - s.size(), ' ');
+        os << padding << s << "  |";
+
+        // Print offset
+        Vector3i offset = site.unitcellOffset();
+        s = "";
+        std::string sPart;
+        for (int i = 0; i < 3; i++)
+        {
+            sPart = std::to_string(offset[i]);
+            padding = std::string(5 - sPart.size(), ' ');
+            s += " " + padding + sPart;
+        }
+        padding = std::string(19 - s.size(), ' ');
+        os << padding << s << "  |";
+
+        // Print position
+        s = "";
+        for (int i = 0; i < 3; i++)
+        {
+            sPart = std::to_string(position[i]);
+            padding = std::string(11 - sPart.size(), ' ');
+            s += " " + padding + sPart;
+        }
+        padding = std::string(36 - s.size(), ' ');
+        os << padding << s << std::endl;
+    }
+
+    os << std::string(width, '=');
+    return os;
 }

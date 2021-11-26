@@ -249,10 +249,10 @@ class GroundStateFinder:
         cluster_to_orbit_map = []
         for orb_index in range(len(full_orbit_list)):
 
-            equivalent_clusters = full_orbit_list.get_orbit(orb_index).equivalent_clusters
+            clusters = full_orbit_list.get_orbit(orb_index).clusters
 
             # Determine the sites and the orbit associated with each cluster
-            for cluster in equivalent_clusters:
+            for cluster in clusters:
 
                 # Do not include clusters for which the parameter is 0
                 parameter = self._transformed_parameters[orb_index + 1]
@@ -260,7 +260,7 @@ class GroundStateFinder:
                     continue
 
                 # Add the the list of sites and the orbit to the respective cluster maps
-                cluster_sites = [site.index for site in cluster]
+                cluster_sites = [site.index for site in cluster.lattice_sites]
                 cluster_to_sites_map.append(cluster_sites)
                 cluster_to_orbit_map.append(orb_index)
 

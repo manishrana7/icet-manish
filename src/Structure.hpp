@@ -27,14 +27,11 @@ public:
             const Matrix3d &,
             const std::vector<bool> &);
 
-  /// Returns distance vector between two sites.
-  double getDistance(const size_t, const size_t, const Vector3i, const Vector3i) const;
+  /// Return the position of a site in Cartesian coordinates.
+  Vector3d position(const LatticeSite &) const;
 
   /// Return the position of a site in Cartesian coordinates.
-  Vector3d getPosition(const LatticeSite &) const;
-
-  /// Return the position of a site in Cartesian coordinates.
-  Vector3d getPositionByIndex(const size_t &index) const;
+  Vector3d positionByIndex(const size_t &index) const;
 
   /// Returns atomic number of site.
   int getAtomicNumber(const size_t) const;
@@ -49,7 +46,7 @@ public:
   void setPositions(const Matrix<double, Dynamic, 3> &positions) { _positions = positions; }
 
   /// Returns positions.
-  Matrix<double, Dynamic, 3, RowMajor> getPositions() const { return _positions; }
+  Matrix<double, Dynamic, 3, RowMajor> positions() const { return _positions; }
 
   /// Set atomic numbers.
   void setAtomicNumbers(const py::array_t<int> &atomicNumbers) { _atomicNumbers = atomicNumbers; }
