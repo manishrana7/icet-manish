@@ -13,24 +13,12 @@ LocalOrbitListGenerator::LocalOrbitListGenerator(const OrbitList &primitiveOrbit
       _fractionalPositionTolerance(fractionalPositionTolerance)
 {
     _primitiveStructure = std::make_shared<Structure>(primitiveOrbitList.structure());
-    _mapSitesAndFindCellOffsets();
-}
 
-/**
-@details Maps supercell positions to reference to the primitive cell and find
-unique primitive cell offsets. Loops through all sites in supercell and
-map them to the primitive structures cell and find the unique primitive cell
-offsets.
-*/
-void LocalOrbitListGenerator::_mapSitesAndFindCellOffsets()
-{
-    _primitiveToSupercellMap.clear();
-
-    std::set<Vector3i, Vector3iCompare> uniqueCellOffsets;
-
-    // Map all sites
+    // Extract unique primitive cell offsets, i.e., all offsets in units of the
+    // primitive lattice vectors that together tile the supercell
     for (size_t i = 0; i < _supercell->size(); i++)
     {
+        // Find the lattice site of the supercell site in terms of the primitive cell
         Vector3d position_i = _supercell->positionByIndex(i);
         LatticeSite primitiveSite = _primitiveStructure->findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
 
@@ -44,21 +32,18 @@ void LocalOrbitListGenerator::_mapSitesAndFindCellOffsets()
         // uniqueCellOffets, but that is not a problem.
         if (primitiveSite.index() == 0)
         {
-            uniqueCellOffsets.insert(primitiveSite.unitcellOffset());
+            _uniquePrimitiveCellOffsets.push_back(primitiveSite.unitcellOffset());
         }
     }
-
-    _uniquePrimcellOffsets.clear();
-    _uniquePrimcellOffsets.assign(uniqueCellOffsets.begin(), uniqueCellOffsets.end());
-    if (_uniquePrimcellOffsets.size() != _supercell->size() / _primitiveStructure->size())
+    if (_uniquePrimitiveCellOffsets.size() != _supercell->size() / _primitiveStructure->size())
     {
         std::ostringstream msg;
-        msg << "Wrong number of unitcell offsets found (LocalOrbitListGenerator::mapSitesAndFindCellOffsets)." << std::endl;
+        msg << "Wrong number of unitcell offsets found (LocalOrbitListGenerator constructor)." << std::endl;
         msg << "Expected: " << _supercell->size() / _primitiveStructure->size() << std::endl;
-        msg << "Found:    " << _uniquePrimcellOffsets.size();
+        msg << "Found:    " << _uniquePrimitiveCellOffsets.size();
         throw std::runtime_error(msg.str());
     }
-    std::sort(_uniquePrimcellOffsets.begin(), _uniquePrimcellOffsets.end(), Vector3iCompare());
+    std::sort(_uniquePrimitiveCellOffsets.begin(), _uniquePrimitiveCellOffsets.end(), Vector3iCompare());
 }
 
 /**
@@ -130,7 +115,8 @@ OrbitList LocalOrbitListGenerator::getFullOrbitList()
 {
     OrbitList orbitList = OrbitList(*_supercell);
 
-    for (auto &offset : _uniquePrimcellOffsets)
+    // Generate the full orbit list by adding together the local orbit lists for each unique offset
+    for (auto &offset : _uniquePrimitiveCellOffsets)
     {
         orbitList += getLocalOrbitList(offset);
     }
