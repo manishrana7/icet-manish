@@ -16,7 +16,7 @@ This is a small class that has a:
 orbit list (from primitive structure)
 supercell
 list of unique primitive cell offsets that the supercell span
-the primToSupercellMap
+the primitiveToSupercellMap
 
 
 you can query this object with
@@ -26,7 +26,7 @@ OrbitList getLocalOrbitList(int i);
 
 std::vector<Vector3i> getUniqueOffsets() const;
 
-std::vector<Vector3d> primToSupercellMap() const;
+std::vector<Vector3d> primitiveToSupercellMap() const;
 
 etc...
 */
@@ -36,7 +36,7 @@ class LocalOrbitListGenerator
 public:
     /// Constructor.
     LocalOrbitListGenerator(){};
-    LocalOrbitListGenerator(const OrbitList &, const Structure &, const double);
+    LocalOrbitListGenerator(const OrbitList &, std::shared_ptr<Structure>, const double);
 
     /// Generates and returns the local orbit list with the input index.
     OrbitList getLocalOrbitList(const size_t);
@@ -48,7 +48,7 @@ public:
     size_t getNumberOfUniqueOffsets() const { return _uniquePrimcellOffsets.size(); }
 
     /// Returns the primitive lattice neighbor to supercell lattice neigbhor map.
-    std::unordered_map<LatticeSite, LatticeSite> getMapFromPrimitiveToSupercell() const { return _primToSupercellMap; }
+    std::unordered_map<LatticeSite, LatticeSite> getMapFromPrimitiveToSupercell() const { return _primitiveToSupercellMap; }
 
     /// Returns the unique primitive cells
     std::vector<Vector3i> getUniquePrimitiveCellOffsets() const { return _uniquePrimcellOffsets; }
@@ -61,10 +61,10 @@ private:
     OrbitList _orbitList;
 
     /// Supercell structure from which the local orbit list will be based upon.
-    Structure _supercell;
+    std::shared_ptr<Structure> _supercell;
 
     /// Maps a latticeNeighbor from the primitive and get the equivalent in supercell.
-    std::unordered_map<LatticeSite, LatticeSite> _primToSupercellMap;
+    std::unordered_map<LatticeSite, LatticeSite> _primitiveToSupercellMap;
 
     /// Finds the position of the atom that is closest to the origin.
     Vector3d getClosestToOrigin();

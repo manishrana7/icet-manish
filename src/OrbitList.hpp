@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "Cluster.hpp"
-#include "Geometry.hpp"
 #include "LatticeSite.hpp"
 #include "ManyBodyNeighborList.hpp"
 #include "Orbit.hpp"
@@ -40,15 +39,8 @@ public:
     /// Returns the orbit of the given index.
     const Orbit &getOrbit(unsigned int) const;
 
-    /// Returns an orbit in the given (supercell) structure.
-    Orbit getSuperCellOrbit(const Structure &,
-                            const Vector3i &,
-                            const unsigned int,
-                            std::unordered_map<LatticeSite, LatticeSite> &,
-                            const double) const;
-
     /// Returns the local orbit list for a site.
-    OrbitList getLocalOrbitList(const Structure &,
+    OrbitList getLocalOrbitList(std::shared_ptr<Structure>,
                                 const Vector3i &,
                                 std::unordered_map<LatticeSite, LatticeSite> &,
                                 const double) const;
@@ -94,12 +86,6 @@ public:
                                                                bool,
                                                                bool) const;
 
-    /// @todo Clarify description.
-    /// First construct rows_sort = sorted(rows)  then returns true/false if rows_sort exists in taken_rows
-    bool isRowsTaken(const std::unordered_set<std::vector<int>,
-                                              VectorHash> &,
-                     std::vector<int>) const;
-
     /// Finds and returns sites in first column of matrix of equivalent sites along with their unit cell translated indistinguishable sites.
     std::vector<std::vector<LatticeSite>> getAllColumnsFromCluster(const std::vector<LatticeSite> &) const;
 
@@ -119,7 +105,7 @@ public:
     const std::vector<Orbit> getOrbits() const { return _orbits; }
 
     /// Returns the primitive structure.
-    Structure getPrimitiveStructure() const { return _primitiveStructure; }
+    const Structure &primitiveStructure() const { return _primitiveStructure; }
 
     /// Sets primitive structure.
     void setPrimitiveStructure(const Structure &primitive) { _primitiveStructure = primitive; }

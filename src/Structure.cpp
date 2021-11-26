@@ -20,39 +20,11 @@ Structure::Structure(const Matrix<double, Dynamic, 3, RowMajor> &positions,
 }
 
 /**
-  @details This function computes the distance between two sites.
-  @param index1 index of the first site
-  @param index2 index of the second site
-  @param offset1 offset of site 1 relative to origin in units of lattice vectors
-  @param offset2 offset of site 2 relative to origin in units of lattice vectors
-*/
-double Structure::getDistance(const size_t index1,
-                              const size_t index2,
-                              const Vector3i offset1 = {0, 0, 0},
-                              const Vector3i offset2 = {0, 0, 0}) const
-{
-    if (index1 >= (size_t)_positions.rows() ||
-        index2 >= (size_t)_positions.rows())
-    {
-        std::ostringstream msg;
-        msg << "At least one site index out of bounds ";
-        msg << " index1: " << index1;
-        msg << " index2: " << index2;
-        msg << " positions: " << _positions.rows();
-        msg << " (Structure::getDistance)";
-        throw std::out_of_range(msg.str());
-    }
-    Vector3d pos1 = _positions.row(index1) + offset1.transpose().cast<double>() * _cell;
-    Vector3d pos2 = _positions.row(index2) + offset2.transpose().cast<double>() * _cell;
-    return (pos1 - pos2).norm();
-}
-
-/**
   @details This function returns the position of a site.
   @param latticeNeighbor site for which to obtain the position
   @returns a 3-dimensional position vector
 */
-Vector3d Structure::getPosition(const LatticeSite &latticeNeighbor) const
+Vector3d Structure::position(const LatticeSite &latticeNeighbor) const
 {
     if (latticeNeighbor.index() >= (size_t)_positions.rows())
     {
@@ -60,7 +32,7 @@ Vector3d Structure::getPosition(const LatticeSite &latticeNeighbor) const
         msg << "Site index out of bounds";
         msg << " index: " << latticeNeighbor.index();
         msg << " number of positions: " << _positions.rows();
-        msg << " (Structure::getPosition)";
+        msg << " (Structure::position)";
         throw std::out_of_range(msg.str());
     }
     Vector3d position = _positions.row(latticeNeighbor.index()) + latticeNeighbor.unitcellOffset().transpose().cast<double>() * _cell;
@@ -70,7 +42,7 @@ Vector3d Structure::getPosition(const LatticeSite &latticeNeighbor) const
 @details This function returns the position of a specific site in Cartesian coordinates.
 @param index index of the site
  **/
-Vector3d Structure::getPositionByIndex(const size_t &index) const
+Vector3d Structure::positionByIndex(const size_t &index) const
 {
     Vector3d position = _positions.row(index);
     return position;

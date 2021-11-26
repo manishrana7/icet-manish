@@ -603,7 +603,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
         orbit = cluster_space.orbit_list.get_orbit(orbit_index)
         local_Mi = cluster_space.get_number_of_allowed_species_by_site(
             cluster_space._get_primitive_structure(),
-            orbit.sites_of_representative_cluster)
+            orbit.representative_cluster.lattice_sites)
 
         mc_vectors = orbit.get_multicomponent_vectors(local_Mi)
         return mc_vectors

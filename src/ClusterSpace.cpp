@@ -16,7 +16,7 @@ ClusterSpace::ClusterSpace(std::vector<std::vector<std::string>> &chemicalSymbol
                            const double fractionalPositionTolerance)
     : _primitiveOrbitList(orbitList), _chemicalSymbols(chemicalSymbols)
 {
-    _primitiveStructure = _primitiveOrbitList->getPrimitiveStructure();
+    _primitiveStructure = _primitiveOrbitList->primitiveStructure();
 
     _numberOfAllowedSpeciesPerSite.resize(chemicalSymbols.size());
     for (size_t i = 0; i < _numberOfAllowedSpeciesPerSite.size(); i++)
@@ -62,20 +62,19 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
                                                    const double fractionalPositionTolerance) const
 {
     // Construct orbit list for this structure.
-    LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(*_primitiveOrbitList, structure, fractionalPositionTolerance);
-    size_t uniqueOffsets = localOrbitListGenerator.getNumberOfUniqueOffsets();
+    std::shared_ptr<Structure> supercell = std::make_shared<Structure>(structure);
+    LocalOrbitListGenerator localOrbitListGenerator = LocalOrbitListGenerator(*_primitiveOrbitList, supercell, fractionalPositionTolerance);
     auto currentOrbitList = localOrbitListGenerator.getFullOrbitList();
 
     // Check that the number of unique offsets equals the number of unit cells in the supercell.
-    size_t numberOfUnitcellRepetitions = structure.size() / _primitiveStructure.size();
-    if (uniqueOffsets != numberOfUnitcellRepetitions)
+    if (localOrbitListGenerator.getNumberOfUniqueOffsets() != structure.size() / _primitiveStructure.size())
     {
         std::ostringstream msg;
         msg << "The number of unique offsets does not match the number of primitive units in the input structure (ClusterSpace::getClusterVector)" << std::endl;
-        msg << uniqueOffsets << " != " << numberOfUnitcellRepetitions;
+        msg << localOrbitListGenerator.getNumberOfUniqueOffsets() << " != " << structure.size() / _primitiveStructure.size();
         throw std::runtime_error(msg.str());
     }
-    return getClusterVectorFromOrbitList(currentOrbitList, structure);
+    return getClusterVectorFromOrbitList(currentOrbitList, supercell);
 }
 
 /**
@@ -220,7 +219,7 @@ void ClusterSpace::computeMultiComponentVectors()
     {
 
         std::vector<std::vector<int>> permutedMCVector;
-        auto numberOfAllowedSpecies = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _primitiveOrbitList->getOrbit(orbitIndex).getSitesOfRepresentativeCluster());
+        auto numberOfAllowedSpecies = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _primitiveOrbitList->getOrbit(orbitIndex).representativeCluster().latticeSites());
 
         auto multiComponentVectors = _primitiveOrbitList->getOrbit(orbitIndex).getMultiComponentVectors(numberOfAllowedSpecies);
         if (std::none_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n)
@@ -299,7 +298,7 @@ void ClusterSpace::removeOrbits(std::vector<size_t> &indices)
 @param newOccupation New atomic number on the site with index flipIndex. If this argument is not -1, a change in cluster vector will be calculated.
 */
 const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const OrbitList &orbitList,
-                                                                      const Structure &supercell,
+                                                                      const std::shared_ptr<Structure> supercell,
                                                                       const double firstElement,
                                                                       const int flipIndex,
                                                                       const int newOccupation) const
@@ -326,14 +325,14 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
         std::map<std::vector<int>, double> counts;
         if (newOccupation > -1)
         {
-            counts = currentOrbit.countClusterChanges(supercell, flipIndex, newOccupation);
+            counts = currentOrbit.getClusterCountChanges(supercell, flipIndex, newOccupation);
         }
         else
         {
-            counts = currentOrbit.countClusters(supercell, flipIndex);
+            counts = currentOrbit.getClusterCounts(supercell, flipIndex);
         }
 
-        const std::vector<LatticeSite> &representativeSites = currentPrimitiveOrbit.getSitesOfRepresentativeCluster();
+        const std::vector<LatticeSite> &representativeSites = currentPrimitiveOrbit.representativeCluster().latticeSites();
 
         std::vector<int> allowedOccupations;
         try
@@ -391,7 +390,7 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
             // local cluster vectors or changes in cluster vectors, we have only counted
             // a subset of the clusters. We thus need to compute the multiplicity by
             // analyzing the orbit in detail.
-            clusterVector[cvInfo.clusterVectorIndex] = clusterVectorElement / cvInfo.multiplicity / (double)supercell.size();
+            clusterVector[cvInfo.clusterVectorIndex] = clusterVectorElement / cvInfo.multiplicity / (double)supercell->size();
         }
     }
     return clusterVector;

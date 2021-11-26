@@ -4,25 +4,26 @@
 @details This constructor creates an orbit from a set of equivalent clusters and a structure.
          Note that the sites of each cluster need to be ordered in a consistent manner
          (This ordering is enforced when Orbit objects are created via an OrbitList object)
-@param equivalentClusters The clusters that together make up the orbit.
-@param structure Structure that this orbit relates to
+@param clusters
+    The clusters that together make up the orbit. Normally, these should be symmetry equivalent,
+    but note that this needs to be ensured before constructing the orbit; it is not enforced by
+    the constructor.
 @param allowedClusterPermutations
     Allowed permutations for this orbit; e.g., if 0, 2, 1 is in this set
     then 0, 1, 0 is the same multi-component vector as 0, 0, 1
 **/
-Orbit::Orbit(const Structure &structure,
-             const std::vector<std::vector<LatticeSite>> equivalentClusters,
+Orbit::Orbit(const std::vector<Cluster> clusters,
              const std::set<std::vector<int>> allowedClusterPermutations)
 {
-    _representativeCluster = Cluster(structure, equivalentClusters[0]);
-    _equivalentClusters = equivalentClusters;
+    _representativeCluster = clusters[0];
+    _clusters = clusters;
     _allowedClusterPermutations = allowedClusterPermutations;
 
-    // Sort equivalent clusters according the coordinates of their sites.
+    // Sort clusters according the coordinates of their sites.
     // This is done only to achieve a reproducible ordering, which under some
     // circumstances matters when sorting the orbit list (and thereby the
     // cluster vector).
-    std::sort(_equivalentClusters.begin(), _equivalentClusters.end());
+    std::sort(_clusters.begin(), _clusters.end());
 }
 
 /**
@@ -30,21 +31,9 @@ Orbit::Orbit(const Structure &structure,
 @details Note that this function only appends the new cluster to the end without resorting.
 @param latticeSiteGroup Cluster to be added represented by a group of lattice sites
 */
-void Orbit::addEquivalentCluster(const std::vector<LatticeSite> &latticeSiteGroup)
+void Orbit::addCluster(const Cluster &cluster)
 {
-    _equivalentClusters.push_back(latticeSiteGroup);
-}
-
-/**
-@param index cluster index
-*/
-std::vector<LatticeSite> Orbit::getClusterByIndex(unsigned int index) const
-{
-    if (index >= _equivalentClusters.size())
-    {
-        throw std::out_of_range("Index out of range (Orbit::getClusterByIndex)");
-    }
-    return _equivalentClusters[index];
+    _clusters.push_back(cluster);
 }
 
 /**
@@ -105,7 +94,7 @@ std::vector<std::vector<int>> Orbit::getAllPossibleMultiComponentVectorPermutati
 }
 
 /**
-@details Check if this orbit contains a cluster in its list of equivalent clusters.
+@details Check if this orbit contains a cluster in its list of clusters.
 @param cluster cluster (represented by a list of sites) to look for
 @param sorted if true the order of sites in the cluster is irrelevant
 @returns true if the cluster is present in the orbit
@@ -118,9 +107,9 @@ bool Orbit::contains(const std::vector<LatticeSite> cluster, bool sorted) const
         std::sort(clusterCopy.begin(), clusterCopy.end());
     }
 
-    for (size_t i = 0; i < _equivalentClusters.size(); i++)
+    for (size_t i = 0; i < _clusters.size(); i++)
     {
-        auto sites = _equivalentClusters[i];
+        auto sites = _clusters[i].latticeSites();
 
         // compare the sorted sites
         if (sorted)
@@ -137,21 +126,6 @@ bool Orbit::contains(const std::vector<LatticeSite> cluster, bool sorted) const
 }
 
 /**
-@brief Check whether a site is included in a cluster
-@details A cluster will count as included if index is among the lattice sites
-         that have a zero offset.
-@param index Index of site to check whether it is included
-@param cluster
-    Vector of LatticeSite, at least one of which must contain index for this
-    function to return true
-*/
-bool Orbit::isSiteIncluded(int index, const std::vector<LatticeSite> &cluster) const
-{
-    return std::any_of(cluster.begin(), cluster.end(), [=](const LatticeSite &ls)
-                       { return ls.index() == index && ls.unitcellOffset().norm() < 1e-4; });
-}
-
-/**
 @brief Count the occupations of the clusters in this orbit.
 @details
     Note that the orderings of the sites in the clusters matter, meaning,
@@ -165,30 +139,31 @@ bool Orbit::isSiteIncluded(int index, const std::vector<LatticeSite> &cluster) c
    a factor 1/n, where n is the number of occurrences of this index. By default
    (i.e. siteIndexForDoubleCountingCorrection = -1) no such correction is applied.
 */
-std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structure,
-                                                        int siteIndexForDoubleCountingCorrection) const
+std::map<std::vector<int>, double> Orbit::getClusterCounts(const std::shared_ptr<Structure> structure,
+                                                           int siteIndexForDoubleCountingCorrection) const
 {
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elements(order());
-    for (const auto &sites : _equivalentClusters)
+    for (const auto &cluster : _clusters)
     {
+
         // If we apply the double counting correction for some site we need
         // to ensure that we only count clusters that include this site.
-        if (siteIndexForDoubleCountingCorrection < 0 || isSiteIncluded(siteIndexForDoubleCountingCorrection, sites))
+        if (siteIndexForDoubleCountingCorrection < 0 || cluster.isSiteIndexIncludedWithZeroOffset(siteIndexForDoubleCountingCorrection))
         {
+            const std::vector<LatticeSite> &sites = cluster.latticeSites();
             for (size_t i = 0; i < sites.size(); i++)
             {
-                elements[i] = structure.getAtomicNumbers().at(sites[i].index());
+                elements[i] = structure->getAtomicNumbers().at(sites[i].index());
             }
-            double unit = 1;
             // If the current atom (siteIndexForDoubleCountingCorrection) occurs more than once,
-            // we risk double counting it if we calculate a change in cluster vector or
-            // a local cluster vector. To avoid this, we count the clusters in units of
-            // 1 / n, where n is the number of occurences of the present atom in the cluster.
+            // we risk double counting it if we calculate a local cluster vector. To avoid this,
+            // we count the clusters in units of 1 / n, where n is the number of occurences of
+            // the present atom in the cluster.
+            double unit = 1;
             if (siteIndexForDoubleCountingCorrection > -1)
             {
-                unit /= (double)std::count_if(sites.begin(), sites.end(), [=](LatticeSite ls)
-                                              { return ls.index() == siteIndexForDoubleCountingCorrection; });
+                unit /= cluster.getCountOfOccurencesOfSiteIndex(siteIndexForDoubleCountingCorrection);
             }
             tmpCounts[elements] += unit;
         }
@@ -211,9 +186,9 @@ std::map<std::vector<int>, double> Orbit::countClusters(const Structure &structu
 @param flipIndex index of site that has been flipped
 @param newOccupation new atomic number of site that has been flipped
 */
-std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &structure,
-                                                              const int flipIndex,
-                                                              const int newOccupation) const
+std::map<std::vector<int>, double> Orbit::getClusterCountChanges(const std::shared_ptr<Structure> structure,
+                                                                 const int flipIndex,
+                                                                 const int newOccupation) const
 {
     std::map<std::vector<int>, double> tmpCounts;
     std::vector<int> elementsOld(order());
@@ -221,15 +196,16 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
     int siteIndex;
     int occupation;
 
-    for (const auto &sites : _equivalentClusters)
+    for (const auto &cluster : _clusters)
     {
         // Only count clusters where site flipIndex is included (with zero offset)
-        if (isSiteIncluded(flipIndex, sites))
+        if (cluster.isSiteIndexIncludedWithZeroOffset(flipIndex))
         {
+            const std::vector<LatticeSite> &sites = cluster.latticeSites();
             for (size_t i = 0; i < sites.size(); i++)
             {
                 siteIndex = sites[i].index();
-                occupation = structure.getAtomicNumbers().at(siteIndex);
+                occupation = structure->getAtomicNumbers().at(siteIndex);
                 elementsOld[i] = occupation;
 
                 // If the present site is the one that was changed,
@@ -243,12 +219,11 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
                     elementsNew[i] = occupation;
                 }
             }
-            double unit = 1;
             // If the current site (flipIndex) occurs more than once,
             // we risk double counting it. To avoid this, we count the clusters in units of
             // 1 / n, where n is the number of occurrences of the present atom in the cluster.
-            unit /= (double)std::count_if(sites.begin(), sites.end(), [=](LatticeSite ls)
-                                          { return ls.index() == flipIndex; });
+            double unit = 1.0 / (double)cluster.getCountOfOccurencesOfSiteIndex(flipIndex);
+
             // The old cluster has disappeared and we got elementNew instead
             tmpCounts[elementsOld] -= unit;
             tmpCounts[elementsNew] += unit;
@@ -257,16 +232,59 @@ std::map<std::vector<int>, double> Orbit::countClusterChanges(const Structure &s
     return tmpCounts;
 }
 
+/**
+@brief Translates the clusters of this orbit by an offset.
+@param cellOffset Offset to translate with.
+**/
+void Orbit::translate(const Vector3i &cellOffset)
+{
+    _representativeCluster.translate(cellOffset);
+    for (auto &cluster : _clusters)
+    {
+        cluster.translate(cellOffset);
+    }
+}
+
+/**
+@brief Transforms the clusters to a new cell
+@details
+    Each cluster in the orbit consists of a vector of lattice sites, and
+    these sites are defined in relation to a specific atomic structure
+    (typically a primitive structure), and a pointer to this structure
+    is stored in each cluster. This function redefines the sites
+    such that they refer to a new cell (typically a supercell).
+@param supercell The new atomic structure
+@param cellOffset
+    Offset to be applied to sites before transformation to supercell.
+    This offset is specified in terms of the old (primitive) structure. 
+@param primitiveToSupercellMap
+    Map from lattice site referring to old structure to lattice site
+    referring to the new structure. This map will successivelly be
+    populated when executing the function, and is only used for
+    reasons of performance.
+@fractionalPositionTolerance 
+**/
+void Orbit::transformToSupercell(std::shared_ptr<Structure> supercellPtr,
+                                 std::unordered_map<LatticeSite, LatticeSite> &primitiveToSupercellMap,
+                                 const double fractionalPositionTolerance)
+{
+    _representativeCluster.transformToSupercell(supercellPtr, primitiveToSupercellMap, fractionalPositionTolerance);
+    for (auto &cluster : _clusters)
+    {
+        cluster.transformToSupercell(supercellPtr, primitiveToSupercellMap, fractionalPositionTolerance);
+    }
+}
+
 namespace std
 {
 
     /// Stream operator.
     ostream &operator<<(ostream &os, const Orbit &orbit)
     {
-        for (const auto cluster : orbit.getEquivalentClusters())
+        for (const auto cluster : orbit.clusters())
         {
             os << "  ";
-            for (const auto site : cluster)
+            for (const auto site : cluster.latticeSites())
             {
                 os << " " << site;
             }

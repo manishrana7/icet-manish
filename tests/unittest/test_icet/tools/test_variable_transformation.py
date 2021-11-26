@@ -23,15 +23,16 @@ the cluster_space.py file
 import unittest
 from io import StringIO
 
-# import numpy as np
+import numpy as np
 from ase.build import fcc111
 from icet import ClusterExpansion, ClusterSpace
-# from icet.tools.variable_transformation import _is_sites_in_orbit
+from icet.core.lattice_site import LatticeSite
+from icet.tools.variable_transformation import _is_site_group_in_orbit
 
 
-def find_orbit_and_equivalent_site_with_indices(orbit_list, site_indices):
+def find_orbit_and_cluster_with_indices(orbit_list, site_indices):
     """
-    Go through the orbit list and find the equivalent with the specified list
+    Go through the orbit list and find the cluster with the specified list
     of site indices
     ----------
     orbit_list
@@ -47,11 +48,12 @@ def find_orbit_and_equivalent_site_with_indices(orbit_list, site_indices):
         if len(site_indices) != orbit.order:
             continue
 
-        for sites in orbit.equivalent_clusters:
+        for cluster in orbit.clusters:
 
-            # Check if the list of site indices matches those for the equivalent site
-            if all(sites[j].index == site_indices[j] for j in range(len(site_indices))):
-                return orbit, sites
+            # Check if the list of site indices matches those for the cluster
+            if all(cluster.lattice_sites[j].index == site_indices[j]
+                   for j in range(len(site_indices))):
+                return orbit, cluster
 
         return None, None
 
@@ -141,35 +143,34 @@ class TestVariableTransformationTriplets(unittest.TestCase):
         """Silences unittest from printing the docstrings in test cases."""
         return None
 
-
-'''
-    def test_is_sites_in_orbit(self):
-        """Tests _is_sites_in_orbit functionality """
-
+    def test_is_site_group_in_orbit(self):
+        """Tests _is_site_group_in_orbit functionality """
         # Check that a pair for which all sites have the different indices and but the same offset
         # gives true
-        orbit, sites = find_orbit_and_equivalent_site_with_indices(self.cs.orbit_list, [2, 3])
-        for i in range(len(sites)):
-            sites[i].unitcell_offset += np.array([-2, -2, -2])
-        self.assertTrue(_is_sites_in_orbit(orbit, sites))
+        orbit, cluster = find_orbit_and_cluster_with_indices(self.cs.orbit_list, [2, 3])
+        orbit.translate([2, 2, 2])
+        self.assertTrue(_is_site_group_in_orbit(orbit, cluster.lattice_sites))
 
         # Check that a pair for which all sites have the different indices and one has been offset
-        # still gives true
-        orbit, sites = find_orbit_and_equivalent_site_with_indices(self.cs.orbit_list, [2, 3])
-        sites[0].unitcell_offset += np.array([-2, -2, -2])
-        self.assertFalse(_is_sites_in_orbit(orbit, sites))
+        # gives false
+        orbit, cluster = find_orbit_and_cluster_with_indices(self.cs.orbit_list, [2, 3])
+        lattice_sites = cluster.lattice_sites
+        lattice_sites[0] = LatticeSite(lattice_sites[0].index,
+                                       lattice_sites[0].unitcell_offset + np.array([-2, -2, -2]))
+        self.assertFalse(_is_site_group_in_orbit(orbit, lattice_sites))
 
         # Check that a triplet for which all sites have the same offset gives true
-        orbit, sites = find_orbit_and_equivalent_site_with_indices(self.cs.orbit_list, [0, 0, 0])
-        for i in range(len(sites)):
-            sites[i].unitcell_offset += np.array([-2, -2, -2])
-        self.assertTrue(_is_sites_in_orbit(orbit, sites))
+        orbit, cluster = find_orbit_and_cluster_with_indices(self.cs.orbit_list, [0, 0, 0])
+        orbit.translate([2, 2, 2])
+        self.assertTrue(_is_site_group_in_orbit(orbit, cluster.lattice_sites))
 
         # Check that a triplet in which one site has a different offset gives false
-        orbit, sites = find_orbit_and_equivalent_site_with_indices(self.cs.orbit_list, [0, 0, 0])
-        sites[0].unitcell_offset += np.array([-2, -2, -2])
-        self.assertFalse(_is_sites_in_orbit(orbit, sites))
-'''
+        orbit, cluster = find_orbit_and_cluster_with_indices(self.cs.orbit_list, [0, 0, 0])
+        lattice_sites = cluster.lattice_sites
+        lattice_sites[0] = LatticeSite(lattice_sites[0].index,
+                                       lattice_sites[0].unitcell_offset + np.array([-2, -2, -2]))
+        self.assertFalse(_is_site_group_in_orbit(orbit, lattice_sites))
+
 
 if __name__ == '__main__':
     unittest.main()
