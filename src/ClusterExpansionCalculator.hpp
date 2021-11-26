@@ -42,7 +42,7 @@ private:
     OrbitList _fullOrbitList;
 
     /// Maps offsets to local orbit lists.
-    std::unordered_map<Vector3d, OrbitList, Vector3dHash> _localOrbitlists;
+    std::unordered_map<Vector3i, OrbitList, Vector3iHash> _localOrbitlists;
 
     /// Internal cluster space.
     ClusterSpace _clusterSpace;
@@ -51,5 +51,5 @@ private:
     std::shared_ptr<Structure> _supercell;
 
     /// Maps supercell index to its corresponding primitive cell offset.
-    std::map<int, Vector3d> _indexToOffset;
+    std::map<int, Vector3i> _indexToOffset;
 };

@@ -48,7 +48,7 @@ class ManyBodyNeighborList
     }
 
 
-    void translateAllNi(std::vector<LatticeSite> &Ni, const Vector3d &unitCellOffset) const;
+    void translateAllNi(std::vector<LatticeSite> &Ni, const Vector3i &unitCellOffset) const;
 
     size_t getNumberOfSites(const unsigned int index) const;
 

@@ -19,12 +19,12 @@ struct VectorHash {
 };
 
 /// Hash function for a three-dimensional vector.
-struct Vector3dHash {
+struct Vector3iHash {
     /// Hash operator.
-    size_t operator()(const Vector3d& v) const
+    size_t operator()(const Vector3i& v) const
     {
         size_t seed = 0;
-        for (size_t i =0; i<3; i++) {
+        for (size_t i = 0; i < 3; i++) {
             hash_combine(seed, hash_value(v[i]));
         }
         return seed;
@@ -32,10 +32,10 @@ struct Vector3dHash {
 };
 
 /// Comparison operation for two three-dimensional vectors.
-struct Vector3dCompare
+struct Vector3iCompare
 {
     /// Comparison operator.
-    bool operator()(const Vector3d &lhs, const Vector3d &rhs) const
+    bool operator()(const Vector3i &lhs, const Vector3i &rhs) const
     {
         for (size_t i = 0; i < 3; i++)
         {

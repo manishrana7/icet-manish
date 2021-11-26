@@ -226,7 +226,7 @@ PYBIND11_MODULE(_icet, m)
 
         )pbdoc")
         .def(py::init<const int,
-                      const Vector3d &>(),
+                      const Vector3i &>(),
              "Initializes a LatticeSite object.",
              py::arg("site_index"),
              py::arg("unitcell_offset"))
@@ -242,7 +242,7 @@ PYBIND11_MODULE(_icet, m)
             "list(int) : unit cell offset (in units of the cell vectors)")
         .def(py::self < py::self)
         .def(py::self == py::self)
-        .def(py::self + Eigen::Vector3d())
+        .def(py::self + Eigen::Vector3i())
         .def("__hash__", [](const LatticeSite &latticeNeighbor)
              { return std::hash<LatticeSite>{}(latticeNeighbor); });
 
@@ -381,7 +381,7 @@ PYBIND11_MODULE(_icet, m)
              Parameters
              ----------
              offset : List[int]
-                scaled coordinates in terms of the cell vectors of
+                offset in multiples of the cell vectors of
                 the structure used to define the clusters in this orbit
                 (typically the primitive structure)
              )pbdoc")

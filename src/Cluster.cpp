@@ -16,7 +16,7 @@ Cluster::Cluster(const std::vector<LatticeSite> &latticeSites,
 @brief Translates this cluster by an offset.
 @param offset Coordinates referring to the axes of the structure in this cluster
 **/
-void Cluster::translate(const Eigen::Vector3d &offset)
+void Cluster::translate(const Eigen::Vector3i &offset)
 {
     for (LatticeSite &site : _latticeSites)
     {
@@ -178,12 +178,12 @@ std::ostream &operator<<(std::ostream &os, const Cluster &cluster)
         os << padding << s << "  |";
 
         // Print offset
-        Vector3d offset = site.unitcellOffset();
+        Vector3i offset = site.unitcellOffset();
         s = "";
         std::string sPart;
         for (int i = 0; i < 3; i++)
         {
-            sPart = std::to_string((int)offset[i]);
+            sPart = std::to_string(offset[i]);
             padding = std::string(5 - sPart.size(), ' ');
             s += " " + padding + sPart;
         }

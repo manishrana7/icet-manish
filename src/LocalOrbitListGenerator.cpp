@@ -27,7 +27,7 @@ int LocalOrbitListGenerator::getIndexOfAtomClosestToOrigin()
         Vector3d position_i = _primitiveStructure->positions().row(i);
         LatticeSite lattice_site = _primitiveStructure->findLatticeSiteByPosition(position_i, _fractionalPositionTolerance);
         // @todo Can this be removed?
-        if (lattice_site.unitcellOffset().norm() > FLOATTYPE_EPSILON)
+        if (lattice_site.unitcellOffset().norm() > _fractionalPositionTolerance)
         {
             continue;
         }
@@ -50,7 +50,7 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
 {
     _primitiveToSupercellMap.clear();
 
-    std::set<Vector3d, Vector3dCompare> uniqueCellOffsets;
+    std::set<Vector3i, Vector3iCompare> uniqueCellOffsets;
 
     // Map all sites
     for (size_t i = 0; i < _supercell->size(); i++)
@@ -70,7 +70,7 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
     // If empty: add zero offset
     if (uniqueCellOffsets.size() == 0)
     {
-        Vector3d zeroVector = {0.0, 0.0, 0.0};
+        Vector3i zeroVector = {0, 0, 0};
         uniqueCellOffsets.insert(zeroVector);
     }
 
@@ -86,7 +86,7 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
         msg << "Found:    " << _uniquePrimcellOffsets.size();
         throw std::runtime_error(msg.str());
     }
-    std::sort(_uniquePrimcellOffsets.begin(), _uniquePrimcellOffsets.end(), Vector3dCompare());
+    std::sort(_uniquePrimcellOffsets.begin(), _uniquePrimcellOffsets.end(), Vector3iCompare());
 }
 
 /**
@@ -97,7 +97,7 @@ void LocalOrbitListGenerator::mapSitesAndFindCellOffsets()
     differences in cluster vector, this parameter needs to be true (if false, not all
     clusters involving this offset will be included).
 */
-OrbitList LocalOrbitListGenerator::getLocalOrbitList(const Vector3d &offset, bool selfContained = false)
+OrbitList LocalOrbitListGenerator::getLocalOrbitList(const Vector3i &offset, bool selfContained = false)
 {
     if (std::find(_uniquePrimcellOffsets.begin(), _uniquePrimcellOffsets.end(), offset) == _uniquePrimcellOffsets.end())
     {

@@ -2,7 +2,6 @@
 
 #include <boost/functional/hash.hpp>
 #include <iostream>
-#include "FloatType.hpp"
 #include "LatticeSite.hpp"
 #include "Structure.hpp"
 
@@ -42,7 +41,7 @@ public:
     }
 
     /// Translate the sites of the cluster by a constant vector.
-    void translate(const Eigen::Vector3d &offset);
+    void translate(const Eigen::Vector3i &offset);
 
     /// Transform this cluster to a new structure
     void transformToSupercell(std::shared_ptr<const Structure>,

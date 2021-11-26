@@ -1,7 +1,5 @@
 #include "Structure.hpp"
 
-#include "FloatType.hpp"
-
 using namespace Eigen;
 
 /**
@@ -37,7 +35,7 @@ Vector3d Structure::position(const LatticeSite &latticeNeighbor) const
         msg << " (Structure::position)";
         throw std::out_of_range(msg.str());
     }
-    Vector3d position = _positions.row(latticeNeighbor.index()) + latticeNeighbor.unitcellOffset().transpose() * _cell;
+    Vector3d position = _positions.row(latticeNeighbor.index()) + latticeNeighbor.unitcellOffset().transpose().cast<double>() * _cell;
     return position;
 }
 /**
@@ -94,13 +92,15 @@ LatticeSite Structure::findLatticeSiteByPosition(const Vector3d &position, const
     {
         Vector3d distanceVector = position - _positions.row(i).transpose();
         Vector3d fractionalDistanceVector = _cell.transpose().partialPivLu().solve(distanceVector);
-        icet::roundVector3d(fractionalDistanceVector, FLOATTYPE_EPSILON);
+
+        // Check whether whether the fractionalDistanceVector is all integers,
+        // if it is we have found the corresponding lattice site
         Vector3d latticeVector = {round(fractionalDistanceVector[0]),
                                   round(fractionalDistanceVector[1]),
                                   round(fractionalDistanceVector[2])};
         if ((fractionalDistanceVector - latticeVector).norm() < fractionalPositionTolerance)
         {
-            return LatticeSite(i, latticeVector);
+            return LatticeSite(i, latticeVector.cast<int>());
         }
     }
 

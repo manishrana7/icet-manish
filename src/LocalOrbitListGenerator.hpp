@@ -24,7 +24,7 @@ you can query this object with
 ///Generate the orbit list from the primitive offset with count i
 OrbitList getLocalOrbitList(int i);
 
-std::vector<Vector3d> getUniqueOffsets() const;
+std::vector<Vector3i> getUniqueOffsets() const;
 
 std::vector<Vector3d> primitiveToSupercellMap() const;
 
@@ -38,7 +38,7 @@ public:
     LocalOrbitListGenerator(const OrbitList &, std::shared_ptr<Structure>, const double);
 
     /// Generates and returns the local orbit list with the input index.
-    OrbitList getLocalOrbitList(const Vector3d &, bool);
+    OrbitList getLocalOrbitList(const Vector3i &, bool);
 
     /// Generates the full orbit list from this structure.
     OrbitList getFullOrbitList();
@@ -50,7 +50,7 @@ public:
     std::unordered_map<LatticeSite, LatticeSite> getMapFromPrimitiveToSupercell() const { return _primitiveToSupercellMap; }
 
     /// Returns the unique primitive cells
-    std::vector<Vector3d> getUniquePrimitiveCellOffsets() const { return _uniquePrimcellOffsets; }
+    std::vector<Vector3i> getUniquePrimitiveCellOffsets() const { return _uniquePrimcellOffsets; }
 
 private:
     /// Maps supercell positions to reference.
@@ -75,7 +75,7 @@ private:
     size_t _indexToClosestAtom;
 
     /// The unique offsets of the primitive cell required to "cover" the supercell.
-    std::vector<Vector3d> _uniquePrimcellOffsets;
+    std::vector<Vector3i> _uniquePrimcellOffsets;
 
     /// Tolerance applied when comparing positions in Cartesian coordinates.
     double _fractionalPositionTolerance;

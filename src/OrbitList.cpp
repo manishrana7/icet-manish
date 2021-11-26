@@ -413,7 +413,7 @@ std::vector<std::vector<LatticeSite>> OrbitList::getSitesTranslatedToUnitcell(co
 std::vector<LatticeSite> OrbitList::getTranslatedSites(const std::vector<LatticeSite> &latticeSites,
                                                        const unsigned int index) const
 {
-    Vector3d offset = latticeSites[index].unitcellOffset();
+    Vector3i offset = latticeSites[index].unitcellOffset();
     auto translatedSites = latticeSites;
     for (auto &latticeSite : translatedSites)
     {
