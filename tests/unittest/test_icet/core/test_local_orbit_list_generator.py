@@ -79,10 +79,9 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
             print(offset)
             lol = self.lolg.generate_local_orbit_list(offset)
             for orbit, orbit_ in zip(lol.orbits, fol.orbits):
-                print(len(orbit_.clusters))
                 for cluster in orbit.clusters:
                     self.assertIn(cluster.lattice_sites,
-                                  [cluster_.lattice_sites for cluster_ in orbit_.clusters])
+                                  [cluster.lattice_sites for cluster in orbit_.clusters])
 
     def test_unique_offset_count(self):
         """
