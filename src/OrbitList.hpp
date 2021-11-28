@@ -26,6 +26,7 @@ public:
 
     /// Constructs orbit list from a set of neighbor lists, a matrix of equivalent sites, and a structure.
     OrbitList(const Structure &,
+              std::vector<std::vector<int>> &,
               const std::vector<std::vector<LatticeSite>> &,
               const std::vector<std::vector<std::vector<LatticeSite>>> &,
               const double);

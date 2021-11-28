@@ -8,11 +8,13 @@
 @param positionTolerance tolerance applied when comparing positions in Cartesian coordinates
 **/
 OrbitList::OrbitList(const Structure &structure,
+                     std::vector<std::vector<int>> &atomicNumbers,
                      const std::vector<std::vector<LatticeSite>> &matrixOfEquivalentSites,
                      const std::vector<std::vector<std::vector<LatticeSite>>> &neighborLists,
                      const double positionTolerance)
 {
     _structure = structure;
+    _structure.setAllowedAtomicNumbers(atomicNumbers);
     _matrixOfEquivalentSites = matrixOfEquivalentSites;
     _referenceLatticeSites = getReferenceLatticeSites();
 

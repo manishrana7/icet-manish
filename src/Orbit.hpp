@@ -13,6 +13,24 @@
 using namespace Eigen;
 
 /**
+@brief This struct keeps track of information pertaining to a specific element
+       in the cluster vector.
+*/
+struct ClusterVectorElement
+{
+  /// A multi-component vector contains the indices of the point functions
+  /// (only non-trivial if the number of components are more than two)
+  std::vector<int> multiComponentVector;
+
+  /// Site permutations describe how the sites in the cluster can be re-ordered
+  std::vector<std::vector<int>> sitePermutations;
+
+  /// Multiplicity for this cluster vector element
+  double multiplicity;
+};
+
+
+/**
 This class handles an orbit.
 
 An orbit is a set of clusters that are equivalent under the symmetry operations
@@ -102,6 +120,8 @@ public:
         return *this;
     }
 
+    std::vector<ClusterVectorElement> _clusterVectorElements;
+
 private:
     /// Container of all clusters in this orbit
     std::vector<Cluster> _clusters;
@@ -111,6 +131,11 @@ private:
 
     /// Contains the allowed sites permutations. i.e. if 0, 2, 1 is in this set then 0, 1, 0 is the same multi-component vector as 0, 0, 1
     std::set<std::vector<int>> _allowedClusterPermutations;
+
+    ///
+    std::vector<std::vector<int>> _computeMultiComponentVectors();
+
+    std::vector<std::vector<std::vector<int>>> _getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &) const;
 };
 
 namespace std

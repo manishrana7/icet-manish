@@ -42,9 +42,6 @@ public:
   /// Returns the size of the structure, i.e., the number of sites.
   size_t size() const { return _atomicNumbers.size(); }
 
-  /// Set the atomic positions.
-  void setPositions(const Matrix<double, Dynamic, 3> &positions) { _positions = positions; }
-
   /// Returns positions.
   Matrix<double, Dynamic, 3, RowMajor> positions() const { return _positions; }
 
@@ -57,23 +54,20 @@ public:
   /// Returns periodic boundary conditions.
   std::vector<bool> getPBC() const { return _pbc; }
 
-  /// Set periodic boundary conditions.
-  void setPBC(const std::vector<bool> pbc) { _pbc = pbc; }
-
-  /// Set the cell metric.
-  void setCell(const Matrix<double, 3, 3> &cell) { _cell = cell; }
-
   /// Returns the cell metric.
   Matrix<double, 3, 3> getCell() const { return _cell; }
-
-  /// Set allowed components for each site by vector.
-  void setNumberOfAllowedSpecies(const std::vector<int> &);
 
   /// Returns number of allowed components on each site.
   int getNumberOfAllowedSpeciesBySite(const size_t) const;
 
   /// Returns number of allowed components on each site.
   std::vector<int> getNumberOfAllowedSpeciesBySites(const std::vector<LatticeSite> &) const;
+
+  /// Set allowed components for each site by vector.
+  void setAllowedAtomicNumbers(const std::vector<std::vector <int>> &);
+
+  /// Get allowed components for each site.
+  const std::vector<std::vector<int>> &allowedAtomicNumbers() const { return _allowedAtomicNumbers; }
 
 private:
   /// List of atomic numbers.
@@ -88,6 +82,6 @@ private:
   /// Periodic boundary conditions.
   std::vector<bool> _pbc;
 
-  /// List of the number of allowed components on each site.
-  std::vector<int> _numbersOfAllowedSpecies;
+  /// Specifies the atomic numbers that are allowed on each site.
+  std::vector<std::vector<int>> _allowedAtomicNumbers;
 };

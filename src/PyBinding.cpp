@@ -14,7 +14,6 @@
 #include "ManyBodyNeighborList.hpp"
 #include "Orbit.hpp"
 #include "OrbitList.hpp"
-#include "PeriodicTable.hpp"
 #include "Structure.hpp"
 #include "Symmetry.hpp"
 
@@ -90,38 +89,28 @@ PYBIND11_MODULE(_icet, m)
              py::arg("atomic_numbers"),
              py::arg("cell"),
              py::arg("pbc"))
-        .def_property(
+        .def_property_readonly(
             "pbc",
             &Structure::getPBC,
-            &Structure::setPBC,
             "list(int) : periodic boundary conditions")
-        .def_property(
+        .def_property_readonly(
             "cell",
             &Structure::getCell,
-            &Structure::setCell,
             "list(list(float)) : cell metric")
-        .def_property(
+        .def_property_readonly(
             "positions",
             &Structure::positions,
-            &Structure::setPositions,
             "list(list(float)) : atomic positions in Cartesian coordinates")
-        .def_property("atomic_numbers",
-                      &Structure::getAtomicNumbers,
-                      &Structure::setAtomicNumbers,
-                      "list(int) : atomic numbers of species on each site")
-        .def("set_number_of_allowed_species",
-             (void (Structure::*)(const std::vector<int> &)) & Structure::setNumberOfAllowedSpecies,
-             py::arg("numbersOfAllowedSpecies"),
-             R"pbdoc(
-             Sets the number of allowed species on each site.
-
-             This method allows one to specify for each site in the structure
-             the number of species allowed on that site.
-
-             Parameters
-             ----------
-             numbersOfAllowedSpecies : list(int)
-             )pbdoc")
+        .def_property(
+            "atomic_numbers",
+            &Structure::getAtomicNumbers,
+            &Structure::setAtomicNumbers,
+            "list(int) : atomic numbers of species on each site")
+        .def_property(
+            "allowed_atomic_numbers",
+            &Structure::allowedAtomicNumbers,
+            &Structure::setAllowedAtomicNumbers,
+            "allowedAtomicNumbers : list(list(int))")
         .def("get_number_of_allowed_species_by_sites",
              &Structure::getNumberOfAllowedSpeciesBySites)
         .def("get_position",
@@ -307,18 +296,6 @@ PYBIND11_MODULE(_icet, m)
             "clusters",
             &Orbit::clusters,
             "list of the clusters in this orbit")
-        .def("get_multicomponent_vectors", &Orbit::getMultiComponentVectors,
-             R"pbdoc(
-             Return the multi-component vectors for this orbit given the allowed components.
-             The multi-component vectors are returned as a list of tuples.
-
-             Parameters
-             ----------
-             allowed_components : list(int)
-                The allowed components for the lattice sites,
-                allowed_components[i] correspond to the number
-                of allowed compoments at lattice site
-                orbit.representative_cluster[i].)pbdoc")
         .def(
             "get_cluster_counts",
             [](const Orbit &orbit,
@@ -329,19 +306,18 @@ PYBIND11_MODULE(_icet, m)
                 for (const auto &mapPair : orbit.getClusterCounts(structure,
                                                                   siteIndexForDoubleCountingCorrection))
                 {
-                    py::list element_symbols;
+                    py::list atomicNumbers;
                     for (auto el : mapPair.first)
                     {
-                        auto getElementSymbols = PeriodicTable::intStr[el];
-                        element_symbols.append(getElementSymbols);
+                        atomicNumbers.append(el);
                     }
                     double countDouble = mapPair.second;
-                    if (std::abs(std::round(countDouble) - countDouble) > 1e-6)
+                    if (std::abs(std::round(mapPair.second) - mapPair.second) > 1e-6)
                     {
                         std::runtime_error("Cluster count is a non-integer.");
                     }
-                    int count = (int)std::round(countDouble);
-                    clusterCountDict[py::tuple(element_symbols)] = count;
+                    int count = (int)std::round(mapPair.second);
+                    clusterCountDict[py::tuple(atomicNumbers)] = count;
                 }
                 return clusterCountDict;
             },
@@ -432,11 +408,13 @@ PYBIND11_MODULE(_icet, m)
         )pbdoc")
         .def(py::init<>())
         .def(py::init<const Structure &,
+                      std::vector<std::vector<int>> &,
                       const std::vector<std::vector<LatticeSite>> &,
                       const std::vector<std::vector<std::vector<LatticeSite>>> &,
                       const double>(),
              "Constructs an OrbitList object from a matrix of equivalent sites.",
              py::arg("structure"),
+             py::arg("atomic_numbers"),
              py::arg("matrix_of_equivalent_sites"),
              py::arg("neighbor_lists"),
              py::arg("position_tolerance"))
@@ -566,12 +544,10 @@ PYBIND11_MODULE(_icet, m)
     /// @todo Check which of the following members must actually be exposed.
     /// @todo Turn getters into properties if possible. (Some might require massaging in cluster_space.py.)
     py::class_<ClusterSpace>(m, "ClusterSpace")
-        .def(py::init<std::vector<std::vector<std::string>> &,
-                      std::shared_ptr<OrbitList>,
+        .def(py::init<std::shared_ptr<OrbitList>,
                       const double,
                       const double>(),
              "Initializes an icet ClusterSpace instance.",
-             py::arg("chemical_symbols"),
              py::arg("orbit_list"),
              py::arg("position_tolerance"),
              py::arg("fractional_position_tolerance"))
@@ -619,13 +595,7 @@ PYBIND11_MODULE(_icet, m)
             py::arg("index2"))
 
         .def_property_readonly("species_maps", &ClusterSpace::getSpeciesMaps)
-        .def("get_multicomponent_vectors_by_orbit", &ClusterSpace::getMultiComponentVectorsByOrbit)
-        .def("get_chemical_symbols",
-             &ClusterSpace::getChemicalSymbols,
-             "Returns list of species associated with cluster space as chemical symbols.")
-        .def("get_cutoffs", &ClusterSpace::getCutoffs)
         .def("_get_primitive_structure", &ClusterSpace::primitiveStructure)
-        .def("get_multicomponent_vector_permutations", &ClusterSpace::getMultiComponentVectorPermutations)
         .def("_remove_orbits_cpp", &ClusterSpace::removeOrbits)
         .def("evaluate_cluster_function",
              &ClusterSpace::evaluateClusterFunction,

@@ -10,38 +10,23 @@
 @param positionTolerance tolerance applied when comparing positions in Cartesian coordinates
 @param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
 */
-ClusterSpace::ClusterSpace(std::vector<std::vector<std::string>> &chemicalSymbols,
-                           std::shared_ptr<OrbitList> orbitList,
+ClusterSpace::ClusterSpace(std::shared_ptr<OrbitList> orbitList,
                            const double positionTolerance,
                            const double fractionalPositionTolerance)
-    : _primitiveOrbitList(orbitList), _chemicalSymbols(chemicalSymbols)
+    : _primitiveOrbitList(orbitList)
 {
-    _primitiveStructure = std::make_shared<Structure>(_primitiveOrbitList->structure());
-
-    std::vector<int> numberOfAllowedSpeciesPerSite(chemicalSymbols.size());
-    for (size_t i = 0; i < numberOfAllowedSpeciesPerSite.size(); i++)
-    {
-        numberOfAllowedSpeciesPerSite[i] = chemicalSymbols[i].size();
-    }
-    _primitiveStructure->setNumberOfAllowedSpecies(numberOfAllowedSpeciesPerSite);
-
-    // Set up a map between chemical species and the internal species enumeration scheme.
-    for (size_t i = 0; i < _primitiveStructure->size(); i++)
+    // Set up a map between atomic numbers and the internal species enumeration scheme.
+    for (const auto &atomicNumbers : _primitiveOrbitList->structure().allowedAtomicNumbers())
     {
         std::unordered_map<int, int> speciesMap;
-        std::vector<int> species;
-        for (const auto el : chemicalSymbols[i])
+        std::vector<int> atomicNumbersCopy = atomicNumbers;
+        sort(atomicNumbersCopy.begin(), atomicNumbersCopy.end());
+        for (size_t i = 0; i < atomicNumbersCopy.size(); i++)
         {
-            species.push_back(PeriodicTable::strInt[el]);
-        }
-        sort(species.begin(), species.end());
-        for (size_t i = 0; i < species.size(); i++)
-        {
-            speciesMap[species[i]] = i;
+            speciesMap[atomicNumbersCopy[i]] = i;
         }
         _speciesMaps.push_back(speciesMap);
     }
-    computeMultiComponentVectors();
 }
 
 /**
@@ -67,11 +52,11 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
     auto currentOrbitList = localOrbitListGenerator.getFullOrbitList();
 
     // Check that the number of unique offsets equals the number of unit cells in the supercell.
-    if (localOrbitListGenerator.getNumberOfUniqueOffsets() != structure.size() / _primitiveStructure->size())
+    if (localOrbitListGenerator.getNumberOfUniqueOffsets() != structure.size() / _primitiveOrbitList->structure().size())
     {
         std::ostringstream msg;
         msg << "The number of unique offsets does not match the number of primitive units in the input structure (ClusterSpace::getClusterVector)" << std::endl;
-        msg << localOrbitListGenerator.getNumberOfUniqueOffsets() << " != " << structure.size() / _primitiveStructure->size();
+        msg << localOrbitListGenerator.getNumberOfUniqueOffsets() << " != " << structure.size() / _primitiveOrbitList->structure().size();
         throw std::runtime_error(msg.str());
     }
     return getClusterVectorFromOrbitList(currentOrbitList, supercell);
@@ -98,6 +83,7 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
   @todo This function should take an Orbit rather than an orbit index.
 */
 
+/*
 std::vector<std::vector<std::vector<int>>> ClusterSpace::getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &multiComponentVectors, const int orbitIndex) const
 {
     const auto allowedPermutations = _primitiveOrbitList->getOrbit(orbitIndex).getAllowedClusterPermutations();
@@ -131,6 +117,7 @@ std::vector<std::vector<std::vector<int>>> ClusterSpace::getMultiComponentVector
     }
     return elementPermutations;
 }
+*/
 
 /**
 @details Evaluates the cluster function using the specified parameters.
@@ -189,6 +176,7 @@ double ClusterSpace::evaluateClusterProduct(const std::vector<int> &multiCompone
 }
 
 /// Computes permutations and multicomponent vectors of each orbit.
+/*
 void ClusterSpace::computeMultiComponentVectors()
 {
     std::vector<int> emptyVec = {0};
@@ -219,37 +207,18 @@ void ClusterSpace::computeMultiComponentVectors()
     }
     _clusterVectorLength = clusterVectorIndex + 1;
 }
+*/
 
-/**
-@details Returns a list of pair where pair.first is the index of the underlying
-    orbit in _primitiveOrbitList and pair.second is the multi-component vector for the
-    orbit with index `index`
-@param index orbit index
-**/
-std::pair<int, std::vector<int>> ClusterSpace::getMultiComponentVectorsByOrbit(const unsigned int index)
-{
-    if (index >= _clusterVectorLength)
+size_t ClusterSpace::getClusterSpaceSize() const {
+    int size = 0;
+    for (size_t orbitIndex = 0; orbitIndex < _primitiveOrbitList->size(); orbitIndex++)
     {
-        std::ostringstream msg;
-        msg << "Out of range (ClusterSpace::getMultiComponentVectorsByOrbit)" << std::endl;
-        msg << index << " >= " << _clusterVectorLength;
-        throw std::out_of_range(msg.str());
+        const Orbit &orbit = _primitiveOrbitList->getOrbit(orbitIndex);
+        size += orbit._clusterVectorElements.size();
     }
-    for (int i = 0; i < _clusterVectorElementInfoList.size(); i++)
-    {
-        for (auto cvInfo : _clusterVectorElementInfoList[i])
-        {
-            if (index == cvInfo.clusterVectorIndex)
-            {
-                return make_pair(i, cvInfo.multiComponentVector);
-            }
-        }
-    }
-    std::ostringstream msg;
-    msg << "Found no multi component vector with index " << index;
-    msg << " (ClusterSpace::getMultiComponentVectorsByOrbit)" << std::endl;
-    throw std::runtime_error(msg.str());
-}
+    return size;
+} 
+
 
 /**
 @details This function removes orbits from the underlying orbit list.
@@ -261,10 +230,7 @@ void ClusterSpace::removeOrbits(std::vector<size_t> &indices)
     for (int i = indices.size() - 1; i >= 0; i--)
     {
         _primitiveOrbitList->removeOrbit(indices[i]);
-        _clusterVectorElementInfoList.erase(_clusterVectorElementInfoList.begin() + indices[i]);
     }
-    // We need to recompute the possible multi-component vectors, which includes updating the size of the cluster vector.
-    computeMultiComponentVectors();
 }
 
 /*
@@ -286,7 +252,7 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
     {
         throw std::runtime_error("flipIndex needs to be specified (larger than -1) if newOccupation is specified (ClusterSpace::getClusterVectorFromOrbitList)");
     }
-    std::vector<double> clusterVector(_clusterVectorLength);
+    std::vector<double> clusterVector;
     clusterVector[0] = firstElement;
 
     if (_primitiveOrbitList->size() != orbitList.size())
@@ -312,9 +278,11 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
         }
 
         // Extract allowed occupations
-        std::vector<int> allowedOccupations = _primitiveStructure->getNumberOfAllowedSpeciesBySites(currentPrimitiveOrbit.representativeCluster().latticeSites());
+        // @todo Get this from Orbit instead
+        std::vector<int> allowedOccupations = _primitiveOrbitList->structure().getNumberOfAllowedSpeciesBySites(currentPrimitiveOrbit.representativeCluster().latticeSites());
 
         // Skip the rest if any of the sites are inactive (i.e. allowed occupation < 2)
+        // @todo Let orbit handle this
         if (std::any_of(allowedOccupations.begin(), allowedOccupations.end(), [](int allowedOccupation)
                         { return allowedOccupation < 2; }))
         {
@@ -332,25 +300,28 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
         // Example 1: For an AB alloy we obtain [0, 0] and [0, 0, 0] for pair and triplet terms, respectively.
         // Example 2: For an ABC alloy we obtain [0, 0], [0, 1], [1, 1] for pairs and similarly for triplets.
         // Depending on the symmetry of the cluster one might also obtain [1, 0] (e.g., in a clathrate or for some clusters on a HCP lattice).
-        for (size_t j = 0; j < _clusterVectorElementInfoList[currentOrbitIndex].size(); j++)
+        for (auto &cvElement : currentPrimitiveOrbit._clusterVectorElements)
         {
-            double clusterVectorElement = 0;
-            const ClusterVectorElementInfo &cvInfo = _clusterVectorElementInfoList[currentOrbitIndex][j];
-
             /// Push back zero if nothing was counted for this orbit
             if (counts.size() == 0)
             {
-                clusterVector[cvInfo.clusterVectorIndex] = 0;
+                clusterVector.push_back(0);
                 continue;
             }
+
+            double clusterVectorElement = 0;
 
             /// Loop over all the counts for this orbit
             for (const auto &elementsCountPair : counts)
             {
                 /// Loop over all equivalent permutations for this orbit and mc vector
-                for (const auto &perm : cvInfo.sitePermutations)
+                for (const auto &perm : cvElement.sitePermutations)
                 {
-                    clusterVectorElement += evaluateClusterProduct(cvInfo.multiComponentVector, allowedOccupations, elementsCountPair.first, indicesOfRepresentativeSites, perm) * elementsCountPair.second;
+                    clusterVectorElement += evaluateClusterProduct(cvElement.multiComponentVector, 
+                                                                   allowedOccupations, 
+                                                                   elementsCountPair.first, 
+                                                                   indicesOfRepresentativeSites, 
+                                                                   perm) * elementsCountPair.second;
                 }
             }
 
@@ -359,7 +330,7 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
             // local cluster vectors or changes in cluster vectors, we have only counted
             // a subset of the clusters. We thus need to compute the multiplicity by
             // analyzing the orbit in detail.
-            clusterVector[cvInfo.clusterVectorIndex] = clusterVectorElement / cvInfo.multiplicity / (double)supercell->size();
+            clusterVector.push_back(clusterVectorElement / cvElement.multiplicity * (double)_primitiveOrbitList->structure().size() / (double)supercell->size());
         }
     }
     return clusterVector;

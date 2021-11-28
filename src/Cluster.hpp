@@ -51,6 +51,8 @@ public:
     /// Check whether a site index is included with a zero offset.
     bool isSiteIndexIncludedWithZeroOffset(const int index) const;
 
+    std::vector<int> getNumberOfAllowedSpeciesPerSite() const { return _structure->getNumberOfAllowedSpeciesBySites(_latticeSites); };
+
     /// Count the number of occurences of a site index among the sites in this cluster
     unsigned int getCountOfOccurencesOfSiteIndex(int) const;
 

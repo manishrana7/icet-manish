@@ -21,7 +21,7 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
     {
         // Find offset of this atom in terms of the primitive structure
         Vector3d position = _supercell->positionByIndex(i);
-        Vector3i offset = _clusterSpace.primitiveStructure()->findLatticeSiteByPosition(position, fractionalPositionTolerance).unitcellOffset();
+        Vector3i offset = _clusterSpace.primitiveStructure().findLatticeSiteByPosition(position, fractionalPositionTolerance).unitcellOffset();
 
         // Create map from atom index to offset
         _indexToOffset[i] = offset;

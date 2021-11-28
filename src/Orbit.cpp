@@ -24,6 +24,8 @@ Orbit::Orbit(const std::vector<Cluster> clusters,
     // circumstances matters when sorting the orbit list (and thereby the
     // cluster vector).
     std::sort(_clusters.begin(), _clusters.end());
+
+    _computeMultiComponentVectors();
 }
 
 /**
@@ -39,15 +41,20 @@ void Orbit::addCluster(const Cluster &cluster)
 /**
 @param Mi_local list of the number of allowed species per site
 */
-std::vector<std::vector<int>> Orbit::getMultiComponentVectors(const std::vector<int> &Mi_local) const
+std::vector<std::vector<int>> Orbit::_computeMultiComponentVectors()
 {
-    if (std::any_of(Mi_local.begin(), Mi_local.end(), [](const int i)
+    std::cout << "before get M" << std::endl;
+    std::vector<int> numberOfAllowedSpecies = representativeCluster().getNumberOfAllowedSpeciesPerSite();
+    std::cout << "after get M" << std::endl;
+    std::cout << numberOfAllowedSpecies[0] << std::endl;
+
+    if (std::any_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](const int i)
                     { return i < 2; }))
     {
         std::vector<std::vector<int>> emptyVector;
         return emptyVector;
     }
-    auto allMCVectors = getAllPossibleMultiComponentVectorPermutations(Mi_local);
+    auto allMCVectors = getAllPossibleMultiComponentVectorPermutations(numberOfAllowedSpecies);
     std::sort(allMCVectors.begin(), allMCVectors.end());
     std::vector<std::vector<int>> distinctMCVectors;
     for (const auto &mcVector : allMCVectors)
@@ -66,7 +73,49 @@ std::vector<std::vector<int>> Orbit::getMultiComponentVectors(const std::vector<
             distinctMCVectors.push_back(mcVector);
         }
     }
+
+    auto sitePermutations = _getMultiComponentVectorPermutations(distinctMCVectors);
+    for (int j = 0; j < distinctMCVectors.size(); j++)
+    {
+        ClusterVectorElement cvElement = {distinctMCVectors[j],
+                                          sitePermutations[j],
+                                          (double)sitePermutations[j].size() * size()};
+        _clusterVectorElements.push_back(cvElement);
+    }
+
     return distinctMCVectors;
+}
+
+std::vector<std::vector<std::vector<int>>> Orbit::_getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &multiComponentVectors) const
+{
+    std::vector<std::vector<std::vector<int>>> elementPermutations;
+    std::vector<int> selfPermutation;
+    for (size_t i = 0; i < multiComponentVectors[0].size(); i++)
+    {
+        selfPermutation.push_back(i);
+    }
+
+    for (const auto &mc : multiComponentVectors)
+    {
+        std::vector<std::vector<int>> mcPermutations;
+        mcPermutations.push_back(selfPermutation);
+        std::vector<std::vector<int>> takenPermutations;
+        takenPermutations.push_back(selfPermutation);
+        for (const std::vector<int> perm : _allowedClusterPermutations)
+        {
+            auto permutedMultiComponentVector = icet::getPermutedVector(mc, perm);
+            auto findPerm = find(multiComponentVectors.begin(), multiComponentVectors.end(), permutedMultiComponentVector);
+            auto findIfTaken = find(takenPermutations.begin(), takenPermutations.end(), permutedMultiComponentVector);
+            if (findPerm == multiComponentVectors.end() && findIfTaken == takenPermutations.end() && mc != permutedMultiComponentVector)
+            {
+                mcPermutations.push_back(perm);
+                takenPermutations.push_back(permutedMultiComponentVector);
+            }
+        }
+        sort(mcPermutations.begin(), mcPermutations.end());
+        elementPermutations.push_back(mcPermutations);
+    }
+    return elementPermutations;
 }
 
 /// Similar to get all permutations but needs to be filtered through the number of allowed species

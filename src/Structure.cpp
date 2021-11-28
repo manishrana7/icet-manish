@@ -13,10 +13,8 @@ Structure::Structure(const Matrix<double, Dynamic, 3, RowMajor> &positions,
                      const py::array_t<int> &atomicNumbers,
                      const Matrix3d &cell,
                      const std::vector<bool> &pbc)
-    : _atomicNumbers(atomicNumbers), _cell(cell), _pbc(pbc)
-{
-    setPositions(positions);
-    _numbersOfAllowedSpecies.resize(positions.rows());
+    : _atomicNumbers(atomicNumbers), _cell(cell), _pbc(pbc), _positions(positions)
+{  
 }
 
 /**
@@ -115,25 +113,22 @@ LatticeSite Structure::findLatticeSiteByPosition(const Vector3d &position, const
 }
 
 /**
-  @details This function allows one to specify the number of components
-  that are allowed on each lattice site via a vector. This can be employed to
-  construct "parallel" cluster expansions such as in (A,B) on site #1 with
-  (C,D) on site #2.
-  @param numbersOfAllowedSpecies list with the number of components
-  allowed on each site
+  @brief Prescribes the atomic numbers that are allowed on each site in the structure.
+  @param atomicNumbers
+    Nested list with the atomic numbers allowed on each site in the structure.
 **/
-void Structure::setNumberOfAllowedSpecies(const std::vector<int> &numbersOfAllowedSpecies)
+void Structure::setAllowedAtomicNumbers(const std::vector<std::vector<int>> &atomicNumbers)
 {
-    if (numbersOfAllowedSpecies.size() != size())
+    if (atomicNumbers.size() != size())
     {
         std::ostringstream msg;
         msg << "Size of input list incompatible with structure";
-        msg << " length: " << numbersOfAllowedSpecies.size();
+        msg << " length: " << atomicNumbers.size();
         msg << " nsites: " << size();
-        msg << " (Structure::setNumberOfAllowedSpecies)";
+        msg << " (Structure::setAllowedAtomicNumbers)";
         throw std::out_of_range(msg.str());
     }
-    _numbersOfAllowedSpecies = numbersOfAllowedSpecies;
+    _allowedAtomicNumbers = atomicNumbers;
 }
 
 /**
@@ -144,16 +139,23 @@ void Structure::setNumberOfAllowedSpecies(const std::vector<int> &numbersOfAllow
 **/
 int Structure::getNumberOfAllowedSpeciesBySite(const size_t index) const
 {
-    if (index >= _numbersOfAllowedSpecies.size())
+    if (_allowedAtomicNumbers.size() < size())
+    {
+        std::ostringstream msg;
+        msg << "Allowed atomic numbers per site not set in this structure";
+        msg << " (Structure::getNumberOfAllowedSpeciesBySite)";
+        throw std::out_of_range(msg.str());
+    }
+    else if (index >= _allowedAtomicNumbers.size())
     {
         std::ostringstream msg;
         msg << "Site index out of bounds";
         msg << " index: " << index;
-        msg << " nsites: " << _numbersOfAllowedSpecies.size();
+        msg << " nsites: " << _allowedAtomicNumbers.size();
         msg << " (Structure::getNumberOfAllowedSpeciesBySite)";
         throw std::out_of_range(msg.str());
     }
-    return _numbersOfAllowedSpecies[index];
+    return _allowedAtomicNumbers[index].size();
 }
 
 /**
