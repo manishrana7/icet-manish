@@ -44,9 +44,6 @@ public:
   /// Returns the default cluster function.
   double evaluateClusterFunction(const int, const int, const int) const;
 
-  /// Removes orbits.
-  void removeOrbits(std::vector<size_t> &);
-
   /// Merge orbits.
   void mergeOrbits(const int index1, const int index2) { _primitiveOrbitList->mergeOrbits(index1, index2); }
 

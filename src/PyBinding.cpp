@@ -609,7 +609,6 @@ PYBIND11_MODULE(_icet, m)
 
         .def_property_readonly("species_maps", &ClusterSpace::getSpeciesMaps)
         .def("_get_primitive_structure", &ClusterSpace::primitiveStructure)
-        .def("_remove_orbits_cpp", &ClusterSpace::removeOrbits)
         .def("evaluate_cluster_function",
              &ClusterSpace::evaluateClusterFunction,
              "Evaluates value of a cluster function.")

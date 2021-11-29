@@ -79,6 +79,26 @@ void Orbit::_computeMultiComponentVectors()
     }
 }
 
+/**
+  @details This method returns the multi-component vector permutations for
+  each multi-component vector.
+
+  Example 1: Given multi-component vectors [0, 0], [0, 1] and [1, 1]
+  the returned permutations should be [[1, 0]], [[0, 1],[1, 0]], [1, 1].
+  i.e. the [0, 1] multi-component vector should count elements with
+  permutations [1, 0] and [1, 0].
+
+  Example 2: Given multi-component vectors [0, 0], [0, 1], [1, 0] and [1, 1]
+  the returned permutations will only be the self permutations since the
+  multi-component vectors [0, 1] and [1, 0] will handle the AB vs BA choice.
+
+  @param multiComponentVectors multi-component vectors for this orbit
+  @param orbitIndex index from which to take the allowed permutations
+
+  @returns a vector of a vector of a vector of ints; here the innermost index
+
+  @todo This function should take an Orbit rather than an orbit index.
+*/
 std::vector<std::vector<std::vector<int>>> Orbit::_getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &multiComponentVectors) const
 {
     std::vector<std::vector<std::vector<int>>> elementPermutations;
