@@ -45,8 +45,7 @@ public:
     // @todo Add description.
     void addColumnsFromMatrixOfEquivalentSites(std::vector<std::vector<std::vector<LatticeSite>>> &,
                                                std::unordered_set<std::vector<int>, VectorHash> &,
-                                               const std::vector<int> &,
-                                               bool) const;
+                                               const std::vector<int> &) const;
 
     /// Returns the number of orbits.
     size_t size() const { return _orbits.size(); }
@@ -70,7 +69,7 @@ public:
                                                                        bool sort = true) const;
 
     /// @todo Add description.
-    std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> getMatchesInMatrixOfEquivalenSites(const std::vector<std::vector<LatticeSite>> &) const;
+    std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> getMatchesInMatrixOfEquivalentSites(const std::vector<std::vector<LatticeSite>> &) const;
 
     /// @todo Add description.
     void transformSiteToSupercell(LatticeSite &,

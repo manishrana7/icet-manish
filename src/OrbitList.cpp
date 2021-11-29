@@ -64,16 +64,17 @@ OrbitList::OrbitList(const Structure &structure,
                     throw std::runtime_error("Original sites are not sorted (OrbitList::OrbitList)");
                 }
 
-                // get all translational variants of cluster
+                // Get all translational variants of cluster, only to be able to extract
+                // the "lowest" one according to how lattice sites are sorted
                 std::vector<std::vector<LatticeSite>> clusterWithTranslations = getSitesTranslatedToUnitcell(cluster);
 
                 // get all sites from the matrix of equivalent sites
-                auto pairsOfSiteAndIndex = getMatchesInMatrixOfEquivalenSites(clusterWithTranslations);
+                auto pairOfSitesAndRowIndices = getMatchesInMatrixOfEquivalentSites(clusterWithTranslations)[0];
 
-                if (rowsTaken.find(pairsOfSiteAndIndex[0].second) == rowsTaken.end())
+                if (rowsTaken.find(pairOfSitesAndRowIndices.second) == rowsTaken.end())
                 {
                     // Found new stuff
-                    addColumnsFromMatrixOfEquivalentSites(listOfEquivalentClusters, rowsTaken, pairsOfSiteAndIndex[0].second, true);
+                    addColumnsFromMatrixOfEquivalentSites(listOfEquivalentClusters, rowsTaken, pairOfSitesAndRowIndices.second);
                 }
             }
 
@@ -86,7 +87,7 @@ OrbitList::OrbitList(const Structure &structure,
                 if (find == rowsTaken.end())
                 {
                     // Found new stuff
-                    addColumnsFromMatrixOfEquivalentSites(listOfEquivalentClusters, rowsTaken, indices, true);
+                    addColumnsFromMatrixOfEquivalentSites(listOfEquivalentClusters, rowsTaken, indices);
                 }
             }
         }
@@ -427,14 +428,12 @@ the second index (vector) over the equivalent cluster in a given orbit, and
 the final vector runs over the lattice sites that represent a particular cluster.
 
 @param rowsTaken
-@param pm_rows indices of rows in matrix of symmetry equivalent sites
-@param add
+@param rowIndices indices of rows in matrix of symmetry equivalent sites
 @todo fix the description of this function, including its name
 **/
 void OrbitList::addColumnsFromMatrixOfEquivalentSites(std::vector<std::vector<std::vector<LatticeSite>>> &listOfEquivalentClusters,
                                                       std::unordered_set<std::vector<int>, VectorHash> &rowsTaken,
-                                                      const std::vector<int> &pm_rows,
-                                                      bool add) const
+                                                      const std::vector<int> &rowIndices) const
 {
 
     std::vector<std::vector<LatticeSite>> columnLatticeSites;
@@ -443,29 +442,28 @@ void OrbitList::addColumnsFromMatrixOfEquivalentSites(std::vector<std::vector<st
     {
         std::vector<LatticeSite> nondistinctLatticeSites;
 
-        for (const int &row : pm_rows)
+        for (const int &row : rowIndices)
         {
             nondistinctLatticeSites.push_back(_matrixOfEquivalentSites[row][column]);
         }
         auto translatedEquivalentSites = getSitesTranslatedToUnitcell(nondistinctLatticeSites);
+        auto pairsOfSitesAndRowIndices = getMatchesInMatrixOfEquivalentSites(translatedEquivalentSites);
 
-        auto pairsOfSiteAndIndex = getMatchesInMatrixOfEquivalenSites(translatedEquivalentSites);
-
-        auto find = rowsTaken.find(pairsOfSiteAndIndex[0].second);
+        auto find = rowsTaken.find(pairsOfSitesAndRowIndices[0].second);
         bool findOnlyOne = true;
         if (find == rowsTaken.end())
         {
-            for (size_t i = 0; i < pairsOfSiteAndIndex.size(); i++)
+            for (size_t i = 0; i < pairsOfSitesAndRowIndices.size(); i++)
             {
-                find = rowsTaken.find(pairsOfSiteAndIndex[i].second);
+                find = rowsTaken.find(pairsOfSitesAndRowIndices[i].second);
                 if (find == rowsTaken.end())
                 {
-                    if (add && findOnlyOne && validCluster(pairsOfSiteAndIndex[i].first))
+                    if (findOnlyOne && validCluster(pairsOfSitesAndRowIndices[i].first))
                     {
-                        columnLatticeSites.push_back(pairsOfSiteAndIndex[0].first);
+                        columnLatticeSites.push_back(pairsOfSitesAndRowIndices[0].first);
                         findOnlyOne = false;
                     }
-                    rowsTaken.insert(pairsOfSiteAndIndex[i].second);
+                    rowsTaken.insert(pairsOfSitesAndRowIndices[i].second);
                 }
             }
         }
@@ -479,7 +477,7 @@ void OrbitList::addColumnsFromMatrixOfEquivalentSites(std::vector<std::vector<st
 /**
 @details Returns the first set of translated sites that exist in referenceLatticeSites.
 */
-std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> OrbitList::getMatchesInMatrixOfEquivalenSites(
+std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> OrbitList::getMatchesInMatrixOfEquivalentSites(
     const std::vector<std::vector<LatticeSite>> &translatedSites) const
 {
     std::vector<int> perm_matrix_rows;
