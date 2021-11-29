@@ -70,8 +70,9 @@ OrbitList::OrbitList(const Structure &structure,
 
                 // get all sites from the matrix of equivalent sites
                 auto pairOfSitesAndRowIndices = getMatchesInMatrixOfEquivalentSites(clusterWithTranslations)[0];
-
-                if (rowsTaken.find(pairOfSitesAndRowIndices.second) == rowsTaken.end())
+                std::vector<int> sortedRowIndices = pairOfSitesAndRowIndices.second;
+                std::sort(sortedRowIndices.begin(), sortedRowIndices.end());
+                if (rowsTaken.find(sortedRowIndices) == rowsTaken.end())
                 {
                     // Found new stuff
                     addColumnsFromMatrixOfEquivalentSites(listOfEquivalentClusters, rowsTaken, pairOfSitesAndRowIndices.second);
@@ -322,6 +323,17 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
         throw std::runtime_error(msg.str());
     }
 
+
+    for (int i = 0; i < equivalentSiteGroups.size(); i++) {
+        for (int j = 0; j < equivalentSiteGroups[i].size(); j++)
+        {
+            std::cout << permutedEquivalentSiteGroups[i][j] << std::endl;
+            std::cout << equivalentSiteGroups[i][j] << std::endl << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+
     // Turn the permuted equivalent clusters into actual Cluster objects
     std::vector<Cluster> clusters;
     std::shared_ptr<Structure> structurePtr = std::make_shared<Structure>(_structure);
@@ -389,10 +401,12 @@ std::vector<std::vector<LatticeSite>> OrbitList::getSitesTranslatedToUnitcell(co
         if (latticeSites[i].unitcellOffset().norm() > 0.5) // only translate sites outside the primitive unitcell
         {
             auto translatedSites = getTranslatedSites(latticeSites, i);
+            /*
             if (sort)
             {
                 std::sort(translatedSites.begin(), translatedSites.end());
             }
+            */  
             listOfTranslatedLatticeSites.push_back(translatedSites);
         }
     }
@@ -448,14 +462,17 @@ void OrbitList::addColumnsFromMatrixOfEquivalentSites(std::vector<std::vector<st
         }
         auto translatedEquivalentSites = getSitesTranslatedToUnitcell(nondistinctLatticeSites);
         auto pairsOfSitesAndRowIndices = getMatchesInMatrixOfEquivalentSites(translatedEquivalentSites);
-
-        auto find = rowsTaken.find(pairsOfSitesAndRowIndices[0].second);
+        std::vector<int> sortedRowIndices = pairsOfSitesAndRowIndices[0].second;
+        std::sort(sortedRowIndices.begin(), sortedRowIndices.end());
+        auto find = rowsTaken.find(sortedRowIndices);
         bool findOnlyOne = true;
         if (find == rowsTaken.end())
         {
             for (size_t i = 0; i < pairsOfSitesAndRowIndices.size(); i++)
             {
-                find = rowsTaken.find(pairsOfSitesAndRowIndices[i].second);
+                std::vector<int> sortedRowIndices = pairsOfSitesAndRowIndices[i].second;
+                std::sort(sortedRowIndices.begin(), sortedRowIndices.end());
+                auto find = rowsTaken.find(sortedRowIndices);
                 if (find == rowsTaken.end())
                 {
                     if (findOnlyOne && validCluster(pairsOfSitesAndRowIndices[i].first))
@@ -463,7 +480,7 @@ void OrbitList::addColumnsFromMatrixOfEquivalentSites(std::vector<std::vector<st
                         columnLatticeSites.push_back(pairsOfSitesAndRowIndices[0].first);
                         findOnlyOne = false;
                     }
-                    rowsTaken.insert(pairsOfSitesAndRowIndices[i].second);
+                    rowsTaken.insert(sortedRowIndices);
                 }
             }
         }
