@@ -78,11 +78,6 @@ public:
                                   std::unordered_map<LatticeSite, LatticeSite> &,
                                   const double) const;
 
-    /// Returns all columns from the given rows in matrix of equivalent sites
-    std::vector<std::vector<LatticeSite>> getAllColumnsFromRow(const std::vector<int> &,
-                                                               bool,
-                                                               bool) const;
-
     /// Finds and returns sites in first column of matrix of equivalent sites along with their unit cell translated indistinguishable sites.
     std::vector<std::vector<LatticeSite>> getAllColumnsFromCluster(const std::vector<LatticeSite> &) const;
 

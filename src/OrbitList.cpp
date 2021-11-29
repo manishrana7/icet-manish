@@ -327,48 +327,30 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
 }
 
 /**
-@details Finds the sites in referenceLatticeSites, extract all columns along with their unit cell translated indistinguishable sites.
-@param sites sites that correspond to the columns that will be returned
-@returns columns along with their unit cell translated indistinguishable sites
+@details
+    Finds the sites in _referenceLatticeSites, extracts all columns along with
+    their unit cell translated equivalent sites from the rows corresponding to
+    these reference lattice sites.
+@param sites Sites that correspond to the rows that will be returned
+@returns Columns along with their unit cell translated indistinguishable sites
 **/
 std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromCluster(const std::vector<LatticeSite> &sites) const
 {
-    bool sortRows = false;
-    std::vector<int> rowIndicesFromReferenceLatticeSites = getReferenceLatticeSiteIndices(sites, sortRows);
-    std::vector<std::vector<LatticeSite>> p_equal = getAllColumnsFromRow(rowIndicesFromReferenceLatticeSites, true, sortRows);
-    return p_equal;
-}
+    std::vector<int> rowIndicesFromReferenceLatticeSites = getReferenceLatticeSiteIndices(sites, false);
 
-/**
-@brief Returns the lattice sites in all columns from the given rows in matrix of symmetry equivalent sites
-@param rows indices of rows to return
-@param includeTranslatedSites If true it will also include the equivalent sites found from the rows by moving each site into the unitcell.
-@param sort if true (default) the first column will be sorted
-**/
-std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromRow(const std::vector<int> &rowIndices,
-                                                                      bool includeTranslatedSites,
-                                                                      bool sort) const
-{
     std::vector<std::vector<LatticeSite>> allColumns;
-
-    for (size_t column = 0; column < _matrixOfEquivalentSites[0].size(); column++)
+    for (size_t columnIndex = 0; columnIndex < _matrixOfEquivalentSites[0].size(); columnIndex++)
     {
         std::vector<LatticeSite> nondistinctLatticeSites;
 
-        for (const int &row : rowIndices)
+        for (const int &rowIndex : rowIndicesFromReferenceLatticeSites)
         {
-            nondistinctLatticeSites.push_back(_matrixOfEquivalentSites[row][column]);
+            nondistinctLatticeSites.push_back(_matrixOfEquivalentSites[rowIndex][columnIndex]);
         }
 
-        if (includeTranslatedSites)
-        {
-            auto translatedEquivalentSites = getSitesTranslatedToUnitcell(nondistinctLatticeSites, sort);
-            allColumns.insert(allColumns.end(), translatedEquivalentSites.begin(), translatedEquivalentSites.end());
-        }
-        else
-        {
-            allColumns.push_back(nondistinctLatticeSites);
-        }
+        // Include translated sites as well
+        auto translatedEquivalentSites = getSitesTranslatedToUnitcell(nondistinctLatticeSites, false);
+        allColumns.insert(allColumns.end(), translatedEquivalentSites.begin(), translatedEquivalentSites.end());
     }
     return allColumns;
 }
