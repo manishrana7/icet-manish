@@ -183,7 +183,7 @@ For each orbit:
 
 1. Take representative cluster
 2. Find the rows, which match the sites that belong to this cluster, and ...
-3. Get all columns for these rows, i.e the sites that are directly equivalent, call these equivalentClustersWithTranslations.
+3. Get all columns for these rows, i.e the sites that are directly equivalent, call these equivalentSiteGroupsWithTranslations.
 4. Construct all possible permutations for the representative cluster, call these representativeClusterWithTranslationsAndPermutations.
 5. Construct the intersection of p_equal and p_all, call this consistentEquivalentClustersWithTranslations.
 6. Get the index version of consistentEquivalentClustersWithTranslations and these are then the allowed permutations for this orbit.
@@ -198,62 +198,64 @@ For each orbit:
                 continue
 
 **/
-Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equivalentClusters)
+Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equivalentSiteGroups)
 {
 
     bool sortRows = false;
 
     // step one: Get representative cluster
-    std::vector<LatticeSite> sitesOfRepresentativeCluster = equivalentClusters[0];
-    auto representativeClusterWithTranslations = getSitesTranslatedToUnitcell(sitesOfRepresentativeCluster, sortRows);
+    std::vector<LatticeSite> representativeSiteGroup = equivalentSiteGroups[0];
+    auto representativeSiteGroupWithTranslations = getSitesTranslatedToUnitcell(representativeSiteGroup, sortRows);
 
     // step two: Find the rows these sites belong to and
     // step three: Get all columns for these rows
-    std::vector<std::vector<LatticeSite>> equivalentClustersWithTranslations;
-    for (auto reprCluster : representativeClusterWithTranslations)
+    std::vector<std::vector<LatticeSite>> equivalentSiteGroupsWithTranslations;
+    for (auto representativeSiteGroup : representativeSiteGroupWithTranslations)
     {
-        auto equivClusters = getAllColumnsFromCluster(reprCluster);
-        equivalentClustersWithTranslations.insert(equivalentClustersWithTranslations.end(), equivClusters.begin(), equivClusters.end());
+        auto equivalentSiteGroups = getAllColumnsFromCluster(representativeSiteGroup);
+        equivalentSiteGroupsWithTranslations.insert(equivalentSiteGroupsWithTranslations.end(), equivalentSiteGroups.begin(), equivalentSiteGroups.end());
     }
-    std::sort(equivalentClustersWithTranslations.begin(), equivalentClustersWithTranslations.end());
+    std::sort(equivalentSiteGroupsWithTranslations.begin(), equivalentSiteGroupsWithTranslations.end());
 
     // Step four: Construct all possible permutations of the representative cluster
-    std::vector<std::vector<LatticeSite>> representativeClusterWithTranslationsAndPermutations;
-    for (auto reprCluster : representativeClusterWithTranslations)
+    std::vector<std::vector<LatticeSite>> representativeSiteGroupWithTranslationsAndPermutations;
+    for (auto representativeSiteGroup : representativeSiteGroupWithTranslations)
     {
-        std::vector<std::vector<LatticeSite>> permClusters = icet::getAllPermutations<LatticeSite>(reprCluster);
-        representativeClusterWithTranslationsAndPermutations.insert(representativeClusterWithTranslationsAndPermutations.end(), permClusters.begin(), permClusters.end());
+        std::vector<std::vector<LatticeSite>> permutedSiteGroups = icet::getAllPermutations<LatticeSite>(representativeSiteGroup);
+        representativeSiteGroupWithTranslationsAndPermutations.insert(representativeSiteGroupWithTranslationsAndPermutations.end(),
+                                                                      permutedSiteGroups.begin(), permutedSiteGroups.end());
     }
-    std::sort(representativeClusterWithTranslationsAndPermutations.begin(), representativeClusterWithTranslationsAndPermutations.end());
+    std::sort(representativeSiteGroupWithTranslationsAndPermutations.begin(), representativeSiteGroupWithTranslationsAndPermutations.end());
 
-    // Step five: Construct intersection of equivalentClustersWithTranslations and
-    // representativeClusterWithTranslationsAndPermutations. This will
+    // Step five: Construct intersection of equivalentSiteGroupsWithTranslations and
+    // representativeSiteGroupsWithTranslationsAndPermutations. This will
     // generate the list of equivalent clusters that is consistent with the
     // permutations of the representative cluster. This is relevant for
     // systems with more than two components, for which one must deal with
-    // multi-component vectors.
-    std::vector<std::vector<LatticeSite>> consistentEquivalentClustersWithTranslations;
-    std::set_intersection(equivalentClustersWithTranslations.begin(), equivalentClustersWithTranslations.end(),
-                          representativeClusterWithTranslationsAndPermutations.begin(), representativeClusterWithTranslationsAndPermutations.end(),
-                          std::back_inserter(consistentEquivalentClustersWithTranslations));
+    // multicomponent vectors.
+    std::vector<std::vector<LatticeSite>> consistentEquivalentSiteGroupsWithTranslations;
+    std::set_intersection(equivalentSiteGroupsWithTranslations.begin(), equivalentSiteGroupsWithTranslations.end(),
+                          representativeSiteGroupWithTranslationsAndPermutations.begin(), representativeSiteGroupWithTranslationsAndPermutations.end(),
+                          std::back_inserter(consistentEquivalentSiteGroupsWithTranslations));
 
     // Step six: Get the index version of consistentEquivalentClustersWithTranslations
     std::set<std::vector<int>> allowedPermutations;
-    for (const auto &equivCluster : consistentEquivalentClustersWithTranslations)
+    for (const auto &equivalentSiteGroup : consistentEquivalentSiteGroupsWithTranslations)
     {
         size_t failedLoops = 0;
-        for (auto reprCluster : representativeClusterWithTranslations)
+        for (const auto &representativeSiteGroup : representativeSiteGroupWithTranslations)
         {
             try
             {
-                std::vector<int> allowedPermutation = icet::getPermutation<LatticeSite>(reprCluster, equivCluster);
+                std::vector<int> allowedPermutation = icet::getPermutation<LatticeSite>(representativeSiteGroup,
+                                                                                        equivalentSiteGroup);
                 allowedPermutations.insert(allowedPermutation);
             }
             catch (const std::runtime_error &e)
             {
                 {
                     failedLoops++;
-                    if (failedLoops == representativeClusterWithTranslations.size())
+                    if (failedLoops == representativeSiteGroupWithTranslations.size())
                     {
                         throw std::runtime_error("Did not find integer permutation from allowed permutation to any translated representative site (OrbitList::createOrbit)");
                     }
@@ -265,20 +267,21 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
 
     // Step seven: Relate equivalent clusters to the representative cluster, i.e. what is the consistent ordering of the cluster
     std::unordered_set<std::vector<LatticeSite>> p_equal_set;
-    p_equal_set.insert(equivalentClustersWithTranslations.begin(), equivalentClustersWithTranslations.end());
+    p_equal_set.insert(equivalentSiteGroupsWithTranslations.begin(),
+                       equivalentSiteGroupsWithTranslations.end());
 
-    std::vector<std::vector<LatticeSite>> permutedEquivalentClusters;
+    std::vector<std::vector<LatticeSite>> permutedEquivalentSiteGroups;
 
-    for (const auto &equivalentOrbitSites : equivalentClusters)
+    for (const auto &equivalentSiteGroup : equivalentSiteGroups)
     {
-        if (p_equal_set.find(equivalentOrbitSites) == p_equal_set.end())
+        if (p_equal_set.find(equivalentSiteGroup) == p_equal_set.end())
         {
             // Did not find the cluster in p_equal_set meaning that this cluster is not permuted as it should
-            auto equivalentlyTranslatedEquivalentOrbitSites = getSitesTranslatedToUnitcell(equivalentOrbitSites, sortRows);
+            auto equivalentlyTranslatedEquivalentSiteGroup = getSitesTranslatedToUnitcell(equivalentSiteGroup, sortRows);
             std::vector<std::vector<LatticeSite>> translatedPermutationsOfSites;
-            for (const auto eq_trans_equivalentOrbitsites : equivalentlyTranslatedEquivalentOrbitSites)
+            for (const auto eq_trans_equivalentSiteGroup : equivalentlyTranslatedEquivalentSiteGroup)
             {
-                const auto allPermutationsOfSites_i = icet::getAllPermutations<LatticeSite>(eq_trans_equivalentOrbitsites);
+                const auto allPermutationsOfSites_i = icet::getAllPermutations<LatticeSite>(eq_trans_equivalentSiteGroup);
                 for (const auto perm : allPermutationsOfSites_i)
                 {
                     translatedPermutationsOfSites.push_back(perm);
@@ -289,7 +292,7 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
                 const auto findOnePerm = p_equal_set.find(perm);
                 if (findOnePerm != p_equal_set.end()) // one perm is one of the equivalent sites. This means that equivalentOrbitSites is associated to p_equal
                 {
-                    permutedEquivalentClusters.push_back(perm);
+                    permutedEquivalentSiteGroups.push_back(perm);
                     break;
                 }
                 if (perm == translatedPermutationsOfSites.back())
@@ -300,22 +303,22 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
         }
         else
         {
-            permutedEquivalentClusters.push_back(equivalentOrbitSites);
+            permutedEquivalentSiteGroups.push_back(equivalentSiteGroup);
         }
     }
 
-    if (permutedEquivalentClusters.size() != equivalentClusters.size())
+    if (permutedEquivalentSiteGroups.size() != equivalentSiteGroups.size())
     {
         std::ostringstream msg;
         msg << "Not all clusters were permuted (OrbitList::createOrbit) " << std::endl;
-        msg << permutedEquivalentClusters.size() << " != " << equivalentClusters.size();
+        msg << permutedEquivalentSiteGroups.size() << " != " << equivalentSiteGroups.size();
         throw std::runtime_error(msg.str());
     }
 
     // Turn the permuted equivalent clusters into actual Cluster objects
     std::vector<Cluster> clusters;
     std::shared_ptr<Structure> structurePtr = std::make_shared<Structure>(_structure);
-    for (auto cluster : permutedEquivalentClusters)
+    for (auto cluster : permutedEquivalentSiteGroups)
     {
         clusters.push_back(Cluster(cluster, structurePtr));
     }
@@ -536,7 +539,7 @@ bool OrbitList::validCluster(const std::vector<LatticeSite> &latticeSites) const
 /**
 @details Returns a list of indices of entries in latticeSites that are equivalent to the sites in reference lattice sites.
 @param sort if true the first column will be sorted
-@param latticeSites list of sites to search in
+@param latticeSiteGroup list of sites to search in
 @return indices of entries in latticeSites that are equivalent to sites in the reference lattice sites
 **/
 std::vector<int> OrbitList::getIndicesOfEquivalentLatticeSites(const std::vector<LatticeSite> &latticeSites,

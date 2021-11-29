@@ -435,8 +435,11 @@ class ClusterSpace(_ClusterSpace):
             indices to all orbits to be removed
         """
         size_before = len(self._orbit_list)
-        for ind in indices:
+
+        # Since we remove orbits, orbit indices will change, so we loop "backwards"
+        for ind in reversed(sorted(indices)):
             self._orbit_list.remove_orbit(ind)
+
         size_after = len(self._orbit_list)
         assert size_before - len(indices) == size_after
 
