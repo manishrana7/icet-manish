@@ -64,7 +64,10 @@ public:
   std::vector<int> getNumberOfAllowedSpeciesBySites(const std::vector<LatticeSite> &) const;
 
   /// Set allowed components for each site by vector.
-  void setAllowedAtomicNumbers(const std::vector<std::vector <int>> &);
+  void setAllowedAtomicNumbers(const std::vector<std::vector<int>> &);
+
+  /// Checks whether allowed atomic numbers are set
+  bool hasAllowedAtomicNumbers() const { return _allowedAtomicNumbers.size() == size(); }
 
   /// Get allowed components for each site.
   const std::vector<std::vector<int>> &allowedAtomicNumbers() const { return _allowedAtomicNumbers; }

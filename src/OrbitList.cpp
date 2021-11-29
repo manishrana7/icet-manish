@@ -8,13 +8,17 @@
 @param positionTolerance tolerance applied when comparing positions in Cartesian coordinates
 **/
 OrbitList::OrbitList(const Structure &structure,
-                     std::vector<std::vector<int>> &atomicNumbers,
                      const std::vector<std::vector<LatticeSite>> &matrixOfEquivalentSites,
                      const std::vector<std::vector<std::vector<LatticeSite>>> &neighborLists,
                      const double positionTolerance)
 {
+    if (!structure.hasAllowedAtomicNumbers())
+    {
+        std::ostringstream msg;
+        msg << "OrbitList must be intialized with a Structure with specified allowed atomic numbers.";
+        throw std::runtime_error(msg.str());
+    }
     _structure = structure;
-    _structure.setAllowedAtomicNumbers(atomicNumbers);
     _matrixOfEquivalentSites = matrixOfEquivalentSites;
     _referenceLatticeSites = getReferenceLatticeSites();
 
@@ -592,13 +596,13 @@ void OrbitList::removeOrbit(const size_t index)
 
 /**
 @details Removes all orbits that have inactive sites.
-@param structure the structure containining the number of allowed species on each lattice site
 **/
-void OrbitList::removeInactiveOrbits(const Structure &structure)
+void OrbitList::removeInactiveOrbits()
 {
     for (int i = _orbits.size() - 1; i >= 0; i--)
     {
-        auto numberOfAllowedSpecies = structure.getNumberOfAllowedSpeciesBySites(_orbits[i].representativeCluster().latticeSites());
+        // @todo: get numbers from Cluster class
+        auto numberOfAllowedSpecies = _structure.getNumberOfAllowedSpeciesBySites(_orbits[i].representativeCluster().latticeSites());
         if (std::any_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n)
                         { return n < 2; }))
         {

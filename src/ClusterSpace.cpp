@@ -209,16 +209,16 @@ void ClusterSpace::computeMultiComponentVectors()
 }
 */
 
-size_t ClusterSpace::getClusterSpaceSize() const {
-    int size = 0;
+size_t ClusterSpace::size() const
+{
+    int size = 1; // 1 for the zerolet
     for (size_t orbitIndex = 0; orbitIndex < _primitiveOrbitList->size(); orbitIndex++)
     {
         const Orbit &orbit = _primitiveOrbitList->getOrbit(orbitIndex);
         size += orbit._clusterVectorElements.size();
     }
     return size;
-} 
-
+}
 
 /**
 @details This function removes orbits from the underlying orbit list.
@@ -253,8 +253,7 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
         throw std::runtime_error("flipIndex needs to be specified (larger than -1) if newOccupation is specified (ClusterSpace::getClusterVectorFromOrbitList)");
     }
     std::vector<double> clusterVector;
-    clusterVector[0] = firstElement;
-
+    clusterVector.push_back(firstElement);
     if (_primitiveOrbitList->size() != orbitList.size())
     {
         std::cout << orbitList.size() << " >= " << _primitiveOrbitList->size() << std::endl;
@@ -317,11 +316,12 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
                 /// Loop over all equivalent permutations for this orbit and mc vector
                 for (const auto &perm : cvElement.sitePermutations)
                 {
-                    clusterVectorElement += evaluateClusterProduct(cvElement.multiComponentVector, 
-                                                                   allowedOccupations, 
-                                                                   elementsCountPair.first, 
-                                                                   indicesOfRepresentativeSites, 
-                                                                   perm) * elementsCountPair.second;
+                    clusterVectorElement += evaluateClusterProduct(cvElement.multicomponentVector,
+                                                                   allowedOccupations,
+                                                                   elementsCountPair.first,
+                                                                   indicesOfRepresentativeSites,
+                                                                   perm) *
+                                            elementsCountPair.second;
                 }
             }
 
@@ -330,7 +330,7 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
             // local cluster vectors or changes in cluster vectors, we have only counted
             // a subset of the clusters. We thus need to compute the multiplicity by
             // analyzing the orbit in detail.
-            clusterVector.push_back(clusterVectorElement / cvElement.multiplicity * (double)_primitiveOrbitList->structure().size() / (double)supercell->size());
+            clusterVector.push_back(clusterVectorElement / (double)cvElement.multiplicity * (double)_primitiveOrbitList->structure().size() / (double)supercell->size());
         }
     }
     return clusterVector;

@@ -146,14 +146,14 @@ class ClusterSpace(_ClusterSpace):
         self._orbit_list = OrbitList(
             structure=occupied_primitive,
             cutoffs=self._cutoffs,
+            chemical_symbols=self._primitive_chemical_symbols,
             symprec=self.symprec,
             position_tolerance=self.position_tolerance,
             fractional_position_tolerance=self.fractional_position_tolerance)
-        self._orbit_list.remove_inactive_orbits(primitive_chemical_symbols)
+        self._orbit_list.remove_inactive_orbits()
 
         # call (base) C++ constructor
         _ClusterSpace.__init__(self,
-                               chemical_symbols=primitive_chemical_symbols,
                                orbit_list=self._orbit_list,
                                position_tolerance=self.position_tolerance,
                                fractional_position_tolerance=self.fractional_position_tolerance)
@@ -350,11 +350,33 @@ class ClusterSpace(_ClusterSpace):
                                ('sublattices', '.')])
         sublattices = self.get_sublattices(self.primitive_structure)
         data.append(zerolet)
+
+        index = 0
+        for orbit_index in range(len(self.orbit_list)):
+            orbit = self.orbit_list.get_orbit(orbit_index)
+            representative_cluster = orbit.representative_cluster
+            orbit_sublattices = '-'.join(
+                [sublattices[sublattices.get_sublattice_index(ls.index)].symbol
+                 for ls in representative_cluster.lattice_sites])
+            for cv_element in orbit.cluster_vector_elements:
+                index += 1
+                record = OrderedDict(
+                    [('index', index),
+                     ('order', representative_cluster.order),
+                     ('radius', representative_cluster.radius),
+                     ('multiplicity', cv_element['multiplicity']),
+                     ('orbit_index', orbit_index),
+                     ('multicomponent_vector', cv_element['multicomponent_vector']),
+                     ('sublattices', orbit_sublattices)])
+                data.append(record)
+        return data
+
+        """
         index = 1
         while index < len(self):
-            multicomponent_vectors_by_orbit = self.get_multicomponent_vectors_by_orbit(index)
-            orbit_index = multicomponent_vectors_by_orbit[0]
-            mc_vector = multicomponent_vectors_by_orbit[1]
+            multicomponent_vectors = self.get_multicomponent_vectors_by_orbit(index)
+            orbit_index = multicomponent_vectors[0]
+            mc_vector = multicomponent_vectors[1]
             orbit = self.orbit_list.get_orbit(orbit_index)
             repr_sites = orbit.representative_cluster.lattice_sites
             orbit_sublattices = '-'.join(
@@ -379,6 +401,7 @@ class ClusterSpace(_ClusterSpace):
             data.append(record)
             index += 1
         return data
+        """
 
     def get_number_of_orbits_by_order(self) -> OrderedDict:
         """

@@ -296,6 +296,21 @@ PYBIND11_MODULE(_icet, m)
             "clusters",
             &Orbit::clusters,
             "list of the clusters in this orbit")
+        .def_property_readonly(
+            "cluster_vector_elements",
+            [](const Orbit &orbit)
+            {
+                std::vector<py::dict> clusterVectorElements;
+                for (auto cvElement : orbit.clusterVectorElements())
+                {
+                    py::dict cvElementPy;
+                    cvElementPy["multicomponent_vector"] = cvElement.multicomponentVector;
+                    cvElementPy["site_permutations"] = cvElement.sitePermutations;
+                    cvElementPy["multiplicity"] = cvElement.multiplicity;
+                    clusterVectorElements.push_back(cvElementPy);
+                }
+                return clusterVectorElements;
+            })
         .def(
             "get_cluster_counts",
             [](const Orbit &orbit,
@@ -408,13 +423,11 @@ PYBIND11_MODULE(_icet, m)
         )pbdoc")
         .def(py::init<>())
         .def(py::init<const Structure &,
-                      std::vector<std::vector<int>> &,
                       const std::vector<std::vector<LatticeSite>> &,
                       const std::vector<std::vector<std::vector<LatticeSite>>> &,
                       const double>(),
              "Constructs an OrbitList object from a matrix of equivalent sites.",
              py::arg("structure"),
-             py::arg("atomic_numbers"),
              py::arg("matrix_of_equivalent_sites"),
              py::arg("neighbor_lists"),
              py::arg("position_tolerance"))
@@ -430,7 +443,7 @@ PYBIND11_MODULE(_icet, m)
         .def("get_orbit",
              &OrbitList::getOrbit,
              "Returns the orbit at position i in the orbit list.")
-        .def("_remove_inactive_orbits",
+        .def("remove_inactive_orbits",
              &OrbitList::removeInactiveOrbits)
         .def("sort", &OrbitList::sort,
              R"pbdoc(
@@ -600,7 +613,7 @@ PYBIND11_MODULE(_icet, m)
         .def("evaluate_cluster_function",
              &ClusterSpace::evaluateClusterFunction,
              "Evaluates value of a cluster function.")
-        .def("__len__", &ClusterSpace::getClusterSpaceSize);
+        .def("__len__", &ClusterSpace::size);
 
     py::class_<ClusterExpansionCalculator>(m, "_ClusterExpansionCalculator")
         .def(py::init<const ClusterSpace &,

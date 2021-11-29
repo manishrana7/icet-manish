@@ -58,12 +58,6 @@ class TestStructure(unittest.TestCase):
         """Tests positions of atoms in structure."""
         for i, vec in enumerate(self.icet_structure.positions):
             self.assertListEqual(vec.tolist(), self.positions[i])
-        new_positions = [[0., 0., 0.001],
-                         [0., 1.15470054, 1.63299316]]
-        self.icet_structure.positions = new_positions
-        retval = self.icet_structure.positions
-        for i, vec in enumerate(retval):
-            self.assertListEqual(vec.tolist(), new_positions[i])
 
     def test_atomic_numbers(self):
         """Tests atomic numbers."""
@@ -74,20 +68,10 @@ class TestStructure(unittest.TestCase):
         """Tests cell."""
         for i, vec in enumerate(self.icet_structure.cell):
             self.assertListEqual(vec.tolist(), self.cell[i])
-        new_cell = [[2., 0., 0.],
-                    [-1., 2., 0.],
-                    [0., 0., 4.]]
-        self.icet_structure.cell = new_cell
-        retval = self.icet_structure.cell
-        for i, vec in enumerate(retval):
-            self.assertListEqual(vec.tolist(), new_cell[i])
 
     def test_pbc(self):
         """Tests periodic boundary conditions."""
         self.assertListEqual(self.icet_structure.pbc, [True, True, True])
-        self.icet_structure.pbc = [True, True, False]
-        retval = self.icet_structure.pbc
-        self.assertListEqual(retval, [True, True, False])
 
     def test_set_and_get_atomic_numbers(self):
         """Tests set and get atomic numbers."""

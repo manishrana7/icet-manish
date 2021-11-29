@@ -27,7 +27,7 @@ public:
   const Structure &primitiveStructure() const { return _primitiveOrbitList->structure(); }
 
   /// Returns the cluster space size, i.e. the length of a cluster vector.
-  size_t getClusterSpaceSize() const;
+  size_t size() const;
 
   /// Returns the mapping between atomic numbers and the internal species enumeration scheme for each site.
   const std::vector<std::unordered_map<int, int>> &getSpeciesMaps() const { return _speciesMaps; }

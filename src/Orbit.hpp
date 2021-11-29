@@ -18,17 +18,16 @@ using namespace Eigen;
 */
 struct ClusterVectorElement
 {
-  /// A multi-component vector contains the indices of the point functions
-  /// (only non-trivial if the number of components are more than two)
-  std::vector<int> multiComponentVector;
+    /// A multi-component vector contains the indices of the point functions
+    /// (only non-trivial if the number of components are more than two)
+    std::vector<int> multicomponentVector;
 
-  /// Site permutations describe how the sites in the cluster can be re-ordered
-  std::vector<std::vector<int>> sitePermutations;
+    /// Site permutations describe how the sites in the cluster can be re-ordered
+    std::vector<std::vector<int>> sitePermutations;
 
-  /// Multiplicity for this cluster vector element
-  double multiplicity;
+    /// Multiplicity for this cluster vector element
+    size_t multiplicity;
 };
-
 
 /**
 This class handles an orbit.
@@ -88,6 +87,9 @@ public:
     /// Translates the orbit with an offset
     void translate(const Vector3i &);
 
+    /// Appends an orbit to this orbit.
+    Orbit &operator+=(const Orbit &orbit_rhs);
+
     /// Comparison operator for automatic sorting in containers.
     friend bool
     operator==(const Orbit &orbit1, const Orbit &orbit2)
@@ -101,24 +103,7 @@ public:
         throw std::logic_error("Reached < operator in Orbit");
     }
 
-    /// Appends an orbit to this orbit.
-    Orbit &operator+=(const Orbit &orbit_rhs)
-    {
-        // Get representative sites
-        auto rep_sites_rhs = orbit_rhs.representativeCluster().latticeSites();
-        auto rep_sites_this = _representativeCluster.latticeSites();
-
-        if (rep_sites_this.size() != rep_sites_rhs.size())
-        {
-            throw std::runtime_error("Orbit order is not equal (Orbit &operator+=)");
-        }
-
-        const auto rhsClusters = orbit_rhs.clusters();
-
-        // Insert rhs eq sites
-        _clusters.insert(_clusters.end(), rhsClusters.begin(), rhsClusters.end());
-        return *this;
-    }
+    const std::vector<ClusterVectorElement> &clusterVectorElements() const { return _clusterVectorElements; }
 
     std::vector<ClusterVectorElement> _clusterVectorElements;
 
@@ -133,7 +118,7 @@ private:
     std::set<std::vector<int>> _allowedClusterPermutations;
 
     ///
-    std::vector<std::vector<int>> _computeMultiComponentVectors();
+    void _computeMultiComponentVectors();
 
     std::vector<std::vector<std::vector<int>>> _getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &) const;
 };

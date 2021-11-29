@@ -14,7 +14,7 @@ Structure::Structure(const Matrix<double, Dynamic, 3, RowMajor> &positions,
                      const Matrix3d &cell,
                      const std::vector<bool> &pbc)
     : _atomicNumbers(atomicNumbers), _cell(cell), _pbc(pbc), _positions(positions)
-{  
+{
 }
 
 /**
@@ -139,7 +139,7 @@ void Structure::setAllowedAtomicNumbers(const std::vector<std::vector<int>> &ato
 **/
 int Structure::getNumberOfAllowedSpeciesBySite(const size_t index) const
 {
-    if (_allowedAtomicNumbers.size() < size())
+    if (!hasAllowedAtomicNumbers())
     {
         std::ostringstream msg;
         msg << "Allowed atomic numbers per site not set in this structure";

@@ -15,6 +15,8 @@ from icet.core.matrix_of_equivalent_positions import \
     _get_lattice_site_matrix_of_equivalent_positions, \
     matrix_of_equivalent_positions_from_structure
 from icet.core.structure import Structure
+from icet.tools.geometry import (chemical_symbols_to_numbers,
+                                 atomic_number_to_chemical_symbol)
 from icet.input_output.logging_tools import logger
 
 logger = logger.getChild('orbit_list')
@@ -47,6 +49,7 @@ class OrbitList(_OrbitList):
     def __init__(self,
                  structure: Atoms,
                  cutoffs: List[float],
+                 chemical_symbols: List[List[str]],
                  symprec: float,
                  position_tolerance: float,
                  fractional_position_tolerance: float) -> None:
@@ -58,6 +61,8 @@ class OrbitList(_OrbitList):
                                                             position_tolerance=position_tolerance,
                                                             find_primitive=False,
                                                             symprec=symprec)
+        prim_structure.allowed_atomic_numbers = [chemical_symbols_to_numbers(syms)
+                                                 for syms in chemical_symbols]
 
         logger.info('Done getting matrix_of_equivalent_positions.')
 
@@ -122,21 +127,6 @@ class OrbitList(_OrbitList):
         supercell_orbit_list = lolg.generate_full_orbit_list()
         return supercell_orbit_list
 
-    def remove_inactive_orbits(self,
-                               allowed_species: List[List[str]]) -> None:
-        """ Removes orbits with inactive sites.
-
-        Parameters
-        ----------
-        allowed_species
-            the list of allowed species on each site in the primitive
-            structure
-        """
-        structure = self.get_structure()
-        number_of_allowed_species = [len(sym) for sym in allowed_species]
-        structure.set_number_of_allowed_species(number_of_allowed_species)
-        self._remove_inactive_orbits(structure)
-
     def get_cluster_counts(self,
                            structure: Atoms,
                            fractional_position_tolerance: float,
@@ -175,7 +165,8 @@ class OrbitList(_OrbitList):
             orbit = supercell_orbit_list.get_orbit(i)
             counts = orbit.get_cluster_counts(structure_icet)
             sorted_counts = Counter()
-            for symbols, count in counts.items():
+            for atomic_numbers, count in counts.items():
+                symbols = atomic_number_to_chemical_symbol(atomic_numbers)
                 sorted_symbols = tuple(sorted(symbols))
                 sorted_counts[sorted_symbols] += count
             cluster_counts_full[i] = sorted_counts

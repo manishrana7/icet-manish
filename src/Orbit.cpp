@@ -24,7 +24,6 @@ Orbit::Orbit(const std::vector<Cluster> clusters,
     // circumstances matters when sorting the orbit list (and thereby the
     // cluster vector).
     std::sort(_clusters.begin(), _clusters.end());
-
     _computeMultiComponentVectors();
 }
 
@@ -41,49 +40,43 @@ void Orbit::addCluster(const Cluster &cluster)
 /**
 @param Mi_local list of the number of allowed species per site
 */
-std::vector<std::vector<int>> Orbit::_computeMultiComponentVectors()
+void Orbit::_computeMultiComponentVectors()
 {
-    std::cout << "before get M" << std::endl;
+    _clusterVectorElements.clear();
+
     std::vector<int> numberOfAllowedSpecies = representativeCluster().getNumberOfAllowedSpeciesPerSite();
-    std::cout << "after get M" << std::endl;
-    std::cout << numberOfAllowedSpecies[0] << std::endl;
-
-    if (std::any_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](const int i)
-                    { return i < 2; }))
+    if (std::none_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](const int i)
+                     { return i < 2; }))
     {
-        std::vector<std::vector<int>> emptyVector;
-        return emptyVector;
-    }
-    auto allMCVectors = getAllPossibleMultiComponentVectorPermutations(numberOfAllowedSpecies);
-    std::sort(allMCVectors.begin(), allMCVectors.end());
-    std::vector<std::vector<int>> distinctMCVectors;
-    for (const auto &mcVector : allMCVectors)
-    {
-        std::vector<std::vector<int>> permutedMCVectors;
-        for (const auto &allowedPermutation : _allowedClusterPermutations)
+        auto allMCVectors = getAllPossibleMultiComponentVectorPermutations(numberOfAllowedSpecies);
+        std::sort(allMCVectors.begin(), allMCVectors.end());
+        std::vector<std::vector<int>> distinctMCVectors;
+        for (const auto &mcVector : allMCVectors)
         {
-            permutedMCVectors.push_back(icet::getPermutedVector<int>(mcVector, allowedPermutation));
-        }
-        std::sort(permutedMCVectors.begin(), permutedMCVectors.end());
+            std::vector<std::vector<int>> permutedMCVectors;
+            for (const auto &allowedPermutation : _allowedClusterPermutations)
+            {
+                permutedMCVectors.push_back(icet::getPermutedVector<int>(mcVector, allowedPermutation));
+            }
+            std::sort(permutedMCVectors.begin(), permutedMCVectors.end());
 
-        // if not any of the vectors in permutedMCVectors exist in distinctMCVectors
-        if (!std::any_of(permutedMCVectors.begin(), permutedMCVectors.end(), [&](const std::vector<int> &permMcVector)
-                         { return !(std::find(distinctMCVectors.begin(), distinctMCVectors.end(), permMcVector) == distinctMCVectors.end()); }))
+            // if not any of the vectors in permutedMCVectors exist in distinctMCVectors
+            if (!std::any_of(permutedMCVectors.begin(), permutedMCVectors.end(), [&](const std::vector<int> &permMcVector)
+                             { return !(std::find(distinctMCVectors.begin(), distinctMCVectors.end(), permMcVector) == distinctMCVectors.end()); }))
+            {
+                distinctMCVectors.push_back(mcVector);
+            }
+        }
+
+        auto sitePermutations = _getMultiComponentVectorPermutations(distinctMCVectors);
+        for (int j = 0; j < distinctMCVectors.size(); j++)
         {
-            distinctMCVectors.push_back(mcVector);
+            ClusterVectorElement cvElement = {distinctMCVectors[j],
+                                              sitePermutations[j],
+                                              sitePermutations[j].size() * size()};
+            _clusterVectorElements.push_back(cvElement);
         }
     }
-
-    auto sitePermutations = _getMultiComponentVectorPermutations(distinctMCVectors);
-    for (int j = 0; j < distinctMCVectors.size(); j++)
-    {
-        ClusterVectorElement cvElement = {distinctMCVectors[j],
-                                          sitePermutations[j],
-                                          (double)sitePermutations[j].size() * size()};
-        _clusterVectorElements.push_back(cvElement);
-    }
-
-    return distinctMCVectors;
 }
 
 std::vector<std::vector<std::vector<int>>> Orbit::_getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &multiComponentVectors) const
@@ -324,9 +317,58 @@ void Orbit::transformToSupercell(std::shared_ptr<Structure> supercellPtr,
     }
 }
 
+/**
+@brief The += operator appends an orbit to this orbit.
+*/
+Orbit &Orbit::operator+=(const Orbit &orbit_rhs)
+{
+    // Get representative sites
+    auto rep_sites_rhs = orbit_rhs.representativeCluster().latticeSites();
+    auto rep_sites_this = _representativeCluster.latticeSites();
+
+    // Check that order is the same
+    if (rep_sites_this.size() != rep_sites_rhs.size())
+    {
+        throw std::runtime_error("Orbit order is not equal (Orbit &operator+=)");
+    }
+
+    // Check that number of multicomponents match
+    if (_clusterVectorElements.size() != orbit_rhs.clusterVectorElements().size())
+    {
+        throw std::runtime_error("Can only merge orbits with identical multicomponent vectors (Orbit &operator+=)");
+    }
+
+    // Check that multicomponent vectors and site permutations match
+    for (int i = 0; i < _clusterVectorElements.size(); i++)
+    {
+        ClusterVectorElement cvElementLeft = _clusterVectorElements[i];
+        ClusterVectorElement cvElementRight = orbit_rhs.clusterVectorElements()[i];
+        if (cvElementLeft.multicomponentVector != cvElementRight.multicomponentVector)
+        {
+            throw std::runtime_error("Can only merge orbits with identical multicomponent vectors (Orbit &operator+=)");
+        }
+
+        if (cvElementLeft.sitePermutations != cvElementRight.sitePermutations)
+        {
+            throw std::runtime_error("Can only merge orbits with identical site permutations (Orbit &operator+=)");
+        }
+    }
+
+    // Insert rhs clusters
+    const auto rhsClusters = orbit_rhs.clusters();
+    _clusters.insert(_clusters.end(), rhsClusters.begin(), rhsClusters.end());
+
+    // Update multiplicities
+    for (int i = 0; i < _clusterVectorElements.size(); i++)
+    {
+        _clusterVectorElements[i].multiplicity += orbit_rhs.clusterVectorElements()[i].multiplicity;
+    }
+
+    return *this;
+}
+
 namespace std
 {
-
     /// Stream operator.
     ostream &operator<<(ostream &os, const Orbit &orbit)
     {

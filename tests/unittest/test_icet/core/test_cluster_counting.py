@@ -9,10 +9,11 @@ def orbit_list():
     """Create an orbit list based on a primitive hcp structure."""
     structure_prim = bulk('Ni', 'hcp', a=2.0)
     cutoffs = [2.2]
+    chemical_symbols = [('Ni', 'Fe'), ('Ni', 'Fe')]
     symprec = 1e-5
     position_tolerance = 1e-5
     fractional_position_tolerance = 1e-6
-    orbit_list = OrbitList(structure_prim, cutoffs,
+    orbit_list = OrbitList(structure_prim, cutoffs, chemical_symbols,
                            symprec, position_tolerance,
                            fractional_position_tolerance)
     orbit_list.sort(position_tolerance)
