@@ -55,8 +55,8 @@ public:
     std::vector<LatticeSite> getReferenceLatticeSites() const;
 
     // Returns rows of the matrix of equivalent sites that match the lattice sites.
-    std::vector<int> getIndicesOfEquivalentLatticeSites(const std::vector<LatticeSite> &,
-                                                        bool = true) const;
+    std::vector<int> getReferenceLatticeSiteIndices(const std::vector<LatticeSite> &,
+                                                    bool = true) const;
 
     // Returns true if the cluster includes at least on site from the unit cell at the origin.
     bool validCluster(const std::vector<LatticeSite> &) const;

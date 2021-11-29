@@ -81,7 +81,7 @@ OrbitList::OrbitList(const Structure &structure,
             if (mbnlPair.second.size() == 0)
             {
                 std::vector<LatticeSite> cluster = mbnlPair.first;
-                auto indices = getIndicesOfEquivalentLatticeSites(cluster);
+                auto indices = getReferenceLatticeSiteIndices(cluster);
                 auto find = rowsTaken.find(indices);
                 if (find == rowsTaken.end())
                 {
@@ -212,8 +212,8 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
     std::vector<std::vector<LatticeSite>> equivalentSiteGroupsWithTranslations;
     for (auto representativeSiteGroup : representativeSiteGroupWithTranslations)
     {
-        auto equivalentSiteGroups = getAllColumnsFromCluster(representativeSiteGroup);
-        equivalentSiteGroupsWithTranslations.insert(equivalentSiteGroupsWithTranslations.end(), equivalentSiteGroups.begin(), equivalentSiteGroups.end());
+        std::vector<std::vector<LatticeSite>> equivSiteGroups = getAllColumnsFromCluster(representativeSiteGroup);
+        equivalentSiteGroupsWithTranslations.insert(equivalentSiteGroupsWithTranslations.end(), equivSiteGroups.begin(), equivSiteGroups.end());
     }
     std::sort(equivalentSiteGroupsWithTranslations.begin(), equivalentSiteGroupsWithTranslations.end());
 
@@ -297,7 +297,7 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
                 }
                 if (perm == translatedPermutationsOfSites.back())
                 {
-                    throw std::runtime_error("Did not find a permutation of the orbit sites to the permutations of the representative sites (OrbitList::createOrbit)");
+                    throw std::runtime_error("Did not find a permutation of a site group to the permutations of the representative sites (OrbitList::createOrbit)");
                 }
             }
         }
@@ -334,8 +334,8 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
 std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromCluster(const std::vector<LatticeSite> &sites) const
 {
     bool sortRows = false;
-    std::vector<int> rowsFromReferenceLatticeSites = getIndicesOfEquivalentLatticeSites(sites, sortRows);
-    std::vector<std::vector<LatticeSite>> p_equal = getAllColumnsFromRow(rowsFromReferenceLatticeSites, true, sortRows);
+    std::vector<int> rowIndicesFromReferenceLatticeSites = getReferenceLatticeSiteIndices(sites, sortRows);
+    std::vector<std::vector<LatticeSite>> p_equal = getAllColumnsFromRow(rowIndicesFromReferenceLatticeSites, true, sortRows);
     return p_equal;
 }
 
@@ -345,7 +345,7 @@ std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromCluster(const 
 @param includeTranslatedSites If true it will also include the equivalent sites found from the rows by moving each site into the unitcell.
 @param sort if true (default) the first column will be sorted
 **/
-std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromRow(const std::vector<int> &rows,
+std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromRow(const std::vector<int> &rowIndices,
                                                                       bool includeTranslatedSites,
                                                                       bool sort) const
 {
@@ -355,7 +355,7 @@ std::vector<std::vector<LatticeSite>> OrbitList::getAllColumnsFromRow(const std:
     {
         std::vector<LatticeSite> nondistinctLatticeSites;
 
-        for (const int &row : rows)
+        for (const int &row : rowIndices)
         {
             nondistinctLatticeSites.push_back(_matrixOfEquivalentSites[row][column]);
         }
@@ -500,7 +500,7 @@ std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> OrbitList::ge
     {
         try
         {
-            perm_matrix_rows = getIndicesOfEquivalentLatticeSites(sites);
+            perm_matrix_rows = getReferenceLatticeSiteIndices(sites);
         }
         catch (const std::runtime_error)
         {
@@ -537,33 +537,36 @@ bool OrbitList::validCluster(const std::vector<LatticeSite> &latticeSites) const
 }
 
 /**
-@details Returns a list of indices of entries in latticeSites that are equivalent to the sites in reference lattice sites.
-@param sort if true the first column will be sorted
-@param latticeSiteGroup list of sites to search in
-@return indices of entries in latticeSites that are equivalent to sites in the reference lattice sites
+@details
+    For each lattice site in the input vector, this function returns the
+    index of the entry in _referenceLatticeSites that holds an equivalent
+    lattice site.
+@param latticeSites List of sites to search for
+@param sort If true, the returned list of indices will be sorted
+@return Indices of entries in _referenceLatticeSites that are equivalent to the sites latticeSites
 **/
-std::vector<int> OrbitList::getIndicesOfEquivalentLatticeSites(const std::vector<LatticeSite> &latticeSites,
-                                                               bool sort) const
+std::vector<int> OrbitList::getReferenceLatticeSiteIndices(const std::vector<LatticeSite> &latticeSites,
+                                                           bool sort) const
 {
-    std::vector<int> rows;
+    std::vector<int> rowIndices;
     for (const auto &latticeSite : latticeSites)
     {
         const auto find = std::find(_referenceLatticeSites.begin(), _referenceLatticeSites.end(), latticeSite);
         if (find == _referenceLatticeSites.end())
         {
-            throw std::runtime_error("Did not find lattice site in the reference lattice sites in the matrix of equivalent sites (OrbitList::getIndicesOfEquivalentLatticeSites)");
+            throw std::runtime_error("Did not find lattice site in the reference lattice sites in the matrix of equivalent sites (OrbitList::getReferenceLatticeSiteIndices)");
         }
         else
         {
-            int row_in_referenceLatticeSites = std::distance(_referenceLatticeSites.begin(), find);
-            rows.push_back(row_in_referenceLatticeSites);
+            int rowIndexInReferenceLatticeSites = std::distance(_referenceLatticeSites.begin(), find);
+            rowIndices.push_back(rowIndexInReferenceLatticeSites);
         }
     }
     if (sort)
     {
-        std::sort(rows.begin(), rows.end());
+        std::sort(rowIndices.begin(), rowIndices.end());
     }
-    return rows;
+    return rowIndices;
 }
 
 /**
