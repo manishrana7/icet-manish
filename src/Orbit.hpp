@@ -107,6 +107,9 @@ public:
 
     std::vector<ClusterVectorElement> _clusterVectorElements;
 
+    /// Is this orbit active, i.e., does all of its sites have at least two allowed occupations?
+    bool active() const { return _active; }
+
 private:
     /// Container of all clusters in this orbit
     std::vector<Cluster> _clusters;
@@ -116,6 +119,8 @@ private:
 
     /// Contains the allowed sites permutations. i.e. if 0, 2, 1 is in this set then 0, 1, 0 is the same multi-component vector as 0, 0, 1
     std::set<std::vector<int>> _allowedClusterPermutations;
+
+    bool _active;
 
     ///
     void _computeMultiComponentVectors();

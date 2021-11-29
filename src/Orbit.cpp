@@ -48,6 +48,7 @@ void Orbit::_computeMultiComponentVectors()
     if (std::none_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](const int i)
                      { return i < 2; }))
     {
+        _active = true;
         auto allMCVectors = getAllPossibleMultiComponentVectorPermutations(numberOfAllowedSpecies);
         std::sort(allMCVectors.begin(), allMCVectors.end());
         std::vector<std::vector<int>> distinctMCVectors;
@@ -76,6 +77,10 @@ void Orbit::_computeMultiComponentVectors()
                                               sitePermutations[j].size() * size()};
             _clusterVectorElements.push_back(cvElement);
         }
+    }
+    else
+    {
+        _active = false;
     }
 }
 

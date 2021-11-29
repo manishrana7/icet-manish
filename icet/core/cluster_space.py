@@ -371,38 +371,6 @@ class ClusterSpace(_ClusterSpace):
                 data.append(record)
         return data
 
-        """
-        index = 1
-        while index < len(self):
-            multicomponent_vectors = self.get_multicomponent_vectors_by_orbit(index)
-            orbit_index = multicomponent_vectors[0]
-            mc_vector = multicomponent_vectors[1]
-            orbit = self.orbit_list.get_orbit(orbit_index)
-            repr_sites = orbit.representative_cluster.lattice_sites
-            orbit_sublattices = '-'.join(
-                [sublattices[sublattices.get_sublattice_index(ls.index)].symbol
-                 for ls in repr_sites])
-            local_Mi = self._get_primitive_structure().get_number_of_allowed_species_by_sites(
-                repr_sites)
-            mc_vectors = orbit.get_multicomponent_vectors(local_Mi)
-            mc_permutations = self.get_multicomponent_vector_permutations(mc_vectors, orbit_index)
-            mc_index = mc_vectors.index(mc_vector)
-            mc_permutations_multiplicity = len(mc_permutations[mc_index])
-            cluster = orbit.representative_cluster
-            multiplicity = len(orbit.clusters)
-
-            record = OrderedDict([('index', index),
-                                  ('order', cluster.order),
-                                  ('radius', cluster.radius),
-                                  ('multiplicity', multiplicity * mc_permutations_multiplicity),
-                                  ('orbit_index', orbit_index)])
-            record['multicomponent_vector'] = mc_vector
-            record['sublattices'] = orbit_sublattices
-            data.append(record)
-            index += 1
-        return data
-        """
-
     def get_number_of_orbits_by_order(self) -> OrderedDict:
         """
         Returns the number of orbits by order.

@@ -211,8 +211,13 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
     // Start to occupy the cluster vector orbit by orbit
     for (size_t orbitIndex = 0; orbitIndex < _primitiveOrbitList->size(); orbitIndex++)
     {
-        const Orbit &supercellOrbit = orbitList.getOrbit(orbitIndex);
         const Orbit &primitiveOrbit = _primitiveOrbitList->getOrbit(orbitIndex);
+        const Orbit &supercellOrbit = orbitList.getOrbit(orbitIndex);
+
+        if (!primitiveOrbit.active())
+        {
+            continue;
+        }
 
         // Count clusters
         if (newOccupation > -1)
@@ -227,14 +232,8 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
         // Extract allowed occupations
         allowedOccupations = primitiveOrbit.representativeCluster().getNumberOfAllowedSpeciesPerSite();
 
-        // Skip the rest if any of the sites are inactive (i.e. allowed occupation < 2)
-        // @todo Let orbit handle this
-        if (std::any_of(allowedOccupations.begin(), allowedOccupations.end(), [](int allowedOccupation)
-                        { return allowedOccupation < 2; }))
-        {
-            continue;
-        }
-
+        // Extract indices of representative sites
+        // (needed to extract internal integer representation of each element)
         indicesOfRepresentativeSites.clear();
         for (const LatticeSite &site : primitiveOrbit.representativeCluster().latticeSites())
         {
