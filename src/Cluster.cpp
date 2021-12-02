@@ -25,9 +25,9 @@ void Cluster::translate(const Eigen::Vector3i &offset)
 }
 
 /**
-@details Transforms a site from the primitive structure to a given supercell.
+@details Transforms the sites in this cluster from the current structure to a new, given supercell.
 This involves finding a map from the site in the primitive cell to the supercell.
-If no map is found mapping is attempted based on the position of the site in the supercell.
+If no map is found, mapping is attempted based on the position of the site in the supercell.
 (The map is important for performance.)
 @param supercell supercell structure
 @param primitiveToSupercellMap map from primitive to supercell

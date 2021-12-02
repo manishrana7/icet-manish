@@ -122,6 +122,8 @@ PYBIND11_MODULE(_icet, m)
              ----------
              numbersOfAllowedSpecies : list(int)
              )pbdoc")
+        .def("get_number_of_allowed_species_by_sites",
+             &Structure::getNumberOfAllowedSpeciesBySites)
         .def("get_position",
              &Structure::position,
              py::arg("site"),
@@ -440,9 +442,9 @@ PYBIND11_MODULE(_icet, m)
              py::arg("position_tolerance"))
         .def_property_readonly(
             "orbits",
-            &OrbitList::getOrbits,
+            &OrbitList::orbits,
             "list(_icet.Orbit) : list of orbits")
-        .def("get_orbit_list", &OrbitList::getOrbits,
+        .def("get_orbit_list", &OrbitList::orbits,
              "Returns the list of orbits")
         .def("add_orbit",
              &OrbitList::addOrbit,
@@ -482,7 +484,7 @@ PYBIND11_MODULE(_icet, m)
              lattice_neighbors : list(_icet.LatticeSite)
                 set of lattice sites that might be representative for a cluster
              sort : bool
-                If true sort translasted sites.
+                If true sort translated sites.
              )pbdoc",
              py::arg("lattice_neighbors"),
              py::arg("sort"))
@@ -498,9 +500,9 @@ PYBIND11_MODULE(_icet, m)
                  sites that correspond to the columns that will be returned
              )pbdoc",
              py::arg("sites"))
-        .def("get_primitive_structure",
-             &OrbitList::primitiveStructure,
-             "Returns the primitive atomic structure used to construct the OrbitList instance.")
+        .def("get_structure",
+             &OrbitList::structure,
+             "Returns the atomic structure used to construct the OrbitList instance.")
         .def("__len__",
              &OrbitList::size,
              "Returns the total number of orbits counted in the OrbitList instance.")
@@ -532,17 +534,22 @@ PYBIND11_MODULE(_icet, m)
              py::arg("structure"),
              py::arg("fractional_position_tolerance"))
         .def("generate_local_orbit_list",
-             (OrbitList(LocalOrbitListGenerator::*)(const size_t)) & LocalOrbitListGenerator::getLocalOrbitList,
+             &LocalOrbitListGenerator::getLocalOrbitList,
              R"pbdoc(
-             Generates and returns the local orbit list from an input index corresponding a specific offset of
+             Generates and returns the local orbit list for an offset of
              the primitive structure.
 
              Parameters
              ----------
-             index : int
-                 index of the unique offsets list
+             offset : list(int)
+                 Offset in terms of primitive cell vectors
+             self_contained : bool
+                 If this orbit list will be used on its own to calculate local cluster vectors or
+                 differences in cluster vector, this parameter needs to be true (if false, not all
+                 clusters involving this offset will be included).
              )pbdoc",
-             py::arg("index"))
+             py::arg("offset"),
+             py::arg("self_contained") = false)
         .def("generate_full_orbit_list",
              &LocalOrbitListGenerator::getFullOrbitList,
              R"pbdoc(
@@ -552,9 +559,6 @@ PYBIND11_MODULE(_icet, m)
         .def("get_number_of_unique_offsets",
              &LocalOrbitListGenerator::getNumberOfUniqueOffsets,
              "Returns the number of unique offsets")
-        .def("_get_primitive_to_supercell_map",
-             &LocalOrbitListGenerator::getMapFromPrimitiveToSupercell,
-             "Returns the primitive to supercell mapping")
         .def("_get_unique_primcell_offsets",
              &LocalOrbitListGenerator::getUniquePrimitiveCellOffsets,
              "Returns a list with offsets of primitive structure that span to position of atoms in the supercell.");
@@ -622,7 +626,6 @@ PYBIND11_MODULE(_icet, m)
         .def("get_cutoffs", &ClusterSpace::getCutoffs)
         .def("_get_primitive_structure", &ClusterSpace::primitiveStructure)
         .def("get_multicomponent_vector_permutations", &ClusterSpace::getMultiComponentVectorPermutations)
-        .def("get_number_of_allowed_species_by_site", &ClusterSpace::getNumberOfAllowedSpeciesBySite)
         .def("_remove_orbits_cpp", &ClusterSpace::removeOrbits)
         .def("evaluate_cluster_function",
              &ClusterSpace::evaluateClusterFunction,

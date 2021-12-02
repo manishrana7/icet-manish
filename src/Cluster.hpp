@@ -41,11 +41,12 @@ public:
     }
 
     /// Translate the sites of the cluster by a constant vector.
-    void translate(const Eigen::Vector3i &offset);
+    void translate(const Eigen::Vector3i &);
 
+    /// Transform this cluster to a new structure
     void transformToSupercell(std::shared_ptr<const Structure>,
                               std::unordered_map<LatticeSite, LatticeSite> &,
-                              const double fractionalPositionTolerance);
+                              const double);
 
     /// Check whether a site index is included with a zero offset.
     bool isSiteIndexIncludedWithZeroOffset(const int index) const;

@@ -132,10 +132,10 @@ class OrbitList(_OrbitList):
             the list of allowed species on each site in the primitive
             structure
         """
-        prim_structure = self.get_primitive_structure()
+        structure = self.get_structure()
         number_of_allowed_species = [len(sym) for sym in allowed_species]
-        prim_structure.set_number_of_allowed_species(number_of_allowed_species)
-        self._remove_inactive_orbits(prim_structure)
+        structure.set_number_of_allowed_species(number_of_allowed_species)
+        self._remove_inactive_orbits(structure)
 
     def get_cluster_counts(self,
                            structure: Atoms,
