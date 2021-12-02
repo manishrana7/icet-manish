@@ -39,12 +39,6 @@ public:
     /// Returns the orbit of the given index.
     const Orbit &getOrbit(unsigned int) const;
 
-    /// Returns the local orbit list for a site.
-    OrbitList getLocalOrbitList(std::shared_ptr<Structure>,
-                                const Vector3i &,
-                                std::unordered_map<LatticeSite, LatticeSite> &,
-                                const double) const;
-
     // @todo Add description.
     void addColumnsFromMatrixOfEquivalentSites(std::vector<std::vector<std::vector<LatticeSite>>> &,
                                                std::unordered_set<std::vector<int>, VectorHash> &,
@@ -55,7 +49,7 @@ public:
     size_t size() const { return _orbits.size(); }
 
     // Returns the first column of the matrix of equivalent sites.
-    std::vector<LatticeSite> getReferenceLatticeSites(bool = true) const;
+    std::vector<LatticeSite> getReferenceLatticeSites() const;
 
     // Returns rows of the matrix of equivalent sites that match the lattice sites.
     std::vector<int> getIndicesOfEquivalentLatticeSites(const std::vector<LatticeSite> &,
@@ -65,12 +59,12 @@ public:
     bool validCluster(const std::vector<LatticeSite> &) const;
 
     // @todo Add description.
-    std::vector<LatticeSite> translateSites(const std::vector<LatticeSite> &,
-                                            const unsigned int) const;
+    std::vector<LatticeSite> getTranslatedSites(const std::vector<LatticeSite> &,
+                                                const unsigned int) const;
 
     /// @todo Add description.
     std::vector<std::vector<LatticeSite>> getSitesTranslatedToUnitcell(const std::vector<LatticeSite> &,
-                                                                       bool sortit = true) const;
+                                                                       bool sort = true) const;
 
     /// @todo Add description.
     std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> getMatchesInMatrixOfEquivalenSites(const std::vector<std::vector<LatticeSite>> &) const;
@@ -89,9 +83,6 @@ public:
     /// Finds and returns sites in first column of matrix of equivalent sites along with their unit cell translated indistinguishable sites.
     std::vector<std::vector<LatticeSite>> getAllColumnsFromCluster(const std::vector<LatticeSite> &) const;
 
-    /// Returns the first column of the matrix of equivalent sites used to construct the orbit list.
-    std::vector<LatticeSite> getFirstColumnOfMatrixOfEquivalentSites() const { return _referenceLatticeSites; }
-
     /// Returns the matrix of equivalent sites used to construct the orbit list.
     std::vector<std::vector<LatticeSite>> getMatrixOfEquivalentSites() const { return _matrixOfEquivalentSites; }
 
@@ -102,13 +93,10 @@ public:
     void removeInactiveOrbits(const Structure &);
 
     /// Returns the orbits in this orbit list.
-    const std::vector<Orbit> getOrbits() const { return _orbits; }
+    const std::vector<Orbit> &orbits() const { return _orbits; }
 
-    /// Returns the primitive structure.
-    const Structure &primitiveStructure() const { return _primitiveStructure; }
-
-    /// Sets primitive structure.
-    void setPrimitiveStructure(const Structure &primitive) { _primitiveStructure = primitive; }
+    /// Returns the structure.
+    const Structure &structure() const;
 
     /// Merge two orbits.
     void mergeOrbits(int index1, int index2);
@@ -123,8 +111,8 @@ private:
     /// Matrix of equivalent sites.
     std::vector<std::vector<LatticeSite>> _matrixOfEquivalentSites;
 
-    /// Primitive structure for which orbit list was constructed.
-    Structure _primitiveStructure;
+    /// Structure for which orbit list was constructed.
+    Structure _structure;
 
     /// Create an orbit by deducing the proper permutations
     Orbit createOrbit(const std::vector<std::vector<LatticeSite>> &);

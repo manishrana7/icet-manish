@@ -16,17 +16,17 @@ ClusterSpace::ClusterSpace(std::vector<std::vector<std::string>> &chemicalSymbol
                            const double fractionalPositionTolerance)
     : _primitiveOrbitList(orbitList), _chemicalSymbols(chemicalSymbols)
 {
-    _primitiveStructure = _primitiveOrbitList->primitiveStructure();
+    _primitiveStructure = std::make_shared<Structure>(_primitiveOrbitList->structure());
 
-    _numberOfAllowedSpeciesPerSite.resize(chemicalSymbols.size());
-    for (size_t i = 0; i < _numberOfAllowedSpeciesPerSite.size(); i++)
+    std::vector<int> numberOfAllowedSpeciesPerSite(chemicalSymbols.size());
+    for (size_t i = 0; i < numberOfAllowedSpeciesPerSite.size(); i++)
     {
-        _numberOfAllowedSpeciesPerSite[i] = chemicalSymbols[i].size();
+        numberOfAllowedSpeciesPerSite[i] = chemicalSymbols[i].size();
     }
-    _primitiveStructure.setNumberOfAllowedSpecies(_numberOfAllowedSpeciesPerSite);
+    _primitiveStructure->setNumberOfAllowedSpecies(numberOfAllowedSpeciesPerSite);
 
     // Set up a map between chemical species and the internal species enumeration scheme.
-    for (size_t i = 0; i < _primitiveStructure.size(); i++)
+    for (size_t i = 0; i < _primitiveStructure->size(); i++)
     {
         std::unordered_map<int, int> speciesMap;
         std::vector<int> species;
@@ -67,11 +67,11 @@ std::vector<double> ClusterSpace::getClusterVector(const Structure &structure,
     auto currentOrbitList = localOrbitListGenerator.getFullOrbitList();
 
     // Check that the number of unique offsets equals the number of unit cells in the supercell.
-    if (localOrbitListGenerator.getNumberOfUniqueOffsets() != structure.size() / _primitiveStructure.size())
+    if (localOrbitListGenerator.getNumberOfUniqueOffsets() != structure.size() / _primitiveStructure->size())
     {
         std::ostringstream msg;
         msg << "The number of unique offsets does not match the number of primitive units in the input structure (ClusterSpace::getClusterVector)" << std::endl;
-        msg << localOrbitListGenerator.getNumberOfUniqueOffsets() << " != " << structure.size() / _primitiveStructure.size();
+        msg << localOrbitListGenerator.getNumberOfUniqueOffsets() << " != " << structure.size() / _primitiveStructure->size();
         throw std::runtime_error(msg.str());
     }
     return getClusterVectorFromOrbitList(currentOrbitList, supercell);
@@ -188,25 +188,6 @@ double ClusterSpace::evaluateClusterProduct(const std::vector<int> &multiCompone
     return clusterProduct;
 }
 
-/**
-@details Returns the number of species allowed on each site of the provided structure.
-
-@param structure an atomic configuration
-@param latticeSites a list of sites
-
-@returns the number of allowed species for each site
-**/
-std::vector<int> ClusterSpace::getNumberOfAllowedSpeciesBySite(const Structure &structure, const std::vector<LatticeSite> &latticeSites) const
-{
-    std::vector<int> numberOfAllowedSpecies;
-    numberOfAllowedSpecies.reserve(latticeSites.size());
-    for (const auto &latsite : latticeSites)
-    {
-        numberOfAllowedSpecies.push_back(structure.getNumberOfAllowedSpeciesBySite(latsite.index()));
-    }
-    return numberOfAllowedSpecies;
-}
-
 /// Computes permutations and multicomponent vectors of each orbit.
 void ClusterSpace::computeMultiComponentVectors()
 {
@@ -218,9 +199,7 @@ void ClusterSpace::computeMultiComponentVectors()
     for (size_t orbitIndex = 0; orbitIndex < _primitiveOrbitList->size(); orbitIndex++)
     {
 
-        std::vector<std::vector<int>> permutedMCVector;
-        auto numberOfAllowedSpecies = getNumberOfAllowedSpeciesBySite(_primitiveStructure, _primitiveOrbitList->getOrbit(orbitIndex).representativeCluster().latticeSites());
-
+        auto numberOfAllowedSpecies = _primitiveStructure->getNumberOfAllowedSpeciesBySites(_primitiveOrbitList->getOrbit(orbitIndex).representativeCluster().latticeSites());
         auto multiComponentVectors = _primitiveOrbitList->getOrbit(orbitIndex).getMultiComponentVectors(numberOfAllowedSpecies);
         if (std::none_of(numberOfAllowedSpecies.begin(), numberOfAllowedSpecies.end(), [](int n)
                          { return n < 2; }))
@@ -229,7 +208,7 @@ void ClusterSpace::computeMultiComponentVectors()
             for (int j = 0; j < multiComponentVectors.size(); j++)
             {
                 clusterVectorIndex++;
-                double multiplicity = (double)sitePermutations[j].size() * (double)_primitiveOrbitList->getOrbit(orbitIndex).size() / (double)_primitiveStructure.size();
+                double multiplicity = (double)sitePermutations[j].size() * (double)_primitiveOrbitList->getOrbit(orbitIndex).size() / (double)_primitiveStructure->size();
                 ClusterVectorElementInfo cvInfo = {multiComponentVectors[j],
                                                    sitePermutations[j],
                                                    clusterVectorIndex,
@@ -332,18 +311,8 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
             counts = currentOrbit.getClusterCounts(supercell, flipIndex);
         }
 
-        const std::vector<LatticeSite> &representativeSites = currentPrimitiveOrbit.representativeCluster().latticeSites();
-
-        std::vector<int> allowedOccupations;
-        try
-        {
-            allowedOccupations = getNumberOfAllowedSpeciesBySite(_primitiveStructure, representativeSites);
-        }
-        catch (const std::exception &e)
-        {
-            std::cout << e.what() << std::endl;
-            throw std::runtime_error("Failed getting allowed occupations (ClusterSpace::getClusterVectorFromOrbitList)");
-        }
+        // Extract allowed occupations
+        std::vector<int> allowedOccupations = _primitiveStructure->getNumberOfAllowedSpeciesBySites(currentPrimitiveOrbit.representativeCluster().latticeSites());
 
         // Skip the rest if any of the sites are inactive (i.e. allowed occupation < 2)
         if (std::any_of(allowedOccupations.begin(), allowedOccupations.end(), [](int allowedOccupation)
@@ -353,7 +322,7 @@ const std::vector<double> ClusterSpace::getClusterVectorFromOrbitList(const Orbi
         }
 
         std::vector<int> indicesOfRepresentativeSites;
-        for (const LatticeSite &site : representativeSites)
+        for (const LatticeSite &site : currentPrimitiveOrbit.representativeCluster().latticeSites())
         {
             indicesOfRepresentativeSites.push_back(site.index());
         }

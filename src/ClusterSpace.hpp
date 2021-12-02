@@ -60,10 +60,10 @@ public:
   std::vector<double> getCutoffs() const { return _clusterCutoffs; }
 
   /// Returns the primitive structure.
-  const Structure &primitiveStructure() const { return _primitiveStructure; }
+  const std::shared_ptr<Structure> &primitiveStructure() const { return _primitiveStructure; }
 
   /// Returns the number of allowed components for each site.
-  std::vector<int> getNumberOfAllowedSpeciesBySite(const Structure &, const std::vector<LatticeSite> &) const;
+  std::vector<int> getNumberOfAllowedSpeciesBySites(const std::vector<LatticeSite> &) const;
 
   /// Returns a list of species associated with cluster space as chemical symbols.
   std::vector<std::vector<std::string>> getChemicalSymbols() const { return _chemicalSymbols; }
@@ -91,13 +91,10 @@ public:
 
 private:
   /// Primitive (prototype) structure.
-  Structure _primitiveStructure;
+  std::shared_ptr<Structure> _primitiveStructure;
 
   /// Primitive orbit list based on the structure and the cutoffs.
   std::shared_ptr<OrbitList> _primitiveOrbitList;
-
-  /// Number of allowed components on each site of the primitive structure.
-  std::vector<int> _numberOfAllowedSpeciesPerSite;
 
   /// Radial cutoffs by cluster order starting with pairs.
   std::vector<double> _clusterCutoffs;

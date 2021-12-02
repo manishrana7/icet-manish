@@ -2,7 +2,7 @@
 
 /**
 @details This constructor generates an orbit list for the given (supercell) structure from a set of neighbor lists and a matrix of (symmetry) equivalent sites.
-@param structure (supercell) structure for which to generate orbit list
+@param structure Structure that the orbits will be based on
 @param matrixOfEquivalentSites matrix of symmetry equivalent sites
 @param neighborLists neighbor lists for each (cluster) order (0=pairs, 1=triplets etc)
 @param positionTolerance tolerance applied when comparing positions in Cartesian coordinates
@@ -12,9 +12,9 @@ OrbitList::OrbitList(const Structure &structure,
                      const std::vector<std::vector<std::vector<LatticeSite>>> &neighborLists,
                      const double positionTolerance)
 {
-    _primitiveStructure = structure;
+    _structure = structure;
     _matrixOfEquivalentSites = matrixOfEquivalentSites;
-    _referenceLatticeSites = getReferenceLatticeSites(false);
+    _referenceLatticeSites = getReferenceLatticeSites();
 
     /**
     The following list is used to compile "raw data" for the orbit list.
@@ -249,7 +249,7 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
                     failedLoops++;
                     if (failedLoops == representativeClusterWithTranslations.size())
                     {
-                        throw std::runtime_error("Did not find integer permutation from allowed permutation to any translated representative site (OrbitList::addPermutationInformationToOrbits)");
+                        throw std::runtime_error("Did not find integer permutation from allowed permutation to any translated representative site (OrbitList::createOrbit)");
                     }
                     continue;
                 }
@@ -288,7 +288,7 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
                 }
                 if (perm == translatedPermutationsOfSites.back())
                 {
-                    throw std::runtime_error("Did not find a permutation of the orbit sites to the permutations of the representative sites (OrbitList::addPermutationInformationToOrbits)");
+                    throw std::runtime_error("Did not find a permutation of the orbit sites to the permutations of the representative sites (OrbitList::createOrbit)");
                 }
             }
         }
@@ -308,10 +308,10 @@ Orbit OrbitList::createOrbit(const std::vector<std::vector<LatticeSite>> &equiva
 
     // Turn the permuted equivalent clusters into actual Cluster objects
     std::vector<Cluster> clusters;
-    std::shared_ptr<Structure> primStructurePtr = std::make_shared<Structure>(_primitiveStructure);
+    std::shared_ptr<Structure> structurePtr = std::make_shared<Structure>(_structure);
     for (auto cluster : permutedEquivalentClusters)
     {
-        clusters.push_back(Cluster(cluster, primStructurePtr));
+        clusters.push_back(Cluster(cluster, structurePtr));
     }
     Orbit newOrbit = Orbit(clusters, allowedPermutations);
     return newOrbit;
@@ -386,12 +386,11 @@ std::vector<std::vector<LatticeSite>> OrbitList::getSitesTranslatedToUnitcell(co
 
     std::vector<std::vector<LatticeSite>> listOfTranslatedLatticeSites;
     listOfTranslatedLatticeSites.push_back(latticeSites);
-    Vector3i zeroVector = {0, 0, 0};
     for (size_t i = 0; i < latticeSites.size(); i++)
     {
-        if ((latticeSites[i].unitcellOffset() - zeroVector).norm() > 0.5) // only translate sites outside the primitive unitcell
+        if (latticeSites[i].unitcellOffset().norm() > 0.5) // only translate sites outside the primitive unitcell
         {
-            auto translatedSites = translateSites(latticeSites, i);
+            auto translatedSites = getTranslatedSites(latticeSites, i);
             if (sort)
             {
                 std::sort(translatedSites.begin(), translatedSites.end());
@@ -408,11 +407,11 @@ std::vector<std::vector<LatticeSite>> OrbitList::getSitesTranslatedToUnitcell(co
 
 /**
 @details Takes all lattice sites in vector latticeSites and subtracts the unitcell offset of site latticeSites[index].
-@param latticeSites list of lattice sites, typically a cluster
-@param index index of site relative to which to shift
+@param latticeSites List of lattice sites, typically a cluster
+@param index Index of site relative to which to shift
 */
-std::vector<LatticeSite> OrbitList::translateSites(const std::vector<LatticeSite> &latticeSites,
-                                                   const unsigned int index) const
+std::vector<LatticeSite> OrbitList::getTranslatedSites(const std::vector<LatticeSite> &latticeSites,
+                                                       const unsigned int index) const
 {
     Vector3i offset = latticeSites[index].unitcellOffset();
     auto translatedSites = latticeSites;
@@ -518,10 +517,9 @@ std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> OrbitList::ge
 */
 bool OrbitList::validCluster(const std::vector<LatticeSite> &latticeSites) const
 {
-    Vector3i zeroVector = {0, 0, 0};
     for (const auto &latticeSite : latticeSites)
     {
-        if (latticeSite.unitcellOffset() == zeroVector)
+        if (latticeSite.unitcellOffset().norm() < 0.5)
         {
             return true;
         }
@@ -562,9 +560,8 @@ std::vector<int> OrbitList::getIndicesOfEquivalentLatticeSites(const std::vector
 /**
 @details Returns reference lattice sites, which is equivalent to returning the first column of the matrix of equivalent sites.
 @todo Expand description.
-@param sort if true (default) the first column will be sorted
 **/
-std::vector<LatticeSite> OrbitList::getReferenceLatticeSites(bool sort) const
+std::vector<LatticeSite> OrbitList::getReferenceLatticeSites() const
 {
     std::vector<LatticeSite> referenceLatticeSites;
     referenceLatticeSites.reserve(_matrixOfEquivalentSites[0].size());
@@ -572,49 +569,7 @@ std::vector<LatticeSite> OrbitList::getReferenceLatticeSites(bool sort) const
     {
         referenceLatticeSites.push_back(row[0]);
     }
-    if (sort)
-    {
-        std::sort(referenceLatticeSites.begin(), referenceLatticeSites.end());
-    }
     return referenceLatticeSites;
-}
-
-/**
-@details Returns a "local" orbitList by offsetting each site in the primitive cell by an offset.
-@param supercell supercell structure
-@param cellOffset offset to be applied to sites
-@param primitiveToSupercellMap map from primitive to supercell
-@param fractionalPositionTolerance tolerance applied when comparing positions in fractional coordinates
-**/
-OrbitList OrbitList::getLocalOrbitList(std::shared_ptr<Structure> supercell,
-                                       const Vector3i &cellOffset,
-                                       std::unordered_map<LatticeSite, LatticeSite> &primitiveToSupercellMap,
-                                       const double fractionalPositionTolerance) const
-{
-    OrbitList localOrbitList = OrbitList();
-    localOrbitList.setPrimitiveStructure(_primitiveStructure);
-    for (const auto orbit : _orbits)
-    {
-        // Copy the orbit
-        Orbit supercellOrbit = orbit;
-
-        // Translate all clusters of the new orbit
-        supercellOrbit.translate(cellOffset);
-
-        // Technically we should use the fractional position tolerance
-        // corresponding to the cell metric of the supercell structure.
-        // This is, however, not uniquely defined. Moreover, the difference
-        // would only matter for very large supercells. We (@angqvist,
-        // @erikfransson, @erhart) therefore decide to defer this issue
-        // until someone encounters the problem in a practical situation.
-        // In principle, one should not handle coordinates (floats) at this
-        // level anymore. Rather one should transform any (supercell)
-        // structure into an effective representation in terms of lattice
-        // sites before any further operations.
-        supercellOrbit.transformToSupercell(supercell, primitiveToSupercellMap, fractionalPositionTolerance);
-        localOrbitList.addOrbit(supercellOrbit);
-    }
-    return localOrbitList;
 }
 
 /**
@@ -651,6 +606,20 @@ void OrbitList::removeInactiveOrbits(const Structure &structure)
 }
 
 /**
+@brief Getter for stucture object,
+*/
+const Structure &OrbitList::structure() const
+{
+    if (_structure.size() == 0)
+    {
+        std::ostringstream msg;
+        msg << "No structure has been initialized in this OrbitList (OrbitList::structure)";
+        throw std::runtime_error(msg.str());
+    }
+    return _structure;
+}
+
+/**
 @brief Adds an orbit to another orbit.
 @details
     This function adds the clusters of the orbit with orbit index index2
@@ -673,7 +642,7 @@ OrbitList &OrbitList::operator+=(const OrbitList &rhs_ol)
 {
     if (size() == 0)
     {
-        _orbits = rhs_ol.getOrbits();
+        _orbits = rhs_ol.orbits();
         return *this;
     }
 

@@ -7,97 +7,29 @@ ClusterExpansionCalculator::ClusterExpansionCalculator(const ClusterSpace &clust
 {
     _clusterSpace = clusterSpace;
     _supercell = std::make_shared<Structure>(structure);
-    std::shared_ptr<Structure> primitiveStructure = std::make_shared<Structure>(_clusterSpace.primitiveStructure());
-
     LocalOrbitListGenerator LOLG = LocalOrbitListGenerator(clusterSpace.getPrimitiveOrbitList(), _supercell, fractionalPositionTolerance);
-    size_t uniqueOffsets = LOLG.getNumberOfUniqueOffsets();
-    int numberOfOrbits = _clusterSpace.getPrimitiveOrbitList().size();
-    std::vector<Orbit> orbitVector;
+
+    // Create a full orbit list, used to calculate full cluster vectors.
     _fullOrbitList = LOLG.getFullOrbitList();
 
-    for (const auto orbit : clusterSpace.getPrimitiveOrbitList().getOrbits())
+    // Map indices in the supercell to offsets in the primitive cell,
+    // and for each unique offset, precompute all possible
+    // self-contained local orbit lists for the supercell.
+    // The latter can be used to calculate local cluster vectors
+    // and cluster vector differences.
+    for (size_t i = 0; i < _supercell->size(); i++)
     {
-        orbitVector.push_back(Orbit(orbit.clusters(), orbit.getAllowedClusterPermutations()));
-    }
+        // Find offset of this site in terms of the primitive structure
+        Vector3d position = _supercell->positionByIndex(i);
+        Vector3i offset = _clusterSpace.primitiveStructure()->findLatticeSiteByPosition(position, fractionalPositionTolerance).unitcellOffset();
 
-    /* Strategy for constructing the "full" primitive orbit lists.
+        // Create map from atom index to offset
+        _indexToOffset[i] = offset;
 
-    First we fill up a `std::vector<Orbit> orbitVector`,
-    where `vector<orbit>` is essentially an orbit list.
-
-    The existing method for constructing the _full_ orbit list proceeds
-    by looping over all local orbit lists with `LocalOrbitListGenerator` and
-    adding the sites to the local orbit list.
-
-    Now we do something similar by looping over each local orbit list
-    (by looping over `offsetIndex`).
-    The local orbitlist is retrieved here: `LOLG.getLocalOrbitList(offsetIndex)`
-
-    Then for each `orbit` in `LOLG.getLocalOrbitList(offsetIndex)`
-    each group of lattice sites in `orbit.equivalentSites()` is added to
-    `orbitVector[orbitIndex]` if the lattice sites have a site with offset `[0, 0, 0]`.
-
-    When the full primitive orbit list is used to create a local orbit list for
-    site `index` in the supercell it should thus contain all lattice sites that
-    contain `index`.
-    */
-
-    for (size_t offsetIndex = 0; offsetIndex < uniqueOffsets; offsetIndex++)
-    {
-        // This orbit list is a local orbit list related to the supercell
-        OrbitList localOrbitList = LOLG.getLocalOrbitList(offsetIndex);
-        for (int orbitIndex = 0; orbitIndex < numberOfOrbits; orbitIndex++)
+        // If we still have not created a local orbit list for this offset, we should make one
+        if (_localOrbitlists.find(offset) == _localOrbitlists.end())
         {
-            for (const auto cluster : localOrbitList.getOrbit(orbitIndex).clusters())
-            {
-                std::vector<LatticeSite> primitiveEquivalentSites;
-                for (const auto site : cluster.latticeSites())
-                {
-                    Vector3d sitePosition = _supercell->position(site);
-                    auto primitiveSite = _clusterSpace.primitiveStructure().findLatticeSiteByPosition(sitePosition, fractionalPositionTolerance);
-                    primitiveEquivalentSites.push_back(primitiveSite);
-                }
-                std::vector<std::vector<LatticeSite>> translatedClusters = _clusterSpace.getPrimitiveOrbitList().getSitesTranslatedToUnitcell(primitiveEquivalentSites, false);
-
-                for (auto translatedCluster : translatedClusters)
-                {
-                    if (std::any_of(translatedCluster.begin(), translatedCluster.end(), [=](LatticeSite ls)
-                                    { return (ls.unitcellOffset()).norm() < fractionalPositionTolerance; }))
-                    {
-                        // false or true here does not seem to matter
-                        if (!orbitVector[orbitIndex].contains(translatedCluster, true))
-                        {
-                            orbitVector[orbitIndex].addCluster(Cluster(translatedCluster, primitiveStructure));
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Now create the full primitive orbit list using the vector<orbit>
-    _fullPrimitiveOrbitList.setPrimitiveStructure(_clusterSpace.primitiveStructure());
-    int orbitIndex = -1;
-    for (auto orbit : orbitVector)
-    {
-        orbitIndex++;
-        _fullPrimitiveOrbitList.addOrbit(orbit);
-    }
-
-    _primitiveToSupercellMap.clear();
-    _indexToOffset.clear();
-
-    // Precompute all possible local orbitlists for this supercell and map it to the offset
-    for (size_t i = 0; i < structure.size(); i++)
-    {
-        Vector3d localPosition = structure.positions().row(i);
-        LatticeSite localSite = _clusterSpace.primitiveStructure().findLatticeSiteByPosition(localPosition, fractionalPositionTolerance);
-        Vector3i offsetVector = localSite.unitcellOffset();
-        _indexToOffset[i] = offsetVector;
-
-        if (_localOrbitlists.find(offsetVector) == _localOrbitlists.end())
-        {
-            _localOrbitlists[offsetVector] = _fullPrimitiveOrbitList.getLocalOrbitList(_supercell, offsetVector, _primitiveToSupercellMap, fractionalPositionTolerance);
+            _localOrbitlists[offset] = LOLG.getLocalOrbitList(offset, true);
         }
     }
 }
