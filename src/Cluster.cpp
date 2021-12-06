@@ -45,7 +45,7 @@ void Cluster::transformToSupercell(std::shared_ptr<const Structure> supercell,
 
         if (find == primitiveToSupercellMap.end())
         {
-            sitePosition = _structure->position(site);
+            sitePosition = _structure->getPosition(site);
             supercellSite = supercell->findLatticeSiteByPosition(sitePosition, fractionalPositionTolerance);
             primitiveToSupercellMap[site] = supercellSite;
         }
@@ -76,7 +76,7 @@ double Cluster::radius() const
     Vector3d centerPosition = {0.0, 0.0, 0.0};
     for (const auto &site : _latticeSites)
     {
-        centerPosition += _structure->position(site);
+        centerPosition += _structure->getPosition(site);
     }
     centerPosition /= _latticeSites.size();
 
@@ -84,7 +84,7 @@ double Cluster::radius() const
     double avgDistanceToCenter = 0.0;
     for (const auto &site : _latticeSites)
     {
-        avgDistanceToCenter += (centerPosition - _structure->position(site)).norm();
+        avgDistanceToCenter += (centerPosition - _structure->getPosition(site)).norm();
     }
     avgDistanceToCenter /= order();
     return avgDistanceToCenter;
@@ -93,12 +93,12 @@ double Cluster::radius() const
 /**
 @brief Returns the positions of the sites in this cluster in Cartesian coordinates.
 **/
-std::vector<Vector3d> Cluster::positions() const
+std::vector<Vector3d> Cluster::getPositions() const
 {
     std::vector<Vector3d> currentPositions;
     for (const LatticeSite &site : _latticeSites)
     {
-        currentPositions.push_back(_structure->position(site));
+        currentPositions.push_back(_structure->getPosition(site));
     }
     return currentPositions;
 }
@@ -108,7 +108,7 @@ std::vector<Vector3d> Cluster::positions() const
 **/
 std::vector<float> Cluster::distances() const
 {
-    std::vector<Vector3d> currentPositions = positions();
+    std::vector<Vector3d> currentPositions = getPositions();
     std::vector<float> distances = {};
     for (int i = 1; i < currentPositions.size(); i++)
     {
@@ -169,7 +169,7 @@ std::ostream &operator<<(std::ostream &os, const Cluster &cluster)
     for (int site_i = 0; site_i < cluster.order(); site_i++)
     {
         LatticeSite site = cluster.latticeSites()[site_i];
-        Vector3d position = cluster.positions()[site_i];
+        Vector3d position = cluster.getPositions()[site_i];
 
         // Print index
         std::string s = std::to_string(site.index());

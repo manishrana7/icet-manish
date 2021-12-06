@@ -58,14 +58,6 @@ class Structure(_Structure):
                     conf.cell,
                     conf.pbc.tolist())
 
-    def __str__(self) -> str:
-        s = ['Cell:']
-        s += ['{}\n'.format(self.cell)]
-        s += ['Atomic numbers and positions:']
-        for atomic_number, position in zip(self.atomic_numbers, self.positions):
-            s += ['{}  [{:}  {:}  {:}]'.format(atomic_number, *position)]
-        return '\n'.join(s)
-
     def find_lattice_sites_by_positions(self,
                                         positions: List[Sequence],
                                         fractional_position_tolerance: float) -> List[LatticeSite]:
