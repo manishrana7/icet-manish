@@ -28,25 +28,19 @@ public:
             const std::vector<bool> &);
 
   /// Return the position of a site in Cartesian coordinates.
-  Vector3d position(const LatticeSite &) const;
+  Vector3d getPosition(const LatticeSite &) const;
 
-  /// Return the position of a site in Cartesian coordinates.
-  Vector3d positionByIndex(const size_t &index) const;
+  /// Return the position of specific site in the structure in Cartesian coordinates.
+  Vector3d positionByIndex(const size_t &) const;
 
-  /// Returns atomic number of site.
-  int getAtomicNumber(const size_t) const;
+  /// Returns positions of all sites in the structure in Cartesian coordinates.
+  Matrix<double, Dynamic, 3, RowMajor> getPositions() const;
 
   /// Return LatticeSite object that matches the given position.
   LatticeSite findLatticeSiteByPosition(const Vector3d &, const double) const;
 
   /// Returns the size of the structure, i.e., the number of sites.
   size_t size() const { return _atomicNumbers.size(); }
-
-  /// Set the atomic positions.
-  void setPositions(const Matrix<double, Dynamic, 3> &positions) { _positions = positions; }
-
-  /// Returns positions.
-  Matrix<double, Dynamic, 3, RowMajor> positions() const { return _positions; }
 
   /// Set atomic numbers.
   void setAtomicNumbers(const py::array_t<int> &atomicNumbers) { _atomicNumbers = atomicNumbers; }
@@ -80,7 +74,7 @@ private:
   py::array_t<int> _atomicNumbers;
 
   /// Positions of sites in Cartesian coordinates.
-  Matrix<double, Dynamic, 3, RowMajor> _positions;
+  Matrix<double, Dynamic, 3, RowMajor> _scaledPositions;
 
   /// Cell metric.
   Matrix3d _cell;

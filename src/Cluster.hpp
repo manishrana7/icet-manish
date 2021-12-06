@@ -32,7 +32,7 @@ public:
     std::vector<float> distances() const;
 
     /// Returns the positions of the sites in this cluster in Cartesian coordinates.
-    std::vector<Vector3d> positions() const;
+    std::vector<Vector3d> getPositions() const;
 
     /// Comparison operator for automatic sorting.
     friend bool operator<(const Cluster &cluster1, const Cluster &cluster2)

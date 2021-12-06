@@ -99,11 +99,10 @@ PYBIND11_MODULE(_icet, m)
             "cell",
             &Structure::getCell,
             &Structure::setCell,
-            "list(list(float)) : cell metric")
-        .def_property(
+            "List[List[float]] : cell metric")
+        .def_property_readonly(
             "positions",
-            &Structure::positions,
-            &Structure::setPositions,
+            &Structure::getPositions,
             "list(list(float)) : atomic positions in Cartesian coordinates")
         .def_property("atomic_numbers",
                       &Structure::getAtomicNumbers,
@@ -125,7 +124,7 @@ PYBIND11_MODULE(_icet, m)
         .def("get_number_of_allowed_species_by_sites",
              &Structure::getNumberOfAllowedSpeciesBySites)
         .def("get_position",
-             &Structure::position,
+             &Structure::getPosition,
              py::arg("site"),
              R"pbdoc(
              Returns the position of a specified site
@@ -204,7 +203,7 @@ PYBIND11_MODULE(_icet, m)
             "int : order of the cluster (= number of sites)")
         .def_property_readonly(
             "positions",
-            &Cluster::positions,
+            &Cluster::getPositions,
             "List[float] : positions of sites in the cluster in Cartesian coordinates")
         .def("__len__",
              &Cluster::order)

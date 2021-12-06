@@ -15,55 +15,54 @@ Structure::Structure(const Matrix<double, Dynamic, 3, RowMajor> &positions,
                      const std::vector<bool> &pbc)
     : _atomicNumbers(atomicNumbers), _cell(cell), _pbc(pbc)
 {
-    setPositions(positions);
+    _scaledPositions = positions * _cell.inverse();
     _numbersOfAllowedSpecies.resize(positions.rows());
 }
 
 /**
-  @details This function returns the position of a site.
-  @param latticeNeighbor site for which to obtain the position
+  @details Returns the position of a lattice site.
+  @param latticeSite site for which to obtain the position
   @returns a 3-dimensional position vector
 */
-Vector3d Structure::position(const LatticeSite &latticeNeighbor) const
+Vector3d Structure::getPosition(const LatticeSite &latticeSite) const
 {
-    if (latticeNeighbor.index() >= (size_t)_positions.rows())
+    if (latticeSite.index() >= (size_t)_scaledPositions.rows())
     {
         std::ostringstream msg;
         msg << "Site index out of bounds";
-        msg << " index: " << latticeNeighbor.index();
-        msg << " number of positions: " << _positions.rows();
-        msg << " (Structure::position)";
+        msg << " index: " << latticeSite.index();
+        msg << " number of sites: " << _scaledPositions.rows();
+        msg << " (Structure::getPosition)";
         throw std::out_of_range(msg.str());
     }
-    Vector3d position = _positions.row(latticeNeighbor.index()) + latticeNeighbor.unitcellOffset().transpose().cast<double>() * _cell;
+    Vector3d position = (_scaledPositions.row(latticeSite.index()) + latticeSite.unitcellOffset().transpose().cast<double>()) * _cell;
     return position;
 }
+
 /**
-@details This function returns the position of a specific site in Cartesian coordinates.
-@param index index of the site
- **/
+  @details Returns the position of a specific site in Cartesian coordinates.
+  @param index index of the site
+*/
 Vector3d Structure::positionByIndex(const size_t &index) const
 {
-    Vector3d position = _positions.row(index);
-    return position;
-}
-/**
-  @details This function returns the atomic number of a site.
-  @param index index of site
-  @returns atomic number
-**/
-int Structure::getAtomicNumber(const size_t index) const
-{
-    if (index >= _atomicNumbers.size())
+    if (index >= (size_t)_scaledPositions.rows())
     {
         std::ostringstream msg;
-        msg << "Site index out of bounds";
+        msg << "Index out of bounds";
         msg << " index: " << index;
-        msg << " nsites: " << _atomicNumbers.size();
-        msg << " (Structure::getAtomicNumber)";
+        msg << " number of sites: " << _scaledPositions.rows();
+        msg << " (Structure::positionByIndex)";
         throw std::out_of_range(msg.str());
     }
-    return _atomicNumbers.at(index);
+    return _scaledPositions.row(index) * _cell;
+}
+
+/**
+  @brief Returns the positions (in Cartesian coordinates) of all atoms in this structure.
+*/
+Matrix<double, Dynamic, 3, RowMajor> Structure::getPositions() const
+{
+    return _scaledPositions * _cell;
 }
 
 /**
@@ -87,11 +86,11 @@ int Structure::getAtomicNumber(const size_t index) const
 */
 LatticeSite Structure::findLatticeSiteByPosition(const Vector3d &position, const double fractionalPositionTolerance) const
 {
+    Vector3d scaledPosition = _cell.transpose().partialPivLu().solve(position);
     /// Loop over all positions
-    for (size_t i = 0; i < (size_t)_positions.rows(); i++)
+    for (size_t i = 0; i < (size_t)_scaledPositions.rows(); i++)
     {
-        Vector3d distanceVector = position - _positions.row(i).transpose();
-        Vector3d fractionalDistanceVector = _cell.transpose().partialPivLu().solve(distanceVector);
+        Vector3d fractionalDistanceVector = scaledPosition - _scaledPositions.row(i).transpose();
 
         // Check whether whether the fractionalDistanceVector is all integers,
         // if it is we have found the corresponding lattice site
@@ -104,12 +103,11 @@ LatticeSite Structure::findLatticeSiteByPosition(const Vector3d &position, const
         }
     }
 
-    Vector3d fractionalPosition = _cell.transpose().partialPivLu().solve(position);
     std::ostringstream msg;
     msg << "Failed to find site by position (findLatticeSiteByPosition)." << std::endl;
     msg << "Try increasing symprec or position_tolerance." << std::endl;
     msg << "position: " << position[0] << " " << position[1] << " " << position[2] << std::endl;
-    msg << "fractional position: " << fractionalPosition[0] << " " << fractionalPosition[1] << " " << fractionalPosition[2] << std::endl;
+    msg << "scaled position: " << scaledPosition[0] << " " << scaledPosition[1] << " " << scaledPosition[2] << std::endl;
     msg << "fractional position tolerance: " << fractionalPositionTolerance;
     throw std::runtime_error(msg.str());
 }
