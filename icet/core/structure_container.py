@@ -17,6 +17,7 @@ logger = logger.getChild('structure_container')
 
 
 class StructureContainer:
+    cluster_space_type = ClusterSpace
     """
     This class serves as a container for structure objects as well as their fit
     properties and cluster vectors.
@@ -323,8 +324,8 @@ class StructureContainer:
             handle.add(temp_db_file.name, arcname='database')
             handle.add(temp_cs_file.name, arcname='cluster_space')
 
-    @staticmethod
-    def read(infile: Union[str, BinaryIO, TextIO]):
+    @classmethod
+    def read(cls, infile: Union[str, BinaryIO, TextIO]):
         """
         Reads StructureContainer object from file.
 
@@ -347,10 +348,10 @@ class StructureContainer:
             cs_file = tar_file.extractfile('cluster_space')
             temp_db_file.write(tar_file.extractfile('database').read())
             temp_db_file.seek(0)
-            cluster_space = ClusterSpace.read(cs_file)
+            cluster_space = cls.cluster_space_type.read(cs_file)
             database = ase.db.connect(temp_db_file.name, type='db')
 
-            structure_container = StructureContainer(cluster_space)
+            structure_container = cls(cluster_space)
             fit_structures = []
             for row in database.select():
                 data = row.data

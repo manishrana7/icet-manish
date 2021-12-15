@@ -7,6 +7,7 @@ import tarfile
 
 
 class VariableBasisClusterExpansion(ClusterExpansion):
+    cluster_space_type = VariableBasisClusterSpace
 
     def __init__(self, cluster_space: VariableBasisClusterSpace, parameters: np.array,
                  metadata: dict = None):
@@ -47,27 +48,3 @@ class VariableBasisClusterExpansion(ClusterExpansion):
         self._metadata = metadata
         self._add_default_metadata()
 
-    @staticmethod
-    def read(filename: str):
-        """
-        Reads VariableBasisClusterExpansion object from file.
-
-        Parameters
-        ---------
-        filename
-            file from which to read
-        """
-        with tarfile.open(name=filename, mode='r') as tar_file:
-            cs_file = tempfile.NamedTemporaryFile()
-            cs_file.write(tar_file.extractfile('cluster_space').read())
-            cs_file.seek(0)
-            cs = VariableBasisClusterSpace.read(cs_file.name)
-            items = pickle.load(tar_file.extractfile('items'))
-
-        ce = VariableBasisClusterExpansion.__new__(VariableBasisClusterExpansion)
-        ce._cluster_space = cs
-        ce._parameters = items['parameters']
-        ce._metadata = items['metadata']
-
-        assert list(items['parameters']) == list(ce.parameters)
-        return ce

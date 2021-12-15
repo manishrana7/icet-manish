@@ -4,10 +4,11 @@ Main module of the icet package.
 """
 
 from .core.cluster_space import ClusterSpace
-from .core.variable_basis_cluster_space import VariableBasisClusterSpace
 from .core.cluster_expansion import ClusterExpansion
-from .core.variable_basis_cluster_expansion import VariableBasisClusterExpansion
 from .core.structure_container import StructureContainer
+from .core.variable_basis_cluster_space import VariableBasisClusterSpace
+from .core.variable_basis_cluster_expansion import VariableBasisClusterExpansion
+from .core.variable_basis_structure_container import VariableBasisStructureContainer
 
 __project__ = 'icet'
 __description__ = 'A Pythonic approach to cluster expansions'
@@ -23,4 +24,5 @@ __all__ = ['ClusterSpace',
            'ClusterExpansion',
            'StructureContainer',
            'VariableBasisClusterSpace',
-           'VariableBasisClusterExpansion']
+           'VariableBasisClusterExpansion',
+           'VariableBasisStructureContainer']

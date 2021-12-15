@@ -55,6 +55,7 @@ class ClusterExpansion:
        >>>     sc[k].symbol = 'Pd'
        >>> print(ce.predict(sc))
     """
+    cluster_space_type = ClusterSpace
 
     def __init__(self, cluster_space: ClusterSpace, parameters: np.array,
                  metadata: dict = None) -> None:
@@ -326,8 +327,8 @@ class ClusterExpansion:
             tar_file.addfile(tar_info, temp_file)
             temp_file.close()
 
-    @staticmethod
-    def read(filename: str):
+    @classmethod
+    def read(cls, filename: str):
         """
         Reads ClusterExpansion object from file.
 
@@ -340,10 +341,10 @@ class ClusterExpansion:
             cs_file = tempfile.NamedTemporaryFile()
             cs_file.write(tar_file.extractfile('cluster_space').read())
             cs_file.seek(0)
-            cs = ClusterSpace.read(cs_file.name)
+            cs = cls.cluster_space_type.read(cs_file.name)
             items = pickle.load(tar_file.extractfile('items'))
 
-        ce = ClusterExpansion.__new__(ClusterExpansion)
+        ce = cls.__new__(ClusterExpansion)
         ce._cluster_space = cs
         ce._parameters = items['parameters']
 
