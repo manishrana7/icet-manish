@@ -25,6 +25,7 @@ build:linux:
 
 build:macos:
   before_script:
+    - echo $PATH
     - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
     - export PATH=/Library/Frameworks/Python.framework/Versions/3.8/bin:${PATH}
   extends: .build
