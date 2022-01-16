@@ -110,7 +110,7 @@ def test_initialization_warning(system, pairs, n_warnings, warning):
         handler.close()
         logger.removeHandler(handler)
 
-    logfile = NamedTemporaryFile(mode='w+', encoding='utf-8')
+    logfile = NamedTemporaryFile(mode='w+', encoding='utf-8', delete=False)
     set_log_config(filename=logfile.name)
     StructureFactorObserver(supercell, q_points, symbol_pairs=pairs)
 

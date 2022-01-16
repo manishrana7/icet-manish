@@ -2,6 +2,7 @@
 This module provides the ClusterExpansion class.
 """
 
+import os
 import pandas as pd
 import numpy as np
 import pickle
@@ -314,7 +315,8 @@ class ClusterExpansion:
             items['metadata'] = self._metadata
 
         with tarfile.open(name=filename, mode='w') as tar_file:
-            cs_file = tempfile.NamedTemporaryFile()
+            cs_file = tempfile.NamedTemporaryFile(delete=False)
+            cs_file.close()
             self._cluster_space.write(cs_file.name)
             tar_file.add(cs_file.name, arcname='cluster_space')
 
@@ -324,6 +326,7 @@ class ClusterExpansion:
             temp_file.seek(0)
             tar_info = tar_file.gettarinfo(arcname='items', fileobj=temp_file)
             tar_file.addfile(tar_info, temp_file)
+            os.remove(cs_file.name)
             temp_file.close()
 
     @staticmethod
@@ -337,11 +340,12 @@ class ClusterExpansion:
             file from which to read
         """
         with tarfile.open(name=filename, mode='r') as tar_file:
-            cs_file = tempfile.NamedTemporaryFile()
+            cs_file = tempfile.NamedTemporaryFile(delete=False)
             cs_file.write(tar_file.extractfile('cluster_space').read())
-            cs_file.seek(0)
+            cs_file.close()
             cs = ClusterSpace.read(cs_file.name)
             items = pickle.load(tar_file.extractfile('items'))
+            os.remove(cs_file.name)
 
         ce = ClusterExpansion.__new__(ClusterExpansion)
         ce._cluster_space = cs

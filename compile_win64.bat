@@ -1,5 +1,5 @@
 mkdir build 
 cd build
-cmake .. -G "Visual Studio 15 2017 Win64"
-msbuild ALL_BUILD.vcxproj /p:Configuration=Release
+cmake .. -G "Visual Studio 16 2019"
+msbuild ALL_BUILD.vcxproj /p:Configuration=Debug
 cd ..

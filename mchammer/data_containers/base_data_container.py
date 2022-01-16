@@ -303,7 +303,7 @@ class BaseDataContainer:
         self._metadata['date_last_backup'] = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 
         # Save reference atomic structure
-        reference_structure_file = tempfile.NamedTemporaryFile()
+        reference_structure_file = tempfile.NamedTemporaryFile(delete=False)
         ase_write(reference_structure_file.name, self.structure, format='json')
 
         # Save reference data
@@ -313,12 +313,12 @@ class BaseDataContainer:
                           'last_state': self._last_state,
                           'data_container_type': data_container_type}
 
-        reference_data_file = tempfile.NamedTemporaryFile()
+        reference_data_file = tempfile.NamedTemporaryFile(delete=False)
         with open(reference_data_file.name, 'w') as fileobj:
             json.dump(reference_data, fileobj, cls=Int64Encoder)
 
         # Save runtime data
-        runtime_data_file = tempfile.NamedTemporaryFile()
+        runtime_data_file = tempfile.NamedTemporaryFile(delete=False)
         np.savez_compressed(runtime_data_file, self._data_list)
 
         # Write temporary tar file
@@ -394,13 +394,13 @@ class BaseDataContainer:
 
         with tarfile.open(mode='r', name=filename) as tf:
             # file with structures
-            with tempfile.NamedTemporaryFile() as fobj:
+            with tempfile.NamedTemporaryFile(delete=False) as fobj:
                 fobj.write(tf.extractfile('atoms').read())
                 fobj.flush()
                 structure = ase_read(fobj.name, format='json')
 
             # file with reference data
-            with tempfile.NamedTemporaryFile() as fobj:
+            with tempfile.NamedTemporaryFile(delete=False) as fobj:
                 fobj.write(tf.extractfile('reference_data').read())
                 fobj.flush()
                 with open(fobj.name, encoding='utf-8') as fd:
@@ -419,7 +419,7 @@ class BaseDataContainer:
                 dc._last_state[tag] = value
 
             # add runtime data from file
-            with tempfile.NamedTemporaryFile() as fobj:
+            with tempfile.NamedTemporaryFile(delete=False) as fobj:
                 fobj.write(tf.extractfile('runtime_data').read())
                 fobj.seek(0)
                 if old_format:

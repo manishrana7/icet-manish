@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 
 #include "Cluster.hpp"
 #include "LatticeSite.hpp"

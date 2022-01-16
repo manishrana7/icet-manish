@@ -247,7 +247,8 @@ class TestEnsemble(unittest.TestCase):
             n_iters // observer.interval + 1)
 
         # write data container to tempfile
-        temp_container_file = tempfile.NamedTemporaryFile()
+        temp_container_file = tempfile.NamedTemporaryFile(delete=False)
+        temp_container_file.close()
         dc_read.write(temp_container_file.name)
 
         # initialise a new ensemble with dc file
@@ -285,7 +286,8 @@ class TestEnsemble(unittest.TestCase):
         ensemble parameters fails."""
         n_iters = 10
         self.ensemble.run(n_iters)
-        ensemble_T1000 = tempfile.NamedTemporaryFile()
+        ensemble_T1000 = tempfile.NamedTemporaryFile(delete=False)
+        ensemble_T1000.close()
         self.ensemble.write_data_container(ensemble_T1000.name)
 
         with self.assertRaises(ValueError) as context:
@@ -293,6 +295,7 @@ class TestEnsemble(unittest.TestCase):
                              calculator=self.calculator,
                              temperature=3000,
                              dc_filename=ensemble_T1000.name)
+        os.remove(ensemble_T1000.name)
         self.assertIn("Ensemble parameters do not match those stored in"
                       " data container file: {('temperature', 1000)}",
                       str(context.exception))
@@ -311,7 +314,8 @@ class TestEnsemble(unittest.TestCase):
         calculator = ClusterExpansionCalculator(structure, ce)
 
         # Carry out Monte Carlo simulations
-        dc_file = tempfile.NamedTemporaryFile()
+        dc_file = tempfile.NamedTemporaryFile(delete=False)
+        dc_file.close()
         mc = ConcreteEnsemble(structure=structure, calculator=calculator)
         mc.write_data_container(dc_file.name)
         mc.run(10)
@@ -320,6 +324,7 @@ class TestEnsemble(unittest.TestCase):
         mc = ConcreteEnsemble(structure=structure, calculator=calculator,
                               dc_filename=dc_file.name)
         mc.run(10)
+        os.remove(dc_file.name)
 
     def test_internal_run(self):
         """Tests the _run method."""

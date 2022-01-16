@@ -1,3 +1,4 @@
+import os
 import unittest
 import tempfile
 import random
@@ -264,7 +265,8 @@ class TestBaseDataContainer(unittest.TestCase):
         for mctrial in range(1, 101):
             self.dc.append(mctrial, row_data)
 
-        temp_file = tempfile.NamedTemporaryFile()
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        temp_file.close()
 
         # check before with a non-tar file
         with self.assertRaises(TypeError) as context:
@@ -277,6 +279,7 @@ class TestBaseDataContainer(unittest.TestCase):
 
         # read from file object
         dc_read = BaseDataContainer.read(temp_file)
+        os.remove(temp_file.name)
 
         # check properties and metadata
         self.assertEqual(self.structure, dc_read.structure)

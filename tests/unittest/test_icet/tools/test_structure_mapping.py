@@ -203,7 +203,7 @@ class TestStructureMapping(unittest.TestCase):
             """
             if reference is None:
                 reference = self.reference
-            logfile = NamedTemporaryFile(mode='w+', encoding='utf-8')
+            logfile = NamedTemporaryFile(mode='w+', encoding='utf-8', delete=False)
             set_log_config(filename=logfile.name)
             mapped, info = map_structure_to_reference(structure,
                                                       reference,
