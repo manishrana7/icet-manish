@@ -3,10 +3,6 @@ image: $CI_REGISTRY/materials-modeling/$CI_PROJECT_NAME/cicd
 variables:
   INSTDIR: "local_installation"
 
-before_script:
-  - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
-
-
 #------------------- build stage -------------------
 
 .build:
@@ -19,15 +15,27 @@ before_script:
     - pip3 install --target=$INSTDIR .
 
 build:linux:
+  before_script:
+    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
   extends: .build
   tags:
     - linux
 
-#build:macos:
-#  extends: .build
-#  tags:
-#    - macos
+build:macos:
+  before_script:
+    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
+  extends: .build
+  tags:
+    - macos
 
+build:windows:
+  before_script:
+    - $env:PATH+=";C:\Python38;C:\Python38\Scripts"
+    - $env:PYTHONPATH+="$PWD/${INSTDIR}"
+    - Set-Alias -Name pip3 -Value pip
+  extends: .build
+  tags:
+    - windowsvm
 
 #------------------- test stage -------------------
 
@@ -35,14 +43,18 @@ build:linux:
   stage: test
   coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
   script:
+    - pip3 install numba
+    - pip3 install trainstation
     - xdoctest icet
     - xdoctest mchammer
     - pytest -v -m coverage_hangup tests/
-    - coverage run -m pytest --verbose -m 'not coverage_hangup' --junitxml=report.xml tests/
+    - coverage run -m pytest --verbose -m "not coverage_hangup" --junitxml=report.xml tests/
     - coverage report -m --omit=icet/tools/constituent_strain_helper_functions.py
     - coverage html --omit=icet/tools/constituent_strain_helper_functions.py
 
 basic_tests:linux:
+  before_script:
+    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
   extends: .basic_tests
   needs:
     - build:linux
@@ -55,16 +67,35 @@ basic_tests:linux:
     reports:
       junit: report.xml
 
-#basic_tests:macos:
-#  extends: .basic_tests
-#  needs:
-#    - build:macos
-#  tags:
-#    - macos
-#  artifacts:
-#    expire_in: 2 days
-#    reports:
-#      junit: report.xml
+basic_tests:macos:
+  before_script:
+    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
+  extends: .basic_tests
+  needs:
+    - build:macos
+  tags:
+    - macos
+  artifacts:
+    expire_in: 2 days
+    reports:
+      junit: report.xml
+
+basic_tests:windows:
+  before_script:
+    - $env:PATH+=";C:\Python38;C:\Python38\Scripts"
+    - $env:PYTHONPATH+="$PWD/${INSTDIR}"
+  extends: .basic_tests
+  needs:
+    - build:windows
+  tags:
+    - windowsvm
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - htmlcov/
+    reports:
+      junit: report.xml
+
 
 benchmarks_examples:
   stage: test
@@ -89,7 +120,7 @@ benchmarks_examples:
         echo
       done
 
-style_check:
+style_check:linux:
   stage: test
   tags:
     - linux
@@ -111,6 +142,7 @@ test_documentation:
     paths:
       - public
   script:
+    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
     - mkdir public
     - cd doc/apidoc/
     - doxygen Doxyfile

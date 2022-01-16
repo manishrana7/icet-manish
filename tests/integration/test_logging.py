@@ -36,7 +36,7 @@ for log_level in [logging.DEBUG, logging.INFO, logging.WARNING]:
     for handler in logger.handlers:
         logger.removeHandler(handler)
 
-    logfile = tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8')
+    logfile = tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8', delete=False)
     set_log_config(filename=logfile.name, level=logging.INFO)
 
     cs = ClusterSpace(structure, cutoffs, symbols)

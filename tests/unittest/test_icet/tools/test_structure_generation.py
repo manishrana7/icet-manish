@@ -154,7 +154,7 @@ class TestStructureGenerationBinaryFCC(unittest.TestCase):
 
         # Use supercells that do not fit
         supercells = [self.prim.repeat((2, 2, 1)), self.prim.repeat((3, 1, 1))]
-        logfile = NamedTemporaryFile(mode='w+', encoding='utf-8')
+        logfile = NamedTemporaryFile(mode='w+', encoding='utf-8', delete=False)
         set_log_config(filename=logfile.name)
         structure = generate_target_structure_from_supercells(supercells=supercells, **kwargs)
         logfile.seek(0)
@@ -165,7 +165,7 @@ class TestStructureGenerationBinaryFCC(unittest.TestCase):
 
         # Use two supercells that do not fit
         supercells = [self.prim.repeat((3, 3, 1)), self.prim.repeat((3, 1, 1))]
-        logfile = NamedTemporaryFile(mode='w+', encoding='utf-8')
+        logfile = NamedTemporaryFile(mode='w+', encoding='utf-8', delete=False)
         set_log_config(filename=logfile.name)
         with self.assertRaises(ValueError) as cm:
             generate_target_structure_from_supercells(supercells=supercells, **kwargs)
@@ -219,7 +219,7 @@ class TestStructureGenerationBinaryFCC(unittest.TestCase):
 
         # Test with supercell that does not match
         supercells = [self.prim]
-        logfile = NamedTemporaryFile(mode='w+', encoding='utf-8')
+        logfile = NamedTemporaryFile(mode='w+', encoding='utf-8', delete=False)
         set_log_config(filename=logfile.name)
         with self.assertRaises(ValueError) as cm:
             generate_sqs_from_supercells(supercells=supercells, **kwargs)

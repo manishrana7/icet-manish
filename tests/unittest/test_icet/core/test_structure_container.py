@@ -20,6 +20,7 @@ the structure_container.py file
 
 """
 
+import os
 import sys
 import tempfile
 import unittest
@@ -248,7 +249,8 @@ index | user_tag    | n_atoms | chemical formula | Au atoms | energy    | volume
 
     def test_read_write(self):
         """Tests the read and write functionality."""
-        temp_file = tempfile.NamedTemporaryFile()
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        temp_file.close()
 
         # check before with a non-tar file
         with self.assertRaises(TypeError) as context:
@@ -279,6 +281,7 @@ index | user_tag    | n_atoms | chemical formula | Au atoms | energy    | volume
             self.assertEqual(fs.user_tag, fs_read.user_tag)
             self.assertEqual(fs.properties, fs_read.properties)
         temp_file.close()
+        os.remove(temp_file.name)
 
 
 class TestFitStructure(unittest.TestCase):

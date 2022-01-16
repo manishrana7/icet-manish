@@ -465,14 +465,16 @@ index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | 
 
     def test_read_write(self):
         """Tests read/write functionality."""
-        f = tempfile.NamedTemporaryFile()
+        f = tempfile.NamedTemporaryFile(delete=False)
+        f.close()
         self.cs.write(f.name)
-        f.seek(0)
+
         cs_read = ClusterSpace.read(f.name)
         self.assertEqualAtoms(self.cs._input_structure, cs_read._input_structure)
         self.assertEqual(list(self.cs._cutoffs), list(cs_read._cutoffs))
         self.assertEqual(self.cs._input_chemical_symbols,
                          cs_read._input_chemical_symbols)
+        os.remove(f.name)
 
     def test_chemical_symbols(self):
         """Tests chemical_symbols property."""
@@ -804,10 +806,12 @@ class TestClusterSpaceMergedOrbits(unittest.TestCase):
     def test_read_write(self):
         """Tests read/write functionality."""
         self.cs.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]})
-        f = tempfile.NamedTemporaryFile()
+        f = tempfile.NamedTemporaryFile(delete=False)
+        f.close()
         self.cs.write(f.name)
-        f.seek(0)
+
         cs_read = ClusterSpace.read(f.name)
+        os.remove(f.name)
         self.assertEqualAtoms(self.cs._input_structure, cs_read._input_structure)
         self.assertAlmostEqualList(list(self.cs._cutoffs), list(cs_read._cutoffs))
         self.assertEqual(self.cs._input_chemical_symbols,
@@ -896,10 +900,12 @@ class TestClusterSpaceMergedOrbitsTernary(unittest.TestCase):
     def test_read_write(self):
         """Tests read/write functionality."""
         self.cs.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]})
-        f = tempfile.NamedTemporaryFile()
+        f = tempfile.NamedTemporaryFile(delete=False)
+        f.close()
         self.cs.write(f.name)
-        f.seek(0)
+
         cs_read = ClusterSpace.read(f.name)
+        os.remove(f.name)
         self.assertEqualAtoms(self.cs._input_structure, cs_read._input_structure)
         self.assertAlmostEqualList(list(self.cs._cutoffs), list(cs_read._cutoffs))
         self.assertEqual(self.cs._input_chemical_symbols,
@@ -981,10 +987,12 @@ class TestClusterSpaceMergedOrbitsSublattices(unittest.TestCase):
     def test_read_write(self):
         """Tests read/write functionality."""
         self.cs.merge_orbits({2: [5, 8], 3: [6, 9], 4: [7, 10]})
-        f = tempfile.NamedTemporaryFile()
+        f = tempfile.NamedTemporaryFile(delete=False)
+        f.close()
         self.cs.write(f.name)
-        f.seek(0)
+
         cs_read = ClusterSpace.read(f.name)
+        os.remove(f.name)
         self.assertEqualAtoms(self.cs._input_structure, cs_read._input_structure)
         self.assertAlmostEqualList(list(self.cs._cutoffs), list(cs_read._cutoffs))
         self.assertEqual(self.cs._input_chemical_symbols,

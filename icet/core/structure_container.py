@@ -1,7 +1,6 @@
 """
 This module provides the StructureContainer class.
 """
-
 import tarfile
 import tempfile
 
@@ -305,11 +304,12 @@ class StructureContainer:
             output file name or file object
         """
         # Write cluster space to tempfile
-        temp_cs_file = tempfile.NamedTemporaryFile()
+        temp_cs_file = tempfile.NamedTemporaryFile(delete=False)
         self.cluster_space.write(temp_cs_file.name)
 
         # Write fit structures as an ASE db in tempfile
-        temp_db_file = tempfile.NamedTemporaryFile()
+        temp_db_file = tempfile.NamedTemporaryFile(delete=False)
+        temp_db_file.close()
         if self._structure_list:
             db = ase.db.connect(temp_db_file.name, type='db', append=False)
 
@@ -342,7 +342,7 @@ class StructureContainer:
         if not tarfile.is_tarfile(filename):
             raise TypeError('{} is not a tar file'.format(filename))
 
-        temp_db_file = tempfile.NamedTemporaryFile()
+        temp_db_file = tempfile.NamedTemporaryFile(delete=False)
         with tarfile.open(mode='r', name=filename) as tar_file:
             cs_file = tar_file.extractfile('cluster_space')
             temp_db_file.write(tar_file.extractfile('database').read())
@@ -360,7 +360,6 @@ class StructureContainer:
                                              properties=data['properties'])
                 fit_structures.append(fit_structure)
             structure_container._structure_list = fit_structures
-
         return structure_container
 
 
