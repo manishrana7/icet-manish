@@ -106,6 +106,7 @@ benchmarks_examples:
   needs:
     - build:linux
   script:
+    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
     - for f in benchmark/*.py; do python3 -u "$f"; done
     - pwd=`pwd`
     - |
@@ -176,7 +177,7 @@ pages:
   script:
     - mkdir -p public/dev
     - mv htmlcov/ public/
-
+    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
     # --------------------------
     # DEVELOPMENT VERSION
     - git checkout master
@@ -231,6 +232,7 @@ pypi:
   environment:
       name: pypi-upload
   script:
+    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
     # check out the latest tag (redundant if job is limited to tags; still a sensible precaution)
     - tag=$(git tag | tail -1)
     - echo "tag= $tag"
