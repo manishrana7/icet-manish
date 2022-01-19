@@ -21,6 +21,9 @@ public:
     /// Empty constructor.
     OrbitList(){};
 
+    /// Constructor with structure only.
+    OrbitList(const Structure &structure) { _structure = structure; };
+
     /// Constructs orbit list from a set of neighbor lists, a matrix of equivalent sites, and a structure.
     OrbitList(const Structure &,
               const std::vector<std::vector<LatticeSite>> &,
@@ -42,8 +45,7 @@ public:
     // @todo Add description.
     void addColumnsFromMatrixOfEquivalentSites(std::vector<std::vector<std::vector<LatticeSite>>> &,
                                                std::unordered_set<std::vector<int>, VectorHash> &,
-                                               const std::vector<int> &,
-                                               bool) const;
+                                               const std::vector<int> &) const;
 
     /// Returns the number of orbits.
     size_t size() const { return _orbits.size(); }
@@ -52,8 +54,8 @@ public:
     std::vector<LatticeSite> getReferenceLatticeSites() const;
 
     // Returns rows of the matrix of equivalent sites that match the lattice sites.
-    std::vector<int> getIndicesOfEquivalentLatticeSites(const std::vector<LatticeSite> &,
-                                                        bool = true) const;
+    std::vector<int> getReferenceLatticeSiteIndices(const std::vector<LatticeSite> &,
+                                                    bool = true) const;
 
     // Returns true if the cluster includes at least on site from the unit cell at the origin.
     bool validCluster(const std::vector<LatticeSite> &) const;
@@ -67,7 +69,7 @@ public:
                                                                        bool sort = true) const;
 
     /// @todo Add description.
-    std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> getMatchesInMatrixOfEquivalenSites(const std::vector<std::vector<LatticeSite>> &) const;
+    std::vector<std::pair<std::vector<LatticeSite>, std::vector<int>>> getMatchesInMatrixOfEquivalentSites(const std::vector<std::vector<LatticeSite>> &) const;
 
     /// @todo Add description.
     void transformSiteToSupercell(LatticeSite &,
@@ -75,13 +77,8 @@ public:
                                   std::unordered_map<LatticeSite, LatticeSite> &,
                                   const double) const;
 
-    /// Returns all columns from the given rows in matrix of equivalent sites
-    std::vector<std::vector<LatticeSite>> getAllColumnsFromRow(const std::vector<int> &,
-                                                               bool,
-                                                               bool) const;
-
-    /// Finds and returns sites in first column of matrix of equivalent sites along with their unit cell translated indistinguishable sites.
-    std::vector<std::vector<LatticeSite>> getAllColumnsFromCluster(const std::vector<LatticeSite> &) const;
+    /// Returns symmetry related site groups via _matrixOfEquivalentSites and translations
+    std::vector<std::vector<LatticeSite>> getSymmetryRelatedSiteGroups(const std::vector<LatticeSite> &) const;
 
     /// Returns the matrix of equivalent sites used to construct the orbit list.
     std::vector<std::vector<LatticeSite>> getMatrixOfEquivalentSites() const { return _matrixOfEquivalentSites; }
@@ -90,7 +87,7 @@ public:
     void removeOrbit(const size_t);
 
     /// Removes all orbits that have inactive sites.
-    void removeInactiveOrbits(const Structure &);
+    void removeOrbitsWithInactiveSites();
 
     /// Returns the orbits in this orbit list.
     const std::vector<Orbit> &orbits() const { return _orbits; }
@@ -105,7 +102,7 @@ private:
     /// Contains all the orbits in the orbit list.
     std::vector<Orbit> _orbits;
 
-    /// @todo Add description.
+    /// Lattice sites used as references, equivalent to the first column of the _matrixOfEquivalentSites
     std::vector<LatticeSite> _referenceLatticeSites;
 
     /// Matrix of equivalent sites.

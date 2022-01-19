@@ -10,9 +10,24 @@ Cluster::Cluster(const std::vector<LatticeSite> &latticeSites,
 {
     _latticeSites = latticeSites;
     _structure = structure;
+
+    // A sanity check: no site index can be larger than
+    // the number of sites in structure
+    for (auto &site : _latticeSites)
+    {
+        if (site.index() > structure->size())
+        {
+            std::ostringstream msg;
+            msg << "Lattice site incompatible with size of structure,";
+            msg << " lattice site: " << site;
+            msg << ", number of sites in structure: " << _structure->size();
+            msg << " (Cluster initialization)";
+            throw std::runtime_error(msg.str());
+        }
+    }
 }
 
-/** 
+/**
 @brief Translates this cluster by an offset.
 @param offset Coordinates referring to the axes of the structure in this cluster
 **/
@@ -118,6 +133,21 @@ std::vector<float> Cluster::distances() const
         }
     }
     return distances;
+}
+
+/**
+@brief Returns the number of allowed components on each site in this cluster.
+@return std::vector<int>
+*/
+std::vector<int> Cluster::getNumberOfAllowedSpeciesPerSite() const
+{
+    const std::vector<std::vector<int>> &allowedNumbers = _structure->allowedAtomicNumbers();
+    std::vector<int> numberOfAllowedSpecies;
+    for (const auto &site : _latticeSites)
+    {
+        numberOfAllowedSpecies.push_back(allowedNumbers[site.index()].size());
+    }
+    return numberOfAllowedSpecies;
 }
 
 /**

@@ -81,8 +81,7 @@ OrbitList LocalOrbitListGenerator::getLocalOrbitList(const Vector3i &offset, boo
                 for (auto translatedSites : translatedSiteGroups)
                 {
                     // Only add clusters that are not duplicates of previus clusters.
-                    // false or true here does not seem to matter.
-                    if (!supercellOrbit.contains(translatedSites, true))
+                    if (!supercellOrbit.contains(translatedSites))
                     {
                         supercellOrbit.addCluster(Cluster(translatedSites, _primitiveStructure));
                     }

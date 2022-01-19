@@ -14,9 +14,9 @@
 
 @details
     The constructor takes a primitive orbit list, which is an orbit list
-    generated for the primitive cell, and a supercell. Objects of this class can then
-    generate orbit lists for that supercell. There are two types of orbit
-    lists for a supercell: local orbit lists and full orbit lists.
+    generated for the primitive cell, and a supercell. Objects of this class
+    can then generate orbit lists for that supercell. There are two types of
+    orbit lists for a supercell: local orbit lists and full orbit lists.
     
     A local orbit list is an orbit list with the same number of clusters as
     the primitive orbit list, but where each cluster refers to a specific

@@ -14,6 +14,23 @@
 using namespace Eigen;
 
 /**
+@brief This struct keeps track of information pertaining to a specific element
+       in the cluster vector.
+*/
+struct ClusterVectorElement
+{
+    /// A multi-component vector contains the indices of the point functions
+    /// (only non-trivial if the number of components is more than two)
+    std::vector<int> multiComponentVector;
+
+    /// Site permutations describe how the sites in the cluster can be re-ordered
+    std::vector<std::vector<int>> sitePermutations;
+
+    /// Multiplicity for this cluster vector element
+    size_t multiplicity;
+};
+
+/**
 This class handles an orbit.
 
 An orbit is a set of clusters that are equivalent under the symmetry operations
@@ -38,7 +55,7 @@ public:
     double radius() const { return representativeCluster().radius(); }
 
     /// Returns the representative cluster for this orbit
-    const Cluster &representativeCluster() const { return _representativeCluster; }
+    const Cluster &representativeCluster() const { return _clusters[0]; }
 
     /// Returns all clusters in this orbit.
     const std::vector<Cluster> &clusters() const { return _clusters; }
@@ -49,13 +66,8 @@ public:
     /// Gets the allowed permutations of clusters.
     std::set<std::vector<int>> getAllowedClusterPermutations() const { return _allowedClusterPermutations; }
 
-    /// Returns the relevant multicomponent vectors of this orbit given the number of allowed components.
-    std::vector<std::vector<int>> getMultiComponentVectors(const std::vector<int> &Mi_local) const;
-
-    std::vector<std::vector<int>> getAllPossibleMultiComponentVectorPermutations(const std::vector<int> &Mi_local) const;
-
-    /// Returns true if the input sites exists in _clusters, order does not matter if sorted=false.
-    bool contains(const std::vector<LatticeSite>, bool) const;
+    /// Returns true if the input sites can be found among the clusters of this orbit.
+    bool contains(const std::vector<LatticeSite>) const;
 
     /// Counts occupations of clusters in this orbit.
     std::map<std::vector<int>, double> getClusterCounts(std::shared_ptr<Structure>, int doNotDoubleCountThisSiteIndex = -1) const;
@@ -71,6 +83,9 @@ public:
     /// Translates the orbit with an offset
     void translate(const Vector3i &);
 
+    /// Merges another orbit into this orbit.
+    Orbit &operator+=(const Orbit &orbit_rhs);
+
     /// Comparison operator for automatic sorting in containers.
     friend bool
     operator==(const Orbit &orbit1, const Orbit &orbit2)
@@ -84,34 +99,30 @@ public:
         throw std::logic_error("Reached < operator in Orbit");
     }
 
-    /// Appends an orbit to this orbit.
-    Orbit &operator+=(const Orbit &orbit_rhs)
-    {
-        // Get representative sites
-        auto rep_sites_rhs = orbit_rhs.representativeCluster().latticeSites();
-        auto rep_sites_this = _representativeCluster.latticeSites();
+    /// Container for multi-component vectors along with their site permutations and multiplicities.
+    const std::vector<ClusterVectorElement> &clusterVectorElements() const { return _clusterVectorElements; }
 
-        if (rep_sites_this.size() != rep_sites_rhs.size())
-        {
-            throw std::runtime_error("Orbit order is not equal (Orbit &operator+=)");
-        }
-
-        const auto rhsClusters = orbit_rhs.clusters();
-
-        // Insert rhs eq sites
-        _clusters.insert(_clusters.end(), rhsClusters.begin(), rhsClusters.end());
-        return *this;
-    }
+    /// Is this orbit active, i.e., do all of its sites have at least two allowed occupations?
+    bool active() const { return _active; }
 
 private:
     /// Container of all clusters in this orbit
     std::vector<Cluster> _clusters;
 
-    /// One of the clusters chosen to represent the orbit
-    Cluster _representativeCluster;
-
     /// Contains the allowed sites permutations. i.e. if 0, 2, 1 is in this set then 0, 1, 0 is the same multi-component vector as 0, 0, 1
     std::set<std::vector<int>> _allowedClusterPermutations;
+
+    /// Is this orbit active, i.e., do all of its sites have at least two allowed occupations?
+    bool _active;
+
+    /// Container for multi-component vectors along with their site permutations and multiplicities.
+    std::vector<ClusterVectorElement> _clusterVectorElements;
+
+    /// Computes all symmetrically distinct multi-component vectors for this orbit.
+    std::vector<std::vector<int>> _getDistinctMultiComponentVectors(const std::vector<int> &) const;
+
+    /// Extracts the allowed permutations of sites for each multi-component vector.
+    std::vector<std::vector<std::vector<int>>> _getMultiComponentVectorPermutations(const std::vector<std::vector<int>> &) const;
 };
 
 namespace std

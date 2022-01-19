@@ -124,9 +124,9 @@ class Sublattices:
         """ Generator over sublattices. """
         yield from self._sublattices
 
-    def get_sublattice_index(self, index: int) -> int:
-        """ Returns the index of the sublattice the symbol
-        or index in the structure belongs to.
+    def get_sublattice_index_from_site_index(self, index: int) -> int:
+        """ Returns the index of the sublattice the
+        index in the structure belongs to.
 
         Parameters
         ----------

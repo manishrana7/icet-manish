@@ -200,7 +200,7 @@ class ConfigurationManager(object):
             if len(self._occupations) >= site < 0:
                 raise ValueError('Site {} is not a valid site index'.format(site))
             old_Z = self._occupations[site]
-            sublattice_index = self.sublattices.get_sublattice_index(site)
+            sublattice_index = self.sublattices.get_sublattice_index_from_site_index(site)
 
             if new_Z not in self.sublattices[sublattice_index].atomic_numbers:
                 raise ValueError('Invalid new species {} on site {}'.format(new_Z, site))

@@ -243,8 +243,6 @@ index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | 
 ===================================================================================================================
 """  # noqa
 
-        print(target)
-        print(retval)
         self.assertEqual(strip_surrounding_spaces(target), strip_surrounding_spaces(retval))
 
     def test_print_overview(self):
