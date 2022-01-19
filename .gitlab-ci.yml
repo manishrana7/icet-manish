@@ -75,6 +75,8 @@ basic_tests:macos:
     - build:macos
   tags:
     - macos
+  only:
+    - schedules
   artifacts:
     expire_in: 2 days
     reports:
@@ -89,6 +91,8 @@ basic_tests:windows:
     - build:windows
   tags:
     - windowsvm
+  only:
+    - schedules
   artifacts:
     expire_in: 2 days
     paths:
