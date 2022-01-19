@@ -5,7 +5,6 @@ from icet.core.structure import Structure
 from _icet import Cluster
 from icet.core.orbit import Orbit
 from ase.build import bulk
-import itertools
 import numpy as np
 
 
@@ -15,30 +14,22 @@ class TestOrbit(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestOrbit, self).__init__(*args, **kwargs)
 
-        self.lattice_sites_pairs = []
-        indices = [i for i in range(8)]
-        unitcell_offsets = []
-        cartesian_product_lists = [[0., 1.], [0., 1.], [0., 1.]]
-        for element in itertools.product(*cartesian_product_lists):
-            unitcell_offsets.append(list(element))
-        self.lattice_sites_pairs = [[LatticeSite(index,
-                                                 unitcell_offset),
-                                     LatticeSite(index + 1,
-                                                 unitcell_offset)]
-                                    for index, unitcell_offset in
-                                    zip(indices, unitcell_offsets)]
-
-        self.lattice_sites_triplets = [[LatticeSite(index,
-                                                    unitcell_offset),
-                                        LatticeSite(
-                                            index + 1, unitcell_offset),
-                                        LatticeSite(
-                                            index + 3, unitcell_offset)]
-                                       for index, unitcell_offset in
-                                       zip(indices, unitcell_offsets)]
+        self.structure = Structure.from_atoms(bulk('Al'))
 
         self.allowed_permutations_pair = set([(0, 1)])
         self.allowed_permutations_triplet = set([(0, 2, 1)])
+
+        lattice_site_for_cluster = [LatticeSite(0, [i, 0, 0]) for i in range(3)]
+
+        # Pair and triplet clusters
+        self.pair_sites = [lattice_site_for_cluster[0],
+                           lattice_site_for_cluster[1]]
+        self.pair_sites_alt = [lattice_site_for_cluster[1],
+                               lattice_site_for_cluster[2]]
+        self.triplet_sites = lattice_site_for_cluster
+        self.pair_cluster = Cluster(self.pair_sites, self.structure)
+        self.pair_cluster_alt = Cluster(self.pair_sites, self.structure)
+        self.triplet_cluster = Cluster(self.triplet_sites, self.structure)
 
     def shortDescription(self):
         """Silences unittest from printing the docstrings in test cases."""
@@ -46,18 +37,13 @@ class TestOrbit(unittest.TestCase):
 
     def setUp(self):
         """Instantiates class before each test."""
-        self.structure = Structure.from_atoms(bulk('Al'))
-        lattice_site_for_cluster = [LatticeSite(0, [i, 0, 0]) for i in range(3)]
-
-        self.pair_sites = [lattice_site_for_cluster[0],
-                           lattice_site_for_cluster[1]]
-        self.triplet_sites = lattice_site_for_cluster
-
-        self.pair_cluster = Cluster(self.pair_sites, self.structure)
-        self.triplet_cluster = Cluster(self.triplet_sites, self.structure)
+        self.structure.allowed_atomic_numbers = [[13, 30]]
 
         self.orbit_pair = Orbit([self.pair_cluster],
                                 self.allowed_permutations_pair)
+
+        self.orbit_pair_two_clusters = Orbit([self.pair_cluster, self.pair_cluster_alt],
+                                             self.allowed_permutations_pair)
 
         self.orbit_triplet = Orbit([self.triplet_cluster],
                                    self.allowed_permutations_triplet)
@@ -65,6 +51,10 @@ class TestOrbit(unittest.TestCase):
     def test_init(self):
         """Tests the initializer."""
         orbit = Orbit([self.pair_cluster], self.allowed_permutations_pair)
+        self.assertIsInstance(orbit, Orbit)
+
+        orbit = Orbit([self.pair_cluster, self.pair_cluster_alt],
+                      self.allowed_permutations_pair)
         self.assertIsInstance(orbit, Orbit)
 
         orbit = Orbit([self.triplet_cluster], self.allowed_permutations_triplet)
@@ -101,11 +91,15 @@ class TestOrbit(unittest.TestCase):
         self.assertEqual(
             self.orbit_pair.order, 2)
         self.assertEqual(
+            self.orbit_pair_two_clusters.order, 2)
+        self.assertEqual(
             self.orbit_triplet.order, 3)
 
     def test_len(self):
         """Tests lenght of orbit."""
         self.assertEqual(len(self.orbit_pair), 1)
+        self.assertEqual(len(self.orbit_pair_two_clusters), 2)
+        self.assertEqual(len(self.orbit_triplet), 1)
 
     def test_radius(self):
         """Tests geometrical size of orbit."""
@@ -114,22 +108,28 @@ class TestOrbit(unittest.TestCase):
     def test_translate(self):
         """Tests translation by an offset."""
         offset = np.array((1, 1, 1))
-        clusters = [Cluster(sites, self.structure) for sites in self.lattice_sites_pairs]
-        orbit = Orbit(clusters, self.allowed_permutations_pair)
-        orbit_with_offset = Orbit(clusters, self.allowed_permutations_pair)
-        orbit_with_offset.translate(offset)
 
-        # Loop through sites check index is same and offset has been added
-        for cluster, cluster_with_offset in zip(orbit.clusters, orbit_with_offset.clusters):
-            for site, site_with_offset in zip(cluster.lattice_sites,
-                                              cluster_with_offset.lattice_sites):
-                self.assertEqual(site.index, site_with_offset.index)
-                self.assertListEqual(list(site.unitcell_offset),
-                                     list(site_with_offset.unitcell_offset - offset))
+        for clusters, perm in zip([(self.pair_cluster,),
+                                   (self.pair_cluster, self.pair_cluster_alt),
+                                   (self.triplet_cluster,)],
+                                  [self.allowed_permutations_pair,
+                                   self.allowed_permutations_pair,
+                                   self.allowed_permutations_triplet]):
+            orbit = Orbit(clusters, perm)
+            orbit_with_offset = Orbit(clusters, perm)
+            orbit_with_offset.translate(offset)
 
-        # List is allowed but only length 3
-        with self.assertRaises(TypeError):
-            orbit_with_offset.translate([1, 1, 1, 1])
+            # Loop through sites check index is same and offset has been added
+            for cluster, cluster_with_offset in zip(orbit.clusters, orbit_with_offset.clusters):
+                for site, site_with_offset in zip(cluster.lattice_sites,
+                                                  cluster_with_offset.lattice_sites):
+                    self.assertEqual(site.index, site_with_offset.index)
+                    self.assertListEqual(list(site.unitcell_offset),
+                                         list(site_with_offset.unitcell_offset - offset))
+
+            # List is allowed but only length 3
+            with self.assertRaises(TypeError):
+                orbit_with_offset.translate([1, 1, 1, 1])
 
     def test_allowed_permutations(self):
         """Tests the allowed permutations property."""
@@ -142,20 +142,24 @@ class TestOrbit(unittest.TestCase):
         """Tests the get mc vectors functionality for a pair orbit."""
         # Binary mc vectors
         # Allow only identity permutation
+        self.structure.allowed_atomic_numbers = [[13, 14]]
         allowed_permutations = set([tuple(i for i in range(self.orbit_pair.order))])
         orbit = Orbit([Cluster(self.pair_sites, self.structure)], allowed_permutations)
-        mc_vectors = orbit.get_multicomponent_vectors([2] * orbit.order)
+        mc_vectors = [el['multicomponent_vector'] for el in orbit.cluster_vector_elements]
         self.assertEqual(mc_vectors, [[0, 0]])
 
         # Ternary mc vectors
-        mc_vectors = orbit.get_multicomponent_vectors([3] * self.orbit_pair.order)
+        self.structure.allowed_atomic_numbers = [[13, 14, 15]]
+        allowed_permutations = set([tuple(i for i in range(self.orbit_pair.order))])
+        orbit = Orbit([Cluster(self.pair_sites, self.structure)], allowed_permutations)
+        mc_vectors = [el['multicomponent_vector'] for el in orbit.cluster_vector_elements]
         target = [[0, 0], [0, 1], [1, 0], [1, 1]]
         self.assertEqual(mc_vectors, target)
 
         # Allow the [1,0] permutation
         allowed_permutations = set([(0, 1), (1, 0)])
         orbit = Orbit([Cluster(self.pair_sites, self.structure)], allowed_permutations)
-        mc_vectors = orbit.get_multicomponent_vectors([3] * self.orbit_pair.order)
+        mc_vectors = [el['multicomponent_vector'] for el in orbit.cluster_vector_elements]
         target = [[0, 0], [0, 1], [1, 1]]
         self.assertEqual(mc_vectors, target)
 
@@ -164,10 +168,9 @@ class TestOrbit(unittest.TestCase):
         # Binary mc vectors
         # Allow only identity permutation
         allowed_permutations = set([tuple(i for i in range(self.orbit_triplet.order))])
+        self.structure.allowed_atomic_numbers = [[13, 14, 15]]
         orbit = Orbit([Cluster(self.triplet_sites, self.structure)], allowed_permutations)
-
-        # Ternary mc vectors
-        mc_vectors = orbit.get_multicomponent_vectors([3] * self.orbit_triplet.order)
+        mc_vectors = [el['multicomponent_vector'] for el in orbit.cluster_vector_elements]
         target = [[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
                   [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]]
         self.assertEqual(mc_vectors, target)
@@ -175,7 +178,7 @@ class TestOrbit(unittest.TestCase):
         # Allow the [0, 2, 1] permutation
         allowed_permutations = set([(0, 1, 2), (0, 2, 1)])
         orbit = Orbit([Cluster(self.triplet_sites, self.structure)], allowed_permutations)
-        mc_vectors = self.orbit_triplet.get_multicomponent_vectors([3] * self.orbit_triplet.order)
+        mc_vectors = [el['multicomponent_vector'] for el in orbit.cluster_vector_elements]
         target = [[0, 0, 0], [0, 0, 1], [0, 1, 1],
                   [1, 0, 0], [1, 0, 1], [1, 1, 1]]
         self.assertEqual(mc_vectors, target)

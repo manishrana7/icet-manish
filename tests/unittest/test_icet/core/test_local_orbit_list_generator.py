@@ -24,8 +24,9 @@ class TestLocalOrbitListGenerator(unittest.TestCase):
         """Instantiate class for each test case."""
         prim_structure = bulk('Al')
         cutoffs = [4.2, 4.2]
+        chemical_symbols = [['Al', 'Zn']]
         self.orbit_list = OrbitList(
-            prim_structure, cutoffs,
+            prim_structure, cutoffs, chemical_symbols,
             symprec=self.symprec, position_tolerance=self.position_tolerance,
             fractional_position_tolerance=self.fractional_position_tolerance)
         self.primitive = self.orbit_list.get_structure()
@@ -117,11 +118,12 @@ class TestLocalOrbitListGeneratorHCP(unittest.TestCase):
         super(TestLocalOrbitListGeneratorHCP, self).__init__(*args, **kwargs)
         prim_structure = bulk('Ni', 'hcp', a=4.0)
         cutoffs = [4.2, 4.2]
+        chemical_symbols = [['Al', 'Zn'], ['Al', 'Zn']]
         self.symprec = 1e-5
         self.position_tolerance = 1e-5
         self.fractional_position_tolerance = 1e-6
         self.orbit_list = OrbitList(
-            prim_structure, cutoffs,
+            prim_structure, cutoffs, chemical_symbols,
             symprec=self.symprec, position_tolerance=self.position_tolerance,
             fractional_position_tolerance=self.fractional_position_tolerance)
         self.primitive = self.orbit_list.get_structure()

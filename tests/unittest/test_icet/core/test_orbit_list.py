@@ -21,6 +21,7 @@ class TestOrbitList(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestOrbitList, self).__init__(*args, **kwargs)
         self.cutoffs = [4.2]
+        self.chemical_symbols = [['Ag', 'Pd']]
         self.symprec = 1e-5
         self.position_tolerance = 1e-5
         self.fractional_position_tolerance = 1e-6
@@ -42,14 +43,14 @@ class TestOrbitList(unittest.TestCase):
     def setUp(self):
         """Instantiate class before each test."""
         self.orbit_list = OrbitList(
-            self.structure, self.cutoffs,
+            self.structure, self.cutoffs, self.chemical_symbols,
             symprec=self.symprec, position_tolerance=self.position_tolerance,
             fractional_position_tolerance=self.fractional_position_tolerance)
 
     def test_init(self):
         """Test the different initializers."""
         orbit_list = OrbitList(
-            self.structure, self.cutoffs,
+            self.structure, self.cutoffs, self.chemical_symbols,
             symprec=self.symprec, position_tolerance=self.position_tolerance,
             fractional_position_tolerance=self.fractional_position_tolerance)
         self.assertIsInstance(orbit_list, OrbitList)
@@ -58,6 +59,7 @@ class TestOrbitList(unittest.TestCase):
         """Tests varyinh tolerances."""
         structure = bulk('Al', crystalstructure='bcc', a=4, cubic=True)
         structure[1].position += 1e-5
+        chemical_symbols = [('Al', 'Zn'), ('Al', 'Zn')]
 
         # low tol
         pos_tol = 1e-9
@@ -65,7 +67,7 @@ class TestOrbitList(unittest.TestCase):
         symprec = pos_tol
         cutoffs = [8, 8, 8]
         orbit_list = OrbitList(
-            structure, cutoffs,
+            structure, cutoffs, chemical_symbols,
             symprec=symprec, position_tolerance=pos_tol,
             fractional_position_tolerance=frac_tol)
         self.assertEqual(len(orbit_list), 395)
@@ -76,7 +78,7 @@ class TestOrbitList(unittest.TestCase):
         symprec = pos_tol
         cutoffs = [8, 8, 8]
         orbit_list = OrbitList(
-            structure, cutoffs,
+            structure, cutoffs, chemical_symbols,
             symprec=symprec, position_tolerance=pos_tol,
             fractional_position_tolerance=frac_tol)
         self.assertEqual(len(orbit_list), 84)
@@ -95,7 +97,9 @@ class TestOrbitList(unittest.TestCase):
     def test_add_orbit(self):
         """Tests add_orbit funcionality."""
         n_orbits_before = len(self.orbit_list)
-        orbit = Orbit([Cluster(self.lattice_sites, Structure.from_atoms(self.structure))],
+        structure = Structure.from_atoms(self.structure)
+        structure.allowed_atomic_numbers = [[47, 46]]
+        orbit = Orbit([Cluster(self.lattice_sites, structure)],
                       set([tuple(0 for _ in self.lattice_sites)]))
         self.orbit_list.add_orbit(orbit)
         self.assertEqual(len(self.orbit_list), n_orbits_before + 1)
@@ -129,13 +133,16 @@ class TestOrbitList(unittest.TestCase):
 
     def test_remove_all_orbits(self):
         """Tests removing all orbits."""
-
         chemical_symbols = [
             ['Al'] * len(self.orbit_list.get_structure())]
-        len_before = len(self.orbit_list)
+        orbit_list = OrbitList(
+            self.structure, self.cutoffs, chemical_symbols,
+            symprec=self.symprec, position_tolerance=self.position_tolerance,
+            fractional_position_tolerance=self.fractional_position_tolerance)
+        len_before = len(orbit_list)
         self.assertNotEqual(len_before, 0)
-        self.orbit_list.remove_inactive_orbits(chemical_symbols)
-        len_after = len(self.orbit_list)
+        orbit_list.remove_orbits_with_inactive_sites()
+        len_after = len(orbit_list)
         self.assertEqual(len_after, 0)
 
     def test_get_structure(self):
@@ -151,9 +158,8 @@ class TestOrbitList(unittest.TestCase):
         """Tests orbit list is returned for the given supercell."""
         # TODO : Tests fails for an actual supercell of the testing structure
         structure_supercell = self.structure.copy()
-        orbit_list_super = \
-            self.orbit_list.get_supercell_orbit_list(
-                structure_supercell, self.position_tolerance)
+        orbit_list_super = self.orbit_list.get_supercell_orbit_list(
+            structure_supercell, self.position_tolerance)
         orbit_list_super.sort(self.position_tolerance)
         self.orbit_list.sort(self.position_tolerance)
         for k in range(len(orbit_list_super)):
@@ -213,19 +219,18 @@ class TestOrbitList(unittest.TestCase):
             self.orbit_list._get_sites_translated_to_unitcell(sites, False),
             target)
 
-    def test_get_all_columns_from_sites(self):
-        """Tests get_all_columns_from_sites functionality."""
+    def test_get_symmetry_related_site_groups(self):
+        """Tests get_symmetry_related_site_groups functionality."""
         # These sites are first and last elements in column1
         sites = [LatticeSite(0, [0., 0., 0.]),
                  LatticeSite(0, [1., 0., 0.])]
 
         pm = self.orbit_list.matrix_of_equivalent_positions
-        columns = self.orbit_list._get_all_columns_from_sites(sites)
+        columns = self.orbit_list._get_symmetry_related_site_groups(sites)
         for i in range(len(pm[0])):
             perm_sites = [pm[0][i], pm[-1][i]]
-            translated_sites = \
-                self.orbit_list._get_sites_translated_to_unitcell(perm_sites,
-                                                                  False)
+            translated_sites = self.orbit_list._get_sites_translated_to_unitcell(perm_sites,
+                                                                                 False)
             for k, sites in enumerate(translated_sites):
                 self.assertEqual(columns[k + 2 * i], sites)
 
@@ -245,8 +250,9 @@ class TestOrbitList(unittest.TestCase):
         5. Check allowed_perm list is equal to orbit.allowed_permutation.
         """
         cutoffs = [1.6, 1.6]
+        chemical_symbols = [(atom.symbol, 'X') for atom in structure]
         orbit_list = OrbitList(
-            structure, cutoffs,
+            structure, cutoffs, chemical_symbols,
             symprec=self.symprec, position_tolerance=self.position_tolerance,
             fractional_position_tolerance=self.fractional_position_tolerance)
 
@@ -263,8 +269,7 @@ class TestOrbitList(unittest.TestCase):
                     perm_sites = get_permutation(sites, perm)
                     # Get from all columns those sites at the rows
                     # where permuted sites is found in column1.
-                    columns = \
-                        orbit_list._get_all_columns_from_sites(perm_sites)
+                    columns = orbit_list._get_symmetry_related_site_groups(perm_sites)
                     # Any translated sites will be found in columns since
                     # permutation is not allowed
                     if perm not in orbit.allowed_permutations:
@@ -284,8 +289,9 @@ class TestOrbitList(unittest.TestCase):
         (compared to each respresentative cluster).
         """
         cutoffs = [1.5, 1.4]
+        chemical_symbols = [(atom.symbol, 'X') for atom in structure]
         orbit_list = OrbitList(
-            structure, cutoffs,
+            structure, cutoffs, chemical_symbols,
             symprec=self.symprec, position_tolerance=self.position_tolerance,
             fractional_position_tolerance=self.fractional_position_tolerance)
 
@@ -299,7 +305,7 @@ class TestOrbitList(unittest.TestCase):
                     cluster.lattice_sites, False)
                 # Get all columns from each group of sites
                 for sites in trans_eq_sites:
-                    columns = orbit_list._get_all_columns_from_sites(sites)
+                    columns = orbit_list._get_symmetry_related_site_groups(sites)
                     # Check that representative sites can be found in columns
                     if repr_sites in columns:
                         match_repr_site = True
@@ -348,8 +354,9 @@ class TestOrbitList(unittest.TestCase):
         """
         structure = bulk('Al', 'fcc', a=3.0)
         cutoffs = [2.5]
+        chemical_symbols = [('Ni', 'Al')]
         orbit_list = OrbitList(
-            structure, cutoffs,
+            structure, cutoffs, chemical_symbols,
             symprec=self.symprec, position_tolerance=self.position_tolerance,
             fractional_position_tolerance=self.fractional_position_tolerance)
         # only a singlet and a pair are expected
@@ -371,8 +378,9 @@ class TestOrbitList(unittest.TestCase):
         """
         structure = bulk('Al', 'bcc', a=3.0)
         cutoffs = [3.0]
+        chemical_symbols = [('Ni', 'Al')]
         orbit_list = OrbitList(
-            structure, cutoffs,
+            structure, cutoffs, chemical_symbols,
             symprec=self.symprec, position_tolerance=self.position_tolerance,
             fractional_position_tolerance=self.fractional_position_tolerance)
         # one singlet and two pairs expected
@@ -397,8 +405,9 @@ class TestOrbitList(unittest.TestCase):
         """
         structure = bulk('Ni', 'hcp', a=3.0)
         cutoffs = [3.1]
+        chemical_symbols = [('Ni', 'Al'), ('Ni', 'Al')]
         orbit_list = OrbitList(
-            structure, cutoffs,
+            structure, cutoffs, chemical_symbols,
             symprec=self.symprec, position_tolerance=self.position_tolerance,
             fractional_position_tolerance=self.fractional_position_tolerance)
         # only one singlet and one pair expected

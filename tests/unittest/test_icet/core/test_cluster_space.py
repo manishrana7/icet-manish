@@ -603,11 +603,23 @@ class TestClusterSpaceTernary(unittest.TestCase):
             The orbit which the mc vectors should be returned from.
         """
         orbit = cluster_space.orbit_list.get_orbit(orbit_index)
-        local_Mi = cluster_space._get_primitive_structure().get_number_of_allowed_species_by_sites(
-            orbit.representative_cluster.lattice_sites)
-
-        mc_vectors = orbit.get_multicomponent_vectors(local_Mi)
+        mc_vectors = [el['multicomponent_vector'] for el in orbit.cluster_vector_elements]
         return mc_vectors
+
+    def _get_multicomponent_vector_permutations(self, cluster_space, orbit_index):
+        """
+        Helper function to  return the mc vectors for a
+        particular orbit.
+
+        Parameters
+        ----------
+        cluster_space : icet cluster space
+        orbit_index : int
+            The orbit which the permutations should be returned from.
+        """
+        orbit = cluster_space.orbit_list.get_orbit(orbit_index)
+        permutations = [el['site_permutations'] for el in orbit.cluster_vector_elements]
+        return permutations
 
     def test_multicomponent_cluster_vector_permutation(self):
         """Tests the multicomponent permutation functionality."""
@@ -620,8 +632,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
         permutations_target = [[[0, 1]],
                                [[0, 1], [1, 0]],
                                [[0, 1]]]
-        permutation_retval = self.cs.get_multicomponent_vector_permutations(
-            mc_vector_target, orbit_index)
+        permutation_retval = self._get_multicomponent_vector_permutations(self.cs, orbit_index)
         self.assertEqual(permutations_target, permutation_retval)
 
         # Test orbit number 2
@@ -637,13 +648,11 @@ class TestClusterSpaceTernary(unittest.TestCase):
                                [[0, 1, 2], [0, 2, 1], [2, 0, 1]],
                                [[0, 1, 2], [1, 0, 2], [1, 2, 0]],
                                [[0, 1, 2]]]
-        permutation_retval = self.cs.get_multicomponent_vector_permutations(
-            mc_vector_target, orbit_index)
+        permutation_retval = self._get_multicomponent_vector_permutations(self.cs, orbit_index)
         self.assertEqual(permutations_target, permutation_retval)
 
         # Test orbit 3
         orbit_index = 3
-
         mc_vector_target = [[0, 0, 0, 0],
                             [0, 0, 0, 1],
                             [0, 0, 1, 1],
@@ -658,9 +667,7 @@ class TestClusterSpaceTernary(unittest.TestCase):
                                 [2, 0, 3, 1], [2, 3, 0, 1]],
                                [[0, 1, 2, 3], [1, 0, 2, 3], [1, 2, 0, 3], [1, 2, 3, 0]],
                                [[0, 1, 2, 3]]]
-        permutation_retval = self.cs.get_multicomponent_vector_permutations(
-            mc_vector_target, orbit_index)
-
+        permutation_retval = self._get_multicomponent_vector_permutations(self.cs, orbit_index)
         self.assertEqual(permutations_target, permutation_retval)
 
 
@@ -845,7 +852,7 @@ class TestClusterSpaceMergedOrbitsTernary(unittest.TestCase):
         """ Tests merge orbits function"""
 
         # Merge orbits
-        self.cs.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]})
+        self.cs.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]}, ignore_permutations=True)
 
         order_target = [0, 1, 1, 2, 2, 2, 3, 3, 3, 3]
         radii_target = [0] * 3 + [1.4142135623730951] * 3 + [1.632993161855452] * 4
@@ -873,6 +880,12 @@ class TestClusterSpaceMergedOrbitsTernary(unittest.TestCase):
             self.cs.merge_orbits({0: [5]})
         self.assertTrue('does not match the order' in str(cm.exception))
 
+    def test_merge_orbits_fails_when_site_permutations_differ(self):
+        """Tests that merging orbits with different site permutations fails."""
+        with self.assertRaises(ValueError) as cm:
+            self.cs.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]}, ignore_permutations=False)
+        self.assertIn('Orbit 4 and orbit 5 have different site permutations', str(cm.exception))
+
     def test_cluster_vectors(self):
         """ Tests that the same cluster vector is produced regardless of which orbit is
         used as key when merging """
@@ -880,12 +893,12 @@ class TestClusterSpaceMergedOrbitsTernary(unittest.TestCase):
         cv_target = [1, 0.5, 0.48112522, 0.25, 0.24056261, 0.21560847, 0.125, 0.12028131,
                      0.10648148, 0.08613694]
         cs = self.cs.copy()
-        cs.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]})
+        cs.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]}, ignore_permutations=True)
         cv = cs.get_cluster_vector(self.structure)
         self.assertAlmostEqualList(list(cv), cv_target)
 
         cs = self.cs.copy()
-        cs.merge_orbits({2: [1, 3], 4: [5, 6, 7, 8, 9, 10]})
+        cs.merge_orbits({2: [1, 3], 4: [5, 6, 7, 8, 9, 10]}, ignore_permutations=True)
         cv = cs.get_cluster_vector(self.structure)
         self.assertAlmostEqualList(list(cv), cv_target)
 
@@ -893,13 +906,13 @@ class TestClusterSpaceMergedOrbitsTernary(unittest.TestCase):
                      0.12028131, 0.10349462, 0.1124552, 0.08613694]
 
         cs = self.cs.copy()
-        cs.merge_orbits({1: [2, 3], 5: [4, 6, 7, 8, 9, 10]})
+        cs.merge_orbits({1: [2, 3], 5: [4, 6, 7, 8, 9, 10]}, ignore_permutations=True)
         cv = cs.get_cluster_vector(self.structure)
         self.assertAlmostEqualList(list(cv), cv_target)
 
     def test_read_write(self):
         """Tests read/write functionality."""
-        self.cs.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]})
+        self.cs.merge_orbits({1: [2, 3], 4: [5, 6, 7, 8, 9, 10]}, ignore_permutations=True)
         f = tempfile.NamedTemporaryFile(delete=False)
         f.close()
         self.cs.write(f.name)

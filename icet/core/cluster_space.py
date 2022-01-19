@@ -147,14 +147,14 @@ class ClusterSpace(_ClusterSpace):
         self._orbit_list = OrbitList(
             structure=occupied_primitive,
             cutoffs=self._cutoffs,
+            chemical_symbols=self._primitive_chemical_symbols,
             symprec=self.symprec,
             position_tolerance=self.position_tolerance,
             fractional_position_tolerance=self.fractional_position_tolerance)
-        self._orbit_list.remove_inactive_orbits(primitive_chemical_symbols)
+        self._orbit_list.remove_orbits_with_inactive_sites()
 
         # call (base) C++ constructor
         _ClusterSpace.__init__(self,
-                               chemical_symbols=primitive_chemical_symbols,
                                orbit_list=self._orbit_list,
                                position_tolerance=self.position_tolerance,
                                fractional_position_tolerance=self.fractional_position_tolerance)
@@ -351,34 +351,25 @@ class ClusterSpace(_ClusterSpace):
                                ('sublattices', '.')])
         sublattices = self.get_sublattices(self.primitive_structure)
         data.append(zerolet)
-        index = 1
-        while index < len(self):
-            multicomponent_vectors_by_orbit = self.get_multicomponent_vectors_by_orbit(index)
-            orbit_index = multicomponent_vectors_by_orbit[0]
-            mc_vector = multicomponent_vectors_by_orbit[1]
-            orbit = self.orbit_list.get_orbit(orbit_index)
-            repr_sites = orbit.representative_cluster.lattice_sites
-            orbit_sublattices = '-'.join(
-                [sublattices[sublattices.get_sublattice_index(ls.index)].symbol
-                 for ls in repr_sites])
-            local_Mi = self._get_primitive_structure().get_number_of_allowed_species_by_sites(
-                repr_sites)
-            mc_vectors = orbit.get_multicomponent_vectors(local_Mi)
-            mc_permutations = self.get_multicomponent_vector_permutations(mc_vectors, orbit_index)
-            mc_index = mc_vectors.index(mc_vector)
-            mc_permutations_multiplicity = len(mc_permutations[mc_index])
-            cluster = orbit.representative_cluster
-            multiplicity = len(orbit.clusters)
 
-            record = OrderedDict([('index', index),
-                                  ('order', cluster.order),
-                                  ('radius', cluster.radius),
-                                  ('multiplicity', multiplicity * mc_permutations_multiplicity),
-                                  ('orbit_index', orbit_index)])
-            record['multicomponent_vector'] = mc_vector
-            record['sublattices'] = orbit_sublattices
-            data.append(record)
-            index += 1
+        index = 0
+        for orbit_index in range(len(self.orbit_list)):
+            orbit = self.orbit_list.get_orbit(orbit_index)
+            representative_cluster = orbit.representative_cluster
+            orbit_sublattices = '-'.join(
+                [sublattices[sublattices.get_sublattice_index_from_site_index(ls.index)].symbol
+                 for ls in representative_cluster.lattice_sites])
+            for cv_element in orbit.cluster_vector_elements:
+                index += 1
+                record = OrderedDict(
+                    [('index', index),
+                     ('order', representative_cluster.order),
+                     ('radius', representative_cluster.radius),
+                     ('multiplicity', cv_element['multiplicity']),
+                     ('orbit_index', orbit_index),
+                     ('multicomponent_vector', cv_element['multicomponent_vector']),
+                     ('sublattices', orbit_sublattices)])
+                data.append(record)
         return data
 
     def get_number_of_orbits_by_order(self) -> OrderedDict:
@@ -445,7 +436,12 @@ class ClusterSpace(_ClusterSpace):
             indices to all orbits to be removed
         """
         size_before = len(self._orbit_list)
-        self._remove_orbits_cpp(indices)
+
+        # Since we remove orbits, orbit indices will change,
+        # so we run over the orbits in reverse order.
+        for ind in reversed(sorted(indices)):
+            self._orbit_list.remove_orbit(ind)
+
         size_after = len(self._orbit_list)
         assert size_before - len(indices) == size_after
 
@@ -539,7 +535,9 @@ class ClusterSpace(_ClusterSpace):
         if not all(structure.pbc):
             raise ValueError('Input structure must have periodic boundary conditions.')
 
-    def merge_orbits(self, equivalent_orbits: Dict[int, List[int]]) -> None:
+    def merge_orbits(self,
+                     equivalent_orbits: Dict[int, List[int]],
+                     ignore_permutations=False) -> None:
         """ Combines several orbits into one. This allows one to make custom
         cluster spaces by manually declaring the clusters in two or more
         orbits to be equivalent. This is a powerful approach for simplifying
@@ -554,9 +552,14 @@ class ClusterSpace(_ClusterSpace):
         Parameters
         ----------
         equivalent_orbits
-            the keys of this dictionary denote the indices of the orbit into
-            which to merge, the values are the indices of the orbits that are
-            supposed to be merged into the orbit denoted by the key
+            The keys of this dictionary denote the indices of the orbit into
+            which to merge. The values are the indices of the orbits that are
+            supposed to be merged into the orbit denoted by the key.
+        ignore_permutations
+            If true, orbits will be merged even if their multi-component
+            vectors and/or site permutations differ. While the object will
+            still be functional, the cluster space may not be properly spanned
+            by the resulting cluster vectors.
 
         Note
         ----
@@ -594,7 +597,7 @@ class ClusterSpace(_ClusterSpace):
         self._pruning_history.append(('merge', equivalent_orbits))
         orbits_to_delete = []
         for k1, orbit_indices in equivalent_orbits.items():
-            order1 = self.orbit_list.get_orbit(k1).order
+            orbit1 = self.orbit_list.get_orbit(k1)
 
             for k2 in orbit_indices:
 
@@ -604,10 +607,33 @@ class ClusterSpace(_ClusterSpace):
                 if k2 in orbits_to_delete:
                     raise ValueError(f'Orbit {k2} cannot be merged into orbit {k1}'
                                      ' since it was already merged with another orbit.')
-                order2 = self.orbit_list.get_orbit(k2).order
-                if order1 != order2:
-                    raise ValueError(f'The order of orbit {k1} ({order1}) does not'
-                                     f' match the order of orbit {k2} ({order2}).')
+                orbit2 = self.orbit_list.get_orbit(k2)
+                if orbit1.order != orbit2.order:
+                    raise ValueError(f'The order of orbit {k1} ({orbit1.order}) does not'
+                                     f' match the order of orbit {k2} ({orbit2.order}).')
+
+                if not ignore_permutations:
+                    # compare site permutations
+                    permutations1 = [el['site_permutations']
+                                     for el in orbit1.cluster_vector_elements]
+                    permutations2 = [el['site_permutations']
+                                     for el in orbit2.cluster_vector_elements]
+                    for vec_group1, vec_group2 in zip(permutations1, permutations2):
+                        if len(vec_group1) != len(vec_group2) or \
+                                not np.allclose(np.array(vec_group1), np.array(vec_group2)):
+                            raise ValueError(f'Orbit {k1} and orbit {k2} have different '
+                                             'site permutations.')
+
+                        # compare multi-component vectors (maybe this is redundant because
+                        # site permutations always differ if multi-component vectors differ?)
+                    mc_vectors1 = [el['multicomponent_vector']
+                                   for el in orbit1.cluster_vector_elements]
+                    mc_vectors2 = [el['multicomponent_vector']
+                                   for el in orbit2.cluster_vector_elements]
+                    if not all(np.allclose(vec1, vec2)
+                               for vec1, vec2 in zip(mc_vectors1, mc_vectors2)):
+                        raise ValueError(f'Orbit {k1} and orbit {k2} have different '
+                                         'multi-component vectors.')
 
                 # merge
                 self._merge_orbit(k1, k2)
@@ -723,7 +749,9 @@ class ClusterSpace(_ClusterSpace):
                     if key == 'prune':
                         cs._prune_orbit_list(value)
                     elif key == 'merge':
-                        cs.merge_orbits(value)
+                        # It is safe to ignore permutations here because otherwise
+                        # the orbits could not have been merged in the first place.
+                        cs.merge_orbits(value, ignore_permutations=True)
             else:  # for backwards compatibility
                 for value in items['pruning_history']:
                     cs._pruning_history(value)
@@ -742,5 +770,7 @@ class ClusterSpace(_ClusterSpace):
             if key == 'prune':
                 cs_copy._prune_orbit_list(value)
             elif key == 'merge':
-                cs_copy.merge_orbits(value)
+                # It is safe to ignore permutations here because otherwise
+                # the orbits could not have been merged in the first place.
+                cs_copy.merge_orbits(value, ignore_permutations=True)
         return cs_copy

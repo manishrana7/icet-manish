@@ -195,9 +195,8 @@ def system(request):
         prim = bulk(chemical_symbols[0][0], a=alat, c=clat, crystalstructure='hcp')
         cutoffs = [5, 4]
         cs = ClusterSpace(prim, cutoffs=cutoffs, chemical_symbols=chemical_symbols)
-        print(cs)
         merge_orbits_data = {1: [3], 4: [5, 6]}
-        cs.merge_orbits(merge_orbits_data)
+        cs.merge_orbits(merge_orbits_data, ignore_permutations=True)
     elif model == 'sublattices_fcc':
         alat = 4.0
         chemical_symbols = [['Ag', 'Pd'], ['H', 'X']]

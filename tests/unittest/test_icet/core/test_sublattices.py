@@ -123,7 +123,7 @@ class TestSublattices(unittest.TestCase):
         """Tests the get allowed numbers on site method."""
 
         for atom in self.supercell:
-            sublattice_index = self.sublattices.get_sublattice_index(atom.index)
+            sublattice_index = self.sublattices.get_sublattice_index_from_site_index(atom.index)
             allowed_numbers = self.sublattices.get_allowed_numbers_on_site(atom.index)
             self.assertEqual(allowed_numbers, self.sublattices[sublattice_index].atomic_numbers)
 
@@ -131,15 +131,15 @@ class TestSublattices(unittest.TestCase):
         """Tests the get allowed numbers on site method."""
 
         for atom in self.supercell:
-            sublattice_index = self.sublattices.get_sublattice_index(atom.index)
+            sublattice_index = self.sublattices.get_sublattice_index_from_site_index(atom.index)
             allowed_symbols = self.sublattices.get_allowed_symbols_on_site(atom.index)
             self.assertEqual(allowed_symbols, self.sublattices[sublattice_index].chemical_symbols)
 
-    def test_get_sublattice_index(self):
+    def test_get_sublattice_index_from_site_index(self):
         """Tests the get sublattice index method."""
 
         for i in range(len(self.supercell)):
-            sublattice_index = self.sublattices.get_sublattice_index(index=i)
+            sublattice_index = self.sublattices.get_sublattice_index_from_site_index(index=i)
             if i % 2 == 0:
                 self.assertEqual(sublattice_index, 0)
             else:

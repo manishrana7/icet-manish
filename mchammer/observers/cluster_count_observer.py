@@ -7,6 +7,7 @@ from ase import Atoms
 from icet import ClusterSpace
 from icet.core.local_orbit_list_generator import LocalOrbitListGenerator
 from icet.core.structure import Structure
+from icet.tools.geometry import chemical_symbols_to_numbers
 from mchammer.observers.base_observer import BaseObserver
 
 
@@ -95,7 +96,7 @@ class ClusterCountObserver(BaseObserver):
             orbit = self._full_orbit_list.get_orbit(i)
             cluster_counts = orbit.get_cluster_counts(structure_icet)
             for chemical_symbols in self._possible_occupations[i]:
-                count = cluster_counts.get(chemical_symbols, 0)
+                count = cluster_counts.get(tuple(chemical_symbols_to_numbers(chemical_symbols)), 0)
                 row = {}
                 row['dc_tag'] = '{}_{}'.format(i, '_'.join(chemical_symbols))
                 row['occupation'] = chemical_symbols

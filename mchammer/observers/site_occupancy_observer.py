@@ -123,7 +123,7 @@ class SiteOccupancyObserver(BaseObserver):
         """
 
         primitive_structure = Structure.from_atoms(cluster_space.primitive_structure)
-        chemical_symbols = cluster_space.get_chemical_symbols()
+        chemical_symbols = cluster_space.chemical_symbols
 
         if len(chemical_symbols) == 1:
             # If the allowed species are the same for all sites no loop is
