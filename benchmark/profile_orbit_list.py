@@ -15,6 +15,7 @@ if __name__ == '__main__':
     t = time.process_time()
     orbit = OrbitList(structure=structure,
                       cutoffs=cutoffs,
+                      chemical_symbols=[('Al', 'Ti')],
                       symprec=symprec,
                       position_tolerance=position_tolerance,
                       fractional_position_tolerance=fractional_position_tolerance)  # noqa
