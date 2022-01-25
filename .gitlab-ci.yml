@@ -1,39 +1,53 @@
 image: $CI_REGISTRY/materials-modeling/$CI_PROJECT_NAME/cicd
 
 variables:
-  INSTDIR: "local_installation"
+  INSTDIR_LINUX: "local_installation_linux"
+  INSTDIR_MACOS: "local_installation_macos"
+  INSTDIR_WINDOWS: "local_installation_windows"
 
 #------------------- build stage -------------------
 
 .build:
   stage: build
-  artifacts:
-    expire_in: 2 days
-    paths:
-      - local_installation/
-  script:
-    - pip3 install --target=$INSTDIR .
 
 build:linux:
   before_script:
-    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
+    - export PYTHONPATH=$PWD/$INSTDIR_LINUX:${PYTHONPATH}
   extends: .build
+  script:
+    - pip3 install --target=$INSTDIR_LINUX .
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - local_installation_linux/
   tags:
     - linux
 
 build:macos:
   before_script:
-    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
+    - export PYTHONPATH=$PWD/$INSTDIR_MACOS:${PYTHONPATH}
   extends: .build
+  script:
+    - pip3 install --target=$INSTDIR_MACOS .
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - local_installation_linux/
   tags:
     - macos
 
 build:windows:
   before_script:
     - $env:PATH+=";C:\Python38;C:\Python38\Scripts"
-    - $env:PYTHONPATH+="$PWD/${INSTDIR}"
+    - $env:PYTHONPATH+="$PWD/${INSTDIR_WINDOWS}"
     - Set-Alias -Name pip3 -Value pip
   extends: .build
+  script:
+    - pip3 install --target=$INSTDIR_WINDOWS .
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - local_installation_windows/
   tags:
     - windowsvm
 
@@ -54,7 +68,7 @@ build:windows:
 
 basic_tests:linux:
   before_script:
-    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
+    - export PYTHONPATH=$PWD/$INSTDIR_LINUX:${PYTHONPATH}
   extends: .basic_tests
   needs:
     - build:linux
@@ -69,7 +83,7 @@ basic_tests:linux:
 
 basic_tests:macos:
   before_script:
-    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
+    - export PYTHONPATH=$PWD/$INSTDIR_MACOS:${PYTHONPATH}
   extends: .basic_tests
   needs:
     - build:macos
@@ -85,7 +99,7 @@ basic_tests:macos:
 basic_tests:windows:
   before_script:
     - $env:PATH+=";C:\Python38;C:\Python38\Scripts"
-    - $env:PYTHONPATH+="$PWD/${INSTDIR}"
+    - $env:PYTHONPATH+="$PWD/${INSTDIR_WINDOWS}"
   extends: .basic_tests
   needs:
     - build:windows
@@ -110,7 +124,7 @@ benchmarks_examples:
   needs:
     - build:linux
   script:
-    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
+    - export PYTHONPATH=$PWD/$INSTDIR_LINUX:${PYTHONPATH}
     - for f in benchmark/*.py; do python3 -u "$f"; done
     - pwd=`pwd`
     - |
@@ -147,7 +161,7 @@ test_documentation:
     paths:
       - public
   script:
-    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
+    - export PYTHONPATH=$PWD/$INSTDIR_LINUX:${PYTHONPATH}
     - mkdir public
     - cd doc/apidoc/
     - doxygen Doxyfile
@@ -181,7 +195,7 @@ pages:
   script:
     - mkdir -p public/dev
     - mv htmlcov/ public/
-    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
+    - export PYTHONPATH=$PWD/$INSTDIR_LINUX:${PYTHONPATH}
     # --------------------------
     # DEVELOPMENT VERSION
     - git checkout master
@@ -206,9 +220,9 @@ pages:
     - echo "tag= $tag"
     - git checkout $tag
     # We need to re-install because C++ objects are imported when building the documentation 
-    - rm -r $INSTDIR
-    - mkdir $INSTDIR
-    - pip3 install --target=$INSTDIR .
+    - rm -r $INSTDIR_LINUX
+    - mkdir $INSTDIR_LINUX
+    - pip3 install --target=$INSTDIR_LINUX .
     - cd doc/apidoc/
     - doxygen Doxyfile
     - cd ../..
@@ -236,7 +250,7 @@ pypi:
   environment:
       name: pypi-upload
   script:
-    - export PYTHONPATH=$PWD/$INSTDIR:${PYTHONPATH}
+    - export PYTHONPATH=$PWD/$INSTDIR_LINUX:${PYTHONPATH}
     # check out the latest tag (redundant if job is limited to tags; still a sensible precaution)
     - tag=$(git tag | tail -1)
     - echo "tag= $tag"
@@ -245,3 +259,4 @@ pypi:
     - python3 setup.py sdist
     - ls -l dist/
     - python3 -m twine upload dist/*
+
