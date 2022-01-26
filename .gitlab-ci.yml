@@ -32,7 +32,7 @@ build:macos:
   artifacts:
     expire_in: 2 days
     paths:
-      - local_installation_linux/
+      - local_installation_macos/
   tags:
     - macos
 
