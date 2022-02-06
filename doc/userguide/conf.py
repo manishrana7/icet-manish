@@ -63,7 +63,7 @@ html_context = {
 htmlhelp_basename = 'icetdoc'
 intersphinx_mapping = \
     {'ase': ('https://wiki.fysik.dtu.dk/ase', None),
-     'numpy':  ('https://docs.scipy.org/doc/numpy/', None),
+     'numpy':  ('https://numpy.org/doc/stable/', None),
      'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
      'trainstation': ('https://trainstation.materialsmodeling.org/', None)}
 
