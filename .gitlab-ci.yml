@@ -33,6 +33,8 @@ build:macos:
     expire_in: 2 days
     paths:
       - local_installation_macos/
+  only:
+    - schedules
   tags:
     - macos
 
@@ -48,6 +50,8 @@ build:windows:
     expire_in: 2 days
     paths:
       - local_installation_windows/
+  only:
+    - schedules
   tags:
     - windowsvm
 
