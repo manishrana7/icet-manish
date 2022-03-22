@@ -101,9 +101,16 @@ def get_transformation_matrix(structure: Atoms,
                         if _is_site_group_in_orbit(sub_orbit, sub_sites):
                             transformation[j, i] += (-2.0) ** (sub_order)
                             n_terms_actual += 1
-            # check that the number of contributions matches the number
+            # If the number of contributions does not match the number of subclusters,
+            # this orbit list is incompatible with the ground state finder
             # of subclusters
-            assert(n_terms_actual == n_terms_target)
+            if n_terms_actual != n_terms_target:
+                raise ValueError('At least one cluster had subclusters that were not included'
+                                 ' in the cluster space. This is typically caused by cutoffs'
+                                 ' that are longer for a higher-order orbit than lower-order one'
+                                 ' (such as 8 Angstrom for triplets and 6 Angstrom for pairs).'
+                                 ' Please use a different cluster space for the ground state '
+                                 ' finder.')
 
     return transformation
 

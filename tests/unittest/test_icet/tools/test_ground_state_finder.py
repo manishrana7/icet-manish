@@ -195,6 +195,15 @@ class TestGroundStateFinder(unittest.TestCase):
         self.assertTrue('Currently, systems with more than two allowed species on any sublattice '
                         'are not supported.' in str(cm.exception))
 
+    def test_init_fails_for_dubious_cluster_space(self):
+        """Test initialization of GSF when triplets have longer cutoffs than pairs."""
+        cs = ClusterSpace(self.structure_prim, [4.0, 6.0], ['Ag', 'Au'])
+        ce = ClusterExpansion(cs, [0.5] * len(cs))
+        with self.assertRaises(ValueError) as cm:
+            icet.tools.ground_state_finder.GroundStateFinder(ce, self.supercell,
+                                                             verbose=False)
+        self.assertIn('At least one cluster had subclusters that were not', str(cm.exception))
+
     def test_optimization_status_property(self):
         """Tests the optimization_status property."""
 
