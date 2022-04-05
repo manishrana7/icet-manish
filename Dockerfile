@@ -41,5 +41,9 @@ RUN \
     cloud_sptheme \
     sphinx \
     sphinx-rtd-theme \
+    sphinx_autodoc_typehints \
     sphinx_sitemap \
-    sphinxcontrib-bibtex
+    sphinxcontrib-bibtex \
+  && \
+  pip3 install --upgrade \
+    jinja2==3.0.3
