@@ -89,6 +89,12 @@ Bibliography
    | Acta Materialia **211**, 116893 (2021)
    | `doi: 10.1016/j.actamat.2021.116893 <https://doi.org/10.1016/j.actamat.2021.116893>`_
 
+.. [RahLofErh22]
+   | J. M. Rahm, J. Löfgren, and P. Erhart
+   | *Quantitative predictions of thermodynamic hysteresis: Temperature-dependent character of the phase transition in Pd–H*
+   | Acta Materialia **227**,  117697 (2022)
+   | `doi: 10.1016/j.actamat.2022.117697 <https://doi.org/10.1016/j.actamat.2022.117697>`_
+
 .. [SadErh12]
    | B. Sadigh, and P. Erhart
    | *Calculation of excess free energies of precipitates via direct thermodynamic integration across phase boundaries*

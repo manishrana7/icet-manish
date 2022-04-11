@@ -8,7 +8,7 @@ Constituent strain calculations
 
 This example demonstrates how strain can be incorporated in cluster
 expansions in :program:`icet` using the constituent strain formalism
-originally introduced by Laks et al. [LakFerFro92]_.
+originally introduced by Laks *et al.* [LakFerFro92]_.
 
 .. warning ::
   
@@ -103,8 +103,7 @@ coefficients are interpolated using the functions in
 Functions from this module (which is *specific for the cubic case and the
 choice of crystallographic directions in the notebook*) will be supplied
 as input arguments to :class:`ConstituentStrain <icet.tools.ConstituentStrain>`. 
-For further details, please see [REFERENCE TO OUR PAPER WHEN PUBLISHED], in
-particular its Supporting Information.
+For further details, please see [RahLofErh22]_, in particular its Supporting Information.
 
 
 Fit a cluster expansion with strain
@@ -180,7 +179,7 @@ object.
   The
   :class:`ConstituentStrainCalculator <mchammer.calculators.ConstituentStrainCalculator>`
   is currently only compatible with ensembles that flip one site at a time.
-  It can therefore not be used together with the canonical ensemble currently.
+  Presently it can therefore not be used together with the canonical ensemble.
 
 .. literalinclude:: ../../../examples/advanced_topics/constituent_strain/2_run_monte_carlo.py
 
