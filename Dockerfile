@@ -24,6 +24,7 @@ RUN \
     flake8 \
     mypy \
     pytest \
+    setuptools_scm \
     twine \
   && \
   pip3 install --upgrade \
