@@ -39,14 +39,8 @@
     background: #e7cee4 !important;
 }
 
-.rst-content dl:not(.docutils) dt { /* class definitions */
-    background: #e6f5f1;
-    color: black;
+html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.glossary):not(.simple)>dt { /* class definitions */
     border-top: solid 3px #00c895;
-}
-
-.rst-content dl:not(.docutils) dl dt{ /* functions */
-    border-left:solid 3px #00c895;
     background: #e6f5f1;
     color: black;
 }
