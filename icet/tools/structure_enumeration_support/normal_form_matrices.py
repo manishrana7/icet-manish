@@ -203,12 +203,14 @@ class SmithNormalForm(object):
             # (Euclidean algorithm for finding greatest common divisor)
             while sorted(A[0])[1] != 0 or sorted(A[:, 0])[1] != 0:
                 A, R = _gcd_reduce_row(A, R, 0)
-                A, L = _gcd_reduce_column(A, L, 0)
+                A, L = _gcd_reduce_row(A.T, L.T, 0)
+                A, L = A.T, L.T
 
             # Do the same thing for lower 2x2 matrix
             while sorted(A[1, 1:])[0] != 0 or sorted(A[1:, 1])[0] != 0:
                 A, R = _gcd_reduce_row(A, R, 1)
-                A, L = _gcd_reduce_column(A, L, 1)
+                A, L = _gcd_reduce_row(A.T, L.T, 1)
+                A, L = A.T, L.T
 
             # If last diagonal entry is negative,
             # make it positive
@@ -251,52 +253,6 @@ class SmithNormalForm(object):
                 for k in range(self.S[2]):
                     group_order.append([i, j, k])
         self.group_order = group_order
-
-
-def _switch_rows(A: np.ndarray, i: int, j: int) -> np.ndarray:
-    """
-    Switch rows in matrix.
-
-    Parameters
-    ---------
-    A
-        Matrix in which rows will be swapped.
-    i
-        Index of row 1 to be swapped.
-    j
-        Index of row 2 to be swapped.
-
-    Returns
-    -------
-    Matrix with swapped rows.
-    """
-    row = A[j].copy()
-    A[j] = A[i]
-    A[i] = row
-    return A
-
-
-def _switch_columns(A: np.ndarray, i: int, j: int):
-    """
-    Switch columns in matrix.
-
-    Parameters
-    ---------
-    A : ndarray
-        Matrix in which columns will be swapped.
-    i : int
-        Index of column 1 to be swapped.
-    j : int
-        Index of column 2 to be swapped.
-
-    Returns
-    -------
-    Matrix with swapped columns.
-    """
-    col = A[:, j].copy()
-    A[:, j] = A[:, i]
-    A[:, i] = col
-    return A
 
 
 def _gcd_reduce_row(A: np.ndarray, R: np.ndarray, i: int) -> Tuple[np.ndarray, np.ndarray]:
@@ -344,59 +300,7 @@ def _gcd_reduce_row(A: np.ndarray, R: np.ndarray, i: int) -> Tuple[np.ndarray, n
         A[:, max_index] = A[:, max_index] - A[:, min_index]
         R[:, max_index] = R[:, max_index] - R[:, min_index]
     max_index = np.argmax(A[i])
-    A = _switch_columns(A, i, max_index)
-    R = _switch_columns(R, i, max_index)
     return A, R
-
-
-def _gcd_reduce_column(A: np.ndarray, L: np.ndarray, j: int) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Use row operations to make A[i, i] the greatest common
-    denominator of the elements in column i and the other elements
-    zero.
-
-    Parameters
-    ----------
-    A
-        Matrix whose column is to be cleared.
-    L
-        Matrix that should be subject to the same operations.
-    i
-        Index of column to be treated.
-
-    Returns
-    -------
-    A
-        Treated matrix A.
-    L
-        Matrix that has been subject to the same operations.
-    """
-    for i in range(j, 3):
-        if A[i, j] < 0:
-            A[i] = -1 * A[i]
-            L[i] = -1 * L[i]
-    while np.sort(A[j:, j])[1 - j] > 0:
-        max_index = np.argmax(A[j:, j]) + j
-        min_index = np.argmin(A[j:, j]) + j
-        if max_index == min_index:
-            max_index += 1
-        if A[min_index, j] == 0 and j == 0:
-            if np.sort(A[:, j])[1] > 0:
-                min_index += 1
-                min_index = min_index % 3
-                if min_index == max_index:
-                    min_index += 1
-                    min_index = min_index % 3
-            if A[min_index, j] == A[max_index, j]:
-                tmp = min_index
-                min_index = max_index
-                max_index = tmp
-        A[max_index] = A[max_index] - A[min_index]
-        L[max_index] = L[max_index] - L[min_index]
-    max_index = np.argmax(A[:, j])
-    A = _switch_rows(A, j, max_index)
-    L = _switch_rows(L, j, max_index)
-    return A, L
 
 
 def get_unique_snfs(hnfs: List[HermiteNormalForm]) -> List[SmithNormalForm]:
