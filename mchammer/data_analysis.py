@@ -54,7 +54,7 @@ def get_autocorrelation_function(data: np.ndarray, max_lag: int = None) -> np.nd
     """
     if max_lag is None:
         max_lag = len(data) - 1
-    if 1 > max_lag >= len(data):
+    if max_lag < 1 or max_lag >= len(data):
         raise ValueError('max_lag should be between 1 and len(data)-1.')
     series = pd.Series(data)
     acf = [series.autocorr(lag) for lag in range(0, max_lag)]
