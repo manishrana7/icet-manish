@@ -754,7 +754,7 @@ class ClusterSpace(_ClusterSpace):
                         cs.merge_orbits(value, ignore_permutations=True)
             else:  # for backwards compatibility
                 for value in items['pruning_history']:
-                    cs._pruning_history(value)
+                    cs._prune_orbit_list(value)
 
         return cs
 
