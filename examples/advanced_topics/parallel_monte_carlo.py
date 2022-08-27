@@ -38,3 +38,4 @@ for temperature in range(600, 199, -100):
 pool = Pool(processes=4)
 results = pool.map_async(run_mc, args)
 results.get()
+pool.close()
