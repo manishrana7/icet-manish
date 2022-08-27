@@ -37,9 +37,9 @@ Next, all sets of parameters to be run are stored in a list:
 
 Finally, a `multiprocessing Pool object <https://docs.python.org/3.7/library/m
 ultiprocessing.html#multiprocessing.pool.Pool>`_ is created. At this step, the
-number of processes is specified. It is typically advisable to use the same
-number of processes as available cores. The simulation is started by
-mapping the sets of parameters to the run function.
+number of processes can be specified (the default value for `processes` is the
+number of CPUs on your machine, which is typically a sensible choice). The
+simulation is started by mapping the sets of parameters to the run function.
 
 .. literalinclude:: ../../../examples/advanced_topics/parallel_monte_carlo.py
    :start-after: # step 4
