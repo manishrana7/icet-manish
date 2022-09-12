@@ -61,10 +61,12 @@ def map_structure_to_reference(structure: Atoms,
     reference positions (`dravg`), and the strain tensor for the input
     structure relative to the reference structure (`strain_tensor`).
 
-    The Atoms object that provide further supplemental information via
+    The returned Atoms object provides further supplemental information via
     custom per-atom arrays including the atomic displacements
-    (`Displacement`, `Displacement_Magnitude`) as well as the
-    distances to the three closest sites (`Minimum_Distances`).
+    (`Displacement`, `Displacement_Magnitude`),the distances to the
+    three closest sites (`Minimum_Distances`), as well as a mapping
+    between the indices of the returned Atoms object and those of the input
+    structure ('IndexMapping').
 
     Parameters
     ----------
@@ -349,6 +351,7 @@ def _match_positions(structure: Atoms, reference: Atoms) -> Tuple[Atoms, float, 
     mapped.new_array('Displacement_Magnitude', displacement_magnitudes, float)
     mapped.new_array('Minimum_Distances', minimum_distances,
                      float, shape=(n_dist_max,))
+    mapped.new_array('IndexMapping', col_ind, int)
 
     drmax = np.nanmax(displacement_magnitudes)
     dravg = np.nanmean(displacement_magnitudes)
