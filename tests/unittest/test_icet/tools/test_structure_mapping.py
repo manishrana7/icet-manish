@@ -174,6 +174,10 @@ class TestStructureMapping(unittest.TestCase):
             if t[0] is None:
                 continue
             self.assertTrue(np.allclose(a, t))
+        target_val = [0, 12,  1, 14,  2, 13,  3, 11,
+                      4,  5,  6, 15,  7,  8,  9, 10]
+        for a, t in zip(mapped.arrays['IndexMapping'], target_val):
+            self.assertTrue(np.equal(a, t))
 
         # Working example: with less than 3 atoms
         reference = self.reference.copy()
