@@ -11,6 +11,7 @@ RUN \
   apt-get install -qy \
     doxygen \
     graphviz \
+    pandoc \
     zip
 # Packages for testing
 # Packages needed for icet
@@ -23,13 +24,15 @@ RUN \
     coverage \
     flake8 \
     mypy \
+    nbmake \
     pytest \
     setuptools_scm \
     twine \
   && \
   pip3 install --upgrade \
     ase \
-    mip \
+    mip==1.13.0 \
+    numba \
     numpy \
     pandas \
     scikit-learn \
@@ -40,6 +43,7 @@ RUN \
   pip3 install --upgrade \
     breathe \
     cloud_sptheme \
+    nbsphinx \
     sphinx \
     sphinx-rtd-theme \
     sphinx_autodoc_typehints \

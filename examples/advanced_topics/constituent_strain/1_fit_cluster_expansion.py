@@ -2,8 +2,8 @@ from custom_functions import (custom_k_to_parameter_function,
                               custom_strain_energy_function)
 from icet import (ClusterSpace,
                   StructureContainer,
-                  ClusterExpansion,
-                  Optimizer)
+                  ClusterExpansion)
+from trainstation import Optimizer
 from icet.tools import (ConstituentStrain,
                         enumerate_structures,
                         get_mixing_energy_constraints)

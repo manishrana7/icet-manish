@@ -17,11 +17,28 @@ def redlich_kister(x: float, *coeffs: float) -> float:
         Redlich-Kister coefficients,
         ``coeffs[0] (1 - 2x)^0 x (1 - x) + coeffs[1] * (1 - 2x)^1 x (1 - x) + ...``
     """
-    y = 0
+    y = 0.0
     for p in range(len(coeffs)):
         y += coeffs[p] * (1 - 2 * x)**p
     y *= x * (1 - x)
     return y
+
+
+def redlich_kister_vector(x: np.ndarray, *coeffs: float) -> float:
+    """
+    Evaluate Redlich-Kister polynomial
+    with coefficients coeff at points x.
+
+    Parameters
+    ----------
+    x
+        Array of points in interval [0, 1] where polynomial
+        should be evaluated
+    coeffs
+        Redlich-Kister coefficients,
+        ``coeffs[0] (1 - 2x)^0 x (1 - x) + coeffs[1] * (1 - 2x)^1 x (1 - x) + ...``
+    """
+    return np.array([redlich_kister(xi, *coeffs) for xi in x])
 
 
 @njit

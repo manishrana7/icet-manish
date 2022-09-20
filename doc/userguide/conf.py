@@ -27,6 +27,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
     'sphinx_sitemap',
+    'nbsphinx'
 ]
 
 graphviz_output_format = 'svg'
@@ -67,6 +68,10 @@ intersphinx_mapping = \
      'numpy':  ('https://numpy.org/doc/stable/', None),
      'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
      'trainstation': ('https://trainstation.materialsmodeling.org/', None)}
+
+
+# Settings for nbsphinx
+nbsphinx_execute = 'never'
 
 # Options for doxygen incorporation
 breathe_projects = {'icet': '../apidoc/xml/'}

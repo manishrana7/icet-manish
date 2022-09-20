@@ -20,11 +20,12 @@ command line::
 
    structure_enumeration
    mapping_structures
-   wang_landau_simulations
-   parallel_monte_carlo
-   hybrid_ensembles
    sqs_generation
    customizing_cluster_spaces
-   constituent_strain
    cluster_vectors
+   training_of_ce
+   constituent_strain
    data_container
+   hybrid_ensembles
+   wang_landau_simulations
+   parallel_monte_carlo
