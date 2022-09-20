@@ -35,10 +35,11 @@ corresponding to clusters of increasing order (pairs, triplets, quadruplets,
 etc). The values then specify the longest distance allowed between any two
 atoms in clusters of the respective order. In the example below, the cluster
 space will contain all pairs of atoms that are 13.5 Å or closer to each other,
-all triplets among which the longest distance is 6.0 Å or less, and all
-quadruplets among which the longest distance is 5.5 Å or less. If higher-order
+all triplets among which the longest distance is 6.5 Å or less, and all
+quadruplets among which the longest distance is 6.0 Å or less. If higher-order
 clusters (quintuplets etc.) are to be included, one would simply extend the
-list.
+list. Note here that one should typically select cutoffs with some care based on
+how cluster expansions accuracy changes with cutoffs.
 
 The *allowed chemical elements* are specified as a list. Two formats are
 possible. If all sites in the structure are to be occupied identically, it
@@ -67,46 +68,47 @@ information in a tabular format by simply calling the :func:`print` function
 with the instance of interest as input argument. For the case at hand, the
 output should look as follows::
 
-  ====================================== Cluster Space =======================================
-   space group                            : Fm-3m (225)
-   chemical species                       : ['Ag', 'Pd'] (sublattice A)
-   cutoffs                                : 13.5000 6.0000 5.5000
-   total number of parameters             : 55
-   number of parameters by order          : 0= 1  1= 1  2= 25  3= 12  4= 16
-   fractional_position_tolerance          : 2e-06
-   position_tolerance                     : 1e-05
-   symprec                                : 1e-05
-  --------------------------------------------------------------------------------------------
-  index | order |  radius  | multiplicity | orbit_index | multi_component_vector | sublattices
-  --------------------------------------------------------------------------------------------
-     0  |   0   |   0.0000 |        1     |      -1     |           .            |      .
-     1  |   1   |   0.0000 |        1     |       0     |          [0]           |      A
-     2  |   2   |   1.4460 |        6     |       1     |         [0, 0]         |     A-A
-     3  |   2   |   2.0450 |        3     |       2     |         [0, 0]         |     A-A
-     4  |   2   |   2.5046 |       12     |       3     |         [0, 0]         |     A-A
-     5  |   2   |   2.8921 |        6     |       4     |         [0, 0]         |     A-A
-     6  |   2   |   3.2334 |       12     |       5     |         [0, 0]         |     A-A
-     7  |   2   |   3.5420 |        4     |       6     |         [0, 0]         |     A-A
-     8  |   2   |   3.8258 |       24     |       7     |         [0, 0]         |     A-A
-     9  |   2   |   4.0900 |        3     |       8     |         [0, 0]         |     A-A
-   ...
-    45  |   4   |   2.1691 |        8     |      44     |      [0, 0, 0, 0]      |   A-A-A-A
-    46  |   4   |   2.2295 |       24     |      45     |      [0, 0, 0, 0]      |   A-A-A-A
-    47  |   4   |   2.3434 |       48     |      46     |      [0, 0, 0, 0]      |   A-A-A-A
-    48  |   4   |   2.4193 |        8     |      47     |      [0, 0, 0, 0]      |   A-A-A-A
-    49  |   4   |   2.4222 |       24     |      48     |      [0, 0, 0, 0]      |   A-A-A-A
-    50  |   4   |   2.5046 |        6     |      49     |      [0, 0, 0, 0]      |   A-A-A-A
-    51  |   4   |   2.5657 |       48     |      50     |      [0, 0, 0, 0]      |   A-A-A-A
-    52  |   4   |   2.7676 |       48     |      51     |      [0, 0, 0, 0]      |   A-A-A-A
-    53  |   4   |   2.7940 |       12     |      52     |      [0, 0, 0, 0]      |   A-A-A-A
-    54  |   4   |   2.8921 |        6     |      53     |      [0, 0, 0, 0]      |   A-A-A-A
-  ============================================================================================
+   ====================================== Cluster Space ======================================
+    space group                            : Fm-3m (225)
+    chemical species                       : ['Ag', 'Pd'] (sublattice A)
+    cutoffs                                : 13.5000 6.5000 6.0000
+    total number of parameters             : 82
+    number of parameters by order          : 0= 1  1= 1  2= 25  3= 20  4= 35
+    fractional_position_tolerance          : 2e-06
+    position_tolerance                     : 1e-05
+    symprec                                : 1e-05
+   -------------------------------------------------------------------------------------------
+   index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | sublattices
+   -------------------------------------------------------------------------------------------
+      0  |   0   |   0.0000 |        1     |      -1     |           .           |      .     
+      1  |   1   |   0.0000 |        1     |       0     |          [0]          |      A     
+      2  |   2   |   1.4460 |        6     |       1     |        [0, 0]         |     A-A    
+      3  |   2   |   2.0450 |        3     |       2     |        [0, 0]         |     A-A    
+      4  |   2   |   2.5046 |       12     |       3     |        [0, 0]         |     A-A    
+      5  |   2   |   2.8921 |        6     |       4     |        [0, 0]         |     A-A    
+      6  |   2   |   3.2334 |       12     |       5     |        [0, 0]         |     A-A    
+      7  |   2   |   3.5420 |        4     |       6     |        [0, 0]         |     A-A    
+      8  |   2   |   3.8258 |       24     |       7     |        [0, 0]         |     A-A    
+      9  |   2   |   4.0900 |        3     |       8     |        [0, 0]         |     A-A    
+    ...
+     72  |   4   |   2.7940 |       12     |      71     |     [0, 0, 0, 0]      |   A-A-A-A  
+     73  |   4   |   2.7940 |       24     |      72     |     [0, 0, 0, 0]      |   A-A-A-A  
+     74  |   4   |   2.8281 |       24     |      73     |     [0, 0, 0, 0]      |   A-A-A-A  
+     75  |   4   |   2.8921 |        3     |      74     |     [0, 0, 0, 0]      |   A-A-A-A  
+     76  |   4   |   2.8921 |        6     |      75     |     [0, 0, 0, 0]      |   A-A-A-A  
+     77  |   4   |   2.8921 |       12     |      76     |     [0, 0, 0, 0]      |   A-A-A-A  
+     78  |   4   |   2.9632 |       24     |      77     |     [0, 0, 0, 0]      |   A-A-A-A  
+     79  |   4   |   2.9862 |        8     |      78     |     [0, 0, 0, 0]      |   A-A-A-A  
+     80  |   4   |   3.0951 |       24     |      79     |     [0, 0, 0, 0]      |   A-A-A-A  
+     81  |   4   |   3.5420 |        2     |      80     |     [0, 0, 0, 0]      |   A-A-A-A  
+   ===========================================================================================
+
 
 .. note::
 
   The ``radius`` is *not* the same as the longest distance between atoms in
   the cluster (which was the measure used for initialization via ``cutoffs``),
-  but is the average distance from all atoms to the center of mass (assuming
+  but is the average distance from all atoms to the geometric center of mass (assuming
   all atoms have the same mass).
 
 
@@ -135,33 +137,64 @@ By calling the :func:`print` function with the :class:`StructureContainer
 <icet.StructureContainer>` as input argument, one obtains the following
 result::
 
-  ========================== Structure Container ==========================
-  Total number of structures: 137
-  -------------------------------------------------------------------------
-  index |       user_tag        | natoms | chemical formula | mixing-energy
-  -------------------------------------------------------------------------
-     0  | Ag                    |     1  | Ag               |      0.000
-     1  | Pd                    |     1  | Pd               |      0.000
-     2  | AgPd_0002             |     2  | AgPd             |     -0.040
-     3  | AgPd_0003             |     3  | AgPd2            |     -0.029
-     4  | AgPd_0004             |     3  | Ag2Pd            |     -0.049
-     5  | AgPd_0005             |     3  | AgPd2            |     -0.018
-     6  | AgPd_0006             |     3  | Ag2Pd            |     -0.056
-     7  | AgPd_0007             |     3  | AgPd2            |     -0.030
-     8  | AgPd_0008             |     3  | Ag2Pd            |     -0.048
-     9  | AgPd_0009             |     4  | AgPd3            |     -0.017
-   ...
-   127  | AgPd_0127             |     6  | Ag5Pd            |     -0.032
-   128  | AgPd_0128             |     6  | AgPd5            |     -0.012
-   129  | AgPd_0129             |     6  | Ag2Pd4           |     -0.026
-   130  | AgPd_0130             |     6  | Ag2Pd4           |     -0.024
-   131  | AgPd_0131             |     6  | Ag4Pd2           |     -0.059
-   132  | AgPd_0132             |     6  | Ag4Pd2           |     -0.054
-   133  | AgPd_0133             |     6  | Ag3Pd3           |     -0.046
-   134  | AgPd_0134             |     6  | Ag3Pd3           |     -0.048
-   135  | AgPd_0135             |     6  | Ag5Pd            |     -0.040
-   136  | AgPd_0001             |     2  | AgPd             |     -0.063
-  =========================================================================
+   ====================== Structure Container ======================
+   Total number of structures: 625
+   -----------------------------------------------------------------
+   index | user_tag  | n_atoms | chemical formula | mixing_energy
+   -----------------------------------------------------------------
+   0     | Ag        | 1       | Ag               |    0.0000    
+   1     | Pd        | 1       | Pd               |    0.0000    
+   2     | AgPd_0002 | 2       | AgPd             |   -0.0398    
+   3     | AgPd_0003 | 3       | AgPd2            |   -0.0286    
+   4     | AgPd_0004 | 3       | Ag2Pd            |   -0.0485    
+   5     | AgPd_0005 | 3       | AgPd2            |   -0.0178    
+   6     | AgPd_0006 | 3       | Ag2Pd            |   -0.0557    
+   7     | AgPd_0007 | 3       | AgPd2            |   -0.0297    
+   8     | AgPd_0008 | 3       | Ag2Pd            |   -0.0477    
+   9     | AgPd_0009 | 4       | AgPd3            |   -0.0173    
+   10    | AgPd_0010 | 4       | Ag3Pd            |   -0.0356    
+   11    | AgPd_0011 | 4       | Ag2Pd2           |   -0.0331    
+   12    | AgPd_0012 | 4       | AgPd3            |   -0.0139    
+   13    | AgPd_0013 | 4       | Ag3Pd            |   -0.0459    
+   14    | AgPd_0014 | 4       | Ag2Pd2           |   -0.0478    
+   15    | AgPd_0015 | 4       | AgPd3            |   -0.0201    
+   16    | AgPd_0016 | 4       | Ag3Pd            |   -0.0465    
+   17    | AgPd_0017 | 4       | Ag2Pd2           |   -0.0498    
+   18    | AgPd_0018 | 4       | AgPd3            |   -0.0162    
+   19    | AgPd_0019 | 4       | Ag3Pd            |   -0.0369    
+   20    | AgPd_0020 | 4       | Ag2Pd2           |   -0.0428    
+   21    | AgPd_0021 | 4       | AgPd3            |   -0.0151    
+   22    | AgPd_0022 | 4       | Ag3Pd            |   -0.0527    
+   23    | AgPd_0023 | 4       | Ag2Pd2           |   -0.0520    
+   24    | AgPd_0024 | 4       | AgPd3            |   -0.0292    
+   25    | AgPd_0025 | 4       | Ag3Pd            |   -0.0470    
+   26    | AgPd_0026 | 4       | AgPd3            |   -0.0238    
+   27    | AgPd_0027 | 4       | Ag3Pd            |   -0.0526    
+   28    | AgPd_0028 | 5       | AgPd4            |   -0.0152    
+   29    | AgPd_0029 | 5       | Ag2Pd3           |   -0.0180    
+   30    | AgPd_0030 | 5       | Ag2Pd3           |   -0.0417    
+   31    | AgPd_0031 | 5       | Ag4Pd            |   -0.0283    
+   32    | AgPd_0032 | 5       | Ag3Pd2           |   -0.0236    
+   33    | AgPd_0033 | 5       | Ag3Pd2           |   -0.0547    
+   34    | AgPd_0034 | 5       | AgPd4            |   -0.0089    
+   35    | AgPd_0035 | 5       | Ag2Pd3           |   -0.0324    
+   36    | AgPd_0036 | 5       | Ag2Pd3           |   -0.0341    
+   37    | AgPd_0037 | 5       | Ag4Pd            |   -0.0362    
+   38    | AgPd_0038 | 5       | Ag3Pd2           |   -0.0471    
+   39    | AgPd_0039 | 5       | Ag3Pd2           |   -0.0527    
+   40    | AgPd_0040 | 5       | AgPd4            |   -0.0128    
+   41    | AgPd_0041 | 5       | Ag2Pd3           |   -0.0379    
+   42    | AgPd_0042 | 5       | Ag2Pd3           |   -0.0403    
+   43    | AgPd_0043 | 5       | Ag4Pd            |   -0.0396    
+   44    | AgPd_0044 | 5       | Ag3Pd2           |   -0.0603    
+   45    | AgPd_0045 | 5       | Ag3Pd2           |   -0.0546    
+   46    | AgPd_0046 | 5       | AgPd4            |   -0.0135    
+   47    | AgPd_0047 | 5       | Ag2Pd3           |   -0.0281    
+   48    | AgPd_0048 | 5       | Ag2Pd3           |   -0.0345    
+    ...
+   624   | AgPd_0505 | 8       | Ag2Pd6           |   -0.0165    
+   =================================================================
+
 
 Training CE parameters
 ----------------------
@@ -170,7 +203,7 @@ Since the :class:`StructureContainer <icet.StructureContainer>` object created
 in the previous section, contains all the information required for
 constructing a cluster expansion, the next step is to train the parameters,
 i.e. to fit the *effective cluster interactions* (:term:`ECIs`) using the
-target data. More precisely, the goal is to achieve the best possible
+target mixing energies. More precisely, the goal is to achieve the best possible
 agreement with a set of training structures, which represent a subset of all
 the structures in the :class:`StructureContainer
 <trainstation.StructureContainer>`. In practice, this is a two step process
@@ -209,31 +242,36 @@ This procedure is repeated 10 times (the default value for ``number_of_splits``)
 The "final" CE is ultimately constructed using *all* available data by calling the :func:`train <trainstation.CrossValidationEstimator.train>` method.
 Once it is finished, the results can be displayed by providing the :class:`CrossValidationEstimator <trainstation.CrossValidationEstimator>` object to the :func:`print` function, which gives the output shown below::
 
-  ============== CrossValidationEstimator ==============
-  alpha_optimal                  : 0.001944862
-  fit_method                     : lasso
-  n_nonzero_parameters           : 40
-  n_parameters                   : 55
-  n_splits                       : 10
-  n_target_values                : 625
-  parameters_norm                : 0.06954891
-  rmse_train                     : 0.002077373
-  rmse_train_final               : 0.002085274
-  rmse_validation                : 0.002267498
-  seed                           : 42
-  shuffle                        : True
-  standardize                    : True
-  target_values_std              : 0.01486413
-  validation_method              : k-fold
-  ======================================================
+   ============== CrossValidationEstimator ==============
+   seed                           : 42
+   fit_method                     : ardr
+   standardize                    : True
+   n_target_values                : 625
+   n_parameters                   : 82
+   n_nonzero_parameters           : 44
+   parameters_norm                : 0.07314093
+   target_values_std              : 0.01486413
+   rmse_train                     : 0.001632753
+   R2_train                       : 0.988
+   AIC                            : -7937.285
+   BIC                            : -7742.024
+   validation_method              : k-fold
+   n_splits                       : 10
+   rmse_validation                : 0.001889973
+   R2_validation                  : 0.9829637
+   shuffle                        : True
+   ======================================================
+
+
 
 We have thus constructed a CE with an average root mean square error (RMSE,
-``rmse_validation``) for the validation set of only 2.4 meV/atom. The original
-cluster space included 173 parameters (``number_of_parameters``), 54 of which
+``rmse_validation``) for the validation set of only 1.8 meV/atom. The original
+cluster space included 82 parameters (``number_of_parameters``), 44 of which
 are non-zero (``number_of_nonzero_parameters``) in the final CE. The efficiency
-of the LASSO method for finding sparse solutions is evident from the
-number of non-zero parameters (54) being much smaller than the total number of
-parameters (173).
+of the ARDR method for finding sparse solutions is evident from the
+number of non-zero parameters (44) being much smaller than the total number of
+parameters (82). The performance and application area of different optimization
+algorithms are analyzed and compared in the advanced tutorial section.
 
 .. note::
 
@@ -259,42 +297,43 @@ Information regarding the parameters and associated cluster space
 can be displayed by using the :func:`print` function with the
 :class:`ClusterExpansion <icet.ClusterExpansion>` object as input argument::
 
-  ================================================ Cluster Expansion =================================================
-   space group                            : Fm-3m (225)
-   chemical species                       : ['Ag', 'Pd'] (sublattice A)
-   cutoffs                                : 13.5000 6.0000 5.5000
-   total number of parameters             : 55
-   number of parameters by order          : 0= 1  1= 1  2= 25  3= 12  4= 16
-   fractional_position_tolerance          : 2e-06
-   position_tolerance                     : 1e-05
-   symprec                                : 1e-05
-   total number of nonzero parameters     : 40
-   number of nonzero parameters by order  : 0= 1  1= 1  2= 19  3= 10  4= 9 
-  --------------------------------------------------------------------------------------------------------------------
-  index | order |  radius  | multiplicity | orbit_index | multi_component_vector | sublattices | parameter |    ECI   
-  --------------------------------------------------------------------------------------------------------------------
-     0  |   0   |   0.0000 |        1     |      -1     |           .            |      .      |    -0.045 |    -0.045
-     1  |   1   |   0.0000 |        1     |       0     |          [0]           |      A      |   -0.0353 |   -0.0353
-     2  |   2   |   1.4460 |        6     |       1     |         [0, 0]         |     A-A     |    0.0285 |   0.00475
-     3  |   2   |   2.0450 |        3     |       2     |         [0, 0]         |     A-A     |    0.0134 |   0.00447
-     4  |   2   |   2.5046 |       12     |       3     |         [0, 0]         |     A-A     |    0.0172 |   0.00144
-     5  |   2   |   2.8921 |        6     |       4     |         [0, 0]         |     A-A     |        -0 |        -0
-     6  |   2   |   3.2334 |       12     |       5     |         [0, 0]         |     A-A     |        -0 |        -0
-     7  |   2   |   3.5420 |        4     |       6     |         [0, 0]         |     A-A     |    0.0029 |  0.000724
-     8  |   2   |   3.8258 |       24     |       7     |         [0, 0]         |     A-A     |  -0.00178 | -7.41e-05
-     9  |   2   |   4.0900 |        3     |       8     |         [0, 0]         |     A-A     | -0.000288 |  -9.6e-05
-   ...
-    45  |   4   |   2.1691 |        8     |      44     |      [0, 0, 0, 0]      |   A-A-A-A   |         0 |         0
-    46  |   4   |   2.2295 |       24     |      45     |      [0, 0, 0, 0]      |   A-A-A-A   |        -0 |        -0
-    47  |   4   |   2.3434 |       48     |      46     |      [0, 0, 0, 0]      |   A-A-A-A   |        -0 |        -0
-    48  |   4   |   2.4193 |        8     |      47     |      [0, 0, 0, 0]      |   A-A-A-A   |   0.00101 |  0.000127
-    49  |   4   |   2.4222 |       24     |      48     |      [0, 0, 0, 0]      |   A-A-A-A   |         0 |         0
-    50  |   4   |   2.5046 |        6     |      49     |      [0, 0, 0, 0]      |   A-A-A-A   | -0.000682 | -0.000114
-    51  |   4   |   2.5657 |       48     |      50     |      [0, 0, 0, 0]      |   A-A-A-A   |        -0 |        -0
-    52  |   4   |   2.7676 |       48     |      51     |      [0, 0, 0, 0]      |   A-A-A-A   |  -0.00395 | -8.23e-05
-    53  |   4   |   2.7940 |       12     |      52     |      [0, 0, 0, 0]      |   A-A-A-A   |  0.000196 |  1.63e-05
-    54  |   4   |   2.8921 |        6     |      53     |      [0, 0, 0, 0]      |   A-A-A-A   | -0.000411 | -6.85e-05
-  ====================================================================================================================
+   ================================================ Cluster Expansion ================================================
+    space group                            : Fm-3m (225)
+    chemical species                       : ['Ag', 'Pd'] (sublattice A)
+    cutoffs                                : 13.5000 6.5000 6.0000
+    total number of parameters             : 82
+    number of parameters by order          : 0= 1  1= 1  2= 25  3= 20  4= 35
+    fractional_position_tolerance          : 2e-06
+    position_tolerance                     : 1e-05
+    symprec                                : 1e-05
+    total number of nonzero parameters     : 44
+    number of nonzero parameters by order  : 0= 1  1= 1  2= 14  3= 13  4= 15 
+   -------------------------------------------------------------------------------------------------------------------
+   index | order |  radius  | multiplicity | orbit_index | multicomponent_vector | sublattices | parameter |    ECI   
+   -------------------------------------------------------------------------------------------------------------------
+      0  |   0   |   0.0000 |        1     |      -1     |           .           |      .      |    -0.046 |    -0.046
+      1  |   1   |   0.0000 |        1     |       0     |          [0]          |      A      |   -0.0366 |   -0.0366
+      2  |   2   |   1.4460 |        6     |       1     |        [0, 0]         |     A-A     |    0.0306 |    0.0051
+      3  |   2   |   2.0450 |        3     |       2     |        [0, 0]         |     A-A     |    0.0141 |    0.0047
+      4  |   2   |   2.5046 |       12     |       3     |        [0, 0]         |     A-A     |    0.0206 |   0.00171
+      5  |   2   |   2.8921 |        6     |       4     |        [0, 0]         |     A-A     |   0.00163 |  0.000272
+      6  |   2   |   3.2334 |       12     |       5     |        [0, 0]         |     A-A     |         0 |         0
+      7  |   2   |   3.5420 |        4     |       6     |        [0, 0]         |     A-A     |   0.00328 |  0.000819
+      8  |   2   |   3.8258 |       24     |       7     |        [0, 0]         |     A-A     |         0 |         0
+      9  |   2   |   4.0900 |        3     |       8     |        [0, 0]         |     A-A     |  0.000574 |  0.000191
+    ...
+     72  |   4   |   2.7940 |       12     |      71     |     [0, 0, 0, 0]      |   A-A-A-A   |  0.000911 |  7.59e-05
+     73  |   4   |   2.7940 |       24     |      72     |     [0, 0, 0, 0]      |   A-A-A-A   |         0 |         0
+     74  |   4   |   2.8281 |       24     |      73     |     [0, 0, 0, 0]      |   A-A-A-A   |  -0.00278 | -0.000116
+     75  |   4   |   2.8921 |        3     |      74     |     [0, 0, 0, 0]      |   A-A-A-A   |         0 |         0
+     76  |   4   |   2.8921 |        6     |      75     |     [0, 0, 0, 0]      |   A-A-A-A   |  -0.00067 | -0.000112
+     77  |   4   |   2.8921 |       12     |      76     |     [0, 0, 0, 0]      |   A-A-A-A   |  -0.00054 |  -4.5e-05
+     78  |   4   |   2.9632 |       24     |      77     |     [0, 0, 0, 0]      |   A-A-A-A   |         0 |         0
+     79  |   4   |   2.9862 |        8     |      78     |     [0, 0, 0, 0]      |   A-A-A-A   |   0.00121 |  0.000151
+     80  |   4   |   3.0951 |       24     |      79     |     [0, 0, 0, 0]      |   A-A-A-A   |         0 |         0
+     81  |   4   |   3.5420 |        2     |      80     |     [0, 0, 0, 0]      |   A-A-A-A   | -0.000936 | -0.000468
+   ===================================================================================================================
+
 
 Note that in the table above the parameters obtained from the
 optimizer and the :term:`ECIs` are shown separately, with the

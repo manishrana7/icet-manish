@@ -10,21 +10,20 @@ primitive_structure = db.get(id=1).toatoms()  # primitive structure
 
 # step 2: Set up the basic structure and a cluster space
 cs = ClusterSpace(structure=primitive_structure,
-                  cutoffs=[13.5, 6.0, 5.5],
+                  cutoffs=[13.5, 6.5, 6.0],
                   chemical_symbols=['Ag', 'Pd'])
 print(cs)
 
 # step 3: Parse the input structures and set up a structure container
 sc = StructureContainer(cluster_space=cs)
-for row in db.select('natoms<=8'):
+for row in db.select():
     sc.add_structure(structure=row.toatoms(),
                      user_tag=row.tag,
                      properties={'mixing_energy': row.mixing_energy})
 print(sc)
 
 # step 4: Train parameters
-opt = CrossValidationEstimator(fit_data=sc.get_fit_data(key='mixing_energy'),
-                               fit_method='lasso')
+opt = CrossValidationEstimator(fit_data=sc.get_fit_data(key='mixing_energy'), fit_method='ardr')
 opt.validate()
 opt.train()
 print(opt)

@@ -61,8 +61,6 @@ build:windows:
   stage: test
   coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
   script:
-    - pip3 install numba
-    - pip3 install trainstation
     - xdoctest icet
     - xdoctest mchammer
     - pytest -v -m coverage_hangup tests/
@@ -142,6 +140,28 @@ benchmarks_examples:
         done
         echo
       done
+
+
+.test_notebooks:
+  stage: test
+  before_script:
+    - export PYTHONPATH=$PWD/$INSTDIR_LINUX:${PYTHONPATH}
+  tags:
+    - linux
+  needs:
+    - build:linux
+  script:
+    - pytest --nbmake --nbmake-timeout=3600 $(find examples/ -name '*.ipynb')
+
+test_notebooks:manual:
+  extends: .test_notebooks
+  when: manual
+
+test_notebooks:schedules:
+  extends: .test_notebooks
+  only:
+   - schedules
+
 
 style_check:linux:
   stage: test

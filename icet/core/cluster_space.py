@@ -410,7 +410,7 @@ class ClusterSpace(_ClusterSpace):
                 fractional_position_tolerance=self.fractional_position_tolerance)
         except Exception as e:
             self.assert_structure_compatibility(structure)
-            raise(e)
+            raise Exception(str(e))
         return cv
 
     def get_coordinates_of_representative_cluster(self, orbit_index: int) -> List[Tuple[float]]:
