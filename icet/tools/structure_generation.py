@@ -1,5 +1,4 @@
 import itertools
-import random
 from typing import List, Dict, Tuple, Union
 import numpy as np
 from mchammer.ensembles import TargetClusterVectorAnnealing
@@ -22,6 +21,7 @@ def generate_target_structure_from_supercells(cluster_space: ClusterSpace,
                                               n_steps: int = None,
                                               optimality_weight: float = 1.0,
                                               random_seed: int = None,
+                                              random_start: bool = True,
                                               tol: float = 1e-5) -> Atoms:
     """
     Given a ``cluster_space`` and a ``target_cluster_vector`` and one
@@ -62,8 +62,12 @@ def generate_target_structure_from_supercells(cluster_space: ClusterSpace,
         controls weighting :math:`L` of perfect correlations, see
         :class:`mchammer.calculators.TargetVectorCalculator`
     random_seed
-        seed for the random number generator used in the
-        Monte Carlo simulation
+        seed for the random number generator used in the Monte Carlo simulation
+        and used for initializing the occupation of the supercells if
+        random_start is True
+    random_start
+        randomly occupy starting structure, can be disabled
+        if the user prefers to pass an initial structure
     tol
         Numerical tolerance
     """
@@ -78,15 +82,17 @@ def generate_target_structure_from_supercells(cluster_space: ClusterSpace,
     warning_issued = False
     for supercell in supercells:
         supercell_copy = supercell.copy()
-        try:
-            occupy_structure_randomly(supercell_copy, cluster_space,
-                                      target_concentrations)
-        except ValueError:
-            if not warning_issued:
-                logger.warning('At least one supercell was not commensurate with the specified '
-                               'target concentrations.')
-                warning_issued = True
-            continue
+        if random_start:
+            try:
+                occupy_structure_randomly(supercell_copy, cluster_space,
+                                          target_concentrations,
+                                          random_seed)
+            except ValueError:
+                if not warning_issued:
+                    logger.warning('At least one supercell was not commensurate with the specified '
+                                   'target concentrations.')
+                    warning_issued = True
+                continue
         valid_supercells.append(supercell_copy)
         calculators.append(TargetVectorCalculator(supercell_copy, cluster_space,
                                                   target_cluster_vector,
@@ -220,6 +226,7 @@ def generate_sqs_from_supercells(cluster_space: ClusterSpace,
                                  n_steps: int = None,
                                  optimality_weight: float = 1.0,
                                  random_seed: int = None,
+                                 random_start: bool = True,
                                  tol: float = 1e-5) -> Atoms:
     """
     Given a ``cluster_space`` and one or more ``supercells``, generate
@@ -261,8 +268,12 @@ def generate_sqs_from_supercells(cluster_space: ClusterSpace,
         controls weighting :math:`L` of perfect correlations, see
         :class:`mchammer.calculators.TargetVectorCalculator`
     random_seed
-        seed for the random number generator used in the
-        Monte Carlo simulation
+        seed for the random number generator used in the Monte Carlo simulation
+        and used for initializing the occupation of the supercells if
+        random_start is True
+    random_start
+        randomly occupy starting structure, can be disabled
+        if the user prefers to pass an initial structure
     tol
         Numerical tolerance
     """
@@ -277,6 +288,7 @@ def generate_sqs_from_supercells(cluster_space: ClusterSpace,
                                                      n_steps=n_steps,
                                                      optimality_weight=optimality_weight,
                                                      random_seed=random_seed,
+                                                     random_start=random_start,
                                                      tol=tol)
 
 
@@ -470,7 +482,8 @@ def generate_sqs_by_enumeration(cluster_space: ClusterSpace,
 
 
 def occupy_structure_randomly(structure: Atoms, cluster_space: ClusterSpace,
-                              target_concentrations: dict) -> None:
+                              target_concentrations: dict,
+                              random_seed: int = None) -> None:
     """
     Occupy a structure with quasirandom order but fulfilling
     ``target_concentrations``.
@@ -489,7 +502,10 @@ def occupy_structure_randomly(structure: Atoms, cluster_space: ClusterSpace,
         for a system with two sublattices.
         The symbols defining sublattices ('A', 'B' etc) can be
         found by printing the `cluster_space`
+    random_seed
+        seed for the random number generator)
     """
+    rng = np.random.default_rng(random_seed)
     target_concentrations = _validate_concentrations(cluster_space=cluster_space,
                                                      concentrations=target_concentrations)
 
@@ -514,7 +530,7 @@ def occupy_structure_randomly(structure: Atoms, cluster_space: ClusterSpace,
         assert len(symbols) == len(sl.indices)
 
         # Shuffle to introduce randomness
-        random.shuffle(symbols)
+        rng.shuffle(symbols)
 
         # Assign symbols to the right indices
         for symbol, lattice_site in zip(symbols, sl.indices):
