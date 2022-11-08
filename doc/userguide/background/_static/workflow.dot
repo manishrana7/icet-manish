@@ -37,8 +37,8 @@ digraph g {
   StructureContainer [ href="../moduleref_icet/structure_container.html#icet.StructureContainer",
                        target="_top" ];
   Optimizer [ label="Optimizer",
-              href="../moduleref_icet/optimizers.html",
-              target="_top"];
+              href="https://trainstation.materialsmodeling.org/moduleref.html",
+              target="_blank"];
   ClusterExpansion [ href="../moduleref_icet/cluster_expansion.html#icet.ClusterExpansion",
                            target="_top" ];
   ClusterExpansionCalculator [ href="../moduleref_mchammer/calculators.html#mchammer.calculators.ClusterExpansionCalculator",
