@@ -20,8 +20,7 @@ class TargetVectorCalculator(BaseCalculator):
 
     .. math::
         Q = - \\omega L + \\sum_{\\alpha}
-         \\left| \\Gamma_{\\alpha} - \\Gamma^{\\text{target}}_{\\alpha}
-         \\right|.
+        \\left||\\Gamma_{\\alpha} - \\Gamma^{\\text{target}}_{\\alpha}\\right||.
 
     Here, :math:`\\Gamma_{\\alpha}` are components in the cluster vector
     and :math:`\\Gamma^\\text{target}_{\\alpha}` the corresponding
