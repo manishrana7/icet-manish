@@ -333,7 +333,13 @@ class BaseDataContainer:
         f.close()  # Required for Windows
         shutil.copy(file_name, outfile)
         os.remove(file_name)
+
+        reference_data_file.close()
+        reference_structure_file.close()
         runtime_data_file.close()
+        os.remove(reference_data_file.name)
+        os.remove(reference_structure_file.name)
+        os.remove(runtime_data_file.name)
 
     def _add_default_metadata(self):
         """Adds default metadata to metadata dict."""
