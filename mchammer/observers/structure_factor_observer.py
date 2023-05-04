@@ -179,12 +179,14 @@ class StructureFactorObserver(BaseObserver):
                        q_points: List[Sequence]) -> np.ndarray:
         """ Get S(q) lookup data for a given supercell and q-points. """
         n_atoms = len(structure)
-        dist_vectors = structure.get_all_distances(mic=True, vector=True)
         Sq_lookup = np.zeros((n_atoms, n_atoms, len(self._q_points)), dtype=np.complex128)
         for i in range(n_atoms):
-            for j in range(n_atoms):
-                Rij = dist_vectors[i][j]
+            inds = [f for f in range(i, n_atoms)]
+            dist_vectors = structure.get_distances(i, inds, mic=True, vector=True)
+            for j in range(i, n_atoms):
+                Rij = dist_vectors[j - i]
                 Sq_lookup[i, j, :] = np.exp(-1j * np.dot(q_points, Rij))
+                Sq_lookup[j, i, :] = np.exp(-1j * np.dot(q_points, -Rij))
         return Sq_lookup
 
     def _get_indices(self,
