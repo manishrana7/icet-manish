@@ -430,7 +430,7 @@ def generate_sqs_by_enumeration(cluster_space: ClusterSpace,
                                          target_concentrations=target_concentrations)
     # Translate concentrations to the format required for concentration
     # restricted enumeration
-    cr = {}  # type: Dict[str, tuple]
+    cr: Dict[str, tuple] = {}
     sublattices = cluster_space.get_sublattices(cluster_space.primitive_structure)
     for sl in sublattices:
         mult_factor = len(sl.indices) / len(cluster_space.primitive_structure)
@@ -516,7 +516,7 @@ def occupy_structure_randomly(structure: Atoms, cluster_space: ClusterSpace,
 
     symbols_all = [''] * len(structure)
     for sl in cluster_space.get_sublattices(structure):
-        symbols = []  # type: List[str] # chemical_symbols in one sublattice
+        symbols: List[str] = []  # chemical_symbols in one sublattice
         chemical_symbols = sl.chemical_symbols
         if len(chemical_symbols) == 1:
             symbols += [chemical_symbols[0]] * len(sl.indices)
@@ -650,7 +650,7 @@ def _get_sqs_cluster_vector(cluster_space: ClusterSpace,
     # Internally, icet sorts species according to atomic numbers.
     # Also check that each symbol only occurs in one sublattice.
     symbol_to_integer_map = {}
-    found_species = []  # type: List[str]
+    found_species: List[str] = []
     for sublattice in all_sublattices:
         if len(sublattice.chemical_symbols) < 2:
             continue

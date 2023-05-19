@@ -63,8 +63,8 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
     ensemble_specs: List[Dict]
         A list of dictionaries, which should contain the following items:
 
-            * 'ensemble', which could be either "vcsgc"; "semi-grand"
-              or "canonical", lowercase and uppercase letters or any
+            * 'ensemble', which could be either 'vcsgc'; 'semi-grand'
+              or 'canonical', lowercase and uppercase letters or any
               combination thereof are accepted (required)
             * 'sublattice_index', index for the sublattice of
               interest (required)
@@ -202,7 +202,7 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
 
         self._ensemble_parameters = dict(temperature=temperature)
 
-        self._trial_steps_per_ensemble = {"ensemble_{}".format(i): 0 for i in
+        self._trial_steps_per_ensemble = {'ensemble_{}'.format(i): 0 for i in
                                           range(len(ensemble_specs))}
 
         # process the list of ensembles and parameters
@@ -249,7 +249,7 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
         ----------
          ensemble_specs: List[Dict]
             A list of dictionaries, which should contain the following items:
-            * 'ensemble', which could be either "vcsgc"; "semi-grand" or "canonical", lowercase
+            * 'ensemble', which could be either 'vcsgc'; 'semi-grand' or 'canonical', lowercase
             and upercase letters or any combination thereof are accepted
             * 'sublattice_index', index for the sublattice of interest
             * 'allowed_symbols', list of allowed chemical symbols
@@ -266,14 +266,14 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
 
         for ind, ensemble_spec in enumerate(ensemble_specs):
 
-            ensemble_arg = {}  # type: Dict[str, Any]
-            tag = "ensemble_{}".format(ind)
+            ensemble_arg: Dict[str, Any] = {}
+            tag = 'ensemble_{}'.format(ind)
             ensemble_arg['tag'] = tag
 
             # check the ensemble name
             if 'ensemble' not in ensemble_spec:
-                raise ValueError("The dictionary {} lacks the required key"
-                                 " 'ensemble'".format(ensemble_spec))
+                raise ValueError(
+                    f"The dictionary {ensemble_spec} lacks the required key 'ensemble'")
             ensemble = ensemble_spec['ensemble'].lower()
             if ensemble not in self._ensemble_trial_steps.keys():
                 msg = ['Ensemble not available']
@@ -292,12 +292,12 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
                 keys = ['phis', 'kappa'] + keys
             for key in keys[:-1]:
                 if key not in ensemble_spec:
-                    raise ValueError("The dictionary {} lacks the key '{}', which is required for"
-                                     " {} ensembles".format(ensemble_spec, key, ensemble))
+                    raise ValueError(f"The dictionary {ensemble_spec} lacks the key '{key}',"
+                                     f' which is required for {ensemble} ensembles')
             for key in ensemble_spec.keys():
                 if key not in keys:
-                    raise ValueError("Unknown key '{}', for a {} ensemble,"
-                                     " in the dictionary {}".format(key, ensemble, ensemble_spec))
+                    raise ValueError(f"Unknown key '{key}', for a {ensemble} ensemble,"
+                                     f' in the dictionary {ensemble_spec}')
 
             # record the sublattice index
             ensemble_arg['sublattice_index'] = ensemble_spec['sublattice_index']
@@ -365,8 +365,8 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
                     if number in self._ensemble_args[i]['phis'].keys():
                         count_specified_elements += 1
                 if count_specified_elements != len(allowed_species) - 1:
-                    raise ValueError("phis must be set for N - 1 elements on a sublattice with"
-                                     " N elements")
+                    raise ValueError('phis must be set for N - 1 elements on a sublattice with'
+                                     ' N elements')
 
     def _check_sublattice_index(self, sublattice_index: int):
         """Check the 'sublattice_index' item in the 'ensemble_spec' dictionary
@@ -379,15 +379,15 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
 
         if not isinstance(sublattice_index, int):
             raise TypeError("'sublattice_index' must be an integer, not"
-                            " {}".format(type(sublattice_index)))
+                            f' {format(type(sublattice_index))}')
 
         # check that the sublattice exists
         if sublattice_index not in range(len(self.sublattices)):
-            raise ValueError("There is no sublattice with index {}".format(sublattice_index))
+            raise ValueError('There is no sublattice with index {}'.format(sublattice_index))
 
         # check that the sublattice is active
         if len(self.sublattices[sublattice_index].chemical_symbols) == 1:
-            raise ValueError("The sublattice {} is inactive".format(sublattice_index))
+            raise ValueError('The sublattice {} is inactive'.format(sublattice_index))
 
     def _extract_allowed_species(self, allowed_symbols: List[str], sublattice_index: int
                                  ) -> List[int]:
@@ -405,11 +405,11 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
         if not isinstance(allowed_symbols, list) or not all(
                 [isinstance(i, str) for i in allowed_symbols]):
             raise TypeError(
-                "'allowed_symbols' must be a List[str], not {}".format(type(allowed_symbols)))
+                f"'allowed_symbols' must be a List[str], not {type(allowed_symbols)}")
         for symbol in allowed_symbols:
             if symbol not in self.sublattices[sublattice_index].chemical_symbols:
-                raise ValueError("The species {} is not allowed on sublattice"
-                                 " {}".format(symbol, sublattice_index))
+                raise ValueError('The species {} is not allowed on sublattice'
+                                 ' {}'.format(symbol, sublattice_index))
 
         return [atomic_numbers[s] for s in allowed_symbols]
 
@@ -432,11 +432,11 @@ class HybridEnsemble(ThermodynamicBaseEnsemble):
             probabilities = [w / norm for w in weights]
         else:
             if len(probabilities) != len(self._ensemble_args):
-                raise ValueError("The number of probabilities must be match the number of"
-                                 " ensembles")
+                raise ValueError('The number of probabilities must be match the number of'
+                                 ' ensembles')
 
             if not isclose(sum(probabilities), 1.0):
-                raise ValueError("The sum of all probabilities must be equal to 1")
+                raise ValueError('The sum of all probabilities must be equal to 1')
 
         self._probabilities = probabilities
 

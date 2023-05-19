@@ -195,7 +195,7 @@ class TestEnsemble(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             self.ensemble.get_random_sublattice_index([1, 0])
-        self.assertIn("probability_distribution should have the same size as sublattices",
+        self.assertIn('probability_distribution should have the same size as sublattices',
                       str(context.exception))
 
     def test_run_with_dict_observer(self):
@@ -296,7 +296,7 @@ class TestEnsemble(unittest.TestCase):
                              temperature=3000,
                              dc_filename=ensemble_T1000.name)
         os.remove(ensemble_T1000.name)
-        self.assertIn("Ensemble parameters do not match those stored in"
+        self.assertIn('Ensemble parameters do not match those stored in'
                       " data container file: {('temperature', 1000)}",
                       str(context.exception))
 

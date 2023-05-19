@@ -48,7 +48,7 @@ class Sublattice:
 
     @property
     def symbol(self):
-        """Symbol representation of sublattice, i.e. A, B, C, etc.."""
+        """Symbol representation of sublattice, i.e. A, B, C, etc."""
         return self._symbol
 
 
@@ -185,8 +185,8 @@ class Sublattices:
     def assert_occupation_is_allowed(self, chemical_symbols: List[str]):
         """Asserts that the current occupation obeys the sublattices."""
         if len(chemical_symbols) != len(self._structure):
-            raise ValueError("len of input chemical symbols ({}) do not match len of supercell"
-                             " ({})".format(len(chemical_symbols), len(self._structure)))
+            raise ValueError(f'Length of input chemical symbols ({len(chemical_symbols)}) does not'
+                             f' match length of supercell ({len(self._structure)}')
         for sl in self:
             for i in sl.indices:
                 if not chemical_symbols[i] in sl.chemical_symbols:

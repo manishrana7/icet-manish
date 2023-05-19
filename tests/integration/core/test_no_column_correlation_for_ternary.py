@@ -66,8 +66,7 @@ def checkNoCorrelation(cvs, tol=0.99):
                 continue
             corr = getColumnCorrelation(i, j, cvs_matrix)
             if corr > tol:
-                print("columns {} and {} were correletated with {}".format(
-                    i, j, corr))
+                print(f'columns {i} and {j} were correletated with {corr}')
                 no_correlated_columns = False
     assert no_correlated_columns
 

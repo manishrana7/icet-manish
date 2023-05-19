@@ -38,25 +38,25 @@ class TestStructurePoolGenerationWithAnnealing(unittest.TestCase):
                                            int(1e1))
         assert len(inds) == 10
 
-        start_inds = [f for f in range(10)]
+        initial_indices = [f for f in range(10)]
         (inds, traj) = structure_annealing(self.cs,
                                            self.structure_pool,
                                            10,
                                            int(1e1),
-                                           start_inds=start_inds)
+                                           initial_indices=initial_indices)
         assert len(inds) == 10
 
-        base = [self.structure_pool[i] for i in start_inds]
+        base = [self.structure_pool[i] for i in initial_indices]
         tmp_structure_pool = self.structure_pool[5:]
         (inds, traj) = structure_annealing(self.cs,
                                            tmp_structure_pool,
                                            10,
                                            int(1e1),
                                            base_structures=base,
-                                           start_inds=start_inds)
+                                           initial_indices=initial_indices)
         assert len(inds) == 10
 
-        base = [self.structure_pool[i] for i in start_inds]
+        base = [self.structure_pool[i] for i in initial_indices]
         tmp_structure_pool = self.structure_pool[5:]
         (inds, traj) = structure_annealing(self.cs,
                                            tmp_structure_pool,
@@ -65,17 +65,17 @@ class TestStructurePoolGenerationWithAnnealing(unittest.TestCase):
                                            base_structures=base)
         assert len(inds) == 10
 
-    def test_structure_annealing_with_start_inds(self):
+    def test_structure_annealing_with_initial_indices(self):
         """
         Test that it start with the correct indices
         """
-        start_inds = [f for f in range(10)]
+        initial_indices = [f for f in range(10)]
         (inds, _) = structure_annealing(self.cs,
                                         self.structure_pool,
                                         10,
                                         0,
-                                        start_inds=start_inds)
-        assert np.all(np.array(start_inds) == inds)
+                                        initial_indices=initial_indices)
+        assert np.all(np.array(initial_indices) == inds)
 
     def test_structure_annealing_minimization_condition_number(self):
         """
@@ -102,14 +102,14 @@ class TestStructurePoolGenerationWithAnnealing(unittest.TestCase):
         """
         Test that the correlation also minimizes the condition number
         """
-        start_inds = [f for f in range(10)]
+        initial_indices = [f for f in range(10)]
         (end_inds, traj) = structure_annealing(self.cs,
                                                self.structure_pool,
                                                10,
                                                int(1e3),
-                                               start_inds=start_inds)
+                                               initial_indices=initial_indices)
         A_start = []
-        for ind in start_inds:
+        for ind in initial_indices:
             A_start.append(self.cs.get_cluster_vector(self.structure_pool[ind]))
         A_start = np.array(A_start)
 
@@ -124,12 +124,12 @@ class TestStructurePoolGenerationWithAnnealing(unittest.TestCase):
         """
         Test that we return the correct structure indices
         """
-        start_inds = [f for f in range(10)]
+        initial_indices = [f for f in range(10)]
         (end_inds, traj) = structure_annealing(self.cs,
                                                self.structure_pool,
                                                10,
                                                int(1e3),
-                                               start_inds=start_inds)
+                                               initial_indices=initial_indices)
         A_end = []
         for ind in end_inds:
             A_end.append(self.cs.get_cluster_vector(self.structure_pool[ind]))
@@ -140,8 +140,8 @@ class TestStructurePoolGenerationWithAnnealing(unittest.TestCase):
         """
         Test that we return the correct structure indices
         """
-        start_inds = [i for i in range(5)]
-        base = [self.structure_pool[i] for i in start_inds]
+        initial_indices = [i for i in range(5)]
+        base = [self.structure_pool[i] for i in initial_indices]
         tmp_structure_pool = self.structure_pool[5:]
         (end_inds, traj) = structure_annealing(self.cs,
                                                tmp_structure_pool,

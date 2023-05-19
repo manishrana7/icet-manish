@@ -78,7 +78,7 @@ def test_init(constituent_strain, cluster_expansion):
     assert isinstance(calc.constituent_strain, ConstituentStrain)
 
 
-@pytest.mark.parametrize("occupations, expected_energy",
+@pytest.mark.parametrize('occupations, expected_energy',
                          [(np.array([29, 29, 29, 29]), 3.6),
                           (np.array([47, 29, 29, 29]), 5.0801431977),
                           (np.array([29, 29, 47, 47]), 6.0771033330)])
@@ -90,7 +90,7 @@ def test_calculate_total(constituent_strain_calculator, occupations, expected_en
     assert abs(energy - expected_energy) < 1e-6
 
 
-@pytest.mark.parametrize("current_occupations, sites",
+@pytest.mark.parametrize('current_occupations, sites',
                          [(np.array([29, 29, 29, 29]), [0]),
                           (np.array([47, 29, 29, 29]), [0]),
                           (np.array([29, 29, 47, 47]), [0]),
@@ -147,7 +147,7 @@ def test_calculate_change_single_flip(constituent_strain_calculator,
     assert abs(e_change - (e_after - e_before)) > 1e-6
 
 
-@pytest.mark.parametrize("current_occupations, sites",
+@pytest.mark.parametrize('current_occupations, sites',
                          [(np.array([29, 29, 29, 29]), [0, 2])])
 def test_calculate_change_multi_flip(constituent_strain_calculator,
                                      current_occupations,

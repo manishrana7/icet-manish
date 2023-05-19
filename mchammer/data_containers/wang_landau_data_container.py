@@ -2,7 +2,7 @@
 
 from warnings import warn
 from collections import Counter, OrderedDict
-from typing import Any, BinaryIO, Counter as CounterType, Dict, List, Optional, TextIO, Tuple, Union
+from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -419,9 +419,9 @@ def get_density_of_states_wl(dcs: Union[WangLandauDataContainer,
             entropies[tag2].entropy = entropies[tag2].entropy - offset
 
         # compile entropy over the entire energy range
-        data = {}  # type: Dict[float, float]
+        data: Dict[float, float] = {}
         indices = {}
-        counts = Counter()  # type: CounterType[float]
+        counts = Counter()
         for df in entropies.values():
             for index, en, ent in zip(df.index, df.energy, df.entropy):
                 data[en] = data.get(en, 0) + ent

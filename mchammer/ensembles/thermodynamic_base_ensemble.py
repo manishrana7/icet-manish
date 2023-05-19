@@ -1,5 +1,5 @@
 from abc import abstractproperty
-from typing import Dict, List, Type, Any
+from typing import Dict, List, Type
 
 import numpy as np
 
@@ -214,7 +214,7 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
 
     def _get_swap_sublattice_probabilities(self) -> List[float]:
         """ Returns sublattice probabilities suitable for swaps."""
-        sublattice_probabilities = []  # type: List[Any]
+        sublattice_probabilities = []
         for i, sl in enumerate(self.sublattices):
             if self.configuration.is_swap_possible(i):
                 sublattice_probabilities.append(len(sl.indices))
@@ -230,7 +230,7 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
         """Returns the default sublattice probability which is based on
         the sizes of a sublattice.
         """
-        probability_distribution = []  # type: List[Any]
+        probability_distribution = []
         for i, sl in enumerate(self.sublattices):
             if len(sl.chemical_symbols) > 1:
                 probability_distribution.append(len(sl.indices))

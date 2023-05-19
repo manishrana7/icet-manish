@@ -56,7 +56,7 @@ class TestEnsemble(unittest.TestCase):
             SemiGrandCanonicalEnsemble(structure=self.structure,
                                        calculator=self.calculator,
                                        temperature=self.temperature)
-        self.assertTrue("required positional argument:"
+        self.assertTrue('required positional argument:'
                         " 'chemical_potentials'" in str(context.exception))
 
     def test_property_boltzmann(self):

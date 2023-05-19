@@ -178,7 +178,7 @@ class TestSublattices(unittest.TestCase):
         """Tests that the number of sublattices are correct
         in the case of the allowed species have duplicates in them.
         """
-        structure = bulk("Al").repeat(2)
+        structure = bulk('Al').repeat(2)
 
         chemical_symbols = [['H']] + [['Al', 'Ge']]*(len(structure)-1)
         cs = ClusterSpace(
@@ -206,7 +206,8 @@ class TestSublattices(unittest.TestCase):
         # wrong length of chemical symbols should not work either
         with self.assertRaises(ValueError) as context:
             self.sublattices.assert_occupation_is_allowed(['Al', 'Ge'])
-        self.assertTrue('len of input chemical symbols (2)' in str(context.exception))
+        print('xxx', str(context.exception))
+        self.assertTrue('Length of input chemical symbols (2)' in str(context.exception))
 
 
 if __name__ == '__main__':
