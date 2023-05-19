@@ -74,7 +74,7 @@ class BaseEnsemble(ABC):
 
         # initialize basic variables
         self._accepted_trials = 0
-        self._observers = {}  # type: Dict[str, BaseObserver]
+        self._observers: Dict[str, BaseObserver] = {}
         self._step = 0
 
         # calculator and configuration
@@ -101,7 +101,7 @@ class BaseEnsemble(ABC):
 
         # add ensemble parameters and metadata
         if not self._ensemble_parameters:
-            self._ensemble_parameters = {}  # type: Dict[str, Any]
+            self._ensemble_parameters: Dict[str, Any] = {}
         self._ensemble_parameters['n_atoms'] = len(self.structure)
         metadata = OrderedDict(ensemble_name=self.__class__.__name__,
                                user_tag=user_tag, seed=self.random_seed)
@@ -116,7 +116,7 @@ class BaseEnsemble(ABC):
             self._data_container_filename = dc_filename
 
         if dc_filename is not None and os.path.isfile(dc_filename):
-            self._data_container = data_container_class.read(dc_filename)  # type: BaseDataContainer
+            self._data_container: BaseDataContainer = data_container_class.read(dc_filename)
 
             dc_ensemble_parameters = self.data_container.ensemble_parameters
             if not dicts_equal(self.ensemble_parameters,

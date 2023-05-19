@@ -374,13 +374,13 @@ class TestDataContainer(unittest.TestCase):
         del dc._last_state['entropy']
         with self.assertRaises(ValueError) as context:
             with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
+                warnings.simplefilter('ignore')
                 ret = get_density_of_states_wl(dc)
         self.assertTrue('Entropy information could not be retrieved' in str(context.exception))
         dcs = {'a': self.prepareDataContainer(), 'b': dc}
         with self.assertRaises(ValueError) as context:
             with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
+                warnings.simplefilter('ignore')
                 ret = get_density_of_states_wl(dcs)
         self.assertTrue('Entropy information could not be retrieved' in str(context.exception))
 

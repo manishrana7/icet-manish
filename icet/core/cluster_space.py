@@ -123,7 +123,7 @@ class ClusterSpace(_ClusterSpace):
         self._input_chemical_symbols = copy.deepcopy(chemical_symbols)
         chemical_symbols = self._get_chemical_symbols()
 
-        self._pruning_history = []  # type: List[tuple]
+        self._pruning_history: List[tuple] = []
 
         # set up primitive
         occupied_primitive, primitive_chemical_symbols = get_occupied_primitive_structure(
@@ -247,7 +247,7 @@ class ClusterSpace(_ClusterSpace):
         # (use largest orbit to obtain maximum line length)
         prototype_orbit = self.orbit_data[-1]
         width = len(repr_orbit(prototype_orbit))
-        s = []  # type: List
+        s = []
         s += ['{s:=^{n}}'.format(s=' Cluster Space ', n=width)]
         s += [' {:38} : {}'.format('space group', self.space_group)]
         s += [' {:38} : {}'
@@ -381,7 +381,7 @@ class ClusterSpace(_ClusterSpace):
         an ordered dictionary where keys and values represent order and number
         of orbits, respectively
         """
-        count_orbits = {}  # type: dict[int, int]
+        count_orbits: Dict[int, int] = {}
         for orbit in self.orbit_data:
             k = orbit['order']
             count_orbits[k] = count_orbits.get(k, 0) + 1

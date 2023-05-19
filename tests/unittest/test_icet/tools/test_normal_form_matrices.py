@@ -18,7 +18,7 @@ def hnf():
 """
 
 
-@pytest.mark.parametrize("H, rotations, translations, basis_shifts", (
+@pytest.mark.parametrize('H, rotations, translations, basis_shifts', (
     (np.array([[1, 0, 0], [1, 2, 0], [0, 0, 2]]),
      [np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])],
      [[0, 0, 0]],
@@ -40,7 +40,7 @@ def test_initialize_hnf(H, rotations, translations, basis_shifts):
     assert np.allclose(hnf.transformations[0][2], [0, 0, 0])
 
 
-@pytest.mark.parametrize("det, pbc, target_hnfs", (
+@pytest.mark.parametrize('det, pbc, target_hnfs', (
     (1, [True, True, True], [[[1, 0, 0], [0, 1, 0], [0, 0, 1]]]),
     (2, [True, True, True], [[[1, 0, 0], [0, 1, 0], [0, 0, 2]],
                              [[1, 0, 0], [0, 1, 0], [0, 1, 2]],
@@ -65,7 +65,7 @@ def test_yield_hermite_normal_forms(det, pbc, target_hnfs):
         assert np.allclose(hnf, target_hnf)
 
 
-@pytest.mark.parametrize("ncells, rotations, pbc, target_hnf_matrices", (
+@pytest.mark.parametrize('ncells, rotations, pbc, target_hnf_matrices', (
     (2, [[[1, 0, 0], [0, 1, 0], [0, 0, 1]],
          [[-1, 0, 0], [0, 1, 0], [0, 0, -1]]],
      [True, True, True],
@@ -86,7 +86,7 @@ def test_yield_reduced_hnfs(ncells, rotations, pbc, target_hnf_matrices):
         assert np.allclose(hnf.H, target_hnf_matrices[i])
 
 
-@pytest.mark.parametrize("H, target_S", (
+@pytest.mark.parametrize('H, target_S', (
                          ([[2, 0, 0], [0, 2, 0], [0, 0, 2]], [2, 2, 2]),
                          ([[3, 0, 0], [0, 2, 0], [0, 0, 2]], [1, 2, 6]),
                          ([[1, 0, 0], [0, 2, 0], [0, 0, 4]], [1, 2, 4]),
@@ -111,7 +111,7 @@ def test_add_hnf():
 
 
 def test_set_group_order():
-    """Tests that calculation of "group order"."""
+    """Tests that calculation of 'group order'."""
     snf = SmithNormalForm(np.array([[1, 0, 0], [0, 2, 0], [0, 0, 4]]))
     assert snf.group_order is None
     snf.set_group_order()

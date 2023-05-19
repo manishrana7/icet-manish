@@ -45,7 +45,7 @@ class SiteOccupancyObserver(BaseObserver):
     The following snippet illustrate how to use the site occupancy factor (SOF)
     observer in a Monte Carlo simulation of a surface slab. Here, the SOF
     observer is used to monitor the concentrations of different species at the
-    surface, the first subsurface layer, and the remaining "bulk". A minimal
+    surface, the first subsurface layer, and the remaining 'bulk'. A minimal
     cluster expansion is used with slightly modified surface interactions in
     order to obtain an example that can be run without much ado. In practice,
     one should of course use a proper cluster expansion::
@@ -144,10 +144,10 @@ class SiteOccupancyObserver(BaseObserver):
                     # check that the allowed species are equal for all sites
                     if allowed_species[site] is not None and \
                             species != allowed_species[site]:
-                        raise Exception("The allowed species {} for the site"
-                                        " with index {} differs from the"
-                                        " result {} for the previous index"
-                                        " ({})!".format(species, indices[k],
+                        raise Exception('The allowed species {} for the site'
+                                        ' with index {} differs from the'
+                                        ' result {} for the previous index'
+                                        ' ({})!'.format(species, indices[k],
                                                         allowed_species[site],
                                                         indices[k-1]))
                     allowed_species[site] = species

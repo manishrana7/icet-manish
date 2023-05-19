@@ -653,7 +653,7 @@ class TestGroundStateFinderTriplets(unittest.TestCase):
         gsf = icet.tools.ground_state_finder.GroundStateFinder(self.ce, self.supercell,
                                                                verbose=False)
         gs = gsf.get_ground_state(threads=1)
-        self.assertEqual(gs.get_chemical_formula(), "Au12Pd12")
+        self.assertEqual(gs.get_chemical_formula(), 'Au12Pd12')
 
         # Ensure that an exception is raised when no solution is found
         gsf = icet.tools.ground_state_finder.GroundStateFinder(self.ce, self.supercell,
@@ -811,7 +811,7 @@ class TestGroundStateFinderTwoActiveSublattices(unittest.TestCase):
 
         # Check that get_ground_state passes no counts are provided
         gs = self.gsf.get_ground_state()
-        self.assertEqual(gs.get_chemical_formula(), "Au8Li8")
+        self.assertEqual(gs.get_chemical_formula(), 'Au8Li8')
 
 
 if __name__ == '__main__':

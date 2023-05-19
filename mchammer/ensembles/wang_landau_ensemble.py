@@ -3,7 +3,7 @@
 import random
 
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -261,7 +261,7 @@ class WangLandauEnsemble(BaseEnsemble):
             self._ensemble_parameters[key] = count
 
         # set the convergence, which may be updated in case of a restart
-        self._converged = None  # type: Optional[bool]
+        self._converged: bool = None
 
         # the constructor of the parent classes must be called *after*
         # the ensemble_parameters dict has been populated
@@ -300,9 +300,9 @@ class WangLandauEnsemble(BaseEnsemble):
         if not hasattr(self, '_entropy_history'):
             self._entropy_history = {}
         if not hasattr(self, '_histogram'):
-            self._histogram = {}  # type: Dict[int, int]
+            self._histogram: Dict[int, int] = {}
         if not hasattr(self, '_entropy'):
-            self._entropy = {}  # type: Dict[int, float]
+            self._entropy: Dict[int, float] = {}
 
     @property
     def fill_factor(self) -> float:
@@ -629,7 +629,7 @@ class WangLandauEnsemble(BaseEnsemble):
         """Returns sublattice probabilities suitable for swaps. This method
         has been copied without modification from ThermodynamicBaseEnsemble.
         """
-        sublattice_probabilities = []  # type: List[Any]
+        sublattice_probabilities = []
         for i, sl in enumerate(self.sublattices):
             if self.configuration.is_swap_possible(i):
                 sublattice_probabilities.append(len(sl.indices))
@@ -646,7 +646,7 @@ class WangLandauEnsemble(BaseEnsemble):
         sizes of a sublattice. This method has been copied without
         modification from ThermodynamicBaseEnsemble.
         """
-        sublattice_probabilities = []  # type: List[Any]
+        sublattice_probabilities = []
         for _, sl in enumerate(self.sublattices):
             if len(sl.chemical_symbols) > 1:
                 sublattice_probabilities.append(len(sl.indices))

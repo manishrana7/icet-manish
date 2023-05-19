@@ -74,7 +74,7 @@ class TestEnsemble(unittest.TestCase):
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
-        self.assertIn("The dictionary {} lacks the required key"
+        self.assertIn('The dictionary {} lacks the required key'
                       " 'ensemble'".format(ensemble_specs[0]), str(context.exception))
 
         with self.assertRaises(ValueError) as context:
@@ -84,7 +84,7 @@ class TestEnsemble(unittest.TestCase):
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
         self.assertIn("The dictionary {} lacks the key 'sublattice_index', which is required for"
-                      " {} ensembles".format(ensemble_specs[0], ensemble_specs[0]['ensemble']),
+                      ' {} ensembles'.format(ensemble_specs[0], ensemble_specs[0]['ensemble']),
                       str(context.exception))
 
         with self.assertRaises(ValueError) as context:
@@ -94,7 +94,7 @@ class TestEnsemble(unittest.TestCase):
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
         self.assertIn("Unknown key 'temperature', for a {} ensemble, in the dictionary"
-                      " {}".format(ensemble_specs[0]['ensemble'], ensemble_specs[0]),
+                      ' {}'.format(ensemble_specs[0]['ensemble'], ensemble_specs[0]),
                       str(context.exception))
 
         with self.assertRaises(ValueError) as context:
@@ -113,7 +113,7 @@ class TestEnsemble(unittest.TestCase):
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
         self.assertIn("The dictionary {} lacks the key 'chemical_potentials', which is required for"
-                      " {} ensembles".format(ensemble_specs[0], ensemble_specs[0]['ensemble']),
+                      ' {} ensembles'.format(ensemble_specs[0], ensemble_specs[0]['ensemble']),
                       str(context.exception))
 
         with self.assertRaises(ValueError) as context:
@@ -123,7 +123,7 @@ class TestEnsemble(unittest.TestCase):
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
         self.assertIn("The dictionary {} lacks the key 'phis', which is required for {}"
-                      " ensembles".format(ensemble_specs[0], ensemble_specs[0]['ensemble']),
+                      ' ensembles'.format(ensemble_specs[0], ensemble_specs[0]['ensemble']),
                       str(context.exception))
 
         with self.assertRaises(ValueError) as context:
@@ -133,7 +133,7 @@ class TestEnsemble(unittest.TestCase):
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
         self.assertIn("The dictionary {} lacks the key 'kappa', which is required for {}"
-                      " ensembles".format(ensemble_specs[0], ensemble_specs[0]['ensemble']),
+                      ' ensembles'.format(ensemble_specs[0], ensemble_specs[0]['ensemble']),
                       str(context.exception))
 
         with self.assertRaises(ValueError) as context:
@@ -143,7 +143,7 @@ class TestEnsemble(unittest.TestCase):
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
         self.assertIn("Unknown key 'phis', for a {} ensemble, in the dictionary"
-                      " {}".format(ensemble_specs[0]['ensemble'], ensemble_specs[0]),
+                      ' {}'.format(ensemble_specs[0]['ensemble'], ensemble_specs[0]),
                       str(context.exception))
 
         with self.assertRaises(ValueError) as context:
@@ -153,7 +153,7 @@ class TestEnsemble(unittest.TestCase):
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
         self.assertIn("Unknown key 'kappa', for a {} ensemble, in the dictionary"
-                      " {}".format(ensemble_specs[0]['ensemble'], ensemble_specs[0]),
+                      ' {}'.format(ensemble_specs[0]['ensemble'], ensemble_specs[0]),
                       str(context.exception))
 
         with self.assertRaises(ValueError) as context:
@@ -164,7 +164,7 @@ class TestEnsemble(unittest.TestCase):
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
         self.assertIn("Unknown key 'chemical_potentials', for a {} ensemble, in the dictionary"
-                      " {}".format(ensemble_specs[0]['ensemble'], ensemble_specs[0]),
+                      ' {}'.format(ensemble_specs[0]['ensemble'], ensemble_specs[0]),
                       str(context.exception))
 
         with self.assertRaises(ValueError) as context:
@@ -175,7 +175,7 @@ class TestEnsemble(unittest.TestCase):
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
         self.assertIn("Unknown key 'phis', for a {} ensemble, in the dictionary"
-                      " {}".format(ensemble_specs[0]['ensemble'], ensemble_specs[0]),
+                      ' {}'.format(ensemble_specs[0]['ensemble'], ensemble_specs[0]),
                       str(context.exception))
 
         with self.assertRaises(ValueError) as context:
@@ -187,7 +187,7 @@ class TestEnsemble(unittest.TestCase):
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
         self.assertIn("Unknown key 'kappa', for a {} ensemble, in the dictionary"
-                      " {}".format(ensemble_specs[0]['ensemble'], ensemble_specs[0]),
+                      ' {}'.format(ensemble_specs[0]['ensemble'], ensemble_specs[0]),
                       str(context.exception))
 
         with self.assertRaises(ValueError) as context:
@@ -199,7 +199,7 @@ class TestEnsemble(unittest.TestCase):
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
         self.assertIn("Unknown key 'chemical_potentials', for a {} ensemble, in the dictionary "
-                      "{}".format(ensemble_specs[0]['ensemble'], ensemble_specs[0]),
+                      '{}'.format(ensemble_specs[0]['ensemble'], ensemble_specs[0]),
                       str(context.exception))
 
         with self.assertRaises(TypeError) as context:
@@ -217,7 +217,7 @@ class TestEnsemble(unittest.TestCase):
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
-        self.assertIn("There is no sublattice with index 1", str(context.exception))
+        self.assertIn('There is no sublattice with index 1', str(context.exception))
 
         with self.assertRaises(TypeError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 0,
@@ -236,7 +236,7 @@ class TestEnsemble(unittest.TestCase):
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
-        self.assertIn("The species Ge is not allowed on sublattice 0",
+        self.assertIn('The species Ge is not allowed on sublattice 0',
                       str(context.exception))
 
         with self.assertRaises(ValueError) as context:
@@ -682,7 +682,7 @@ class TestEnsembleSublattices(unittest.TestCase):
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
-        self.assertIn("There is no sublattice with index 2", str(context.exception))
+        self.assertIn('There is no sublattice with index 2', str(context.exception))
 
         with self.assertRaises(ValueError) as context:
             ensemble_specs = [{'ensemble': 'canonical', 'sublattice_index': 0,
@@ -691,7 +691,7 @@ class TestEnsembleSublattices(unittest.TestCase):
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
-        self.assertIn("The species H is not allowed on sublattice 0",
+        self.assertIn('The species H is not allowed on sublattice 0',
                       str(context.exception))
 
         with self.assertRaises(ValueError) as context:
@@ -701,7 +701,7 @@ class TestEnsembleSublattices(unittest.TestCase):
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
-        self.assertIn("The species Au is not allowed on sublattice 1",
+        self.assertIn('The species Au is not allowed on sublattice 1',
                       str(context.exception))
 
     def test_property_probabilities(self):
@@ -880,7 +880,7 @@ class TestEnsembleSpectatorSublattice(unittest.TestCase):
                            calculator=self.calculator,
                            temperature=self.temperature,
                            ensemble_specs=ensemble_specs)
-        self.assertIn("The sublattice 1 is inactive", str(context.exception))
+        self.assertIn('The sublattice 1 is inactive', str(context.exception))
 
     def test_property_probabilities(self):
         """Tests probabilities property."""

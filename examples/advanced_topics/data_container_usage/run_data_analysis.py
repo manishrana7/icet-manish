@@ -25,7 +25,7 @@ ax1 = fig.add_subplot(111)
 ax1.plot(steps[:max_lag], acf, label='potential')
 ax1.axhline(y=np.exp(-2), ls='--', c='k', label=r'e$^{-2}$')
 ax1.annotate('Correlation length', xy=(corr_length, np.exp(-2)), xytext=(corr_length, 0.5),
-             arrowprops=dict(arrowstyle="->"))
+             arrowprops=dict(arrowstyle='->'))
 
 plt.xlim([0, steps[max_lag]])
 ax1.set_xlabel('mctrial steps')

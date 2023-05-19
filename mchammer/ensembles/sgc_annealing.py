@@ -112,7 +112,7 @@ class SGCAnnealing(ThermodynamicBaseEnsemble):
                  trajectory_write_interval: int = None,
                  sublattice_probabilities: List[float] = None) -> None:
 
-        self._ensemble_parameters = dict(n_steps=n_steps)  # type: Dict[str, Any]
+        self._ensemble_parameters: Dict[str, Any] = dict(n_steps=n_steps)
 
         self._chemical_potentials = get_chemical_potentials(chemical_potentials)
 

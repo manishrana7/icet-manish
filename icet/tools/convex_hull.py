@@ -7,7 +7,7 @@ import numpy as np
 from typing import List, Sized, Union
 from scipy.interpolate import griddata
 from scipy.spatial import ConvexHull as ConvexHullSciPy
-from scipy.spatial.qhull import QhullError
+from scipy.spatial import QhullError
 
 
 class ConvexHull:
@@ -89,8 +89,8 @@ generated/scipy.spatial.ConvexHull.html>`_.
         hull = ConvexHullSciPy(points)
 
         # Collect convex hull points in handy arrays
-        concentrations = []  # type: ignore
-        energies = []  # type: ignore
+        concentrations = []
+        energies = []
         for vertex in hull.vertices:
             if self.dimensions == 1:
                 concentrations.append(points[vertex][0])

@@ -66,7 +66,7 @@ def test_spin_variables(constituent_strain):
     assert constituent_strain.concentration_number == 29
 
 
-@pytest.mark.parametrize("k_to_parameter_function, expected_parameter",
+@pytest.mark.parametrize('k_to_parameter_function, expected_parameter',
                          [(lambda kpt: 2 * kpt, 0.5), (lambda kpt: -kpt, 0.25), (None, 0.25)])
 def test_kpoints(supercell, primitive_structure, chemical_symbols, concentration_symbol,
                  strain_energy_function, k_to_parameter_function, expected_parameter):
@@ -114,7 +114,7 @@ def test_nonbinary_systems(supercell, primitive_structure, concentration_symbol,
     assert 'specify two' in str(e.value)
 
 
-@pytest.mark.parametrize("occupations, expected_c",
+@pytest.mark.parametrize('occupations, expected_c',
                          [([29, 29, 47, 47], 0.5),
                           ([47, 29, 47, 47], 0.25),
                           ([47, 47, 47, 47], 0.0)])
@@ -124,7 +124,7 @@ def test_get_concentration(constituent_strain, occupations, expected_c):
     assert abs(c - expected_c) < 1e-6
 
 
-@pytest.mark.parametrize("occupations, kpt, expected_value",
+@pytest.mark.parametrize('occupations, kpt, expected_value',
                          [(np.array([29] * 4), np.array([0, 0, 0.25]), 0),
                           (np.array([29, 47, 47, 29]), np.array([0, 0, 0.25]), -1),
                           (np.array([47, 29, 29, 47]), np.array([0, 0, 0.25]), 1),
@@ -150,8 +150,8 @@ def test_get_structure_factor(supercell, occupations, kpt, expected_value):
     assert abs(S_pos + S_neg) < 1e-6
 
 
-@pytest.mark.parametrize("wanted_kpoint, occupations, concentration, "
-                         "expected_DE, expected_structure_factor, multiplicity",
+@pytest.mark.parametrize('wanted_kpoint, occupations, concentration, '
+                         'expected_DE, expected_structure_factor, multiplicity',
                          [([0, 0, 0.25], [29] * 4, 1.0, 0.0, 0.0, 0.5),
                           ([0, 0, 0.25], [47] * 4, 0.0, 0.0, 0.0, 0.5),
                           ([0, 0, 0.25], [29, 47, 47, 29], 0.5, 0.25, -1, 0.5),
@@ -181,7 +181,7 @@ def test_get_constituent_strain_term(constituent_strain, wanted_kpoint,
     assert abs(kpoint.structure_factor - expected_structure_factor) < 1e-6
 
 
-@pytest.mark.parametrize("occupations, expected_value",
+@pytest.mark.parametrize('occupations, expected_value',
                          [([29] * 4, 0),
                           ([47] * 4, 0),
                           ([47, 47, 47, 29], 0.078900822032611),
@@ -192,7 +192,7 @@ def test_get_constituent_strain(constituent_strain, occupations, expected_value)
     assert abs(e - expected_value) < 1e-6
 
 
-@pytest.mark.parametrize("occupations, atom_index, expected_change",
+@pytest.mark.parametrize('occupations, atom_index, expected_change',
                          [([47] * 4, 3, 0.078900822032611),
                           ([47, 47, 47, 29], 1, 0.119275833246148 - 0.078900822032611),
                           ([47, 29, 47, 29], 1, 0.078900822032611 - 0.119275833246148)])
@@ -286,7 +286,7 @@ def test_ordered_combinations():
     assert tuple(sorted(ordered_combinations)) == tuple(sorted(expected_combinations))
 
 
-@pytest.mark.parametrize("k, translations",
+@pytest.mark.parametrize('k, translations',
                          [([0, 0, 0], [0, 0, 0]),
                           ([0, 0, 0], [-10, 7, 0]),
                           ([0, 0, 0.03], [0, 0, 0]),
@@ -306,7 +306,7 @@ def test_translate_to_1BZ(primitive_structure, k, translations):
     assert np.linalg.norm(k_back - k) < 1e-6
 
 
-@pytest.mark.parametrize("kpt, equivalent_kpts",
+@pytest.mark.parametrize('kpt, equivalent_kpts',
                          [([0, 0, 0], [[0, 0, 0]]),  # gamma
                           ([0, 0, 0.03], [[0, 0, 0.03]]),  # random
                           ([0, 0, 0.25], [[0, 0, 0.25], [0, 0, -0.25]]),  # 100 face
@@ -334,7 +334,7 @@ def test_find_equivalent_kpoints_fcc(primitive_structure, kpt, equivalent_kpts):
                        for equivalent_kpt in equivalent_kpts])
 
 
-@pytest.mark.parametrize("kpt, equivalent_kpts",
+@pytest.mark.parametrize('kpt, equivalent_kpts',
                          [([0, 0, 0], [[0, 0, 0]]),  # gamma
                           ([0, 0, 0.03], [[0, 0, 0.03]]),  # random
                           ([0, 0, 0.125], [[0, 0, 0.125], [0, 0, -0.125]]),  # face
@@ -364,7 +364,7 @@ def test_find_equivalent_kpoints_sc(kpt, equivalent_kpts):
                        for equivalent_kpt in equivalent_kpts])
 
 
-@pytest.mark.parametrize("x, parameters, expected_value",
+@pytest.mark.parametrize('x, parameters, expected_value',
                          [(0.0, [0.1, 0.2, 0.3], 0),
                           (1.0, [0.1, 0.2, 0.3], 0),
                           (0.5, [1, 2, 3], 0.25),

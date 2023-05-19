@@ -166,7 +166,7 @@ class TestBinaryShortRangeOrderObserver(unittest.TestCase):
 
     def test_property_tag(self):
         """Tests property tag."""
-        self.assertEqual(self.observer.tag, "BinaryShortRangeOrderObserver")
+        self.assertEqual(self.observer.tag, 'BinaryShortRangeOrderObserver')
 
     def test_property_interval(self):
         """Tests property interval."""

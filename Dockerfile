@@ -1,5 +1,6 @@
+
 # Base image
-FROM python:3.7
+FROM python:3.8
 
 # 1. Base packages
 # 2. Packages for testing
@@ -31,7 +32,7 @@ RUN \
   && \
   pip3 install --upgrade \
     ase \
-    mip==1.13.0 \
+    mip \
     numba \
     numpy \
     pandas \

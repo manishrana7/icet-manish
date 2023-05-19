@@ -177,7 +177,7 @@ class ClusterExpansion:
         par_col_width = max(len('{:9.3g}'.format(max(self._parameters, key=abs))), len('ECI'))
         width = len(cluster_space_repr[0]) + 2 * (len(' | ') + par_col_width)
 
-        s = []  # type: List
+        s = []
         s += ['{s:=^{n}}'.format(s=' Cluster Expansion ', n=width)]
         s += [t for t in cluster_space_repr if re.search(':', t)]
 

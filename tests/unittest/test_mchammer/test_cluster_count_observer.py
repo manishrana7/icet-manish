@@ -30,7 +30,7 @@ class TestClusterCountObserver(unittest.TestCase):
 
     def test_property_tag(self):
         """Tests property tag."""
-        self.assertEqual(self.observer.tag, "ClusterCountObserver")
+        self.assertEqual(self.observer.tag, 'ClusterCountObserver')
 
     def test_property_interval(self):
         """Tests property interval."""

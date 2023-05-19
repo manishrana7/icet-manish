@@ -62,10 +62,10 @@ class BaseDataContainer:
         self._ensemble_parameters = ensemble_parameters
         self._metadata = metadata
         self._add_default_metadata()
-        self._last_state = {}  # type: Dict[str, Any]
+        self._last_state: Dict[str, Any] = {}
 
-        self._observables = set()  # type: Set[str]
-        self._data_list = []  # type: List[Dict[str, Any]]
+        self._observables: Set[str] = set()
+        self._data_list: List[Dict[str, Any]] = []
 
     def append(self, mctrial: int, record: Dict[str, Union[int, float, list]]):
         """
@@ -353,7 +353,7 @@ class BaseDataContainer:
     def __str__(self):
         """ string representation of data container """
         width = 80
-        s = []  # type: List
+        s = []
         s += ['{s:=^{n}}'.format(s=' Data Container ', n=width)]
         data_container_type = str(self.__class__).split('.')[-1].replace("'>", '')
         s += [' {:22}: {}'.format('data_container_type', data_container_type)]

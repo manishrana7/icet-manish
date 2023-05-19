@@ -31,7 +31,7 @@ def cluster_space(ideal_structure) -> ClusterSpace:
     return cs
 
 
-@pytest.mark.parametrize("P,occupation,cv_target", testdata)
+@pytest.mark.parametrize('P,occupation,cv_target', testdata)
 def test_mapping_with_occupation_only(ideal_structure, cluster_space, P, occupation, cv_target):
     structure = make_supercell(ideal_structure, P)
     for elem, occ in occupation.items():
