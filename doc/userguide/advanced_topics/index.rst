@@ -19,6 +19,7 @@ command line::
    :caption: Contents
 
    structure_enumeration
+   training_set_generation
    mapping_structures
    sqs_generation
    customizing_cluster_spaces

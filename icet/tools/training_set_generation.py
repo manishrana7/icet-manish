@@ -10,25 +10,6 @@ from mchammer.ensembles.canonical_annealing import available_cooling_functions
 logger = logger.getChild('training_set_generation')
 
 
-def _covariance(X: np.ndarray) -> np.ndarray:
-    """Get the norm of the covariance between parameters.
-
-    Ignore diagonal since self correlation is not important
-
-    Parameters
-    ----------
-    X
-        current fit matrix
-    """
-    cov = X.T @ X
-    cov = np.tril(cov, k=-1)
-    return np.linalg.norm(cov)
-
-
-available_metric_functions = {'covariance': _covariance,
-                              'condition number': np.linalg.cond}
-
-
 def _get_fit_matrix(structure_container: StructureContainer,
                     new_inds: np.ndarray,
                     n_base_structures: int) -> np.ndarray:
@@ -82,7 +63,7 @@ def _do_swap(inds: np.ndarray,
     return _inds
 
 
-def structure_annealing(
+def structure_selection_annealing(
         cluster_space: ClusterSpace,
         monte_carlo_structures: List[Atoms],
         n_structures_to_add: int,
@@ -91,7 +72,6 @@ def structure_annealing(
         cooling_start: float = 5,
         cooling_stop: float = 0.001,
         cooling_function: Union[str, Callable] = 'exponential',
-        metric_function: Union[str, Callable] = 'condition number',
         initial_indices: List[int] = None) \
             -> Tuple[List[int], List[float]]:
     """Given a cluster space, a base pool of structures, and a new pool
@@ -126,12 +106,9 @@ def structure_annealing(
         Artificial number that rescales the difference between the
         metric value between two iterations.  Available options are
         ``'linear'`` and ``'exponential'``
-    metric_function
-        Metric to measure how good your current structure pool is.
-        Available options are ``'condition number'`` and ``'covariance'``
     initial_indices
         Picks out the starting structure from the
-        :attr:`monte_carlo_structures pool. Can be used if you want
+        :attr:`monte_carlo_structures` pool. Can be used if you want
         to continue from an old run for example.
 
     Example
@@ -147,42 +124,36 @@ def structure_annealing(
 
         >>> prim = bulk('Au', a=4.0)
         >>> cs = ClusterSpace(prim, [6.0], [['Au', 'Pd']])
-        >>> target_concentrations = []
-        >>> for i in range(1, 8):
-        >>>     target_concentrations.append({'Au': i / 8, 'Pd': (8 - i) / 8})
         >>> structure_pool = []
         >>> for _ in range(500):
-        >>>     structure = prim.repeat(4)
-        >>>     concentration = np.random.choice(target_concentrations)
+        >>>     # Create random supercell.
+        >>>     supercell = np.random.randint(1, 4, size=3)
+        >>>     structure = prim.repeat(supercell)
+
+        >>>     # Randomize concentrations in the supercell
+        >>>     n_atoms = len(structure)
+        >>>     n_Au = np.random.randint(0, n_atoms)
+        >>>     n_Pd = n_atoms - n_Au
+        >>>     concentration = {'Au': n_Au / n_atoms, 'Pd': n_Pd / n_atoms}
+
+        >>>     # Occupy the structure randomly and store it.
         >>>     occupy_structure_randomly(structure, cs, concentration)
         >>>     structure_pool.append(structure)
+        >>> start_inds = [f for f in range(10)]
 
-    Now we can use the :func:`structure_annealing` function to find an
+    Now we can use the :func:`structure_selection_annealing` function to find an
     optimized structure pool::
 
-        >>> inds, traj = structure_annealing(cs,
-        >>>                                  structure_pool,
-        >>>                                  n_structures_to_add=10,
-        >>>                                  n_steps=100)
-        >>> training_structures = []
-        >>> for ind in inds:
-        >>>     training_structures.append(structure_pool[ind])
+        >>> inds, cond = structure_selection_annealing(cs,
+        >>>                                            structure_pool,
+        >>>                                            n_structures_to_add=10,
+        >>>                                            n_steps=100)
+        >>> training_structures = [structure_pool[ind] for ind in inds]
         >>> print(training_structures)
 
     """
     if base_structures is None:
         base_structures = []
-
-    # set up metric function
-    if isinstance(metric_function, str):
-        available = sorted(available_metric_functions.keys())
-        if metric_function not in available:
-            raise ValueError(f'Select from the available metric_functions: {available}')
-        _metric_function = available_metric_functions[metric_function]
-    elif callable(metric_function):
-        _metric_function = metric_function
-    else:
-        raise TypeError('metric_function must be either str or a function')
 
     # set up cooling function
     if isinstance(cooling_function, str):
@@ -195,7 +166,7 @@ def structure_annealing(
     else:
         raise TypeError('cooling_function must be either str or a function')
 
-    # setup cluster vectors
+    # set up cluster vectors
     structure_container = StructureContainer(cluster_space)
     for structure in base_structures:
         structure_container.add_structure(structure, properties={'energy': 0})
@@ -217,8 +188,8 @@ def structure_annealing(
     fit_matrix = _get_fit_matrix(structure_container, inds, n_base_structures)
 
     # get metric of fitting_matrix
-    metric_val = _metric_function(fit_matrix)
-    metric_traj = [metric_val]
+    cond = np.linalg.cond(fit_matrix)
+    cond_traj = [cond]
     for n in range(n_steps):
         # get current artificial cooling
         T = _cooling_function(n, cooling_start, cooling_stop, n_steps)
@@ -228,14 +199,14 @@ def structure_annealing(
         new_fit_matrix = _get_fit_matrix(structure_container, new_inds, n_base_structures)
 
         # get new metric
-        metric_new = _metric_function(new_fit_matrix)
-        if (metric_val - metric_new) / T > np.log(np.random.uniform()):
+        cond_new = np.linalg.cond(new_fit_matrix)
+        if (cond - cond_new) / T > np.log(np.random.uniform()):
             # if accepted update data
-            metric_val = metric_new
+            cond = cond_new
             inds = new_inds
-            metric_traj.append(metric_val)
+            cond_traj.append(cond)
 
-        if n % 100:
-            logger.info(f'step: {n:6d}   T: {T:8.5f}   current metric: {metric_val:8.5f}')
+        if n % 100 == 0:
+            logger.info(f'step {n:6d}, T {T:8.5f} , current condition number {cond:8.5f}')
 
-    return inds, metric_traj
+    return inds, cond_traj

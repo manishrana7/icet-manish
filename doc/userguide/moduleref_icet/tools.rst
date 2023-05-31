@@ -34,6 +34,12 @@ Structure enumeration
    single: Function reference; Special structures
    single: Class reference; Special structures
 
+Generation of training structures
+---------------------------------
+
+.. autofunction:: icet.tools.training_set_generation.structure_selection_annealing
+
+
 Generation of special structures
 --------------------------------
 
