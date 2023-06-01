@@ -8,7 +8,7 @@ import numpy as np
 from ase.build import bulk
 from icet import ClusterSpace
 from icet.tools.structure_generation import occupy_structure_randomly
-from icet.tools.training_set_generation import structure_annealing
+from icet.tools.training_set_generation import structure_selection_annealing
 
 
 # Convenience function for supercell size generation
@@ -60,8 +60,8 @@ n_steps = 10000
 
 # start the annealing procedure to minimize the condition number of the fit matrix,
 # the base_structures are always included.
-indices, traj = structure_annealing(cluster_space, structures[5:], n_structures_to_add, n_steps,
-                                    base_structures=base_structures)
+indices, traj = structure_selection_annealing(cluster_space, structures[5:], n_structures_to_add,
+                                              n_steps, base_structures=base_structures)
 condition_number_base_structures = traj[-1]
 
 # collect the extra structures
