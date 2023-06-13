@@ -97,7 +97,6 @@ class OrbitList(_OrbitList):
                             position_tolerance=position_tolerance)
         logger.info('Finished construction of orbit list.')
 
-
     @property
     def primitive_structure(self):
         """
@@ -118,7 +117,7 @@ class OrbitList(_OrbitList):
 
     def __getitem__(self, index: int) -> Orbit:
         """
-        Subscripting an OrbitList returns and Orbit
+        Returns an Orbit when subscripting and OrbitList
         """
         return self.get_orbit(index)
 
