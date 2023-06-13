@@ -8,6 +8,7 @@ from collections import Counter
 import numpy as np
 
 from _icet import _OrbitList
+from icet.core.orbit import Orbit
 from ase import Atoms
 from icet.core.local_orbit_list_generator import LocalOrbitListGenerator
 from icet.core.neighbor_list import get_neighbor_lists
@@ -96,6 +97,7 @@ class OrbitList(_OrbitList):
                             position_tolerance=position_tolerance)
         logger.info('Finished construction of orbit list.')
 
+
     @property
     def primitive_structure(self):
         """
@@ -113,6 +115,12 @@ class OrbitList(_OrbitList):
             s += [f'orbit: {k:3}   order: {orbit.order:3}'
                   f'   multiplicity: {len(orbit):3}   representative_cluster: {c}']
         return '\n'.join(s)
+
+    def __getitem__(self, index: int) -> Orbit:
+        """
+        Subscripting an OrbitList returns and Orbit
+        """
+        return self.get_orbit(index)
 
     def get_supercell_orbit_list(self,
                                  structure: Atoms,
