@@ -404,6 +404,8 @@ class BaseDataContainer:
                 fobj.write(tf.extractfile('atoms').read())
                 fobj.flush()
                 structure = ase_read(fobj.name, format='json')
+            tmpfname = fobj.name
+            os.remove(tmpfname)
 
             # file with reference data
             with tempfile.NamedTemporaryFile(delete=False) as fobj:
@@ -411,6 +413,8 @@ class BaseDataContainer:
                 fobj.flush()
                 with open(fobj.name, encoding='utf-8') as fd:
                     reference_data = json.load(fd)
+            tmpfname = fobj.name
+            os.remove(tmpfname)
 
             # init DataContainer
             dc = cls(structure=structure,
@@ -434,6 +438,8 @@ class BaseDataContainer:
                     dc._data_list = data.T.apply(lambda x: x.dropna().to_dict()).tolist()
                 else:
                     dc._data_list = np.load(fobj, allow_pickle=True)['arr_0'].tolist()
+            tmpfname = fobj.name
+            os.remove(tmpfname)
 
         dc._observables = set([key for data in dc._data_list for key in data])
         dc._observables = dc._observables - {'mctrial'}
