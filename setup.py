@@ -6,15 +6,14 @@ import sys
 from glob import glob
 
 import setuptools
-from setuptools import Extension, find_packages, setup
+from pybind11.setup_helpers import Pybind11Extension
+from setuptools import find_packages, setup
 from setuptools.command.build_ext import build_ext
 
-
-icet_cpp_module = Extension(
+icet_cpp_module = Pybind11Extension(
     '_icet',
     glob('src/*.cpp'),
     include_dirs=[
-        'src/3rdparty/pybind11/include/',
         'src/3rdparty/boost_1_68_0/',
         'src/3rdparty/eigen3/'
     ],
