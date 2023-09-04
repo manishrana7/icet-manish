@@ -103,3 +103,14 @@ For analysis functions see :ref:`here <data_container_analysis_functions>`.
    :inherited-members:
 
 .. autofunction:: mchammer.ensembles.wang_landau_ensemble.get_bins_for_parallel_simulations
+
+
+Thermodynamic-integration ensemble
+----------------------------------
+
+For analysis functions see :ref:`here <data_container_analysis_functions>`.
+
+.. autoclass:: ThermodynamicIntegrationEnsemble
+   :members:
+   :undoc-members:
+   :inherited-members:

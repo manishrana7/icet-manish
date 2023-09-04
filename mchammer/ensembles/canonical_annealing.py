@@ -208,7 +208,7 @@ class CanonicalAnnealing(ThermodynamicBaseEnsemble):
 
 
 def _cooling_linear(step, T_start, T_stop, n_steps):
-    return T_start + (T_stop-T_start) * step / (n_steps - 1)
+    return T_start + (T_stop-T_start) * (step + 1) / n_steps
 
 
 def _cooling_exponential(step, T_start, T_stop, n_steps):

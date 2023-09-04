@@ -42,5 +42,9 @@ Analysis functions
 
 .. autofunction:: mchammer.data_containers.get_density_of_states_wl
 
+.. autofunction:: mchammer.free_energy_tools.get_free_energy_thermodynamic_integration
+
+.. autofunction:: mchammer.free_energy_tools.get_free_energy_temperature_integration
+
 .. automodule:: mchammer.data_analysis
    :members:
