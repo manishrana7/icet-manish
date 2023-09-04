@@ -143,5 +143,10 @@ Bibliography
    | Physical Review Letters **65**, 353 (1990)
    | `doi: 10.1103/PhysRevLett.65.353 <https://doi.org/10.1103/PhysRevLett.65.353>`_
 
+.. [FreAstKon16]
+   | R. Freitas, M. Asta and M. Koning
+   | *Nonequilibrium free-energy calculation of solids using LAMMPS*
+   | Computational Materials Science **112 Part A** 333 (2016)
+   | `doi: 10.1016/j.commatsci.2022.111275 <https://doi.org/10.1016/j.commatsci.2022.111275>`_
 
 Also see this :ref:`list of publications <publications>` using icet.

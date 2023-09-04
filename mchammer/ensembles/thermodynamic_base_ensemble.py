@@ -133,6 +133,31 @@ class ThermodynamicBaseEnsemble(BaseEnsemble):
             return 1
         return 0
 
+    def do_thermodynamic_swap(self,
+                              sublattice_index: int,
+                              lambda_val: float,
+                              allowed_species: List[int] = None) -> int:
+        """ Carries out one Monte Carlo trial step.
+
+        Parameters
+        ---------
+        sublattice_index
+            the sublattice the swap will act on
+        allowed_species
+            list of atomic numbers for allowed species
+
+        Returns
+        -------
+        Returns 1 or 0 depending on if trial move was accepted or rejected
+        """
+        sites, species = self.configuration.get_swapped_state(sublattice_index, allowed_species)
+        potential_diff = self._get_property_change(sites, species)
+
+        if self._acceptance_condition(potential_diff * lambda_val):
+            self.update_occupations(sites, species)
+            return 1
+        return 0
+
     def do_sgc_flip(self, chemical_potentials: Dict[int, float],
                     sublattice_index: int,
                     allowed_species: List[int] = None) -> int:

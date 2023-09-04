@@ -29,4 +29,5 @@ command line::
    data_container
    hybrid_ensembles
    wang_landau_simulations
+   free_energy_canonical_ensemble
    parallel_monte_carlo

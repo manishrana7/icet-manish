@@ -8,6 +8,7 @@ from .sgc_annealing import SGCAnnealing
 from .target_cluster_vector_annealing import TargetClusterVectorAnnealing
 from .vcsgc_ensemble import VCSGCEnsemble
 from .wang_landau_ensemble import WangLandauEnsemble
+from .thermodynamic_integration_ensemble import ThermodynamicIntegrationEnsemble
 
 __all__ = ['CanonicalEnsemble',
            'CanonicalAnnealing',
@@ -16,4 +17,5 @@ __all__ = ['CanonicalEnsemble',
            'SGCAnnealing',
            'TargetClusterVectorAnnealing',
            'VCSGCEnsemble',
-           'WangLandauEnsemble']
+           'WangLandauEnsemble',
+           'ThermodynamicIntegrationEnsemble']
