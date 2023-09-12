@@ -10,10 +10,9 @@ from mchammer.free_energy_tools import get_free_energy_thermodynamic_integration
 from mchammer.ensembles.thermodynamic_base_ensemble import ThermodynamicBaseEnsemble
 from mchammer.ensembles import CanonicalEnsemble
 
-import hashlib
-import time
 import os
 from itertools import permutations
+import tempfile
 
 from mchammer.free_energy_tools import _lambda_function_forward
 
@@ -177,8 +176,9 @@ class TestEnsemble(unittest.TestCase):
         this is the compared with the direct method.
         However, this time the simulation is restarted.
         """
-        clock = str(time.time()).encode('utf-8')
-        fname = f'/tmp/{hashlib.md5(clock).hexdigest()}.dc'
+        tmpfolder = tempfile._get_default_tempdir()
+        tmpname = next(tempfile._get_candidate_names())
+        fname = f'{tmpfolder}/{tmpname}'
         ensemble = ThermodynamicIntegrationEnsemble(
             structure=self.atoms[0], calculator=self.calculator,
             temperature=self.T,
