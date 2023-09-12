@@ -10,21 +10,18 @@ from mchammer.ensembles import CanonicalAnnealing
 from mchammer.ensembles import CanonicalEnsemble
 from mchammer.free_energy_tools import (get_free_energy_thermodynamic_integration,
                                         get_free_energy_temperature_integration)
-from sympy.utilities.iterables import multiset_permutations
+from itertools import combinations
 
 
-def get_all_structures(struct):
+def get_all_structures(struct, n_Ag):
     """
     Generates all possible lattice occupations
     """
-    symbols = struct.get_chemical_symbols()
-    for i in range(8):
-        symbols[i] = 'Ag'
-    permutation = multiset_permutations(symbols)
+    permutation = list(combinations(range(len(struct)), n_Ag))
     atoms = []
     for perm in permutation:
         atom = struct.copy()
-        atom.symbols = perm
+        atom.symbols[np.array(perm)] = 'Ag'
         atoms.append(atom)
     return atoms
 
@@ -58,15 +55,17 @@ ce = ClusterExpansion(cs, [0, 0, 2])
 supercell = prim.repeat((4, 4, 1))
 calc = ClusterExpansionCalculator(supercell, ce)
 
-start_configuration = supercell.copy()
-for i in range(8):
-    start_configuration[i].symbol = 'Ag'
-
 n_integration_steps = 400000
 n_equilibration_steps = 1000
 temperature_max = 30
 temperature_min = 0.2
 temperature_max_plot_limit = 4
+n_Ag = 8
+
+start_configuration = supercell.copy()
+for i in range(n_Ag):
+    start_configuration[i].symbol = 'Ag'
+
 
 ##########################################################################################
 # Thermodynamic integration
@@ -203,7 +202,7 @@ free_energy_temperature_average = 0.5 * (free_energy_temperature_forward +
 # Analytical solution
 ##########################################################################################
 # Get all possible occupations
-atoms = get_all_structures(supercell)
+atoms = get_all_structures(supercell, n_Ag)
 
 # Gets the free energy from the enumerated structures
 temperatures = np.linspace(temperature_min, temperature_max_plot_limit, 1000)
