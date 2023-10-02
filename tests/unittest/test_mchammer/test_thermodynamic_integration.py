@@ -184,7 +184,6 @@ class TestEnsemble(unittest.TestCase):
             temperature=self.T,
             n_steps=self.n_steps,
             forward=True,
-            trajectory_write_interval=1,
             dc_filename=fname)
 
         ensemble._lambda_function = _lambda_function_forward
