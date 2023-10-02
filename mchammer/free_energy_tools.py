@@ -3,6 +3,7 @@ from icet import ClusterSpace
 from icet.core.sublattices import Sublattices
 
 import numpy as np
+from scipy.integrate import cumulative_trapezoid
 
 from ase import Atoms
 from ase.units import kB
@@ -26,8 +27,11 @@ def _lambda_function_forward(n_steps: int, step: int) -> float:
     step
         current step
     """
-    x = step / (n_steps - 1)
-    return x**5*(70*x**4 - 315*x**3 + 540*x**2 - 420*x + 126)
+    x = (step + 1) / (n_steps)
+    lam = x**5*(70*x**4 - 315*x**3 + 540*x**2 - 420*x + 126)
+    # Due to numerical precision lambda may be slightly outside the interval [0.0, 1.0]
+    lam = np.clip(lam, 0.0, 1.0)
+    return lam
 
 
 def _lambda_function_backward(n_steps: int, step: int) -> float:
@@ -182,11 +186,12 @@ def get_free_energy_thermodynamic_integration(dc: DataContainer,
         simulation
     """
 
-    potential = dc.get('potential')
+    lambdas, potentials = dc.get('lambda', 'potential')
     if not forward:
         # We want to integrate from high to low temperature even though
         # the simulation was from low to high.
-        potential = potential[::-1]
+        potentials = potentials[::-1]
+        lambdas = lambdas[::-1]
 
     sublattices = cluster_space.get_sublattices(dc.structure)
     if sublattice_probabilities is None:
@@ -199,19 +204,18 @@ def get_free_energy_thermodynamic_integration(dc: DataContainer,
                                                  boltzmann_constant)
 
     temperature = dc._ensemble_parameters['temperature']
-    n_steps = potential.size
-    x = np.arange(0, n_steps, 1)
-    lambdas = _lambda_function_forward(n_steps, x)
     with np.errstate(divide='ignore'):
+        # First value of lambdas will be zero (we ignore this warning)
         temperatures = (1 / lambdas) * temperature
     temp_inds = np.where(temperatures <= max_temperature)[0]
 
-    free_energy_change = []
-    for n in temp_inds:
-        free_energy_change.append(np.trapz(potential[:n + 1], x=lambdas[:n + 1]))
-    free_energy = (1 / lambdas[temp_inds] * free_energy_change -
-                   temperatures[temp_inds] * ideal_mixing_entropy)
-    return (temperatures[temp_inds], free_energy)
+    free_energy_change = cumulative_trapezoid(potentials, x=lambdas, initial=0)
+    with np.errstate(invalid='ignore', divide='ignore'):
+        # First value of lambdas will be zero (we ignore this warning)
+        free_energy = (free_energy_change / lambdas -
+                       temperatures * ideal_mixing_entropy)
+    free_energy[np.isnan(free_energy)] = 0
+    return (temperatures[temp_inds], free_energy[temp_inds])
 
 
 def get_free_energy_temperature_integration(dc: DataContainer,
@@ -233,9 +237,10 @@ def get_free_energy_temperature_integration(dc: DataContainer,
     Parameters
     ----------
     dc
-        data containers from an canonical annealing simulations.
-        The first(or last) temperature in the data container has to be at
-        the same temperature as the temperature_reference.
+        Data container from an canonical annealing simulation.
+        The first (last for forward=False) temperature in the
+        data container has to be at the same temperature as the
+        temperature_reference.
     cluster_space
         The cluster space used to construct the cluster_expansion
     forward
@@ -256,8 +261,7 @@ def get_free_energy_temperature_integration(dc: DataContainer,
         The same boltzmann_constant that were provided to the canonical annealing
         simulation
     """
-    potentials = dc.get('potential')
-    temperatures = dc.get('temperature')
+    temperatures, potentials = dc.get('temperature', 'potential')
     if not forward:
         # We want to integrate from high to low temperature even though
         # the simulation was from low to high.
@@ -285,9 +289,7 @@ def get_free_energy_temperature_integration(dc: DataContainer,
         free_energy_reference = -ideal_mixing_entropy * temperature_reference
 
     reference = free_energy_reference / temperature_reference
-    free_energy = []
-    for n in temp_inds:
-        integral = np.trapz(potentials[:n + 1] / temperatures[:n + 1]**2,
-                            x=temperatures[:n + 1])
-        free_energy.append((reference - integral) * temperatures[n])
-    return (temperatures[temp_inds], np.array(free_energy))
+    integral = cumulative_trapezoid(potentials / temperatures**2,
+                                    x=temperatures, initial=0)
+    free_energy = (reference - integral) * temperatures
+    return (temperatures[temp_inds], free_energy[temp_inds])

@@ -140,12 +140,13 @@ class ThermodynamicIntegrationEnsemble(ThermodynamicBaseEnsemble):
                  dc_filename: str = None,
                  data_container: str = None,
                  data_container_write_period: float = 600,
-                 ensemble_data_write_interval: int = 1,
+                 ensemble_data_write_interval: int = None,
                  trajectory_write_interval: int = None,
                  sublattice_probabilities: List[float] = None,
                  ) -> None:
 
-        self._ensemble_parameters = dict(temperature=temperature)
+        self._ensemble_parameters = dict(temperature=temperature,
+                                         n_steps=n_steps)
         self._last_state = dict()
 
         super().__init__(
@@ -183,8 +184,10 @@ class ThermodynamicIntegrationEnsemble(ThermodynamicBaseEnsemble):
 
         if forward:
             self._lambda_function = _lambda_function_forward
+            self._lambda = 0
         else:
             self._lambda_function = _lambda_function_backward
+            self._lambda = 1
 
     @property
     def temperature(self) -> float:
@@ -209,3 +212,8 @@ class ThermodynamicIntegrationEnsemble(ThermodynamicBaseEnsemble):
             logger.warning('The simulation is already done')
         else:
             super().run(self.n_steps - self.step)
+
+    def _get_ensemble_data(self):
+        data = super()._get_ensemble_data()
+        data['lambda'] = self._lambda
+        return data

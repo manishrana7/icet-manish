@@ -6,7 +6,8 @@ from ase.build import bulk
 
 from icet import ClusterSpace
 from mchammer.free_energy_tools import (get_free_energy_thermodynamic_integration,
-                                        get_free_energy_temperature_integration)
+                                        get_free_energy_temperature_integration,
+                                        _lambda_function_forward)
 from mchammer import DataContainer
 from mchammer.free_energy_tools import (_lognpermutations, _npermutations)
 
@@ -47,10 +48,12 @@ class TestEnsemble(unittest.TestCase):
         dc = DataContainer(
                 structure=structure,
                 ensemble_parameters={'n_atoms': len(structure),
-                                     'temperature': temperature})
+                                     'temperature': temperature,
+                                     'n_steps': 100})
         for i in range(1000):
             dc.append(i, {'potential': potential,
-                          'occupations': structure.numbers})
+                          'occupations': structure.numbers,
+                          'lambda': _lambda_function_forward(1000, i)})
         (_, A) = get_free_energy_thermodynamic_integration(dc, self.cs_single,
                                                            True,
                                                            temperature)
@@ -89,10 +92,12 @@ class TestEnsemble(unittest.TestCase):
         dc = DataContainer(
                 structure=structure,
                 ensemble_parameters={'n_atoms': len(structure),
-                                     'temperature': temperature})
+                                     'temperature': temperature,
+                                     'n_steps': 1000})
         for i in range(1000):
             dc.append(i, {'potential': potential,
-                          'occupations': structure.numbers})
+                          'occupations': structure.numbers,
+                          'lambda': _lambda_function_forward(1000, i)})
         (_, A) = get_free_energy_thermodynamic_integration(dc, self.cs_double,
                                                            True,
                                                            temperature)
@@ -136,10 +141,12 @@ class TestEnsemble(unittest.TestCase):
         dc = DataContainer(
                 structure=structure,
                 ensemble_parameters={'n_atoms': len(structure),
-                                     'temperature': temperature})
+                                     'temperature': temperature,
+                                     'n_steps': 1000})
         for i in range(1000):
             dc.append(i, {'potential': potential,
-                          'occupations': structure.numbers})
+                          'occupations': structure.numbers,
+                          'lambda': _lambda_function_forward(1000, i)})
         (_, A) = get_free_energy_thermodynamic_integration(dc, self.cs_double,
                                                            True,
                                                            temperature,
@@ -182,10 +189,12 @@ class TestEnsemble(unittest.TestCase):
         dc = DataContainer(
                 structure=structure,
                 ensemble_parameters={'n_atoms': len(structure),
-                                     'temperature': temperature})
+                                     'temperature': temperature,
+                                     'n_steps': 1000})
         for i in range(1000):
             dc.append(i, {'potential': potential,
-                          'occupations': structure.numbers})
+                          'occupations': structure.numbers,
+                          'lambda': _lambda_function_forward(1000, i)})
         (_, A) = get_free_energy_thermodynamic_integration(dc, self.cs_double,
                                                            True,
                                                            temperature,

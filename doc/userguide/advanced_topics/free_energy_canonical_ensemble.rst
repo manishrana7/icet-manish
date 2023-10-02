@@ -87,9 +87,10 @@ to get a reasonable starting structure at high temperatures for the thermodynami
 We now want to sample the configurational space on the path between the two Hamiltonians,
 i.e., on the path :math:`\lambda \in [0,1]`, this sampling is carried out by
 :class:`ThermodynamicIntegrationEnsemble <mchammer.ensembles.ThermodynamicIntegrationEnsemble>`.
-Note that we set the ``ensemble_data_write_interval`` to 1, this is to get every point of the
-integral. This is also the default. The integral is then calculated in
-:func:`get_free_energy_thermodynamic_integration
+Note that we set the ``ensemble_data_write_interval`` to 1, this is to get the free energy
+for as many temperatures as possible, but it is also to increase the accuracy of the integration later on.
+Although, keep in mind that it is likely not necessary to have it as tightly sampled in the general case.
+The integral is then calculated in :func:`get_free_energy_thermodynamic_integration
 <mchammer.free_energy_tools.get_free_energy_thermodynamic_integration>`.
 We set ``forward`` to ``True`` to indicate that we are going from :math:`H_A` to :math:`H_B`
 
@@ -132,8 +133,8 @@ simulation from high to low temperature. We start from an equilibrated structure
 :class:`CanonicalEnsemble <mchammer.ensembles.CanonicalEnsemble>` simulation at a high
 temperature.
 
-Note that we set the ``ensemble_data_write_interval`` to 1, this is to get every point of the
-integral.
+Note that we set the ``ensemble_data_write_interval`` to 1 again, with the same justification here as
+for the TI simulation.
 
 We can then extract the temperature dependence of the free energy from the canonical annealing as
 outlined above. The integral is calculated in :func:`get_free_energy_temperature_integration
