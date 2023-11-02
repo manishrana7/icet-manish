@@ -699,7 +699,7 @@ class ClusterSpace(_ClusterSpace):
             # write structure
             temp_file = tempfile.NamedTemporaryFile(delete=False)
             temp_file.close()
-            ase_write(temp_file.name, self._input_structure, format='json')
+            ase_write(temp_file.name, self._input_structure, format='json', parallel=False)
             with open(temp_file.name, 'rb') as tt:
                 tar_info = tar_file.gettarinfo(arcname='atoms', fileobj=tt)
                 tar_file.addfile(tar_info, tt)
@@ -727,7 +727,7 @@ class ClusterSpace(_ClusterSpace):
         temp_file = tempfile.NamedTemporaryFile(delete=False)
         temp_file.write(tar_file.extractfile('atoms').read())
         temp_file.close()
-        structure = ase_read(temp_file.name, format='json')
+        structure = ase_read(temp_file.name, format='json', parallel=False)
         os.remove(temp_file.name)
 
         tar_file.close()

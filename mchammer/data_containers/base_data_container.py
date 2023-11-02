@@ -304,7 +304,7 @@ class BaseDataContainer:
 
         # Save reference atomic structure
         reference_structure_file = tempfile.NamedTemporaryFile(delete=False)
-        ase_write(reference_structure_file.name, self.structure, format='json')
+        ase_write(reference_structure_file.name, self.structure, format='json', parallel=False)
 
         # Save reference data
         data_container_type = str(self.__class__).split('.')[-1].replace("'>", '')
@@ -403,7 +403,7 @@ class BaseDataContainer:
             with tempfile.NamedTemporaryFile(delete=False) as fobj:
                 fobj.write(tf.extractfile('atoms').read())
                 fobj.flush()
-                structure = ase_read(fobj.name, format='json')
+                structure = ase_read(fobj.name, format='json', parallel=False)
             tmpfname = fobj.name
             os.remove(tmpfname)
 
